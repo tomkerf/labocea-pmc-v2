@@ -1,0 +1,7 @@
+name = "labocea-pmc-v2"
+main = "worker/index.js"
+compatibility_date = "2024-01-01"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"

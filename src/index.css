@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* ============================================================
+   DESIGN SYSTEM — Labocea PMC V2
+   Inspiré Apple (macOS Sequoia / iOS 18)
+   ============================================================ */
+
+:root {
+  /* Fonds */
+  --color-bg-primary:    #F5F5F7;
+  --color-bg-secondary:  #FFFFFF;
+  --color-bg-tertiary:   #F0F0F2;
+
+  /* Texte */
+  --color-text-primary:  #1D1D1F;
+  --color-text-secondary:#6E6E73;
+  --color-text-tertiary: #AEAEB2;
+
+  /* Accents */
+  --color-accent:        #0071E3;
+  --color-accent-hover:  #0077ED;
+  --color-accent-light:  #E8F1FB;
+
+  /* Statuts */
+  --color-success:       #34C759;
+  --color-success-light: #EAF8EE;
+  --color-warning:       #FF9F0A;
+  --color-warning-light: #FFF4E3;
+  --color-danger:        #FF3B30;
+  --color-danger-light:  #FFEEED;
+  --color-neutral:       #8E8E93;
+
+  /* Bordures */
+  --color-border:        #D2D2D7;
+  --color-border-subtle: #E5E5EA;
+
+  /* Ombres */
+  --shadow-card:  0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-modal: 0 20px 60px rgba(0,0,0,0.15);
+
+  /* Rayons */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   20px;
+  --radius-full: 9999px;
+}
+
+/* Reset de base */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+               "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Champ texte générique — utilisé dans les formulaires */
+.field-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--color-text-primary);
+  padding: 0;
+}
+
+.field-input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+select.field-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23AEAEB2' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  padding-right: 20px;
+}

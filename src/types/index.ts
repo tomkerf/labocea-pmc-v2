@@ -1,0 +1,186 @@
+// ============================================================
+// TYPES — Labocea PMC V2
+// Interfaces TypeScript pour toutes les collections Firestore
+// ============================================================
+
+import { Timestamp } from 'firebase/firestore'
+
+// --- Utilisateurs ---
+
+export type UserRole = 'technicien' | 'charge_mission' | 'admin'
+
+export interface AppUser {
+  uid: string
+  prenom: string
+  nom: string
+  initiales: string
+  email: string
+  role: UserRole
+  createdAt: Timestamp
+  lastLoginAt: Timestamp
+}
+
+// --- Clients / Missions ---
+
+export type NouvelleDemandeType = 'Annuelle' | 'Avenant' | 'Ponctuelle'
+export type SegmentType =
+  | 'Réseaux de mesure'
+  | 'AEP'
+  | 'Eaux usées'
+  | 'Eaux superficielles'
+  | 'Eaux souterraines'
+  | 'Autre'
+
+export type SamplingStatus = 'planned' | 'done' | 'overdue' | 'non_effectue'
+export type FrequenceType = 'Mensuel' | 'Bimensuel' | 'Trimestriel' | 'Semestriel' | 'Annuel'
+export type NatureEauType = 'Eau usée' | 'Rivière' | 'Souterraine' | 'AEP' | 'Marine'
+export type MethodeType = 'Ponctuel' | 'Composite' | 'Automatique'
+export type NappeType = 'haute' | 'basse' | ''
+
+export interface ReportHistory {
+  from: string
+  to: string
+  by: string       // uid
+  reason: string
+  at: string       // ISO timestamp
+}
+
+export interface Sampling {
+  id: string
+  num: number
+  plannedMonth: number    // 0-11
+  plannedDay: number
+  status: SamplingStatus
+  doneDate: string        // "2026-03-25" | ""
+  comment: string
+  nappe: NappeType
+  rapportPrevu: boolean
+  rapportDate: string
+  tente: boolean
+  reportHistory: ReportHistory[]
+  doneBy: string          // uid
+}
+
+export interface Plan {
+  id: string
+  nom: string
+  siteNom: string
+  frequence: FrequenceType
+  meteo: string
+  nature: NatureEauType
+  methode: MethodeType
+  lat: string
+  lng: string
+  gpsApprox: boolean
+  customMonths: number[]
+  bimensuelMonths: number[]
+  defaultDay: number
+  customDays: Record<string, number>
+  samplings: Sampling[]
+}
+
+export interface Client {
+  id: string
+  annee: string
+  nom: string
+  numClient: string
+  nouvelleDemande: NouvelleDemandeType
+  interlocuteur: string
+  telephone: string
+  mobile: string
+  email: string
+  fonction: string
+  mission: string
+  segment: SegmentType
+  numDevis: string
+  numConvention: string
+  preleveur: string
+  dureeContrat: string
+  periodeIntervention: string
+  sites: string[]
+  montantTotal: number
+  partPMC: number
+  partSousTraitance: number
+  plans: Plan[]
+  _v2ts?: Timestamp
+  createdBy: string
+  updatedBy: string
+  updatedAt: Timestamp
+}
+
+// --- Équipements ---
+
+export type CategorieEquipement =
+  | 'multiparametre'
+  | 'turbidimetre'
+  | 'preleveur_auto'
+  | 'debitmetre'
+  | 'ph_metre'
+  | 'conductimetre'
+  | 'autre'
+
+export type CategorieType = CategorieEquipement
+export type EtatEquipement = 'operationnel' | 'en_maintenance' | 'hors_service' | 'prete'
+export type EtatType = EtatEquipement
+export type LocalisationEquipement = 'labo' | 'terrain' | 'externe'
+export type LocalisationType = LocalisationEquipement
+
+export interface Equipement {
+  id: string
+  nom: string
+  marque: string
+  modele: string
+  numSerie: string
+  categorie: CategorieEquipement
+  dateAcquisition: string  // ISO date
+  etat: EtatEquipement
+  localisation: LocalisationEquipement
+  notes: string
+  prochainEtalonnage: string  // ISO date
+  createdBy: string
+  updatedAt: Timestamp
+}
+
+// --- Vérifications métrologiques ---
+
+export type TypeVerification = 'etalonnage_interne' | 'verification_externe' | 'controle_terrain'
+export type ResultatVerification = 'conforme' | 'non_conforme' | 'a_reprendre'
+
+export interface Verification {
+  id: string
+  equipementId: string
+  equipementNom: string
+  type: TypeVerification
+  date: string              // ISO date
+  resultat: ResultatVerification
+  remarques: string
+  prochainControle: string  // ISO date
+  technicienUid: string
+  technicienNom: string
+  documentUrl: string
+  createdAt: Timestamp
+}
+
+// --- Maintenances ---
+
+export type TypeMaintenance = 'preventive' | 'corrective' | 'panne'
+export type StatutMaintenance = 'planifiee' | 'en_cours' | 'realisee' | 'abandonnee'
+
+export interface Maintenance {
+  id: string
+  equipementId: string
+  equipementNom: string
+  type: TypeMaintenance
+  statut: StatutMaintenance
+  datePrevue: string        // ISO date
+  dateRealisee: string | null
+  dureeHeures: number | null
+  description: string
+  travauxRealises: string
+  piecesRemplacees: string
+  technicienUid: string
+  technicienNom: string
+  cout: number | null
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
