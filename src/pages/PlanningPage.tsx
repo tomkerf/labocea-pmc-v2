@@ -313,6 +313,7 @@ export default function PlanningPage() {
             const dateStr = toISODate(day)
             const isSelected = isSameDay(day, selectedDate)
             const isToday = isSameDay(day, today)
+            const isWeekend = i >= 5
             const eventCount = eventsByDate[dateStr]?.length ?? 0
 
             return (
@@ -323,12 +324,15 @@ export default function PlanningPage() {
                 onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--color-bg-tertiary)' }}
                 onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
                 <span className="text-[10px] font-medium uppercase"
-                  style={{ color: isSelected ? 'rgba(255,255,255,0.8)' : 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
+                  style={{
+                    color: isSelected ? 'rgba(255,255,255,0.8)' : isWeekend ? 'var(--color-border)' : 'var(--color-text-tertiary)',
+                    letterSpacing: '0.04em',
+                  }}>
                   {JOURS[i]}
                 </span>
                 <span className="text-sm font-semibold w-7 h-7 flex items-center justify-center rounded-full"
                   style={{
-                    color: isSelected ? 'white' : isToday ? 'var(--color-accent)' : 'var(--color-text-primary)',
+                    color: isSelected ? 'white' : isToday ? 'var(--color-accent)' : isWeekend ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
                     background: isToday && !isSelected ? 'var(--color-accent-light)' : 'transparent',
                   }}>
                   {day.getDate()}
@@ -446,35 +450,47 @@ export default function PlanningPage() {
 
                 {/* Panneau de validation inline */}
                 {isValidating && canQuickValidate && (
-                  <div className="px-5 py-4 flex items-end gap-3"
+                  <div className="px-5 py-4 flex flex-col gap-3"
                     style={{ background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
-                    <div className="flex-1">
-                      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
-                        Date de réalisation
-                      </label>
-                      <input
-                        type="date"
-                        value={validationDate}
-                        onChange={(e) => setValidationDate(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg text-sm"
+                    <div className="flex items-end gap-3">
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                          Date de réalisation
+                        </label>
+                        <input
+                          type="date"
+                          value={validationDate}
+                          onChange={(e) => setValidationDate(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg text-sm"
+                          style={{
+                            background: 'var(--color-bg-secondary)',
+                            border: '1px solid var(--color-border)',
+                            color: 'var(--color-text-primary)',
+                          }}
+                        />
+                      </div>
+                      <button
+                        onClick={() => handleValidate(event)}
+                        disabled={saving || !validationDate}
+                        className="px-4 py-2 rounded-lg text-sm font-medium"
                         style={{
-                          background: 'var(--color-bg-secondary)',
-                          border: '1px solid var(--color-border)',
-                          color: 'var(--color-text-primary)',
-                        }}
-                      />
+                          background: 'var(--color-success)',
+                          color: 'white',
+                          opacity: saving ? 0.6 : 1,
+                        }}>
+                        {saving ? 'Enregistrement…' : 'Confirmer'}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleValidate(event)}
-                      disabled={saving || !validationDate}
-                      className="px-4 py-2 rounded-lg text-sm font-medium"
-                      style={{
-                        background: 'var(--color-success)',
-                        color: 'white',
-                        opacity: saving ? 0.6 : 1,
-                      }}>
-                      {saving ? 'Enregistrement…' : 'Confirmer'}
-                    </button>
+                    {validationDate && (() => {
+                      const d = new Date(validationDate + 'T12:00:00')
+                      const isWE = d.getDay() === 0 || d.getDay() === 6
+                      return isWE ? (
+                        <p className="text-xs px-3 py-2 rounded-lg"
+                          style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+                          ⚠️ Intervention un week-end — vérifiez la date avant de confirmer.
+                        </p>
+                      ) : null
+                    })()}
                   </div>
                 )}
               </div>
