@@ -99,6 +99,12 @@ export default function PlanningPage() {
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
 
+  const isValidationWeekend = useMemo(() => {
+    if (!validationDate) return false
+    const d = new Date(validationDate + 'T12:00:00')
+    return d.getDay() === 0 || d.getDay() === 6
+  }, [validationDate])
+
   // ── Construction de l'index date → events ──────────────────
 
   const eventsByDate = useMemo(() => {
@@ -481,16 +487,12 @@ export default function PlanningPage() {
                         {saving ? 'Enregistrement…' : 'Confirmer'}
                       </button>
                     </div>
-                    {validationDate && (() => {
-                      const d = new Date(validationDate + 'T12:00:00')
-                      const isWE = d.getDay() === 0 || d.getDay() === 6
-                      return isWE ? (
-                        <p className="text-xs px-3 py-2 rounded-lg"
-                          style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
-                          ⚠️ Intervention un week-end — vérifiez la date avant de confirmer.
-                        </p>
-                      ) : null
-                    })()}
+                    {isValidationWeekend && (
+                      <p className="text-xs px-3 py-2 rounded-lg"
+                        style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+                        ⚠️ Intervention un week-end — vérifiez la date avant de confirmer.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
