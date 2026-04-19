@@ -450,7 +450,7 @@ export default function PlanningPage() {
 
   const today = new Date(); today.setHours(0,0,0,0)
 
-  const [viewMode,    setViewMode]    = useState<ViewMode>('semaine')
+  const [viewMode,    setViewMode]    = useState<ViewMode>('mois')
   const [weekStart,   setWeekStart]   = useState(() => startOfWeek(today))
   const [monthStart,  setMonthStart]  = useState(() => startOfMonth(today))
   const [selectedDate,setSelectedDate]= useState(today)
