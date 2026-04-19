@@ -83,11 +83,19 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
         </p>
       </div>
 
-      {/* Badge état */}
-      <span className="shrink-0 text-xs px-2.5 py-1 rounded-full font-medium"
-        style={{ background: etatCfg.bg, color: etatCfg.color }}>
-        {etatCfg.label}
-      </span>
+      {/* Badges */}
+      <div className="flex flex-col items-end gap-1 shrink-0">
+        {metroPercent === 0 && (
+          <span className="text-xs px-2.5 py-1 rounded-full font-medium"
+            style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+            À étalonner
+          </span>
+        )}
+        <span className="text-xs px-2.5 py-1 rounded-full font-medium"
+          style={{ background: etatCfg.bg, color: etatCfg.color }}>
+          {etatCfg.label}
+        </span>
+      </div>
     </button>
   )
 }

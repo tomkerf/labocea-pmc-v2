@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Trash2 } from 'lucide-react'
+import { ChevronLeft, Trash2, AlertTriangle } from 'lucide-react'
 import { doc, onSnapshot, deleteDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveEquipement } from '@/hooks/useEquipements'
@@ -101,6 +101,12 @@ export default function EquipementPage() {
   )
 
   const metroPercent = calcMetroPercent(equipement.prochainEtalonnage)
+  const isMetroOverdue = equipement.prochainEtalonnage
+    ? new Date(equipement.prochainEtalonnage).getTime() < Date.now()
+    : false
+  const metroOverdueDays = isMetroOverdue
+    ? Math.floor((Date.now() - new Date(equipement.prochainEtalonnage).getTime()) / (1000 * 60 * 60 * 24))
+    : 0
 
   return (
     <div className="p-6 max-w-2xl">
@@ -146,6 +152,18 @@ export default function EquipementPage() {
           </button>
         </div>
       </div>
+
+      {/* Alerte étalonnage en retard */}
+      {isMetroOverdue && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-6"
+          style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
+          <AlertTriangle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+          <p className="text-sm font-medium" style={{ color: 'var(--color-danger)' }}>
+            Étalonnage en retard de {metroOverdueDays} jour{metroOverdueDays > 1 ? 's' : ''}
+            {' '}— prévu le {new Date(equipement.prochainEtalonnage).toLocaleDateString('fr-FR')}
+          </p>
+        </div>
+      )}
 
       {/* Identification */}
       <Section title="Identification">
