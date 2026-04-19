@@ -1067,9 +1067,9 @@ export default function PlanningPage() {
               )}
               <button
                 onClick={() => setSelectedDay(dateStr)}
-                className="ml-auto flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium"
-                style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-                <Plus size={11} /> Planifier
+                className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                style={{ background: 'var(--color-accent)', color: 'white' }}>
+                <Plus size={12} /> Planifier
               </button>
             </div>
 
@@ -1229,14 +1229,8 @@ export default function PlanningPage() {
                       minHeight: 120,
                     }}>
                     {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => goToDay(dateStr)} />)}
-                    {/* Bouton + toujours visible, plus marqué au survol */}
-                    <div className="mt-auto flex items-center justify-center py-1">
-                      <button
-                        onClick={e => { e.stopPropagation(); goToDay(dateStr) }}
-                        className="flex items-center gap-1 px-2 py-0.5 rounded-full opacity-25 group-hover:opacity-100 transition-opacity"
-                        style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)', fontSize: 10 }}>
-                        <Plus size={9} /> Planifier
-                      </button>
+                    <div className="mt-auto pt-1">
+                      <div />
                     </div>
                   </div>
                 )
@@ -1297,12 +1291,8 @@ export default function PlanningPage() {
                           </span>
                         )}
                       </span>
-                      <button
-                        onClick={e => { e.stopPropagation(); goToDay(dateStr) }}
-                        className="w-[18px] h-[18px] flex items-center justify-center rounded-full opacity-30 group-hover:opacity-100 transition-opacity"
-                        style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
-                        <Plus size={10} />
-                      </button>
+                      <Plus size={10} className="opacity-0 group-hover:opacity-40 transition-opacity"
+                        style={{ color: 'var(--color-text-tertiary)' }} />
                     </div>
                     {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact onExpand={() => goToDay(dateStr)} />)}
                     {evts.length>MAX && (
