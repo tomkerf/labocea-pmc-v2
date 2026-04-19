@@ -53,7 +53,7 @@ type ViewMode = 'semaine' | 'mois'
 
 // ── Helpers ─────────────────────────────────────────────────
 
-const JOURS_COURT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+const JOURS_COURT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'] // lun-ven uniquement
 const JOURS_LONG  = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
 const MOIS_LONG   = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
                      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
@@ -73,14 +73,22 @@ function toISO(d: Date): string {
 }
 function sameDay(a: Date, b: Date): boolean { return toISO(a) === toISO(b) }
 
+// Grille mensuelle 5 colonnes (lun-ven uniquement — sans week-ends)
 function buildMonthGrid(ms: Date): (Date|null)[] {
   const y = ms.getFullYear(), m = ms.getMonth()
   const dim = new Date(y, m+1, 0).getDate()
-  const offset = ms.getDay() === 0 ? 6 : ms.getDay()-1
+  const firstDow = ms.getDay() // 0=dim, 1=lun … 6=sam
+  // Décalage = position du 1er dans la grille lun-ven (0=lun, …, 4=ven)
+  // Si le 1er tombe sam/dim → 0 (les jours de WE ne sont pas affichés)
+  const offset = (firstDow >= 1 && firstDow <= 5) ? firstDow - 1 : 0
   const cells: (Date|null)[] = []
-  for (let i=0; i<offset; i++) cells.push(null)
-  for (let d=1; d<=dim; d++) cells.push(new Date(y,m,d))
-  while (cells.length%7) cells.push(null)
+  for (let i = 0; i < offset; i++) cells.push(null)
+  for (let d = 1; d <= dim; d++) {
+    const date = new Date(y, m, d)
+    const dow = date.getDay()
+    if (dow !== 0 && dow !== 6) cells.push(date) // skip sam & dim
+  }
+  while (cells.length % 5) cells.push(null)
   return cells
 }
 
@@ -324,7 +332,7 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                     <div key={evt.id} className="flex items-center gap-3 px-4 py-3"
                       style={{ borderBottom: i < dayEvents.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
                       <div className="w-1 self-stretch rounded-full shrink-0"
-                        style={{ background: evt.techColor ?? evt.statusColor, minHeight: 28 }} />
+                        style={{ background: evt.statusColor, minHeight: 28 }} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
                           {evt.title}
@@ -468,7 +476,7 @@ export default function PlanningPage() {
   const [validationDate, setValidationDate] = useState(toISO(today))
   const [saving, setSaving] = useState(false)
 
-  const weekDays  = useMemo(() => Array.from({length:7},(_,i) => addDays(weekStart,i)), [weekStart])
+  const weekDays  = useMemo(() => Array.from({length:5},(_,i) => addDays(weekStart,i)), [weekStart])
   const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])
   const isWeekend = (d: Date) => { const day = d.getDay(); return day===0||day===6 }
 
@@ -755,7 +763,7 @@ export default function PlanningPage() {
       >
         {/* Dot couleur tech (ou statut si pas de tech) */}
         <span className="shrink-0 w-[7px] h-[7px] rounded-full"
-          style={{ background: event.techColor ?? event.statusColor }} />
+          style={{ background: event.statusColor }} />
         <span className="flex-1 truncate font-medium" style={{ color: 'var(--color-text-primary)' }}>
           {event.title}
         </span>
@@ -773,7 +781,7 @@ export default function PlanningPage() {
   function EventRow({ event, isLast }: { event:PlanningEvent; isLast:boolean }) {
     const isValidating = validatingId===event.id
     const isEvt = event.type==='evenement'
-    const dotColor = event.techColor ?? event.statusColor
+    const dotColor = event.statusColor
 
     return (
       <div style={{ borderBottom: isLast?'none':'1px solid var(--color-border-subtle)' }}>
@@ -960,14 +968,13 @@ export default function PlanningPage() {
         {viewMode==='semaine' && (
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* En-têtes colonnes */}
-            <div className="grid grid-cols-7 shrink-0"
+            <div className="grid grid-cols-5 shrink-0"
               style={{ borderBottom:'1px solid var(--color-border-subtle)' }}>
               {weekDays.map((day,i) => {
                 const isToday = sameDay(day,today)
-                const isWE = isWeekend(day)
                 return (
                   <div key={i} className="py-2 px-2 text-center"
-                    style={{ borderRight: i<6?'1px solid var(--color-border-subtle)':'none' }}>
+                    style={{ borderRight: i<4?'1px solid var(--color-border-subtle)':'none' }}>
                     <div className="text-[10px] font-medium uppercase mb-1"
                       style={{ color:'var(--color-text-tertiary)', letterSpacing:'0.04em' }}>
                       {JOURS_COURT[i]}
@@ -975,7 +982,7 @@ export default function PlanningPage() {
                     <div className="w-7 h-7 flex items-center justify-center rounded-full mx-auto text-sm font-semibold"
                       style={{
                         background: isToday ? '#FF3B30' : 'transparent',
-                        color: isToday ? 'white' : isWE ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+                        color: isToday ? 'white' : 'var(--color-text-primary)',
                       }}>
                       {day.getDate()}
                     </div>
@@ -985,19 +992,18 @@ export default function PlanningPage() {
             </div>
 
             {/* Colonnes événements */}
-            <div className="grid grid-cols-7 flex-1 overflow-y-auto">
+            <div className="grid grid-cols-5 flex-1 overflow-y-auto">
               {weekDays.map((day,i) => {
                 const dateStr = toISO(day)
                 const evts = filteredForDay(dateStr)
                 const isToday = sameDay(day,today)
-                const isWE = isWeekend(day)
                 return (
                   <div key={i}
                     className="p-1.5 flex flex-col gap-1 cursor-pointer group"
                     onClick={() => setSelectedDay(dateStr)}
                     style={{
-                      borderRight: i<6?'1px solid var(--color-border-subtle)':'none',
-                      background: isToday?'rgba(255,59,48,0.04)':isWE?'rgba(0,0,0,0.015)':'transparent',
+                      borderRight: i<4?'1px solid var(--color-border-subtle)':'none',
+                      background: isToday?'rgba(255,59,48,0.04)':'transparent',
                       minHeight: 120,
                     }}>
                     {evts.map(evt => <EventPill key={evt.id} event={evt} />)}
@@ -1017,22 +1023,22 @@ export default function PlanningPage() {
         {viewMode==='mois' && (
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* En-têtes jours */}
-            <div className="grid grid-cols-7 shrink-0"
+            <div className="grid grid-cols-5 shrink-0"
               style={{ borderBottom:'1px solid var(--color-border-subtle)' }}>
               {JOURS_COURT.map((j,i) => (
                 <div key={j} className="py-2 text-center text-[10px] font-medium uppercase"
                   style={{ color:'var(--color-text-tertiary)', letterSpacing:'0.04em',
-                    borderRight:i<6?'1px solid var(--color-border-subtle)':'none' }}>
+                    borderRight:i<4?'1px solid var(--color-border-subtle)':'none' }}>
                   {j}
                 </div>
               ))}
             </div>
             {/* Grille */}
-            <div className="grid grid-cols-7 flex-1 overflow-y-auto" style={{ gridAutoRows:'1fr' }}>
+            <div className="grid grid-cols-5 flex-1 overflow-y-auto" style={{ gridAutoRows:'1fr' }}>
               {monthGrid.map((day,i) => {
                 if (!day) return (
                   <div key={i} style={{
-                    borderRight:(i%7)<6?'1px solid var(--color-border-subtle)':'none',
+                    borderRight:(i%5)<4?'1px solid var(--color-border-subtle)':'none',
                     borderBottom:'1px solid var(--color-border-subtle)',
                     background:'rgba(0,0,0,0.015)',
                   }} />
@@ -1040,16 +1046,15 @@ export default function PlanningPage() {
                 const dateStr = toISO(day)
                 const evts = filteredForDay(dateStr)
                 const isToday = sameDay(day,today)
-                const isWE = isWeekend(day)
                 const MAX = 3
                 return (
                   <div key={i}
                     className="p-1 flex flex-col gap-0.5 cursor-pointer group"
                     onClick={() => setSelectedDay(dateStr)}
                     style={{
-                      borderRight:(i%7)<6?'1px solid var(--color-border-subtle)':'none',
+                      borderRight:(i%5)<4?'1px solid var(--color-border-subtle)':'none',
                       borderBottom:'1px solid var(--color-border-subtle)',
-                      background: isToday?'rgba(255,59,48,0.04)':isWE?'rgba(0,0,0,0.015)':'transparent',
+                      background: isToday?'rgba(255,59,48,0.04)':'transparent',
                       minHeight: 90,
                     }}>
                     <div className="flex items-center justify-between mb-0.5 px-0.5">
@@ -1057,7 +1062,7 @@ export default function PlanningPage() {
                         <span className="w-[22px] h-[22px] flex items-center justify-center rounded-full text-[11px] font-semibold"
                           style={{
                             background: isToday ? '#FF3B30' : 'transparent',
-                            color: isToday ? 'white' : isWE ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)',
+                            color: isToday ? 'white' : 'var(--color-text-secondary)',
                           }}>
                           {day.getDate()}
                         </span>
