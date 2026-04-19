@@ -8,10 +8,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { generateId } from '@/lib/ids'
 import type { Client, Plan, SegmentType, NouvelleDemandeType } from '@/types'
 
-const SEGMENTS: SegmentType[] = [
-  'Réseaux de mesure', 'AEP', 'Eaux usées',
-  'Eaux superficielles', 'Eaux souterraines', 'Autre',
-]
+const SEGMENTS: SegmentType[] = ['SRA', 'Réseau de mesure', 'RSDE']
 const NOUVELLES_DEMANDES: NouvelleDemandeType[] = ['Annuelle', 'Avenant', 'Ponctuelle']
 
 // Debounce auto-save : 800ms après la dernière modif

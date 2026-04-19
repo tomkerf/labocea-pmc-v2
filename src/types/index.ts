@@ -24,12 +24,9 @@ export interface AppUser {
 
 export type NouvelleDemandeType = 'Annuelle' | 'Avenant' | 'Ponctuelle'
 export type SegmentType =
-  | 'Réseaux de mesure'
-  | 'AEP'
-  | 'Eaux usées'
-  | 'Eaux superficielles'
-  | 'Eaux souterraines'
-  | 'Autre'
+  | 'SRA'
+  | 'Réseau de mesure'
+  | 'RSDE'
 
 export type SamplingStatus = 'planned' | 'done' | 'overdue' | 'non_effectue'
 export type FrequenceType = 'Mensuel' | 'Bimensuel' | 'Trimestriel' | 'Semestriel' | 'Annuel'
