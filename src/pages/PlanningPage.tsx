@@ -510,7 +510,7 @@ export default function PlanningPage() {
     clients.forEach((client: Client) => {
       client.plans.forEach(plan => {
         const isAuto = plan.methode === 'Automatique'
-        const baseSub = plan.siteNom || plan.nom || '—'
+        const baseSub = plan.nom || plan.siteNom || '—'
         plan.samplings.forEach((s:Sampling) => {
           const overdue = isSamplingOverdue(s)
           const dateStr = s.doneDate || toISO(new Date(year, s.plannedMonth, s.plannedDay||1))
