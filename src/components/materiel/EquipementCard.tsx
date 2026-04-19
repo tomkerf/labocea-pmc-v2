@@ -1,4 +1,10 @@
 import { useNavigate } from 'react-router-dom'
+import {
+  Pipette, Activity, SlidersHorizontal, Snowflake, HardDrive,
+  Thermometer, Ruler, FlaskConical, Droplets, ArrowDownToLine,
+  Gauge, Timer, Package,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import CircleProgress from './CircleProgress'
 import type { Equipement } from '@/types'
 
@@ -24,6 +30,26 @@ const CATEGORIE_LABELS: Record<string, string> = {
   autre:          'Autre',
 }
 
+const CATEGORIE_ICONS: Record<string, LucideIcon> = {
+  preleveur:      Pipette,
+  preleveur_auto: Pipette,
+  debitmetre:     Activity,
+  multiparametre: SlidersHorizontal,
+  turbidimetre:   SlidersHorizontal,
+  ph_metre:       SlidersHorizontal,
+  conductimetre:  SlidersHorizontal,
+  glaciere:       Snowflake,
+  enregistreur:   HardDrive,
+  thermometre:    Thermometer,
+  reglet:         Ruler,
+  eprouvette:     FlaskConical,
+  flacon:         Droplets,
+  pompe_pz:       ArrowDownToLine,
+  sonde_niveau:   Gauge,
+  chronometre:    Timer,
+  autre:          Package,
+}
+
 const ETAT_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
   operationnel:    { label: 'Opérationnel',    bg: 'var(--color-success-light)', color: 'var(--color-success)' },
   en_maintenance:  { label: 'En maintenance',  bg: 'var(--color-warning-light)', color: 'var(--color-warning)' },
@@ -38,9 +64,14 @@ function calcMetroPercent(prochainEtalonnage: string): number | null {
   const next = new Date(prochainEtalonnage).getTime()
   const msDiff = next - now
   if (msDiff <= 0) return 0
-  // on affiche 100% si l'échéance est dans plus de 12 mois
   const msYear = 365 * 24 * 60 * 60 * 1000
   return Math.min(100, Math.round((msDiff / msYear) * 100))
+}
+
+function getMetroColor(percent: number): string {
+  if (percent >= 60) return 'var(--color-success)'
+  if (percent >= 30) return 'var(--color-warning)'
+  return 'var(--color-danger)'
 }
 
 interface EquipementCardProps {
@@ -51,6 +82,16 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
   const navigate = useNavigate()
   const etatCfg = ETAT_CONFIG[equipement.etat] ?? ETAT_CONFIG.operationnel
   const metroPercent = calcMetroPercent(equipement.prochainEtalonnage)
+
+  const Icon = CATEGORIE_ICONS[equipement.categorie] ?? Package
+  const iconSize = 16
+
+  // Couleur de l'icône selon statut métrologique (ou neutre si pas d'étalonnage)
+  const iconColor = metroPercent !== null
+    ? getMetroColor(metroPercent)
+    : 'var(--color-text-tertiary)'
+
+  const categoryIcon = <Icon size={iconSize} strokeWidth={1.8} color={iconColor} />
 
   return (
     <button
@@ -64,14 +105,14 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-bg-secondary)')}
     >
-      {/* Anneau métrologie */}
+      {/* Anneau métrologie avec icône au centre */}
       <div className="shrink-0">
         {metroPercent !== null ? (
-          <CircleProgress percent={metroPercent} size={44} />
+          <CircleProgress percent={metroPercent} size={44} icon={categoryIcon} />
         ) : (
           <div className="w-11 h-11 rounded-full flex items-center justify-center"
-            style={{ background: 'var(--color-bg-tertiary)' }}>
-            <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>—</span>
+            style={{ background: 'var(--color-bg-tertiary)', border: '2px solid var(--color-border)' }}>
+            <Icon size={iconSize} strokeWidth={1.8} color="var(--color-text-tertiary)" />
           </div>
         )}
       </div>
