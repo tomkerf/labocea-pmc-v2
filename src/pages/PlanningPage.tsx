@@ -169,29 +169,25 @@ interface DayModalProps {
 }
 
 function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate, onValidatePool, onCancelSampling }: DayModalProps) {
+  const defaultTab: 'pool'|'jour'|'evt' = pool.length > 0 ? 'pool' : dayEvents.length > 0 ? 'jour' : 'evt'
+  const [activeTab,   setActiveTab]   = useState<'pool'|'jour'|'evt'>(defaultTab)
   const [poolValidId, setPoolValidId] = useState<string|null>(null)
-  const [poolDate, setPoolDate]       = useState(dateStr)
-  const [poolSaving, setPoolSaving]   = useState(false)
-  const [showEvtForm, setShowEvtForm] = useState(false)
-  const [evtTitre, setEvtTitre]       = useState('')
-  const [evtType, setEvtType]         = useState<TypeEvenement>('rappel')
-  const [evtHeure, setEvtHeure]       = useState('')
-  const [evtNotes, setEvtNotes]       = useState('')
-  const [evtSaving, setEvtSaving]     = useState(false)
+  const [poolDate,    setPoolDate]    = useState(dateStr)
+  const [poolSaving,  setPoolSaving]  = useState(false)
+  const [evtTitre,    setEvtTitre]    = useState('')
+  const [evtType,     setEvtType]     = useState<TypeEvenement>('rappel')
+  const [evtHeure,    setEvtHeure]    = useState('')
+  const [evtNotes,    setEvtNotes]    = useState('')
+  const [evtSaving,   setEvtSaving]   = useState(false)
 
   const date     = new Date(dateStr + 'T12:00:00')
   const dayLabel = date.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
-  const monthLabel = MOIS_LONG[date.getMonth()] + ' ' + date.getFullYear()
 
   async function handleValidatePool(item: PoolItem) {
     if (poolSaving) return
     setPoolSaving(true)
-    try {
-      await onValidatePool(item, poolDate)
-      setPoolValidId(null)
-    } finally {
-      setPoolSaving(false)
-    }
+    try { await onValidatePool(item, poolDate); setPoolValidId(null) }
+    finally { setPoolSaving(false) }
   }
 
   async function handleCreateEvt() {
@@ -199,23 +195,24 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
     setEvtSaving(true)
     try {
       await createEvenement(evtTitre.trim(), dateStr, evtType, evtHeure, evtNotes, uid, initiales)
-      setShowEvtForm(false)
       setEvtTitre(''); setEvtHeure(''); setEvtNotes('')
-    } finally {
-      setEvtSaving(false)
-    }
+      setActiveTab('jour')
+    } finally { setEvtSaving(false) }
   }
 
+  const TABS = [
+    { id: 'pool' as const, label: 'À planifier', count: pool.length },
+    { id: 'jour' as const, label: 'Ce jour',     count: dayEvents.length },
+    { id: 'evt'  as const, label: '+ Événement', count: 0 },
+  ]
+
   return (
-    <div
-      className="fixed inset-0 z-40 flex items-end md:items-center justify-center"
+    <div className="fixed inset-0 z-40 flex items-end md:items-center justify-center"
       style={{ background: 'rgba(0,0,0,0.35)' }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div
-        className="w-full md:max-w-lg flex flex-col overflow-hidden rounded-t-[20px] md:rounded-2xl"
-        style={{ background: 'var(--color-bg-primary)', maxHeight: '88vh', boxShadow: 'var(--shadow-modal)' }}
-      >
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="w-full md:max-w-lg flex flex-col overflow-hidden rounded-t-[20px] md:rounded-2xl"
+        style={{ background: 'var(--color-bg-primary)', maxHeight: '88vh', boxShadow: 'var(--shadow-modal)' }}>
+
         {/* Handle mobile */}
         <div className="md:hidden flex justify-center pt-2.5 pb-1 shrink-0">
           <div className="w-9 h-1 rounded-full" style={{ background: 'var(--color-border)' }} />
@@ -233,22 +230,37 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
           </button>
         </div>
 
+        {/* Onglets */}
+        <div className="flex px-4 pt-3 pb-2.5 gap-1.5 shrink-0"
+          style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+          {TABS.map(tab => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+              style={{
+                background: activeTab === tab.id ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
+                color: activeTab === tab.id ? 'white' : 'var(--color-text-secondary)',
+              }}>
+              {tab.label}
+              {tab.count > 0 && (
+                <span className="text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full"
+                  style={{ background: activeTab === tab.id ? 'rgba(255,255,255,0.25)' : 'var(--color-border)' }}>
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
         {/* Contenu scrollable */}
         <div className="flex-1 overflow-y-auto">
-          <div className="px-4 py-4 space-y-5">
+          <div className="px-4 py-4">
 
-            {/* ── Section pool : à planifier ce mois ── */}
-            <div>
-              <p className="text-[10px] font-semibold uppercase mb-2.5"
-                style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-                À planifier — {monthLabel}
-              </p>
-              {pool.length === 0 ? (
-                <div className="rounded-xl py-5 text-center"
+            {/* ── Onglet : À planifier ── */}
+            {activeTab === 'pool' && (
+              pool.length === 0 ? (
+                <div className="rounded-xl py-8 text-center"
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
-                  <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-                    Tout est planifié ce mois ✓
-                  </p>
+                  <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Tout est planifié ce mois ✓</p>
                 </div>
               ) : (
                 <div className="rounded-xl overflow-hidden"
@@ -261,7 +273,6 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                       <div key={item.sampling.id}
                         style={{ borderBottom: i < pool.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
                         <div className="flex items-center gap-3 px-4 py-3">
-                          {/* Barre couleur statut */}
                           <div className="w-1 self-stretch rounded-full shrink-0"
                             style={{ background: cfg.color, minHeight: 32 }} />
                           <div className="flex-1 min-w-0">
@@ -303,13 +314,11 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                             {isValidating ? 'Annuler' : '→ Ce jour'}
                           </button>
                         </div>
-
                         {isValidating && (
                           <div className="px-4 py-3 flex items-end gap-3"
                             style={{ background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
                             <div className="flex-1">
-                              <label className="block text-xs font-medium mb-1"
-                                style={{ color: 'var(--color-text-secondary)' }}>
+                              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                                 Planifier le
                               </label>
                               <input type="date" value={poolDate} onChange={e => setPoolDate(e.target.value)}
@@ -327,16 +336,17 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                     )
                   })}
                 </div>
-              )}
-            </div>
+              )
+            )}
 
-            {/* ── Section événements du jour ── */}
-            {dayEvents.length > 0 && (
-              <div>
-                <p className="text-[10px] font-semibold uppercase mb-2.5"
-                  style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-                  Ce jour
-                </p>
+            {/* ── Onglet : Ce jour ── */}
+            {activeTab === 'jour' && (
+              dayEvents.length === 0 ? (
+                <div className="rounded-xl py-8 text-center"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+                  <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Aucune intervention ce jour.</p>
+                </div>
+              ) : (
                 <div className="rounded-xl overflow-hidden"
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
                   {dayEvents.map((evt, i) => (
@@ -345,12 +355,9 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                       <div className="w-1 self-stretch rounded-full shrink-0"
                         style={{ background: evt.statusColor, minHeight: 28 }} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                          {evt.title}
-                        </p>
+                        <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{evt.title}</p>
                         <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                          {evt.subtitle}
-                          {evt.plannedTime && ` · ${evt.plannedTime}`}
+                          {evt.subtitle}{evt.plannedTime && ` · ${evt.plannedTime}`}
                         </p>
                       </div>
                       <span className="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0"
@@ -359,16 +366,14 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                       </span>
                       {evt.type === 'evenement' ? (
                         <button onClick={() => evt.evenementData && deleteEvenement(evt.evenementData.id)}
-                          className="shrink-0 p-1.5 rounded-lg"
-                          style={{ color: 'var(--color-text-tertiary)' }}
+                          className="shrink-0 p-1.5 rounded-lg" style={{ color: 'var(--color-text-tertiary)' }}
                           onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
                           onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
                           <Trash2 size={14} />
                         </button>
                       ) : evt.type === 'prelevement' && !evt.isDone ? (
                         <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            onClick={() => onCancelSampling(evt)}
+                          <button onClick={() => onCancelSampling(evt)}
                             className="px-2.5 py-1 rounded-lg text-xs font-medium"
                             style={{ color: 'var(--color-text-secondary)', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}
                             title="Retirer du calendrier — redevient à planifier">
@@ -390,64 +395,47 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                     </div>
                   ))}
                 </div>
-              </div>
+              )
             )}
 
-            {/* ── Section nouvel événement ── */}
-            <div>
-              <p className="text-[10px] font-semibold uppercase mb-2.5"
-                style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-                Ajouter un événement
-              </p>
-              {!showEvtForm ? (
-                <button
-                  onClick={() => setShowEvtForm(true)}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-medium transition-colors"
-                  style={{ background: 'var(--color-bg-secondary)', border: '1px dashed var(--color-border)', color: 'var(--color-text-secondary)' }}>
-                  <Plus size={15} /> Nouvel événement
-                </button>
-              ) : (
-                <div className="rounded-xl p-4"
-                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-                  <div className="flex flex-col gap-2.5">
-                    <input
-                      type="text" value={evtTitre} onChange={e => setEvtTitre(e.target.value)}
-                      placeholder="Titre de l'événement…" autoFocus
-                      className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-                      style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
-                      onKeyDown={e => e.key === 'Enter' && handleCreateEvt()} />
-                    <div className="flex gap-2">
-                      <select value={evtType} onChange={e => setEvtType(e.target.value as TypeEvenement)}
-                        className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
-                        style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
-                        <option value="rappel">Rappel</option>
-                        <option value="reunion">Réunion / Entretien</option>
-                        <option value="rapport">Rapport</option>
-                        <option value="autre">Autre</option>
-                      </select>
-                      <input type="time" value={evtHeure} onChange={e => setEvtHeure(e.target.value)}
-                        className="px-3 py-2 rounded-lg text-sm outline-none"
-                        style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', width: 110 }} />
-                    </div>
-                    <input type="text" value={evtNotes} onChange={e => setEvtNotes(e.target.value)}
-                      placeholder="Notes (optionnel)"
-                      className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-                      style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
-                    <div className="flex items-center justify-between">
-                      <button onClick={() => setShowEvtForm(false)} className="text-xs px-2 py-1"
-                        style={{ color: 'var(--color-text-tertiary)' }}>
-                        Annuler
-                      </button>
-                      <button onClick={handleCreateEvt} disabled={!evtTitre.trim() || evtSaving}
-                        className="px-4 py-2 rounded-lg text-sm font-medium"
-                        style={{ background: evtTitre.trim() ? 'var(--color-accent)' : 'var(--color-border)', color: 'white', opacity: evtSaving ? 0.6 : 1 }}>
-                        {evtSaving ? 'Ajout…' : 'Ajouter'}
-                      </button>
-                    </div>
+            {/* ── Onglet : + Événement ── */}
+            {activeTab === 'evt' && (
+              <div className="rounded-xl p-4"
+                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                <div className="flex flex-col gap-2.5">
+                  <input
+                    type="text" value={evtTitre} onChange={e => setEvtTitre(e.target.value)}
+                    placeholder="Titre de l'événement…" autoFocus
+                    className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                    style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+                    onKeyDown={e => e.key === 'Enter' && handleCreateEvt()} />
+                  <div className="flex gap-2">
+                    <select value={evtType} onChange={e => setEvtType(e.target.value as TypeEvenement)}
+                      className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
+                      style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
+                      <option value="rappel">Rappel</option>
+                      <option value="reunion">Réunion / Entretien</option>
+                      <option value="rapport">Rapport</option>
+                      <option value="autre">Autre</option>
+                    </select>
+                    <input type="time" value={evtHeure} onChange={e => setEvtHeure(e.target.value)}
+                      className="px-3 py-2 rounded-lg text-sm outline-none"
+                      style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', width: 110 }} />
+                  </div>
+                  <input type="text" value={evtNotes} onChange={e => setEvtNotes(e.target.value)}
+                    placeholder="Notes (optionnel)"
+                    className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                    style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+                  <div className="flex items-center justify-end">
+                    <button onClick={handleCreateEvt} disabled={!evtTitre.trim() || evtSaving}
+                      className="px-4 py-2 rounded-lg text-sm font-medium"
+                      style={{ background: evtTitre.trim() ? 'var(--color-accent)' : 'var(--color-border)', color: 'white', opacity: evtSaving ? 0.6 : 1 }}>
+                      {evtSaving ? 'Ajout…' : 'Ajouter'}
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
           </div>
         </div>
@@ -1038,11 +1026,14 @@ export default function PlanningPage() {
                       minHeight: 120,
                     }}>
                     {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => setSelectedDay(dateStr)} />)}
-                    {/* Bouton + au survol */}
-                    <div className="mt-auto flex items-center justify-center py-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="text-[10px]" style={{ color:'var(--color-text-tertiary)' }}>
-                        <Plus size={10} className="inline" /> Ajouter
-                      </span>
+                    {/* Bouton + toujours visible, plus marqué au survol */}
+                    <div className="mt-auto flex items-center justify-center py-1">
+                      <button
+                        onClick={e => { e.stopPropagation(); setSelectedDay(dateStr) }}
+                        className="flex items-center gap-1 px-2 py-0.5 rounded-full opacity-25 group-hover:opacity-100 transition-opacity"
+                        style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)', fontSize: 10 }}>
+                        <Plus size={9} /> Planifier
+                      </button>
                     </div>
                   </div>
                 )
@@ -1103,8 +1094,12 @@ export default function PlanningPage() {
                           </span>
                         )}
                       </span>
-                      <Plus size={10} className="opacity-0 group-hover:opacity-60 transition-opacity"
-                        style={{ color:'var(--color-text-tertiary)' }} />
+                      <button
+                        onClick={e => { e.stopPropagation(); setSelectedDay(dateStr) }}
+                        className="w-[18px] h-[18px] flex items-center justify-center rounded-full opacity-30 group-hover:opacity-100 transition-opacity"
+                        style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
+                        <Plus size={10} />
+                      </button>
                     </div>
                     {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact onExpand={() => setSelectedDay(dateStr)} />)}
                     {evts.length>MAX && (
