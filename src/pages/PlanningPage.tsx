@@ -6,12 +6,10 @@ import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMaintenancesListener, saveMaintenance } from '@/hooks/useMaintenances'
 import { useEvenementsListener, createEvenement, deleteEvenement } from '@/hooks/useEvenements'
-import { useUsersListener } from '@/hooks/useUsers'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useEvenementsStore } from '@/stores/evenementsStore'
-import { useUsersStore } from '@/stores/usersStore'
 import { useAuthStore } from '@/stores/authStore'
 import type { Client, Sampling, Verification, Maintenance, EvenementPersonnel, TypeEvenement } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
@@ -26,7 +24,6 @@ interface PlanningEvent {
   statusLabel: string
   statusBg: string
   statusColor: string
-  techColor?: string    // couleur avatar du technicien
   link: string
   isDone: boolean
   technicien: string
@@ -46,7 +43,6 @@ interface PoolItem {
   planNom: string
   siteNom: string
   techInitiales: string
-  techColor: string
 }
 
 type ViewMode = 'semaine' | 'mois'
@@ -92,28 +88,6 @@ function buildMonthGrid(ms: Date): (Date|null)[] {
   return cells
 }
 
-// Attribue une couleur déterministe à un technicien à partir de ses initiales.
-// Le hash garantit que les mêmes initiales donnent toujours la même couleur,
-// et que chaque technicien obtient une couleur distincte de la palette.
-const TECH_PALETTE = [
-  '#0071E3', // bleu
-  '#30B0C7', // cyan
-  '#00C7BE', // menthe
-  '#5856D6', // indigo
-  '#AF52DE', // violet
-  '#FF2D55', // rose
-  '#A2845E', // marron
-  '#636366', // gris
-  '#3A6073', // ardoise
-]
-function colorFromInitiales(initiales: string): string {
-  if (!initiales || initiales === '—') return TECH_PALETTE[0]
-  let hash = 0
-  for (let i = 0; i < initiales.length; i++) {
-    hash = initiales.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  return TECH_PALETTE[Math.abs(hash) % TECH_PALETTE.length]
-}
 
 function sortEvts(evts: PlanningEvent[]): PlanningEvent[] {
   return evts.slice().sort((a,b) => {
@@ -250,9 +224,9 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                       <div key={item.sampling.id}
                         style={{ borderBottom: i < pool.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
                         <div className="flex items-center gap-3 px-4 py-3">
-                          {/* Barre couleur tech */}
+                          {/* Barre couleur statut */}
                           <div className="w-1 self-stretch rounded-full shrink-0"
-                            style={{ background: item.techColor, minHeight: 32 }} />
+                            style={{ background: cfg.color, minHeight: 32 }} />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
                               {item.clientNom}
@@ -267,7 +241,7 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                               </span>
                               {item.techInitiales && item.techInitiales !== '—' && (
                                 <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                                  style={{ background: item.techColor + '22', color: item.techColor }}>
+                                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
                                   {item.techInitiales}
                                 </span>
                               )}
@@ -450,7 +424,7 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
 export default function PlanningPage() {
   useClientsListener(); useEquipementsListener()
   useVerificationsListener(); useMaintenancesListener()
-  useEvenementsListener(); useUsersListener()
+  useEvenementsListener()
 
   const navigate   = useNavigate()
   const uid        = useAuthStore(s => s.uid())
@@ -459,7 +433,6 @@ export default function PlanningPage() {
   const { verifications } = useMetrologieStore()
   const { maintenances }  = useMaintenancesStore()
   const { evenements }    = useEvenementsStore()
-  const { users }         = useUsersStore()
 
   const today = new Date(); today.setHours(0,0,0,0)
 
@@ -478,23 +451,6 @@ export default function PlanningPage() {
 
   const weekDays  = useMemo(() => Array.from({length:5},(_,i) => addDays(weekStart,i)), [weekStart])
   const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])
-  // ── Couleurs techniciens (initiales → couleur) ──────────
-  // Priorité : avatarColor choisi par l'user > couleur auto (hash des initiales)
-
-  const colorByInitiales = useMemo(() => {
-    const map: Record<string,string> = {}
-    users.forEach(u => {
-      if (u.initiales) map[u.initiales] = u.avatarColor ?? colorFromInitiales(u.initiales)
-    })
-    return map
-  }, [users])
-
-  // Retourne la couleur d'un technicien par ses initiales —
-  // utilise le store si l'user est connu, sinon calcule le hash.
-  function getTechColor(initiales: string): string {
-    if (!initiales || initiales === '—') return TECH_PALETTE[0]
-    return colorByInitiales[initiales] ?? colorFromInitiales(initiales)
-  }
 
   // ── Index date → events ─────────────────────────────────
 
@@ -518,7 +474,6 @@ export default function PlanningPage() {
           const common = {
             type: 'prelevement' as const,
             statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
-            techColor: getTechColor(client.preleveur),
             link:`/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
             isDone: s.status==='done', technicien: client.preleveur||'—',
             plannedTime: s.plannedTime, clientId:client.id, planId:plan.id, samplingId:s.id,
@@ -552,7 +507,6 @@ export default function PlanningPage() {
         title:m.equipementNom||'Équipement',
         subtitle: m.type==='preventive'?'Maintenance préventive':m.type==='corrective'?'Maintenance corrective':'Panne',
         statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
-        techColor: getTechColor(m.technicienNom),
         link:`/maintenances/${m.id}`, isDone:m.statut==='realisee', technicien:m.technicienNom||'—',
         maintenanceData:m,
       })
@@ -565,7 +519,6 @@ export default function PlanningPage() {
         title:v.equipementNom||'Équipement',
         subtitle: v.type==='etalonnage_interne'?'Étalonnage interne':v.type==='verification_externe'?'Vérification externe':'Contrôle terrain',
         statusLabel:'Métrologie', statusBg:'var(--color-accent-light)', statusColor:'var(--color-accent)',
-        techColor: getTechColor(v.technicienNom),
         link:`/metrologie/${v.id}`, isDone:false, technicien:v.technicienNom||'—',
       })
     })
@@ -576,14 +529,13 @@ export default function PlanningPage() {
         id:ev.id, type:'evenement',
         title:ev.titre, subtitle:cfg.label,
         statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
-        techColor: getTechColor(ev.createdByInitiales ?? ''),
         link:'', isDone:false, technicien:ev.createdByInitiales||'—',
         plannedTime:ev.heure||undefined, evenementData:ev,
       })
     })
 
     return map
-  }, [clients, maintenances, verifications, evenements, colorByInitiales])
+  }, [clients, maintenances, verifications, evenements])
 
   // ── Filtrage technicien ─────────────────────────────────
 
@@ -624,7 +576,6 @@ export default function PlanningPage() {
               planNom: plan.nom,
               siteNom: plan.siteNom,
               techInitiales: client.preleveur || '—',
-              techColor: getTechColor(client.preleveur),
             })
           }
         })
@@ -637,7 +588,7 @@ export default function PlanningPage() {
       if (aOvr !== bOvr) return aOvr - bOvr
       return a.clientNom.localeCompare(b.clientNom)
     })
-  }, [selectedDay, clients, colorByInitiales])
+  }, [selectedDay, clients])
 
   // ── Liste période (mobile) ──────────────────────────────
 
@@ -769,7 +720,7 @@ export default function PlanningPage() {
           </span>
           {hasTech && (
             <span className="shrink-0 text-[9px] font-semibold px-1 rounded"
-              style={{ background: (event.techColor ?? event.statusColor) + '28', color: event.techColor ?? event.statusColor }}>
+              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
               {event.technicien}
             </span>
           )}
@@ -956,15 +907,14 @@ export default function PlanningPage() {
                 Tous
               </button>
               {allTechs.map(t => {
-                const tColor = getTechColor(t)
                 const isActive = filterTech === t
                 return (
                   <button key={t} onClick={() => setFilterTech(t===filterTech?'':t)}
                     className="px-2.5 py-1 rounded-full text-xs font-medium"
                     style={{
-                      background: isActive ? tColor : 'var(--color-bg-secondary)',
-                      color: isActive ? 'white' : tColor,
-                      border: `1px solid ${isActive ? 'transparent' : tColor + '66'}`,
+                      background: isActive ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                      color: isActive ? 'white' : 'var(--color-text-secondary)',
+                      border: `1px solid ${isActive ? 'transparent' : 'var(--color-border-subtle)'}`,
                     }}>
                     {t}
                   </button>
