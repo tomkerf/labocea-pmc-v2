@@ -31,6 +31,19 @@ const ETATS = [
   { value: 'prete', label: 'Prêté' },
 ]
 
+/** Correspondance anciens noms V1 → nouveaux noms V2 */
+const CATEGORIE_ALIAS: Record<string, string> = {
+  preleveur_auto:  'preleveur',
+  turbidimetre:    'multiparametre',
+  ph_metre:        'multiparametre',
+  conductimetre:   'multiparametre',
+  autre:           'autre',
+}
+
+function normalizeCategorie(cat: string): string {
+  return CATEGORIE_ALIAS[cat] ?? cat
+}
+
 export default function MaterielPage() {
   useEquipementsListener()
   const navigate = useNavigate()
@@ -45,7 +58,7 @@ export default function MaterielPage() {
   const filtered = equipements.filter((e: Equipement) => {
     const q = search.toLowerCase()
     const matchSearch = !q || e.nom.toLowerCase().includes(q) || e.marque.toLowerCase().includes(q) || e.modele.toLowerCase().includes(q) || e.numSerie.toLowerCase().includes(q)
-    const matchCategorie = !filterCategorie || e.categorie === filterCategorie
+    const matchCategorie = !filterCategorie || normalizeCategorie(e.categorie) === filterCategorie
     const matchEtat = !filterEtat || e.etat === filterEtat
     return matchSearch && matchCategorie && matchEtat
   })
