@@ -478,8 +478,6 @@ export default function PlanningPage() {
 
   const weekDays  = useMemo(() => Array.from({length:5},(_,i) => addDays(weekStart,i)), [weekStart])
   const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])
-  const isWeekend = (d: Date) => { const day = d.getDay(); return day===0||day===6 }
-
   // ── Couleurs techniciens (initiales → couleur) ──────────
   // Priorité : avatarColor choisi par l'user > couleur auto (hash des initiales)
 
