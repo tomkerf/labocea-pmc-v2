@@ -275,6 +275,26 @@ function SamplingForm({ sampling, onUpdate }: SamplingFormProps) {
       </div>
 
       <div>
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Heure prévue</label>
+        <input
+          type="time"
+          value={sampling.plannedTime ?? ''}
+          onChange={(e) => onUpdate('plannedTime', e.target.value)}
+          className="field-input w-full"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Mois prévu</label>
+        <select
+          value={sampling.plannedMonth}
+          onChange={(e) => onUpdate('plannedMonth', parseInt(e.target.value))}
+          className="field-input w-full">
+          {MOIS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+        </select>
+      </div>
+
+      <div>
         <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
           Jour prévu
           <span className="ml-1 font-normal" style={{ color: 'var(--color-text-tertiary)' }}>(1–31)</span>
@@ -289,16 +309,6 @@ function SamplingForm({ sampling, onUpdate }: SamplingFormProps) {
           }}
           className="field-input w-full"
           placeholder="Ex : 15"
-        />
-      </div>
-
-      <div>
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Heure prévue</label>
-        <input
-          type="time"
-          value={sampling.plannedTime ?? ''}
-          onChange={(e) => onUpdate('plannedTime', e.target.value)}
-          className="field-input w-full"
         />
       </div>
 
