@@ -195,12 +195,13 @@ export default function DashboardPage() {
   )
 
   const alertesCombinees: { label: string; detail: string; link: string; isUrgent: boolean }[] = [
-    ...prelevementsEnRetard.map((p) => ({
-      label: p.clientNom,
-      detail: [p.siteNom, p.planNom].filter(Boolean).join(' · ') || 'Prélèvement en retard',
-      link: `/missions/${p.clientId}/plan/${p.planId}/sampling/${p.samplingId}`,
+    ...(prelevementsEnRetard.length > 0 ? [{
+      label: `${prelevementsEnRetard.length} prélèvement${prelevementsEnRetard.length > 1 ? 's' : ''} en retard`,
+      detail: prelevementsEnRetard.slice(0, 2).map((p) => p.clientNom).join(', ')
+        + (prelevementsEnRetard.length > 2 ? `… +${prelevementsEnRetard.length - 2}` : ''),
+      link: '/planning',
       isUrgent: true,
-    })),
+    }] : []),
     ...alertesMetro.map((v: Verification) => ({
       label: v.equipementNom || 'Équipement',
       detail: v.prochainControle
