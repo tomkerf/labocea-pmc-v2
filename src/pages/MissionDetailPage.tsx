@@ -139,7 +139,7 @@ export default function MissionDetailPage() {
     : `https://maps.google.com/?q=${encodeURIComponent(plan.siteNom || plan.nom || '')}`
 
   return (
-    <div className="max-w-lg mx-auto pb-32">
+    <div className="max-w-lg mx-auto pb-48 md:pb-32">
 
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-3">
@@ -318,14 +318,16 @@ export default function MissionDetailPage() {
         </div>
       )}
 
-      {/* Bouton Terminer */}
+      {/* Bouton Terminer — positionné au-dessus de la TabBar sur mobile */}
       {sampling.status !== 'done' && (
-        <div className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-3"
+        <div
+          className="fixed left-0 right-0 px-4 pt-3 md:bottom-0"
           style={{
+            bottom: 'calc(65px + env(safe-area-inset-bottom))',
             background: 'rgba(245,245,247,0.92)',
             backdropFilter: 'blur(12px)',
             borderTop: '1px solid var(--color-border-subtle)',
-            paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)',
+            paddingBottom: '12px',
           }}>
           <button
             onClick={handleTerminer}
