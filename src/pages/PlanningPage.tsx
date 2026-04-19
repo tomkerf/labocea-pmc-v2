@@ -275,7 +275,7 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                               color: isValidating ? 'var(--color-text-secondary)' : 'var(--color-success)',
                               border: `1px solid ${isValidating ? 'var(--color-border)' : 'transparent'}`,
                             }}>
-                            {isValidating ? 'Annuler' : '✓ Fait'}
+                            {isValidating ? 'Annuler' : '→ Ce jour'}
                           </button>
                         </div>
 
@@ -285,7 +285,7 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                             <div className="flex-1">
                               <label className="block text-xs font-medium mb-1"
                                 style={{ color: 'var(--color-text-secondary)' }}>
-                                Date de réalisation
+                                Planifier le
                               </label>
                               <input type="date" value={poolDate} onChange={e => setPoolDate(e.target.value)}
                                 className="w-full px-3 py-2 rounded-lg text-sm"
@@ -635,16 +635,18 @@ export default function PlanningPage() {
 
   // ── Validation depuis le DayModal ───────────────────────
 
+  // Planifie un sampling à un jour précis du mois (sans le marquer "fait")
   async function handleValidatePool(item: PoolItem, date: string) {
     if (!uid) return
     const client = clients.find((c: Client) => c.id === item.clientId)
     if (!client) return
+    const plannedDay = new Date(date + 'T12:00:00').getDate()
     await saveClient({
       ...client,
       plans: client.plans.map(plan => plan.id !== item.planId ? plan : {
         ...plan,
         samplings: plan.samplings.map((s: Sampling) =>
-          s.id !== item.sampling.id ? s : { ...s, status: 'done' as const, doneDate: date, doneBy: uid }
+          s.id !== item.sampling.id ? s : { ...s, plannedDay }
         )
       })
     }, uid)
