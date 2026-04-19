@@ -595,11 +595,19 @@ export default function PlanningPage() {
     return Array.from(s).sort()
   }, [eventsByDate])
 
+  // Avec regroupement par client (vue mois, DayModal)
   function filteredForDay(dateStr:string): PlanningEvent[] {
     let evts = eventsByDate[dateStr]??[]
     if (filterTech) evts = evts.filter(e => e.technicien===filterTech)
     if (filterRetard) evts = evts.filter(e => e.statusColor==='var(--color-danger)'||e.statusLabel==='En retard')
-    return groupByClient(evts)  // inclut le tri
+    return groupByClient(evts)
+  }
+  // Sans regroupement (vue semaine et vue jour : chaque prélèvement visible)
+  function filteredForDayFlat(dateStr:string): PlanningEvent[] {
+    let evts = eventsByDate[dateStr]??[]
+    if (filterTech) evts = evts.filter(e => e.technicien===filterTech)
+    if (filterRetard) evts = evts.filter(e => e.statusColor==='var(--color-danger)'||e.statusLabel==='En retard')
+    return sortEvts(evts)
   }
 
   const totalOverdue = useMemo(() => {
@@ -1194,7 +1202,7 @@ export default function PlanningPage() {
             <div className="grid grid-cols-5 flex-1 overflow-y-auto">
               {weekDays.map((day,i) => {
                 const dateStr = toISO(day)
-                const evts = filteredForDay(dateStr)
+                const evts = filteredForDayFlat(dateStr)
                 const isToday = sameDay(day,today)
                 return (
                   <div key={i}
