@@ -1,10 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search } from 'lucide-react'
+import { Plus, Search, AlertTriangle } from 'lucide-react'
 import { useClientsListener, createClient } from '@/hooks/useClients'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore } from '@/stores/authStore'
+import { isSamplingOverdue } from '@/lib/overdue'
 import ClientCard from '@/components/missions/ClientCard'
+import type { Client } from '@/types'
+
+function hasOverdue(client: Client): boolean {
+  return client.plans.some((p) => p.samplings.some(isSamplingOverdue))
+}
 
 export default function MissionsPage() {
   useClientsListener()
@@ -14,16 +20,19 @@ export default function MissionsPage() {
   const uid = useAuthStore((s) => s.uid())
 
   const [search, setSearch] = useState('')
+  const [onlyRetard, setOnlyRetard] = useState(false)
   const [creating, setCreating] = useState(false)
 
-  // Filtrage par nom / segment / préleveur
+  const overdueCount = clients.filter(hasOverdue).length
+
   const filtered = clients.filter((c) => {
     const q = search.toLowerCase()
-    return (
+    const matchSearch =
       c.nom.toLowerCase().includes(q) ||
       (c.segment ?? '').toLowerCase().includes(q) ||
       (c.preleveur ?? '').toLowerCase().includes(q)
-    )
+    const matchRetard = !onlyRetard || hasOverdue(c)
+    return matchSearch && matchRetard
   })
 
   async function handleNewClient() {
@@ -84,22 +93,39 @@ export default function MissionsPage() {
         </button>
       </div>
 
-      {/* Recherche */}
-      <div className="relative mb-4">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
-          style={{ color: 'var(--color-text-tertiary)' }} />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Rechercher un client, segment, préleveur…"
-          className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
-          style={{
-            background: 'var(--color-bg-secondary)',
-            border: '1px solid var(--color-border-subtle)',
-            color: 'var(--color-text-primary)',
-          }}
-        />
+      {/* Recherche + filtre retard */}
+      <div className="flex gap-2 mb-4">
+        <div className="relative flex-1">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
+            style={{ color: 'var(--color-text-tertiary)' }} />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un client, segment, préleveur…"
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
+            style={{
+              background: 'var(--color-bg-secondary)',
+              border: '1px solid var(--color-border-subtle)',
+              color: 'var(--color-text-primary)',
+            }}
+          />
+        </div>
+
+        {overdueCount > 0 && (
+          <button
+            onClick={() => setOnlyRetard((v) => !v)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium shrink-0 transition-colors"
+            style={{
+              background: onlyRetard ? 'var(--color-danger)' : 'var(--color-danger-light)',
+              color: onlyRetard ? 'white' : 'var(--color-danger)',
+              border: '1px solid var(--color-danger)',
+            }}
+          >
+            <AlertTriangle size={14} />
+            {overdueCount} en retard
+          </button>
+        )}
       </div>
 
       {/* Liste */}
@@ -111,7 +137,7 @@ export default function MissionsPage() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-            {search ? 'Aucun résultat pour cette recherche.' : 'Aucun client — crée le premier.'}
+            {onlyRetard ? 'Aucun client en retard.' : search ? 'Aucun résultat pour cette recherche.' : 'Aucun client — crée le premier.'}
           </p>
         </div>
       ) : (
