@@ -1198,15 +1198,35 @@ export default function PlanningPage() {
                 const isToday = sameDay(day,today)
                 return (
                   <div key={i}
-                    className="p-1.5 flex flex-col gap-1 cursor-pointer group"
+                    className="p-2 flex flex-col cursor-pointer group"
                     onClick={() => setSelectedDay(dateStr)}
                     style={{
                       borderRight: i<4?'1px solid var(--color-border-subtle)':'none',
                       background: isToday?'rgba(255,59,48,0.04)':'transparent',
                       minHeight: 120,
                     }}>
-                    {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => setSelectedDay(dateStr)} />)}
-                    {/* Bouton + toujours visible, plus marqué au survol */}
+                    {/* Points colorés par statut */}
+                    {evts.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {evts.slice(0, 12).map(evt => (
+                          <span key={evt.id} className="w-2 h-2 rounded-full shrink-0"
+                            style={{ background: evt.statusColor }} />
+                        ))}
+                        {evts.length > 12 && (
+                          <span className="text-[9px] leading-none self-center"
+                            style={{ color: 'var(--color-text-tertiary)' }}>
+                            +{evts.length - 12}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {/* Compteur */}
+                    {evts.length > 0 && (
+                      <span className="text-[10px] mt-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                        {evts.length} intervention{evts.length > 1 ? 's' : ''}
+                      </span>
+                    )}
+                    {/* Bouton Planifier */}
                     <div className="mt-auto flex items-center justify-center py-1">
                       <button
                         onClick={e => { e.stopPropagation(); setSelectedDay(dateStr) }}
