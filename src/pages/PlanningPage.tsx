@@ -23,19 +23,20 @@ interface PlanningEvent {
   statusColor: string
   link: string
   isDone: boolean
-  technicien: string   // initiales ou nom du technicien assigné
-  // Pour validation rapide
+  technicien: string
   clientId?: string
   planId?: string
   samplingId?: string
   maintenanceData?: Maintenance
 }
 
+type ViewMode = 'semaine' | 'mois'
+
 // ── Helpers ─────────────────────────────────────────────────
 
 const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
-const MOIS_LONG = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-                   'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
+const MOIS_LONG = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
 
 function startOfWeek(date: Date): Date {
   const d = new Date(date)
@@ -45,10 +46,18 @@ function startOfWeek(date: Date): Date {
   return d
 }
 
+function startOfMonth(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1)
+}
+
 function addDays(date: Date, n: number): Date {
   const d = new Date(date)
   d.setDate(d.getDate() + n)
   return d
+}
+
+function addMonths(date: Date, n: number): Date {
+  return new Date(date.getFullYear(), date.getMonth() + n, 1)
 }
 
 function toISODate(date: Date): string {
@@ -57,6 +66,20 @@ function toISODate(date: Date): string {
 
 function isSameDay(a: Date, b: Date): boolean {
   return toISODate(a) === toISODate(b)
+}
+
+// Génère les cellules de la grille mensuelle (lundi en premier)
+function buildMonthGrid(monthStart: Date): (Date | null)[] {
+  const year = monthStart.getFullYear()
+  const month = monthStart.getMonth()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const firstDayOfWeek = monthStart.getDay() // 0=dim, 1=lun...
+  const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1 // décalage lundi
+  const cells: (Date | null)[] = []
+  for (let i = 0; i < offset; i++) cells.push(null)
+  for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d))
+  while (cells.length % 7 !== 0) cells.push(null)
+  return cells
 }
 
 const SAMPLING_STATUS: Record<string, { label: string; bg: string; color: string }> = {
@@ -90,7 +113,9 @@ export default function PlanningPage() {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
+  const [viewMode, setViewMode] = useState<ViewMode>('semaine')
   const [weekStart, setWeekStart] = useState<Date>(() => startOfWeek(today))
+  const [monthStart, setMonthStart] = useState<Date>(() => startOfMonth(today))
   const [selectedDate, setSelectedDate] = useState<Date>(today)
   const [filterTechnicien, setFilterTechnicien] = useState<string>('')
   const [validatingId, setValidatingId] = useState<string | null>(null)
@@ -98,6 +123,7 @@ export default function PlanningPage() {
   const [saving, setSaving] = useState(false)
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
+  const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])
 
   const isValidationWeekend = useMemo(() => {
     if (!validationDate) return false
@@ -117,7 +143,6 @@ export default function PlanningPage() {
       map[dateStr].push(event)
     }
 
-    // Prélèvements
     clients.forEach((client) => {
       client.plans.forEach((plan) => {
         plan.samplings.forEach((s: Sampling) => {
@@ -143,7 +168,6 @@ export default function PlanningPage() {
       })
     })
 
-    // Maintenances
     maintenances.forEach((m: Maintenance) => {
       const dateStr = m.dateRealisee || m.datePrevue
       const cfg = MAINTENANCE_STATUS[m.statut] ?? MAINTENANCE_STATUS.planifiee
@@ -163,7 +187,6 @@ export default function PlanningPage() {
       })
     })
 
-    // Vérifications — pas de validation rapide (résultat + prochain contrôle requis)
     verifications.forEach((v: Verification) => {
       if (!v.prochainControle) return
       add(v.prochainControle, {
@@ -184,7 +207,6 @@ export default function PlanningPage() {
     return map
   }, [clients, maintenances, verifications])
 
-  // Liste de tous les techniciens uniques dans toutes les données
   const allTechniciens = useMemo(() => {
     const set = new Set<string>()
     Object.values(eventsByDate).forEach((events) =>
@@ -239,7 +261,23 @@ export default function PlanningPage() {
     setValidationDate(toISODate(today))
   }
 
-  // ── Libellé semaine ─────────────────────────────────────────
+  function selectDay(day: Date) {
+    setSelectedDate(day)
+    setValidatingId(null)
+    if (viewMode === 'semaine') setWeekStart(startOfWeek(day))
+  }
+
+  function switchView(mode: ViewMode) {
+    setViewMode(mode)
+    if (mode === 'mois') setMonthStart(startOfMonth(selectedDate))
+    if (mode === 'semaine') setWeekStart(startOfWeek(selectedDate))
+  }
+
+  function typeLabel(type: PlanningEvent['type']): string {
+    if (type === 'prelevement') return 'Prélèvement'
+    if (type === 'maintenance') return 'Maintenance'
+    return 'Métrologie'
+  }
 
   const weekLabel = (() => {
     const end = addDays(weekStart, 6)
@@ -249,18 +287,32 @@ export default function PlanningPage() {
     return `${MOIS_LONG[weekStart.getMonth()]} — ${MOIS_LONG[end.getMonth()]} ${end.getFullYear()}`
   })()
 
-  function typeLabel(type: PlanningEvent['type']): string {
-    if (type === 'prelevement') return 'Prélèvement'
-    if (type === 'maintenance') return 'Maintenance'
-    return 'Métrologie'
-  }
-
   // ── Render ─────────────────────────────────────────────────
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="p-6 max-w-3xl">
+
+      {/* En-tête : titre + toggle vue + filtre technicien */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>Planning</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>Planning</h1>
+
+          {/* Toggle Semaine / Mois */}
+          <div className="flex rounded-lg overflow-hidden"
+            style={{ border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-tertiary)' }}>
+            {(['semaine', 'mois'] as ViewMode[]).map((mode) => (
+              <button key={mode}
+                onClick={() => switchView(mode)}
+                className="px-3 py-1 text-xs font-medium transition-colors capitalize"
+                style={{
+                  background: viewMode === mode ? 'var(--color-accent)' : 'transparent',
+                  color: viewMode === mode ? 'white' : 'var(--color-text-secondary)',
+                }}>
+                {mode}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Filtre technicien */}
         {allTechniciens.length > 1 && (
@@ -291,74 +343,169 @@ export default function PlanningPage() {
         )}
       </div>
 
-      {/* Navigation semaine */}
-      <div className="rounded-xl overflow-hidden mb-5"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+      {/* ── VUE SEMAINE ── */}
+      {viewMode === 'semaine' && (
+        <div className="rounded-xl overflow-hidden mb-5"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          <div className="flex items-center justify-between px-5 py-3"
+            style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+            <button onClick={() => setWeekStart(addDays(weekStart, -7))}
+              className="p-1 rounded-lg" style={{ color: 'var(--color-text-secondary)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
+              <ChevronLeft size={18} />
+            </button>
+            <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+              {weekLabel}
+            </span>
+            <button onClick={() => setWeekStart(addDays(weekStart, 7))}
+              className="p-1 rounded-lg" style={{ color: 'var(--color-text-secondary)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
+              <ChevronRight size={18} />
+            </button>
+          </div>
 
-        <div className="flex items-center justify-between px-5 py-3"
-          style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <button onClick={() => setWeekStart(addDays(weekStart, -7))}
-            className="p-1 rounded-lg" style={{ color: 'var(--color-text-secondary)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
-            <ChevronLeft size={18} />
-          </button>
-          <span className="text-sm font-medium capitalize" style={{ color: 'var(--color-text-primary)' }}>
-            {weekLabel}
-          </span>
-          <button onClick={() => setWeekStart(addDays(weekStart, 7))}
-            className="p-1 rounded-lg" style={{ color: 'var(--color-text-secondary)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
-            <ChevronRight size={18} />
-          </button>
-        </div>
+          <div className="grid grid-cols-7 px-3 py-4 gap-1">
+            {weekDays.map((day, i) => {
+              const dateStr = toISODate(day)
+              const isSelected = isSameDay(day, selectedDate)
+              const isToday = isSameDay(day, today)
+              const isWeekend = i >= 5
+              const events = filterTechnicien
+                ? (eventsByDate[dateStr] ?? []).filter((e) => e.technicien === filterTechnicien)
+                : eventsByDate[dateStr] ?? []
+              const eventCount = events.length
 
-        <div className="grid grid-cols-7 px-3 py-4 gap-1">
-          {weekDays.map((day, i) => {
-            const dateStr = toISODate(day)
-            const isSelected = isSameDay(day, selectedDate)
-            const isToday = isSameDay(day, today)
-            const isWeekend = i >= 5
-            const eventCount = eventsByDate[dateStr]?.length ?? 0
-
-            return (
-              <button key={i}
-                onClick={() => { setSelectedDate(day); setValidatingId(null) }}
-                className="flex flex-col items-center gap-1.5 py-2 px-1 rounded-xl transition-colors"
-                style={{ background: isSelected ? 'var(--color-accent)' : 'transparent' }}
-                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--color-bg-tertiary)' }}
-                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
-                <span className="text-[10px] font-medium uppercase"
-                  style={{
-                    color: isSelected ? 'rgba(255,255,255,0.8)' : isWeekend ? 'var(--color-border)' : 'var(--color-text-tertiary)',
-                    letterSpacing: '0.04em',
-                  }}>
-                  {JOURS[i]}
-                </span>
-                <span className="text-sm font-semibold w-7 h-7 flex items-center justify-center rounded-full"
-                  style={{
-                    color: isSelected ? 'white' : isToday ? 'var(--color-accent)' : isWeekend ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
-                    background: isToday && !isSelected ? 'var(--color-accent-light)' : 'transparent',
-                  }}>
-                  {day.getDate()}
-                </span>
-                {eventCount > 0 ? (
-                  <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+              return (
+                <button key={i}
+                  onClick={() => selectDay(day)}
+                  className="flex flex-col items-center gap-1.5 py-2 px-1 rounded-xl transition-colors"
+                  style={{ background: isSelected ? 'var(--color-accent)' : 'transparent' }}
+                  onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--color-bg-tertiary)' }}
+                  onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
+                  <span className="text-[10px] font-medium uppercase"
                     style={{
-                      background: isSelected ? 'rgba(255,255,255,0.25)' : 'var(--color-accent-light)',
-                      color: isSelected ? 'white' : 'var(--color-accent)',
+                      color: isSelected ? 'rgba(255,255,255,0.8)' : isWeekend ? 'var(--color-border)' : 'var(--color-text-tertiary)',
+                      letterSpacing: '0.04em',
                     }}>
-                    {eventCount}
+                    {JOURS[i]}
                   </span>
-                ) : <span className="h-4" />}
-              </button>
-            )
-          })}
+                  <span className="text-sm font-semibold w-7 h-7 flex items-center justify-center rounded-full"
+                    style={{
+                      color: isSelected ? 'white' : isToday ? 'var(--color-accent)' : isWeekend ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+                      background: isToday && !isSelected ? 'var(--color-accent-light)' : 'transparent',
+                    }}>
+                    {day.getDate()}
+                  </span>
+                  {eventCount > 0 ? (
+                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+                      style={{
+                        background: isSelected ? 'rgba(255,255,255,0.25)' : 'var(--color-accent-light)',
+                        color: isSelected ? 'white' : 'var(--color-accent)',
+                      }}>
+                      {eventCount}
+                    </span>
+                  ) : <span className="h-4" />}
+                </button>
+              )
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Titre du jour */}
+      {/* ── VUE MOIS ── */}
+      {viewMode === 'mois' && (
+        <div className="rounded-xl overflow-hidden mb-5"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+
+          {/* Navigation mois */}
+          <div className="flex items-center justify-between px-5 py-3"
+            style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+            <button onClick={() => setMonthStart(addMonths(monthStart, -1))}
+              className="p-1 rounded-lg" style={{ color: 'var(--color-text-secondary)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
+              <ChevronLeft size={18} />
+            </button>
+            <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+              {MOIS_LONG[monthStart.getMonth()]} {monthStart.getFullYear()}
+            </span>
+            <button onClick={() => setMonthStart(addMonths(monthStart, 1))}
+              className="p-1 rounded-lg" style={{ color: 'var(--color-text-secondary)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
+              <ChevronRight size={18} />
+            </button>
+          </div>
+
+          {/* En-têtes jours */}
+          <div className="grid grid-cols-7 px-3 pt-3 pb-1 gap-1">
+            {JOURS.map((j, i) => (
+              <div key={j} className="text-center text-[10px] font-medium uppercase py-1"
+                style={{
+                  color: i >= 5 ? 'var(--color-border)' : 'var(--color-text-tertiary)',
+                  letterSpacing: '0.04em',
+                }}>
+                {j}
+              </div>
+            ))}
+          </div>
+
+          {/* Grille jours */}
+          <div className="grid grid-cols-7 px-3 pb-3 gap-1">
+            {monthGrid.map((day, i) => {
+              if (!day) return <div key={i} />
+
+              const dateStr = toISODate(day)
+              const isSelected = isSameDay(day, selectedDate)
+              const isToday = isSameDay(day, today)
+              const dayOfWeek = (i % 7)
+              const isWeekend = dayOfWeek >= 5
+              const events = filterTechnicien
+                ? (eventsByDate[dateStr] ?? []).filter((e) => e.technicien === filterTechnicien)
+                : eventsByDate[dateStr] ?? []
+              const eventCount = events.length
+
+              // Couleurs des dots : priorité danger > warning > accent > success
+              const hasOverdue = events.some((e) => e.statusColor === 'var(--color-danger)')
+              const hasWarning = events.some((e) => e.statusColor === 'var(--color-warning)')
+              const dotColor = hasOverdue ? 'var(--color-danger)'
+                : hasWarning ? 'var(--color-warning)'
+                : 'var(--color-accent)'
+
+              return (
+                <button key={i}
+                  onClick={() => selectDay(day)}
+                  className="flex flex-col items-center gap-1 py-2 rounded-xl transition-colors"
+                  style={{ background: isSelected ? 'var(--color-accent)' : 'transparent', minHeight: 56 }}
+                  onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--color-bg-tertiary)' }}
+                  onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
+                  <span className="text-sm font-semibold w-7 h-7 flex items-center justify-center rounded-full"
+                    style={{
+                      color: isSelected ? 'white' : isToday ? 'var(--color-accent)' : isWeekend ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+                      background: isToday && !isSelected ? 'var(--color-accent-light)' : 'transparent',
+                      fontSize: 13,
+                    }}>
+                    {day.getDate()}
+                  </span>
+                  {eventCount > 0 ? (
+                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+                      style={{
+                        background: isSelected ? 'rgba(255,255,255,0.25)' : `${dotColor}22`,
+                        color: isSelected ? 'white' : dotColor,
+                      }}>
+                      {eventCount}
+                    </span>
+                  ) : <span className="h-4" />}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Titre du jour sélectionné */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-xs font-semibold uppercase"
           style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
@@ -380,7 +527,7 @@ export default function PlanningPage() {
             Aucune intervention prévue ce jour.
           </p>
           {!isSameDay(selectedDate, today) && (
-            <button onClick={() => setSelectedDate(today)} className="mt-3 text-xs" style={{ color: 'var(--color-accent)' }}>
+            <button onClick={() => selectDay(today)} className="mt-3 text-xs" style={{ color: 'var(--color-accent)' }}>
               Revenir à aujourd'hui
             </button>
           )}
@@ -396,13 +543,10 @@ export default function PlanningPage() {
               <div key={event.id + i}
                 style={{ borderBottom: i < selectedEvents.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
 
-                {/* Ligne principale */}
                 <div className="flex items-center gap-3 px-4 py-3.5">
-                  {/* Barre colorée */}
                   <div className="w-1 self-stretch rounded-full shrink-0"
                     style={{ background: event.statusColor, minHeight: 36 }} />
 
-                  {/* Contenu cliquable → fiche */}
                   <button className="flex-1 min-w-0 text-left" onClick={() => navigate(event.link)}>
                     <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
                       {event.title}
@@ -424,13 +568,11 @@ export default function PlanningPage() {
                     </div>
                   </button>
 
-                  {/* Badge statut */}
                   <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
                     style={{ background: event.statusBg, color: event.statusColor }}>
                     {event.statusLabel}
                   </span>
 
-                  {/* Bouton action */}
                   {event.isDone ? (
                     <CheckCircle2 size={20} className="shrink-0" style={{ color: 'var(--color-success)' }} />
                   ) : event.type === 'verification' ? (
@@ -454,7 +596,6 @@ export default function PlanningPage() {
                   )}
                 </div>
 
-                {/* Panneau de validation inline */}
                 {isValidating && canQuickValidate && (
                   <div className="px-5 py-4 flex flex-col gap-3"
                     style={{ background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
@@ -501,12 +642,22 @@ export default function PlanningPage() {
         </div>
       )}
 
-      {!weekDays.some((d) => isSameDay(d, today)) && (
+      {/* Lien retour semaine en cours (vue semaine uniquement) */}
+      {viewMode === 'semaine' && !weekDays.some((d) => isSameDay(d, today)) && (
         <button onClick={() => { setWeekStart(startOfWeek(today)); setSelectedDate(today) }}
           className="mt-4 text-xs" style={{ color: 'var(--color-accent)' }}>
           ← Revenir à la semaine en cours
         </button>
       )}
+
+      {/* Lien retour mois en cours (vue mois uniquement) */}
+      {viewMode === 'mois' && monthStart.getMonth() !== today.getMonth() && (
+        <button onClick={() => { setMonthStart(startOfMonth(today)); setSelectedDate(today) }}
+          className="mt-4 text-xs" style={{ color: 'var(--color-accent)' }}>
+          ← Revenir au mois en cours
+        </button>
+      )}
+
     </div>
   )
 }
