@@ -314,25 +314,32 @@ export default function PlanningPage() {
     return `${weekStart.getDate()} ${MOIS_LONG[weekStart.getMonth()]} – ${end.getDate()} ${MOIS_LONG[end.getMonth()]} ${end.getFullYear()}`
   })() : `${MOIS_LONG[monthStart.getMonth()]} ${monthStart.getFullYear()}`
 
-  // ── Pill calendrier (desktop) ───────────────────────────────
+  // ── Pill calendrier Apple-style (desktop) ──────────────────
 
   function EventPill({ event }: { event:PlanningEvent }) {
     const isEvt = event.type==='evenement'
     return (
       <button
         onClick={() => isEvt ? null : navigate(event.link)}
-        className="w-full text-left rounded-md px-2 py-1 text-[11px] leading-tight truncate block"
+        className="w-full text-left flex items-center gap-1.5 px-1.5 py-[3px] rounded-[5px] text-[11px] leading-snug"
         style={{
           background: event.statusBg,
-          color: event.statusColor,
-          borderLeft: `2px solid ${event.statusColor}`,
           cursor: isEvt ? 'default' : 'pointer',
         }}
         title={`${event.title} — ${event.subtitle}`}
       >
-        <span className="font-semibold block truncate">{event.title}</span>
-        <span className="opacity-75 truncate block">{event.subtitle}</span>
-        {event.plannedTime && <span className="opacity-60"> · {event.plannedTime}</span>}
+        {/* Point coloré */}
+        <span className="shrink-0 w-[7px] h-[7px] rounded-full" style={{ background: event.statusColor }} />
+        {/* Titre */}
+        <span className="flex-1 truncate font-medium" style={{ color: 'var(--color-text-primary)' }}>
+          {event.title}
+        </span>
+        {/* Heure */}
+        {event.plannedTime && (
+          <span className="shrink-0 text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
+            {event.plannedTime}
+          </span>
+        )}
       </button>
     )
   }
@@ -582,7 +589,7 @@ export default function PlanningPage() {
                     </div>
                     <div className="w-7 h-7 flex items-center justify-center rounded-full mx-auto text-sm font-semibold"
                       style={{
-                        background:isToday?'var(--color-accent)':'transparent',
+                        background:isToday?'#FF3B30':'transparent',
                         color:isToday?'white':isWE?'var(--color-text-tertiary)':'var(--color-text-primary)',
                       }}>
                       {day.getDate()}
@@ -655,16 +662,23 @@ export default function PlanningPage() {
                       background: isToday?'var(--color-accent-light)':isWE?'var(--color-bg-tertiary)30':'transparent',
                       minHeight: 90,
                     }}>
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className={`text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full`}
-                        style={{
-                          background:isToday?'var(--color-accent)':'transparent',
-                          color:isToday?'white':isWE?'var(--color-text-tertiary)':'var(--color-text-secondary)',
-                        }}>
-                        {day.getDate()}
+                    <div className="flex items-center justify-between mb-1 px-0.5">
+                      <span className="text-[11px] font-semibold flex items-center gap-1">
+                        <span className={`w-[22px] h-[22px] flex items-center justify-center rounded-full text-[11px] font-semibold`}
+                          style={{
+                            background: isToday ? '#FF3B30' : 'transparent',
+                            color: isToday ? 'white' : isWE ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)',
+                          }}>
+                          {day.getDate()}
+                        </span>
+                        {day.getDate()===1 && (
+                          <span className="text-[10px] font-normal" style={{ color:'var(--color-text-tertiary)' }}>
+                            {MOIS_LONG[day.getMonth()].slice(0,3).toLowerCase()}.
+                          </span>
+                        )}
                       </span>
                       <button onClick={() => openNewEvt(dateStr)}
-                        className="opacity-0 hover:opacity-100 p-0.5 rounded"
+                        className="p-0.5 rounded opacity-0"
                         style={{ color:'var(--color-text-tertiary)' }}
                         onMouseEnter={e=>(e.currentTarget.style.opacity='1')}
                         onMouseLeave={e=>(e.currentTarget.style.opacity='0')}>
