@@ -768,7 +768,7 @@ export default function PlanningPage() {
     // compact = true en vue mois : une seule ligne, pas de sous-titre
     const isGrouped = (event.count ?? 0) > 1
     const hasSubtitle = !compact && event.subtitle && event.subtitle !== '—'
-    const hasTech = !isGrouped && event.technicien && event.technicien !== '—'
+    const hasTech = event.technicien && event.technicien !== '—'
 
     function handleClick(e: React.MouseEvent) {
       e.stopPropagation()
@@ -789,17 +789,18 @@ export default function PlanningPage() {
           <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
             {event.title}
           </span>
-          {isGrouped ? (
-            <span className="shrink-0 text-[9px] font-bold px-1 rounded"
-              style={{ background: event.statusColor + '28', color: event.statusColor }}>
-              ×{event.count}
-            </span>
-          ) : hasTech ? (
+          {hasTech && (
             <span className="shrink-0 text-[9px] font-semibold px-1 rounded"
               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
               {event.technicien}
             </span>
-          ) : null}
+          )}
+          {isGrouped && (
+            <span className="shrink-0 text-[9px] font-bold px-1 rounded"
+              style={{ background: event.statusColor + '28', color: event.statusColor }}>
+              ×{event.count}
+            </span>
+          )}
           {event.plannedTime && (
             <span className="shrink-0 text-[9px]" style={{ color: 'var(--color-text-tertiary)' }}>
               {event.plannedTime}
