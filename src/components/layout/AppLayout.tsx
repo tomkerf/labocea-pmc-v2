@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Sidebar from './Sidebar'
 import TabBar from './TabBar'
 import { useAuthStore } from '@/stores/authStore'
-import { getAvatarColor } from '@/components/ui/UserAvatar'
+import { getAvatarColor, AVATAR_COLORS } from '@/components/ui/UserAvatar'
 
 const pageTitles: Record<string, string> = {
   '/':             'Missions',
@@ -21,7 +21,8 @@ export default function AppLayout() {
   // Synchronise la couleur d'accentuation de l'app avec la couleur d'avatar du user
   useEffect(() => {
     const accent = getAvatarColor(avatarColor)
-    const accentLight = accent + '1A'   // ~10% opacité sur fond blanc
+    const match = AVATAR_COLORS.find((c) => c.value === accent)
+    const accentLight = match?.accentLight ?? '#E8F1FB'
     const root = document.documentElement
     root.style.setProperty('--color-accent', accent)
     root.style.setProperty('--color-accent-hover', accent)
