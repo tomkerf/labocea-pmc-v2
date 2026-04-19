@@ -975,6 +975,23 @@ export default function PlanningPage() {
         </div>
       </div>
 
+      {/* ── Légende statuts ── */}
+      <div className="hidden md:flex items-center gap-4 px-6 py-1.5 shrink-0"
+        style={{ borderBottom:'1px solid var(--color-border-subtle)', background:'var(--color-bg-secondary)' }}>
+        {[
+          { color:'var(--color-text-tertiary)', label:'Planifié' },
+          { color:'var(--color-danger)',        label:'En retard' },
+          { color:'var(--color-success)',        label:'Réalisé' },
+          { color:'var(--color-warning)',        label:'Non effectué' },
+          { color:'var(--color-accent)',         label:'Métrologie' },
+        ].map(({ color, label }) => (
+          <div key={label} className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
+            <span className="text-[11px]" style={{ color:'var(--color-text-tertiary)' }}>{label}</span>
+          </div>
+        ))}
+      </div>
+
       {/* ── DESKTOP : vue calendrier grille ── */}
       <div className="hidden md:flex flex-col flex-1 overflow-hidden">
 
