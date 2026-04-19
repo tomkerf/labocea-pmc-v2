@@ -71,12 +71,13 @@ export default function PlanPage() {
   const [saving, setSaving] = useState(false)
   const [selectedSampling, setSelectedSampling] = useState<string | null>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isDirty = useRef(false)
 
   useEffect(() => {
     if (!clientId) return
     const ref = doc(db, 'clients-v2', clientId)
     const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists()) setClient({ id: snap.id, ...snap.data() } as Client)
+      if (snap.exists() && !isDirty.current) setClient({ id: snap.id, ...snap.data() } as Client)
       setLoading(false)
     })
     return () => unsub()
@@ -85,13 +86,14 @@ export default function PlanPage() {
   const plan = client?.plans.find((p) => p.id === planId) ?? null
 
   function triggerSave(updated: Client) {
+    isDirty.current = true
     setClient(updated)
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(async () => {
       if (!uid) return
       setSaving(true)
       try { await saveClient(updated, uid) }
-      finally { setSaving(false) }
+      finally { setSaving(false); isDirty.current = false }
     }, DEBOUNCE)
   }
 

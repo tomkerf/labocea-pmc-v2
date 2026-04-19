@@ -23,14 +23,20 @@ export default function ClientPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [sitesInput, setSitesInput] = useState('')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isDirty = useRef(false)
 
   // Écoute temps réel sur le document client
   useEffect(() => {
     if (!clientId) return
     const ref = doc(db, 'clients-v2', clientId)
     const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists()) setClient({ id: snap.id, ...snap.data() } as Client)
+      if (snap.exists() && !isDirty.current) {
+        const data = { id: snap.id, ...snap.data() } as Client
+        setClient(data)
+        setSitesInput(data.sites.join(', '))
+      }
       setLoading(false)
     })
     return () => unsub()
@@ -38,13 +44,18 @@ export default function ClientPage() {
 
   // Auto-save déclenché à chaque modif du client
   function triggerSave(updated: Client) {
+    isDirty.current = true
     setClient(updated)
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(async () => {
       if (!uid) return
       setSaving(true)
-      try { await saveClient(updated, uid) }
-      finally { setSaving(false) }
+      try {
+        await saveClient(updated, uid)
+      } finally {
+        setSaving(false)
+        isDirty.current = false
+      }
     }, DEBOUNCE)
   }
 
@@ -53,9 +64,13 @@ export default function ClientPage() {
     triggerSave({ ...client, [field]: value })
   }
 
-  // Gestion des sites (liste libre)
-  function updateSites(raw: string) {
-    update('sites', raw.split(',').map((s) => s.trim()).filter(Boolean))
+  // Gestion des sites (liste libre) — état local pour ne pas casser le curseur
+  function handleSitesChange(raw: string) {
+    setSitesInput(raw)
+    if (!client) return
+    isDirty.current = true
+    const parsed = raw.split(',').map((s) => s.trim()).filter(Boolean)
+    triggerSave({ ...client, sites: parsed })
   }
 
   // Nouveau plan
@@ -170,7 +185,7 @@ export default function ClientPage() {
             className="field-input" placeholder="2026" />
         </Field>
         <Field label="Sites (séparés par virgule)" last>
-          <input value={client.sites.join(', ')} onChange={(e) => updateSites(e.target.value)}
+          <input value={sitesInput} onChange={(e) => handleSitesChange(e.target.value)}
             className="field-input" placeholder="Quimper, Kerambris, Aven" />
         </Field>
       </Section>
