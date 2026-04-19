@@ -250,8 +250,8 @@ export default function MissionDetailPage() {
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
                 {item.done
-                  ? <CheckCircle2 size={22} style={{ color: 'var(--color-accent)', shrink: 0 }} />
-                  : <Circle size={22} style={{ color: 'var(--color-border)', shrink: 0 }} />
+                  ? <CheckCircle2 size={22} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
+                  : <Circle size={22} style={{ color: 'var(--color-border)', flexShrink: 0 }} />
                 }
                 <span className="flex-1 text-sm font-medium"
                   style={{
