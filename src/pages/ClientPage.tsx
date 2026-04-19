@@ -95,6 +95,9 @@ export default function ClientPage() {
   // Supprimer le client
   async function handleDeleteClient() {
     if (!client) return
+    // Annuler tout auto-save en attente — sinon saveClient recrée le document après deleteDoc
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    isDirty.current = false
     await deleteClient(client.id)
     navigate('/missions')
   }

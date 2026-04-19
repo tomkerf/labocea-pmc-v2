@@ -86,6 +86,7 @@ export default function EquipementPage() {
   async function handleDelete() {
     if (!equipementId) return
     if (!confirm(`Supprimer "${equipement?.nom || 'cet équipement'}" ? Cette action est irréversible.`)) return
+    if (saveTimer.current) clearTimeout(saveTimer.current)
     await deleteDoc(doc(db, 'equipements', equipementId))
     navigate('/materiel')
   }
