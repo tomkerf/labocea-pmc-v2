@@ -27,6 +27,7 @@ interface PlanningEvent {
   link: string
   isDone: boolean
   technicien: string
+  count?: number          // nb prélèvements regroupés (même client, même jour)
   plannedTime?: string
   clientId?: string
   planId?: string
@@ -96,6 +97,42 @@ function sortEvts(evts: PlanningEvent[]): PlanningEvent[] {
     if (b.plannedTime) return 1
     return 0
   })
+}
+
+// Regroupe les prélèvements du même client sur un même jour en une seule pill
+function groupByClient(evts: PlanningEvent[]): PlanningEvent[] {
+  const prelev = evts.filter(e => e.type === 'prelevement')
+  const others = evts.filter(e => e.type !== 'prelevement')
+
+  const groups = new Map<string, PlanningEvent[]>()
+  prelev.forEach(e => {
+    const key = e.clientId ?? e.id
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key)!.push(e)
+  })
+
+  const statusPri = (e: PlanningEvent) => {
+    if (e.statusColor === 'var(--color-danger)')        return 0  // en retard
+    if (e.statusColor === 'var(--color-warning)')       return 1  // non effectué
+    if (e.statusColor === 'var(--color-text-secondary)') return 2  // planifié
+    return 3                                                       // réalisé
+  }
+
+  const merged: PlanningEvent[] = []
+  groups.forEach(group => {
+    if (group.length === 1) { merged.push(group[0]); return }
+    const worst = group.reduce((best, e) => statusPri(e) < statusPri(best) ? e : best, group[0])
+    // Noms de points uniques (retire "· Bilan 24h J1/J2" pour dédupliquer)
+    const pointNames = [...new Set(
+      group.map(e => e.subtitle.replace(/ · Bilan 24h J[12]$/, '')).filter(s => s && s !== '—')
+    )]
+    const subtitle = pointNames.length <= 2
+      ? pointNames.join(' · ')
+      : `${group.length} prélèvements`
+    merged.push({ ...worst, subtitle, count: group.length, link: `/missions/${worst.clientId}` })
+  })
+
+  return sortEvts([...merged, ...others])
 }
 
 const SAMPLING_CFG: Record<string,{label:string;bg:string;color:string}> = {
@@ -549,7 +586,7 @@ export default function PlanningPage() {
     let evts = eventsByDate[dateStr]??[]
     if (filterTech) evts = evts.filter(e => e.technicien===filterTech)
     if (filterRetard) evts = evts.filter(e => e.statusColor==='var(--color-danger)'||e.statusLabel==='En retard')
-    return sortEvts(evts)
+    return groupByClient(evts)  // inclut le tri
   }
 
   const totalOverdue = useMemo(() => {
@@ -702,9 +739,10 @@ export default function PlanningPage() {
 
   // ── EventPill (calendrier desktop) ─────────────────────
 
-  function EventPill({ event }: { event:PlanningEvent }) {
-    const hasSubtitle = event.subtitle && event.subtitle !== '—'
-    const hasTech = event.technicien && event.technicien !== '—'
+  function EventPill({ event, compact }: { event:PlanningEvent; compact?: boolean }) {
+    // compact = true en vue mois : une seule ligne, pas de sous-titre
+    const hasSubtitle = !compact && event.subtitle && event.subtitle !== '—'
+    const hasTech = !event.count && event.technicien && event.technicien !== '—'
     return (
       <button
         onClick={e => { e.stopPropagation(); if (event.type !== 'evenement') navigate(event.link) }}
@@ -712,25 +750,30 @@ export default function PlanningPage() {
         style={{ background: event.statusBg, cursor: event.type === 'evenement' ? 'default' : 'pointer' }}
         title={`${event.title} — ${event.subtitle} (${event.technicien})`}
       >
-        {/* Ligne 1 : dot + client + technicien */}
+        {/* Ligne 1 : dot + client + badge ×N ou technicien */}
         <div className="flex items-center gap-1">
           <span className="shrink-0 w-[6px] h-[6px] rounded-full" style={{ background: event.statusColor }} />
           <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
             {event.title}
           </span>
-          {hasTech && (
+          {event.count && event.count > 1 ? (
+            <span className="shrink-0 text-[9px] font-bold px-1 rounded"
+              style={{ background: event.statusColor + '28', color: event.statusColor }}>
+              ×{event.count}
+            </span>
+          ) : hasTech ? (
             <span className="shrink-0 text-[9px] font-semibold px-1 rounded"
               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
               {event.technicien}
             </span>
-          )}
+          ) : null}
           {event.plannedTime && (
             <span className="shrink-0 text-[9px]" style={{ color: 'var(--color-text-tertiary)' }}>
               {event.plannedTime}
             </span>
           )}
         </div>
-        {/* Ligne 2 : nom du point */}
+        {/* Ligne 2 : nom du point (masquée en vue mois) */}
         {hasSubtitle && (
           <div className="text-[10px] truncate pl-[14px]" style={{ color: 'var(--color-text-secondary)' }}>
             {event.subtitle}
@@ -1055,7 +1098,7 @@ export default function PlanningPage() {
                       <Plus size={10} className="opacity-0 group-hover:opacity-60 transition-opacity"
                         style={{ color:'var(--color-text-tertiary)' }} />
                     </div>
-                    {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} />)}
+                    {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact />)}
                     {evts.length>MAX && (
                       <span className="text-[10px] pl-1 mt-0.5" style={{ color:'var(--color-text-tertiary)' }}>
                         +{evts.length-MAX} autres
