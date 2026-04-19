@@ -27,6 +27,7 @@ export async function createEvenement(
   heure: string,
   notes: string,
   uid: string,
+  initiales?: string,
 ): Promise<string> {
   const ref = await addDoc(collection(db, 'evenements'), {
     titre,
@@ -35,6 +36,7 @@ export async function createEvenement(
     heure: heure || null,
     notes: notes || null,
     createdBy: uid,
+    createdByInitiales: initiales || null,
     createdAt: serverTimestamp(),
   })
   return ref.id

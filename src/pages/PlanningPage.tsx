@@ -119,6 +119,7 @@ export default function PlanningPage() {
 
   const navigate = useNavigate()
   const uid = useAuthStore((s) => s.uid())
+  const initiales = useAuthStore((s) => s.initiales())
   const { clients } = useMissionsStore()
   const { verifications } = useMetrologieStore()
   const { maintenances } = useMaintenancesStore()
@@ -245,7 +246,7 @@ export default function PlanningPage() {
         statusColor: cfg.color,
         link: '',
         isDone: false,
-        technicien: '',
+        technicien: ev.createdByInitiales || '—',
         plannedTime: ev.heure || undefined,
         evenementData: ev,
       })
@@ -363,6 +364,7 @@ export default function PlanningPage() {
         newEventHeure,
         newEventNotes,
         uid,
+        initiales,
       )
       setShowNewEvent(false)
       setNewEventTitre('')

@@ -170,6 +170,7 @@ export interface EvenementPersonnel {
   type: TypeEvenement
   notes?: string
   createdBy: string
+  createdByInitiales?: string   // dénormalisé — initiales du créateur (ex: "THK")
   createdAt: Timestamp
 }
 
