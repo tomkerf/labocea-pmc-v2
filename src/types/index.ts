@@ -42,11 +42,18 @@ export interface ReportHistory {
   at: string       // ISO timestamp
 }
 
+export interface ChecklistItem {
+  id: string
+  label: string
+  done: boolean
+}
+
 export interface Sampling {
   id: string
   num: number
   plannedMonth: number    // 0-11
   plannedDay: number
+  plannedTime?: string    // "HH:MM"
   status: SamplingStatus
   doneDate: string        // "2026-03-25" | ""
   comment: string
@@ -56,6 +63,7 @@ export interface Sampling {
   tente: boolean
   reportHistory: ReportHistory[]
   doneBy: string          // uid
+  checklist?: ChecklistItem[]
 }
 
 export interface Plan {

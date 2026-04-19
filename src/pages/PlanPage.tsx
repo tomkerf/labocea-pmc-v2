@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2 } from 'lucide-react'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveClient } from '@/hooks/useClients'
 import { useAuthStore } from '@/stores/authStore'
 import { generateId } from '@/lib/ids'
-import type { Client, Plan, Sampling, SamplingStatus, FrequenceType, NatureEauType, MethodeType, NappeType } from '@/types'
+import type { Client, Plan, Sampling, SamplingStatus, FrequenceType, NatureEauType, MethodeType, NappeType, ChecklistItem } from '@/types'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
@@ -241,6 +241,25 @@ interface SamplingFormProps {
 }
 
 function SamplingForm({ sampling, onUpdate }: SamplingFormProps) {
+  const [newTask, setNewTask] = useState('')
+  const checklist: ChecklistItem[] = sampling.checklist ?? []
+
+  function addTask() {
+    const label = newTask.trim()
+    if (!label) return
+    const item: ChecklistItem = { id: crypto.randomUUID(), label, done: false }
+    onUpdate('checklist', [...checklist, item])
+    setNewTask('')
+  }
+
+  function toggleTask(id: string) {
+    onUpdate('checklist', checklist.map((t) => t.id === id ? { ...t, done: !t.done } : t))
+  }
+
+  function deleteTask(id: string) {
+    onUpdate('checklist', checklist.filter((t) => t.id !== id))
+  }
+
   return (
     <div className="grid grid-cols-2 gap-x-8 gap-y-3">
       <div>
@@ -270,6 +289,16 @@ function SamplingForm({ sampling, onUpdate }: SamplingFormProps) {
           }}
           className="field-input w-full"
           placeholder="Ex : 15"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Heure prévue</label>
+        <input
+          type="time"
+          value={sampling.plannedTime ?? ''}
+          onChange={(e) => onUpdate('plannedTime', e.target.value)}
+          className="field-input w-full"
         />
       </div>
 
@@ -317,6 +346,55 @@ function SamplingForm({ sampling, onUpdate }: SamplingFormProps) {
           onChange={(e) => onUpdate('comment', e.target.value)}
           placeholder="Remarques…"
           className="field-input w-full" />
+      </div>
+
+      {/* Checklist */}
+      <div className="col-span-2">
+        <label className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+          Checklist terrain
+        </label>
+        {checklist.length > 0 && (
+          <div className="rounded-lg overflow-hidden mb-2"
+            style={{ border: '1px solid var(--color-border-subtle)' }}>
+            {checklist.map((item, i) => (
+              <div key={item.id}
+                className="flex items-center gap-3 px-3 py-2"
+                style={{ borderBottom: i < checklist.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
+                <input type="checkbox" checked={item.done}
+                  onChange={() => toggleTask(item.id)}
+                  className="cursor-pointer" />
+                <span className="flex-1 text-sm"
+                  style={{
+                    color: item.done ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+                    textDecoration: item.done ? 'line-through' : 'none',
+                  }}>
+                  {item.label}
+                </span>
+                <button onClick={() => deleteTask(item.id)}
+                  className="shrink-0 p-1 rounded"
+                  style={{ color: 'var(--color-text-tertiary)' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <input
+            value={newTask}
+            onChange={(e) => setNewTask(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addTask()}
+            placeholder="Ajouter une tâche…"
+            className="field-input flex-1 text-sm"
+          />
+          <button onClick={addTask}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium"
+            style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+            <Plus size={15} />
+          </button>
+        </div>
       </div>
     </div>
   )

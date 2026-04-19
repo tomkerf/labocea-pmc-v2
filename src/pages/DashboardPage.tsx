@@ -128,6 +128,20 @@ export default function DashboardPage() {
 
   // ── Planning du jour = prélèvements planifiés aujourd'hui ──
 
+  const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes()
+
+  function getSamplingBadge(s: Sampling): { label: string; bg: string; color: string } {
+    if (s.status === 'done')         return { label: 'Réalisé',  bg: 'var(--color-success-light)', color: 'var(--color-success)' }
+    if (s.status === 'overdue')      return { label: 'Urgent',   bg: 'var(--color-danger-light)',  color: 'var(--color-danger)' }
+    if (s.status === 'non_effectue') return { label: 'Non fait', bg: 'var(--color-warning-light)', color: 'var(--color-warning)' }
+    if (s.plannedTime) {
+      const [h, m] = s.plannedTime.split(':').map(Number)
+      const tMin = h * 60 + m
+      if (nowMinutes >= tMin && nowMinutes < tMin + 120) return { label: 'En cours', bg: 'var(--color-accent-light)', color: 'var(--color-accent)' }
+    }
+    return { label: 'À faire', bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }
+  }
+
   const planningJour: { clientNom: string; siteNom: string; planId: string; clientId: string; sampling: Sampling }[] = []
   clients.forEach((client) => {
     client.plans.forEach((plan) => {
@@ -142,6 +156,12 @@ export default function DashboardPage() {
         }
       })
     })
+  })
+
+  planningJour.sort((a, b) => {
+    const ta = a.sampling.plannedTime ?? '99:99'
+    const tb = b.sampling.plannedTime ?? '99:99'
+    return ta.localeCompare(tb)
   })
 
   // ── État du parc ───────────────────────────────────────────
@@ -173,15 +193,6 @@ export default function DashboardPage() {
       isUrgent: m.statut === 'en_cours',
     })),
   ].sort((a, b) => (b.isUrgent ? 1 : 0) - (a.isUrgent ? 1 : 0)).slice(0, 6)
-
-  // ── Statut badge config ────────────────────────────────────
-
-  const statusConfig: Record<string, { label: string; bg: string; color: string }> = {
-    planned:       { label: 'Planifié',     bg: 'var(--color-bg-tertiary)',    color: 'var(--color-text-secondary)' },
-    done:          { label: 'Réalisé',      bg: 'var(--color-success-light)',  color: 'var(--color-success)' },
-    overdue:       { label: 'En retard',    bg: 'var(--color-danger-light)',   color: 'var(--color-danger)' },
-    non_effectue:  { label: 'Non effectué', bg: 'var(--color-warning-light)',  color: 'var(--color-warning)' },
-  }
 
   // ── Render ─────────────────────────────────────────────────
 
@@ -238,7 +249,7 @@ export default function DashboardPage() {
             <div className="rounded-xl overflow-hidden"
               style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
               {planningJour.slice(0, 6).map(({ clientNom, siteNom, planId, clientId, sampling }, i) => {
-                const cfg = statusConfig[sampling.status] ?? statusConfig.planned
+                const cfg = getSamplingBadge(sampling)
                 return (
                   <button key={`${planId}-${sampling.id}`}
                     onClick={() => navigate(`/missions/${clientId}/plan/${planId}`)}
@@ -247,6 +258,12 @@ export default function DashboardPage() {
                     onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
                     onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                   >
+                    {sampling.plannedTime && (
+                      <span className="text-xs font-semibold shrink-0 w-10 text-center px-1.5 py-1 rounded-lg"
+                        style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                        {sampling.plannedTime}
+                      </span>
+                    )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{clientNom}</p>
                       <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{siteNom || '—'}</p>
