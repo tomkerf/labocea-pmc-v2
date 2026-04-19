@@ -1,19 +1,20 @@
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import type { Client } from '@/types'
+import { isSamplingOverdue } from '@/lib/overdue'
 
 const MOIS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 
 function getNextSampling(client: Client): { label: string; overdue: boolean } | null {
   const now = new Date()
   const currentMonth = now.getMonth()
-
   let next: { month: number; overdue: boolean } | null = null
 
   for (const plan of client.plans) {
     for (const s of plan.samplings) {
       if (s.status === 'done' || s.status === 'non_effectue') continue
-      if (s.status === 'overdue') {
+      const overdue = isSamplingOverdue(s)
+      if (overdue) {
         if (!next || next.month > s.plannedMonth) next = { month: s.plannedMonth, overdue: true }
       } else if (s.plannedMonth >= currentMonth) {
         if (!next || s.plannedMonth < next.month) next = { month: s.plannedMonth, overdue: false }
@@ -29,7 +30,7 @@ function countByStatus(client: Client) {
   let overdue = 0, planned = 0, done = 0
   for (const plan of client.plans) {
     for (const s of plan.samplings) {
-      if (s.status === 'overdue') overdue++
+      if (isSamplingOverdue(s)) overdue++
       else if (s.status === 'planned') planned++
       else if (s.status === 'done') done++
     }

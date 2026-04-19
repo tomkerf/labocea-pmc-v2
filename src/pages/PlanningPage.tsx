@@ -10,6 +10,7 @@ import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useAuthStore } from '@/stores/authStore'
 import type { Sampling, Verification, Maintenance } from '@/types'
+import { isSamplingOverdue } from '@/lib/overdue'
 
 // ── Types ───────────────────────────────────────────────────
 
@@ -120,6 +121,7 @@ export default function PlanningPage() {
   const [monthStart, setMonthStart] = useState<Date>(() => startOfMonth(today))
   const [selectedDate, setSelectedDate] = useState<Date>(today)
   const [filterTechnicien, setFilterTechnicien] = useState<string>('')
+  const [filterRetard, setFilterRetard] = useState(false)
   const [validatingId, setValidatingId] = useState<string | null>(null)
   const [validationDate, setValidationDate] = useState<string>(toISODate(today))
   const [saving, setSaving] = useState(false)
@@ -219,16 +221,36 @@ export default function PlanningPage() {
     return Array.from(set).sort()
   }, [eventsByDate])
 
+  // Compte total des prélèvements en retard (toutes dates)
+  const totalOverdue = useMemo(() => {
+    let count = 0
+    clients.forEach((client) => client.plans.forEach((plan) => plan.samplings.forEach((s: Sampling) => {
+      if (isSamplingOverdue(s)) count++
+    })))
+    return count
+  }, [clients])
+
+  // En mode "retard", on affiche tous les events en retard toutes dates confondues
+  const allOverdueEvents = useMemo(() => {
+    if (!filterRetard) return []
+    return Object.values(eventsByDate)
+      .flat()
+      .filter((e) => e.statusColor === 'var(--color-danger)' || e.statusLabel === 'En retard')
+      .filter((e) => !filterTechnicien || e.technicien === filterTechnicien)
+  }, [filterRetard, eventsByDate, filterTechnicien])
+
   const allEventsForDay = eventsByDate[toISODate(selectedDate)] ?? []
-  const selectedEvents = (filterTechnicien
-    ? allEventsForDay.filter((e) => e.technicien === filterTechnicien)
-    : allEventsForDay
-  ).slice().sort((a, b) => {
-    if (a.plannedTime && b.plannedTime) return a.plannedTime.localeCompare(b.plannedTime)
-    if (a.plannedTime) return -1
-    if (b.plannedTime) return 1
-    return 0
-  })
+  const selectedEvents = filterRetard
+    ? allOverdueEvents
+    : (filterTechnicien
+      ? allEventsForDay.filter((e) => e.technicien === filterTechnicien)
+      : allEventsForDay
+    ).slice().sort((a, b) => {
+      if (a.plannedTime && b.plannedTime) return a.plannedTime.localeCompare(b.plannedTime)
+      if (a.plannedTime) return -1
+      if (b.plannedTime) return 1
+      return 0
+    })
 
   // ── Validation rapide ───────────────────────────────────────
 
@@ -323,6 +345,19 @@ export default function PlanningPage() {
             ))}
           </div>
         </div>
+
+        {/* Filtre retard */}
+        {totalOverdue > 0 && (
+          <button
+            onClick={() => setFilterRetard((v) => !v)}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-colors"
+            style={{
+              background: filterRetard ? 'var(--color-danger)' : 'var(--color-danger-light)',
+              color: filterRetard ? 'white' : 'var(--color-danger)',
+            }}>
+            ⚠ {totalOverdue} en retard
+          </button>
+        )}
 
         {/* Filtre technicien */}
         {allTechniciens.length > 1 && (
@@ -518,10 +553,12 @@ export default function PlanningPage() {
       {/* Titre du jour sélectionné */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-xs font-semibold uppercase"
-          style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-          {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+          style={{ color: filterRetard ? 'var(--color-danger)' : 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+          {filterRetard
+            ? `⚠ ${allOverdueEvents.length} prélèvement${allOverdueEvents.length > 1 ? 's' : ''} en retard`
+            : selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
         </h2>
-        {isSameDay(selectedDate, today) && (
+        {!filterRetard && isSameDay(selectedDate, today) && (
           <span className="text-xs px-2 py-0.5 rounded-full font-medium"
             style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
             Aujourd'hui

@@ -1,10 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Plus, X, UserPlus, Hammer, Gauge } from 'lucide-react'
+import { useMissionsStore } from '@/stores/missionsStore'
+import { isSamplingOverdue } from '@/lib/overdue'
 
-const navItems: { to: string; icon: React.ElementType; label: string; end?: boolean }[] = [
+const navItems: { to: string; icon: React.ElementType; label: string; end?: boolean; badge?: boolean }[] = [
   { to: '/',         icon: LayoutDashboard, label: 'Accueil',  end: true },
-  { to: '/missions', icon: ClipboardList,   label: 'Missions'            },
+  { to: '/missions', icon: ClipboardList,   label: 'Missions', badge: true },
   { to: '/planning', icon: CalendarDays,    label: 'Planning'            },
   { to: '/materiel', icon: Wrench,          label: 'Matériel'            },
 ]
@@ -18,6 +20,16 @@ const actions = [
 export default function TabBar() {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const { clients } = useMissionsStore()
+
+  const overdueCount = useMemo(() => {
+    let count = 0
+    for (const client of clients)
+      for (const plan of client.plans)
+        for (const s of plan.samplings)
+          if (isSamplingOverdue(s)) count++
+    return count
+  }, [clients])
 
   function handleAction(path: string) {
     setOpen(false)
@@ -72,7 +84,7 @@ export default function TabBar() {
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
-        {navItems.slice(0, 2).map(({ to, icon: Icon, label, end }) => (
+        {navItems.slice(0, 2).map(({ to, icon: Icon, label, end, badge }) => (
           <NavLink
             key={to}
             to={to}
@@ -82,7 +94,15 @@ export default function TabBar() {
               color: isActive ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
             })}
           >
-            <Icon size={22} strokeWidth={1.8} />
+            <div className="relative">
+              <Icon size={22} strokeWidth={1.8} />
+              {badge && overdueCount > 0 && (
+                <span className="absolute -top-1 -right-2 text-[9px] font-bold px-1 py-px rounded-full leading-none"
+                  style={{ background: 'var(--color-danger)', color: 'white', minWidth: 14, textAlign: 'center' }}>
+                  {overdueCount}
+                </span>
+              )}
+            </div>
             {label}
           </NavLink>
         ))}

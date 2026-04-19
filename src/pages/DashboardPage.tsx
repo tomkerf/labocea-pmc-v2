@@ -10,7 +10,8 @@ import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
-import type { Sampling, Verification, Maintenance, Equipement } from '@/types'
+import type { Sampling, Verification, Maintenance, Equipement, Client, Plan } from '@/types'
+import { isSamplingOverdue } from '@/lib/overdue'
 
 // ── Helpers ────────────────────────────────────────────────
 
@@ -175,7 +176,31 @@ export default function DashboardPage() {
 
   // ── Alertes combinées triées par urgence ───────────────────
 
+  // Prélèvements en retard
+  const prelevementsEnRetard: { clientNom: string; siteNom: string; planNom: string; clientId: string; planId: string; samplingId: string }[] = []
+  clients.forEach((client: Client) =>
+    client.plans.forEach((plan: Plan) =>
+      plan.samplings.forEach((s: Sampling) => {
+        if (isSamplingOverdue(s))
+          prelevementsEnRetard.push({
+            clientNom: client.nom,
+            siteNom: plan.siteNom,
+            planNom: plan.nom,
+            clientId: client.id,
+            planId: plan.id,
+            samplingId: s.id,
+          })
+      })
+    )
+  )
+
   const alertesCombinees: { label: string; detail: string; link: string; isUrgent: boolean }[] = [
+    ...prelevementsEnRetard.map((p) => ({
+      label: p.clientNom,
+      detail: [p.siteNom, p.planNom].filter(Boolean).join(' · ') || 'Prélèvement en retard',
+      link: `/missions/${p.clientId}/plan/${p.planId}/sampling/${p.samplingId}`,
+      isUrgent: true,
+    })),
     ...alertesMetro.map((v: Verification) => ({
       label: v.equipementNom || 'Équipement',
       detail: v.prochainControle
@@ -192,7 +217,7 @@ export default function DashboardPage() {
       link: `/maintenances/${m.id}`,
       isUrgent: m.statut === 'en_cours',
     })),
-  ].sort((a, b) => (b.isUrgent ? 1 : 0) - (a.isUrgent ? 1 : 0)).slice(0, 6)
+  ].sort((a, b) => (b.isUrgent ? 1 : 0) - (a.isUrgent ? 1 : 0)).slice(0, 8)
 
   // ── Render ─────────────────────────────────────────────────
 
