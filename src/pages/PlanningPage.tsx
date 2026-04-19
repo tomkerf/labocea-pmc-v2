@@ -18,6 +18,7 @@ interface PlanningEvent {
   type: 'prelevement' | 'maintenance' | 'verification'
   title: string
   subtitle: string
+  detail?: string
   statusLabel: string
   statusBg: string
   statusColor: string
@@ -154,7 +155,8 @@ export default function PlanningPage() {
             id: s.id,
             type: 'prelevement',
             title: client.nom,
-            subtitle: plan.siteNom || plan.nom || '—',
+            subtitle: plan.siteNom || '—',
+            detail: plan.nom || undefined,
             statusLabel: cfg.label,
             statusBg: cfg.bg,
             statusColor: cfg.color,
@@ -560,7 +562,7 @@ export default function PlanningPage() {
                       {event.title}
                     </p>
                     <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                      {event.subtitle}
+                      {event.subtitle}{event.detail ? ` · ${event.detail}` : ''}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
                       <p className="text-[10px] font-medium uppercase tracking-wide"
