@@ -139,6 +139,7 @@ export default function PlanningPage() {
   const [saving, setSaving] = useState(false)
 
   // Formulaire nouvel événement
+  const [showPool, setShowPool] = useState(true)
   const [showNewEvent, setShowNewEvent] = useState(false)
   const [newEventTitre, setNewEventTitre] = useState('')
   const [newEventType, setNewEventType] = useState<TypeEvenement>('rappel')
@@ -278,6 +279,49 @@ export default function PlanningPage() {
       .filter((e) => e.statusColor === 'var(--color-danger)' || e.statusLabel === 'En retard')
       .filter((e) => !filterTechnicien || e.technicien === filterTechnicien)
   }, [filterRetard, eventsByDate, filterTechnicien])
+
+  // ── Pool : prélèvements restant à faire ce mois ─────────────
+
+  const poolMonth = viewMode === 'mois' ? monthStart.getMonth() : today.getMonth()
+  const poolYear  = viewMode === 'mois' ? monthStart.getFullYear() : today.getFullYear()
+
+  interface PoolItem {
+    samplingId: string
+    clientNom: string
+    siteNom: string
+    preleveur: string
+    overdue: boolean
+    link: string
+  }
+
+  const pool = useMemo<PoolItem[]>(() => {
+    const items: PoolItem[] = []
+    clients.forEach((client) => {
+      if (filterTechnicien && client.preleveur !== filterTechnicien) return
+      client.plans.forEach((plan) => {
+        plan.samplings.forEach((s: Sampling) => {
+          if (s.status === 'done' || s.status === 'non_effectue') return
+          if (s.plannedMonth !== poolMonth) return
+          items.push({
+            samplingId: s.id,
+            clientNom: client.nom,
+            siteNom: plan.siteNom || plan.nom || '—',
+            preleveur: client.preleveur || '—',
+            overdue: isSamplingOverdue(s),
+            link: `/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
+          })
+        })
+      })
+    })
+    return items.sort((a, b) => {
+      if (a.overdue && !b.overdue) return -1
+      if (!a.overdue && b.overdue) return 1
+      return a.clientNom.localeCompare(b.clientNom)
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clients, filterTechnicien, poolMonth, poolYear])
+
+  const poolOverdueCount = pool.filter((p) => p.overdue).length
 
   const allEventsForDay = eventsByDate[toISODate(selectedDate)] ?? []
   const selectedEvents = filterRetard
@@ -582,6 +626,84 @@ export default function PlanningPage() {
               )
             })}
           </div>
+        </div>
+      )}
+
+      {/* ── Pool : interventions restantes du mois ── */}
+      {!filterRetard && (
+        <div className="mb-5">
+          {/* En-tête pool */}
+          <button
+            onClick={() => setShowPool((v) => !v)}
+            className="flex items-center justify-between w-full mb-2 group"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase"
+                style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+                À planifier — {MOIS_LONG[poolMonth]} {poolYear}
+              </span>
+              {pool.length > 0 && (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                  style={{
+                    background: poolOverdueCount > 0 ? 'var(--color-danger-light)' : 'var(--color-bg-tertiary)',
+                    color: poolOverdueCount > 0 ? 'var(--color-danger)' : 'var(--color-text-secondary)',
+                  }}>
+                  {pool.length} restant{pool.length > 1 ? 's' : ''}
+                  {poolOverdueCount > 0 ? ` · ${poolOverdueCount} en retard` : ''}
+                </span>
+              )}
+            </div>
+            <ChevronRight size={14}
+              style={{
+                color: 'var(--color-text-tertiary)',
+                transform: showPool ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'transform 150ms',
+              }} />
+          </button>
+
+          {/* Chips */}
+          {showPool && (
+            pool.length === 0 ? (
+              <p className="text-xs px-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                ✓ Toutes les interventions de ce mois sont planifiées.
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {pool.map((item) => (
+                  <button
+                    key={item.samplingId}
+                    onClick={() => navigate(item.link)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                    style={{
+                      background: item.overdue ? 'var(--color-danger-light)' : 'var(--color-bg-secondary)',
+                      color: item.overdue ? 'var(--color-danger)' : 'var(--color-text-primary)',
+                      border: `1px solid ${item.overdue ? 'var(--color-danger)' : 'var(--color-border)'}`,
+                      boxShadow: 'var(--shadow-card)',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.8' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.opacity = '1' }}
+                  >
+                    {item.overdue && <span style={{ fontSize: 9 }}>⚠</span>}
+                    <span className="font-semibold">{item.clientNom}</span>
+                    {item.siteNom && item.siteNom !== item.clientNom && (
+                      <span style={{ color: item.overdue ? 'var(--color-danger)' : 'var(--color-text-secondary)', opacity: 0.8 }}>
+                        · {item.siteNom}
+                      </span>
+                    )}
+                    {item.preleveur && item.preleveur !== '—' && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full"
+                        style={{
+                          background: item.overdue ? 'rgba(255,59,48,0.15)' : 'var(--color-bg-tertiary)',
+                          color: item.overdue ? 'var(--color-danger)' : 'var(--color-text-secondary)',
+                        }}>
+                        {item.preleveur}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )
+          )}
         </div>
       )}
 
