@@ -24,6 +24,7 @@ interface PlanningEvent {
   link: string
   isDone: boolean
   technicien: string
+  plannedTime?: string
   clientId?: string
   planId?: string
   samplingId?: string
@@ -160,6 +161,7 @@ export default function PlanningPage() {
             link: `/missions/${client.id}/plan/${plan.id}`,
             isDone: s.status === 'done',
             technicien: client.preleveur || '—',
+            plannedTime: s.plannedTime,
             clientId: client.id,
             planId: plan.id,
             samplingId: s.id,
@@ -216,9 +218,15 @@ export default function PlanningPage() {
   }, [eventsByDate])
 
   const allEventsForDay = eventsByDate[toISODate(selectedDate)] ?? []
-  const selectedEvents = filterTechnicien
+  const selectedEvents = (filterTechnicien
     ? allEventsForDay.filter((e) => e.technicien === filterTechnicien)
     : allEventsForDay
+  ).slice().sort((a, b) => {
+    if (a.plannedTime && b.plannedTime) return a.plannedTime.localeCompare(b.plannedTime)
+    if (a.plannedTime) return -1
+    if (b.plannedTime) return 1
+    return 0
+  })
 
   // ── Validation rapide ───────────────────────────────────────
 
@@ -559,6 +567,12 @@ export default function PlanningPage() {
                         style={{ color: 'var(--color-text-tertiary)' }}>
                         {typeLabel(event.type)}
                       </p>
+                      {event.plannedTime && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold"
+                          style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                          {event.plannedTime}
+                        </span>
+                      )}
                       {event.technicien && event.technicien !== '—' && (
                         <span className="text-[10px] px-1.5 py-0.5 rounded font-medium"
                           style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
