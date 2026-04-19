@@ -165,10 +165,40 @@ export default function PlanPage() {
               {NATURES.map((n) => <option key={n}>{n}</option>)}
             </select>
           </PlanField>
-          <PlanField label="Méthode" last>
+          <PlanField label="Méthode">
             <select value={plan.methode} onChange={(e) => updatePlan('methode', e.target.value as MethodeType)} className="field-input">
               {METHODES.map((m) => <option key={m}>{m}</option>)}
             </select>
+          </PlanField>
+          <PlanField label="Latitude">
+            <input
+              value={plan.lat}
+              onChange={(e) => updatePlan('lat', e.target.value)}
+              className="field-input"
+              placeholder="ex : 48.1234"
+              inputMode="decimal"
+            />
+          </PlanField>
+          <PlanField label="Longitude">
+            <input
+              value={plan.lng}
+              onChange={(e) => updatePlan('lng', e.target.value)}
+              className="field-input"
+              placeholder="ex : -3.5678"
+              inputMode="decimal"
+            />
+          </PlanField>
+          <PlanField label="GPS approximatif" last>
+            <label className="flex items-center gap-2 mt-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={plan.gpsApprox}
+                onChange={(e) => updatePlan('gpsApprox', e.target.checked)}
+              />
+              <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                {plan.gpsApprox ? 'Oui — position approchée' : 'Non — position précise'}
+              </span>
+            </label>
           </PlanField>
         </div>
       </div>
