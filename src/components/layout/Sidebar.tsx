@@ -1,21 +1,24 @@
 import React, { useMemo } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge, Hammer, User } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge, Hammer } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
+import { useAuthStore } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
+import UserAvatar from '@/components/ui/UserAvatar'
 
-const navItems: { to: string; icon: React.ElementType; label: string; end?: boolean; badge?: boolean }[] = [
+const navItems: { to: string; icon?: React.ElementType; label: string; end?: boolean; badge?: boolean; isAccount?: boolean }[] = [
   { to: '/',             icon: LayoutDashboard, label: 'Tableau de bord', end: true },
   { to: '/missions',     icon: ClipboardList,   label: 'Missions',        badge: true },
   { to: '/planning',     icon: CalendarDays,    label: 'Planning'               },
   { to: '/materiel',     icon: Wrench,          label: 'Matériel'               },
   { to: '/metrologie',   icon: Gauge,           label: 'Métrologie'             },
   { to: '/maintenances', icon: Hammer,          label: 'Maintenances'           },
-  { to: '/compte',       icon: User,            label: 'Mon compte'             },
+  { to: '/compte',                              label: 'Mon compte', isAccount: true },
 ]
 
 export default function Sidebar() {
   const { clients } = useMissionsStore()
+  const { appUser } = useAuthStore()
 
   const overdueCount = useMemo(() => {
     let count = 0
@@ -48,7 +51,7 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5">
-        {navItems.map(({ to, icon: Icon, label, end, badge }) => (
+        {navItems.map(({ to, icon: Icon, label, end, badge, isAccount }) => (
           <NavLink
             key={to}
             to={to}
@@ -60,7 +63,16 @@ export default function Sidebar() {
               fontWeight: isActive ? 500 : 400,
             })}
           >
-            <Icon size={17} strokeWidth={1.8} />
+            {isAccount ? (
+              <UserAvatar
+                initiales={appUser?.initiales}
+                color={appUser?.avatarColor}
+                size={20}
+                fontSize={8}
+              />
+            ) : Icon ? (
+              <Icon size={17} strokeWidth={1.8} />
+            ) : null}
             <span className="flex-1">{label}</span>
             {badge && overdueCount > 0 && (
               <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"

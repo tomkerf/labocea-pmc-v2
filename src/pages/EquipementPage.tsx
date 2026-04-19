@@ -6,7 +6,7 @@ import { db } from '@/lib/firebase'
 import { saveEquipement } from '@/hooks/useEquipements'
 import { useAuthStore } from '@/stores/authStore'
 import CircleProgress from '@/components/materiel/CircleProgress'
-import type { Equipement, CategorieType, EtatType, LocalisationType } from '@/types'
+import type { Equipement, CategorieType, EtatType, LocalisationType, MateriauFlacon } from '@/types'
 
 const CATEGORIES: { value: CategorieType; label: string }[] = [
   { value: 'preleveur',     label: 'Préleveur'      },
@@ -209,6 +209,39 @@ export default function EquipementPage() {
           <input type="date" value={equipement.prochainEtalonnage} onChange={(e) => update('prochainEtalonnage', e.target.value)} className="field-input" />
         </Field>
       </Section>
+
+      {/* Caractéristiques flacon */}
+      {equipement.categorie === 'flacon' && (
+        <Section title="Caractéristiques flacon">
+          <Field label="Volume">
+            <input
+              value={equipement.volume ?? ''}
+              onChange={(e) => update('volume', e.target.value)}
+              className="field-input"
+              placeholder="Ex : 20L, 1L, 500 mL"
+            />
+          </Field>
+          <Field label="Matériau">
+            <select
+              value={equipement.materiau ?? ''}
+              onChange={(e) => update('materiau', e.target.value as MateriauFlacon)}
+              className="field-input"
+            >
+              <option value="">— Non renseigné</option>
+              <option value="plastique">Plastique</option>
+              <option value="verre">Verre</option>
+            </select>
+          </Field>
+          <Field label="Poids" last>
+            <input
+              value={equipement.poids ?? ''}
+              onChange={(e) => update('poids', e.target.value)}
+              className="field-input"
+              placeholder="Ex : 0.570 kg"
+            />
+          </Field>
+        </Section>
+      )}
 
       {/* Notes */}
       <Section title="Notes">

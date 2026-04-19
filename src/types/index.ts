@@ -16,6 +16,7 @@ export interface AppUser {
   initiales: string
   email: string
   role: UserRole
+  avatarColor?: string
   createdAt: Timestamp
   lastLoginAt: Timestamp
 }
@@ -135,6 +136,8 @@ export type EtatType = EtatEquipement
 export type LocalisationEquipement = 'labo' | 'terrain' | 'externe'
 export type LocalisationType = LocalisationEquipement
 
+export type MateriauFlacon = 'plastique' | 'verre' | ''
+
 export interface Equipement {
   id: string
   nom: string
@@ -147,6 +150,10 @@ export interface Equipement {
   localisation: LocalisationEquipement
   notes: string
   prochainEtalonnage: string  // ISO date
+  // Champs spécifiques aux flacons
+  volume?: string             // ex: "20L", "1L"
+  poids?: string              // ex: "0.570 kg" (stocké en string pour flexibilité)
+  materiau?: MateriauFlacon
   createdBy: string
   updatedAt: Timestamp
 }
