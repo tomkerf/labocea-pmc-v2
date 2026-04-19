@@ -79,6 +79,29 @@ function buildMonthGrid(ms: Date): (Date|null)[] {
   return cells
 }
 
+// Attribue une couleur déterministe à un technicien à partir de ses initiales.
+// Le hash garantit que les mêmes initiales donnent toujours la même couleur,
+// et que chaque technicien obtient une couleur distincte de la palette.
+const TECH_PALETTE = [
+  '#0071E3', // bleu
+  '#30B0C7', // cyan
+  '#00C7BE', // menthe
+  '#5856D6', // indigo
+  '#AF52DE', // violet
+  '#FF2D55', // rose
+  '#A2845E', // marron
+  '#636366', // gris
+  '#3A6073', // ardoise
+]
+function colorFromInitiales(initiales: string): string {
+  if (!initiales || initiales === '—') return TECH_PALETTE[0]
+  let hash = 0
+  for (let i = 0; i < initiales.length; i++) {
+    hash = initiales.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return TECH_PALETTE[Math.abs(hash) % TECH_PALETTE.length]
+}
+
 function sortEvts(evts: PlanningEvent[]): PlanningEvent[] {
   return evts.slice().sort((a,b) => {
     if (a.plannedTime && b.plannedTime) return a.plannedTime.localeCompare(b.plannedTime)
@@ -428,13 +451,23 @@ export default function PlanningPage() {
   const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])
   const isWeekend = (d: Date) => { const day = d.getDay(); return day===0||day===6 }
 
-  // ── Couleurs techniciens (initiales → avatarColor) ──────
+  // ── Couleurs techniciens (initiales → couleur) ──────────
+  // Priorité : avatarColor choisi par l'user > couleur auto (hash des initiales)
 
   const colorByInitiales = useMemo(() => {
     const map: Record<string,string> = {}
-    users.forEach(u => { if (u.initiales) map[u.initiales] = u.avatarColor ?? '#0071E3' })
+    users.forEach(u => {
+      if (u.initiales) map[u.initiales] = u.avatarColor ?? colorFromInitiales(u.initiales)
+    })
     return map
   }, [users])
+
+  // Retourne la couleur d'un technicien par ses initiales —
+  // utilise le store si l'user est connu, sinon calcule le hash.
+  function getTechColor(initiales: string): string {
+    if (!initiales || initiales === '—') return TECH_PALETTE[0]
+    return colorByInitiales[initiales] ?? colorFromInitiales(initiales)
+  }
 
   // ── Index date → events ─────────────────────────────────
 
@@ -457,7 +490,7 @@ export default function PlanningPage() {
             id: s.id, type:'prelevement',
             title: client.nom, subtitle: plan.siteNom || plan.nom || '—',
             statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
-            techColor: colorByInitiales[client.preleveur] ?? undefined,
+            techColor: getTechColor(client.preleveur),
             link:`/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
             isDone: s.status==='done', technicien: client.preleveur||'—',
             plannedTime: s.plannedTime, clientId:client.id, planId:plan.id, samplingId:s.id,
@@ -474,7 +507,7 @@ export default function PlanningPage() {
         title:m.equipementNom||'Équipement',
         subtitle: m.type==='preventive'?'Maintenance préventive':m.type==='corrective'?'Maintenance corrective':'Panne',
         statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
-        techColor: colorByInitiales[m.technicienNom] ?? undefined,
+        techColor: getTechColor(m.technicienNom),
         link:`/maintenances/${m.id}`, isDone:m.statut==='realisee', technicien:m.technicienNom||'—',
         maintenanceData:m,
       })
@@ -487,7 +520,7 @@ export default function PlanningPage() {
         title:v.equipementNom||'Équipement',
         subtitle: v.type==='etalonnage_interne'?'Étalonnage interne':v.type==='verification_externe'?'Vérification externe':'Contrôle terrain',
         statusLabel:'Métrologie', statusBg:'var(--color-accent-light)', statusColor:'var(--color-accent)',
-        techColor: colorByInitiales[v.technicienNom] ?? undefined,
+        techColor: getTechColor(v.technicienNom),
         link:`/metrologie/${v.id}`, isDone:false, technicien:v.technicienNom||'—',
       })
     })
@@ -498,7 +531,7 @@ export default function PlanningPage() {
         id:ev.id, type:'evenement',
         title:ev.titre, subtitle:cfg.label,
         statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
-        techColor: colorByInitiales[ev.createdByInitiales ?? ''] ?? undefined,
+        techColor: getTechColor(ev.createdByInitiales ?? ''),
         link:'', isDone:false, technicien:ev.createdByInitiales||'—',
         plannedTime:ev.heure||undefined, evenementData:ev,
       })
@@ -546,7 +579,7 @@ export default function PlanningPage() {
               planNom: plan.nom,
               siteNom: plan.siteNom,
               techInitiales: client.preleveur || '—',
-              techColor: colorByInitiales[client.preleveur] ?? '#0071E3',
+              techColor: getTechColor(client.preleveur),
             })
           }
         })
@@ -845,7 +878,7 @@ export default function PlanningPage() {
                 Tous
               </button>
               {allTechs.map(t => {
-                const tColor = colorByInitiales[t] ?? 'var(--color-accent)'
+                const tColor = getTechColor(t)
                 const isActive = filterTech === t
                 return (
                   <button key={t} onClick={() => setFilterTech(t===filterTech?'':t)}
