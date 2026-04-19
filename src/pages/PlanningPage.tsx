@@ -141,9 +141,10 @@ interface DayModalProps {
   initiales: string
   navigate: (path: string) => void
   onValidatePool: (item: PoolItem, date: string) => Promise<void>
+  onCancelSampling: (event: PlanningEvent) => Promise<void>
 }
 
-function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate, onValidatePool }: DayModalProps) {
+function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate, onValidatePool, onCancelSampling }: DayModalProps) {
   const [poolValidId, setPoolValidId] = useState<string|null>(null)
   const [poolDate, setPoolDate]       = useState(dateStr)
   const [poolSaving, setPoolSaving]   = useState(false)
@@ -340,6 +341,21 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                           onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
                           <Trash2 size={14} />
                         </button>
+                      ) : evt.type === 'prelevement' && !evt.isDone ? (
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            onClick={() => onCancelSampling(evt)}
+                            className="px-2.5 py-1 rounded-lg text-xs font-medium"
+                            style={{ color: 'var(--color-text-secondary)', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}
+                            title="Retirer du calendrier — redevient à planifier">
+                            ↩ Annuler
+                          </button>
+                          <button onClick={() => { navigate(evt.link); onClose() }}
+                            className="shrink-0 p-1.5 rounded-lg"
+                            style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
+                            <ExternalLink size={14} />
+                          </button>
+                        </div>
                       ) : (
                         <button onClick={() => { navigate(evt.link); onClose() }}
                           className="shrink-0 p-1.5 rounded-lg"
@@ -634,6 +650,22 @@ export default function PlanningPage() {
   }
 
   // ── Validation depuis le DayModal ───────────────────────
+
+  // Retire un sampling du calendrier → remet plannedDay à 0, il revient dans le pool
+  async function handleCancelSampling(event: PlanningEvent) {
+    if (!uid || !event.clientId || !event.planId || !event.samplingId) return
+    const client = clients.find((c: Client) => c.id === event.clientId)
+    if (!client) return
+    await saveClient({
+      ...client,
+      plans: client.plans.map(plan => plan.id !== event.planId ? plan : {
+        ...plan,
+        samplings: plan.samplings.map((s: Sampling) =>
+          s.id !== event.samplingId ? s : { ...s, plannedDay: 0 }
+        )
+      })
+    }, uid)
+  }
 
   // Planifie un sampling à un jour précis du mois (sans le marquer "fait")
   async function handleValidatePool(item: PoolItem, date: string) {
@@ -1088,6 +1120,7 @@ export default function PlanningPage() {
           initiales={initiales}
           navigate={navigate}
           onValidatePool={handleValidatePool}
+          onCancelSampling={handleCancelSampling}
         />
       )}
 
