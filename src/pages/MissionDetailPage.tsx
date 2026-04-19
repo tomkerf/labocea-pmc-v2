@@ -255,7 +255,7 @@ export default function MissionDetailPage() {
             </div>
           )}
 
-          {checklist.map((item, i) => (
+          {checklist.map((item) => (
             <button
               key={item.id}
               onClick={() => toggleChecklist(item.id)}
