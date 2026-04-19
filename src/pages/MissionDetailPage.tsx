@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { doc, onSnapshot } from 'firebase/firestore'
-import { ChevronLeft, MapPin, Clock, CheckCircle2, Circle, Navigation, ExternalLink } from 'lucide-react'
+import { ChevronLeft, MapPin, Clock, CheckCircle2, Circle, Navigation, ExternalLink, Plus } from 'lucide-react'
 import { db } from '@/lib/firebase'
 import { saveClient } from '@/hooks/useClients'
 import { useAuthStore } from '@/stores/authStore'
@@ -39,6 +39,7 @@ export default function MissionDetailPage() {
   const [client, setClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [newTask, setNewTask] = useState('')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isDirty = useRef(false)
 
@@ -80,10 +81,18 @@ export default function MissionDetailPage() {
 
   function toggleChecklist(itemId: string) {
     if (!sampling) return
-    const checklist = (sampling.checklist ?? []).map((item) =>
+    const updated = (sampling.checklist ?? []).map((item) =>
       item.id === itemId ? { ...item, done: !item.done } : item
     )
-    updateSampling('checklist', checklist)
+    updateSampling('checklist', updated)
+  }
+
+  function addTask() {
+    const label = newTask.trim()
+    if (!label || !sampling) return
+    const item: ChecklistItem = { id: crypto.randomUUID(), label, done: false }
+    updateSampling('checklist', [...(sampling.checklist ?? []), item])
+    setNewTask('')
   }
 
   async function handleTerminer() {
@@ -224,47 +233,78 @@ export default function MissionDetailPage() {
       </div>
 
       {/* Checklist */}
-      {checklist.length > 0 && (
-        <div className="mx-4 mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xs font-semibold uppercase"
-              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-              Checklist terrain
-            </h2>
+      <div className="mx-4 mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xs font-semibold uppercase"
+            style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+            Checklist terrain
+          </h2>
+          {checklist.length > 0 && (
             <span className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
               {checklistDone}/{checklist.length}
             </span>
-          </div>
-          <div className="rounded-2xl overflow-hidden"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-            {checklist.map((item, i) => (
-              <button
-                key={item.id}
-                onClick={() => toggleChecklist(item.id)}
-                className="w-full flex items-center gap-3 px-5 py-4 text-left transition-colors"
+          )}
+        </div>
+
+        <div className="rounded-2xl overflow-hidden"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+
+          {checklist.length === 0 && (
+            <div className="px-5 py-4 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+              Aucune tâche — ajoute-en une ci-dessous.
+            </div>
+          )}
+
+          {checklist.map((item, i) => (
+            <button
+              key={item.id}
+              onClick={() => toggleChecklist(item.id)}
+              className="w-full flex items-center gap-3 px-5 py-4 text-left transition-colors"
+              style={{
+                borderBottom: '1px solid var(--color-border-subtle)',
+                background: 'transparent',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            >
+              {item.done
+                ? <CheckCircle2 size={22} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
+                : <Circle size={22} style={{ color: 'var(--color-border)', flexShrink: 0 }} />
+              }
+              <span className="flex-1 text-sm font-medium"
                 style={{
-                  borderBottom: i < checklist.length - 1 ? '1px solid var(--color-border-subtle)' : 'none',
-                  background: 'transparent',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-              >
-                {item.done
-                  ? <CheckCircle2 size={22} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
-                  : <Circle size={22} style={{ color: 'var(--color-border)', flexShrink: 0 }} />
-                }
-                <span className="flex-1 text-sm font-medium"
-                  style={{
-                    color: item.done ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
-                    textDecoration: item.done ? 'line-through' : 'none',
-                  }}>
-                  {item.label}
-                </span>
-              </button>
-            ))}
+                  color: item.done ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+                  textDecoration: item.done ? 'line-through' : 'none',
+                }}>
+                {item.label}
+              </span>
+            </button>
+          ))}
+
+          {/* Ajout tâche */}
+          <div className="flex items-center gap-2 px-4 py-3"
+            style={{ borderTop: checklist.length > 0 ? 'none' : undefined }}>
+            <input
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addTask()}
+              placeholder="Ajouter une tâche…"
+              className="flex-1 text-sm outline-none bg-transparent"
+              style={{ color: 'var(--color-text-primary)' }}
+            />
+            <button
+              onClick={addTask}
+              disabled={!newTask.trim()}
+              className="p-1.5 rounded-lg transition-colors"
+              style={{
+                background: newTask.trim() ? 'var(--color-accent-light)' : 'transparent',
+                color: newTask.trim() ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
+              }}>
+              <Plus size={16} />
+            </button>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Commentaire */}
       {sampling.comment && (
