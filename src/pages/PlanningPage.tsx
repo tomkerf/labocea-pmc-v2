@@ -744,6 +744,14 @@ export default function PlanningPage() {
     setWeekStart(startOfWeek(today)); setMonthStart(startOfMonth(today))
     setSelectedDate(today); setSelectedDay(null); setValidatingId(null)
   }
+  // Naviguer vers la vue Jour pour une date donnée
+  function goToDay(dateStr: string) {
+    const d = new Date(dateStr + 'T12:00:00')
+    setSelectedDate(d)
+    setViewMode('jour')
+    setSelectedDay(null)
+    setValidatingId(null)
+  }
   function switchView(m:ViewMode) {
     setViewMode(m)
     if (m==='mois') setMonthStart(startOfMonth(selectedDate))
@@ -1046,7 +1054,7 @@ export default function PlanningPage() {
         return (
           <div className="flex-1 overflow-hidden flex flex-col">
 
-            {/* Sous-titre : numéro de semaine */}
+            {/* Sous-titre : numéro de semaine + bouton Planifier */}
             <div className="px-4 py-1.5 shrink-0 flex items-center gap-2"
               style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
               <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -1057,6 +1065,12 @@ export default function PlanningPage() {
                   · {allEvts.length} intervention{allEvts.length > 1 ? 's' : ''}
                 </span>
               )}
+              <button
+                onClick={() => setSelectedDay(dateStr)}
+                className="ml-auto flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium"
+                style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                <Plus size={11} /> Planifier
+              </button>
             </div>
 
             {/* Section "Toute la journée" */}
@@ -1208,17 +1222,17 @@ export default function PlanningPage() {
                 return (
                   <div key={i}
                     className="p-1.5 flex flex-col gap-1 cursor-pointer group"
-                    onClick={() => setSelectedDay(dateStr)}
+                    onClick={() => goToDay(dateStr)}
                     style={{
                       borderRight: i<4?'1px solid var(--color-border-subtle)':'none',
                       background: isToday?'rgba(255,59,48,0.04)':'transparent',
                       minHeight: 120,
                     }}>
-                    {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => setSelectedDay(dateStr)} />)}
+                    {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => goToDay(dateStr)} />)}
                     {/* Bouton + toujours visible, plus marqué au survol */}
                     <div className="mt-auto flex items-center justify-center py-1">
                       <button
-                        onClick={e => { e.stopPropagation(); setSelectedDay(dateStr) }}
+                        onClick={e => { e.stopPropagation(); goToDay(dateStr) }}
                         className="flex items-center gap-1 px-2 py-0.5 rounded-full opacity-25 group-hover:opacity-100 transition-opacity"
                         style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)', fontSize: 10 }}>
                         <Plus size={9} /> Planifier
@@ -1261,7 +1275,7 @@ export default function PlanningPage() {
                 return (
                   <div key={i}
                     className="p-1 flex flex-col gap-0.5 cursor-pointer group"
-                    onClick={() => setSelectedDay(dateStr)}
+                    onClick={() => goToDay(dateStr)}
                     style={{
                       borderRight:(i%5)<4?'1px solid var(--color-border-subtle)':'none',
                       borderBottom:'1px solid var(--color-border-subtle)',
@@ -1284,13 +1298,13 @@ export default function PlanningPage() {
                         )}
                       </span>
                       <button
-                        onClick={e => { e.stopPropagation(); setSelectedDay(dateStr) }}
+                        onClick={e => { e.stopPropagation(); goToDay(dateStr) }}
                         className="w-[18px] h-[18px] flex items-center justify-center rounded-full opacity-30 group-hover:opacity-100 transition-opacity"
                         style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
                         <Plus size={10} />
                       </button>
                     </div>
-                    {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact onExpand={() => setSelectedDay(dateStr)} />)}
+                    {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact onExpand={() => goToDay(dateStr)} />)}
                     {evts.length>MAX && (
                       <span className="text-[10px] pl-1 mt-0.5" style={{ color:'var(--color-text-tertiary)' }}>
                         +{evts.length-MAX} autres
@@ -1334,7 +1348,7 @@ export default function PlanningPage() {
                         Aujourd'hui
                       </span>
                     )}
-                    <button onClick={() => setSelectedDay(dateStr)}
+                    <button onClick={() => goToDay(dateStr)}
                       className="ml-auto flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-medium"
                       style={{ color:'var(--color-text-tertiary)', border:'1px solid var(--color-border-subtle)' }}>
                       <Plus size={9} /> Ajouter
