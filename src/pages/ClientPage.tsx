@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, ChevronRight, Trash2 } from 'lucide-react'
+import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle } from 'lucide-react'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import { saveClient } from '@/hooks/useClients'
+import { saveClient, deleteClient } from '@/hooks/useClients'
 import { useAuthStore } from '@/stores/authStore'
 import { generateId } from '@/lib/ids'
 import type { Client, Plan, SegmentType, NouvelleDemandeType } from '@/types'
@@ -25,6 +25,7 @@ export default function ClientPage() {
   const [client, setClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Écoute temps réel sur le document client
@@ -79,6 +80,13 @@ export default function ClientPage() {
     triggerSave({ ...client, plans: [...client.plans, newPlan] })
   }
 
+  // Supprimer le client
+  async function handleDeleteClient() {
+    if (!client) return
+    await deleteClient(client.id)
+    navigate('/missions')
+  }
+
   // Supprimer un plan
   function deletePlan(planId: string) {
     if (!client || !confirm('Supprimer ce plan et tous ses prélèvements ?')) return
@@ -104,12 +112,38 @@ export default function ClientPage() {
         <ChevronLeft size={16} /> Missions
       </button>
 
-      {/* Titre + statut save */}
+      {/* Titre + statut save + suppression */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
           {client.nom || 'Client sans nom'}
         </h1>
-        {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
+        <div className="flex items-center gap-3">
+          {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
+          {!confirmDelete ? (
+            <button onClick={() => setConfirmDelete(true)}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
+              style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}>
+              <Trash2 size={13} /> Supprimer
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+              style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
+              <AlertTriangle size={13} style={{ color: 'var(--color-danger)' }} />
+              <span className="text-xs font-medium" style={{ color: 'var(--color-danger)' }}>
+                Supprimer définitivement ?
+              </span>
+              <button onClick={handleDeleteClient}
+                className="text-xs font-semibold px-2 py-0.5 rounded"
+                style={{ background: 'var(--color-danger)', color: 'white' }}>
+                Oui
+              </button>
+              <button onClick={() => setConfirmDelete(false)}
+                className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                Annuler
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bloc infos administratives */}

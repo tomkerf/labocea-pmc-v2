@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import {
   collection, onSnapshot, doc,
-  setDoc, addDoc, serverTimestamp, query, orderBy,
+  setDoc, addDoc, deleteDoc, serverTimestamp, query, orderBy,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -35,6 +35,11 @@ export async function saveClient(client: Client, uid: string): Promise<void> {
     updatedBy: uid,
     updatedAt: serverTimestamp(),
   }, { merge: true })
+}
+
+/** Supprime un client */
+export async function deleteClient(clientId: string): Promise<void> {
+  await deleteDoc(doc(db, COLLECTION, clientId))
 }
 
 /** Crée un nouveau client */
