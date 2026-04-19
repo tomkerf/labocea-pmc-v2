@@ -752,23 +752,38 @@ export default function PlanningPage() {
   // ── EventPill (calendrier desktop) ─────────────────────
 
   function EventPill({ event }: { event:PlanningEvent }) {
+    const hasSubtitle = event.subtitle && event.subtitle !== '—'
+    const hasTech = event.technicien && event.technicien !== '—'
     return (
       <button
         onClick={e => { e.stopPropagation(); if (event.type !== 'evenement') navigate(event.link) }}
-        className="w-full text-left flex items-center gap-1.5 px-1.5 py-[3px] rounded-[5px] text-[11px] leading-snug"
+        className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
         style={{ background: event.statusBg, cursor: event.type === 'evenement' ? 'default' : 'pointer' }}
-        title={`${event.title} — ${event.subtitle}`}
+        title={`${event.title} — ${event.subtitle} (${event.technicien})`}
       >
-        {/* Dot couleur tech (ou statut si pas de tech) */}
-        <span className="shrink-0 w-[7px] h-[7px] rounded-full"
-          style={{ background: event.statusColor }} />
-        <span className="flex-1 truncate font-medium" style={{ color: 'var(--color-text-primary)' }}>
-          {event.title}
-        </span>
-        {event.plannedTime && (
-          <span className="shrink-0 text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
-            {event.plannedTime}
+        {/* Ligne 1 : dot + client + technicien */}
+        <div className="flex items-center gap-1">
+          <span className="shrink-0 w-[6px] h-[6px] rounded-full" style={{ background: event.statusColor }} />
+          <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
+            {event.title}
           </span>
+          {hasTech && (
+            <span className="shrink-0 text-[9px] font-semibold px-1 rounded"
+              style={{ background: (event.techColor ?? event.statusColor) + '28', color: event.techColor ?? event.statusColor }}>
+              {event.technicien}
+            </span>
+          )}
+          {event.plannedTime && (
+            <span className="shrink-0 text-[9px]" style={{ color: 'var(--color-text-tertiary)' }}>
+              {event.plannedTime}
+            </span>
+          )}
+        </div>
+        {/* Ligne 2 : nom du point */}
+        {hasSubtitle && (
+          <div className="text-[10px] truncate pl-[14px]" style={{ color: 'var(--color-text-secondary)' }}>
+            {event.subtitle}
+          </div>
         )}
       </button>
     )
