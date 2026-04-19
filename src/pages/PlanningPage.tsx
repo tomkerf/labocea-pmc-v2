@@ -498,19 +498,37 @@ export default function PlanningPage() {
 
     clients.forEach((client: Client) => {
       client.plans.forEach(plan => {
+        const isAuto = plan.methode === 'Automatique'
+        const baseSub = plan.siteNom || plan.nom || '—'
         plan.samplings.forEach((s:Sampling) => {
           const overdue = isSamplingOverdue(s)
           const dateStr = s.doneDate || toISO(new Date(year, s.plannedMonth, s.plannedDay||1))
           const cfg = overdue ? SAMPLING_CFG.overdue : SAMPLING_CFG[s.status] ?? SAMPLING_CFG.planned
-          add(dateStr, {
-            id: s.id, type:'prelevement',
-            title: client.nom, subtitle: plan.siteNom || plan.nom || '—',
+          const common = {
+            type: 'prelevement' as const,
             statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
             techColor: getTechColor(client.preleveur),
             link:`/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
             isDone: s.status==='done', technicien: client.preleveur||'—',
             plannedTime: s.plannedTime, clientId:client.id, planId:plan.id, samplingId:s.id,
+          }
+          // Jour 1 (ou jour unique pour les méthodes ponctuelles / composite)
+          add(dateStr, {
+            ...common,
+            id: s.id,
+            title: client.nom,
+            subtitle: isAuto ? `${baseSub} · Bilan 24h J1` : baseSub,
           })
+          // Méthode Automatique = bilan 24h → occupe aussi le lendemain (J2)
+          if (isAuto) {
+            const dateStr2 = toISO(addDays(new Date(dateStr + 'T12:00:00'), 1))
+            add(dateStr2, {
+              ...common,
+              id: `${s.id}_j2`,
+              title: client.nom,
+              subtitle: `${baseSub} · Bilan 24h J2`,
+            })
+          }
         })
       })
     })
