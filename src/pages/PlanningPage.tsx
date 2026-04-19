@@ -1,22 +1,24 @@
 import { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, CheckCircle2, ExternalLink } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CheckCircle2, ExternalLink, Plus, X, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useClientsListener, saveClient } from '@/hooks/useClients'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMaintenancesListener, saveMaintenance } from '@/hooks/useMaintenances'
+import { useEvenementsListener, createEvenement, deleteEvenement } from '@/hooks/useEvenements'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
+import { useEvenementsStore } from '@/stores/evenementsStore'
 import { useAuthStore } from '@/stores/authStore'
-import type { Sampling, Verification, Maintenance } from '@/types'
+import type { Sampling, Verification, Maintenance, EvenementPersonnel, TypeEvenement } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
 
 // ── Types ───────────────────────────────────────────────────
 
 interface PlanningEvent {
   id: string
-  type: 'prelevement' | 'maintenance' | 'verification'
+  type: 'prelevement' | 'maintenance' | 'verification' | 'evenement'
   title: string
   subtitle: string
   detail?: string
@@ -31,6 +33,7 @@ interface PlanningEvent {
   planId?: string
   samplingId?: string
   maintenanceData?: Maintenance
+  evenementData?: EvenementPersonnel
 }
 
 type ViewMode = 'semaine' | 'mois'
@@ -71,13 +74,12 @@ function isSameDay(a: Date, b: Date): boolean {
   return toISODate(a) === toISODate(b)
 }
 
-// Génère les cellules de la grille mensuelle (lundi en premier)
 function buildMonthGrid(monthStart: Date): (Date | null)[] {
   const year = monthStart.getFullYear()
   const month = monthStart.getMonth()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const firstDayOfWeek = monthStart.getDay() // 0=dim, 1=lun...
-  const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1 // décalage lundi
+  const firstDayOfWeek = monthStart.getDay()
+  const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1
   const cells: (Date | null)[] = []
   for (let i = 0; i < offset; i++) cells.push(null)
   for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d))
@@ -99,6 +101,13 @@ const MAINTENANCE_STATUS: Record<string, { label: string; bg: string; color: str
   abandonnee: { label: 'Abandonnée', bg: 'var(--color-danger-light)',  color: 'var(--color-danger)' },
 }
 
+const TYPE_EVENEMENT: Record<TypeEvenement, { label: string; color: string; bg: string }> = {
+  rappel:  { label: 'Rappel',    color: 'var(--color-accent)',   bg: 'var(--color-accent-light)'   },
+  reunion: { label: 'Réunion',   color: '#AF52DE',               bg: '#F5EEFF'                     },
+  rapport: { label: 'Rapport',   color: 'var(--color-warning)',  bg: 'var(--color-warning-light)'  },
+  autre:   { label: 'Autre',     color: 'var(--color-neutral)',  bg: 'var(--color-bg-tertiary)'    },
+}
+
 // ── Page principale ─────────────────────────────────────────
 
 export default function PlanningPage() {
@@ -106,12 +115,14 @@ export default function PlanningPage() {
   useEquipementsListener()
   useVerificationsListener()
   useMaintenancesListener()
+  useEvenementsListener()
 
   const navigate = useNavigate()
   const uid = useAuthStore((s) => s.uid())
   const { clients } = useMissionsStore()
   const { verifications } = useMetrologieStore()
   const { maintenances } = useMaintenancesStore()
+  const { evenements } = useEvenementsStore()
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -125,6 +136,14 @@ export default function PlanningPage() {
   const [validatingId, setValidatingId] = useState<string | null>(null)
   const [validationDate, setValidationDate] = useState<string>(toISODate(today))
   const [saving, setSaving] = useState(false)
+
+  // Formulaire nouvel événement
+  const [showNewEvent, setShowNewEvent] = useState(false)
+  const [newEventTitre, setNewEventTitre] = useState('')
+  const [newEventType, setNewEventType] = useState<TypeEvenement>('rappel')
+  const [newEventHeure, setNewEventHeure] = useState('')
+  const [newEventNotes, setNewEventNotes] = useState('')
+  const [creatingEvent, setCreatingEvent] = useState(false)
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
   const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])
@@ -150,9 +169,12 @@ export default function PlanningPage() {
     clients.forEach((client) => {
       client.plans.forEach((plan) => {
         plan.samplings.forEach((s: Sampling) => {
+          const overdue = isSamplingOverdue(s)
           const dateStr = s.doneDate
             || toISODate(new Date(year, s.plannedMonth, s.plannedDay || 1))
-          const cfg = SAMPLING_STATUS[s.status] ?? SAMPLING_STATUS.planned
+          const cfg = overdue
+            ? SAMPLING_STATUS.overdue
+            : SAMPLING_STATUS[s.status] ?? SAMPLING_STATUS.planned
           add(dateStr, {
             id: s.id,
             type: 'prelevement',
@@ -210,8 +232,27 @@ export default function PlanningPage() {
       })
     })
 
+    evenements.forEach((ev: EvenementPersonnel) => {
+      const cfg = TYPE_EVENEMENT[ev.type] ?? TYPE_EVENEMENT.autre
+      add(ev.date, {
+        id: ev.id,
+        type: 'evenement',
+        title: ev.titre,
+        subtitle: cfg.label,
+        detail: ev.notes || undefined,
+        statusLabel: cfg.label,
+        statusBg: cfg.bg,
+        statusColor: cfg.color,
+        link: '',
+        isDone: false,
+        technicien: '',
+        plannedTime: ev.heure || undefined,
+        evenementData: ev,
+      })
+    })
+
     return map
-  }, [clients, maintenances, verifications])
+  }, [clients, maintenances, verifications, evenements])
 
   const allTechniciens = useMemo(() => {
     const set = new Set<string>()
@@ -221,7 +262,6 @@ export default function PlanningPage() {
     return Array.from(set).sort()
   }, [eventsByDate])
 
-  // Compte total des prélèvements en retard (toutes dates)
   const totalOverdue = useMemo(() => {
     let count = 0
     clients.forEach((client) => client.plans.forEach((plan) => plan.samplings.forEach((s: Sampling) => {
@@ -230,7 +270,6 @@ export default function PlanningPage() {
     return count
   }, [clients])
 
-  // En mode "retard", on affiche tous les events en retard toutes dates confondues
   const allOverdueEvents = useMemo(() => {
     if (!filterRetard) return []
     return Object.values(eventsByDate)
@@ -296,6 +335,7 @@ export default function PlanningPage() {
   function selectDay(day: Date) {
     setSelectedDate(day)
     setValidatingId(null)
+    setShowNewEvent(false)
     if (viewMode === 'semaine') setWeekStart(startOfWeek(day))
   }
 
@@ -308,7 +348,35 @@ export default function PlanningPage() {
   function typeLabel(type: PlanningEvent['type']): string {
     if (type === 'prelevement') return 'Prélèvement'
     if (type === 'maintenance') return 'Maintenance'
+    if (type === 'evenement') return ''
     return 'Métrologie'
+  }
+
+  async function handleCreateEvent() {
+    if (!newEventTitre.trim() || !uid) return
+    setCreatingEvent(true)
+    try {
+      await createEvenement(
+        newEventTitre.trim(),
+        toISODate(selectedDate),
+        newEventType,
+        newEventHeure,
+        newEventNotes,
+        uid,
+      )
+      setShowNewEvent(false)
+      setNewEventTitre('')
+      setNewEventType('rappel')
+      setNewEventHeure('')
+      setNewEventNotes('')
+    } finally {
+      setCreatingEvent(false)
+    }
+  }
+
+  function openNewEvent() {
+    setShowNewEvent(true)
+    setValidatingId(null)
   }
 
   const weekLabel = (() => {
@@ -324,17 +392,14 @@ export default function PlanningPage() {
   return (
     <div className="p-6 max-w-3xl">
 
-      {/* En-tête : titre + toggle vue + filtre technicien */}
+      {/* En-tête */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>Planning</h1>
-
-          {/* Toggle Semaine / Mois */}
           <div className="flex rounded-lg overflow-hidden"
             style={{ border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-tertiary)' }}>
             {(['semaine', 'mois'] as ViewMode[]).map((mode) => (
-              <button key={mode}
-                onClick={() => switchView(mode)}
+              <button key={mode} onClick={() => switchView(mode)}
                 className="px-3 py-1 text-xs font-medium transition-colors capitalize"
                 style={{
                   background: viewMode === mode ? 'var(--color-accent)' : 'transparent',
@@ -346,10 +411,8 @@ export default function PlanningPage() {
           </div>
         </div>
 
-        {/* Filtre retard */}
         {totalOverdue > 0 && (
-          <button
-            onClick={() => setFilterRetard((v) => !v)}
+          <button onClick={() => setFilterRetard((v) => !v)}
             className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-colors"
             style={{
               background: filterRetard ? 'var(--color-danger)' : 'var(--color-danger-light)',
@@ -359,11 +422,9 @@ export default function PlanningPage() {
           </button>
         )}
 
-        {/* Filtre technicien */}
         {allTechniciens.length > 1 && (
           <div className="flex items-center gap-1.5 flex-wrap">
-            <button
-              onClick={() => setFilterTechnicien('')}
+            <button onClick={() => setFilterTechnicien('')}
               className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
               style={{
                 background: !filterTechnicien ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
@@ -373,8 +434,7 @@ export default function PlanningPage() {
               Tous
             </button>
             {allTechniciens.map((tech) => (
-              <button key={tech}
-                onClick={() => setFilterTechnicien(tech === filterTechnicien ? '' : tech)}
+              <button key={tech} onClick={() => setFilterTechnicien(tech === filterTechnicien ? '' : tech)}
                 className="px-3 py-1 rounded-full text-xs font-medium transition-colors"
                 style={{
                   background: filterTechnicien === tech ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
@@ -400,9 +460,7 @@ export default function PlanningPage() {
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
               <ChevronLeft size={18} />
             </button>
-            <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-              {weekLabel}
-            </span>
+            <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{weekLabel}</span>
             <button onClick={() => setWeekStart(addDays(weekStart, 7))}
               className="p-1 rounded-lg" style={{ color: 'var(--color-text-secondary)' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
@@ -410,7 +468,6 @@ export default function PlanningPage() {
               <ChevronRight size={18} />
             </button>
           </div>
-
           <div className="grid grid-cols-7 px-3 py-4 gap-1">
             {weekDays.map((day, i) => {
               const dateStr = toISODate(day)
@@ -420,20 +477,14 @@ export default function PlanningPage() {
               const events = filterTechnicien
                 ? (eventsByDate[dateStr] ?? []).filter((e) => e.technicien === filterTechnicien)
                 : eventsByDate[dateStr] ?? []
-              const eventCount = events.length
-
               return (
-                <button key={i}
-                  onClick={() => selectDay(day)}
+                <button key={i} onClick={() => selectDay(day)}
                   className="flex flex-col items-center gap-1.5 py-2 px-1 rounded-xl transition-colors"
                   style={{ background: isSelected ? 'var(--color-accent)' : 'transparent' }}
                   onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--color-bg-tertiary)' }}
                   onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
                   <span className="text-[10px] font-medium uppercase"
-                    style={{
-                      color: isSelected ? 'rgba(255,255,255,0.8)' : isWeekend ? 'var(--color-border)' : 'var(--color-text-tertiary)',
-                      letterSpacing: '0.04em',
-                    }}>
+                    style={{ color: isSelected ? 'rgba(255,255,255,0.8)' : isWeekend ? 'var(--color-border)' : 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
                     {JOURS[i]}
                   </span>
                   <span className="text-sm font-semibold w-7 h-7 flex items-center justify-center rounded-full"
@@ -443,13 +494,13 @@ export default function PlanningPage() {
                     }}>
                     {day.getDate()}
                   </span>
-                  {eventCount > 0 ? (
+                  {events.length > 0 ? (
                     <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
                       style={{
                         background: isSelected ? 'rgba(255,255,255,0.25)' : 'var(--color-accent-light)',
                         color: isSelected ? 'white' : 'var(--color-accent)',
                       }}>
-                      {eventCount}
+                      {events.length}
                     </span>
                   ) : <span className="h-4" />}
                 </button>
@@ -463,8 +514,6 @@ export default function PlanningPage() {
       {viewMode === 'mois' && (
         <div className="rounded-xl overflow-hidden mb-5"
           style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-
-          {/* Navigation mois */}
           <div className="flex items-center justify-between px-5 py-3"
             style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
             <button onClick={() => setMonthStart(addMonths(monthStart, -1))}
@@ -483,45 +532,29 @@ export default function PlanningPage() {
               <ChevronRight size={18} />
             </button>
           </div>
-
-          {/* En-têtes jours */}
           <div className="grid grid-cols-7 px-3 pt-3 pb-1 gap-1">
             {JOURS.map((j, i) => (
               <div key={j} className="text-center text-[10px] font-medium uppercase py-1"
-                style={{
-                  color: i >= 5 ? 'var(--color-border)' : 'var(--color-text-tertiary)',
-                  letterSpacing: '0.04em',
-                }}>
+                style={{ color: i >= 5 ? 'var(--color-border)' : 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
                 {j}
               </div>
             ))}
           </div>
-
-          {/* Grille jours */}
           <div className="grid grid-cols-7 px-3 pb-3 gap-1">
             {monthGrid.map((day, i) => {
               if (!day) return <div key={i} />
-
               const dateStr = toISODate(day)
               const isSelected = isSameDay(day, selectedDate)
               const isToday = isSameDay(day, today)
-              const dayOfWeek = (i % 7)
-              const isWeekend = dayOfWeek >= 5
+              const isWeekend = (i % 7) >= 5
               const events = filterTechnicien
                 ? (eventsByDate[dateStr] ?? []).filter((e) => e.technicien === filterTechnicien)
                 : eventsByDate[dateStr] ?? []
-              const eventCount = events.length
-
-              // Couleurs des dots : priorité danger > warning > accent > success
               const hasOverdue = events.some((e) => e.statusColor === 'var(--color-danger)')
               const hasWarning = events.some((e) => e.statusColor === 'var(--color-warning)')
-              const dotColor = hasOverdue ? 'var(--color-danger)'
-                : hasWarning ? 'var(--color-warning)'
-                : 'var(--color-accent)'
-
+              const dotColor = hasOverdue ? 'var(--color-danger)' : hasWarning ? 'var(--color-warning)' : 'var(--color-accent)'
               return (
-                <button key={i}
-                  onClick={() => selectDay(day)}
+                <button key={i} onClick={() => selectDay(day)}
                   className="flex flex-col items-center gap-1 py-2 rounded-xl transition-colors"
                   style={{ background: isSelected ? 'var(--color-accent)' : 'transparent', minHeight: 56 }}
                   onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--color-bg-tertiary)' }}
@@ -534,13 +567,13 @@ export default function PlanningPage() {
                     }}>
                     {day.getDate()}
                   </span>
-                  {eventCount > 0 ? (
+                  {events.length > 0 ? (
                     <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
                       style={{
                         background: isSelected ? 'rgba(255,255,255,0.25)' : `${dotColor}22`,
                         color: isSelected ? 'white' : dotColor,
                       }}>
-                      {eventCount}
+                      {events.length}
                     </span>
                   ) : <span className="h-4" />}
                 </button>
@@ -550,7 +583,7 @@ export default function PlanningPage() {
         </div>
       )}
 
-      {/* Titre du jour sélectionné */}
+      {/* Titre du jour + bouton Ajouter */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-xs font-semibold uppercase"
           style={{ color: filterRetard ? 'var(--color-danger)' : 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
@@ -558,13 +591,89 @@ export default function PlanningPage() {
             ? `⚠ ${allOverdueEvents.length} prélèvement${allOverdueEvents.length > 1 ? 's' : ''} en retard`
             : selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
         </h2>
-        {!filterRetard && isSameDay(selectedDate, today) && (
-          <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-            style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-            Aujourd'hui
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {!filterRetard && isSameDay(selectedDate, today) && (
+            <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+              Aujourd'hui
+            </span>
+          )}
+          {!filterRetard && (
+            <button
+              onClick={() => showNewEvent ? setShowNewEvent(false) : openNewEvent()}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors"
+              style={{
+                background: showNewEvent ? 'var(--color-bg-tertiary)' : 'var(--color-accent-light)',
+                color: showNewEvent ? 'var(--color-text-secondary)' : 'var(--color-accent)',
+                border: '1px solid var(--color-border-subtle)',
+              }}>
+              {showNewEvent ? <X size={12} /> : <Plus size={12} />}
+              {showNewEvent ? 'Annuler' : 'Ajouter'}
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Formulaire nouvel événement */}
+      {showNewEvent && (
+        <div className="rounded-xl mb-3 p-4"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          <p className="text-xs font-semibold uppercase mb-3"
+            style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+            Nouvel événement — {selectedDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+          </p>
+          <div className="flex flex-col gap-2.5">
+            <input
+              type="text"
+              value={newEventTitre}
+              onChange={(e) => setNewEventTitre(e.target.value)}
+              placeholder="Titre de l'événement…"
+              autoFocus
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreateEvent()}
+            />
+            <div className="flex gap-2">
+              <select
+                value={newEventType}
+                onChange={(e) => setNewEventType(e.target.value as TypeEvenement)}
+                className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
+                <option value="rappel">Rappel</option>
+                <option value="reunion">Réunion / Entretien</option>
+                <option value="rapport">Rapport</option>
+                <option value="autre">Autre</option>
+              </select>
+              <input
+                type="time"
+                value={newEventHeure}
+                onChange={(e) => setNewEventHeure(e.target.value)}
+                className="px-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', width: 110 }}
+              />
+            </div>
+            <input
+              type="text"
+              value={newEventNotes}
+              onChange={(e) => setNewEventNotes(e.target.value)}
+              placeholder="Notes (optionnel)"
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+            />
+            <button
+              onClick={handleCreateEvent}
+              disabled={!newEventTitre.trim() || creatingEvent}
+              className="self-end px-4 py-2 rounded-lg text-sm font-medium"
+              style={{
+                background: newEventTitre.trim() ? 'var(--color-accent)' : 'var(--color-border)',
+                color: 'white',
+                opacity: creatingEvent ? 0.6 : 1,
+              }}>
+              {creatingEvent ? 'Ajout…' : 'Ajouter'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Timeline */}
       {selectedEvents.length === 0 ? (
@@ -584,7 +693,7 @@ export default function PlanningPage() {
           style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
           {selectedEvents.map((event, i) => {
             const isValidating = validatingId === event.id
-            const canQuickValidate = !event.isDone && event.type !== 'verification'
+            const isEvenement = event.type === 'evenement'
 
             return (
               <div key={event.id + i}
@@ -594,45 +703,74 @@ export default function PlanningPage() {
                   <div className="w-1 self-stretch rounded-full shrink-0"
                     style={{ background: event.statusColor, minHeight: 36 }} />
 
-                  <button className="flex-1 min-w-0 text-left" onClick={() => navigate(event.link)}>
-                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                      {event.title}
-                    </p>
-                    <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                      {event.subtitle}{event.detail ? ` · ${event.detail}` : ''}
-                    </p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <p className="text-[10px] font-medium uppercase tracking-wide"
-                        style={{ color: 'var(--color-text-tertiary)' }}>
-                        {typeLabel(event.type)}
+                  {isEvenement ? (
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                        {event.title}
                       </p>
-                      {event.plannedTime && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold"
-                          style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-                          {event.plannedTime}
-                        </span>
+                      {event.detail && (
+                        <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                          {event.detail}
+                        </p>
                       )}
-                      {event.technicien && event.technicien !== '—' && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded font-medium"
-                          style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                          {event.technicien}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {event.plannedTime && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold"
+                            style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                            {event.plannedTime}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </button>
+                  ) : (
+                    <button className="flex-1 min-w-0 text-left" onClick={() => navigate(event.link)}>
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                        {event.title}
+                      </p>
+                      <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                        {event.subtitle}{event.detail ? ` · ${event.detail}` : ''}
+                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-[10px] font-medium uppercase tracking-wide"
+                          style={{ color: 'var(--color-text-tertiary)' }}>
+                          {typeLabel(event.type)}
+                        </p>
+                        {event.plannedTime && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold"
+                            style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                            {event.plannedTime}
+                          </span>
+                        )}
+                        {event.technicien && event.technicien !== '—' && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded font-medium"
+                            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                            {event.technicien}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  )}
 
                   <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
                     style={{ background: event.statusBg, color: event.statusColor }}>
                     {event.statusLabel}
                   </span>
 
-                  {event.isDone ? (
+                  {isEvenement ? (
+                    <button
+                      onClick={() => event.evenementData && deleteEvenement(event.evenementData.id)}
+                      className="shrink-0 p-1.5 rounded-lg transition-colors"
+                      style={{ color: 'var(--color-text-tertiary)' }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
+                      <Trash2 size={15} />
+                    </button>
+                  ) : event.isDone ? (
                     <CheckCircle2 size={20} className="shrink-0" style={{ color: 'var(--color-success)' }} />
                   ) : event.type === 'verification' ? (
                     <button onClick={() => navigate(event.link)}
                       className="shrink-0 p-1.5 rounded-lg"
-                      style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}
-                      title="Ouvrir la fiche">
+                      style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
                       <ExternalLink size={15} />
                     </button>
                   ) : (
@@ -649,7 +787,7 @@ export default function PlanningPage() {
                   )}
                 </div>
 
-                {isValidating && canQuickValidate && (
+                {isValidating && !isEvenement && (
                   <div className="px-5 py-4 flex flex-col gap-3"
                     style={{ background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
                     <div className="flex items-end gap-3">
@@ -657,27 +795,16 @@ export default function PlanningPage() {
                         <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                           Date de réalisation
                         </label>
-                        <input
-                          type="date"
-                          value={validationDate}
+                        <input type="date" value={validationDate}
                           onChange={(e) => setValidationDate(e.target.value)}
                           className="w-full px-3 py-2 rounded-lg text-sm"
-                          style={{
-                            background: 'var(--color-bg-secondary)',
-                            border: '1px solid var(--color-border)',
-                            color: 'var(--color-text-primary)',
-                          }}
+                          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
                         />
                       </div>
-                      <button
-                        onClick={() => handleValidate(event)}
+                      <button onClick={() => handleValidate(event)}
                         disabled={saving || !validationDate}
                         className="px-4 py-2 rounded-lg text-sm font-medium"
-                        style={{
-                          background: 'var(--color-success)',
-                          color: 'white',
-                          opacity: saving ? 0.6 : 1,
-                        }}>
+                        style={{ background: 'var(--color-success)', color: 'white', opacity: saving ? 0.6 : 1 }}>
                         {saving ? 'Enregistrement…' : 'Confirmer'}
                       </button>
                     </div>
@@ -695,7 +822,6 @@ export default function PlanningPage() {
         </div>
       )}
 
-      {/* Lien retour semaine en cours (vue semaine uniquement) */}
       {viewMode === 'semaine' && !weekDays.some((d) => isSameDay(d, today)) && (
         <button onClick={() => { setWeekStart(startOfWeek(today)); setSelectedDate(today) }}
           className="mt-4 text-xs" style={{ color: 'var(--color-accent)' }}>
@@ -703,7 +829,6 @@ export default function PlanningPage() {
         </button>
       )}
 
-      {/* Lien retour mois en cours (vue mois uniquement) */}
       {viewMode === 'mois' && monthStart.getMonth() !== today.getMonth() && (
         <button onClick={() => { setMonthStart(startOfMonth(today)); setSelectedDate(today) }}
           className="mt-4 text-xs" style={{ color: 'var(--color-accent)' }}>

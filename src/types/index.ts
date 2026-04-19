@@ -158,6 +158,21 @@ export interface Equipement {
   updatedAt: Timestamp
 }
 
+// --- Événements personnels (planning) ---
+
+export type TypeEvenement = 'rappel' | 'reunion' | 'rapport' | 'autre'
+
+export interface EvenementPersonnel {
+  id: string
+  titre: string
+  date: string           // "2026-04-20"
+  heure?: string         // "09:00"
+  type: TypeEvenement
+  notes?: string
+  createdBy: string
+  createdAt: Timestamp
+}
+
 // --- Vérifications métrologiques ---
 
 export type TypeVerification = 'etalonnage_interne' | 'verification_externe' | 'controle_terrain'
