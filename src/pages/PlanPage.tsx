@@ -12,7 +12,7 @@ const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
 
 const FREQUENCES: FrequenceType[] = ['Mensuel', 'Bimensuel', 'Trimestriel', 'Semestriel', 'Annuel']
-const NATURES: NatureEauType[] = ['Eau usée', 'Rivière', 'Souterraine', 'AEP', 'Marine']
+const NATURES: NatureEauType[] = ['Eau usée', 'Rivière', 'Souterraine', 'Eau pluviale', 'Eau saline', 'Boues', 'Autre']
 const METHODES: MethodeType[] = ['Ponctuel', 'Composite', 'Automatique']
 
 const STATUS_CONFIG: Record<SamplingStatus, { label: string; bg: string; color: string }> = {
