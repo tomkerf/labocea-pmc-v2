@@ -87,15 +87,6 @@ function buildMonthGrid(monthStart: Date): (Date | null)[] {
   return cells
 }
 
-function sortEvents(events: PlanningEvent[]): PlanningEvent[] {
-  return events.slice().sort((a, b) => {
-    if (a.plannedTime && b.plannedTime) return a.plannedTime.localeCompare(b.plannedTime)
-    if (a.plannedTime) return -1
-    if (b.plannedTime) return 1
-    return 0
-  })
-}
-
 const SAMPLING_STATUS: Record<string, { label: string; bg: string; color: string }> = {
   planned:      { label: 'Planifié',     bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)' },
   done:         { label: 'Réalisé',      bg: 'var(--color-success-light)', color: 'var(--color-success)' },
@@ -264,8 +255,6 @@ export default function PlanningPage() {
     return map
   }, [clients, maintenances, verifications, evenements])
 
-  // ── Filtrages dérivés ───────────────────────────────────────
-
   const allTechniciens = useMemo(() => {
     const set = new Set<string>()
     Object.values(eventsByDate).forEach((events) =>
@@ -290,33 +279,18 @@ export default function PlanningPage() {
       .filter((e) => !filterTechnicien || e.technicien === filterTechnicien)
   }, [filterRetard, eventsByDate, filterTechnicien])
 
-  // Événements du jour sélectionné (vue semaine)
-  const selectedDayEvents = useMemo(() => {
-    const evts = eventsByDate[toISODate(selectedDate)] ?? []
-    const filtered = filterTechnicien ? evts.filter((e) => e.technicien === filterTechnicien) : evts
-    return sortEvents(filtered)
-  }, [eventsByDate, selectedDate, filterTechnicien])
-
-  // Événements du mois complet groupés par jour (vue mois)
-  const monthEvents = useMemo(() => {
-    if (viewMode !== 'mois' || filterRetard) return []
-    const year = monthStart.getFullYear()
-    const month = monthStart.getMonth()
-    const daysInMonth = new Date(year, month + 1, 0).getDate()
-    const result: { dateStr: string; date: Date; events: PlanningEvent[] }[] = []
-    for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(year, month, d)
-      const dateStr = toISODate(date)
-      let evts = eventsByDate[dateStr] ?? []
-      if (filterTechnicien) evts = evts.filter((e) => e.technicien === filterTechnicien)
-      if (evts.length > 0) {
-        result.push({ dateStr, date, events: sortEvents(evts) })
-      }
-    }
-    return result
-  }, [viewMode, filterRetard, monthStart, eventsByDate, filterTechnicien])
-
-  const monthTotalEvents = monthEvents.reduce((n, g) => n + g.events.length, 0)
+  const allEventsForDay = eventsByDate[toISODate(selectedDate)] ?? []
+  const selectedEvents = filterRetard
+    ? allOverdueEvents
+    : (filterTechnicien
+      ? allEventsForDay.filter((e) => e.technicien === filterTechnicien)
+      : allEventsForDay
+    ).slice().sort((a, b) => {
+      if (a.plannedTime && b.plannedTime) return a.plannedTime.localeCompare(b.plannedTime)
+      if (a.plannedTime) return -1
+      if (b.plannedTime) return 1
+      return 0
+    })
 
   // ── Validation rapide ───────────────────────────────────────
 
@@ -414,199 +388,6 @@ export default function PlanningPage() {
     }
     return `${MOIS_LONG[weekStart.getMonth()]} — ${MOIS_LONG[end.getMonth()]} ${end.getFullYear()}`
   })()
-
-  // ── Sous-composants rendus inline ───────────────────────────
-
-  function renderEventRow(event: PlanningEvent, i: number, total: number) {
-    const isValidating = validatingId === event.id
-    const isEvenement = event.type === 'evenement'
-
-    return (
-      <div key={event.id + i}
-        style={{ borderBottom: i < total - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-
-        <div className="flex items-center gap-3 px-4 py-3.5">
-          <div className="w-1 self-stretch rounded-full shrink-0"
-            style={{ background: event.statusColor, minHeight: 36 }} />
-
-          {isEvenement ? (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                {event.title}
-              </p>
-              {event.detail && (
-                <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                  {event.detail}
-                </p>
-              )}
-              <div className="flex items-center gap-2 mt-0.5">
-                {event.plannedTime && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold"
-                    style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-                    {event.plannedTime}
-                  </span>
-                )}
-              </div>
-            </div>
-          ) : (
-            <button className="flex-1 min-w-0 text-left" onClick={() => navigate(event.link)}>
-              <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                {event.title}
-              </p>
-              <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                {event.subtitle}{event.detail ? ` · ${event.detail}` : ''}
-              </p>
-              <div className="flex items-center gap-2 mt-0.5">
-                <p className="text-[10px] font-medium uppercase tracking-wide"
-                  style={{ color: 'var(--color-text-tertiary)' }}>
-                  {typeLabel(event.type)}
-                </p>
-                {event.plannedTime && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold"
-                    style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-                    {event.plannedTime}
-                  </span>
-                )}
-                {event.technicien && event.technicien !== '—' && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded font-medium"
-                    style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                    {event.technicien}
-                  </span>
-                )}
-              </div>
-            </button>
-          )}
-
-          <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
-            style={{ background: event.statusBg, color: event.statusColor }}>
-            {event.statusLabel}
-          </span>
-
-          {isEvenement ? (
-            <button
-              onClick={() => event.evenementData && deleteEvenement(event.evenementData.id)}
-              className="shrink-0 p-1.5 rounded-lg transition-colors"
-              style={{ color: 'var(--color-text-tertiary)' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
-              <Trash2 size={15} />
-            </button>
-          ) : event.isDone ? (
-            <CheckCircle2 size={20} className="shrink-0" style={{ color: 'var(--color-success)' }} />
-          ) : event.type === 'verification' ? (
-            <button onClick={() => navigate(event.link)}
-              className="shrink-0 p-1.5 rounded-lg"
-              style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
-              <ExternalLink size={15} />
-            </button>
-          ) : (
-            <button
-              onClick={() => isValidating ? setValidatingId(null) : openValidation(event)}
-              className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-              style={{
-                background: isValidating ? 'var(--color-bg-tertiary)' : 'var(--color-success-light)',
-                color: isValidating ? 'var(--color-text-secondary)' : 'var(--color-success)',
-                border: `1px solid ${isValidating ? 'var(--color-border)' : 'transparent'}`,
-              }}>
-              {isValidating ? 'Annuler' : '✓ Valider'}
-            </button>
-          )}
-        </div>
-
-        {isValidating && !isEvenement && (
-          <div className="px-5 py-4 flex flex-col gap-3"
-            style={{ background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
-            <div className="flex items-end gap-3">
-              <div className="flex-1">
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
-                  Date de réalisation
-                </label>
-                <input type="date" value={validationDate}
-                  onChange={(e) => setValidationDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg text-sm"
-                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
-                />
-              </div>
-              <button onClick={() => handleValidate(event)}
-                disabled={saving || !validationDate}
-                className="px-4 py-2 rounded-lg text-sm font-medium"
-                style={{ background: 'var(--color-success)', color: 'white', opacity: saving ? 0.6 : 1 }}>
-                {saving ? 'Enregistrement…' : 'Confirmer'}
-              </button>
-            </div>
-            {isValidationWeekend && (
-              <p className="text-xs px-3 py-2 rounded-lg"
-                style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
-                ⚠️ Intervention un week-end — vérifiez la date avant de confirmer.
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  function renderNewEventForm() {
-    return (
-      <div className="rounded-xl mb-3 p-4"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-        <p className="text-xs font-semibold uppercase mb-3"
-          style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-          Nouvel événement — {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-        </p>
-        <div className="flex flex-col gap-2.5">
-          <input
-            type="text"
-            value={newEventTitre}
-            onChange={(e) => setNewEventTitre(e.target.value)}
-            placeholder="Titre de l'événement…"
-            autoFocus
-            className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-            style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
-            onKeyDown={(e) => e.key === 'Enter' && handleCreateEvent()}
-          />
-          <div className="flex gap-2">
-            <select
-              value={newEventType}
-              onChange={(e) => setNewEventType(e.target.value as TypeEvenement)}
-              className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
-              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
-              <option value="rappel">Rappel</option>
-              <option value="reunion">Réunion / Entretien</option>
-              <option value="rapport">Rapport</option>
-              <option value="autre">Autre</option>
-            </select>
-            <input
-              type="time"
-              value={newEventHeure}
-              onChange={(e) => setNewEventHeure(e.target.value)}
-              className="px-3 py-2 rounded-lg text-sm outline-none"
-              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', width: 110 }}
-            />
-          </div>
-          <input
-            type="text"
-            value={newEventNotes}
-            onChange={(e) => setNewEventNotes(e.target.value)}
-            placeholder="Notes (optionnel)"
-            className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-            style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
-          />
-          <button
-            onClick={handleCreateEvent}
-            disabled={!newEventTitre.trim() || creatingEvent}
-            className="self-end px-4 py-2 rounded-lg text-sm font-medium"
-            style={{
-              background: newEventTitre.trim() ? 'var(--color-accent)' : 'var(--color-border)',
-              color: 'white',
-              opacity: creatingEvent ? 0.6 : 1,
-            }}>
-            {creatingEvent ? 'Ajout…' : 'Ajouter'}
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   // ── Render ─────────────────────────────────────────────────
 
@@ -804,103 +585,22 @@ export default function PlanningPage() {
         </div>
       )}
 
-      {/* ── Section basse ── */}
-
-      {filterRetard ? (
-        /* Vue "En retard" */
-        <>
-          <div className="mb-3">
-            <h2 className="text-xs font-semibold uppercase"
-              style={{ color: 'var(--color-danger)', letterSpacing: '0.06em' }}>
-              ⚠ {allOverdueEvents.length} prélèvement{allOverdueEvents.length > 1 ? 's' : ''} en retard
-            </h2>
-          </div>
-          {allOverdueEvents.length === 0 ? (
-            <div className="rounded-xl px-5 py-10 text-center"
-              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
-              <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Aucun prélèvement en retard.</p>
-            </div>
-          ) : (
-            <div className="rounded-xl overflow-hidden"
-              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-              {allOverdueEvents.map((event, i) => renderEventRow(event, i, allOverdueEvents.length))}
-            </div>
+      {/* Titre du jour + bouton Ajouter */}
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-xs font-semibold uppercase"
+          style={{ color: filterRetard ? 'var(--color-danger)' : 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+          {filterRetard
+            ? `⚠ ${allOverdueEvents.length} prélèvement${allOverdueEvents.length > 1 ? 's' : ''} en retard`
+            : selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+        </h2>
+        <div className="flex items-center gap-2">
+          {!filterRetard && isSameDay(selectedDate, today) && (
+            <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+              Aujourd'hui
+            </span>
           )}
-        </>
-
-      ) : viewMode === 'semaine' ? (
-        /* Vue semaine — événements du jour sélectionné */
-        <>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-semibold uppercase"
-              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-              {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-            </h2>
-            <div className="flex items-center gap-2">
-              {isSameDay(selectedDate, today) && (
-                <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                  style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-                  Aujourd'hui
-                </span>
-              )}
-              <button
-                onClick={() => showNewEvent ? setShowNewEvent(false) : openNewEvent()}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors"
-                style={{
-                  background: showNewEvent ? 'var(--color-bg-tertiary)' : 'var(--color-accent-light)',
-                  color: showNewEvent ? 'var(--color-text-secondary)' : 'var(--color-accent)',
-                  border: '1px solid var(--color-border-subtle)',
-                }}>
-                {showNewEvent ? <X size={12} /> : <Plus size={12} />}
-                {showNewEvent ? 'Annuler' : 'Ajouter'}
-              </button>
-            </div>
-          </div>
-
-          {showNewEvent && renderNewEventForm()}
-
-          {selectedDayEvents.length === 0 ? (
-            <div className="rounded-xl px-5 py-10 text-center"
-              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
-              <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-                Aucune intervention prévue ce jour.
-              </p>
-              {!isSameDay(selectedDate, today) && (
-                <button onClick={() => selectDay(today)} className="mt-3 text-xs" style={{ color: 'var(--color-accent)' }}>
-                  Revenir à aujourd'hui
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="rounded-xl overflow-hidden"
-              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-              {selectedDayEvents.map((event, i) => renderEventRow(event, i, selectedDayEvents.length))}
-            </div>
-          )}
-
-          {!weekDays.some((d) => isSameDay(d, today)) && (
-            <button onClick={() => { setWeekStart(startOfWeek(today)); setSelectedDate(today) }}
-              className="mt-4 text-xs" style={{ color: 'var(--color-accent)' }}>
-              ← Revenir à la semaine en cours
-            </button>
-          )}
-        </>
-
-      ) : (
-        /* Vue mois — tous les événements du mois groupés par jour */
-        <>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-xs font-semibold uppercase"
-                style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-                {MOIS_LONG[monthStart.getMonth()]} {monthStart.getFullYear()}
-              </h2>
-              {monthTotalEvents > 0 && (
-                <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
-                  {monthTotalEvents} intervention{monthTotalEvents > 1 ? 's' : ''} sur {monthEvents.length} jour{monthEvents.length > 1 ? 's' : ''}
-                </p>
-              )}
-            </div>
+          {!filterRetard && (
             <button
               onClick={() => showNewEvent ? setShowNewEvent(false) : openNewEvent()}
               className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors"
@@ -910,56 +610,232 @@ export default function PlanningPage() {
                 border: '1px solid var(--color-border-subtle)',
               }}>
               {showNewEvent ? <X size={12} /> : <Plus size={12} />}
-              {showNewEvent
-                ? 'Annuler'
-                : `Ajouter le ${selectedDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`}
+              {showNewEvent ? 'Annuler' : 'Ajouter'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Formulaire nouvel événement */}
+      {showNewEvent && (
+        <div className="rounded-xl mb-3 p-4"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          <p className="text-xs font-semibold uppercase mb-3"
+            style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+            Nouvel événement — {selectedDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+          </p>
+          <div className="flex flex-col gap-2.5">
+            <input
+              type="text"
+              value={newEventTitre}
+              onChange={(e) => setNewEventTitre(e.target.value)}
+              placeholder="Titre de l'événement…"
+              autoFocus
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreateEvent()}
+            />
+            <div className="flex gap-2">
+              <select
+                value={newEventType}
+                onChange={(e) => setNewEventType(e.target.value as TypeEvenement)}
+                className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
+                <option value="rappel">Rappel</option>
+                <option value="reunion">Réunion / Entretien</option>
+                <option value="rapport">Rapport</option>
+                <option value="autre">Autre</option>
+              </select>
+              <input
+                type="time"
+                value={newEventHeure}
+                onChange={(e) => setNewEventHeure(e.target.value)}
+                className="px-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', width: 110 }}
+              />
+            </div>
+            <input
+              type="text"
+              value={newEventNotes}
+              onChange={(e) => setNewEventNotes(e.target.value)}
+              placeholder="Notes (optionnel)"
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+            />
+            <button
+              onClick={handleCreateEvent}
+              disabled={!newEventTitre.trim() || creatingEvent}
+              className="self-end px-4 py-2 rounded-lg text-sm font-medium"
+              style={{
+                background: newEventTitre.trim() ? 'var(--color-accent)' : 'var(--color-border)',
+                color: 'white',
+                opacity: creatingEvent ? 0.6 : 1,
+              }}>
+              {creatingEvent ? 'Ajout…' : 'Ajouter'}
             </button>
           </div>
+        </div>
+      )}
 
-          {showNewEvent && renderNewEventForm()}
-
-          {monthEvents.length === 0 ? (
-            <div className="rounded-xl px-5 py-10 text-center"
-              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
-              <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-                Aucune intervention prévue ce mois.
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {monthEvents.map(({ dateStr, date, events }) => {
-                const isDayToday = isSameDay(date, today)
-                return (
-                  <div key={dateStr}>
-                    <div className="flex items-center gap-2 mb-1.5 px-1">
-                      <span className="text-xs font-semibold capitalize"
-                        style={{ color: isDayToday ? 'var(--color-accent)' : 'var(--color-text-secondary)' }}>
-                        {date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                      </span>
-                      {isDayToday && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                          style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-                          Aujourd'hui
-                        </span>
-                      )}
-                    </div>
-                    <div className="rounded-xl overflow-hidden"
-                      style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-                      {events.map((event, i) => renderEventRow(event, i, events.length))}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          {monthStart.getMonth() !== today.getMonth() && (
-            <button onClick={() => { setMonthStart(startOfMonth(today)); setSelectedDate(today) }}
-              className="mt-4 text-xs" style={{ color: 'var(--color-accent)' }}>
-              ← Revenir au mois en cours
+      {/* Timeline */}
+      {selectedEvents.length === 0 ? (
+        <div className="rounded-xl px-5 py-10 text-center"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+            Aucune intervention prévue ce jour.
+          </p>
+          {!isSameDay(selectedDate, today) && (
+            <button onClick={() => selectDay(today)} className="mt-3 text-xs" style={{ color: 'var(--color-accent)' }}>
+              Revenir à aujourd'hui
             </button>
           )}
-        </>
+        </div>
+      ) : (
+        <div className="rounded-xl overflow-hidden"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          {selectedEvents.map((event, i) => {
+            const isValidating = validatingId === event.id
+            const isEvenement = event.type === 'evenement'
+
+            return (
+              <div key={event.id + i}
+                style={{ borderBottom: i < selectedEvents.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
+
+                <div className="flex items-center gap-3 px-4 py-3.5">
+                  <div className="w-1 self-stretch rounded-full shrink-0"
+                    style={{ background: event.statusColor, minHeight: 36 }} />
+
+                  {isEvenement ? (
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                        {event.title}
+                      </p>
+                      {event.detail && (
+                        <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                          {event.detail}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {event.plannedTime && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold"
+                            style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                            {event.plannedTime}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <button className="flex-1 min-w-0 text-left" onClick={() => navigate(event.link)}>
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                        {event.title}
+                      </p>
+                      <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                        {event.subtitle}{event.detail ? ` · ${event.detail}` : ''}
+                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-[10px] font-medium uppercase tracking-wide"
+                          style={{ color: 'var(--color-text-tertiary)' }}>
+                          {typeLabel(event.type)}
+                        </p>
+                        {event.plannedTime && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold"
+                            style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                            {event.plannedTime}
+                          </span>
+                        )}
+                        {event.technicien && event.technicien !== '—' && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded font-medium"
+                            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                            {event.technicien}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  )}
+
+                  <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
+                    style={{ background: event.statusBg, color: event.statusColor }}>
+                    {event.statusLabel}
+                  </span>
+
+                  {isEvenement ? (
+                    <button
+                      onClick={() => event.evenementData && deleteEvenement(event.evenementData.id)}
+                      className="shrink-0 p-1.5 rounded-lg transition-colors"
+                      style={{ color: 'var(--color-text-tertiary)' }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
+                      <Trash2 size={15} />
+                    </button>
+                  ) : event.isDone ? (
+                    <CheckCircle2 size={20} className="shrink-0" style={{ color: 'var(--color-success)' }} />
+                  ) : event.type === 'verification' ? (
+                    <button onClick={() => navigate(event.link)}
+                      className="shrink-0 p-1.5 rounded-lg"
+                      style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
+                      <ExternalLink size={15} />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => isValidating ? setValidatingId(null) : openValidation(event)}
+                      className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                      style={{
+                        background: isValidating ? 'var(--color-bg-tertiary)' : 'var(--color-success-light)',
+                        color: isValidating ? 'var(--color-text-secondary)' : 'var(--color-success)',
+                        border: `1px solid ${isValidating ? 'var(--color-border)' : 'transparent'}`,
+                      }}>
+                      {isValidating ? 'Annuler' : '✓ Valider'}
+                    </button>
+                  )}
+                </div>
+
+                {isValidating && !isEvenement && (
+                  <div className="px-5 py-4 flex flex-col gap-3"
+                    style={{ background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
+                    <div className="flex items-end gap-3">
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                          Date de réalisation
+                        </label>
+                        <input type="date" value={validationDate}
+                          onChange={(e) => setValidationDate(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg text-sm"
+                          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+                        />
+                      </div>
+                      <button onClick={() => handleValidate(event)}
+                        disabled={saving || !validationDate}
+                        className="px-4 py-2 rounded-lg text-sm font-medium"
+                        style={{ background: 'var(--color-success)', color: 'white', opacity: saving ? 0.6 : 1 }}>
+                        {saving ? 'Enregistrement…' : 'Confirmer'}
+                      </button>
+                    </div>
+                    {isValidationWeekend && (
+                      <p className="text-xs px-3 py-2 rounded-lg"
+                        style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+                        ⚠️ Intervention un week-end — vérifiez la date avant de confirmer.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {viewMode === 'semaine' && !weekDays.some((d) => isSameDay(d, today)) && (
+        <button onClick={() => { setWeekStart(startOfWeek(today)); setSelectedDate(today) }}
+          className="mt-4 text-xs" style={{ color: 'var(--color-accent)' }}>
+          ← Revenir à la semaine en cours
+        </button>
+      )}
+
+      {viewMode === 'mois' && monthStart.getMonth() !== today.getMonth() && (
+        <button onClick={() => { setMonthStart(startOfMonth(today)); setSelectedDate(today) }}
+          className="mt-4 text-xs" style={{ color: 'var(--color-accent)' }}>
+          ← Revenir au mois en cours
+        </button>
       )}
 
     </div>
