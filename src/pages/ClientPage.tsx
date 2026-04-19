@@ -27,6 +27,7 @@ export default function ClientPage() {
   const [sitesInput, setSitesInput] = useState('')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isDirty = useRef(false)
+  const isDeleted = useRef(false)
 
   // Écoute temps réel sur le document client
   useEffect(() => {
@@ -49,7 +50,7 @@ export default function ClientPage() {
     setClient(updated)
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(async () => {
-      if (!uid) return
+      if (!uid || isDeleted.current) return
       setSaving(true)
       try {
         await saveClient(updated, uid)
@@ -96,7 +97,8 @@ export default function ClientPage() {
   // Supprimer le client
   async function handleDeleteClient() {
     if (!client) return
-    // Annuler tout auto-save en attente — sinon saveClient recrée le document après deleteDoc
+    // Bloquer tout save en cours ou à venir avant de supprimer
+    isDeleted.current = true
     if (saveTimer.current) clearTimeout(saveTimer.current)
     isDirty.current = false
     await deleteClient(client.id)
