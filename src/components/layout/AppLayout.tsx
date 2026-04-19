@@ -1,7 +1,10 @@
+import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Sidebar from './Sidebar'
 import TabBar from './TabBar'
+import { useAuthStore } from '@/stores/authStore'
+import { getAvatarColor } from '@/components/ui/UserAvatar'
 
 const pageTitles: Record<string, string> = {
   '/':             'Missions',
@@ -13,6 +16,17 @@ const pageTitles: Record<string, string> = {
 
 export default function AppLayout() {
   const location = useLocation()
+  const avatarColor = useAuthStore((s) => s.appUser?.avatarColor)
+
+  // Synchronise la couleur d'accentuation de l'app avec la couleur d'avatar du user
+  useEffect(() => {
+    const accent = getAvatarColor(avatarColor)
+    const accentLight = accent + '1A'   // ~10% opacité sur fond blanc
+    const root = document.documentElement
+    root.style.setProperty('--color-accent', accent)
+    root.style.setProperty('--color-accent-hover', accent)
+    root.style.setProperty('--color-accent-light', accentLight)
+  }, [avatarColor])
 
   // Titre basé sur la route courante (premier segment)
   const rootPath = '/' + (location.pathname.split('/')[1] ?? '')
