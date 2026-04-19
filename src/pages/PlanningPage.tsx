@@ -316,7 +316,7 @@ export default function PlanningPage() {
 
   // ── Pill calendrier (desktop) ───────────────────────────────
 
-  function EventPill({ event, onAdd }: { event:PlanningEvent; onAdd?:()=>void }) {
+  function EventPill({ event }: { event:PlanningEvent }) {
     const isEvt = event.type==='evenement'
     return (
       <button
