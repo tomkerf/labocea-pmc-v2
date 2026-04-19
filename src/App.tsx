@@ -15,6 +15,7 @@ import VerificationPage from '@/pages/VerificationPage'
 import MaintenancesPage from '@/pages/MaintenancesPage'
 import MaintenancePage from '@/pages/MaintenancePage'
 import PlanningPage from '@/pages/PlanningPage'
+import MissionDetailPage from '@/pages/MissionDetailPage'
 
 function AppRoutes() {
   useAuthInit()
@@ -29,7 +30,8 @@ function AppRoutes() {
         <Route path="/"                                  element={<DashboardPage />} />
         <Route path="/missions"                          element={<MissionsPage />} />
         <Route path="/missions/:clientId"                element={<ClientPage />} />
-        <Route path="/missions/:clientId/plan/:planId"   element={<PlanPage />} />
+        <Route path="/missions/:clientId/plan/:planId"                          element={<PlanPage />} />
+        <Route path="/missions/:clientId/plan/:planId/sampling/:samplingId"   element={<MissionDetailPage />} />
         <Route path="/materiel"                          element={<MaterielPage />} />
         <Route path="/materiel/:equipementId"            element={<EquipementPage />} />
         <Route path="/metrologie"                        element={<MerologiePage />} />

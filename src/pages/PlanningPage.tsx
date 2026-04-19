@@ -160,7 +160,7 @@ export default function PlanningPage() {
             statusLabel: cfg.label,
             statusBg: cfg.bg,
             statusColor: cfg.color,
-            link: `/missions/${client.id}/plan/${plan.id}`,
+            link: `/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
             isDone: s.status === 'done',
             technicien: client.preleveur || '—',
             plannedTime: s.plannedTime,

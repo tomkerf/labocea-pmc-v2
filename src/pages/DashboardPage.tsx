@@ -142,7 +142,7 @@ export default function DashboardPage() {
     return { label: 'À faire', bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }
   }
 
-  const planningJour: { clientNom: string; siteNom: string; planId: string; clientId: string; sampling: Sampling }[] = []
+  const planningJour: { clientNom: string; siteNom: string; planId: string; clientId: string; sampling: Sampling; planNom: string }[] = []
   clients.forEach((client) => {
     client.plans.forEach((plan) => {
       plan.samplings.forEach((s: Sampling) => {
@@ -152,7 +152,7 @@ export default function DashboardPage() {
         if (isToday(plannedDate) || (s.status === 'planned' && isToday(
           new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay || 1).toISOString().split('T')[0]
         ))) {
-          planningJour.push({ clientNom: client.nom, siteNom: plan.siteNom, planId: plan.id, clientId: client.id, sampling: s })
+          planningJour.push({ clientNom: client.nom, siteNom: plan.siteNom, planNom: plan.nom, planId: plan.id, clientId: client.id, sampling: s })
         }
       })
     })
@@ -248,11 +248,11 @@ export default function DashboardPage() {
           ) : (
             <div className="rounded-xl overflow-hidden"
               style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-              {planningJour.slice(0, 6).map(({ clientNom, siteNom, planId, clientId, sampling }, i) => {
+              {planningJour.slice(0, 6).map(({ clientNom, siteNom, planNom, planId, clientId, sampling }, i) => {
                 const cfg = getSamplingBadge(sampling)
                 return (
                   <button key={`${planId}-${sampling.id}`}
-                    onClick={() => navigate(`/missions/${clientId}/plan/${planId}`)}
+                    onClick={() => navigate(`/missions/${clientId}/plan/${planId}/sampling/${sampling.id}`)}
                     className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
                     style={{ borderBottom: i < planningJour.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
                     onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
@@ -266,7 +266,9 @@ export default function DashboardPage() {
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{clientNom}</p>
-                      <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{siteNom || '—'}</p>
+                      <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                        {[siteNom, planNom].filter(Boolean).join(' · ') || '—'}
+                      </p>
                     </div>
                     <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
                       style={{ background: cfg.bg, color: cfg.color }}>{cfg.label}</span>
