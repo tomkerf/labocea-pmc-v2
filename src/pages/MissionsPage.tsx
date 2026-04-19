@@ -42,7 +42,7 @@ export default function MissionsPage() {
           email: '',
           fonction: '',
           mission: '',
-          segment: 'Réseaux de mesure',
+          segment: 'Réseau de mesure',
           numDevis: '',
           numConvention: '',
           preleveur: '',
