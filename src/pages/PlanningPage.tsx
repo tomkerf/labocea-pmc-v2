@@ -739,16 +739,24 @@ export default function PlanningPage() {
 
   // ── EventPill (calendrier desktop) ─────────────────────
 
-  function EventPill({ event, compact }: { event:PlanningEvent; compact?: boolean }) {
+  function EventPill({ event, compact, onExpand }: { event:PlanningEvent; compact?: boolean; onExpand?: () => void }) {
     // compact = true en vue mois : une seule ligne, pas de sous-titre
+    const isGrouped = (event.count ?? 0) > 1
     const hasSubtitle = !compact && event.subtitle && event.subtitle !== '—'
-    const hasTech = !event.count && event.technicien && event.technicien !== '—'
+    const hasTech = !isGrouped && event.technicien && event.technicien !== '—'
+
+    function handleClick(e: React.MouseEvent) {
+      e.stopPropagation()
+      if (isGrouped && onExpand) { onExpand(); return }
+      if (event.type !== 'evenement') navigate(event.link)
+    }
+
     return (
       <button
-        onClick={e => { e.stopPropagation(); if (event.type !== 'evenement') navigate(event.link) }}
+        onClick={handleClick}
         className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
-        style={{ background: event.statusBg, cursor: event.type === 'evenement' ? 'default' : 'pointer' }}
-        title={`${event.title} — ${event.subtitle} (${event.technicien})`}
+        style={{ background: event.statusBg, cursor: isGrouped ? 'zoom-in' : event.type === 'evenement' ? 'default' : 'pointer' }}
+        title={isGrouped ? `${event.title} — ${event.count} prélèvements (cliquer pour détails)` : `${event.title} — ${event.subtitle} (${event.technicien})`}
       >
         {/* Ligne 1 : dot + client + badge ×N ou technicien */}
         <div className="flex items-center gap-1">
@@ -756,7 +764,7 @@ export default function PlanningPage() {
           <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
             {event.title}
           </span>
-          {event.count && event.count > 1 ? (
+          {isGrouped ? (
             <span className="shrink-0 text-[9px] font-bold px-1 rounded"
               style={{ background: event.statusColor + '28', color: event.statusColor }}>
               ×{event.count}
@@ -1029,7 +1037,7 @@ export default function PlanningPage() {
                       background: isToday?'rgba(255,59,48,0.04)':'transparent',
                       minHeight: 120,
                     }}>
-                    {evts.map(evt => <EventPill key={evt.id} event={evt} />)}
+                    {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => setSelectedDay(dateStr)} />)}
                     {/* Bouton + au survol */}
                     <div className="mt-auto flex items-center justify-center py-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <span className="text-[10px]" style={{ color:'var(--color-text-tertiary)' }}>
@@ -1098,7 +1106,7 @@ export default function PlanningPage() {
                       <Plus size={10} className="opacity-0 group-hover:opacity-60 transition-opacity"
                         style={{ color:'var(--color-text-tertiary)' }} />
                     </div>
-                    {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact />)}
+                    {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact onExpand={() => setSelectedDay(dateStr)} />)}
                     {evts.length>MAX && (
                       <span className="text-[10px] pl-1 mt-0.5" style={{ color:'var(--color-text-tertiary)' }}>
                         +{evts.length-MAX} autres
