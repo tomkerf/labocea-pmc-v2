@@ -119,7 +119,7 @@ export default function PlanPage() {
   }
 
   if (loading) return <div className="flex justify-center py-20"><div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} /></div>
-  if (!client || !plan) return <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Plan introuvable.</div>
+  if (!client || !plan) return <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Point introuvable.</div>
 
   return (
     <div className="p-6 max-w-2xl">
@@ -132,7 +132,7 @@ export default function PlanPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            {plan.nom || 'Plan sans nom'}
+            {plan.nom || 'Point sans nom'}
           </h1>
           <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
             {plan.siteNom || 'Site non renseigné'}
@@ -147,7 +147,7 @@ export default function PlanPage() {
           Configuration
         </h2>
         <div className="rounded-xl overflow-hidden" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-          <PlanField label="Nom du plan">
+          <PlanField label="Nom du point">
             <input value={plan.nom} onChange={(e) => updatePlan('nom', e.target.value)} className="field-input" />
           </PlanField>
           <PlanField label="Site">

@@ -63,7 +63,7 @@ export default function ClientPage() {
     if (!client) return
     const newPlan: Plan = {
       id: generateId(),
-      nom: 'Nouveau plan',
+      nom: 'Nouveau point',
       siteNom: '',
       frequence: 'Mensuel',
       meteo: '',
@@ -86,7 +86,7 @@ export default function ClientPage() {
 
   // Supprimer un plan
   function deletePlan(planId: string) {
-    if (!client || !confirm('Supprimer ce plan et tous ses prélèvements ?')) return
+    if (!client || !confirm('Supprimer ce point et tous ses prélèvements ?')) return
     triggerSave({ ...client, plans: client.plans.filter((p) => p.id !== planId) })
   }
 
@@ -235,11 +235,11 @@ export default function ClientPage() {
         </Field>
       </Section>
 
-      {/* Plans de prélèvement */}
+      {/* Points de prélèvement */}
       <div className="mt-8">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            Plans de prélèvement
+            Points de prélèvement
           </h2>
           <button onClick={addPlan}
             className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
@@ -250,7 +250,7 @@ export default function ClientPage() {
 
         {client.plans.length === 0 ? (
           <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-            Aucun plan — clique sur "Ajouter" pour créer le premier.
+            Aucun point — clique sur "Ajouter" pour créer le premier.
           </p>
         ) : (
           <div className="rounded-xl overflow-hidden"
@@ -261,7 +261,7 @@ export default function ClientPage() {
                 className="flex items-center px-5 py-3 gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                    {plan.nom || 'Plan sans nom'}
+                    {plan.nom || 'Point sans nom'}
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
                     {[plan.siteNom, plan.frequence, plan.nature].filter(Boolean).join(' · ')}
