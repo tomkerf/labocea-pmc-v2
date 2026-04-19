@@ -9,13 +9,18 @@ import CircleProgress from '@/components/materiel/CircleProgress'
 import type { Equipement, CategorieType, EtatType, LocalisationType } from '@/types'
 
 const CATEGORIES: { value: CategorieType; label: string }[] = [
-  { value: 'multiparametre', label: 'Multiparamètre' },
-  { value: 'turbidimetre', label: 'Turbidimètre' },
-  { value: 'preleveur_auto', label: 'Préleveur automatique' },
-  { value: 'debitmetre', label: 'Débitmètre' },
-  { value: 'ph_metre', label: 'pH-mètre' },
-  { value: 'conductimetre', label: 'Conductimètre' },
-  { value: 'autre', label: 'Autre' },
+  { value: 'preleveur',     label: 'Préleveur'      },
+  { value: 'debitmetre',    label: 'Débitmètre'     },
+  { value: 'multiparametre',label: 'Multiparamètre' },
+  { value: 'glaciere',      label: 'Glacière'       },
+  { value: 'enregistreur',  label: 'Enregistreur'   },
+  { value: 'thermometre',   label: 'Thermomètre'    },
+  { value: 'reglet',        label: 'Réglet'         },
+  { value: 'eprouvette',    label: 'Éprouvette'     },
+  { value: 'flacon',        label: 'Flacon'         },
+  { value: 'pompe_pz',      label: 'Pompe PZ'       },
+  { value: 'sonde_niveau',  label: 'Sonde niveau'   },
+  { value: 'chronometre',   label: 'Chronomètre'    },
 ]
 
 const ETATS: { value: EtatType; label: string }[] = [

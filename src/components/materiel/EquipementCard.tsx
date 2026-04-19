@@ -3,13 +3,18 @@ import CircleProgress from './CircleProgress'
 import type { Equipement } from '@/types'
 
 const CATEGORIE_LABELS: Record<string, string> = {
-  multiparametre: 'Multiparamètre',
-  turbidimetre: 'Turbidimètre',
-  preleveur_auto: 'Préleveur auto.',
-  debitmetre: 'Débitmètre',
-  ph_metre: 'pH-mètre',
-  conductimetre: 'Conductimètre',
-  autre: 'Autre',
+  preleveur:     'Préleveur',
+  debitmetre:    'Débitmètre',
+  multiparametre:'Multiparamètre',
+  glaciere:      'Glacière',
+  enregistreur:  'Enregistreur',
+  thermometre:   'Thermomètre',
+  reglet:        'Réglet',
+  eprouvette:    'Éprouvette',
+  flacon:        'Flacon',
+  pompe_pz:      'Pompe PZ',
+  sonde_niveau:  'Sonde niveau',
+  chronometre:   'Chronomètre',
 }
 
 const ETAT_CONFIG: Record<string, { label: string; bg: string; color: string }> = {

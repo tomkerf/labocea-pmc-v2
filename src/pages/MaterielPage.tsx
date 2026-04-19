@@ -9,13 +9,18 @@ import type { Equipement } from '@/types'
 
 const CATEGORIES = [
   { value: '', label: 'Toutes catégories' },
-  { value: 'multiparametre', label: 'Multiparamètre' },
-  { value: 'turbidimetre', label: 'Turbidimètre' },
-  { value: 'preleveur_auto', label: 'Préleveur auto.' },
-  { value: 'debitmetre', label: 'Débitmètre' },
-  { value: 'ph_metre', label: 'pH-mètre' },
-  { value: 'conductimetre', label: 'Conductimètre' },
-  { value: 'autre', label: 'Autre' },
+  { value: 'preleveur',    label: 'Préleveurs'     },
+  { value: 'debitmetre',   label: 'Débitmètres'    },
+  { value: 'multiparametre', label: 'Multiparamètres' },
+  { value: 'glaciere',     label: 'Glacières'      },
+  { value: 'enregistreur', label: 'Enregistreurs'  },
+  { value: 'thermometre',  label: 'Thermomètres'   },
+  { value: 'reglet',       label: 'Réglets'        },
+  { value: 'eprouvette',   label: 'Éprouvettes'    },
+  { value: 'flacon',       label: 'Flacons'        },
+  { value: 'pompe_pz',     label: 'Pompes PZ'      },
+  { value: 'sonde_niveau', label: 'Sondes niveau'  },
+  { value: 'chronometre',  label: 'Chronomètres'   },
 ]
 
 const ETATS = [

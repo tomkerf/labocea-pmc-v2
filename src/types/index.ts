@@ -116,13 +116,18 @@ export interface Client {
 // --- Équipements ---
 
 export type CategorieEquipement =
-  | 'multiparametre'
-  | 'turbidimetre'
-  | 'preleveur_auto'
+  | 'preleveur'
   | 'debitmetre'
-  | 'ph_metre'
-  | 'conductimetre'
-  | 'autre'
+  | 'multiparametre'
+  | 'glaciere'
+  | 'enregistreur'
+  | 'thermometre'
+  | 'reglet'
+  | 'eprouvette'
+  | 'flacon'
+  | 'pompe_pz'
+  | 'sonde_niveau'
+  | 'chronometre'
 
 export type CategorieType = CategorieEquipement
 export type EtatEquipement = 'operationnel' | 'en_maintenance' | 'hors_service' | 'prete'
