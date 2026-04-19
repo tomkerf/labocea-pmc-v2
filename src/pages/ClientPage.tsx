@@ -6,6 +6,7 @@ import { db } from '@/lib/firebase'
 import { saveClient, deleteClient } from '@/hooks/useClients'
 import { useAuthStore } from '@/stores/authStore'
 import { generateId } from '@/lib/ids'
+import { isSamplingOverdue } from '@/lib/overdue'
 import type { Client, Plan, SegmentType, NouvelleDemandeType } from '@/types'
 
 const SEGMENTS: SegmentType[] = ['SRA', 'Réseau de mesure', 'RSDE']
@@ -273,14 +274,25 @@ export default function ClientPage() {
         ) : (
           <div className="rounded-xl overflow-hidden"
             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-            {client.plans.map((plan, i) => (
+            {client.plans.map((plan, i) => {
+              const overdueCount = plan.samplings.filter(isSamplingOverdue).length
+              return (
               <div key={plan.id}
                 style={{ borderBottom: i < client.plans.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
                 className="flex items-center px-5 py-3 gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                    {plan.nom || 'Point sans nom'}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                      {plan.nom || 'Point sans nom'}
+                    </p>
+                    {overdueCount > 0 && (
+                      <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0 flex items-center gap-1"
+                        style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+                        <AlertTriangle size={10} />
+                        {overdueCount} en retard
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
                     {[plan.siteNom, plan.frequence, plan.nature].filter(Boolean).join(' · ')}
                   </p>
@@ -301,7 +313,8 @@ export default function ClientPage() {
                   <Trash2 size={14} />
                 </button>
               </div>
-            ))}
+            )})}
+
           </div>
         )}
       </div>
