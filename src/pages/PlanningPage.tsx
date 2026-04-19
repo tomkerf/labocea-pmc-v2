@@ -6,12 +6,14 @@ import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMaintenancesListener, saveMaintenance } from '@/hooks/useMaintenances'
 import { useEvenementsListener, createEvenement, deleteEvenement } from '@/hooks/useEvenements'
+import { useUsersListener } from '@/hooks/useUsers'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useEvenementsStore } from '@/stores/evenementsStore'
+import { useUsersStore } from '@/stores/usersStore'
 import { useAuthStore } from '@/stores/authStore'
-import type { Sampling, Verification, Maintenance, EvenementPersonnel, TypeEvenement } from '@/types'
+import type { Client, Sampling, Verification, Maintenance, EvenementPersonnel, TypeEvenement } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
 
 // ── Types ───────────────────────────────────────────────────
@@ -24,6 +26,7 @@ interface PlanningEvent {
   statusLabel: string
   statusBg: string
   statusColor: string
+  techColor?: string    // couleur avatar du technicien
   link: string
   isDone: boolean
   technicien: string
@@ -33,6 +36,17 @@ interface PlanningEvent {
   samplingId?: string
   maintenanceData?: Maintenance
   evenementData?: EvenementPersonnel
+}
+
+interface PoolItem {
+  sampling: Sampling
+  clientId: string
+  clientNom: string
+  planId: string
+  planNom: string
+  siteNom: string
+  techInitiales: string
+  techColor: string
 }
 
 type ViewMode = 'semaine' | 'mois'
@@ -93,49 +107,336 @@ const EVENEMENT_CFG: Record<TypeEvenement,{label:string;color:string;bg:string}>
   autre:   { label:'Autre',   color:'var(--color-neutral)', bg:'var(--color-bg-tertiary)'   },
 }
 
+// ── DayModal ────────────────────────────────────────────────
+
+interface DayModalProps {
+  dateStr: string
+  onClose: () => void
+  dayEvents: PlanningEvent[]
+  pool: PoolItem[]
+  uid: string | null
+  initiales: string
+  navigate: (path: string) => void
+  onValidatePool: (item: PoolItem, date: string) => Promise<void>
+}
+
+function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate, onValidatePool }: DayModalProps) {
+  const [poolValidId, setPoolValidId] = useState<string|null>(null)
+  const [poolDate, setPoolDate]       = useState(dateStr)
+  const [poolSaving, setPoolSaving]   = useState(false)
+  const [showEvtForm, setShowEvtForm] = useState(false)
+  const [evtTitre, setEvtTitre]       = useState('')
+  const [evtType, setEvtType]         = useState<TypeEvenement>('rappel')
+  const [evtHeure, setEvtHeure]       = useState('')
+  const [evtNotes, setEvtNotes]       = useState('')
+  const [evtSaving, setEvtSaving]     = useState(false)
+
+  const date     = new Date(dateStr + 'T12:00:00')
+  const dayLabel = date.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
+  const monthLabel = MOIS_LONG[date.getMonth()] + ' ' + date.getFullYear()
+
+  async function handleValidatePool(item: PoolItem) {
+    if (poolSaving) return
+    setPoolSaving(true)
+    try {
+      await onValidatePool(item, poolDate)
+      setPoolValidId(null)
+    } finally {
+      setPoolSaving(false)
+    }
+  }
+
+  async function handleCreateEvt() {
+    if (!evtTitre.trim() || !uid) return
+    setEvtSaving(true)
+    try {
+      await createEvenement(evtTitre.trim(), dateStr, evtType, evtHeure, evtNotes, uid, initiales)
+      setShowEvtForm(false)
+      setEvtTitre(''); setEvtHeure(''); setEvtNotes('')
+    } finally {
+      setEvtSaving(false)
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-40 flex items-end md:items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.35)' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div
+        className="w-full md:max-w-lg flex flex-col overflow-hidden rounded-t-[20px] md:rounded-2xl"
+        style={{ background: 'var(--color-bg-primary)', maxHeight: '88vh', boxShadow: 'var(--shadow-modal)' }}
+      >
+        {/* Handle mobile */}
+        <div className="md:hidden flex justify-center pt-2.5 pb-1 shrink-0">
+          <div className="w-9 h-1 rounded-full" style={{ background: 'var(--color-border)' }} />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3.5 shrink-0"
+          style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+          <p className="text-base font-semibold capitalize" style={{ color: 'var(--color-text-primary)' }}>
+            {dayLabel}
+          </p>
+          <button onClick={onClose} className="p-1.5 rounded-lg"
+            style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Contenu scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-4 py-4 space-y-5">
+
+            {/* ── Section pool : à planifier ce mois ── */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase mb-2.5"
+                style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+                À planifier — {monthLabel}
+              </p>
+              {pool.length === 0 ? (
+                <div className="rounded-xl py-5 text-center"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+                  <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+                    Tout est planifié ce mois ✓
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-xl overflow-hidden"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                  {pool.map((item, i) => {
+                    const overdue = isSamplingOverdue(item.sampling)
+                    const cfg = overdue ? SAMPLING_CFG.overdue : SAMPLING_CFG[item.sampling.status] ?? SAMPLING_CFG.planned
+                    const isValidating = poolValidId === item.sampling.id
+                    return (
+                      <div key={item.sampling.id}
+                        style={{ borderBottom: i < pool.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
+                        <div className="flex items-center gap-3 px-4 py-3">
+                          {/* Barre couleur tech */}
+                          <div className="w-1 self-stretch rounded-full shrink-0"
+                            style={{ background: item.techColor, minHeight: 32 }} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                              {item.clientNom}
+                            </p>
+                            <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                              {item.planNom}{item.siteNom ? ` · ${item.siteNom}` : ''}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                                style={{ background: cfg.bg, color: cfg.color }}>
+                                {cfg.label}
+                              </span>
+                              {item.techInitiales && item.techInitiales !== '—' && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                                  style={{ background: item.techColor + '22', color: item.techColor }}>
+                                  {item.techInitiales}
+                                </span>
+                              )}
+                              {item.sampling.plannedDay > 0 && (
+                                <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
+                                  Prévu le {item.sampling.plannedDay}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => isValidating
+                              ? setPoolValidId(null)
+                              : (setPoolValidId(item.sampling.id), setPoolDate(dateStr))
+                            }
+                            className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium"
+                            style={{
+                              background: isValidating ? 'var(--color-bg-tertiary)' : 'var(--color-success-light)',
+                              color: isValidating ? 'var(--color-text-secondary)' : 'var(--color-success)',
+                              border: `1px solid ${isValidating ? 'var(--color-border)' : 'transparent'}`,
+                            }}>
+                            {isValidating ? 'Annuler' : '✓ Fait'}
+                          </button>
+                        </div>
+
+                        {isValidating && (
+                          <div className="px-4 py-3 flex items-end gap-3"
+                            style={{ background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
+                            <div className="flex-1">
+                              <label className="block text-xs font-medium mb-1"
+                                style={{ color: 'var(--color-text-secondary)' }}>
+                                Date de réalisation
+                              </label>
+                              <input type="date" value={poolDate} onChange={e => setPoolDate(e.target.value)}
+                                className="w-full px-3 py-2 rounded-lg text-sm"
+                                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+                            </div>
+                            <button onClick={() => handleValidatePool(item)} disabled={poolSaving || !poolDate}
+                              className="px-4 py-2 rounded-lg text-sm font-medium"
+                              style={{ background: 'var(--color-success)', color: 'white', opacity: poolSaving ? 0.6 : 1 }}>
+                              {poolSaving ? '…' : 'Confirmer'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* ── Section événements du jour ── */}
+            {dayEvents.length > 0 && (
+              <div>
+                <p className="text-[10px] font-semibold uppercase mb-2.5"
+                  style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+                  Ce jour
+                </p>
+                <div className="rounded-xl overflow-hidden"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                  {dayEvents.map((evt, i) => (
+                    <div key={evt.id} className="flex items-center gap-3 px-4 py-3"
+                      style={{ borderBottom: i < dayEvents.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
+                      <div className="w-1 self-stretch rounded-full shrink-0"
+                        style={{ background: evt.techColor ?? evt.statusColor, minHeight: 28 }} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                          {evt.title}
+                        </p>
+                        <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                          {evt.subtitle}
+                          {evt.plannedTime && ` · ${evt.plannedTime}`}
+                        </p>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0"
+                        style={{ background: evt.statusBg, color: evt.statusColor }}>
+                        {evt.statusLabel}
+                      </span>
+                      {evt.type === 'evenement' ? (
+                        <button onClick={() => evt.evenementData && deleteEvenement(evt.evenementData.id)}
+                          className="shrink-0 p-1.5 rounded-lg"
+                          style={{ color: 'var(--color-text-tertiary)' }}
+                          onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
+                          onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
+                          <Trash2 size={14} />
+                        </button>
+                      ) : (
+                        <button onClick={() => { navigate(evt.link); onClose() }}
+                          className="shrink-0 p-1.5 rounded-lg"
+                          style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
+                          <ExternalLink size={14} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Section nouvel événement ── */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase mb-2.5"
+                style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+                Ajouter un événement
+              </p>
+              {!showEvtForm ? (
+                <button
+                  onClick={() => setShowEvtForm(true)}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-medium transition-colors"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px dashed var(--color-border)', color: 'var(--color-text-secondary)' }}>
+                  <Plus size={15} /> Nouvel événement
+                </button>
+              ) : (
+                <div className="rounded-xl p-4"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                  <div className="flex flex-col gap-2.5">
+                    <input
+                      type="text" value={evtTitre} onChange={e => setEvtTitre(e.target.value)}
+                      placeholder="Titre de l'événement…" autoFocus
+                      className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                      style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+                      onKeyDown={e => e.key === 'Enter' && handleCreateEvt()} />
+                    <div className="flex gap-2">
+                      <select value={evtType} onChange={e => setEvtType(e.target.value as TypeEvenement)}
+                        className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
+                        style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
+                        <option value="rappel">Rappel</option>
+                        <option value="reunion">Réunion / Entretien</option>
+                        <option value="rapport">Rapport</option>
+                        <option value="autre">Autre</option>
+                      </select>
+                      <input type="time" value={evtHeure} onChange={e => setEvtHeure(e.target.value)}
+                        className="px-3 py-2 rounded-lg text-sm outline-none"
+                        style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', width: 110 }} />
+                    </div>
+                    <input type="text" value={evtNotes} onChange={e => setEvtNotes(e.target.value)}
+                      placeholder="Notes (optionnel)"
+                      className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                      style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+                    <div className="flex items-center justify-between">
+                      <button onClick={() => setShowEvtForm(false)} className="text-xs px-2 py-1"
+                        style={{ color: 'var(--color-text-tertiary)' }}>
+                        Annuler
+                      </button>
+                      <button onClick={handleCreateEvt} disabled={!evtTitre.trim() || evtSaving}
+                        className="px-4 py-2 rounded-lg text-sm font-medium"
+                        style={{ background: evtTitre.trim() ? 'var(--color-accent)' : 'var(--color-border)', color: 'white', opacity: evtSaving ? 0.6 : 1 }}>
+                        {evtSaving ? 'Ajout…' : 'Ajouter'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Composant principal ─────────────────────────────────────
 
 export default function PlanningPage() {
   useClientsListener(); useEquipementsListener()
-  useVerificationsListener(); useMaintenancesListener(); useEvenementsListener()
+  useVerificationsListener(); useMaintenancesListener()
+  useEvenementsListener(); useUsersListener()
 
-  const navigate = useNavigate()
-  const uid       = useAuthStore(s => s.uid())
-  const initiales = useAuthStore(s => s.initiales())
-  const { clients }      = useMissionsStore()
+  const navigate   = useNavigate()
+  const uid        = useAuthStore(s => s.uid())
+  const initiales  = useAuthStore(s => s.initiales())
+  const { clients }       = useMissionsStore()
   const { verifications } = useMetrologieStore()
   const { maintenances }  = useMaintenancesStore()
   const { evenements }    = useEvenementsStore()
+  const { users }         = useUsersStore()
 
   const today = new Date(); today.setHours(0,0,0,0)
 
-  const [viewMode,     setViewMode]     = useState<ViewMode>('semaine')
-  const [weekStart,    setWeekStart]    = useState(() => startOfWeek(today))
-  const [monthStart,   setMonthStart]   = useState(() => startOfMonth(today))
-  const [selectedDate, setSelectedDate] = useState(today)
-  const [filterTech,   setFilterTech]   = useState('')
-  const [filterRetard, setFilterRetard] = useState(false)
+  const [viewMode,    setViewMode]    = useState<ViewMode>('semaine')
+  const [weekStart,   setWeekStart]   = useState(() => startOfWeek(today))
+  const [monthStart,  setMonthStart]  = useState(() => startOfMonth(today))
+  const [selectedDate,setSelectedDate]= useState(today)
+  const [filterTech,  setFilterTech]  = useState('')
+  const [filterRetard,setFilterRetard]= useState(false)
+  const [selectedDay, setSelectedDay] = useState<string|null>(null)
 
-  // Validation rapide
+  // Validation inline (EventRow)
   const [validatingId,   setValidatingId]   = useState<string|null>(null)
   const [validationDate, setValidationDate] = useState(toISO(today))
   const [saving, setSaving] = useState(false)
 
-  // Nouvel événement
-  const [showNewEvt,    setShowNewEvt]    = useState(false)
-  const [newEvtDate,    setNewEvtDate]    = useState('')   // ISO
-  const [newEvtTitre,   setNewEvtTitre]   = useState('')
-  const [newEvtType,    setNewEvtType]    = useState<TypeEvenement>('rappel')
-  const [newEvtHeure,   setNewEvtHeure]   = useState('')
-  const [newEvtNotes,   setNewEvtNotes]   = useState('')
-  const [creatingEvt,   setCreatingEvt]   = useState(false)
-
   const weekDays  = useMemo(() => Array.from({length:7},(_,i) => addDays(weekStart,i)), [weekStart])
   const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])
-
   const isWeekend = (d: Date) => { const day = d.getDay(); return day===0||day===6 }
 
-  // ── Index date → events ─────────────────────────────────────
+  // ── Couleurs techniciens (initiales → avatarColor) ──────
+
+  const colorByInitiales = useMemo(() => {
+    const map: Record<string,string> = {}
+    users.forEach(u => { if (u.initiales) map[u.initiales] = u.avatarColor ?? '#0071E3' })
+    return map
+  }, [users])
+
+  // ── Index date → events ─────────────────────────────────
 
   const eventsByDate = useMemo(() => {
     const map: Record<string,PlanningEvent[]> = {}
@@ -146,7 +447,7 @@ export default function PlanningPage() {
       map[dateStr].push(e)
     }
 
-    clients.forEach(client => {
+    clients.forEach((client: Client) => {
       client.plans.forEach(plan => {
         plan.samplings.forEach((s:Sampling) => {
           const overdue = isSamplingOverdue(s)
@@ -156,6 +457,7 @@ export default function PlanningPage() {
             id: s.id, type:'prelevement',
             title: client.nom, subtitle: plan.siteNom || plan.nom || '—',
             statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
+            techColor: colorByInitiales[client.preleveur] ?? undefined,
             link:`/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
             isDone: s.status==='done', technicien: client.preleveur||'—',
             plannedTime: s.plannedTime, clientId:client.id, planId:plan.id, samplingId:s.id,
@@ -172,6 +474,7 @@ export default function PlanningPage() {
         title:m.equipementNom||'Équipement',
         subtitle: m.type==='preventive'?'Maintenance préventive':m.type==='corrective'?'Maintenance corrective':'Panne',
         statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
+        techColor: colorByInitiales[m.technicienNom] ?? undefined,
         link:`/maintenances/${m.id}`, isDone:m.statut==='realisee', technicien:m.technicienNom||'—',
         maintenanceData:m,
       })
@@ -184,6 +487,7 @@ export default function PlanningPage() {
         title:v.equipementNom||'Équipement',
         subtitle: v.type==='etalonnage_interne'?'Étalonnage interne':v.type==='verification_externe'?'Vérification externe':'Contrôle terrain',
         statusLabel:'Métrologie', statusBg:'var(--color-accent-light)', statusColor:'var(--color-accent)',
+        techColor: colorByInitiales[v.technicienNom] ?? undefined,
         link:`/metrologie/${v.id}`, isDone:false, technicien:v.technicienNom||'—',
       })
     })
@@ -194,15 +498,16 @@ export default function PlanningPage() {
         id:ev.id, type:'evenement',
         title:ev.titre, subtitle:cfg.label,
         statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
+        techColor: colorByInitiales[ev.createdByInitiales ?? ''] ?? undefined,
         link:'', isDone:false, technicien:ev.createdByInitiales||'—',
         plannedTime:ev.heure||undefined, evenementData:ev,
       })
     })
 
     return map
-  }, [clients, maintenances, verifications, evenements])
+  }, [clients, maintenances, verifications, evenements, colorByInitiales])
 
-  // ── Filtrage technicien ─────────────────────────────────────
+  // ── Filtrage technicien ─────────────────────────────────
 
   const allTechs = useMemo(() => {
     const s = new Set<string>()
@@ -219,11 +524,44 @@ export default function PlanningPage() {
 
   const totalOverdue = useMemo(() => {
     let n=0
-    clients.forEach(c => c.plans.forEach(p => p.samplings.forEach((s:Sampling) => { if (isSamplingOverdue(s)) n++ })))
+    clients.forEach((c:Client) => c.plans.forEach(p => p.samplings.forEach((s:Sampling) => { if (isSamplingOverdue(s)) n++ })))
     return n
   }, [clients])
 
-  // ── Liste période (mobile + vue retard) ────────────────────
+  // ── Pool samplings non faits du mois sélectionné ────────
+
+  const poolSamplings = useMemo((): PoolItem[] => {
+    if (!selectedDay) return []
+    const month = new Date(selectedDay + 'T12:00:00').getMonth()
+    const result: PoolItem[] = []
+    clients.forEach((client: Client) => {
+      client.plans.forEach(plan => {
+        plan.samplings.forEach((s: Sampling) => {
+          if (s.plannedMonth === month && s.status !== 'done') {
+            result.push({
+              sampling: s,
+              clientId: client.id,
+              clientNom: client.nom,
+              planId: plan.id,
+              planNom: plan.nom,
+              siteNom: plan.siteNom,
+              techInitiales: client.preleveur || '—',
+              techColor: colorByInitiales[client.preleveur] ?? '#0071E3',
+            })
+          }
+        })
+      })
+    })
+    // Tri : en retard en premier, puis par client
+    return result.sort((a, b) => {
+      const aOvr = isSamplingOverdue(a.sampling) ? 0 : 1
+      const bOvr = isSamplingOverdue(b.sampling) ? 0 : 1
+      if (aOvr !== bOvr) return aOvr - bOvr
+      return a.clientNom.localeCompare(b.clientNom)
+    })
+  }, [selectedDay, clients, colorByInitiales])
+
+  // ── Liste période (mobile) ──────────────────────────────
 
   const periodList = useMemo(() => {
     const days: Date[] = viewMode==='semaine'
@@ -236,14 +574,14 @@ export default function PlanningPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode, weekDays, monthStart, eventsByDate, filterTech, filterRetard])
 
-  // ── Validation ─────────────────────────────────────────────
+  // ── Validation inline ───────────────────────────────────
 
   async function handleValidate(event:PlanningEvent) {
     if (!uid||saving) return
     setSaving(true)
     try {
       if (event.type==='prelevement'&&event.clientId&&event.planId&&event.samplingId) {
-        const client = clients.find(c=>c.id===event.clientId)
+        const client = clients.find((c:Client)=>c.id===event.clientId)
         if (!client) return
         await saveClient({
           ...client,
@@ -262,50 +600,51 @@ export default function PlanningPage() {
     } finally { setSaving(false) }
   }
 
+  // ── Validation depuis le DayModal ───────────────────────
+
+  async function handleValidatePool(item: PoolItem, date: string) {
+    if (!uid) return
+    const client = clients.find((c: Client) => c.id === item.clientId)
+    if (!client) return
+    await saveClient({
+      ...client,
+      plans: client.plans.map(plan => plan.id !== item.planId ? plan : {
+        ...plan,
+        samplings: plan.samplings.map((s: Sampling) =>
+          s.id !== item.sampling.id ? s : { ...s, status: 'done' as const, doneDate: date, doneBy: uid }
+        )
+      })
+    }, uid)
+  }
+
   const isValidationWeekend = useMemo(() => {
     const d = new Date(validationDate+'T12:00:00'); return d.getDay()===0||d.getDay()===6
   }, [validationDate])
 
-  // ── Nouvel événement ────────────────────────────────────────
-
-  function openNewEvt(dateStr:string) {
-    setNewEvtDate(dateStr); setNewEvtTitre(''); setNewEvtType('rappel')
-    setNewEvtHeure(''); setNewEvtNotes(''); setShowNewEvt(true); setValidatingId(null)
-  }
-
-  async function handleCreateEvt() {
-    if (!newEvtTitre.trim()||!uid||!newEvtDate) return
-    setCreatingEvt(true)
-    try {
-      await createEvenement(newEvtTitre.trim(), newEvtDate, newEvtType, newEvtHeure, newEvtNotes, uid, initiales)
-      setShowNewEvt(false)
-    } finally { setCreatingEvt(false) }
-  }
-
-  // ── Navigation ──────────────────────────────────────────────
+  // ── Navigation ──────────────────────────────────────────
 
   function prev() {
-    if (viewMode==='semaine') { setWeekStart(addDays(weekStart,-7)) }
-    else { setMonthStart(addMonths(monthStart,-1)) }
-    setShowNewEvt(false); setValidatingId(null)
+    if (viewMode==='semaine') setWeekStart(addDays(weekStart,-7))
+    else setMonthStart(addMonths(monthStart,-1))
+    setSelectedDay(null); setValidatingId(null)
   }
   function next() {
-    if (viewMode==='semaine') { setWeekStart(addDays(weekStart,7)) }
-    else { setMonthStart(addMonths(monthStart,1)) }
-    setShowNewEvt(false); setValidatingId(null)
+    if (viewMode==='semaine') setWeekStart(addDays(weekStart,7))
+    else setMonthStart(addMonths(monthStart,1))
+    setSelectedDay(null); setValidatingId(null)
   }
   function goToday() {
     setWeekStart(startOfWeek(today)); setMonthStart(startOfMonth(today))
-    setSelectedDate(today); setShowNewEvt(false); setValidatingId(null)
+    setSelectedDate(today); setSelectedDay(null); setValidatingId(null)
   }
   function switchView(m:ViewMode) {
     setViewMode(m)
     if (m==='mois') setMonthStart(startOfMonth(selectedDate))
     if (m==='semaine') setWeekStart(startOfWeek(selectedDate))
-    setShowNewEvt(false); setValidatingId(null)
+    setSelectedDay(null); setValidatingId(null)
   }
 
-  // ── Label période ───────────────────────────────────────────
+  // ── Label période ───────────────────────────────────────
 
   const periodLabel = viewMode==='semaine' ? (() => {
     const end = addDays(weekStart,6)
@@ -314,27 +653,22 @@ export default function PlanningPage() {
     return `${weekStart.getDate()} ${MOIS_LONG[weekStart.getMonth()]} – ${end.getDate()} ${MOIS_LONG[end.getMonth()]} ${end.getFullYear()}`
   })() : `${MOIS_LONG[monthStart.getMonth()]} ${monthStart.getFullYear()}`
 
-  // ── Pill calendrier Apple-style (desktop) ──────────────────
+  // ── EventPill (calendrier desktop) ─────────────────────
 
   function EventPill({ event }: { event:PlanningEvent }) {
-    const isEvt = event.type==='evenement'
     return (
       <button
-        onClick={() => isEvt ? null : navigate(event.link)}
+        onClick={e => { e.stopPropagation(); if (event.type !== 'evenement') navigate(event.link) }}
         className="w-full text-left flex items-center gap-1.5 px-1.5 py-[3px] rounded-[5px] text-[11px] leading-snug"
-        style={{
-          background: event.statusBg,
-          cursor: isEvt ? 'default' : 'pointer',
-        }}
+        style={{ background: event.statusBg, cursor: event.type === 'evenement' ? 'default' : 'pointer' }}
         title={`${event.title} — ${event.subtitle}`}
       >
-        {/* Point coloré */}
-        <span className="shrink-0 w-[7px] h-[7px] rounded-full" style={{ background: event.statusColor }} />
-        {/* Titre */}
+        {/* Dot couleur tech (ou statut si pas de tech) */}
+        <span className="shrink-0 w-[7px] h-[7px] rounded-full"
+          style={{ background: event.techColor ?? event.statusColor }} />
         <span className="flex-1 truncate font-medium" style={{ color: 'var(--color-text-primary)' }}>
           {event.title}
         </span>
-        {/* Heure */}
         {event.plannedTime && (
           <span className="shrink-0 text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
             {event.plannedTime}
@@ -344,16 +678,17 @@ export default function PlanningPage() {
     )
   }
 
-  // ── Ligne liste (mobile + desktop détail) ───────────────────
+  // ── EventRow (liste mobile + desktop) ──────────────────
 
   function EventRow({ event, isLast }: { event:PlanningEvent; isLast:boolean }) {
     const isValidating = validatingId===event.id
     const isEvt = event.type==='evenement'
+    const dotColor = event.techColor ?? event.statusColor
 
     return (
       <div style={{ borderBottom: isLast?'none':'1px solid var(--color-border-subtle)' }}>
         <div className="flex items-center gap-3 px-4 py-3.5">
-          <div className="w-1 self-stretch rounded-full shrink-0" style={{ background:event.statusColor, minHeight:36 }} />
+          <div className="w-1 self-stretch rounded-full shrink-0" style={{ background:dotColor, minHeight:36 }} />
 
           {isEvt ? (
             <div className="flex-1 min-w-0">
@@ -377,8 +712,8 @@ export default function PlanningPage() {
                   </span>
                 )}
                 {event.technicien&&event.technicien!=='—' && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded font-medium"
-                    style={{ background:'var(--color-bg-tertiary)', color:'var(--color-text-secondary)' }}>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                    style={{ background: dotColor + '22', color: dotColor }}>
                     {event.technicien}
                   </span>
                 )}
@@ -424,7 +759,9 @@ export default function PlanningPage() {
             style={{ background:'var(--color-bg-tertiary)', borderTop:'1px solid var(--color-border-subtle)' }}>
             <div className="flex items-end gap-3">
               <div className="flex-1">
-                <label className="block text-xs font-medium mb-1.5" style={{ color:'var(--color-text-secondary)' }}>Date de réalisation</label>
+                <label className="block text-xs font-medium mb-1.5" style={{ color:'var(--color-text-secondary)' }}>
+                  Date de réalisation
+                </label>
                 <input type="date" value={validationDate} onChange={e=>setValidationDate(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg text-sm"
                   style={{ background:'var(--color-bg-secondary)', border:'1px solid var(--color-border)', color:'var(--color-text-primary)' }} />
@@ -447,64 +784,15 @@ export default function PlanningPage() {
     )
   }
 
-  // ── Formulaire nouvel événement ─────────────────────────────
-
-  function NewEventForm() {
-    const d = newEvtDate ? new Date(newEvtDate+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}) : ''
-    return (
-      <div className="rounded-xl p-4 mb-3"
-        style={{ background:'var(--color-bg-secondary)', border:'1px solid var(--color-border-subtle)', boxShadow:'var(--shadow-card)' }}>
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold uppercase" style={{ color:'var(--color-text-tertiary)', letterSpacing:'0.06em' }}>
-            Nouvel événement{d ? ` — ${d}` : ''}
-          </p>
-          <button onClick={() => setShowNewEvt(false)} style={{ color:'var(--color-text-tertiary)' }}>
-            <X size={14} />
-          </button>
-        </div>
-        <div className="flex flex-col gap-2.5">
-          <input type="text" value={newEvtTitre} onChange={e=>setNewEvtTitre(e.target.value)}
-            placeholder="Titre de l'événement…" autoFocus
-            className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-            style={{ background:'var(--color-bg-tertiary)', border:'1px solid var(--color-border)', color:'var(--color-text-primary)' }}
-            onKeyDown={e => e.key==='Enter' && handleCreateEvt()} />
-          <div className="flex gap-2">
-            <select value={newEvtType} onChange={e=>setNewEvtType(e.target.value as TypeEvenement)}
-              className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
-              style={{ background:'var(--color-bg-tertiary)', border:'1px solid var(--color-border)', color:'var(--color-text-primary)' }}>
-              <option value="rappel">Rappel</option>
-              <option value="reunion">Réunion / Entretien</option>
-              <option value="rapport">Rapport</option>
-              <option value="autre">Autre</option>
-            </select>
-            <input type="time" value={newEvtHeure} onChange={e=>setNewEvtHeure(e.target.value)}
-              className="px-3 py-2 rounded-lg text-sm outline-none"
-              style={{ background:'var(--color-bg-tertiary)', border:'1px solid var(--color-border)', color:'var(--color-text-primary)', width:110 }} />
-          </div>
-          <input type="text" value={newEvtNotes} onChange={e=>setNewEvtNotes(e.target.value)}
-            placeholder="Notes (optionnel)"
-            className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-            style={{ background:'var(--color-bg-tertiary)', border:'1px solid var(--color-border)', color:'var(--color-text-primary)' }} />
-          <button onClick={handleCreateEvt} disabled={!newEvtTitre.trim()||creatingEvt}
-            className="self-end px-4 py-2 rounded-lg text-sm font-medium"
-            style={{ background:newEvtTitre.trim()?'var(--color-accent)':'var(--color-border)', color:'white', opacity:creatingEvt?0.6:1 }}>
-            {creatingEvt?'Ajout…':'Ajouter'}
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // ── Render ─────────────────────────────────────────────────
+  // ── Render ──────────────────────────────────────────────
 
   return (
     <div className="flex flex-col h-full">
 
-      {/* ── En-tête navigation ── */}
+      {/* En-tête navigation */}
       <div className="flex items-center justify-between px-4 md:px-6 py-3 shrink-0 flex-wrap gap-2"
         style={{ borderBottom:'1px solid var(--color-border-subtle)', background:'var(--color-bg-secondary)' }}>
 
-        {/* Navigation + label */}
         <div className="flex items-center gap-2">
           <button onClick={prev} className="p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
             onMouseEnter={e=>(e.currentTarget.style.background='var(--color-bg-tertiary)')}
@@ -526,7 +814,6 @@ export default function PlanningPage() {
           </button>
         </div>
 
-        {/* Contrôles droite */}
         <div className="flex items-center gap-2 flex-wrap">
           {/* Toggle vue */}
           <div className="flex rounded-lg overflow-hidden"
@@ -549,7 +836,7 @@ export default function PlanningPage() {
             </button>
           )}
 
-          {/* Filtre technicien */}
+          {/* Filtre technicien — badges colorés */}
           {allTechs.length>1 && (
             <div className="flex items-center gap-1">
               <button onClick={() => setFilterTech('')}
@@ -557,13 +844,21 @@ export default function PlanningPage() {
                 style={{ background:!filterTech?'var(--color-accent)':'var(--color-bg-secondary)', color:!filterTech?'white':'var(--color-text-secondary)', border:`1px solid ${!filterTech?'transparent':'var(--color-border-subtle)'}` }}>
                 Tous
               </button>
-              {allTechs.map(t => (
-                <button key={t} onClick={() => setFilterTech(t===filterTech?'':t)}
-                  className="px-2.5 py-1 rounded-full text-xs font-medium"
-                  style={{ background:filterTech===t?'var(--color-accent)':'var(--color-bg-secondary)', color:filterTech===t?'white':'var(--color-text-secondary)', border:`1px solid ${filterTech===t?'transparent':'var(--color-border-subtle)'}` }}>
-                  {t}
-                </button>
-              ))}
+              {allTechs.map(t => {
+                const tColor = colorByInitiales[t] ?? 'var(--color-accent)'
+                const isActive = filterTech === t
+                return (
+                  <button key={t} onClick={() => setFilterTech(t===filterTech?'':t)}
+                    className="px-2.5 py-1 rounded-full text-xs font-medium"
+                    style={{
+                      background: isActive ? tColor : 'var(--color-bg-secondary)',
+                      color: isActive ? 'white' : tColor,
+                      border: `1px solid ${isActive ? 'transparent' : tColor + '66'}`,
+                    }}>
+                    {t}
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>
@@ -584,13 +879,13 @@ export default function PlanningPage() {
                   <div key={i} className="py-2 px-2 text-center"
                     style={{ borderRight: i<6?'1px solid var(--color-border-subtle)':'none' }}>
                     <div className="text-[10px] font-medium uppercase mb-1"
-                      style={{ color:isWE?'var(--color-text-tertiary)':'var(--color-text-tertiary)', letterSpacing:'0.04em' }}>
+                      style={{ color:'var(--color-text-tertiary)', letterSpacing:'0.04em' }}>
                       {JOURS_COURT[i]}
                     </div>
                     <div className="w-7 h-7 flex items-center justify-center rounded-full mx-auto text-sm font-semibold"
                       style={{
-                        background:isToday?'#FF3B30':'transparent',
-                        color:isToday?'white':isWE?'var(--color-text-tertiary)':'var(--color-text-primary)',
+                        background: isToday ? '#FF3B30' : 'transparent',
+                        color: isToday ? 'white' : isWE ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
                       }}>
                       {day.getDate()}
                     </div>
@@ -607,22 +902,21 @@ export default function PlanningPage() {
                 const isToday = sameDay(day,today)
                 const isWE = isWeekend(day)
                 return (
-                  <div key={i} className="p-1.5 flex flex-col gap-1"
+                  <div key={i}
+                    className="p-1.5 flex flex-col gap-1 cursor-pointer group"
+                    onClick={() => setSelectedDay(dateStr)}
                     style={{
                       borderRight: i<6?'1px solid var(--color-border-subtle)':'none',
-                      background: isToday?'var(--color-accent-light)':isWE?'var(--color-bg-tertiary)40':'transparent',
+                      background: isToday?'rgba(255,59,48,0.04)':isWE?'rgba(0,0,0,0.015)':'transparent',
                       minHeight: 120,
                     }}>
                     {evts.map(evt => <EventPill key={evt.id} event={evt} />)}
-                    {/* Bouton ajouter événement */}
-                    <button
-                      onClick={() => openNewEvt(dateStr)}
-                      className="opacity-0 hover:opacity-100 group-hover:opacity-100 w-full mt-auto flex items-center justify-center gap-1 rounded-md py-1 text-[10px] transition-opacity"
-                      style={{ color:'var(--color-text-tertiary)', border:'1px dashed var(--color-border)' }}
-                      onMouseEnter={e=>(e.currentTarget.style.opacity='1')}
-                      onMouseLeave={e=>(e.currentTarget.style.opacity='0')}>
-                      <Plus size={10}/> Ajouter
-                    </button>
+                    {/* Bouton + au survol */}
+                    <div className="mt-auto flex items-center justify-center py-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-[10px]" style={{ color:'var(--color-text-tertiary)' }}>
+                        <Plus size={10} className="inline" /> Ajouter
+                      </span>
+                    </div>
                   </div>
                 )
               })}
@@ -637,7 +931,7 @@ export default function PlanningPage() {
               style={{ borderBottom:'1px solid var(--color-border-subtle)' }}>
               {JOURS_COURT.map((j,i) => (
                 <div key={j} className="py-2 text-center text-[10px] font-medium uppercase"
-                  style={{ color:i>=5?'var(--color-text-tertiary)':'var(--color-text-tertiary)', letterSpacing:'0.04em',
+                  style={{ color:'var(--color-text-tertiary)', letterSpacing:'0.04em',
                     borderRight:i<6?'1px solid var(--color-border-subtle)':'none' }}>
                   {j}
                 </div>
@@ -647,7 +941,11 @@ export default function PlanningPage() {
             <div className="grid grid-cols-7 flex-1 overflow-y-auto" style={{ gridAutoRows:'1fr' }}>
               {monthGrid.map((day,i) => {
                 if (!day) return (
-                  <div key={i} style={{ borderRight:(i%7)<6?'1px solid var(--color-border-subtle)':'none', borderBottom:'1px solid var(--color-border-subtle)', background:'var(--color-bg-tertiary)40' }} />
+                  <div key={i} style={{
+                    borderRight:(i%7)<6?'1px solid var(--color-border-subtle)':'none',
+                    borderBottom:'1px solid var(--color-border-subtle)',
+                    background:'rgba(0,0,0,0.015)',
+                  }} />
                 )
                 const dateStr = toISO(day)
                 const evts = filteredForDay(dateStr)
@@ -655,16 +953,18 @@ export default function PlanningPage() {
                 const isWE = isWeekend(day)
                 const MAX = 3
                 return (
-                  <div key={i} className="p-1 flex flex-col gap-0.5"
+                  <div key={i}
+                    className="p-1 flex flex-col gap-0.5 cursor-pointer group"
+                    onClick={() => setSelectedDay(dateStr)}
                     style={{
                       borderRight:(i%7)<6?'1px solid var(--color-border-subtle)':'none',
                       borderBottom:'1px solid var(--color-border-subtle)',
-                      background: isToday?'var(--color-accent-light)':isWE?'var(--color-bg-tertiary)30':'transparent',
+                      background: isToday?'rgba(255,59,48,0.04)':isWE?'rgba(0,0,0,0.015)':'transparent',
                       minHeight: 90,
                     }}>
-                    <div className="flex items-center justify-between mb-1 px-0.5">
-                      <span className="text-[11px] font-semibold flex items-center gap-1">
-                        <span className={`w-[22px] h-[22px] flex items-center justify-center rounded-full text-[11px] font-semibold`}
+                    <div className="flex items-center justify-between mb-0.5 px-0.5">
+                      <span className="flex items-center gap-1">
+                        <span className="w-[22px] h-[22px] flex items-center justify-center rounded-full text-[11px] font-semibold"
                           style={{
                             background: isToday ? '#FF3B30' : 'transparent',
                             color: isToday ? 'white' : isWE ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)',
@@ -677,13 +977,8 @@ export default function PlanningPage() {
                           </span>
                         )}
                       </span>
-                      <button onClick={() => openNewEvt(dateStr)}
-                        className="p-0.5 rounded opacity-0"
-                        style={{ color:'var(--color-text-tertiary)' }}
-                        onMouseEnter={e=>(e.currentTarget.style.opacity='1')}
-                        onMouseLeave={e=>(e.currentTarget.style.opacity='0')}>
-                        <Plus size={10} />
-                      </button>
+                      <Plus size={10} className="opacity-0 group-hover:opacity-60 transition-opacity"
+                        style={{ color:'var(--color-text-tertiary)' }} />
                     </div>
                     {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} />)}
                     {evts.length>MAX && (
@@ -702,9 +997,6 @@ export default function PlanningPage() {
       {/* ── MOBILE : scroll vertical liste ── */}
       <div className="md:hidden flex-1 overflow-y-auto">
         <div className="px-4 py-4 space-y-4">
-
-          {showNewEvt && <NewEventForm />}
-
           {periodList.length===0 ? (
             <div className="rounded-xl px-5 py-12 text-center"
               style={{ background:'var(--color-bg-secondary)', border:'1px solid var(--color-border-subtle)' }}>
@@ -721,25 +1013,23 @@ export default function PlanningPage() {
               const dayIdx = (date.getDay()+6)%7
               return (
                 <div key={dateStr}>
-                  {/* En-tête du jour */}
                   <div className="flex items-center gap-2 mb-1.5 px-1">
                     <span className="text-xs font-semibold capitalize"
-                      style={{ color:isToday?'var(--color-accent)':'var(--color-text-secondary)' }}>
+                      style={{ color:isToday?'#FF3B30':'var(--color-text-secondary)' }}>
                       {JOURS_LONG[dayIdx]} {date.getDate()} {MOIS_LONG[date.getMonth()]}
                     </span>
                     {isToday && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                        style={{ background:'var(--color-accent-light)', color:'var(--color-accent)' }}>
+                        style={{ background:'rgba(255,59,48,0.1)', color:'#FF3B30' }}>
                         Aujourd'hui
                       </span>
                     )}
-                    <button onClick={() => openNewEvt(dateStr)}
+                    <button onClick={() => setSelectedDay(dateStr)}
                       className="ml-auto flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-medium"
                       style={{ color:'var(--color-text-tertiary)', border:'1px solid var(--color-border-subtle)' }}>
                       <Plus size={9} /> Ajouter
                     </button>
                   </div>
-                  {/* Événements */}
                   <div className="rounded-xl overflow-hidden"
                     style={{ background:'var(--color-bg-secondary)', border:'1px solid var(--color-border-subtle)', boxShadow:'var(--shadow-card)' }}>
                     {events.map((evt,i) => <EventRow key={evt.id} event={evt} isLast={i===events.length-1} />)}
@@ -751,15 +1041,19 @@ export default function PlanningPage() {
         </div>
       </div>
 
-      {/* ── Formulaire nouvel événement (desktop) ── */}
-      {showNewEvt && (
-        <div className="hidden md:block absolute inset-0 z-20 flex items-center justify-center"
-          style={{ background:'rgba(0,0,0,0.25)' }}
-          onClick={e => { if (e.target===e.currentTarget) setShowNewEvt(false) }}>
-          <div className="w-full max-w-md mx-auto" style={{ marginTop:60 }}>
-            <NewEventForm />
-          </div>
-        </div>
+      {/* ── DayModal ── */}
+      {selectedDay && (
+        <DayModal
+          key={selectedDay}
+          dateStr={selectedDay}
+          onClose={() => setSelectedDay(null)}
+          dayEvents={filteredForDay(selectedDay)}
+          pool={poolSamplings}
+          uid={uid}
+          initiales={initiales}
+          navigate={navigate}
+          onValidatePool={handleValidatePool}
+        />
       )}
 
     </div>
