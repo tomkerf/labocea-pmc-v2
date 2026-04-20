@@ -731,8 +731,10 @@ export default function PlanningPage() {
         const isAuto = plan.methode === 'Automatique'
         const baseSub = plan.nom || plan.siteNom || '—'
         plan.samplings.forEach((s:Sampling) => {
+          // Exclure les samplings non planifiés (pool) — plannedDay = 0 ou absent
+          if (!s.plannedDay && !s.doneDate) return
           const overdue = isSamplingOverdue(s)
-          const dateStr = s.doneDate || toISO(new Date(year, s.plannedMonth, s.plannedDay||1))
+          const dateStr = s.doneDate || toISO(new Date(year, s.plannedMonth, s.plannedDay))
           const cfg = overdue ? SAMPLING_CFG.overdue : SAMPLING_CFG[s.status] ?? SAMPLING_CFG.planned
           const common = {
             type: 'prelevement' as const,
