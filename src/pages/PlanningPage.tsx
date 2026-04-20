@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, CheckCircle2, ExternalLink, Trash2, Plus, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CheckCircle2, ExternalLink, Trash2, Plus, X, Calendar, Bell } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useClientsListener, saveClient } from '@/hooks/useClients'
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -190,10 +190,11 @@ interface DayModalProps {
   initiales: string
   onValidatePool: (item: PoolItem, date: string) => Promise<void>
   onEventSelect: (event: PlanningEvent) => void
+  initialTab?: 'pool'|'jour'|'evt'
 }
 
-function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, onValidatePool, onEventSelect }: DayModalProps) {
-  const defaultTab: 'pool'|'jour' = pool.length > 0 ? 'pool' : 'jour'
+function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, onValidatePool, onEventSelect, initialTab }: DayModalProps) {
+  const defaultTab: 'pool'|'jour'|'evt' = initialTab ?? (pool.length > 0 ? 'pool' : 'jour')
   const [activeTab,   setActiveTab]   = useState<'pool'|'jour'|'evt'>(defaultTab)
   const [poolValidId, setPoolValidId] = useState<string|null>(null)
   const [poolDate,    setPoolDate]    = useState(dateStr)
@@ -471,6 +472,54 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, onValidat
   )
 }
 
+// ── CellContextMenu ─────────────────────────────────────────
+
+function CellContextMenu({ x, y, onClose, onPlanifier, onEvenement }: {
+  x: number; y: number
+  onClose: () => void
+  onPlanifier: () => void
+  onEvenement: () => void
+}) {
+  // Ajuste la position pour rester dans l'écran
+  const safeX = Math.min(x, window.innerWidth  - 220)
+  const safeY = Math.min(y, window.innerHeight - 110)
+
+  return (
+    <div className="fixed inset-0 z-30" onClick={onClose} onContextMenu={e => { e.preventDefault(); onClose() }}>
+      <div className="absolute rounded-xl overflow-hidden"
+        style={{
+          left: safeX, top: safeY,
+          background: 'rgba(255,255,255,0.92)',
+          backdropFilter: 'blur(20px)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08)',
+          border: '1px solid var(--color-border-subtle)',
+          minWidth: 210,
+        }}
+        onClick={e => e.stopPropagation()}>
+        <button
+          onClick={() => { onPlanifier(); onClose() }}
+          className="flex items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium"
+          style={{ color: 'var(--color-text-primary)' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+          <Calendar size={15} style={{ color: 'var(--color-accent)' }} />
+          Planifier un prélèvement
+        </button>
+        <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
+        <button
+          onClick={() => { onEvenement(); onClose() }}
+          className="flex items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium"
+          style={{ color: 'var(--color-text-primary)' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+          <Bell size={15} style={{ color: 'var(--color-accent)' }} />
+          Nouvel événement
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── EventDetailModal ────────────────────────────────────────
 
 interface EventDetailModalProps {
@@ -658,7 +707,9 @@ export default function PlanningPage() {
   const [selectedDate,setSelectedDate]= useState(today)
   const [filterTech,  setFilterTech]  = useState('')
   const [filterRetard,setFilterRetard]= useState(false)
-  const [selectedDay, setSelectedDay] = useState<string|null>(null)
+  const [selectedDay,         setSelectedDay]         = useState<string|null>(null)
+  const [dayModalInitialTab,  setDayModalInitialTab]  = useState<'pool'|'jour'|'evt'>('pool')
+  const [ctxMenu,             setCtxMenu]             = useState<{ dateStr: string; x: number; y: number } | null>(null)
   const [eventDetail, setEventDetail] = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
 
   const weekDays  = useMemo(() => Array.from({length:5},(_,i) => addDays(weekStart,i)), [weekStart])
@@ -1349,6 +1400,7 @@ export default function PlanningPage() {
                   <div key={i}
                     className="p-1.5 flex flex-col gap-1 cursor-pointer group"
                     onClick={() => goToDay(dateStr)}
+                    onContextMenu={e => { e.preventDefault(); setCtxMenu({ dateStr, x: e.clientX, y: e.clientY }) }}
                     style={{
                       borderRight: i<4?'1px solid var(--color-border-subtle)':'none',
                       background: isToday?'rgba(255,59,48,0.04)':'transparent',
@@ -1397,6 +1449,7 @@ export default function PlanningPage() {
                   <div key={i}
                     className="p-1 flex flex-col gap-0.5 cursor-pointer group"
                     onClick={() => goToDay(dateStr)}
+                    onContextMenu={e => { e.preventDefault(); setCtxMenu({ dateStr, x: e.clientX, y: e.clientY }) }}
                     style={{
                       borderRight:(i%5)<4?'1px solid var(--color-border-subtle)':'none',
                       borderBottom:'1px solid var(--color-border-subtle)',
@@ -1485,7 +1538,7 @@ export default function PlanningPage() {
       {/* ── DayModal ── */}
       {selectedDay && (
         <DayModal
-          key={selectedDay}
+          key={selectedDay + dayModalInitialTab}
           dateStr={selectedDay}
           onClose={() => setSelectedDay(null)}
           dayEvents={filteredForDay(selectedDay)}
@@ -1494,6 +1547,24 @@ export default function PlanningPage() {
           initiales={initiales}
           onValidatePool={handleValidatePool}
           onEventSelect={event => setEventDetail({ event, dateStr: selectedDay! })}
+          initialTab={dayModalInitialTab}
+        />
+      )}
+
+      {/* ── CellContextMenu ── */}
+      {ctxMenu && (
+        <CellContextMenu
+          x={ctxMenu.x}
+          y={ctxMenu.y}
+          onClose={() => setCtxMenu(null)}
+          onPlanifier={() => {
+            setDayModalInitialTab('pool')
+            setSelectedDay(ctxMenu.dateStr)
+          }}
+          onEvenement={() => {
+            setDayModalInitialTab('evt')
+            setSelectedDay(ctxMenu.dateStr)
+          }}
         />
       )}
 
