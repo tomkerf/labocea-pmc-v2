@@ -663,8 +663,6 @@ export default function PlanningPage() {
   const [selectedDay, setSelectedDay] = useState<string|null>(null)
   const [eventDetail, setEventDetail] = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
 
-  const [saving, setSaving] = useState(false)
-
   const weekDays  = useMemo(() => Array.from({length:5},(_,i) => addDays(weekStart,i)), [weekStart])
   const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])
 
@@ -905,17 +903,17 @@ export default function PlanningPage() {
     if (viewMode==='jour') setSelectedDate(addDays(selectedDate,-1))
     else if (viewMode==='semaine') setWeekStart(addDays(weekStart,-7))
     else setMonthStart(addMonths(monthStart,-1))
-    setSelectedDay(null); setValidatingId(null)
+    setSelectedDay(null)
   }
   function next() {
     if (viewMode==='jour') setSelectedDate(addDays(selectedDate,1))
     else if (viewMode==='semaine') setWeekStart(addDays(weekStart,7))
     else setMonthStart(addMonths(monthStart,1))
-    setSelectedDay(null); setValidatingId(null)
+    setSelectedDay(null)
   }
   function goToday() {
     setWeekStart(startOfWeek(today)); setMonthStart(startOfMonth(today))
-    setSelectedDate(today); setSelectedDay(null); setValidatingId(null)
+    setSelectedDate(today); setSelectedDay(null)
   }
   // Naviguer vers la vue Jour pour une date donnée
   function goToDay(dateStr: string) {
@@ -923,13 +921,12 @@ export default function PlanningPage() {
     setSelectedDate(d)
     setViewMode('jour')
     setSelectedDay(null)
-    setValidatingId(null)
   }
   function switchView(m:ViewMode) {
     setViewMode(m)
     if (m==='mois') setMonthStart(startOfMonth(selectedDate))
     if (m==='semaine') setWeekStart(startOfWeek(selectedDate))
-    setSelectedDay(null); setValidatingId(null)
+    setSelectedDay(null)
   }
 
   // ── Label période ───────────────────────────────────────
