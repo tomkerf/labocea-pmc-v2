@@ -231,7 +231,7 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, onValidat
   ]
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end md:items-center justify-center"
+    <div className="fixed inset-0 z-[55] flex items-end md:items-center justify-center"
       style={{ background: 'rgba(0,0,0,0.35)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="w-full md:max-w-lg flex flex-col overflow-hidden rounded-t-[20px] md:rounded-2xl"
@@ -485,7 +485,7 @@ function CellContextMenu({ x, y, onClose, onPlanifier, onEvenement }: {
   const safeY = Math.min(y, window.innerHeight - 110)
 
   return (
-    <div className="fixed inset-0 z-30" onClick={onClose} onContextMenu={e => { e.preventDefault(); onClose() }}>
+    <div className="fixed inset-0 z-[55]" onClick={onClose} onContextMenu={e => { e.preventDefault(); onClose() }}>
       <div className="absolute rounded-xl overflow-hidden"
         style={{
           left: safeX, top: safeY,
@@ -557,7 +557,7 @@ function EventDetailModal({ event, dateStr, onClose, navigate, onCancel, onMove,
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center"
+    <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center"
       style={{ background: 'rgba(0,0,0,0.4)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="w-full md:max-w-sm flex flex-col rounded-t-[20px] md:rounded-2xl"
