@@ -695,6 +695,166 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete 
   )
 }
 
+// ── DragCreateModal ─────────────────────────────────────────
+
+function DragCreateModal({
+  dateDebut, dateFin, onClose, onSave,
+}: {
+  dateDebut: string; dateFin: string
+  onClose: () => void
+  onSave: (titre: string, type: TypeEvenement, dateDebut: string, dateFin: string, heure: string, notes: string) => Promise<void>
+}) {
+  const [titre,    setTitre]    = useState('')
+  const [type,     setType]     = useState<TypeEvenement>('autre')
+  const [debut,    setDebut]    = useState(dateDebut)
+  const [fin,      setFin]      = useState(dateFin)
+  const [heure,    setHeure]    = useState('')
+  const [notes,    setNotes]    = useState('')
+  const [saving,   setSaving]   = useState(false)
+
+  const isMultiDay = debut !== fin
+
+  const TYPES: { value: TypeEvenement; label: string; emoji: string }[] = [
+    { value: 'rappel',  label: 'Rappel',   emoji: '🔔' },
+    { value: 'reunion', label: 'Réunion',  emoji: '👥' },
+    { value: 'rapport', label: 'Rapport',  emoji: '📋' },
+    { value: 'autre',   label: 'Autre',    emoji: '📌' },
+  ]
+
+  async function handleSave() {
+    if (!titre.trim()) return
+    setSaving(true)
+    try {
+      await onSave(titre.trim(), type, debut, isMultiDay ? fin : '', heure, notes)
+      onClose()
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function fmtDate(d: string) {
+    const dt = new Date(d + 'T12:00:00')
+    return `${dt.getDate()} ${MOIS_LONG[dt.getMonth()]}`
+  }
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.3)' }}
+      onClick={onClose}>
+      <div className="w-full md:w-[400px] rounded-t-2xl md:rounded-2xl overflow-hidden"
+        style={{
+          background: 'var(--color-bg-secondary)',
+          boxShadow: 'var(--shadow-modal)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        }}
+        onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+          <div>
+            <p className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              Nouvel événement
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+              {isMultiDay ? `${fmtDate(debut)} → ${fmtDate(fin)}` : fmtDate(debut)}
+            </p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg"
+            style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
+            <X size={15} />
+          </button>
+        </div>
+
+        <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
+
+        <div className="px-5 py-4 space-y-3">
+          {/* Titre */}
+          <input
+            autoFocus
+            placeholder="Titre de l'événement"
+            value={titre}
+            onChange={e => setTitre(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSave()}
+            className="w-full px-3 py-2.5 rounded-xl text-sm"
+            style={{
+              background: 'var(--color-bg-tertiary)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text-primary)',
+            }} />
+
+          {/* Type */}
+          <div className="grid grid-cols-4 gap-1.5">
+            {TYPES.map(t => (
+              <button key={t.value} onClick={() => setType(t.value)}
+                className="flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl text-[11px] font-medium"
+                style={{
+                  background: type === t.value ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)',
+                  color: type === t.value ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                  border: `1px solid ${type === t.value ? 'var(--color-accent)' : 'transparent'}`,
+                }}>
+                <span className="text-base">{t.emoji}</span>
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Dates (modifiables) */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                Début
+              </label>
+              <input type="date" value={debut} onChange={e => setDebut(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-sm"
+                style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                Fin
+              </label>
+              <input type="date" value={fin} min={debut} onChange={e => setFin(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-sm"
+                style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+            </div>
+          </div>
+
+          {/* Heure (optionnel, seulement si jour unique) */}
+          {!isMultiDay && (
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                Heure (optionnel)
+              </label>
+              <input type="time" value={heure} onChange={e => setHeure(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-sm"
+                style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+            </div>
+          )}
+
+          {/* Notes */}
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+              Notes (optionnel)
+            </label>
+            <textarea rows={2} placeholder="Remarques…" value={notes} onChange={e => setNotes(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm resize-none"
+              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+          </div>
+
+          {/* Bouton sauvegarder */}
+          <button onClick={handleSave} disabled={!titre.trim() || saving}
+            className="w-full py-3 rounded-xl text-sm font-semibold"
+            style={{
+              background: titre.trim() ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
+              color: titre.trim() ? 'white' : 'var(--color-text-tertiary)',
+            }}>
+            {saving ? 'Enregistrement…' : 'Créer l\'événement'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Composant principal ─────────────────────────────────────
 
 export default function PlanningPage() {
@@ -722,6 +882,19 @@ export default function PlanningPage() {
   const [dayModalInitialTab,  setDayModalInitialTab]  = useState<'pool'|'jour'|'evt'>('pool')
   const [ctxMenu,             setCtxMenu]             = useState<{ dateStr: string; x: number; y: number } | null>(null)
   const [eventDetail, setEventDetail] = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
+
+  // ── Drag-to-create ──────────────────────────────────────
+  const [dragStart,   setDragStart]   = useState<string|null>(null)
+  const [dragEnd,     setDragEnd]     = useState<string|null>(null)
+  const [isDragging,  setIsDragging]  = useState(false)
+  const [dragModal,   setDragModal]   = useState<{ dateDebut: string; dateFin: string } | null>(null)
+
+  function dragRangeMin() { return dragStart && dragEnd ? (dragStart < dragEnd ? dragStart : dragEnd) : null }
+  function dragRangeMax() { return dragStart && dragEnd ? (dragStart > dragEnd ? dragStart : dragEnd) : null }
+  function isInDrag(dateStr: string) {
+    const mn = dragRangeMin(); const mx = dragRangeMax()
+    return isDragging && mn && mx && dateStr >= mn && dateStr <= mx
+  }
 
   const weekDays  = useMemo(() => Array.from({length:5},(_,i) => addDays(weekStart,i)), [weekStart])
   const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])
@@ -801,13 +974,25 @@ export default function PlanningPage() {
 
     evenements.forEach((ev:EvenementPersonnel) => {
       const cfg = EVENEMENT_CFG[ev.type]??EVENEMENT_CFG.autre
-      add(ev.date, {
+      const evObj: PlanningEvent = {
         id:ev.id, type:'evenement',
         title:ev.titre, subtitle:cfg.label,
         statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
         link:'', isDone:false, technicien:ev.createdByInitiales||'—',
         plannedTime:ev.heure||undefined, evenementData:ev,
-      })
+      }
+      // Étendre sur toute la plage date → dateFin (si multi-jours)
+      if (ev.dateFin && ev.dateFin > ev.date) {
+        let cur = ev.date
+        while (cur <= ev.dateFin) {
+          add(cur, { ...evObj, id: `${ev.id}_${cur}` })
+          const d = new Date(cur + 'T12:00:00')
+          d.setDate(d.getDate() + 1)
+          cur = toISO(d)
+        }
+      } else {
+        add(ev.date, evObj)
+      }
     })
 
     return map
@@ -940,6 +1125,44 @@ export default function PlanningPage() {
   // Supprime un événement personnel
   function handleDeleteEvent(event: PlanningEvent) {
     if (event.evenementData) deleteEvenement(event.evenementData.id)
+  }
+
+  // Crée un événement personnel (avec dateFin optionnelle)
+  async function handleSaveEvenement(
+    titre: string, type: TypeEvenement,
+    dateDebut: string, dateFin: string,
+    heure: string, notes: string,
+  ) {
+    if (!uid) return
+    await createEvenement(titre, dateDebut, type, heure, notes, uid, initiales, dateFin || undefined)
+  }
+
+  // ── Drag-to-create handlers ─────────────────────────────────
+  function handleDragMouseDown(e: React.MouseEvent, dateStr: string) {
+    // Seulement clic gauche
+    if (e.button !== 0) return
+    e.preventDefault()
+    setDragStart(dateStr)
+    setDragEnd(dateStr)
+    setIsDragging(true)
+  }
+  function handleDragMouseEnter(dateStr: string) {
+    if (isDragging) setDragEnd(dateStr)
+  }
+  function handleDragMouseUp(e: React.MouseEvent) {
+    if (!isDragging || !dragStart || !dragEnd) return
+    e.stopPropagation()
+    const mn = dragRangeMin()!
+    const mx = dragRangeMax()!
+    setIsDragging(false)
+    setDragStart(null)
+    setDragEnd(null)
+    // Si c'est un simple clic (même case), ouvrir la vue Jour
+    if (mn === mx) {
+      goToDay(mn)
+      return
+    }
+    setDragModal({ dateDebut: mn, dateFin: mx })
   }
 
   // Planifie un sampling à un jour précis du mois (sans le marquer "fait")
@@ -1445,7 +1668,10 @@ export default function PlanningPage() {
               ))}
             </div>
             {/* Grille */}
-            <div className="grid grid-cols-5 flex-1 overflow-y-auto" style={{ gridAutoRows:'1fr' }}>
+            <div className="grid grid-cols-5 flex-1 overflow-y-auto select-none"
+              style={{ gridAutoRows:'1fr' }}
+              onMouseUp={handleDragMouseUp}
+              onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
               {monthGrid.map((day,i) => {
                 if (!day) return (
                   <div key={i} style={{
@@ -1457,17 +1683,24 @@ export default function PlanningPage() {
                 const dateStr = toISO(day)
                 const evts = filteredForDay(dateStr)
                 const isToday = sameDay(day,today)
+                const inDrag = isInDrag(dateStr)
                 const MAX = 3
                 return (
                   <div key={i}
-                    className="p-1 flex flex-col gap-0.5 cursor-pointer group"
-                    onClick={() => goToDay(dateStr)}
+                    className="p-1 flex flex-col gap-0.5 cursor-crosshair group"
+                    onMouseDown={e => handleDragMouseDown(e, dateStr)}
+                    onMouseEnter={() => handleDragMouseEnter(dateStr)}
                     onContextMenu={e => { e.preventDefault(); setCtxMenu({ dateStr, x: e.clientX, y: e.clientY }) }}
                     style={{
                       borderRight:(i%5)<4?'1px solid var(--color-border-subtle)':'none',
                       borderBottom:'1px solid var(--color-border-subtle)',
-                      background: isToday?'rgba(255,59,48,0.04)':'transparent',
+                      background: inDrag
+                        ? 'rgba(0,113,227,0.1)'
+                        : isToday ? 'rgba(255,59,48,0.04)' : 'transparent',
+                      outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
+                      outlineOffset: '-1px',
                       minHeight: 90,
+                      userSelect: 'none',
                     }}>
                     <div className="flex items-center justify-between mb-0.5 px-0.5">
                       <span className="flex items-center gap-1">
@@ -1591,6 +1824,16 @@ export default function PlanningPage() {
           onCancel={handleCancelSampling}
           onMove={handleMoveEvent}
           onDelete={handleDeleteEvent}
+        />
+      )}
+
+      {/* ── DragCreateModal ── */}
+      {dragModal && (
+        <DragCreateModal
+          dateDebut={dragModal.dateDebut}
+          dateFin={dragModal.dateFin}
+          onClose={() => setDragModal(null)}
+          onSave={handleSaveEvenement}
         />
       )}
 

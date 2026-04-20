@@ -28,11 +28,13 @@ export async function createEvenement(
   notes: string,
   uid: string,
   initiales?: string,
+  dateFin?: string,
 ): Promise<string> {
   const ref = await addDoc(collection(db, 'evenements'), {
     titre,
     date,
     type,
+    dateFin: dateFin || null,
     heure: heure || null,
     notes: notes || null,
     createdBy: uid,
