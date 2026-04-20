@@ -5,8 +5,10 @@ import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveClient } from '@/hooks/useClients'
 import { useAuthStore } from '@/stores/authStore'
+import { useUsersListener } from '@/hooks/useUsers'
+import { useUsersStore } from '@/stores/usersStore'
 import { generateId } from '@/lib/ids'
-import type { Client, Plan, Sampling, SamplingStatus, FrequenceType, NatureEauType, MethodeType, NappeType, ChecklistItem } from '@/types'
+import type { AppUser, Client, Plan, Sampling, SamplingStatus, FrequenceType, NatureEauType, MethodeType, NappeType, ChecklistItem } from '@/types'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
@@ -65,6 +67,8 @@ export default function PlanPage() {
   const { clientId, planId } = useParams<{ clientId: string; planId: string }>()
   const navigate = useNavigate()
   const uid = useAuthStore((s) => s.uid())
+  useUsersListener()
+  const users = useUsersStore((s) => s.users)
 
   const [client, setClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)
@@ -106,9 +110,15 @@ export default function PlanPage() {
   function updateSampling(samplingId: string, field: keyof Sampling, value: unknown) {
     if (!client || !plan) return
     const uid_ = uid ?? ''
-    const updatedSamplings = plan.samplings.map((s) =>
-      s.id === samplingId ? { ...s, [field]: value, ...(field === 'status' && value === 'done' ? { doneBy: uid_ } : {}) } : s
-    )
+    const updatedSamplings = plan.samplings.map((s) => {
+      if (s.id !== samplingId) return s
+      const patch: Partial<Sampling> = { [field]: value }
+      // Quand on passe en "Réalisé" et que doneBy n'est pas encore défini → technicien connecté par défaut
+      if (field === 'status' && value === 'done' && !s.doneBy) patch.doneBy = uid_
+      // Quand on quitte "Réalisé" → effacer doneBy
+      if (field === 'status' && value !== 'done') patch.doneBy = ''
+      return { ...s, ...patch }
+    })
     triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? { ...p, samplings: updatedSamplings } : p) })
   }
 
@@ -252,7 +262,7 @@ export default function PlanPage() {
                   {/* Formulaire inline du prélèvement */}
                   {isSelected && (
                     <div className="px-5 py-4" style={{ background: 'var(--color-bg-tertiary)', borderBottom: i < plan.samplings.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                      <SamplingForm sampling={s} onUpdate={(field, val) => updateSampling(s.id, field, val)} />
+                      <SamplingForm sampling={s} onUpdate={(field, val) => updateSampling(s.id, field, val)} users={users} />
                     </div>
                   )}
                 </div>
@@ -270,9 +280,10 @@ export default function PlanPage() {
 interface SamplingFormProps {
   sampling: Sampling
   onUpdate: (field: keyof Sampling, value: unknown) => void
+  users?: AppUser[]
 }
 
-function SamplingForm({ sampling, onUpdate }: SamplingFormProps) {
+function SamplingForm({ sampling, onUpdate, users = [] }: SamplingFormProps) {
   const [newTask, setNewTask] = useState('')
   const checklist: ChecklistItem[] = sampling.checklist ?? []
 
@@ -350,6 +361,23 @@ function SamplingForm({ sampling, onUpdate }: SamplingFormProps) {
           onChange={(e) => onUpdate('doneDate', e.target.value)}
           className="field-input w-full" />
       </div>
+
+      {sampling.status === 'done' && users.length > 0 && (
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Effectué par</label>
+          <select
+            value={sampling.doneBy ?? ''}
+            onChange={(e) => onUpdate('doneBy', e.target.value)}
+            className="field-input w-full">
+            <option value="">— Sélectionner —</option>
+            {users.map((u) => (
+              <option key={u.uid} value={u.uid}>
+                {u.prenom} {u.nom} ({u.initiales})
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Nappe</label>
