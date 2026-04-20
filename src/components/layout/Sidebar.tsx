@@ -38,15 +38,18 @@ export default function Sidebar() {
         borderRight: '1px solid var(--color-border-subtle)',
       }}
     >
-      {/* Titre app */}
-      <div className="px-5 py-5" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-        <span className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-          Labocea PMC
-        </span>
-        <span className="ml-2 text-xs px-1.5 py-0.5 rounded font-medium"
-          style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-          V2
-        </span>
+      {/* Logo + titre app */}
+      <div className="px-4 py-4 flex items-center gap-3" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+        <img src="/logo.png" alt="Labocea" className="w-8 h-8 object-contain shrink-0" />
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            Labocea PMC
+          </span>
+          <span className="text-xs px-1.5 py-0.5 rounded font-medium"
+            style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+            V2
+          </span>
+        </div>
       </div>
 
       {/* Navigation */}

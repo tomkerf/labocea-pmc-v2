@@ -49,9 +49,12 @@ export default function AppLayout() {
             borderBottom: '1px solid var(--color-border-subtle)',
           }}
         >
-          <h1 className="text-base font-semibold md:hidden" style={{ color: 'var(--color-text-primary)' }}>
-            {title}
-          </h1>
+          <div className="md:hidden flex items-center gap-2">
+            <img src="/logo.png" alt="Labocea" className="w-6 h-6 object-contain" />
+            <h1 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              {title}
+            </h1>
+          </div>
         </header>
 
         {/* Pages avec transition */}
