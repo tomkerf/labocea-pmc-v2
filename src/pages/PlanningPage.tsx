@@ -188,11 +188,10 @@ interface DayModalProps {
   uid: string | null
   initiales: string
   onValidatePool: (item: PoolItem, date: string) => Promise<void>
-  onEventSelect: (event: PlanningEvent) => void
   initialTab?: 'pool'|'evt'
 }
 
-function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, onEventSelect, initialTab }: DayModalProps) {
+function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, initialTab }: DayModalProps) {
   const [activeTab,   setActiveTab]   = useState<'pool'|'evt'>(initialTab ?? 'pool')
   const [poolValidId, setPoolValidId] = useState<string|null>(null)
   const [poolDate,    setPoolDate]    = useState(dateStr)
@@ -1762,7 +1761,6 @@ export default function PlanningPage() {
           uid={uid}
           initiales={initiales}
           onValidatePool={handleValidatePool}
-          onEventSelect={event => setEventDetail({ event, dateStr: selectedDay! })}
           initialTab={dayModalInitialTab}
         />
       )}
