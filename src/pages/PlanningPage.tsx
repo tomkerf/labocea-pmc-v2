@@ -194,7 +194,7 @@ interface DayModalProps {
 }
 
 function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate, onValidatePool, onCancelSampling }: DayModalProps) {
-  const defaultTab: 'pool'|'jour'|'evt' = pool.length > 0 ? 'pool' : dayEvents.length > 0 ? 'jour' : 'evt'
+  const defaultTab: 'pool'|'jour' = pool.length > 0 ? 'pool' : 'jour'
   const [activeTab,   setActiveTab]   = useState<'pool'|'jour'|'evt'>(defaultTab)
   const [poolValidId, setPoolValidId] = useState<string|null>(null)
   const [poolDate,    setPoolDate]    = useState(dateStr)
@@ -225,10 +225,9 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
     } finally { setEvtSaving(false) }
   }
 
-  const TABS = [
+  const LIST_TABS = [
     { id: 'pool' as const, label: 'À planifier', count: pool.length },
     { id: 'jour' as const, label: 'Ce jour',     count: dayEvents.length },
-    { id: 'evt'  as const, label: '+ Événement', count: 0 },
   ]
 
   return (
@@ -243,38 +242,51 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
           <div className="w-9 h-1 rounded-full" style={{ background: 'var(--color-border)' }} />
         </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 shrink-0"
+        {/* Header : date + bouton "+ Événement" + fermer */}
+        <div className="flex items-center gap-3 px-5 py-3.5 shrink-0"
           style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <p className="text-base font-semibold capitalize" style={{ color: 'var(--color-text-primary)' }}>
+          <p className="flex-1 text-base font-semibold capitalize" style={{ color: 'var(--color-text-primary)' }}>
             {dayLabel}
           </p>
+          {/* Bouton "+ Événement" sorti des onglets — nature différente (formulaire) */}
+          <button
+            onClick={() => setActiveTab(activeTab === 'evt' ? defaultTab : 'evt')}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors"
+            style={{
+              background: activeTab === 'evt' ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
+              color: activeTab === 'evt' ? 'white' : 'var(--color-text-secondary)',
+              border: `1px solid ${activeTab === 'evt' ? 'transparent' : 'var(--color-border-subtle)'}`,
+            }}>
+            <Plus size={11} /> Événement
+          </button>
           <button onClick={onClose} className="p-1.5 rounded-lg"
             style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
             <X size={16} />
           </button>
         </div>
 
-        {/* Onglets */}
-        <div className="flex px-4 pt-3 pb-2.5 gap-1.5 shrink-0"
-          style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          {TABS.map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-              style={{
-                background: activeTab === tab.id ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
-                color: activeTab === tab.id ? 'white' : 'var(--color-text-secondary)',
-              }}>
-              {tab.label}
-              {tab.count > 0 && (
-                <span className="text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full"
-                  style={{ background: activeTab === tab.id ? 'rgba(255,255,255,0.25)' : 'var(--color-border)' }}>
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+        {/* Onglets — 2 uniquement (listes) */}
+        {activeTab !== 'evt' && (
+          <div className="flex px-4 pt-3 pb-2.5 gap-1.5 shrink-0"
+            style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+            {LIST_TABS.map(tab => (
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                style={{
+                  background: activeTab === tab.id ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
+                  color: activeTab === tab.id ? 'white' : 'var(--color-text-secondary)',
+                }}>
+                {tab.label}
+                {tab.count > 0 && (
+                  <span className="text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full"
+                    style={{ background: activeTab === tab.id ? 'rgba(255,255,255,0.25)' : 'var(--color-border)' }}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Contenu scrollable */}
         <div className="flex-1 overflow-y-auto">
@@ -297,9 +309,14 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                     return (
                       <div key={item.sampling.id}
                         style={{ borderBottom: i < pool.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                        <div className="flex items-center gap-3 px-4 py-3">
-                          <div className="w-1 self-stretch rounded-full shrink-0"
-                            style={{ background: cfg.color, minHeight: 32 }} />
+                        {/* Ligne — tap = ouvrir sélecteur de date */}
+                        <button className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
+                          onClick={() => isValidating
+                            ? setPoolValidId(null)
+                            : (setPoolValidId(item.sampling.id), setPoolDate(dateStr))
+                          }>
+                          {/* Dot statut — remplace la barre colorée */}
+                          <span className="w-2 h-2 rounded-full shrink-0 mt-0.5" style={{ background: cfg.color }} />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
                               {item.clientNom}
@@ -307,7 +324,7 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                             <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
                               {item.planNom}{item.siteNom ? ` · ${item.siteNom}` : ''}
                             </p>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-1.5 mt-1.5">
                               <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
                                 style={{ background: cfg.bg, color: cfg.color }}>
                                 {cfg.label}
@@ -325,20 +342,19 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                               )}
                             </div>
                           </div>
-                          <button
-                            onClick={() => isValidating
-                              ? setPoolValidId(null)
-                              : (setPoolValidId(item.sampling.id), setPoolDate(dateStr))
-                            }
-                            className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium"
+                          {/* Icône cercle +/× — remplace le bouton texte "→ Ce jour" */}
+                          <span className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full transition-colors"
                             style={{
                               background: isValidating ? 'var(--color-bg-tertiary)' : 'var(--color-success-light)',
-                              color: isValidating ? 'var(--color-text-secondary)' : 'var(--color-success)',
-                              border: `1px solid ${isValidating ? 'var(--color-border)' : 'transparent'}`,
+                              border: isValidating ? '1px solid var(--color-border)' : 'none',
                             }}>
-                            {isValidating ? 'Annuler' : '→ Ce jour'}
-                          </button>
-                        </div>
+                            {isValidating
+                              ? <X size={13} style={{ color: 'var(--color-text-secondary)' }} />
+                              : <Plus size={13} style={{ color: 'var(--color-success)' }} />
+                            }
+                          </span>
+                        </button>
+                        {/* Panneau date inline */}
                         {isValidating && (
                           <div className="px-4 py-3 flex items-end gap-3"
                             style={{ background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
@@ -374,69 +390,82 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
               ) : (
                 <div className="rounded-xl overflow-hidden"
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-                  {dayEvents.map((evt, i) => (
-                    <div key={evt.id} className="flex items-center gap-3 px-4 py-3"
-                      style={{ borderBottom: i < dayEvents.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                      <div className="w-1 self-stretch rounded-full shrink-0"
-                        style={{ background: evt.statusColor, minHeight: 28 }} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{evt.title}</p>
-                        <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                          {evt.subtitle}{evt.plannedTime && ` · ${evt.plannedTime}`}
-                        </p>
-                      </div>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0"
-                        style={{ background: evt.statusBg, color: evt.statusColor }}>
-                        {evt.statusLabel}
-                      </span>
-                      {evt.type === 'evenement' ? (
-                        <button onClick={() => evt.evenementData && deleteEvenement(evt.evenementData.id)}
-                          className="shrink-0 p-1.5 rounded-lg" style={{ color: 'var(--color-text-tertiary)' }}
-                          onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
-                          onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
-                          <Trash2 size={14} />
+                  {dayEvents.map((evt, i) => {
+                    const isLast = i === dayEvents.length - 1
+                    return (
+                      <div key={evt.id} className="flex items-center gap-3 px-4 py-3.5"
+                        style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)' }}>
+                        {/* Dot statut */}
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: evt.statusColor }} />
+                        {/* Infos — tappable pour naviguer */}
+                        <button className="flex-1 min-w-0 text-left"
+                          onClick={() => { if (evt.type !== 'evenement' && evt.link) { navigate(evt.link); onClose() } }}
+                          disabled={evt.type === 'evenement' || !evt.link}>
+                          <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{evt.title}</p>
+                          <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                            {evt.subtitle}{evt.plannedTime && ` · ${evt.plannedTime}`}
+                          </p>
                         </button>
-                      ) : evt.type === 'prelevement' && !evt.isDone ? (
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button onClick={() => onCancelSampling(evt)}
-                            className="px-2.5 py-1 rounded-lg text-xs font-medium"
-                            style={{ color: 'var(--color-text-secondary)', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}
-                            title="Retirer du calendrier — redevient à planifier">
-                            ↩ Annuler
+                        {/* Badge statut */}
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0"
+                          style={{ background: evt.statusBg, color: evt.statusColor }}>
+                          {evt.statusLabel}
+                        </span>
+                        {/* Action contextuelle */}
+                        {evt.type === 'evenement' ? (
+                          <button onClick={() => evt.evenementData && deleteEvenement(evt.evenementData.id)}
+                            className="shrink-0 p-1.5 rounded-lg" style={{ color: 'var(--color-text-tertiary)' }}
+                            onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
+                            onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
+                            <Trash2 size={14} />
                           </button>
+                        ) : evt.isDone ? (
+                          <CheckCircle2 size={16} className="shrink-0" style={{ color: 'var(--color-success)' }} />
+                        ) : evt.type === 'prelevement' && !evt.isDone ? (
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button onClick={() => onCancelSampling(evt)}
+                              className="p-1.5 rounded-lg text-sm leading-none"
+                              title="Retirer du calendrier — redevient à planifier"
+                              style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}>
+                              ↩
+                            </button>
+                            <button onClick={() => { navigate(evt.link); onClose() }}
+                              className="shrink-0 p-1.5 rounded-lg"
+                              style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
+                              <ExternalLink size={14} />
+                            </button>
+                          </div>
+                        ) : (
                           <button onClick={() => { navigate(evt.link); onClose() }}
                             className="shrink-0 p-1.5 rounded-lg"
                             style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
                             <ExternalLink size={14} />
                           </button>
-                        </div>
-                      ) : (
-                        <button onClick={() => { navigate(evt.link); onClose() }}
-                          className="shrink-0 p-1.5 rounded-lg"
-                          style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
-                          <ExternalLink size={14} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               )
             )}
 
-            {/* ── Onglet : + Événement ── */}
+            {/* ── Formulaire : + Événement (hors onglets) ── */}
             {activeTab === 'evt' && (
-              <div className="rounded-xl p-4"
-                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-                <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-3">
+                <p className="text-xs font-semibold px-1" style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                  Nouvel événement
+                </p>
+                <div className="rounded-xl p-4 flex flex-col gap-2.5"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
                   <input
                     type="text" value={evtTitre} onChange={e => setEvtTitre(e.target.value)}
                     placeholder="Titre de l'événement…" autoFocus
-                    className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                    className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
                     style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
                     onKeyDown={e => e.key === 'Enter' && handleCreateEvt()} />
                   <div className="flex gap-2">
                     <select value={evtType} onChange={e => setEvtType(e.target.value as TypeEvenement)}
-                      className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
+                      className="flex-1 px-3 py-2.5 rounded-lg text-sm outline-none"
                       style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
                       <option value="rappel">Rappel</option>
                       <option value="reunion">Réunion / Entretien</option>
@@ -444,14 +473,18 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                       <option value="autre">Autre</option>
                     </select>
                     <input type="time" value={evtHeure} onChange={e => setEvtHeure(e.target.value)}
-                      className="px-3 py-2 rounded-lg text-sm outline-none"
+                      className="px-3 py-2.5 rounded-lg text-sm outline-none"
                       style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', width: 110 }} />
                   </div>
                   <input type="text" value={evtNotes} onChange={e => setEvtNotes(e.target.value)}
                     placeholder="Notes (optionnel)"
-                    className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                    className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
                     style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
-                  <div className="flex items-center justify-end">
+                  <div className="flex items-center justify-between pt-0.5">
+                    <button onClick={() => setActiveTab(defaultTab)}
+                      className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+                      Annuler
+                    </button>
                     <button onClick={handleCreateEvt} disabled={!evtTitre.trim() || evtSaving}
                       className="px-4 py-2 rounded-lg text-sm font-medium"
                       style={{ background: evtTitre.trim() ? 'var(--color-accent)' : 'var(--color-border)', color: 'white', opacity: evtSaving ? 0.6 : 1 }}>
