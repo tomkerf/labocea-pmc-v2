@@ -596,26 +596,32 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
         )}
 
         {/* Panneau changer technicien — inline */}
-        {isChangingTech && users.length > 0 && (
+        {isChangingTech && (
           <div className="px-5 py-3.5 flex items-end gap-3"
             style={{ background: 'var(--color-bg-tertiary)', borderBottom: '1px solid var(--color-border-subtle)' }}>
             <div className="flex-1">
               <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
-                Technicien assigné
+                Technicien assigné (initiales)
               </label>
-              <select value={techInitiales} onChange={e => setTechInitiales(e.target.value)} autoFocus
+              <input
+                list="tech-list"
+                value={techInitiales}
+                onChange={e => setTechInitiales(e.target.value.toUpperCase())}
+                placeholder="ex: THK"
+                autoFocus
                 className="w-full px-3 py-2 rounded-lg text-sm"
-                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
+                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+              />
+              <datalist id="tech-list">
+                {/* Utilisateurs V2 enregistrés */}
                 {users.map(u => (
-                  <option key={u.uid} value={u.initiales}>
-                    {u.prenom} {u.nom} ({u.initiales})
-                  </option>
+                  <option key={u.uid} value={u.initiales}>{u.prenom} {u.nom}</option>
                 ))}
-              </select>
+              </datalist>
             </div>
-            <button onClick={handleChangeTech} disabled={saving}
+            <button onClick={handleChangeTech} disabled={saving || !techInitiales.trim()}
               className="px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: 'var(--color-accent)', color: 'white', opacity: saving ? 0.5 : 1 }}>
+              style={{ background: 'var(--color-accent)', color: 'white', opacity: (saving || !techInitiales.trim()) ? 0.5 : 1 }}>
               {saving ? '…' : 'Confirmer'}
             </button>
           </div>
@@ -663,7 +669,7 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
           )}
 
           {/* Changer le technicien */}
-          {isPrelev && users.length > 0 && (
+          {isPrelev && (
             <button onClick={() => { setIsChangingTech(v => !v); setIsMoving(false) }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
               style={{
