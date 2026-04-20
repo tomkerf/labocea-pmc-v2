@@ -52,7 +52,7 @@ export default function AppLayout() {
           <div className="md:hidden flex items-center gap-2">
             <img src="/logo.png" alt="Labocea" className="w-6 h-6 object-contain" />
             <h1 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-              {title}
+              Labocea PMC
             </h1>
           </div>
         </header>
