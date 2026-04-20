@@ -636,7 +636,18 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete 
 
           {/* Voir la mission / maintenance / métrologie */}
           {event.link && (
-            <button onClick={() => { navigate(event.link); onClose() }}
+            <button
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                // Construction explicite de l'URL pour prélèvements (évite ghost-tap iOS sur event.link)
+                const dest = (event.type === 'prelevement' && event.clientId && event.planId && event.samplingId)
+                  ? `/missions/${event.clientId}/plan/${event.planId}/sampling/${event.samplingId}`
+                  : event.link
+                onClose()
+                // Délai court pour laisser le modal se fermer avant la navigation (iOS)
+                setTimeout(() => navigate(dest), 50)
+              }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
               style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
               <ExternalLink size={15} />
