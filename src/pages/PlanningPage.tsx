@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useClientsListener, saveClient } from '@/hooks/useClients'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useVerificationsListener } from '@/hooks/useVerifications'
-import { useMaintenancesListener, saveMaintenance } from '@/hooks/useMaintenances'
+import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { useEvenementsListener, createEvenement, deleteEvenement } from '@/hooks/useEvenements'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useMetrologieStore } from '@/stores/metrologieStore'
@@ -188,13 +188,11 @@ interface DayModalProps {
   pool: PoolItem[]
   uid: string | null
   initiales: string
-  navigate: (path: string) => void
   onValidatePool: (item: PoolItem, date: string) => Promise<void>
-  onCancelSampling: (event: PlanningEvent) => Promise<void>
   onEventSelect: (event: PlanningEvent) => void
 }
 
-function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate, onValidatePool, onCancelSampling, onEventSelect }: DayModalProps) {
+function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, onValidatePool, onEventSelect }: DayModalProps) {
   const defaultTab: 'pool'|'jour' = pool.length > 0 ? 'pool' : 'jour'
   const [activeTab,   setActiveTab]   = useState<'pool'|'jour'|'evt'>(defaultTab)
   const [poolValidId, setPoolValidId] = useState<string|null>(null)
@@ -1494,9 +1492,7 @@ export default function PlanningPage() {
           pool={poolSamplings}
           uid={uid}
           initiales={initiales}
-          navigate={navigate}
           onValidatePool={handleValidatePool}
-          onCancelSampling={handleCancelSampling}
           onEventSelect={event => setEventDetail({ event, dateStr: selectedDay! })}
         />
       )}
