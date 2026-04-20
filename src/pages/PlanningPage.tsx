@@ -1627,20 +1627,29 @@ export default function PlanningPage() {
             </div>
 
             {/* Colonnes événements */}
-            <div className="grid grid-cols-5 flex-1 overflow-y-auto">
+            <div className="grid grid-cols-5 flex-1 overflow-y-auto select-none"
+              onMouseUp={handleDragMouseUp}
+              onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
               {weekDays.map((day,i) => {
                 const dateStr = toISO(day)
                 const evts = filteredForDayFlat(dateStr)
                 const isToday = sameDay(day,today)
+                const inDrag = isInDrag(dateStr)
                 return (
                   <div key={i}
-                    className="p-1.5 flex flex-col gap-1 cursor-pointer group"
-                    onClick={() => goToDay(dateStr)}
+                    className="p-1.5 flex flex-col gap-1 cursor-crosshair group"
+                    onMouseDown={e => handleDragMouseDown(e, dateStr)}
+                    onMouseEnter={() => handleDragMouseEnter(dateStr)}
                     onContextMenu={e => { e.preventDefault(); setCtxMenu({ dateStr, x: e.clientX, y: e.clientY }) }}
                     style={{
                       borderRight: i<4?'1px solid var(--color-border-subtle)':'none',
-                      background: isToday?'rgba(255,59,48,0.04)':'transparent',
+                      background: inDrag
+                        ? 'rgba(0,113,227,0.1)'
+                        : isToday ? 'rgba(255,59,48,0.04)' : 'transparent',
+                      outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
+                      outlineOffset: '-1px',
                       minHeight: 120,
+                      userSelect: 'none',
                     }}>
                     {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => goToDay(dateStr)} onSelect={e => setEventDetail({ event: e, dateStr })} />)}
                     <div className="mt-auto pt-1 flex justify-end pr-0.5">
