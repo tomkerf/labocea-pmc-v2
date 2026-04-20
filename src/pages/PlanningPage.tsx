@@ -191,9 +191,10 @@ interface DayModalProps {
   navigate: (path: string) => void
   onValidatePool: (item: PoolItem, date: string) => Promise<void>
   onCancelSampling: (event: PlanningEvent) => Promise<void>
+  onEventSelect: (event: PlanningEvent) => void
 }
 
-function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate, onValidatePool, onCancelSampling }: DayModalProps) {
+function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate, onValidatePool, onCancelSampling, onEventSelect }: DayModalProps) {
   const defaultTab: 'pool'|'jour' = pool.length > 0 ? 'pool' : 'jour'
   const [activeTab,   setActiveTab]   = useState<'pool'|'jour'|'evt'>(defaultTab)
   const [poolValidId, setPoolValidId] = useState<string|null>(null)
@@ -393,56 +394,26 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
                   {dayEvents.map((evt, i) => {
                     const isLast = i === dayEvents.length - 1
                     return (
-                      <div key={evt.id} className="flex items-center gap-3 px-4 py-3.5"
-                        style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)' }}>
-                        {/* Dot statut */}
+                      <button key={evt.id}
+                        className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
+                        style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)' }}
+                        onClick={() => { onEventSelect(evt) }}>
                         <span className="w-2 h-2 rounded-full shrink-0" style={{ background: evt.statusColor }} />
-                        {/* Infos — tappable pour naviguer */}
-                        <button className="flex-1 min-w-0 text-left"
-                          onClick={() => { if (evt.type !== 'evenement' && evt.link) { navigate(evt.link); onClose() } }}
-                          disabled={evt.type === 'evenement' || !evt.link}>
+                        <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{evt.title}</p>
                           <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
                             {evt.subtitle}{evt.plannedTime && ` · ${evt.plannedTime}`}
                           </p>
-                        </button>
-                        {/* Badge statut */}
+                        </div>
                         <span className="text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0"
                           style={{ background: evt.statusBg, color: evt.statusColor }}>
                           {evt.statusLabel}
                         </span>
-                        {/* Action contextuelle */}
-                        {evt.type === 'evenement' ? (
-                          <button onClick={() => evt.evenementData && deleteEvenement(evt.evenementData.id)}
-                            className="shrink-0 p-1.5 rounded-lg" style={{ color: 'var(--color-text-tertiary)' }}
-                            onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
-                            onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
-                            <Trash2 size={14} />
-                          </button>
-                        ) : evt.isDone ? (
-                          <CheckCircle2 size={16} className="shrink-0" style={{ color: 'var(--color-success)' }} />
-                        ) : evt.type === 'prelevement' && !evt.isDone ? (
-                          <div className="flex items-center gap-1 shrink-0">
-                            <button onClick={() => onCancelSampling(evt)}
-                              className="p-1.5 rounded-lg text-sm leading-none"
-                              title="Retirer du calendrier — redevient à planifier"
-                              style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}>
-                              ↩
-                            </button>
-                            <button onClick={() => { navigate(evt.link); onClose() }}
-                              className="shrink-0 p-1.5 rounded-lg"
-                              style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
-                              <ExternalLink size={14} />
-                            </button>
-                          </div>
-                        ) : (
-                          <button onClick={() => { navigate(evt.link); onClose() }}
-                            className="shrink-0 p-1.5 rounded-lg"
-                            style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
-                            <ExternalLink size={14} />
-                          </button>
-                        )}
-                      </div>
+                        {evt.isDone
+                          ? <CheckCircle2 size={15} className="shrink-0" style={{ color: 'var(--color-success)' }} />
+                          : <ChevronRight size={14} className="shrink-0" style={{ color: 'var(--color-text-tertiary)' }} />
+                        }
+                      </button>
                     )
                   })}
                 </div>
@@ -502,6 +473,170 @@ function DayModal({ dateStr, onClose, dayEvents, pool, uid, initiales, navigate,
   )
 }
 
+// ── EventDetailModal ────────────────────────────────────────
+
+interface EventDetailModalProps {
+  event: PlanningEvent
+  dateStr: string
+  onClose: () => void
+  navigate: (path: string) => void
+  onCancel: (event: PlanningEvent) => Promise<void>
+  onMove: (event: PlanningEvent, newDate: string) => Promise<void>
+  onDelete: (event: PlanningEvent) => void
+}
+
+function EventDetailModal({ event, dateStr, onClose, navigate, onCancel, onMove, onDelete }: EventDetailModalProps) {
+  const [isMoving, setIsMoving] = useState(false)
+  const [moveDate, setMoveDate] = useState(dateStr)
+  const [saving, setSaving] = useState(false)
+
+  const isPrelev = event.type === 'prelevement'
+  const isEvt    = event.type === 'evenement'
+
+  const dateLabel = new Date(dateStr + 'T12:00:00')
+    .toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+
+  async function handleMove() {
+    if (!moveDate || saving) return
+    setSaving(true)
+    try { await onMove(event, moveDate); onClose() }
+    finally { setSaving(false) }
+  }
+
+  async function handleCancel() {
+    setSaving(true)
+    try { await onCancel(event); onClose() }
+    finally { setSaving(false) }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.4)' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="w-full md:max-w-sm flex flex-col overflow-hidden rounded-t-[20px] md:rounded-2xl"
+        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)' }}>
+
+        {/* Handle mobile */}
+        <div className="md:hidden flex justify-center pt-2.5 pb-1 shrink-0">
+          <div className="w-9 h-1 rounded-full" style={{ background: 'var(--color-border)' }} />
+        </div>
+
+        {/* Header — titre + badges + date */}
+        <div className="flex items-start gap-3 px-5 pt-4 pb-4">
+          <span className="w-2.5 h-2.5 rounded-full shrink-0 mt-1.5" style={{ background: event.statusColor }} />
+          <div className="flex-1 min-w-0">
+            <p className="text-base font-semibold leading-snug" style={{ color: 'var(--color-text-primary)' }}>
+              {event.title}
+            </p>
+            {event.subtitle && event.subtitle !== '—' && (
+              <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                {event.subtitle}
+              </p>
+            )}
+            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+              <span className="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                style={{ background: event.statusBg, color: event.statusColor }}>
+                {event.statusLabel}
+              </span>
+              {event.technicien && event.technicien !== '—' && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                  {event.technicien}
+                </span>
+              )}
+              {event.plannedTime && (
+                <span className="text-[11px] px-2 py-0.5 rounded font-semibold"
+                  style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                  {event.plannedTime}
+                </span>
+              )}
+            </div>
+            <p className="text-xs mt-1.5 capitalize" style={{ color: 'var(--color-text-tertiary)' }}>
+              {dateLabel}
+            </p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg shrink-0 mt-0.5"
+            style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
+            <X size={15} />
+          </button>
+        </div>
+
+        <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
+
+        {/* Panneau déplacer — inline */}
+        {isMoving && (
+          <div className="px-5 py-3.5 flex items-end gap-3"
+            style={{ background: 'var(--color-bg-tertiary)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+            <div className="flex-1">
+              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                Nouvelle date
+              </label>
+              <input type="date" value={moveDate} onChange={e => setMoveDate(e.target.value)} autoFocus
+                className="w-full px-3 py-2 rounded-lg text-sm"
+                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+            </div>
+            <button onClick={handleMove} disabled={!moveDate || saving}
+              className="px-4 py-2 rounded-lg text-sm font-medium"
+              style={{ background: 'var(--color-accent)', color: 'white', opacity: (!moveDate || saving) ? 0.5 : 1 }}>
+              {saving ? '…' : 'Déplacer'}
+            </button>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex flex-col px-4 py-3 gap-2">
+
+          {/* Voir la mission / maintenance / métrologie */}
+          {event.link && (
+            <button onClick={() => { navigate(event.link); onClose() }}
+              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
+              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+              <ExternalLink size={15} />
+              {event.type === 'prelevement' ? 'Voir la mission' :
+               event.type === 'maintenance' ? 'Voir la maintenance' :
+               'Voir la métrologie'}
+            </button>
+          )}
+
+          {/* Déplacer */}
+          {isPrelev && !event.isDone && (
+            <button onClick={() => setIsMoving(v => !v)}
+              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
+              style={{
+                background: 'var(--color-bg-tertiary)',
+                color: 'var(--color-text-primary)',
+                border: '1px solid var(--color-border-subtle)',
+              }}>
+              <ChevronRight size={15} style={{ transform: isMoving ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
+              Déplacer à une autre date
+            </button>
+          )}
+
+          {/* Retirer du calendrier */}
+          {isPrelev && !event.isDone && (
+            <button onClick={handleCancel} disabled={saving}
+              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
+              style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+              ↩ Retirer du calendrier
+            </button>
+          )}
+
+          {/* Supprimer événement personnel */}
+          {isEvt && (
+            <button onClick={() => { onDelete(event); onClose() }}
+              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
+              style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+              <Trash2 size={15} /> Supprimer
+            </button>
+          )}
+
+        </div>
+        <div className="md:hidden h-2" />
+      </div>
+    </div>
+  )
+}
+
 // ── Composant principal ─────────────────────────────────────
 
 export default function PlanningPage() {
@@ -526,6 +661,7 @@ export default function PlanningPage() {
   const [filterTech,  setFilterTech]  = useState('')
   const [filterRetard,setFilterRetard]= useState(false)
   const [selectedDay, setSelectedDay] = useState<string|null>(null)
+  const [eventDetail, setEventDetail] = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
 
   // Validation inline (EventRow)
   const [validatingId,   setValidatingId]   = useState<string|null>(null)
@@ -753,6 +889,28 @@ export default function PlanningPage() {
     }, uid)
   }
 
+  // Déplace un sampling vers une nouvelle date (change uniquement le plannedDay)
+  async function handleMoveEvent(event: PlanningEvent, newDate: string) {
+    if (!uid || !event.clientId || !event.planId || !event.samplingId) return
+    const client = clients.find((c: Client) => c.id === event.clientId)
+    if (!client) return
+    const plannedDay = new Date(newDate + 'T12:00:00').getDate()
+    await saveClient({
+      ...client,
+      plans: client.plans.map(plan => plan.id !== event.planId ? plan : {
+        ...plan,
+        samplings: plan.samplings.map((s: Sampling) =>
+          s.id !== event.samplingId ? s : { ...s, plannedDay }
+        )
+      })
+    }, uid)
+  }
+
+  // Supprime un événement personnel
+  function handleDeleteEvent(event: PlanningEvent) {
+    if (event.evenementData) deleteEvenement(event.evenementData.id)
+  }
+
   // Planifie un sampling à un jour précis du mois (sans le marquer "fait")
   async function handleValidatePool(item: PoolItem, date: string) {
     if (!uid) return
@@ -820,7 +978,10 @@ export default function PlanningPage() {
 
   // ── EventPill (calendrier desktop) ─────────────────────
 
-  function EventPill({ event, compact, onExpand }: { event:PlanningEvent; compact?: boolean; onExpand?: () => void }) {
+  function EventPill({ event, compact, onExpand, onSelect }: {
+    event: PlanningEvent; compact?: boolean; onExpand?: () => void
+    onSelect?: (event: PlanningEvent) => void
+  }) {
     // compact = true en vue mois : une seule ligne, pas de sous-titre
     const isGrouped = (event.count ?? 0) > 1
     const hasSubtitle = !compact && event.subtitle && event.subtitle !== '—'
@@ -829,6 +990,7 @@ export default function PlanningPage() {
     function handleClick(e: React.MouseEvent) {
       e.stopPropagation()
       if (isGrouped && onExpand) { onExpand(); return }
+      if (onSelect) { onSelect(event); return }
       if (event.type !== 'evenement') navigate(event.link)
     }
 
@@ -875,106 +1037,44 @@ export default function PlanningPage() {
 
   // ── EventRow (liste mobile + desktop) ──────────────────
 
-  function EventRow({ event, isLast }: { event:PlanningEvent; isLast:boolean }) {
-    const isValidating = validatingId===event.id
-    const isEvt = event.type==='evenement'
+  function EventRow({ event, isLast, onSelect }: {
+    event: PlanningEvent; isLast: boolean
+    onSelect?: (event: PlanningEvent) => void
+  }) {
     const dotColor = event.statusColor
 
     return (
       <div style={{ borderBottom: isLast?'none':'1px solid var(--color-border-subtle)' }}>
-        <div className="flex items-center gap-3 px-4 py-3.5">
-          <div className="w-1 self-stretch rounded-full shrink-0" style={{ background:dotColor, minHeight:36 }} />
-
-          {isEvt ? (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate" style={{ color:'var(--color-text-primary)' }}>{event.title}</p>
+        <button className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
+          onClick={() => onSelect ? onSelect(event) : (event.link && navigate(event.link))}>
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: dotColor }} />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate" style={{ color:'var(--color-text-primary)' }}>{event.title}</p>
+            <p className="text-xs mt-0.5 truncate" style={{ color:'var(--color-text-secondary)' }}>{event.subtitle}</p>
+            <div className="flex items-center gap-1.5 mt-1">
               {event.plannedTime && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold mt-0.5 inline-block"
+                <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold"
                   style={{ background:'var(--color-accent-light)', color:'var(--color-accent)' }}>
                   {event.plannedTime}
                 </span>
               )}
+              {event.technicien&&event.technicien!=='—' && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                  {event.technicien}
+                </span>
+              )}
             </div>
-          ) : (
-            <button className="flex-1 min-w-0 text-left" onClick={() => navigate(event.link)}>
-              <p className="text-sm font-medium truncate" style={{ color:'var(--color-text-primary)' }}>{event.title}</p>
-              <p className="text-xs mt-0.5 truncate" style={{ color:'var(--color-text-secondary)' }}>{event.subtitle}</p>
-              <div className="flex items-center gap-2 mt-0.5">
-                {event.plannedTime && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold"
-                    style={{ background:'var(--color-accent-light)', color:'var(--color-accent)' }}>
-                    {event.plannedTime}
-                  </span>
-                )}
-                {event.technicien&&event.technicien!=='—' && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                    style={{ background: dotColor + '22', color: dotColor }}>
-                    {event.technicien}
-                  </span>
-                )}
-              </div>
-            </button>
-          )}
-
+          </div>
           <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
             style={{ background:event.statusBg, color:event.statusColor }}>
             {event.statusLabel}
           </span>
-
-          {isEvt ? (
-            <button onClick={() => event.evenementData&&deleteEvenement(event.evenementData.id)}
-              className="shrink-0 p-1.5 rounded-lg" style={{ color:'var(--color-text-tertiary)' }}
-              onMouseEnter={e=>(e.currentTarget.style.color='var(--color-danger)')}
-              onMouseLeave={e=>(e.currentTarget.style.color='var(--color-text-tertiary)')}>
-              <Trash2 size={15} />
-            </button>
-          ) : event.isDone ? (
-            <CheckCircle2 size={20} className="shrink-0" style={{ color:'var(--color-success)' }} />
-          ) : event.type==='verification' ? (
-            <button onClick={() => navigate(event.link)} className="shrink-0 p-1.5 rounded-lg"
-              style={{ color:'var(--color-accent)', background:'var(--color-accent-light)' }}>
-              <ExternalLink size={15} />
-            </button>
-          ) : (
-            <button
-              onClick={() => isValidating ? setValidatingId(null) : (setValidatingId(event.id), setValidationDate(toISO(today)))}
-              className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{
-                background: isValidating?'var(--color-bg-tertiary)':'var(--color-success-light)',
-                color: isValidating?'var(--color-text-secondary)':'var(--color-success)',
-                border: `1px solid ${isValidating?'var(--color-border)':'transparent'}`,
-              }}>
-              {isValidating?'Annuler':'✓ Valider'}
-            </button>
-          )}
-        </div>
-
-        {isValidating && !isEvt && (
-          <div className="px-5 py-4 flex flex-col gap-3"
-            style={{ background:'var(--color-bg-tertiary)', borderTop:'1px solid var(--color-border-subtle)' }}>
-            <div className="flex items-end gap-3">
-              <div className="flex-1">
-                <label className="block text-xs font-medium mb-1.5" style={{ color:'var(--color-text-secondary)' }}>
-                  Date de réalisation
-                </label>
-                <input type="date" value={validationDate} onChange={e=>setValidationDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg text-sm"
-                  style={{ background:'var(--color-bg-secondary)', border:'1px solid var(--color-border)', color:'var(--color-text-primary)' }} />
-              </div>
-              <button onClick={() => handleValidate(event)} disabled={saving||!validationDate}
-                className="px-4 py-2 rounded-lg text-sm font-medium"
-                style={{ background:'var(--color-success)', color:'white', opacity:saving?0.6:1 }}>
-                {saving?'…':'Confirmer'}
-              </button>
-            </div>
-            {isValidationWeekend && (
-              <p className="text-xs px-3 py-2 rounded-lg"
-                style={{ background:'var(--color-warning-light)', color:'var(--color-warning)' }}>
-                ⚠️ Intervention un week-end — vérifiez la date.
-              </p>
-            )}
-          </div>
-        )}
+          {event.isDone
+            ? <CheckCircle2 size={18} className="shrink-0" style={{ color:'var(--color-success)' }} />
+            : <ChevronRight size={15} className="shrink-0" style={{ color:'var(--color-text-tertiary)' }} />
+          }
+        </button>
       </div>
     )
   }
@@ -1148,7 +1248,7 @@ export default function PlanningPage() {
                     <span className="text-xs py-1" style={{ color: 'var(--color-text-tertiary)' }}>Aucune intervention planifiée</span>
                   ) : allDayEvts.map(evt => (
                     <button key={evt.id}
-                      onClick={() => evt.type !== 'evenement' && navigate(evt.link)}
+                      onClick={() => setEventDetail({ event: evt, dateStr })}
                       className="flex items-center gap-1.5 px-2 py-1 rounded-[5px] text-left"
                       style={{ background: evt.statusBg }}>
                       <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: evt.statusColor }} />
@@ -1217,7 +1317,7 @@ export default function PlanningPage() {
                     const W      = 1 / evt.totalCols
                     return (
                       <button key={evt.id}
-                        onClick={() => evt.type !== 'evenement' && navigate(evt.link)}
+                        onClick={() => setEventDetail({ event: evt, dateStr })}
                         className="absolute text-left rounded-lg px-2 py-1 overflow-hidden"
                         style={{
                           top: top + 1, height: height - 2,
@@ -1292,7 +1392,7 @@ export default function PlanningPage() {
                       background: isToday?'rgba(255,59,48,0.04)':'transparent',
                       minHeight: 120,
                     }}>
-                    {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => goToDay(dateStr)} />)}
+                    {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => goToDay(dateStr)} onSelect={e => setEventDetail({ event: e, dateStr })} />)}
                     <div className="mt-auto pt-1 flex justify-end pr-0.5">
                       <Plus size={10} className="opacity-20 group-hover:opacity-60 transition-opacity"
                         style={{ color: 'var(--color-text-tertiary)' }} />
@@ -1359,7 +1459,7 @@ export default function PlanningPage() {
                       <Plus size={10} className="opacity-25 group-hover:opacity-70 transition-opacity"
                         style={{ color: 'var(--color-text-tertiary)' }} />
                     </div>
-                    {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact onExpand={() => goToDay(dateStr)} />)}
+                    {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact onExpand={() => goToDay(dateStr)} onSelect={e => setEventDetail({ event: e, dateStr })} />)}
                     {evts.length>MAX && (
                       <span className="text-[10px] pl-1 mt-0.5" style={{ color:'var(--color-text-tertiary)' }}>
                         +{evts.length-MAX} autres
@@ -1411,7 +1511,7 @@ export default function PlanningPage() {
                   </div>
                   <div className="rounded-xl overflow-hidden"
                     style={{ background:'var(--color-bg-secondary)', border:'1px solid var(--color-border-subtle)', boxShadow:'var(--shadow-card)' }}>
-                    {events.map((evt,i) => <EventRow key={evt.id} event={evt} isLast={i===events.length-1} />)}
+                    {events.map((evt,i) => <EventRow key={evt.id} event={evt} isLast={i===events.length-1} onSelect={e => setEventDetail({ event: e, dateStr })} />)}
                   </div>
                 </div>
               )
@@ -1433,6 +1533,21 @@ export default function PlanningPage() {
           navigate={navigate}
           onValidatePool={handleValidatePool}
           onCancelSampling={handleCancelSampling}
+          onEventSelect={event => setEventDetail({ event, dateStr: selectedDay! })}
+        />
+      )}
+
+      {/* ── EventDetailModal ── */}
+      {eventDetail && (
+        <EventDetailModal
+          key={eventDetail.event.id}
+          event={eventDetail.event}
+          dateStr={eventDetail.dateStr}
+          onClose={() => setEventDetail(null)}
+          navigate={navigate}
+          onCancel={handleCancelSampling}
+          onMove={handleMoveEvent}
+          onDelete={handleDeleteEvent}
         />
       )}
 
