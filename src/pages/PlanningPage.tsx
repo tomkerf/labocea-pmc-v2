@@ -526,13 +526,13 @@ interface EventDetailModalProps {
   event: PlanningEvent
   dateStr: string
   onClose: () => void
-  navigate: (path: string) => void
   onCancel: (event: PlanningEvent) => Promise<void>
   onMove: (event: PlanningEvent, newDate: string) => Promise<void>
   onDelete: (event: PlanningEvent) => void
 }
 
-function EventDetailModal({ event, dateStr, onClose, navigate, onCancel, onMove, onDelete }: EventDetailModalProps) {
+function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete }: EventDetailModalProps) {
+  const navigate = useNavigate()
   const [isMoving, setIsMoving] = useState(false)
   const [moveDate, setMoveDate] = useState(dateStr)
   const [saving, setSaving] = useState(false)
@@ -1577,7 +1577,6 @@ export default function PlanningPage() {
           event={eventDetail.event}
           dateStr={eventDetail.dateStr}
           onClose={() => setEventDetail(null)}
-          navigate={navigate}
           onCancel={handleCancelSampling}
           onMove={handleMoveEvent}
           onDelete={handleDeleteEvent}
