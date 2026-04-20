@@ -108,11 +108,22 @@ export default function DashboardPage() {
   const verifiConformes = verifications.filter((v: Verification) => v.resultat === 'conforme').length
   const conformitePct = verifiTotal > 0 ? Math.round((verifiConformes / verifiTotal) * 100) : null
 
-  // Alertes métrologie (retard ou < 30j)
-  const alertesMetro = verifications.filter((v: Verification) => {
+  // Équipements sans enregistrement de vérification (même logique que MerologiePage)
+  const equipementsWithoutVerif = equipements.filter((e: Equipement) => {
+    if (!e.prochainEtalonnage) return false
+    return !verifications.some((v: Verification) => v.equipementId === e.id)
+  })
+
+  // Alertes métrologie — deux sources : verifications + équipements orphelins
+  // (en retard = diff < 0, à prévoir = 0 ≤ diff < 30j)
+  const alertesMetroVerif = verifications.filter((v: Verification) => {
     if (!v.prochainControle) return false
     return daysDiff(v.prochainControle) < 30
   })
+  const alertesMetroEq = equipementsWithoutVerif.filter((e: Equipement) =>
+    daysDiff(e.prochainEtalonnage) < 30
+  )
+  const alertesMetro = [...alertesMetroVerif, ...alertesMetroEq]
 
   // Maintenances actives (planifiée ou en cours)
   const maintenancesActives = maintenances.filter(
@@ -121,13 +132,18 @@ export default function DashboardPage() {
 
   const alertesTotal = alertesMetro.length + maintenancesActives.length
 
-  // À calibrer : vérifications dont le prochain contrôle est dans 0–30j
-  // (même logique que le filtre "À prévoir" de la page Métrologie)
-  const aCalibrrer = verifications.filter((v: Verification) => {
-    if (!v.prochainControle) return false
-    const d = daysDiff(v.prochainControle)
-    return d >= 0 && d < 30
-  }).length
+  // À calibrer : verifications OU équipements orphelins avec échéance dans 0–30j
+  const aCalibrrer = [
+    ...verifications.filter((v: Verification) => {
+      if (!v.prochainControle) return false
+      const d = daysDiff(v.prochainControle)
+      return d >= 0 && d < 30
+    }),
+    ...equipementsWithoutVerif.filter((e: Equipement) => {
+      const d = daysDiff(e.prochainEtalonnage)
+      return d >= 0 && d < 30
+    }),
+  ].length
 
   // ── Planning du jour = prélèvements planifiés aujourd'hui ──
 
@@ -204,15 +220,21 @@ export default function DashboardPage() {
       link: '/planning',
       isUrgent: true,
     }] : []),
-    ...alertesMetro.map((v: Verification) => ({
+    ...alertesMetroVerif.map((v: Verification) => ({
       label: v.equipementNom || 'Équipement',
-      detail: v.prochainControle
-        ? daysDiff(v.prochainControle) < 0
-          ? `Étalonnage en retard de ${Math.abs(daysDiff(v.prochainControle))}j`
-          : `Étalonnage dans ${daysDiff(v.prochainControle)}j`
-        : 'Étalonnage non planifié',
+      detail: daysDiff(v.prochainControle) < 0
+        ? `Étalonnage en retard de ${Math.abs(daysDiff(v.prochainControle))}j`
+        : `Étalonnage dans ${daysDiff(v.prochainControle)}j`,
       link: `/metrologie/${v.id}`,
       isUrgent: daysDiff(v.prochainControle) < 0,
+    })),
+    ...alertesMetroEq.map((e: Equipement) => ({
+      label: e.nom || 'Équipement',
+      detail: daysDiff(e.prochainEtalonnage) < 0
+        ? `Étalonnage en retard de ${Math.abs(daysDiff(e.prochainEtalonnage))}j`
+        : `Étalonnage dans ${daysDiff(e.prochainEtalonnage)}j`,
+      link: `/materiel/${e.id}`,
+      isUrgent: daysDiff(e.prochainEtalonnage) < 0,
     })),
     ...maintenancesActives.map((m: Maintenance) => ({
       label: m.equipementNom || 'Équipement',
