@@ -1465,9 +1465,9 @@ export default function PlanningPage() {
           return Math.ceil((((d.getTime() - y.getTime()) / 86400000) + 1) / 7)
         })()
         return (
-          <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-hidden flex flex-col relative">
 
-            {/* Sous-titre : numéro de semaine + bouton Planifier */}
+            {/* Sous-titre : numéro de semaine */}
             <div className="px-4 py-1.5 shrink-0 flex items-center gap-2"
               style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
               <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -1478,12 +1478,6 @@ export default function PlanningPage() {
                   · {allEvts.length} intervention{allEvts.length > 1 ? 's' : ''}
                 </span>
               )}
-              <button
-                onClick={() => setSelectedDay(dateStr)}
-                className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                style={{ background: 'var(--color-accent)', color: 'white' }}>
-                <Plus size={12} /> Planifier
-              </button>
             </div>
 
             {/* Section "Toute la journée" */}
@@ -1593,6 +1587,21 @@ export default function PlanningPage() {
 
               </div>
             </div>
+
+            {/* FAB Planifier — flottant bas droite */}
+            <button
+              onClick={() => setSelectedDay(dateStr)}
+              className="absolute bottom-6 right-6 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-lg"
+              style={{
+                background: 'var(--color-accent)',
+                color: 'white',
+                boxShadow: '0 4px 16px rgba(0,113,227,0.35)',
+                zIndex: 20,
+              }}>
+              <Plus size={16} strokeWidth={2.5} />
+              Planifier
+            </button>
+
           </div>
         )
       })()}
