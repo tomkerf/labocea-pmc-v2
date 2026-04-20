@@ -6,14 +6,6 @@ import TabBar from './TabBar'
 import { useAuthStore } from '@/stores/authStore'
 import { getAvatarColor, AVATAR_COLORS } from '@/components/ui/UserAvatar'
 
-const pageTitles: Record<string, string> = {
-  '/':             'Missions',
-  '/materiel':     'Matériel',
-  '/metrologie':   'Métrologie',
-  '/maintenances': 'Maintenances',
-  '/compte':       'Mon compte',
-}
-
 export default function AppLayout() {
   const location = useLocation()
   const avatarColor = useAuthStore((s) => s.appUser?.avatarColor)
@@ -28,10 +20,6 @@ export default function AppLayout() {
     root.style.setProperty('--color-accent-hover', accent)
     root.style.setProperty('--color-accent-light', accentLight)
   }, [avatarColor])
-
-  // Titre basé sur la route courante (premier segment)
-  const rootPath = '/' + (location.pathname.split('/')[1] ?? '')
-  const title = pageTitles[rootPath] ?? 'Labocea PMC'
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--color-bg-primary)' }}>
