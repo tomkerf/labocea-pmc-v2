@@ -560,8 +560,8 @@ function EventDetailModal({ event, dateStr, onClose, navigate, onCancel, onMove,
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center"
       style={{ background: 'rgba(0,0,0,0.4)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div className="w-full md:max-w-sm flex flex-col overflow-hidden rounded-t-[20px] md:rounded-2xl"
-        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)' }}>
+      <div className="w-full md:max-w-sm flex flex-col rounded-t-[20px] md:rounded-2xl"
+        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)', maxHeight: '90dvh', overflow: 'hidden' }}>
 
         {/* Handle mobile */}
         <div className="md:hidden flex justify-center pt-2.5 pb-1 shrink-0">
@@ -631,7 +631,8 @@ function EventDetailModal({ event, dateStr, onClose, navigate, onCancel, onMove,
         )}
 
         {/* Actions */}
-        <div className="flex flex-col px-4 py-3 gap-2">
+        <div className="flex flex-col px-4 py-3 gap-2 overflow-y-auto"
+          style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}>
 
           {/* Voir la mission / maintenance / métrologie */}
           {event.link && (
@@ -678,7 +679,6 @@ function EventDetailModal({ event, dateStr, onClose, navigate, onCancel, onMove,
           )}
 
         </div>
-        <div className="md:hidden h-2" />
       </div>
     </div>
   )
