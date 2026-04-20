@@ -485,9 +485,10 @@ interface EventDetailModalProps {
   onDelete: (event: PlanningEvent) => void
   onChangeTech: (event: PlanningEvent, initiales: string) => Promise<void>
   users: AppUser[]
+  techSuggestions: string[]   // toutes les initiales déjà présentes dans les clients
 }
 
-function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete, onChangeTech, users }: EventDetailModalProps) {
+function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete, onChangeTech, users, techSuggestions }: EventDetailModalProps) {
   const navigate = useNavigate()
   const [isMoving,     setIsMoving]     = useState(false)
   const [isChangingTech, setIsChangingTech] = useState(false)
@@ -613,10 +614,17 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
               />
               <datalist id="tech-list">
-                {/* Utilisateurs V2 enregistrés */}
+                {/* Utilisateurs V2 enregistrés (avec nom complet) */}
                 {users.map(u => (
                   <option key={u.uid} value={u.initiales}>{u.prenom} {u.nom}</option>
                 ))}
+                {/* Initiales présentes dans les clients mais sans compte V2 */}
+                {techSuggestions
+                  .filter(ini => !users.some(u => u.initiales === ini))
+                  .map(ini => (
+                    <option key={ini} value={ini} />
+                  ))
+                }
               </datalist>
             </div>
             <button onClick={handleChangeTech} disabled={saving || !techInitiales.trim()}
@@ -1032,6 +1040,13 @@ export default function PlanningPage() {
     if (filterRetard) evts = evts.filter(e => e.statusColor==='var(--color-danger)'||e.statusLabel==='En retard')
     return sortEvts(evts)
   }
+
+  // Toutes les initiales de preleveurs déjà utilisées dans les clients
+  const techSuggestions = useMemo(() => {
+    const s = new Set<string>()
+    clients.forEach((c: Client) => { if (c.preleveur) s.add(c.preleveur) })
+    return Array.from(s).sort()
+  }, [clients])
 
   const totalOverdue = useMemo(() => {
     let n=0
@@ -1863,6 +1878,7 @@ export default function PlanningPage() {
           onDelete={handleDeleteEvent}
           onChangeTech={handleChangeTechnicien}
           users={users}
+          techSuggestions={techSuggestions}
         />
       )}
 
