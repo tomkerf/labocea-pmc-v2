@@ -1198,7 +1198,7 @@ export default function PlanningPage() {
               {monthPoolCount} prélèvement{monthPoolCount > 1 ? 's' : ''} à planifier ce mois
             </span>
             <span className="font-normal" style={{ opacity: 0.75 }}>
-              {' '}— cliquez sur un jour pour les assigner
+              {' '}— clic droit sur un jour pour les assigner
             </span>
           </p>
         </div>
