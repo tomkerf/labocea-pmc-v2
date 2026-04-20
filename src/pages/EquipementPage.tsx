@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Trash2, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, Trash2, AlertTriangle, Gauge, Wrench, Package, Clock } from 'lucide-react'
 import { doc, onSnapshot, deleteDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveEquipement } from '@/hooks/useEquipements'
+import { useVerificationsListener } from '@/hooks/useVerifications'
+import { useMaintenancesListener } from '@/hooks/useMaintenances'
+import { useMetrologieStore } from '@/stores/metrologieStore'
+import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useAuthStore } from '@/stores/authStore'
 import CircleProgress from '@/components/materiel/CircleProgress'
-import type { Equipement, CategorieType, EtatType, LocalisationType, MateriauFlacon } from '@/types'
+import type { Equipement, CategorieType, EtatType, LocalisationType, MateriauFlacon, Verification, Maintenance } from '@/types'
 
 const CATEGORIES: { value: CategorieType; label: string }[] = [
   { value: 'preleveur',     label: 'Préleveur'      },
@@ -50,6 +54,11 @@ export default function EquipementPage() {
   const { equipementId } = useParams<{ equipementId: string }>()
   const navigate = useNavigate()
   const uid = useAuthStore((s) => s.uid())
+
+  useVerificationsListener()
+  useMaintenancesListener()
+  const verifications = useMetrologieStore((s) => s.verifications)
+  const maintenances  = useMaintenancesStore((s) => s.maintenances)
 
   const [equipement, setEquipement] = useState<Equipement | null>(null)
   const [loading, setLoading] = useState(true)
@@ -257,6 +266,13 @@ export default function EquipementPage() {
           />
         </div>
       </Section>
+
+      {/* Fiche de vie */}
+      <FicheDeVie
+        equipement={equipement}
+        verifications={verifications.filter((v) => v.equipementId === equipementId)}
+        maintenances={maintenances.filter((m) => m.equipementId === equipementId)}
+      />
     </div>
   )
 }
@@ -286,6 +302,177 @@ function Field({ label, children, last }: { label: string; children: React.React
         {label}
       </label>
       <div className="flex-1">{children}</div>
+    </div>
+  )
+}
+
+// ── Fiche de vie ────────────────────────────────────────────
+
+type TimelineEntry =
+  | { kind: 'acquisition'; date: string }
+  | { kind: 'verification'; date: string; data: Verification }
+  | { kind: 'maintenance';  date: string; data: Maintenance }
+
+function FicheDeVie({ equipement, verifications, maintenances }: {
+  equipement: Equipement
+  verifications: Verification[]
+  maintenances: Maintenance[]
+}) {
+  // Calcul ancienneté
+  const anciennete = (() => {
+    if (!equipement.dateAcquisition) return null
+    const ms = Date.now() - new Date(equipement.dateAcquisition).getTime()
+    const totalMonths = Math.floor(ms / (1000 * 60 * 60 * 24 * 30.44))
+    const years  = Math.floor(totalMonths / 12)
+    const months = totalMonths % 12
+    if (years === 0) return `${months} mois`
+    if (months === 0) return `${years} an${years > 1 ? 's' : ''}`
+    return `${years} an${years > 1 ? 's' : ''} ${months} mois`
+  })()
+
+  // Construction de la timeline unifiée
+  const entries: TimelineEntry[] = [
+    ...(equipement.dateAcquisition
+      ? [{ kind: 'acquisition' as const, date: equipement.dateAcquisition }]
+      : []),
+    ...verifications.map((v) => ({ kind: 'verification' as const, date: v.date, data: v })),
+    ...maintenances
+      .filter((m) => m.dateRealisee || m.datePrevue)
+      .map((m) => ({ kind: 'maintenance' as const, date: m.dateRealisee || m.datePrevue, data: m })),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  const VERIF_TYPE: Record<string, string> = {
+    etalonnage_interne: 'Étalonnage interne',
+    verification_externe: 'Vérification externe',
+    controle_terrain: 'Contrôle terrain',
+  }
+  const MAINT_TYPE: Record<string, string> = {
+    preventive: 'Maintenance préventive',
+    corrective: 'Maintenance corrective',
+    panne: 'Panne',
+  }
+
+  return (
+    <div className="mb-5">
+      {/* Titre + ancienneté */}
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xs font-semibold uppercase"
+          style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+          Fiche de vie
+        </h2>
+        {anciennete && (
+          <span className="flex items-center gap-1 text-xs font-medium"
+            style={{ color: 'var(--color-text-tertiary)' }}>
+            <Clock size={11} />
+            {anciennete} en service
+          </span>
+        )}
+      </div>
+
+      {entries.length === 0 ? (
+        <div className="rounded-xl px-5 py-6 text-sm text-center"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-tertiary)' }}>
+          Aucun événement enregistré pour cet équipement.
+        </div>
+      ) : (
+        <div className="rounded-xl overflow-hidden"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          {entries.map((entry, i) => {
+            const isLast = i === entries.length - 1
+            const dateLabel = new Date(entry.date + 'T12:00:00').toLocaleDateString('fr-FR', {
+              day: 'numeric', month: 'long', year: 'numeric'
+            })
+
+            if (entry.kind === 'acquisition') {
+              return (
+                <TimelineRow key="acquisition" isLast={isLast}
+                  icon={<Package size={14} />}
+                  iconBg="var(--color-bg-tertiary)" iconColor="var(--color-text-secondary)"
+                  date={dateLabel}
+                  title="Acquisition de l'équipement"
+                  badge={null}
+                />
+              )
+            }
+
+            if (entry.kind === 'verification') {
+              const v = entry.data
+              const isOk = v.resultat === 'conforme'
+              const isNok = v.resultat === 'non_conforme'
+              return (
+                <TimelineRow key={v.id} isLast={isLast}
+                  icon={<Gauge size={14} />}
+                  iconBg={isOk ? 'var(--color-success-light)' : isNok ? 'var(--color-danger-light)' : 'var(--color-warning-light)'}
+                  iconColor={isOk ? 'var(--color-success)' : isNok ? 'var(--color-danger)' : 'var(--color-warning)'}
+                  date={dateLabel}
+                  title={VERIF_TYPE[v.type] ?? v.type}
+                  subtitle={[v.technicienNom, v.remarques].filter(Boolean).join(' · ')}
+                  badge={
+                    isOk  ? { label: 'Conforme',      bg: 'var(--color-success-light)', color: 'var(--color-success)' } :
+                    isNok ? { label: 'Non conforme',   bg: 'var(--color-danger-light)',  color: 'var(--color-danger)'  } :
+                            { label: 'À reprendre',    bg: 'var(--color-warning-light)', color: 'var(--color-warning)' }
+                  }
+                />
+              )
+            }
+
+            // maintenance
+            const m = entry.data
+            const isDone = m.statut === 'realisee'
+            return (
+              <TimelineRow key={m.id} isLast={isLast}
+                icon={<Wrench size={14} />}
+                iconBg={isDone ? 'var(--color-bg-tertiary)' : 'var(--color-warning-light)'}
+                iconColor={isDone ? 'var(--color-text-secondary)' : 'var(--color-warning)'}
+                date={dateLabel}
+                title={MAINT_TYPE[m.type] ?? m.type}
+                subtitle={[m.technicienNom, m.travauxRealises || m.description].filter(Boolean).join(' · ')}
+                badge={
+                  isDone
+                    ? { label: 'Réalisée',  bg: 'var(--color-bg-tertiary)',    color: 'var(--color-text-secondary)' }
+                    : { label: 'Planifiée', bg: 'var(--color-warning-light)',  color: 'var(--color-warning)'        }
+                }
+              />
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function TimelineRow({ icon, iconBg, iconColor, date, title, subtitle, badge, isLast }: {
+  icon: React.ReactNode
+  iconBg: string; iconColor: string
+  date: string
+  title: string
+  subtitle?: string
+  badge: { label: string; bg: string; color: string } | null
+  isLast: boolean
+}) {
+  return (
+    <div className="flex items-start gap-3 px-4 py-3.5"
+      style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)' }}>
+      {/* Icône */}
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+        style={{ background: iconBg, color: iconColor }}>
+        {icon}
+      </div>
+      {/* Contenu */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{title}</p>
+        {subtitle && (
+          <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>{subtitle}</p>
+        )}
+        <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>{date}</p>
+      </div>
+      {/* Badge */}
+      {badge && (
+        <span className="text-[11px] px-2 py-0.5 rounded-full font-medium shrink-0 self-start mt-0.5"
+          style={{ background: badge.bg, color: badge.color }}>
+          {badge.label}
+        </span>
+      )}
     </div>
   )
 }
