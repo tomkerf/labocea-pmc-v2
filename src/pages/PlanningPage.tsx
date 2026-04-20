@@ -602,30 +602,27 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
             style={{ background: 'var(--color-bg-tertiary)', borderBottom: '1px solid var(--color-border-subtle)' }}>
             <div className="flex-1">
               <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
-                Technicien assigné (initiales)
+                Technicien assigné
               </label>
-              <input
-                list="tech-list"
+              <select
                 value={techInitiales}
-                onChange={e => setTechInitiales(e.target.value.toUpperCase())}
-                placeholder="ex: THK"
+                onChange={e => setTechInitiales(e.target.value)}
                 autoFocus
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
-              />
-              <datalist id="tech-list">
+              >
                 {/* Utilisateurs V2 enregistrés (avec nom complet) */}
                 {users.map(u => (
-                  <option key={u.uid} value={u.initiales}>{u.prenom} {u.nom}</option>
+                  <option key={u.uid} value={u.initiales}>{u.prenom} {u.nom} ({u.initiales})</option>
                 ))}
-                {/* Initiales présentes dans les clients mais sans compte V2 */}
+                {/* Initiales présentes dans les clients sans compte V2 */}
                 {techSuggestions
                   .filter(ini => !users.some(u => u.initiales === ini))
                   .map(ini => (
-                    <option key={ini} value={ini} />
+                    <option key={ini} value={ini}>{ini}</option>
                   ))
                 }
-              </datalist>
+              </select>
             </div>
             <button onClick={handleChangeTech} disabled={saving || !techInitiales.trim()}
               className="px-4 py-2 rounded-lg text-sm font-medium"
