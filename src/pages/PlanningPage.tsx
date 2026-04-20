@@ -649,6 +649,21 @@ export default function PlanningPage() {
     return n
   }, [clients])
 
+  // Nombre de samplings non faits dans le mois visible — pour le bandeau "à planifier"
+  const monthPoolCount = useMemo(() => {
+    const refDate = viewMode === 'mois' ? monthStart : viewMode === 'semaine' ? weekStart : selectedDate
+    const month = refDate.getMonth()
+    let count = 0
+    clients.forEach((c: Client) => {
+      c.plans.forEach(plan => {
+        plan.samplings.forEach((s: Sampling) => {
+          if (s.plannedMonth === month && s.status !== 'done') count++
+        })
+      })
+    })
+    return count
+  }, [clients, viewMode, monthStart, weekStart, selectedDate])
+
   // ── Pool samplings non faits du mois sélectionné ────────
 
   const poolSamplings = useMemo((): PoolItem[] => {
@@ -1060,6 +1075,22 @@ export default function PlanningPage() {
         ))}
       </div>
 
+      {/* ── Bandeau "à planifier" — visible en vue mois/semaine quand le pool n'est pas vide ── */}
+      {viewMode !== 'jour' && monthPoolCount > 0 && (
+        <div className="flex items-center gap-2 px-4 md:px-6 py-2 shrink-0"
+          style={{ background: 'var(--color-accent-light)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: 'var(--color-accent)' }} />
+          <p className="text-xs" style={{ color: 'var(--color-accent)' }}>
+            <span className="font-semibold">
+              {monthPoolCount} prélèvement{monthPoolCount > 1 ? 's' : ''} à planifier ce mois
+            </span>
+            <span className="font-normal" style={{ opacity: 0.75 }}>
+              {' '}— cliquez sur un jour pour les assigner
+            </span>
+          </p>
+        </div>
+      )}
+
       {/* ── VUE JOUR (toutes tailles) ── */}
       {viewMode === 'jour' && (() => {
         const D_START = 7, D_END = 20, PX_H = 64, PX_M = PX_H / 60
@@ -1262,8 +1293,9 @@ export default function PlanningPage() {
                       minHeight: 120,
                     }}>
                     {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => goToDay(dateStr)} />)}
-                    <div className="mt-auto pt-1">
-                      <div />
+                    <div className="mt-auto pt-1 flex justify-end pr-0.5">
+                      <Plus size={10} className="opacity-20 group-hover:opacity-60 transition-opacity"
+                        style={{ color: 'var(--color-text-tertiary)' }} />
                     </div>
                   </div>
                 )
@@ -1324,7 +1356,7 @@ export default function PlanningPage() {
                           </span>
                         )}
                       </span>
-                      <Plus size={10} className="opacity-0 group-hover:opacity-40 transition-opacity"
+                      <Plus size={10} className="opacity-25 group-hover:opacity-70 transition-opacity"
                         style={{ color: 'var(--color-text-tertiary)' }} />
                     </div>
                     {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact onExpand={() => goToDay(dateStr)} />)}
