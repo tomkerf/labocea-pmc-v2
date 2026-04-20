@@ -121,10 +121,12 @@ export default function DashboardPage() {
 
   const alertesTotal = alertesMetro.length + maintenancesActives.length
 
-  // Équipements à calibrer (prochainEtalonnage dans < 30j)
-  const aCalibrrer = equipements.filter((e: Equipement) => {
-    if (!e.prochainEtalonnage) return false
-    return daysDiff(e.prochainEtalonnage) < 30
+  // À calibrer : vérifications dont le prochain contrôle est dans 0–30j
+  // (même logique que le filtre "À prévoir" de la page Métrologie)
+  const aCalibrrer = verifications.filter((v: Verification) => {
+    if (!v.prochainControle) return false
+    const d = daysDiff(v.prochainControle)
+    return d >= 0 && d < 30
   }).length
 
   // ── Planning du jour = prélèvements planifiés aujourd'hui ──
