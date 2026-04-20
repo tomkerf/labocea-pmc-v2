@@ -6,12 +6,14 @@ import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { useEvenementsListener, createEvenement, deleteEvenement } from '@/hooks/useEvenements'
+import { useUsersListener } from '@/hooks/useUsers'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useEvenementsStore } from '@/stores/evenementsStore'
+import { useUsersStore } from '@/stores/usersStore'
 import { useAuthStore } from '@/stores/authStore'
-import type { Client, Sampling, Verification, Maintenance, EvenementPersonnel, TypeEvenement } from '@/types'
+import type { Client, Sampling, Verification, Maintenance, EvenementPersonnel, TypeEvenement, AppUser } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
 
 // ── Types ───────────────────────────────────────────────────
@@ -481,13 +483,17 @@ interface EventDetailModalProps {
   onCancel: (event: PlanningEvent) => Promise<void>
   onMove: (event: PlanningEvent, newDate: string) => Promise<void>
   onDelete: (event: PlanningEvent) => void
+  onChangeTech: (event: PlanningEvent, initiales: string) => Promise<void>
+  users: AppUser[]
 }
 
-function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete }: EventDetailModalProps) {
+function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete, onChangeTech, users }: EventDetailModalProps) {
   const navigate = useNavigate()
-  const [isMoving, setIsMoving] = useState(false)
-  const [moveDate, setMoveDate] = useState(dateStr)
-  const [saving, setSaving] = useState(false)
+  const [isMoving,     setIsMoving]     = useState(false)
+  const [isChangingTech, setIsChangingTech] = useState(false)
+  const [moveDate,     setMoveDate]     = useState(dateStr)
+  const [techInitiales, setTechInitiales] = useState(event.technicien ?? '')
+  const [saving,       setSaving]       = useState(false)
 
   const isPrelev = event.type === 'prelevement'
   const isEvt    = event.type === 'evenement'
@@ -505,6 +511,13 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete 
   async function handleCancel() {
     setSaving(true)
     try { await onCancel(event); onClose() }
+    finally { setSaving(false) }
+  }
+
+  async function handleChangeTech() {
+    if (!techInitiales || saving) return
+    setSaving(true)
+    try { await onChangeTech(event, techInitiales); setIsChangingTech(false) }
     finally { setSaving(false) }
   }
 
@@ -582,6 +595,32 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete 
           </div>
         )}
 
+        {/* Panneau changer technicien — inline */}
+        {isChangingTech && users.length > 0 && (
+          <div className="px-5 py-3.5 flex items-end gap-3"
+            style={{ background: 'var(--color-bg-tertiary)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+            <div className="flex-1">
+              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                Technicien assigné
+              </label>
+              <select value={techInitiales} onChange={e => setTechInitiales(e.target.value)} autoFocus
+                className="w-full px-3 py-2 rounded-lg text-sm"
+                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
+                {users.map(u => (
+                  <option key={u.uid} value={u.initiales}>
+                    {u.prenom} {u.nom} ({u.initiales})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button onClick={handleChangeTech} disabled={saving}
+              className="px-4 py-2 rounded-lg text-sm font-medium"
+              style={{ background: 'var(--color-accent)', color: 'white', opacity: saving ? 0.5 : 1 }}>
+              {saving ? '…' : 'Confirmer'}
+            </button>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex flex-col px-4 py-3 gap-2 overflow-y-auto"
           style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}>
@@ -611,7 +650,7 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete 
 
           {/* Déplacer */}
           {isPrelev && !event.isDone && (
-            <button onClick={() => setIsMoving(v => !v)}
+            <button onClick={() => { setIsMoving(v => !v); setIsChangingTech(false) }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
               style={{
                 background: 'var(--color-bg-tertiary)',
@@ -620,6 +659,20 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete 
               }}>
               <ChevronRight size={15} style={{ transform: isMoving ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
               Déplacer à une autre date
+            </button>
+          )}
+
+          {/* Changer le technicien */}
+          {isPrelev && users.length > 0 && (
+            <button onClick={() => { setIsChangingTech(v => !v); setIsMoving(false) }}
+              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
+              style={{
+                background: 'var(--color-bg-tertiary)',
+                color: 'var(--color-text-primary)',
+                border: '1px solid var(--color-border-subtle)',
+              }}>
+              <ChevronRight size={15} style={{ transform: isChangingTech ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
+              Changer le technicien
             </button>
           )}
 
@@ -812,7 +865,7 @@ function DragCreateModal({
 export default function PlanningPage() {
   useClientsListener(); useEquipementsListener()
   useVerificationsListener(); useMaintenancesListener()
-  useEvenementsListener()
+  useEvenementsListener(); useUsersListener()
 
   const navigate   = useNavigate()
   const uid        = useAuthStore(s => s.uid())
@@ -821,6 +874,7 @@ export default function PlanningPage() {
   const { verifications } = useMetrologieStore()
   const { maintenances }  = useMaintenancesStore()
   const { evenements }    = useEvenementsStore()
+  const users             = useUsersStore(s => s.users)
 
   const today = new Date(); today.setHours(0,0,0,0)
 
@@ -1079,6 +1133,14 @@ export default function PlanningPage() {
     if (event.evenementData) deleteEvenement(event.evenementData.id)
   }
 
+  // Change le technicien assigné à un client (client.preleveur = initiales)
+  async function handleChangeTechnicien(event: PlanningEvent, initiales_: string) {
+    if (!uid || !event.clientId) return
+    const client = clients.find((c: Client) => c.id === event.clientId)
+    if (!client) return
+    await saveClient({ ...client, preleveur: initiales_ }, uid)
+  }
+
   // Crée un événement personnel (avec dateFin optionnelle)
   async function handleSaveEvenement(
     titre: string, type: TypeEvenement,
@@ -1198,6 +1260,7 @@ export default function PlanningPage() {
     return (
       <button
         onClick={handleClick}
+        onMouseDown={e => e.stopPropagation()}
         className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
         style={{ background: event.statusBg, cursor: isGrouped ? 'zoom-in' : event.type === 'evenement' ? 'default' : 'pointer' }}
         title={isGrouped ? `${event.title} — ${event.count} prélèvements (cliquer pour détails)` : `${event.title} — ${event.subtitle} (${event.technicien})`}
@@ -1792,6 +1855,8 @@ export default function PlanningPage() {
           onCancel={handleCancelSampling}
           onMove={handleMoveEvent}
           onDelete={handleDeleteEvent}
+          onChangeTech={handleChangeTechnicien}
+          users={users}
         />
       )}
 
