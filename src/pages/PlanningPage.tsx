@@ -663,9 +663,6 @@ export default function PlanningPage() {
   const [selectedDay, setSelectedDay] = useState<string|null>(null)
   const [eventDetail, setEventDetail] = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
 
-  // Validation inline (EventRow)
-  const [validatingId,   setValidatingId]   = useState<string|null>(null)
-  const [validationDate, setValidationDate] = useState(toISO(today))
   const [saving, setSaving] = useState(false)
 
   const weekDays  = useMemo(() => Array.from({length:5},(_,i) => addDays(weekStart,i)), [weekStart])
@@ -845,33 +842,7 @@ export default function PlanningPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode, weekDays, monthStart, eventsByDate, filterTech, filterRetard])
 
-  // ── Validation inline ───────────────────────────────────
-
-  async function handleValidate(event:PlanningEvent) {
-    if (!uid||saving) return
-    setSaving(true)
-    try {
-      if (event.type==='prelevement'&&event.clientId&&event.planId&&event.samplingId) {
-        const client = clients.find((c:Client)=>c.id===event.clientId)
-        if (!client) return
-        await saveClient({
-          ...client,
-          plans: client.plans.map(plan => plan.id!==event.planId ? plan : {
-            ...plan,
-            samplings: plan.samplings.map((s:Sampling) =>
-              s.id===event.samplingId ? {...s,status:'done'as const,doneDate:validationDate,doneBy:uid} : s
-            )
-          })
-        }, uid)
-      }
-      if (event.type==='maintenance'&&event.maintenanceData) {
-        await saveMaintenance({...event.maintenanceData, statut:'realisee', dateRealisee:validationDate}, uid)
-      }
-      setValidatingId(null)
-    } finally { setSaving(false) }
-  }
-
-  // ── Validation depuis le DayModal ───────────────────────
+  // ── Gestion des samplings ───────────────────────────────
 
   // Retire un sampling du calendrier → remet plannedDay à 0, il revient dans le pool
   async function handleCancelSampling(event: PlanningEvent) {
@@ -927,10 +898,6 @@ export default function PlanningPage() {
       })
     }, uid)
   }
-
-  const isValidationWeekend = useMemo(() => {
-    const d = new Date(validationDate+'T12:00:00'); return d.getDay()===0||d.getDay()===6
-  }, [validationDate])
 
   // ── Navigation ──────────────────────────────────────────
 
