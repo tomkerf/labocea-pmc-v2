@@ -478,6 +478,8 @@ function CellContextMenu({ x, y, onClose, onPlanifier, onEvenement }: {
 
 // ── EventDetailModal ────────────────────────────────────────
 
+interface TechOption { code: string; label: string }
+
 interface EventDetailModalProps {
   event: PlanningEvent
   dateStr: string
@@ -486,11 +488,10 @@ interface EventDetailModalProps {
   onMove: (event: PlanningEvent, newDate: string) => Promise<void>
   onDelete: (event: PlanningEvent) => void
   onChangeTech: (event: PlanningEvent, initiales: string) => Promise<void>
-  users: AppUser[]
-  preleveurs: { code: string; nom: string }[]
+  techOptions: TechOption[]
 }
 
-function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete, onChangeTech, users, preleveurs }: EventDetailModalProps) {
+function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete, onChangeTech, techOptions }: EventDetailModalProps) {
   const navigate = useNavigate()
   const [isMoving,     setIsMoving]     = useState(false)
   const [isChangingTech, setIsChangingTech] = useState(false)
@@ -613,17 +614,9 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
               >
-                {/* Préleveurs V1 (source de vérité) */}
-                {preleveurs.map(p => (
-                  <option key={p.code} value={p.code}>{p.nom} ({p.code})</option>
+                {techOptions.map(o => (
+                  <option key={o.code} value={o.code}>{o.label}</option>
                 ))}
-                {/* Utilisateurs V2 sans fiche préleveur V1 */}
-                {users
-                  .filter(u => !preleveurs.some(p => p.code === u.initiales))
-                  .map(u => (
-                    <option key={u.uid} value={u.initiales}>{u.prenom} {u.nom} ({u.initiales})</option>
-                  ))
-                }
               </select>
             </div>
             <button onClick={handleChangeTech} disabled={saving || !techInitiales.trim()}
@@ -1060,6 +1053,18 @@ export default function PlanningPage() {
     clients.forEach((c:Client) => c.plans.forEach(p => p.samplings.forEach((s:Sampling) => { if (isSamplingOverdue(s)) n++ })))
     return n
   }, [clients])
+
+  // Liste unifiée de tous les techniciens : préleveurs V1 + users V2 + codes présents dans clients
+  const techOptions = useMemo((): TechOption[] => {
+    const map = new Map<string, string>()
+    // 1. Préleveurs V1 (nom complet connu)
+    preleveurs.forEach(p => map.set(p.code, `${p.nom} (${p.code})`))
+    // 2. Utilisateurs V2 pas encore dans V1
+    users.forEach(u => { if (u.initiales && !map.has(u.initiales)) map.set(u.initiales, `${u.prenom} ${u.nom} (${u.initiales})`) })
+    // 3. Codes issus des clients (fallback si pas de fiche)
+    clients.forEach((c: Client) => { if (c.preleveur && !map.has(normTech(c.preleveur))) map.set(normTech(c.preleveur), normTech(c.preleveur)) })
+    return Array.from(map.entries()).map(([code, label]) => ({ code, label })).sort((a, b) => a.code.localeCompare(b.code))
+  }, [preleveurs, users, clients])
 
   // Nombre de samplings non faits dans le mois visible — pour le bandeau "à planifier"
   const monthPoolCount = useMemo(() => {
@@ -1896,7 +1901,7 @@ export default function PlanningPage() {
           onDelete={handleDeleteEvent}
           onChangeTech={handleChangeTechnicien}
           users={users}
-          preleveurs={preleveurs}
+          techOptions={techOptions}
         />
       )}
 
