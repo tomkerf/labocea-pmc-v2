@@ -47,11 +47,23 @@ export default function MaintenancesPage() {
 
   const technicienNom = [prenom, initiales].filter(Boolean).join(' ')
 
-  const filtered = maintenances.filter((m: Maintenance) => {
-    const matchStatut = !filterStatut || m.statut === filterStatut
-    const matchType = !filterType || m.type === filterType
-    return matchStatut && matchType
-  })
+  const STATUT_ORDER: Record<string, number> = { en_cours: 0, planifiee: 1, realisee: 2, abandonnee: 3 }
+
+  const filtered = maintenances
+    .filter((m: Maintenance) => {
+      const matchStatut = !filterStatut || m.statut === filterStatut
+      const matchType = !filterType || m.type === filterType
+      return matchStatut && matchType
+    })
+    .sort((a: Maintenance, b: Maintenance) => {
+      const sa = STATUT_ORDER[a.statut] ?? 9
+      const sb = STATUT_ORDER[b.statut] ?? 9
+      if (sa !== sb) return sa - sb
+      // À statut égal : date décroissante (la plus récente en haut)
+      const da = a.datePrevue ?? a.dateRealisee ?? ''
+      const db = b.datePrevue ?? b.dateRealisee ?? ''
+      return db.localeCompare(da)
+    })
 
   async function handleCreate() {
     if (!uid || creating) return
