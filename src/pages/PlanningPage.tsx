@@ -30,6 +30,7 @@ interface PlanningEvent {
   statusColor: string
   link: string
   isDone: boolean
+  priority: number        // 0=retard, 1=non_effectue, 2=planifié, 3=réalisé
   technicien: string
   count?: number          // nb prélèvements regroupés (même client, même jour)
   plannedTime?: string
@@ -141,12 +142,7 @@ function groupByClient(evts: PlanningEvent[]): PlanningEvent[] {
     groups.get(key)!.push(e)
   })
 
-  const statusPri = (e: PlanningEvent) => {
-    if (e.statusColor === 'var(--color-danger)')        return 0  // en retard
-    if (e.statusColor === 'var(--color-warning)')       return 1  // non effectué
-    if (e.statusColor === 'var(--color-text-secondary)') return 2  // planifié
-    return 3                                                       // réalisé
-  }
+  const statusPri = (e: PlanningEvent) => e.priority ?? 2
 
   const merged: PlanningEvent[] = []
   groups.forEach(group => {
@@ -165,18 +161,39 @@ function groupByClient(evts: PlanningEvent[]): PlanningEvent[] {
   return sortEvts([...merged, ...others])
 }
 
-const SAMPLING_CFG: Record<string,{label:string;bg:string;color:string}> = {
-  planned:      { label:'Planifié',     bg:'var(--color-bg-tertiary)',   color:'var(--color-text-secondary)' },
-  done:         { label:'Réalisé',      bg:'var(--color-success-light)', color:'var(--color-success)' },
-  overdue:      { label:'En retard',    bg:'var(--color-danger-light)',  color:'var(--color-danger)' },
-  non_effectue: { label:'Non effectué', bg:'var(--color-warning-light)', color:'var(--color-warning)' },
+const SAMPLING_LABEL: Record<string, string> = {
+  planned:      'Planifié',
+  done:         'Réalisé',
+  overdue:      'En retard',
+  non_effectue: 'Non effectué',
 }
-const MAINTENANCE_CFG: Record<string,{label:string;bg:string;color:string}> = {
-  planifiee:  { label:'Planifiée',  bg:'var(--color-bg-tertiary)',   color:'var(--color-text-secondary)' },
-  en_cours:   { label:'En cours',   bg:'var(--color-warning-light)', color:'var(--color-warning)' },
-  realisee:   { label:'Réalisée',   bg:'var(--color-success-light)', color:'var(--color-success)' },
-  abandonnee: { label:'Abandonnée', bg:'var(--color-danger-light)',  color:'var(--color-danger)' },
+const MAINTENANCE_LABEL: Record<string, string> = {
+  planifiee: 'Planifiée', en_cours: 'En cours', realisee: 'Réalisée', abandonnee: 'Abandonnée',
 }
+const EVENEMENT_LABEL: Record<TypeEvenement, string> = {
+  rappel: 'Rappel', reunion: 'Réunion', rapport: 'Rapport', autre: 'Autre',
+}
+
+// ── Couleurs par technicien ──────────────────────────────────
+const TECH_COLORS: Record<string, { color: string; bg: string }> = {
+  'THK': { color: '#0071E3', bg: '#EBF4FF' },
+  'ROD': { color: '#FF9F0A', bg: '#FFF4E3' },
+}
+const TECH_PALETTE = [
+  { color: '#32ADE6', bg: '#E5F5FD' },
+  { color: '#34C759', bg: '#EAF8EE' },
+  { color: '#AF52DE', bg: '#F5EEFF' },
+  { color: '#FF6B6B', bg: '#FFEEED' },
+  { color: '#5AC8FA', bg: '#E8F7FD' },
+]
+function getTechColor(initiales: string): { color: string; bg: string } {
+  if (TECH_COLORS[initiales]) return TECH_COLORS[initiales]
+  if (!initiales || initiales === '—') return { color: 'var(--color-neutral)', bg: 'var(--color-bg-tertiary)' }
+  const idx = [...initiales].reduce((a, c) => a + c.charCodeAt(0), 0) % TECH_PALETTE.length
+  return TECH_PALETTE[idx]
+}
+
+// Conservé pour la DayModal (badge statut du pool)
 const EVENEMENT_CFG: Record<TypeEvenement,{label:string;color:string;bg:string}> = {
   rappel:  { label:'Rappel',  color:'var(--color-accent)',  bg:'var(--color-accent-light)'  },
   reunion: { label:'Réunion', color:'#AF52DE',              bg:'#F5EEFF'                    },
@@ -346,7 +363,10 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
                   {pool.map((item, i) => {
                     const overdue = isSamplingOverdue(item.sampling)
-                    const cfg = overdue ? SAMPLING_CFG.overdue : SAMPLING_CFG[item.sampling.status] ?? SAMPLING_CFG.planned
+                    const cfgLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[item.sampling.status] ?? SAMPLING_LABEL.planned
+                    const cfgColor = overdue ? 'var(--color-danger)' : item.sampling.status === 'non_effectue' ? 'var(--color-warning)' : item.sampling.status === 'done' ? 'var(--color-success)' : 'var(--color-text-secondary)'
+                    const cfgBg    = overdue ? 'var(--color-danger-light)' : item.sampling.status === 'non_effectue' ? 'var(--color-warning-light)' : item.sampling.status === 'done' ? 'var(--color-success-light)' : 'var(--color-bg-tertiary)'
+                    const cfg = { label: cfgLabel, color: cfgColor, bg: cfgBg }
                     const isValidating = poolValidId === item.sampling.id
                     return (
                       <div key={item.sampling.id}
@@ -934,10 +954,12 @@ export default function PlanningPage() {
           if (!s.plannedDay && !s.doneDate) return
           const overdue = isSamplingOverdue(s)
           const dateStr = s.doneDate || toISO(new Date(year, s.plannedMonth, s.plannedDay))
-          const cfg = overdue ? SAMPLING_CFG.overdue : SAMPLING_CFG[s.status] ?? SAMPLING_CFG.planned
+          const statusLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[s.status] ?? SAMPLING_LABEL.planned
+          const priority = overdue ? 0 : s.status === 'non_effectue' ? 1 : s.status === 'planned' ? 2 : 3
+          const tc = getTechColor(client.preleveur || '')
           const common = {
             type: 'prelevement' as const,
-            statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
+            statusLabel, statusBg: tc.bg, statusColor: tc.color, priority,
             link:`/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
             isDone: s.status==='done', technicien: client.preleveur||'—',
             plannedTime: s.plannedTime, clientId:client.id, planId:plan.id, samplingId:s.id,
@@ -965,12 +987,12 @@ export default function PlanningPage() {
 
     maintenances.forEach((m:Maintenance) => {
       const dateStr = m.dateRealisee||m.datePrevue
-      const cfg = MAINTENANCE_CFG[m.statut]??MAINTENANCE_CFG.planifiee
+      const tc = getTechColor('')   // maintenances : couleur neutre (pas d'initiales dispo)
       add(dateStr, {
-        id:m.id, type:'maintenance',
+        id:m.id, type:'maintenance', priority: m.statut==='realisee' ? 3 : 2,
         title:m.equipementNom||'Équipement',
         subtitle: m.type==='preventive'?'Maintenance préventive':m.type==='corrective'?'Maintenance corrective':'Panne',
-        statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
+        statusLabel: MAINTENANCE_LABEL[m.statut]??'Planifiée', statusBg:tc.bg, statusColor:tc.color,
         link:`/maintenances/${m.id}`, isDone:m.statut==='realisee', technicien:m.technicienNom||'—',
         maintenanceData:m,
       })
@@ -978,21 +1000,22 @@ export default function PlanningPage() {
 
     verifications.forEach((v:Verification) => {
       if (!v.prochainControle) return
+      const tc = getTechColor('')
       add(v.prochainControle, {
-        id:v.id, type:'verification',
+        id:v.id, type:'verification', priority: 2,
         title:v.equipementNom||'Équipement',
         subtitle: v.type==='etalonnage_interne'?'Étalonnage interne':v.type==='verification_externe'?'Vérification externe':'Contrôle terrain',
-        statusLabel:'Métrologie', statusBg:'var(--color-accent-light)', statusColor:'var(--color-accent)',
+        statusLabel:'Métrologie', statusBg:tc.bg, statusColor:tc.color,
         link:`/metrologie/${v.id}`, isDone:false, technicien:v.technicienNom||'—',
       })
     })
 
     evenements.forEach((ev:EvenementPersonnel) => {
-      const cfg = EVENEMENT_CFG[ev.type]??EVENEMENT_CFG.autre
+      const tc = getTechColor(ev.createdByInitiales||'')
       const evObj: PlanningEvent = {
-        id:ev.id, type:'evenement',
-        title:ev.titre, subtitle:cfg.label,
-        statusLabel:cfg.label, statusBg:cfg.bg, statusColor:cfg.color,
+        id:ev.id, type:'evenement', priority: 2,
+        title:ev.titre, subtitle: EVENEMENT_LABEL[ev.type]??'Autre',
+        statusLabel: EVENEMENT_LABEL[ev.type]??'Autre', statusBg:tc.bg, statusColor:tc.color,
         link:'', isDone:false, technicien:ev.createdByInitiales||'—',
         plannedTime:ev.heure||undefined, evenementData:ev,
       }
@@ -1037,14 +1060,14 @@ export default function PlanningPage() {
   function filteredForDay(dateStr:string): PlanningEvent[] {
     let evts = eventsByDate[dateStr]??[]
     if (filterTech) evts = evts.filter(e => normTech(e.technicien)===filterTech)
-    if (filterRetard) evts = evts.filter(e => e.statusColor==='var(--color-danger)'||e.statusLabel==='En retard')
+    if (filterRetard) evts = evts.filter(e => e.priority === 0)
     return groupByClient(evts)
   }
   // Sans regroupement (vue semaine et vue jour : chaque prélèvement visible)
   function filteredForDayFlat(dateStr:string): PlanningEvent[] {
     let evts = eventsByDate[dateStr]??[]
     if (filterTech) evts = evts.filter(e => normTech(e.technicien)===filterTech)
-    if (filterRetard) evts = evts.filter(e => e.statusColor==='var(--color-danger)'||e.statusLabel==='En retard')
+    if (filterRetard) evts = evts.filter(e => e.priority === 0)
     return sortEvts(evts)
   }
 
@@ -1299,9 +1322,12 @@ export default function PlanningPage() {
         style={{ background: event.statusBg, cursor: isGrouped ? 'zoom-in' : event.type === 'evenement' ? 'default' : 'pointer' }}
         title={isGrouped ? `${event.title} — ${event.count} prélèvements (cliquer pour détails)` : `${event.title} — ${event.subtitle} (${event.technicien})`}
       >
-        {/* Ligne 1 : dot + client + badge ×N ou technicien */}
+        {/* Ligne 1 : indicateur (✓ ou dot) + client + tech + heure */}
         <div className="flex items-center gap-1">
-          <span className="shrink-0 w-[6px] h-[6px] rounded-full" style={{ background: event.statusColor }} />
+          {event.isDone
+            ? <span className="shrink-0 text-[9px] font-bold leading-none" style={{ color: event.statusColor }}>✓</span>
+            : <span className="shrink-0 w-[6px] h-[6px] rounded-full" style={{ background: event.statusColor }} />
+          }
           <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
             {event.title}
           </span>
@@ -1313,7 +1339,7 @@ export default function PlanningPage() {
           )}
           {isGrouped && (
             <span className="shrink-0 text-[9px] font-bold px-1 rounded"
-              style={{ background: event.statusColor + '28', color: event.statusColor }}>
+              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
               ×{event.count}
             </span>
           )}
