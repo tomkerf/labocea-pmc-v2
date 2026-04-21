@@ -205,8 +205,12 @@ export default function DashboardPage() {
   // Événements du jour (date ≤ today ≤ dateFin ou date === today)
   evenements
     .filter((ev: EvenementPersonnel) => {
-      const inRange = ev.date <= todayISO && (!ev.dateFin || ev.dateFin >= todayISO)
-      return inRange
+      if (ev.dateFin && ev.dateFin > ev.date) {
+        // Événement multi-jours : today doit être dans la plage
+        return ev.date <= todayISO && ev.dateFin >= todayISO
+      }
+      // Événement ponctuel : uniquement le jour exact
+      return ev.date === todayISO
     })
     .forEach((ev: EvenementPersonnel) => {
       const cfg = EVENEMENT_CFG[ev.type] ?? EVENEMENT_CFG.autre
