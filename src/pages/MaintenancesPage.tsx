@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useMaintenancesListener, createMaintenance } from '@/hooks/useMaintenances'
@@ -43,9 +43,17 @@ export default function MaintenancesPage() {
   const { maintenances, loading } = useMaintenancesStore()
   const [filterStatut, setFilterStatut] = useState('')
   const [filterType, setFilterType] = useState('')
+  const [filterAppareil, setFilterAppareil] = useState('')
   const [creating, setCreating] = useState(false)
 
   const technicienNom = [prenom, initiales].filter(Boolean).join(' ')
+
+  // Liste unique des appareils présents dans les maintenances
+  const appareils = useMemo(() => {
+    const s = new Set<string>()
+    maintenances.forEach((m: Maintenance) => { if (m.equipementNom) s.add(m.equipementNom) })
+    return Array.from(s).sort()
+  }, [maintenances])
 
   const STATUT_ORDER: Record<string, number> = { en_cours: 0, planifiee: 1, realisee: 2, abandonnee: 3 }
 
@@ -53,7 +61,8 @@ export default function MaintenancesPage() {
     .filter((m: Maintenance) => {
       const matchStatut = !filterStatut || m.statut === filterStatut
       const matchType = !filterType || m.type === filterType
-      return matchStatut && matchType
+      const matchAppareil = !filterAppareil || m.equipementNom === filterAppareil
+      return matchStatut && matchType && matchAppareil
     })
     .sort((a: Maintenance, b: Maintenance) => {
       const sa = STATUT_ORDER[a.statut] ?? 9
@@ -112,14 +121,25 @@ export default function MaintenancesPage() {
             {f.label}
           </button>
         ))}
-        <select
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-          className="ml-auto px-3 py-1.5 rounded-lg text-sm"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
-        >
-          {TYPES_FILTER.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-        </select>
+        <div className="flex gap-2 ml-auto">
+          <select
+            value={filterAppareil}
+            onChange={(e) => setFilterAppareil(e.target.value)}
+            className="px-3 py-1.5 rounded-lg text-sm"
+            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: filterAppareil ? 'var(--color-accent)' : 'var(--color-text-primary)' }}
+          >
+            <option value="">Tous appareils</option>
+            {appareils.map((a) => <option key={a} value={a}>{a}</option>)}
+          </select>
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="px-3 py-1.5 rounded-lg text-sm"
+            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
+          >
+            {TYPES_FILTER.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+          </select>
+        </div>
       </div>
 
       {/* Liste */}
