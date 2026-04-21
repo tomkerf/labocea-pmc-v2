@@ -1367,77 +1367,83 @@ export default function PlanningPage() {
     <div className="flex flex-col h-full">
 
       {/* En-tête navigation */}
-      <div className="flex items-center justify-between px-4 md:px-6 py-3 shrink-0 flex-wrap gap-2"
+      <div className="flex flex-col shrink-0"
         style={{ borderBottom:'1px solid var(--color-border-subtle)', background:'var(--color-bg-secondary)' }}>
 
-        <div className="flex items-center gap-2">
-          <button onClick={prev} className="p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
-            onMouseEnter={e=>(e.currentTarget.style.background='var(--color-bg-tertiary)')}
-            onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
-            <ChevronLeft size={18} />
-          </button>
-          <span className="text-sm font-semibold min-w-[180px] text-center" style={{ color:'var(--color-text-primary)' }}>
-            {periodLabel}
-          </span>
-          <button onClick={next} className="p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
-            onMouseEnter={e=>(e.currentTarget.style.background='var(--color-bg-tertiary)')}
-            onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
-            <ChevronRight size={18} />
-          </button>
-          <button onClick={goToday}
-            className="hidden md:block px-2.5 py-1 rounded-lg text-xs font-medium ml-1"
-            style={{ background:'var(--color-bg-tertiary)', color:'var(--color-text-secondary)', border:'1px solid var(--color-border-subtle)' }}>
-            Aujourd'hui
-          </button>
-        </div>
+        {/* Ligne 1 : navigation période + toggle vue */}
+        <div className="flex items-center justify-between px-4 md:px-6 pt-4 pb-3">
+          <div className="flex items-center gap-2">
+            <button onClick={prev} className="p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
+              onMouseEnter={e=>(e.currentTarget.style.background='var(--color-bg-tertiary)')}
+              onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
+              <ChevronLeft size={18} />
+            </button>
+            <span className="text-sm font-semibold min-w-[180px] text-center" style={{ color:'var(--color-text-primary)' }}>
+              {periodLabel}
+            </span>
+            <button onClick={next} className="p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
+              onMouseEnter={e=>(e.currentTarget.style.background='var(--color-bg-tertiary)')}
+              onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
+              <ChevronRight size={18} />
+            </button>
+            <button onClick={goToday}
+              className="hidden md:block px-2.5 py-1 rounded-lg text-xs font-medium ml-1"
+              style={{ background:'var(--color-bg-tertiary)', color:'var(--color-text-secondary)', border:'1px solid var(--color-border-subtle)' }}>
+              Aujourd'hui
+            </button>
+          </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
           {/* Toggle vue */}
           <div className="flex rounded-lg overflow-hidden"
             style={{ border:'1px solid var(--color-border-subtle)', background:'var(--color-bg-tertiary)' }}>
             {(['jour','semaine','mois'] as ViewMode[]).map(m => (
               <button key={m} onClick={() => switchView(m)}
-                className="px-3 py-1 text-xs font-medium capitalize"
+                className="px-3 py-1.5 text-xs font-medium capitalize"
                 style={{ background:viewMode===m?'var(--color-accent)':'transparent', color:viewMode===m?'white':'var(--color-text-secondary)' }}>
                 {m}
               </button>
             ))}
           </div>
-
-          {/* Filtre retard */}
-          {totalOverdue>0 && (
-            <button onClick={() => setFilterRetard(v=>!v)}
-              className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold"
-              style={{ background:filterRetard?'var(--color-danger)':'var(--color-danger-light)', color:filterRetard?'white':'var(--color-danger)' }}>
-              ⚠ {totalOverdue} en retard
-            </button>
-          )}
-
-          {/* Filtre technicien — badges colorés */}
-          {allTechs.length>1 && (
-            <div className="flex items-center gap-1">
-              <button onClick={() => setFilterTech('')}
-                className="px-2.5 py-1 rounded-full text-xs font-medium"
-                style={{ background:!filterTech?'var(--color-accent)':'var(--color-bg-secondary)', color:!filterTech?'white':'var(--color-text-secondary)', border:`1px solid ${!filterTech?'transparent':'var(--color-border-subtle)'}` }}>
-                Tous
-              </button>
-              {allTechs.map(t => {
-                const isActive = filterTech === t
-                return (
-                  <button key={t} onClick={() => setFilterTech(t===filterTech?'':t)}
-                    className="px-2.5 py-1 rounded-full text-xs font-medium"
-                    style={{
-                      background: isActive ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
-                      color: isActive ? 'white' : 'var(--color-text-secondary)',
-                      border: `1px solid ${isActive ? 'transparent' : 'var(--color-border-subtle)'}`,
-                    }}>
-                    {t}
-                  </button>
-                )
-              })}
-            </div>
-          )}
         </div>
+
+        {/* Ligne 2 : filtres technicien + retard */}
+        {(allTechs.length > 1 || totalOverdue > 0) && (
+          <div className="flex items-center gap-2 px-4 md:px-6 pb-3 flex-wrap">
+            {/* Filtre technicien */}
+            {allTechs.length > 1 && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button onClick={() => setFilterTech('')}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium"
+                  style={{ background:!filterTech?'var(--color-accent)':'var(--color-bg-secondary)', color:!filterTech?'white':'var(--color-text-secondary)', border:`1px solid ${!filterTech?'transparent':'var(--color-border-subtle)'}` }}>
+                  Tous
+                </button>
+                {allTechs.map(t => {
+                  const isActive = filterTech === t
+                  return (
+                    <button key={t} onClick={() => setFilterTech(t===filterTech?'':t)}
+                      className="px-3 py-1.5 rounded-full text-xs font-medium"
+                      style={{
+                        background: isActive ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                        color: isActive ? 'white' : 'var(--color-text-secondary)',
+                        border: `1px solid ${isActive ? 'transparent' : 'var(--color-border-subtle)'}`,
+                      }}>
+                      {t}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Filtre retard */}
+            {totalOverdue > 0 && (
+              <button onClick={() => setFilterRetard(v=>!v)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
+                style={{ background:filterRetard?'var(--color-danger)':'var(--color-danger-light)', color:filterRetard?'white':'var(--color-danger)' }}>
+                ⚠ {totalOverdue} en retard
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── Légende statuts ── */}
