@@ -84,6 +84,7 @@ function StatCard({ value, label, sub, accent, warning, danger }: StatCardProps)
 export default function DashboardPage() {
   const navigate = useNavigate()
   const prenom = useAuthStore((s) => s.prenom())
+  const initiales = useAuthStore((s) => s.appUser?.initiales ?? '')
 
   // Listeners temps réel
   useClientsListener()
@@ -181,6 +182,7 @@ export default function DashboardPage() {
   const jourItems: JourItem[] = []
 
   clients.forEach((client) => {
+    if (initiales && client.preleveur && client.preleveur !== initiales) return
     client.plans.forEach((plan) => {
       plan.samplings.forEach((s: Sampling) => {
         const plannedDate = s.doneDate
@@ -205,6 +207,8 @@ export default function DashboardPage() {
   // Événements du jour (date ≤ today ≤ dateFin ou date === today)
   evenements
     .filter((ev: EvenementPersonnel) => {
+      // Filtrer par technicien connecté
+      if (initiales && ev.createdByInitiales && ev.createdByInitiales !== initiales) return false
       if (ev.dateFin && ev.dateFin > ev.date) {
         // Événement multi-jours : today doit être dans la plage
         return ev.date <= todayISO && ev.dateFin >= todayISO
