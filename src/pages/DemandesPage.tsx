@@ -11,11 +11,11 @@ import type { AppUser, Demande, DemandeStatut } from '@/types'
 
 // ── Config statuts ────────────────────────────────────────────
 
-const STATUTS: { key: DemandeStatut; label: string; color: string; bg: string; border: string }[] = [
-  { key: 'attente_devis', label: 'En attente de devis', color: '#d97706', bg: 'rgba(217,119,6,0.08)',  border: 'rgba(217,119,6,0.25)'  },
-  { key: 'devis_envoye',  label: 'Devis envoyé',        color: '#0071E3', bg: 'rgba(0,113,227,0.08)',  border: 'rgba(0,113,227,0.25)'  },
-  { key: 'visite_prelim', label: 'Visite préliminaire', color: '#7c3aed', bg: 'rgba(124,58,237,0.08)', border: 'rgba(124,58,237,0.25)' },
-  { key: 'devis_signe',   label: 'Devis signé',         color: '#16a34a', bg: 'rgba(22,163,74,0.08)',  border: 'rgba(22,163,74,0.25)'  },
+const STATUTS: { key: DemandeStatut; label: string; color: string }[] = [
+  { key: 'attente_devis', label: 'En attente de devis', color: 'var(--color-warning)'  },
+  { key: 'devis_envoye',  label: 'Devis envoyé',        color: 'var(--color-accent)'   },
+  { key: 'visite_prelim', label: 'Visite préliminaire', color: 'var(--color-neutral)'  },
+  { key: 'devis_signe',   label: 'Devis signé',         color: 'var(--color-success)'  },
 ]
 
 const STATUTS_ARCHIVES: { key: DemandeStatut; label: string; color: string }[] = [
@@ -350,18 +350,30 @@ export default function DemandesPage() {
               <div key={col.key} className="flex flex-col" style={{ width: 260 }}>
                 {/* En-tête colonne */}
                 <div
-                  className="flex items-center justify-between px-3 py-2 rounded-t-xl mb-0"
-                  style={{ background: col.bg, border: `1px solid ${col.border}`, borderBottom: 'none' }}
+                  className="flex items-center justify-between px-3 py-2.5 rounded-t-xl"
+                  style={{
+                    background: 'var(--color-bg-secondary)',
+                    borderTop: `3px solid ${col.color}`,
+                    borderLeft: '1px solid var(--color-border-subtle)',
+                    borderRight: '1px solid var(--color-border-subtle)',
+                  }}
                 >
-                  <span className="text-xs font-semibold" style={{ color: col.color }}>{col.label}</span>
-                  <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full" style={{ background: col.border, color: col.color }}>
+                  <span className="text-xs font-semibold" style={{ color: 'var(--color-text-primary)' }}>{col.label}</span>
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                    style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
                     {col.items.length}
                   </span>
                 </div>
                 {/* Cartes */}
                 <div
                   className="flex-1 overflow-y-auto rounded-b-xl p-2 flex flex-col gap-2"
-                  style={{ border: `1px solid ${col.border}`, background: 'var(--color-bg-primary)', minHeight: 120 }}
+                  style={{
+                    borderLeft: '1px solid var(--color-border-subtle)',
+                    borderRight: '1px solid var(--color-border-subtle)',
+                    borderBottom: '1px solid var(--color-border-subtle)',
+                    background: 'var(--color-bg-primary)',
+                    minHeight: 120,
+                  }}
                 >
                   {col.items.length === 0 ? (
                     <p className="text-xs text-center py-6" style={{ color: 'var(--color-text-tertiary)' }}>—</p>
