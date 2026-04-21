@@ -195,44 +195,89 @@ export default function PlanPage() {
     triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updatedPlan : p) })
   }
 
-  function exportSamplingHistory(s: Sampling) {
-    const entries = [...(s.history ?? [])].reverse()
-    const moisLabel = MOIS[s.plannedMonth] ?? `Mois ${s.plannedMonth + 1}`
-    const title = `Historique — Prélèvement n°${s.num} (${moisLabel}) — ${plan?.nom ?? ''} — ${client?.nom ?? ''}`
+  /** Export PDF annuel du plan : synthèse de tous les prélèvements de l'année */
+  function exportAnnualReport() {
+    if (!client || !plan) return
+    const year = new Date().getFullYear()
+    const title = `Suivi des prélèvements ${year} — ${plan.nom} — ${client.nom}`
 
-    const rows = entries.length === 0
-      ? '<tr><td colspan="4" style="padding:12px;color:#888;text-align:center">Aucune modification enregistrée</td></tr>'
-      : entries.map((e) => {
-          const fieldLabel = AUDIT_FIELD_LABELS[e.field as keyof Sampling] ?? e.field
-          const d = new Date(e.at)
-          const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
-          const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-          return `<tr>
-            <td>${dateStr} à ${timeStr}</td>
-            <td>${e.byNom}</td>
-            <td>${fieldLabel}</td>
-            <td>${e.from} → <strong>${e.to}</strong></td>
-          </tr>`
-        }).join('')
+    const statusLabels: Record<string, string> = {
+      planned: 'Planifié', done: 'Réalisé',
+      overdue: 'En retard', non_effectue: 'Non effectué',
+    }
+
+    const rows = plan.samplings.map((s) => {
+      const techUser = users.find((u) => u.uid === s.doneBy)
+      const techLabel = techUser ? `${techUser.prenom} ${techUser.nom}` : (s.doneBy ? s.doneBy : '—')
+      const dateLabel = s.doneDate
+        ? new Date(s.doneDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
+        : '—'
+      const statusLabel = statusLabels[s.status] ?? s.status
+      const motifLabel = s.motif?.trim() || '—'
+
+      // couleur statut
+      const statusColor: Record<string, string> = {
+        done: '#34c759', overdue: '#ff3b30', non_effectue: '#ff9f0a', planned: '#8e8e93',
+      }
+      const color = statusColor[s.status] ?? '#8e8e93'
+
+      return `<tr>
+        <td style="color:#6e6e73;text-align:center">${s.num}</td>
+        <td>${MOIS[s.plannedMonth]}${s.plannedDay ? ` (j.${s.plannedDay})` : ''}</td>
+        <td>${dateLabel}</td>
+        <td><span style="color:${color};font-weight:500">${statusLabel}</span></td>
+        <td>${techLabel}</td>
+        <td style="color:#6e6e73">${motifLabel}</td>
+      </tr>`
+    }).join('')
+
+    const now = new Date()
+    const exportDate = now.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
+    const exportTime = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+
+    const done  = plan.samplings.filter((s) => s.status === 'done').length
+    const nonEf = plan.samplings.filter((s) => s.status === 'non_effectue').length
+    const late  = plan.samplings.filter((s) => s.status === 'overdue').length
 
     const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
       <title>${title}</title>
       <style>
-        body { font-family: -apple-system, Helvetica Neue, sans-serif; font-size: 13px; color: #1d1d1f; margin: 32px; }
-        h1 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
-        p.sub { color: #6e6e73; font-size: 12px; margin-bottom: 24px; }
+        body { font-family: -apple-system, Helvetica Neue, sans-serif; font-size: 13px; color: #1d1d1f; margin: 40px; }
+        h1 { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
+        .meta { color: #6e6e73; font-size: 12px; margin-bottom: 8px; }
+        .stats { display: flex; gap: 24px; margin-bottom: 28px; padding: 12px 0; border-top: 1px solid #e5e5ea; border-bottom: 1px solid #e5e5ea; }
+        .stat { text-align: center; }
+        .stat strong { display: block; font-size: 20px; font-weight: 700; }
+        .stat span { font-size: 11px; color: #6e6e73; text-transform: uppercase; letter-spacing: .04em; }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
              color: #6e6e73; border-bottom: 2px solid #d2d2d7; padding: 8px 12px; }
-        td { padding: 8px 12px; border-bottom: 1px solid #e5e5ea; vertical-align: top; }
-        tr:last-child td { border-bottom: none; }
+        td { padding: 9px 12px; border-bottom: 1px solid #e5e5ea; vertical-align: top; }
         .footer { margin-top: 32px; font-size: 11px; color: #aeaeb2; }
-        @media print { body { margin: 16px; } }
+        @media print { body { margin: 20px; } }
       </style></head><body>
       <h1>${title}</h1>
-      <p class="sub">Exporté le ${new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })} à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} — Labocea PMC</p>
+      <p class="meta">
+        Client : ${client.nom} &nbsp;·&nbsp; Point : ${plan.nom}
+        ${plan.siteNom ? ` &nbsp;·&nbsp; Site : ${plan.siteNom}` : ''}
+        &nbsp;·&nbsp; Fréquence : ${plan.frequence} &nbsp;·&nbsp; Méthode : ${plan.methode}
+      </p>
+      <p class="meta">Exporté le ${exportDate} à ${exportTime} — Labocea PMC</p>
+      <div class="stats">
+        <div class="stat"><strong style="color:#34c759">${done}</strong><span>Réalisés</span></div>
+        <div class="stat"><strong style="color:#ff9f0a">${nonEf}</strong><span>Non effectués</span></div>
+        <div class="stat"><strong style="color:#ff3b30">${late}</strong><span>En retard</span></div>
+        <div class="stat"><strong>${plan.samplings.length}</strong><span>Total</span></div>
+      </div>
       <table>
-        <thead><tr><th>Date / Heure</th><th>Technicien</th><th>Champ</th><th>Modification</th></tr></thead>
+        <thead><tr>
+          <th style="width:32px;text-align:center">N°</th>
+          <th>Mois prévu</th>
+          <th>Date réalisée</th>
+          <th>Statut</th>
+          <th>Technicien</th>
+          <th>Motif</th>
+        </tr></thead>
         <tbody>${rows}</tbody>
       </table>
       <p class="footer">Document généré automatiquement par Labocea PMC V2</p>
@@ -332,11 +377,22 @@ export default function PlanPage() {
           <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             Prélèvements {new Date().getFullYear()}
           </h2>
-          <button onClick={generateSamplingsForPlan}
-            className="text-sm px-3 py-1.5 rounded-lg font-medium"
-            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
-            Générer
-          </button>
+          <div className="flex items-center gap-2">
+            {plan.samplings.length > 0 && (
+              <button
+                onClick={exportAnnualReport}
+                className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
+                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
+              >
+                <FileText size={14} /> Exporter PDF
+              </button>
+            )}
+            <button onClick={generateSamplingsForPlan}
+              className="text-sm px-3 py-1.5 rounded-lg font-medium"
+              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+              Générer
+            </button>
+          </div>
         </div>
 
         {plan.samplings.length === 0 ? (
@@ -380,19 +436,6 @@ export default function PlanPage() {
                         onUpdate={(field, val) => updateSampling(s.id, field, val)}
                         users={users}
                       />
-                      {/* Bouton export historique — visible seulement si des entrées existent */}
-                      {(s.history ?? []).length > 0 && (
-                        <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
-                          <button
-                            onClick={() => exportSamplingHistory(s)}
-                            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg"
-                            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}
-                          >
-                            <FileText size={13} />
-                            Exporter l'historique ({s.history!.length} modification{s.history!.length > 1 ? 's' : ''})
-                          </button>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
