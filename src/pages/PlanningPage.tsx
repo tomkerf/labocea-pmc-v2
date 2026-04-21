@@ -193,13 +193,6 @@ function getTechColor(initiales: string): { color: string; bg: string } {
   return TECH_PALETTE[idx]
 }
 
-// Conservé pour la DayModal (badge statut du pool)
-const EVENEMENT_CFG: Record<TypeEvenement,{label:string;color:string;bg:string}> = {
-  rappel:  { label:'Rappel',  color:'var(--color-accent)',  bg:'var(--color-accent-light)'  },
-  reunion: { label:'Réunion', color:'#AF52DE',              bg:'#F5EEFF'                    },
-  rapport: { label:'Rapport', color:'var(--color-warning)', bg:'var(--color-warning-light)' },
-  autre:   { label:'Autre',   color:'var(--color-neutral)', bg:'var(--color-bg-tertiary)'   },
-}
 
 // ── DayModal ────────────────────────────────────────────────
 
