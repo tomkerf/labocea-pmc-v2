@@ -209,7 +209,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 // ── Carte kanban ──────────────────────────────────────────────
 
 function DemandeCard({ dem, onClick }: { dem: Demande; onClick: () => void }) {
-  const cfg = statutCfg(dem.statut)
   const titre = dem.contactSociete || dem.contactNom || 'Sans nom'
   const sous = dem.contactSociete && dem.contactNom ? dem.contactNom : dem.contactEmail
   const j = joursEcoules(dem.dateReception)
