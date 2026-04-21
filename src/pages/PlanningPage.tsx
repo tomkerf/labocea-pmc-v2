@@ -7,11 +7,13 @@ import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { useEvenementsListener, createEvenement, deleteEvenement } from '@/hooks/useEvenements'
 import { useUsersListener } from '@/hooks/useUsers'
+import { usePreleveursListener } from '@/hooks/usePreleveurs'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useEvenementsStore } from '@/stores/evenementsStore'
 import { useUsersStore } from '@/stores/usersStore'
+import { usePreleveursStore } from '@/stores/preleveursStore'
 import { useAuthStore } from '@/stores/authStore'
 import type { Client, Sampling, Verification, Maintenance, EvenementPersonnel, TypeEvenement, AppUser } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
@@ -485,10 +487,10 @@ interface EventDetailModalProps {
   onDelete: (event: PlanningEvent) => void
   onChangeTech: (event: PlanningEvent, initiales: string) => Promise<void>
   users: AppUser[]
-  techSuggestions: string[]   // toutes les initiales déjà présentes dans les clients
+  preleveurs: { code: string; nom: string }[]
 }
 
-function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete, onChangeTech, users, techSuggestions }: EventDetailModalProps) {
+function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete, onChangeTech, users, preleveurs }: EventDetailModalProps) {
   const navigate = useNavigate()
   const [isMoving,     setIsMoving]     = useState(false)
   const [isChangingTech, setIsChangingTech] = useState(false)
@@ -611,15 +613,15 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
               >
-                {/* Utilisateurs V2 enregistrés (avec nom complet) */}
-                {users.map(u => (
-                  <option key={u.uid} value={u.initiales}>{u.prenom} {u.nom} ({u.initiales})</option>
+                {/* Préleveurs V1 (source de vérité) */}
+                {preleveurs.map(p => (
+                  <option key={p.code} value={p.code}>{p.nom} ({p.code})</option>
                 ))}
-                {/* Initiales présentes dans les clients sans compte V2 */}
-                {techSuggestions
-                  .filter(ini => !users.some(u => u.initiales === ini))
-                  .map(ini => (
-                    <option key={ini} value={ini}>{ini}</option>
+                {/* Utilisateurs V2 sans fiche préleveur V1 */}
+                {users
+                  .filter(u => !preleveurs.some(p => p.code === u.initiales))
+                  .map(u => (
+                    <option key={u.uid} value={u.initiales}>{u.prenom} {u.nom} ({u.initiales})</option>
                   ))
                 }
               </select>
@@ -877,6 +879,7 @@ export default function PlanningPage() {
   useClientsListener(); useEquipementsListener()
   useVerificationsListener(); useMaintenancesListener()
   useEvenementsListener(); useUsersListener()
+  usePreleveursListener()
 
   const navigate   = useNavigate()
   const uid        = useAuthStore(s => s.uid())
@@ -886,6 +889,7 @@ export default function PlanningPage() {
   const { maintenances }  = useMaintenancesStore()
   const { evenements }    = useEvenementsStore()
   const users             = useUsersStore(s => s.users)
+  const preleveurs        = usePreleveursStore(s => s.preleveurs)
 
   const today = new Date(); today.setHours(0,0,0,0)
 
@@ -1024,11 +1028,16 @@ export default function PlanningPage() {
     return parts[parts.length - 1]
   }
 
+  // Liste des techs : préleveurs V1 en priorité, complétée par ceux présents dans les events
   const allTechs = useMemo(() => {
+    if (preleveurs.length > 0) {
+      return preleveurs.map(p => p.code).sort()
+    }
+    // Fallback : extraire depuis les événements du planning
     const s = new Set<string>()
     Object.values(eventsByDate).flat().forEach(e => { if (e.technicien && e.technicien !== '—') s.add(normTech(e.technicien)) })
     return Array.from(s).sort()
-  }, [eventsByDate])
+  }, [preleveurs, eventsByDate])
 
   // Avec regroupement par client (vue mois, DayModal)
   function filteredForDay(dateStr:string): PlanningEvent[] {
@@ -1426,6 +1435,11 @@ export default function PlanningPage() {
                 </button>
                 {allTechs.map(t => {
                   const isActive = filterTech === t
+                  const prel = preleveurs.find(p => p.code === t)
+                  // Affiche "Prénom · CODE" si nom dispo, sinon juste le code
+                  const label = prel?.nom
+                    ? prel.nom.split(' ')[0] + ' · ' + t
+                    : t
                   return (
                     <button key={t} onClick={() => setFilterTech(t===filterTech?'':t)}
                       className="px-3 py-1.5 rounded-full text-xs font-medium"
@@ -1434,7 +1448,7 @@ export default function PlanningPage() {
                         color: isActive ? 'white' : 'var(--color-text-secondary)',
                         border: `1px solid ${isActive ? 'transparent' : 'var(--color-border-subtle)'}`,
                       }}>
-                      {t}
+                      {label}
                     </button>
                   )
                 })}
@@ -1888,7 +1902,7 @@ export default function PlanningPage() {
           onDelete={handleDeleteEvent}
           onChangeTech={handleChangeTechnicien}
           users={users}
-          techSuggestions={techSuggestions}
+          preleveurs={preleveurs}
         />
       )}
 
