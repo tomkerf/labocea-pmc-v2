@@ -8,12 +8,12 @@ import UserAvatar from '@/components/ui/UserAvatar'
 
 const navItems: { to: string; icon?: React.ElementType; label: string; end?: boolean; badge?: boolean; isAccount?: boolean }[] = [
   { to: '/',             icon: LayoutDashboard, label: 'Tableau de bord', end: true },
+  { to: '/demandes',     icon: Inbox,           label: 'Demandes'               },
   { to: '/missions',     icon: ClipboardList,   label: 'Missions',        badge: true },
   { to: '/planning',     icon: CalendarDays,    label: 'Planning'               },
   { to: '/materiel',     icon: Wrench,          label: 'Matériel'               },
   { to: '/metrologie',   icon: Gauge,           label: 'Métrologie'             },
   { to: '/maintenances', icon: Hammer,          label: 'Maintenances'           },
-  { to: '/demandes',    icon: Inbox,            label: 'Demandes'               },
   { to: '/compte',                              label: 'Mon compte', isAccount: true },
 ]
 
