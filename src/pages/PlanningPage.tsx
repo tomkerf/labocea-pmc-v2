@@ -120,6 +120,13 @@ function assignColumns(
   return assigned
 }
 
+// Événement EvenementPersonnel qui couvre plusieurs jours
+function isMultiDay(e: PlanningEvent): boolean {
+  const ev = e.evenementData
+  if (!ev || !ev.dateFin) return false
+  return ev.dateFin > ev.date
+}
+
 function sortEvts(evts: PlanningEvent[]): PlanningEvent[] {
   return evts.slice().sort((a,b) => {
     if (!a.plannedTime && !b.plannedTime) return 0
@@ -1130,6 +1137,41 @@ export default function PlanningPage() {
     })
   }, [selectedDay, clients])
 
+  // ── Événements multi-jours qui s'étirent sur la semaine (style Apple Calendar) ──
+  const weekSpanning = useMemo(() => {
+    if (viewMode !== 'semaine') return []
+    const weekStartISO = toISO(weekStart)
+    const weekEndISO   = toISO(weekDays[4])
+    const weekDayISOs  = weekDays.map(toISO)
+
+    const spans = evenements
+      .filter(ev => {
+        if (!ev.dateFin || ev.dateFin <= ev.date) return false
+        if (filterTech && normTech(ev.createdByInitiales || '') !== filterTech) return false
+        return ev.date <= weekEndISO && ev.dateFin >= weekStartISO
+      })
+      .map(ev => {
+        const tc = getTechColor(ev.createdByInitiales || '')
+        const startClamped = ev.date < weekStartISO ? weekStartISO : ev.date
+        const endClamped   = ev.dateFin! > weekEndISO ? weekEndISO : ev.dateFin!
+        const colStart = weekDayISOs.findIndex(d => d >= startClamped)
+        let colEnd = -1
+        for (let i = 4; i >= 0; i--) { if (weekDayISOs[i] <= endClamped) { colEnd = i; break } }
+        if (colStart === -1 || colEnd === -1 || colStart > colEnd) return null
+        return { ev, tc, colStart, colEnd }
+      })
+      .filter((s): s is { ev: EvenementPersonnel; tc: { color: string; bg: string }; colStart: number; colEnd: number } => s !== null)
+
+    // Répartition sur plusieurs lignes pour éviter les chevauchements
+    const rowEnds: number[] = []
+    return spans.map(s => {
+      let row = rowEnds.findIndex(end => end <= s.colStart)
+      if (row === -1) row = rowEnds.length
+      rowEnds[row] = s.colEnd + 1
+      return { ...s, row }
+    })
+  }, [evenements, viewMode, weekStart, weekDays, filterTech])
+
   // ── Liste période (mobile) ──────────────────────────────
 
   const periodList = useMemo(() => {
@@ -1455,17 +1497,17 @@ export default function PlanningPage() {
                 {allTechs.map(t => {
                   const isActive = filterTech === t
                   const prel = preleveurs.find(p => p.code === t)
-                  // Affiche "Prénom · CODE" si nom dispo, sinon juste le code
                   const label = prel?.nom
                     ? prel.nom.split(' ')[0] + ' · ' + t
                     : t
+                  const tc = getTechColor(t)
                   return (
                     <button key={t} onClick={() => setFilterTech(t===filterTech?'':t)}
                       className="px-3 py-1.5 rounded-full text-xs font-medium"
                       style={{
-                        background: isActive ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
-                        color: isActive ? 'white' : 'var(--color-text-secondary)',
-                        border: `1px solid ${isActive ? 'transparent' : 'var(--color-border-subtle)'}`,
+                        background: isActive ? tc.color : tc.bg,
+                        color: isActive ? 'white' : tc.color,
+                        border: `1px solid ${isActive ? 'transparent' : tc.color + '55'}`,
                       }}>
                       {label}
                     </button>
@@ -1484,23 +1526,6 @@ export default function PlanningPage() {
             )}
           </div>
         )}
-      </div>
-
-      {/* ── Légende statuts ── */}
-      <div className="hidden md:flex items-center gap-4 px-6 py-1.5 shrink-0"
-        style={{ borderBottom:'1px solid var(--color-border-subtle)', background:'var(--color-bg-secondary)' }}>
-        {[
-          { color:'var(--color-text-tertiary)', label:'Planifié' },
-          { color:'var(--color-danger)',        label:'En retard' },
-          { color:'var(--color-success)',        label:'Réalisé' },
-          { color:'var(--color-warning)',        label:'Non effectué' },
-          { color:'var(--color-accent)',         label:'Métrologie' },
-        ].map(({ color, label }) => (
-          <div key={label} className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
-            <span className="text-[11px]" style={{ color:'var(--color-text-tertiary)' }}>{label}</span>
-          </div>
-        ))}
       </div>
 
       {/* ── Bandeau "à planifier" — visible en vue mois/semaine quand le pool n'est pas vide ── */}
@@ -1714,13 +1739,64 @@ export default function PlanningPage() {
               })}
             </div>
 
+            {/* ── Bande "toute la journée" — événements multi-jours ── */}
+            {weekSpanning.length > 0 && (() => {
+              const numRows = Math.max(...weekSpanning.map(s => s.row)) + 1
+              return (
+                <div className="shrink-0"
+                  style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 2px' }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(5, 1fr)',
+                    gridTemplateRows: `repeat(${numRows}, 18px)`,
+                    gap: '2px 0',
+                  }}>
+                    {weekSpanning.map(({ ev, tc, colStart, colEnd, row }) => {
+                      const evObj: PlanningEvent = {
+                        id: ev.id, type: 'evenement', priority: 2,
+                        title: ev.titre,
+                        subtitle: EVENEMENT_LABEL[ev.type] ?? 'Autre',
+                        statusLabel: EVENEMENT_LABEL[ev.type] ?? 'Autre',
+                        statusBg: tc.bg, statusColor: tc.color,
+                        link: '', isDone: false,
+                        technicien: ev.createdByInitiales || '—',
+                        evenementData: ev,
+                      }
+                      return (
+                        <button
+                          key={ev.id}
+                          onMouseDown={e => e.stopPropagation()}
+                          onClick={() => setEventDetail({ event: evObj, dateStr: ev.date })}
+                          className="text-left px-2 rounded flex items-center gap-1 truncate"
+                          style={{
+                            gridColumn: `${colStart + 1} / ${colEnd + 2}`,
+                            gridRow: row + 1,
+                            background: tc.bg,
+                            color: tc.color,
+                            marginLeft: 1,
+                            marginRight: 1,
+                          }}
+                          title={`${ev.titre} (${ev.date} → ${ev.dateFin})`}
+                        >
+                          <span className="text-[11px] font-medium truncate">{ev.titre}</span>
+                          {ev.createdByInitiales && (
+                            <span className="shrink-0 text-[9px] opacity-60">{ev.createdByInitiales}</span>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })()}
+
             {/* Colonnes événements */}
             <div className="grid grid-cols-5 flex-1 overflow-y-auto select-none"
               onMouseUp={handleDragMouseUp}
               onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
               {weekDays.map((day,i) => {
                 const dateStr = toISO(day)
-                const evts = filteredForDayFlat(dateStr)
+                const evts = filteredForDayFlat(dateStr).filter(e => !isMultiDay(e))
                 const isToday = sameDay(day,today)
                 const inDrag = isInDrag(dateStr)
                 return (
