@@ -27,6 +27,8 @@ const STATUS_CONFIG: Record<SamplingStatus, { label: string; bg: string; color: 
 const DEBOUNCE = 800
 
 // ── Champs audités et leur formateur ──────────────────────────
+// Seuls les champs discrets/binaires sont audités — pas les textes libres (motif, comment)
+// qui génèreraient une entrée par frappe clavier
 const AUDIT_FIELDS: Partial<Record<keyof Sampling, (v: unknown) => string>> = {
   status:       (v) => STATUS_CONFIG[v as SamplingStatus]?.label ?? String(v),
   doneDate:     (v) => v ? new Date(v as string).toLocaleDateString('fr-FR') : '—',
@@ -37,8 +39,6 @@ const AUDIT_FIELDS: Partial<Record<keyof Sampling, (v: unknown) => string>> = {
   rapportDate:  (v) => v ? new Date(v as string).toLocaleDateString('fr-FR') : '—',
   nappe:        (v) => ({ haute: 'Haute', basse: 'Basse', '': '—' }[v as string] ?? String(v)),
   doneBy:       () => '—',  // sera résolu depuis users lors du PDF
-  comment:      (v) => (v as string) ? `"${v}"` : '—',
-  motif:        (v) => (v as string) || '—',
 }
 
 const AUDIT_FIELD_LABELS: Partial<Record<keyof Sampling, string>> = {
@@ -51,8 +51,6 @@ const AUDIT_FIELD_LABELS: Partial<Record<keyof Sampling, string>> = {
   rapportDate:  'Date rapport',
   nappe:        'Nappe',
   doneBy:       'Technicien',
-  comment:      'Commentaire',
-  motif:        'Motif',
 }
 
 /** Génère les samplings d'un plan selon sa fréquence */
