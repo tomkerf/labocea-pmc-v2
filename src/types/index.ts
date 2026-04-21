@@ -181,6 +181,38 @@ export interface Equipement {
   updatedAt: Timestamp
 }
 
+// --- Demandes clients (pipeline commercial) ---
+
+export type DemandeStatut =
+  | 'attente_devis'
+  | 'devis_envoye'
+  | 'visite_prelim'
+  | 'devis_signe'
+  | 'refuse'
+  | 'converti'
+
+export interface Demande {
+  id: string
+  contactNom: string
+  contactSociete: string
+  contactEmail: string
+  contactTel: string
+  lieu: string
+  segment: string
+  description: string
+  frequence: string
+  nbPoints: string
+  montantDevis: string
+  dateDevis: string
+  statut: DemandeStatut
+  preleveurUid: string   // uid V2 du technicien assigné
+  notes: string
+  dateReception: string  // ISO date
+  createdBy: string
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
+
 // --- Événements personnels (planning) ---
 
 export type TypeEvenement = 'rappel' | 'reunion' | 'rapport' | 'autre'

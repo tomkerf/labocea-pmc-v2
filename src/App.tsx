@@ -16,6 +16,7 @@ import MaintenancesPage from '@/pages/MaintenancesPage'
 import MaintenancePage from '@/pages/MaintenancePage'
 import PlanningPage from '@/pages/PlanningPage'
 import MissionDetailPage from '@/pages/MissionDetailPage'
+import DemandesPage from '@/pages/DemandesPage'
 
 function AppRoutes() {
   useAuthInit()
@@ -39,6 +40,7 @@ function AppRoutes() {
         <Route path="/maintenances"                      element={<MaintenancesPage />} />
         <Route path="/maintenances/:maintenanceId"       element={<MaintenancePage />} />
         <Route path="/planning"                          element={<PlanningPage />} />
+        <Route path="/demandes"                          element={<DemandesPage />} />
         <Route path="/compte"                            element={<ComptePage />} />
       </Route>
 
