@@ -10,7 +10,9 @@ import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
-import type { Sampling, Verification, Maintenance, Equipement, Client, Plan } from '@/types'
+import { useEvenementsListener } from '@/hooks/useEvenements'
+import { useEvenementsStore } from '@/stores/evenementsStore'
+import type { Sampling, Verification, Maintenance, Equipement, Client, Plan, EvenementPersonnel } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
 
 // ── Helpers ────────────────────────────────────────────────
@@ -88,11 +90,13 @@ export default function DashboardPage() {
   useEquipementsListener()
   useVerificationsListener()
   useMaintenancesListener()
+  useEvenementsListener()
 
   const { clients } = useMissionsStore()
   const { equipements } = useEquipementsStore()
   const { verifications } = useMetrologieStore()
   const { maintenances } = useMaintenancesStore()
+  const { evenements } = useEvenementsStore()
 
   // ── KPIs ──────────────────────────────────────────────────
 
@@ -145,9 +149,17 @@ export default function DashboardPage() {
     }),
   ].length
 
-  // ── Planning du jour = prélèvements planifiés aujourd'hui ──
+  // ── Planning du jour = prélèvements + événements d'aujourd'hui ──
 
+  const todayISO = new Date().toISOString().split('T')[0]
   const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes()
+
+  const EVENEMENT_CFG: Record<string, { label: string; bg: string; color: string; dot: string }> = {
+    rappel:  { label: 'Rappel',  bg: 'var(--color-accent-light)',  color: 'var(--color-accent)',   dot: 'var(--color-accent)'   },
+    reunion: { label: 'Réunion', bg: '#F3EEFF',                    color: '#7C3AED',               dot: '#7C3AED'               },
+    rapport: { label: 'Rapport', bg: 'var(--color-warning-light)', color: 'var(--color-warning)',  dot: 'var(--color-warning)'  },
+    autre:   { label: 'Autre',   bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' },
+  }
 
   function getSamplingBadge(s: Sampling): { label: string; bg: string; color: string } {
     if (s.status === 'done')         return { label: 'Réalisé',  bg: 'var(--color-success-light)', color: 'var(--color-success)' }
@@ -161,7 +173,13 @@ export default function DashboardPage() {
     return { label: 'À faire', bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }
   }
 
-  const planningJour: { clientNom: string; siteNom: string; planId: string; clientId: string; sampling: Sampling; planNom: string }[] = []
+  // Prélèvements du jour
+  type JourItem =
+    | { kind: 'sampling'; time: string; title: string; sub: string; badge: { label: string; bg: string; color: string }; link: string }
+    | { kind: 'evenement'; time: string; title: string; sub: string; badge: { label: string; bg: string; color: string }; dot: string }
+
+  const jourItems: JourItem[] = []
+
   clients.forEach((client) => {
     client.plans.forEach((plan) => {
       plan.samplings.forEach((s: Sampling) => {
@@ -171,15 +189,40 @@ export default function DashboardPage() {
         if (isToday(plannedDate) || (s.status === 'planned' && isToday(
           new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay || 1).toISOString().split('T')[0]
         ))) {
-          planningJour.push({ clientNom: client.nom, siteNom: plan.siteNom, planNom: plan.nom, planId: plan.id, clientId: client.id, sampling: s })
+          jourItems.push({
+            kind: 'sampling',
+            time: s.plannedTime ?? '',
+            title: client.nom,
+            sub: [plan.siteNom, plan.nom].filter(Boolean).join(' · ') || '—',
+            badge: getSamplingBadge(s),
+            link: `/missions/${client.id}/plan/${plan.id}`,
+          })
         }
       })
     })
   })
 
-  planningJour.sort((a, b) => {
-    const ta = a.sampling.plannedTime ?? '99:99'
-    const tb = b.sampling.plannedTime ?? '99:99'
+  // Événements du jour (date ≤ today ≤ dateFin ou date === today)
+  evenements
+    .filter((ev: EvenementPersonnel) => {
+      const inRange = ev.date <= todayISO && (!ev.dateFin || ev.dateFin >= todayISO)
+      return inRange
+    })
+    .forEach((ev: EvenementPersonnel) => {
+      const cfg = EVENEMENT_CFG[ev.type] ?? EVENEMENT_CFG.autre
+      jourItems.push({
+        kind: 'evenement',
+        time: ev.heure ?? '',
+        title: ev.titre,
+        sub: [ev.createdByInitiales, ev.notes].filter(Boolean).join(' · ') || cfg.label,
+        badge: { label: cfg.label, bg: cfg.bg, color: cfg.color },
+        dot: cfg.dot,
+      })
+    })
+
+  jourItems.sort((a, b) => {
+    const ta = a.time || '99:99'
+    const tb = b.time || '99:99'
     return ta.localeCompare(tb)
   })
 
@@ -247,7 +290,7 @@ export default function DashboardPage() {
   // ── Render ─────────────────────────────────────────────────
 
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="p-6 pb-10 max-w-4xl">
 
       {/* Salutation */}
       <div className="mb-8">
@@ -293,38 +336,37 @@ export default function DashboardPage() {
         {/* Planning du jour */}
         <div>
           <SectionTitle>Planning du jour</SectionTitle>
-          {planningJour.length === 0 ? (
-            <EmptyCard>Aucun prélèvement prévu aujourd'hui.</EmptyCard>
+          {jourItems.length === 0 ? (
+            <EmptyCard>Aucune intervention ni événement aujourd'hui.</EmptyCard>
           ) : (
             <div className="rounded-xl overflow-hidden"
               style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-              {planningJour.slice(0, 6).map(({ clientNom, siteNom, planNom, planId, clientId, sampling }, i) => {
-                const cfg = getSamplingBadge(sampling)
-                return (
-                  <button key={`${planId}-${sampling.id}`}
-                    onClick={() => navigate(`/missions/${clientId}/plan/${planId}/sampling/${sampling.id}`)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
-                    style={{ borderBottom: i < planningJour.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    {sampling.plannedTime && (
-                      <span className="text-xs font-semibold shrink-0 w-10 text-center px-1.5 py-1 rounded-lg"
-                        style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-                        {sampling.plannedTime}
-                      </span>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{clientNom}</p>
-                      <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
-                        {[siteNom, planNom].filter(Boolean).join(' · ') || '—'}
-                      </p>
-                    </div>
-                    <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
-                      style={{ background: cfg.bg, color: cfg.color }}>{cfg.label}</span>
-                  </button>
-                )
-              })}
+              {jourItems.slice(0, 8).map((item, i) => (
+                <div key={i}
+                  onClick={() => item.kind === 'sampling' ? navigate(item.link) : navigate('/planning')}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer"
+                  style={{ borderBottom: i < jourItems.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  {/* Heure ou point coloré */}
+                  {item.time ? (
+                    <span className="text-xs font-semibold shrink-0 w-10 text-center px-1.5 py-1 rounded-lg"
+                      style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                      {item.time}
+                    </span>
+                  ) : (
+                    <span className="shrink-0 w-2 h-2 rounded-full mt-0.5"
+                      style={{ background: item.kind === 'evenement' ? item.dot : 'var(--color-text-tertiary)' }} />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{item.title}</p>
+                    <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{item.sub}</p>
+                  </div>
+                  <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
+                    style={{ background: item.badge.bg, color: item.badge.color }}>{item.badge.label}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>
