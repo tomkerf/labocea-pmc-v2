@@ -138,6 +138,14 @@ export type LocalisationType = LocalisationEquipement
 
 export type MateriauFlacon = 'plastique' | 'verre' | ''
 
+export interface FicheDeVieNote {
+  id: string
+  date: string       // ISO date
+  titre: string
+  notes: string
+  auteur?: string    // initiales ou nom
+}
+
 export interface Equipement {
   id: string
   nom: string
@@ -150,6 +158,7 @@ export interface Equipement {
   localisation: LocalisationEquipement
   notes: string
   prochainEtalonnage: string  // ISO date
+  ficheDeVieNotes?: FicheDeVieNote[]
   // Champs spécifiques aux flacons
   volume?: string             // ex: "20L", "1L"
   poids?: string              // ex: "0.570 kg" (stocké en string pour flexibilité)
