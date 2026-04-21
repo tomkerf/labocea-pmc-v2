@@ -358,7 +358,7 @@ export default function DemandesPage() {
                 >
                   <span className="text-xs font-semibold" style={{ color: 'var(--color-text-primary)' }}>{col.label}</span>
                   <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                    style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                    style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
                     {col.items.length}
                   </span>
                 </div>
