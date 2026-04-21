@@ -1054,12 +1054,6 @@ export default function PlanningPage() {
     return sortEvts(evts)
   }
 
-  // Toutes les initiales de preleveurs déjà utilisées dans les clients
-  const techSuggestions = useMemo(() => {
-    const s = new Set<string>()
-    clients.forEach((c: Client) => { if (c.preleveur) s.add(c.preleveur) })
-    return Array.from(s).sort()
-  }, [clients])
 
   const totalOverdue = useMemo(() => {
     let n=0
