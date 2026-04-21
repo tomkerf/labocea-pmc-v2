@@ -41,17 +41,6 @@ const AUDIT_FIELDS: Partial<Record<keyof Sampling, (v: unknown) => string>> = {
   doneBy:       () => '—',  // sera résolu depuis users lors du PDF
 }
 
-const AUDIT_FIELD_LABELS: Partial<Record<keyof Sampling, string>> = {
-  status:       'Statut',
-  doneDate:     'Date réalisée',
-  plannedMonth: 'Mois prévu',
-  plannedDay:   'Jour prévu',
-  plannedTime:  'Heure prévue',
-  rapportPrevu: 'Rapport prévu',
-  rapportDate:  'Date rapport',
-  nappe:        'Nappe',
-  doneBy:       'Technicien',
-}
 
 /** Génère les samplings d'un plan selon sa fréquence */
 function generateSamplings(plan: Plan): Sampling[] {
