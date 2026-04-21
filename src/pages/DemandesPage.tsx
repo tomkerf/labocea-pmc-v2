@@ -222,7 +222,6 @@ function DemandeCard({ dem, onClick }: { dem: Demande; onClick: () => void }) {
       style={{
         background: 'var(--color-bg-secondary)',
         border: '1px solid var(--color-border-subtle)',
-        borderLeft: `3px solid ${cfg.color}`,
         boxShadow: 'var(--shadow-card)',
       }}
       onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)')}
@@ -353,7 +352,7 @@ export default function DemandesPage() {
                   className="flex items-center justify-between px-3 py-2.5 rounded-t-xl"
                   style={{
                     background: 'var(--color-bg-secondary)',
-                    borderTop: `3px solid ${col.color}`,
+                    borderTop: '1px solid var(--color-border-subtle)',
                     borderLeft: '1px solid var(--color-border-subtle)',
                     borderRight: '1px solid var(--color-border-subtle)',
                   }}
