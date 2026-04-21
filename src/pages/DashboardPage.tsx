@@ -368,8 +368,8 @@ export default function DashboardPage() {
                       style={{ background: item.kind === 'evenement' ? item.dot : 'var(--color-text-tertiary)' }} />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{item.title}</p>
-                    <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{item.sub}</p>
+                    <p className="text-sm font-medium leading-snug" style={{ color: 'var(--color-text-primary)' }}>{item.title}</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{item.sub}</p>
                   </div>
                   <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
                     style={{ background: item.badge.bg, color: item.badge.color }}>{item.badge.label}</span>

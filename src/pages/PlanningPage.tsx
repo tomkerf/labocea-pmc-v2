@@ -1121,7 +1121,7 @@ export default function PlanningPage() {
       : Array.from({length: new Date(monthStart.getFullYear(),monthStart.getMonth()+1,0).getDate()},
           (_,i) => new Date(monthStart.getFullYear(),monthStart.getMonth(),i+1))
     return days
-      .map(date => ({ date, dateStr:toISO(date), events: filteredForDay(toISO(date)) }))
+      .map(date => ({ date, dateStr:toISO(date), events: viewMode==='semaine' ? filteredForDayFlat(toISO(date)) : filteredForDay(toISO(date)) }))
       .filter(g => g.events.length>0)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode, weekDays, monthStart, eventsByDate, filterTech, filterRetard])
