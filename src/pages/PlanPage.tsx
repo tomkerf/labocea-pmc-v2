@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, Trash2 } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, History, ChevronDown, ChevronUp } from 'lucide-react'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveClient } from '@/hooks/useClients'
@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { generateId } from '@/lib/ids'
-import type { AppUser, Client, Plan, Sampling, SamplingStatus, FrequenceType, NatureEauType, MethodeType, NappeType, ChecklistItem } from '@/types'
+import type { AppUser, Client, Plan, Sampling, SamplingStatus, FrequenceType, NatureEauType, MethodeType, NappeType, ChecklistItem, SamplingHistoryEntry } from '@/types'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
@@ -25,6 +25,33 @@ const STATUS_CONFIG: Record<SamplingStatus, { label: string; bg: string; color: 
 }
 
 const DEBOUNCE = 800
+
+// ── Champs audités et leur formateur ──────────────────────────
+const AUDIT_FIELDS: Partial<Record<keyof Sampling, (v: unknown) => string>> = {
+  status:       (v) => STATUS_CONFIG[v as SamplingStatus]?.label ?? String(v),
+  doneDate:     (v) => v ? new Date(v as string).toLocaleDateString('fr-FR') : '—',
+  plannedMonth: (v) => MOIS[v as number] ?? String(v),
+  plannedDay:   (v) => v ? `Jour ${v}` : '—',
+  plannedTime:  (v) => (v as string) || '—',
+  rapportPrevu: (v) => v ? 'Oui' : 'Non',
+  rapportDate:  (v) => v ? new Date(v as string).toLocaleDateString('fr-FR') : '—',
+  nappe:        (v) => ({ haute: 'Haute', basse: 'Basse', '': '—' }[v as string] ?? String(v)),
+  doneBy:       () => '—',  // sera résolu depuis users lors de l'affichage
+  comment:      (v) => (v as string) ? `"${v}"` : '—',
+}
+
+const AUDIT_FIELD_LABELS: Partial<Record<keyof Sampling, string>> = {
+  status:       'Statut',
+  doneDate:     'Date réalisée',
+  plannedMonth: 'Mois prévu',
+  plannedDay:   'Jour prévu',
+  plannedTime:  'Heure prévue',
+  rapportPrevu: 'Rapport prévu',
+  rapportDate:  'Date rapport',
+  nappe:        'Nappe',
+  doneBy:       'Technicien',
+  comment:      'Commentaire',
+}
 
 /** Génère les samplings d'un plan selon sa fréquence */
 function generateSamplings(plan: Plan): Sampling[] {
@@ -69,6 +96,11 @@ export default function PlanPage() {
   const uid = useAuthStore((s) => s.uid())
   useUsersListener()
   const users = useUsersStore((s) => s.users)
+  // Nom dénormalisé pour le journal d'audit
+  const currentUser = users.find((u) => u.uid === uid)
+  const currentUserNom = currentUser
+    ? `${currentUser.prenom} ${currentUser.nom}`
+    : (uid ?? '—')
 
   const [client, setClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)
@@ -120,11 +152,36 @@ export default function PlanPage() {
     const uid_ = uid ?? ''
     const updatedSamplings = plan.samplings.map((s) => {
       if (s.id !== samplingId) return s
+
       const patch: Partial<Sampling> = { [field]: value }
+
       // Quand on passe en "Réalisé" et que doneBy n'est pas encore défini → technicien connecté par défaut
       if (field === 'status' && value === 'done' && !s.doneBy) patch.doneBy = uid_
       // Quand on quitte "Réalisé" → effacer doneBy
       if (field === 'status' && value !== 'done') patch.doneBy = ''
+
+      // ── Journal d'audit ──────────────────────────────────────
+      // Tracer uniquement les champs significatifs quand la valeur change vraiment
+      const formatter = AUDIT_FIELDS[field]
+      if (formatter && String(s[field]) !== String(value)) {
+        const entry: SamplingHistoryEntry = {
+          at: new Date().toISOString(),
+          by: uid_,
+          byNom: currentUserNom,
+          field: String(field),
+          from: formatter(s[field]),
+          to: formatter(value),
+        }
+        // Cas spécial doneBy : résoudre le nom depuis users
+        if (field === 'doneBy') {
+          const fromUser = users.find((u) => u.uid === String(s[field]))
+          const toUser   = users.find((u) => u.uid === String(value))
+          entry.from = fromUser ? `${fromUser.prenom} ${fromUser.nom}` : (s[field] ? String(s[field]) : '—')
+          entry.to   = toUser   ? `${toUser.prenom} ${toUser.nom}`     : (value  ? String(value)   : '—')
+        }
+        patch.history = [...(s.history ?? []), entry]
+      }
+
       return { ...s, ...patch }
     })
     triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? { ...p, samplings: updatedSamplings } : p) })
@@ -270,7 +327,12 @@ export default function PlanPage() {
                   {/* Formulaire inline du prélèvement */}
                   {isSelected && (
                     <div className="px-5 py-4" style={{ background: 'var(--color-bg-tertiary)', borderBottom: i < plan.samplings.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                      <SamplingForm sampling={s} onUpdate={(field, val) => updateSampling(s.id, field, val)} users={users} />
+                      <SamplingForm
+                        sampling={s}
+                        onUpdate={(field, val) => updateSampling(s.id, field, val)}
+                        users={users}
+                        auditFieldLabels={AUDIT_FIELD_LABELS}
+                      />
                     </div>
                   )}
                 </div>
@@ -289,9 +351,11 @@ interface SamplingFormProps {
   sampling: Sampling
   onUpdate: (field: keyof Sampling, value: unknown) => void
   users?: AppUser[]
+  auditFieldLabels?: Partial<Record<keyof Sampling, string>>
 }
 
-function SamplingForm({ sampling, onUpdate, users = [] }: SamplingFormProps) {
+function SamplingForm({ sampling, onUpdate, users = [], auditFieldLabels = {} }: SamplingFormProps) {
+  const [showHistory, setShowHistory] = useState(false)
   const [newTask, setNewTask] = useState('')
   const checklist: ChecklistItem[] = sampling.checklist ?? []
 
@@ -474,6 +538,55 @@ function SamplingForm({ sampling, onUpdate, users = [] }: SamplingFormProps) {
           </button>
         </div>
       </div>
+
+      {/* ── Journal d'audit ──────────────────────────────────── */}
+      {(sampling.history ?? []).length > 0 && (
+        <div className="col-span-2 mt-1">
+          <button
+            onClick={() => setShowHistory((v) => !v)}
+            className="flex items-center gap-1.5 text-xs font-medium mb-2"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            <History size={13} />
+            Historique ({sampling.history!.length} modification{sampling.history!.length > 1 ? 's' : ''})
+            {showHistory ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          </button>
+
+          {showHistory && (
+            <div className="rounded-lg overflow-hidden"
+              style={{ border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-primary)' }}>
+              {[...(sampling.history ?? [])].reverse().map((entry, i, arr) => {
+                const label = auditFieldLabels[entry.field as keyof Sampling] ?? entry.field
+                const date = new Date(entry.at)
+                const dateStr = date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
+                const timeStr = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+                return (
+                  <div key={i}
+                    className="flex items-start gap-3 px-3 py-2.5"
+                    style={{ borderBottom: i < arr.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
+                    {/* Dot timeline */}
+                    <div className="shrink-0 mt-1 w-1.5 h-1.5 rounded-full"
+                      style={{ background: 'var(--color-text-tertiary)' }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs" style={{ color: 'var(--color-text-primary)' }}>
+                        <span className="font-medium">{label}</span>
+                        {' '}&rarr;{' '}
+                        <span style={{ color: 'var(--color-success)' }}>{entry.to}</span>
+                        {entry.from && entry.from !== '—' && (
+                          <span style={{ color: 'var(--color-text-tertiary)' }}> (était : {entry.from})</span>
+                        )}
+                      </p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
+                        {entry.byNom} · {dateStr} à {timeStr}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

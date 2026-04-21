@@ -43,6 +43,16 @@ export interface ReportHistory {
   at: string       // ISO timestamp
 }
 
+/** Entrée du journal d'audit d'un prélèvement */
+export interface SamplingHistoryEntry {
+  at: string        // ISO timestamp (new Date().toISOString())
+  by: string        // uid du technicien connecté
+  byNom: string     // nom dénormalisé pour affichage sans lookup
+  field: string     // champ modifié (ex: "status", "doneDate"…)
+  from: string      // ancienne valeur en texte lisible
+  to: string        // nouvelle valeur en texte lisible
+}
+
 export interface ChecklistItem {
   id: string
   label: string
@@ -65,6 +75,8 @@ export interface Sampling {
   reportHistory: ReportHistory[]
   doneBy: string          // uid
   checklist?: ChecklistItem[]
+  /** Journal d'audit : chaque modification de champ sensible est tracée ici */
+  history?: SamplingHistoryEntry[]
 }
 
 export interface Plan {
