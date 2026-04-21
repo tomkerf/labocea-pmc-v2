@@ -37,6 +37,10 @@ function isThisMonth(dateStr: string): boolean {
   return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
 }
 
+function localISO(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
+}
+
 function isToday(dateStr: string): boolean {
   if (!dateStr) return false
   const d = new Date(dateStr)
@@ -152,7 +156,7 @@ export default function DashboardPage() {
 
   // ── Planning du jour = prélèvements + événements d'aujourd'hui ──
 
-  const todayISO = new Date().toISOString().split('T')[0]
+  const todayISO = localISO(new Date())
   const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes()
 
   const EVENEMENT_CFG: Record<string, { label: string; bg: string; color: string; dot: string }> = {
@@ -187,10 +191,8 @@ export default function DashboardPage() {
       plan.samplings.forEach((s: Sampling) => {
         const plannedDate = s.doneDate
           ? s.doneDate
-          : new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay || 1).toISOString().split('T')[0]
-        if (isToday(plannedDate) || (s.status === 'planned' && isToday(
-          new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay || 1).toISOString().split('T')[0]
-        ))) {
+          : localISO(new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay || 1))
+        if (isToday(plannedDate)) {
           jourItems.push({
             kind: 'sampling',
             time: s.plannedTime ?? '',
