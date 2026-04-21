@@ -7,7 +7,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { createClient } from '@/hooks/useClients'
-import type { Demande, DemandeStatut } from '@/types'
+import type { AppUser, Demande, DemandeStatut } from '@/types'
 
 // ── Config statuts ────────────────────────────────────────────
 
@@ -22,8 +22,6 @@ const STATUTS_ARCHIVES: { key: DemandeStatut; label: string; color: string }[] =
   { key: 'refuse',    label: 'Refusé',        color: '#ff3b30' },
   { key: 'converti',  label: 'Mission créée', color: '#34c759' },
 ]
-
-const ALL_STATUTS = [...STATUTS.map(s => s.key), ...STATUTS_ARCHIVES.map(s => s.key)]
 
 function statutCfg(key: string) {
   return STATUTS.find(s => s.key === key) ?? STATUTS_ARCHIVES.find(s => s.key === key) ?? STATUTS[0]
@@ -53,7 +51,7 @@ interface ModalProps {
   onSave: (d: Demande) => void
   onDelete?: () => void
   onConvertir?: (d: Demande) => void
-  users: ReturnType<typeof useUsersStore>['users']
+  users: AppUser[]
 }
 
 function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }: ModalProps) {

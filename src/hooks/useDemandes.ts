@@ -24,6 +24,7 @@ export function useDemandesListener() {
 export async function saveDemande(demande: Demande, uid: string): Promise<void> {
   await setDoc(doc(db, COLLECTION, demande.id), {
     ...demande,
+    updatedBy: uid,
     updatedAt: serverTimestamp(),
   }, { merge: true })
 }
