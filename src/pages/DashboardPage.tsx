@@ -231,9 +231,10 @@ export default function DashboardPage() {
     })
 
   jourItems.sort((a, b) => {
-    const ta = a.time || '99:99'
-    const tb = b.time || '99:99'
-    return ta.localeCompare(tb)
+    if (!a.time && !b.time) return 0
+    if (!a.time) return -1   // sans heure → en haut
+    if (!b.time) return 1
+    return a.time.localeCompare(b.time)
   })
 
   // ── État du parc ───────────────────────────────────────────

@@ -121,9 +121,10 @@ function assignColumns(
 
 function sortEvts(evts: PlanningEvent[]): PlanningEvent[] {
   return evts.slice().sort((a,b) => {
+    if (!a.plannedTime && !b.plannedTime) return 0
+    if (!a.plannedTime) return -1   // sans heure → en haut
+    if (!b.plannedTime) return 1
     if (a.plannedTime && b.plannedTime) return a.plannedTime.localeCompare(b.plannedTime)
-    if (a.plannedTime) return -1
-    if (b.plannedTime) return 1
     return 0
   })
 }
