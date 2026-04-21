@@ -75,6 +75,8 @@ export interface Sampling {
   reportHistory: ReportHistory[]
   doneBy: string          // uid
   checklist?: ChecklistItem[]
+  /** Motif de non-réalisation ou de report (visible si status = non_effectue | overdue) */
+  motif?: string
   /** Journal d'audit : chaque modification de champ sensible est tracée ici */
   history?: SamplingHistoryEntry[]
 }

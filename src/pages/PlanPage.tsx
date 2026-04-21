@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, Trash2, History, ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, FileText } from 'lucide-react'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveClient } from '@/hooks/useClients'
@@ -36,8 +36,9 @@ const AUDIT_FIELDS: Partial<Record<keyof Sampling, (v: unknown) => string>> = {
   rapportPrevu: (v) => v ? 'Oui' : 'Non',
   rapportDate:  (v) => v ? new Date(v as string).toLocaleDateString('fr-FR') : '—',
   nappe:        (v) => ({ haute: 'Haute', basse: 'Basse', '': '—' }[v as string] ?? String(v)),
-  doneBy:       () => '—',  // sera résolu depuis users lors de l'affichage
+  doneBy:       () => '—',  // sera résolu depuis users lors du PDF
   comment:      (v) => (v as string) ? `"${v}"` : '—',
+  motif:        (v) => (v as string) || '—',
 }
 
 const AUDIT_FIELD_LABELS: Partial<Record<keyof Sampling, string>> = {
@@ -51,6 +52,7 @@ const AUDIT_FIELD_LABELS: Partial<Record<keyof Sampling, string>> = {
   nappe:        'Nappe',
   doneBy:       'Technicien',
   comment:      'Commentaire',
+  motif:        'Motif',
 }
 
 /** Génère les samplings d'un plan selon sa fréquence */
@@ -195,6 +197,54 @@ export default function PlanPage() {
     triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updatedPlan : p) })
   }
 
+  function exportSamplingHistory(s: Sampling) {
+    const entries = [...(s.history ?? [])].reverse()
+    const moisLabel = MOIS[s.plannedMonth] ?? `Mois ${s.plannedMonth + 1}`
+    const title = `Historique — Prélèvement n°${s.num} (${moisLabel}) — ${plan?.nom ?? ''} — ${client?.nom ?? ''}`
+
+    const rows = entries.length === 0
+      ? '<tr><td colspan="4" style="padding:12px;color:#888;text-align:center">Aucune modification enregistrée</td></tr>'
+      : entries.map((e) => {
+          const fieldLabel = AUDIT_FIELD_LABELS[e.field as keyof Sampling] ?? e.field
+          const d = new Date(e.at)
+          const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
+          const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+          return `<tr>
+            <td>${dateStr} à ${timeStr}</td>
+            <td>${e.byNom}</td>
+            <td>${fieldLabel}</td>
+            <td>${e.from} → <strong>${e.to}</strong></td>
+          </tr>`
+        }).join('')
+
+    const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+      <title>${title}</title>
+      <style>
+        body { font-family: -apple-system, Helvetica Neue, sans-serif; font-size: 13px; color: #1d1d1f; margin: 32px; }
+        h1 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+        p.sub { color: #6e6e73; font-size: 12px; margin-bottom: 24px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+             color: #6e6e73; border-bottom: 2px solid #d2d2d7; padding: 8px 12px; }
+        td { padding: 8px 12px; border-bottom: 1px solid #e5e5ea; vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+        .footer { margin-top: 32px; font-size: 11px; color: #aeaeb2; }
+        @media print { body { margin: 16px; } }
+      </style></head><body>
+      <h1>${title}</h1>
+      <p class="sub">Exporté le ${new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })} à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} — Labocea PMC</p>
+      <table>
+        <thead><tr><th>Date / Heure</th><th>Technicien</th><th>Champ</th><th>Modification</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p class="footer">Document généré automatiquement par Labocea PMC V2</p>
+      <script>window.onload = () => { window.print() }<\/script>
+      </body></html>`
+
+    const w = window.open('', '_blank')
+    if (w) { w.document.write(html); w.document.close() }
+  }
+
   if (loading) return <div className="flex justify-center py-20"><div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} /></div>
   if (!client || !plan) return <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Point introuvable.</div>
 
@@ -331,8 +381,20 @@ export default function PlanPage() {
                         sampling={s}
                         onUpdate={(field, val) => updateSampling(s.id, field, val)}
                         users={users}
-                        auditFieldLabels={AUDIT_FIELD_LABELS}
                       />
+                      {/* Bouton export historique — visible seulement si des entrées existent */}
+                      {(s.history ?? []).length > 0 && (
+                        <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
+                          <button
+                            onClick={() => exportSamplingHistory(s)}
+                            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg"
+                            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}
+                          >
+                            <FileText size={13} />
+                            Exporter l'historique ({s.history!.length} modification{s.history!.length > 1 ? 's' : ''})
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -351,11 +413,9 @@ interface SamplingFormProps {
   sampling: Sampling
   onUpdate: (field: keyof Sampling, value: unknown) => void
   users?: AppUser[]
-  auditFieldLabels?: Partial<Record<keyof Sampling, string>>
 }
 
-function SamplingForm({ sampling, onUpdate, users = [], auditFieldLabels = {} }: SamplingFormProps) {
-  const [showHistory, setShowHistory] = useState(false)
+function SamplingForm({ sampling, onUpdate, users = [] }: SamplingFormProps) {
   const [newTask, setNewTask] = useState('')
   const checklist: ChecklistItem[] = sampling.checklist ?? []
 
@@ -539,52 +599,18 @@ function SamplingForm({ sampling, onUpdate, users = [], auditFieldLabels = {} }:
         </div>
       </div>
 
-      {/* ── Journal d'audit ──────────────────────────────────── */}
-      {(sampling.history ?? []).length > 0 && (
-        <div className="col-span-2 mt-1">
-          <button
-            onClick={() => setShowHistory((v) => !v)}
-            className="flex items-center gap-1.5 text-xs font-medium mb-2"
-            style={{ color: 'var(--color-text-secondary)' }}
-          >
-            <History size={13} />
-            Historique ({sampling.history!.length} modification{sampling.history!.length > 1 ? 's' : ''})
-            {showHistory ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          </button>
-
-          {showHistory && (
-            <div className="rounded-lg overflow-hidden"
-              style={{ border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-primary)' }}>
-              {[...(sampling.history ?? [])].reverse().map((entry, i, arr) => {
-                const label = auditFieldLabels[entry.field as keyof Sampling] ?? entry.field
-                const date = new Date(entry.at)
-                const dateStr = date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
-                const timeStr = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-                return (
-                  <div key={i}
-                    className="flex items-start gap-3 px-3 py-2.5"
-                    style={{ borderBottom: i < arr.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                    {/* Dot timeline */}
-                    <div className="shrink-0 mt-1 w-1.5 h-1.5 rounded-full"
-                      style={{ background: 'var(--color-text-tertiary)' }} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs" style={{ color: 'var(--color-text-primary)' }}>
-                        <span className="font-medium">{label}</span>
-                        {' '}&rarr;{' '}
-                        <span style={{ color: 'var(--color-success)' }}>{entry.to}</span>
-                        {entry.from && entry.from !== '—' && (
-                          <span style={{ color: 'var(--color-text-tertiary)' }}> (était : {entry.from})</span>
-                        )}
-                      </p>
-                      <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
-                        {entry.byNom} · {dateStr} à {timeStr}
-                      </p>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
+      {/* Motif — visible uniquement si le prélèvement n'a pas été réalisé */}
+      {(sampling.status === 'non_effectue' || sampling.status === 'overdue') && (
+        <div className="col-span-2">
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+            Motif de non-réalisation
+          </label>
+          <input
+            value={sampling.motif ?? ''}
+            onChange={(e) => onUpdate('motif', e.target.value)}
+            placeholder="Ex : Pas d'eau sur site / Annulation client / Accès impossible…"
+            className="field-input w-full"
+          />
         </div>
       )}
     </div>
