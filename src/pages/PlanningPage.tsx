@@ -927,7 +927,7 @@ export default function PlanningPage() {
     clients.forEach((client: Client) => {
       client.plans.forEach(plan => {
         const isAuto = plan.methode === 'Automatique'
-        const baseSub = plan.nom || plan.siteNom || '—'
+        const baseSub = [plan.nom, plan.siteNom].filter(Boolean).join(' · ') || '—'
         plan.samplings.forEach((s:Sampling) => {
           // Exclure les samplings non planifiés (pool) — plannedDay = 0 ou absent
           if (!s.plannedDay && !s.doneDate) return
