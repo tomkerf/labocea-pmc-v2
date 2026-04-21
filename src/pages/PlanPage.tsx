@@ -94,10 +94,18 @@ export default function PlanPage() {
     setClient(updated)
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(async () => {
-      if (!uid) return
+      if (!uid) {
+        saveTimer.current = null
+        return
+      }
+      saveTimer.current = null // le timer a tiré, on efface la ref
       setSaving(true)
       try { await saveClient(updated, uid) }
-      finally { setSaving(false); isDirty.current = false }
+      finally {
+        setSaving(false)
+        // Ne réinitialiser isDirty que s'il n'y a pas de nouveau timer en attente
+        if (!saveTimer.current) isDirty.current = false
+      }
     }, DEBOUNCE)
   }
 

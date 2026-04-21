@@ -28,6 +28,8 @@ export default function ClientPage() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isDirty = useRef(false)
   const isDeleted = useRef(false)
+  // Référence vers le save en cours pour attendre sa fin avant de supprimer
+  const savingPromise = useRef<Promise<void> | null>(null)
 
   // Écoute temps réel sur le document client
   useEffect(() => {
@@ -50,14 +52,25 @@ export default function ClientPage() {
     setClient(updated)
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(async () => {
-      if (!uid || isDeleted.current) return
-      setSaving(true)
-      try {
-        await saveClient(updated, uid)
-      } finally {
-        setSaving(false)
-        isDirty.current = false
+      if (!uid || isDeleted.current) {
+        saveTimer.current = null
+        return
       }
+      saveTimer.current = null // le timer a tiré, on efface la ref
+      setSaving(true)
+      const p = (async () => {
+        try {
+          await saveClient(updated, uid)
+        } finally {
+          setSaving(false)
+          // Ne réinitialiser isDirty que s'il n'y a pas de nouveau timer en attente
+          // (évite d'écraser un onSnapshot qui arriverait entre deux saves)
+          if (!saveTimer.current) isDirty.current = false
+        }
+      })()
+      savingPromise.current = p
+      await p
+      savingPromise.current = null
     }, DEBOUNCE)
   }
 
@@ -97,10 +110,18 @@ export default function ClientPage() {
   // Supprimer le client
   async function handleDeleteClient() {
     if (!client) return
-    // Bloquer tout save en cours ou à venir avant de supprimer
+    // Bloquer tout save futur
     isDeleted.current = true
-    if (saveTimer.current) clearTimeout(saveTimer.current)
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current)
+      saveTimer.current = null
+    }
     isDirty.current = false
+    // Attendre la fin du save en cours avant de supprimer pour éviter le "zombie client"
+    // (un setDoc qui se termine après le deleteDoc recrée le document)
+    if (savingPromise.current) {
+      try { await savingPromise.current } catch { /* ignore */ }
+    }
     await deleteClient(client.id)
     navigate('/missions')
   }
