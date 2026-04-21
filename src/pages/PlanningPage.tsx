@@ -15,7 +15,7 @@ import { useEvenementsStore } from '@/stores/evenementsStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { usePreleveursStore } from '@/stores/preleveursStore'
 import { useAuthStore } from '@/stores/authStore'
-import type { Client, Sampling, Verification, Maintenance, EvenementPersonnel, TypeEvenement, AppUser } from '@/types'
+import type { Client, Sampling, Verification, Maintenance, EvenementPersonnel, TypeEvenement } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
 
 // ── Types ───────────────────────────────────────────────────
@@ -1900,7 +1900,6 @@ export default function PlanningPage() {
           onMove={handleMoveEvent}
           onDelete={handleDeleteEvent}
           onChangeTech={handleChangeTechnicien}
-          users={users}
           techOptions={techOptions}
         />
       )}
