@@ -1017,23 +1017,30 @@ export default function PlanningPage() {
 
   // ── Filtrage technicien ─────────────────────────────────
 
+  // Extrait les initiales (dernier mot après espace) — ex: "Thomas THK" → "THK"
+  function normTech(s: string): string {
+    if (!s || s === '—') return s
+    const parts = s.trim().split(' ')
+    return parts[parts.length - 1]
+  }
+
   const allTechs = useMemo(() => {
     const s = new Set<string>()
-    Object.values(eventsByDate).flat().forEach(e => { if (e.technicien&&e.technicien!=='—') s.add(e.technicien) })
+    Object.values(eventsByDate).flat().forEach(e => { if (e.technicien && e.technicien !== '—') s.add(normTech(e.technicien)) })
     return Array.from(s).sort()
   }, [eventsByDate])
 
   // Avec regroupement par client (vue mois, DayModal)
   function filteredForDay(dateStr:string): PlanningEvent[] {
     let evts = eventsByDate[dateStr]??[]
-    if (filterTech) evts = evts.filter(e => e.technicien===filterTech)
+    if (filterTech) evts = evts.filter(e => normTech(e.technicien)===filterTech)
     if (filterRetard) evts = evts.filter(e => e.statusColor==='var(--color-danger)'||e.statusLabel==='En retard')
     return groupByClient(evts)
   }
   // Sans regroupement (vue semaine et vue jour : chaque prélèvement visible)
   function filteredForDayFlat(dateStr:string): PlanningEvent[] {
     let evts = eventsByDate[dateStr]??[]
-    if (filterTech) evts = evts.filter(e => e.technicien===filterTech)
+    if (filterTech) evts = evts.filter(e => normTech(e.technicien)===filterTech)
     if (filterRetard) evts = evts.filter(e => e.statusColor==='var(--color-danger)'||e.statusLabel==='En retard')
     return sortEvts(evts)
   }
@@ -1485,7 +1492,7 @@ export default function PlanningPage() {
         const dateStr = toISO(selectedDate)
         const allEvts = sortEvts((() => {
           let evts = eventsByDate[dateStr] ?? []
-          if (filterTech)   evts = evts.filter(e => e.technicien === filterTech)
+          if (filterTech)   evts = evts.filter(e => normTech(e.technicien) === filterTech)
           if (filterRetard) evts = evts.filter(e => e.statusColor === 'var(--color-danger)' || e.statusLabel === 'En retard')
           return evts
         })())
