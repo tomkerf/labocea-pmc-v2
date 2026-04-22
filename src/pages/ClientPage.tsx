@@ -4,7 +4,7 @@ import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle } from 'lucide-r
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveClient, deleteClient } from '@/hooks/useClients'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectUid } from '@/stores/authStore'
 import { generateId } from '@/lib/ids'
 import { isSamplingOverdue } from '@/lib/overdue'
 import type { Client, Plan, SegmentType, NouvelleDemandeType } from '@/types'
@@ -18,12 +18,13 @@ const DEBOUNCE = 800
 export default function ClientPage() {
   const { clientId } = useParams<{ clientId: string }>()
   const navigate = useNavigate()
-  const uid = useAuthStore((s) => s.uid())
+  const uid = useAuthStore(selectUid)
 
   const [client, setClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [confirmDeletePlanId, setConfirmDeletePlanId] = useState<string | null>(null)
   const [sitesInput, setSitesInput] = useState('')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isDirty = useRef(false)
@@ -126,10 +127,15 @@ export default function ClientPage() {
     navigate('/missions')
   }
 
-  // Supprimer un plan
-  function deletePlan(planId: string) {
-    if (!client || !confirm('Supprimer ce point et tous ses prélèvements ?')) return
-    triggerSave({ ...client, plans: client.plans.filter((p) => p.id !== planId) })
+  // Supprimer un plan — déclenche la confirmation inline (pas de confirm() natif)
+  function requestDeletePlan(planId: string) {
+    setConfirmDeletePlanId(planId)
+  }
+
+  function confirmDeletePlan() {
+    if (!client || !confirmDeletePlanId) return
+    triggerSave({ ...client, plans: client.plans.filter((p) => p.id !== confirmDeletePlanId) })
+    setConfirmDeletePlanId(null)
   }
 
   if (loading) {
@@ -300,42 +306,64 @@ export default function ClientPage() {
             {client.plans.map((plan, i) => {
               const clientYear = Number(client.annee) || undefined
               const overdueCount = plan.samplings.filter((s) => isSamplingOverdue(s, clientYear)).length
+              const isConfirmingDelete = confirmDeletePlanId === plan.id
               return (
               <div key={plan.id}
                 style={{ borderBottom: i < client.plans.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
-                className="flex items-center px-5 py-3 gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                      {plan.nom || 'Point sans nom'}
+                className="flex flex-col px-5 py-3 gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                        {plan.nom || 'Point sans nom'}
+                      </p>
+                      {overdueCount > 0 && (
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0 flex items-center gap-1"
+                          style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+                          <AlertTriangle size={10} />
+                          {overdueCount} en retard
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                      {[plan.siteNom, plan.frequence, plan.nature].filter(Boolean).join(' · ')}
                     </p>
-                    {overdueCount > 0 && (
-                      <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0 flex items-center gap-1"
-                        style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
-                        <AlertTriangle size={10} />
-                        {overdueCount} en retard
-                      </span>
-                    )}
                   </div>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
-                    {[plan.siteNom, plan.frequence, plan.nature].filter(Boolean).join(' · ')}
-                  </p>
+                  <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0"
+                    style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                    {plan.samplings.length} prélèv.
+                  </span>
+                  <button onClick={() => navigate(`/missions/${client.id}/plan/${plan.id}`)}
+                    className="shrink-0 flex items-center gap-1 text-sm font-medium"
+                    style={{ color: 'var(--color-accent)' }}>
+                    Ouvrir <ChevronRight size={14} />
+                  </button>
+                  <button onClick={() => requestDeletePlan(plan.id)} className="shrink-0 p-1 rounded"
+                    style={{ color: isConfirmingDelete ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
+                    onMouseLeave={(e) => { if (!isConfirmingDelete) e.currentTarget.style.color = 'var(--color-text-tertiary)' }}>
+                    <Trash2 size={14} />
+                  </button>
                 </div>
-                <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0"
-                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                  {plan.samplings.length} prélèv.
-                </span>
-                <button onClick={() => navigate(`/missions/${client.id}/plan/${plan.id}`)}
-                  className="shrink-0 flex items-center gap-1 text-sm font-medium"
-                  style={{ color: 'var(--color-accent)' }}>
-                  Ouvrir <ChevronRight size={14} />
-                </button>
-                <button onClick={() => deletePlan(plan.id)} className="shrink-0 p-1 rounded"
-                  style={{ color: 'var(--color-text-tertiary)' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
-                  <Trash2 size={14} />
-                </button>
+                {/* Confirmation inline — pas de confirm() natif */}
+                {isConfirmingDelete && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                    style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
+                    <AlertTriangle size={13} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+                    <span className="text-xs font-medium flex-1" style={{ color: 'var(--color-danger)' }}>
+                      Supprimer ce point et tous ses prélèvements ?
+                    </span>
+                    <button onClick={confirmDeletePlan}
+                      className="text-xs font-semibold px-2.5 py-1 rounded"
+                      style={{ background: 'var(--color-danger)', color: 'white' }}>
+                      Supprimer
+                    </button>
+                    <button onClick={() => setConfirmDeletePlanId(null)}
+                      className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                      Annuler
+                    </button>
+                  </div>
+                )}
               </div>
             )})}
 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Plus, Search, AlertTriangle } from 'lucide-react'
 import { useClientsListener, createClient } from '@/hooks/useClients'
 import { useMissionsStore } from '@/stores/missionsStore'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectUid } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import ClientCard from '@/components/missions/ClientCard'
 import type { Client } from '@/types'
@@ -18,7 +18,7 @@ export default function MissionsPage() {
 
   const navigate = useNavigate()
   const { clients, loading } = useMissionsStore()
-  const uid = useAuthStore((s) => s.uid())
+  const uid = useAuthStore(selectUid)
 
   const [search, setSearch] = useState('')
   const [onlyRetard, setOnlyRetard] = useState(false)

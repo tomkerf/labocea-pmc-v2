@@ -4,7 +4,7 @@ import { ChevronLeft, Plus, Trash2, FileText } from 'lucide-react'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveClient } from '@/hooks/useClients'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { generateId } from '@/lib/ids'
@@ -94,7 +94,7 @@ function generateSamplings(plan: Plan): Sampling[] {
 export default function PlanPage() {
   const { clientId, planId } = useParams<{ clientId: string; planId: string }>()
   const navigate = useNavigate()
-  const uid = useAuthStore((s) => s.uid())
+  const uid = useAuthStore(selectUid)
   useUsersListener()
   const users = useUsersStore((s) => s.users)
   // Nom dénormalisé pour le journal d'audit
@@ -330,8 +330,16 @@ export default function PlanPage() {
       <script>window.onload = () => { window.print() }<\/script>
       </body></html>`
 
-    const w = window.open('', '_blank')
-    if (w) { w.document.write(html); w.document.close() }
+    // Blob + URL.createObjectURL — compatible tous navigateurs et mobile Safari
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.target = '_blank'
+    a.rel = 'noopener'
+    a.click()
+    // Libérer la mémoire après ouverture
+    setTimeout(() => URL.revokeObjectURL(url), 10_000)
   }
 
   if (loading) return <div className="flex justify-center py-20"><div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} /></div>

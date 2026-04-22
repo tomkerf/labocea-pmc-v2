@@ -17,16 +17,9 @@ interface AuthState {
   setLoading: (loading: boolean) => void
   setInitialized: (initialized: boolean) => void
   reset: () => void
-
-  // Getters dérivés
-  isAuthenticated: () => boolean
-  uid: () => string | null
-  prenom: () => string
-  initiales: () => string
-  role: () => UserRole | null
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   firebaseUser: null,
   appUser: null,
   loading: true,
@@ -37,10 +30,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setLoading: (loading) => set({ loading }),
   setInitialized: (initialized) => set({ initialized }),
   reset: () => set({ firebaseUser: null, appUser: null, loading: false }),
-
-  isAuthenticated: () => get().firebaseUser !== null,
-  uid: () => get().firebaseUser?.uid ?? null,
-  prenom: () => get().appUser?.prenom ?? '',
-  initiales: () => get().appUser?.initiales ?? '',
-  role: () => get().appUser?.role ?? null,
 }))
+
+// ── Sélecteurs nommés — à utiliser dans les composants ──────────
+// Préférer ces sélecteurs aux anciennes méthodes du store :
+//   ✓  const uid = useAuthStore(selectUid)
+//   ✗  const uid = useAuthStore(s => s.uid())
+export const selectUid            = (s: AuthState): string | null  => s.firebaseUser?.uid ?? null
+export const selectPrenom         = (s: AuthState): string         => s.appUser?.prenom ?? ''
+export const selectInitiales      = (s: AuthState): string         => s.appUser?.initiales ?? ''
+export const selectRole           = (s: AuthState): UserRole | null => s.appUser?.role ?? null
+export const selectIsAuthenticated = (s: AuthState): boolean       => s.firebaseUser !== null
+export const selectAppUser        = (s: AuthState): AppUser | null => s.appUser

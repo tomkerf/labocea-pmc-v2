@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge, Hammer, Inbox } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import UserAvatar from '@/components/ui/UserAvatar'
 
@@ -19,7 +19,7 @@ const navItems: { to: string; icon?: React.ElementType; label: string; end?: boo
 
 export default function Sidebar() {
   const { clients } = useMissionsStore()
-  const { appUser } = useAuthStore()
+  const appUser = useAuthStore(selectAppUser)
 
   const overdueCount = useMemo(() => {
     let count = 0
