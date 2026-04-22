@@ -27,7 +27,7 @@ export default function TabBar() {
     for (const client of clients)
       for (const plan of client.plans)
         for (const s of plan.samplings)
-          if (isSamplingOverdue(s)) count++
+          if (isSamplingOverdue(s, Number(client.annee) || undefined)) count++
     return count
   }, [clients])
 

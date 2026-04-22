@@ -9,7 +9,8 @@ import ClientCard from '@/components/missions/ClientCard'
 import type { Client } from '@/types'
 
 function hasOverdue(client: Client): boolean {
-  return client.plans.some((p) => p.samplings.some(isSamplingOverdue))
+  const year = Number(client.annee) || undefined
+  return client.plans.some((p) => p.samplings.some((s) => isSamplingOverdue(s, year)))
 }
 
 export default function MissionsPage() {

@@ -13,7 +13,7 @@ function getNextSampling(client: Client): { label: string; overdue: boolean } | 
   for (const plan of client.plans) {
     for (const s of plan.samplings) {
       if (s.status === 'done' || s.status === 'non_effectue') continue
-      const overdue = isSamplingOverdue(s)
+      const overdue = isSamplingOverdue(s, Number(client.annee) || undefined)
       if (overdue) {
         if (!next || next.month > s.plannedMonth) next = { month: s.plannedMonth, overdue: true }
       } else if (s.plannedMonth >= currentMonth) {
@@ -30,7 +30,7 @@ function countByStatus(client: Client) {
   let overdue = 0, planned = 0, done = 0
   for (const plan of client.plans) {
     for (const s of plan.samplings) {
-      if (isSamplingOverdue(s)) overdue++
+      if (isSamplingOverdue(s, Number(client.annee) || undefined)) overdue++
       else if (s.status === 'planned') planned++
       else if (s.status === 'done') done++
     }

@@ -298,7 +298,8 @@ export default function ClientPage() {
           <div className="rounded-xl overflow-hidden"
             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             {client.plans.map((plan, i) => {
-              const overdueCount = plan.samplings.filter(isSamplingOverdue).length
+              const clientYear = Number(client.annee) || undefined
+              const overdueCount = plan.samplings.filter((s) => isSamplingOverdue(s, clientYear)).length
               return (
               <div key={plan.id}
                 style={{ borderBottom: i < client.plans.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}

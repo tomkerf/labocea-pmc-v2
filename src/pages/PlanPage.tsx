@@ -116,11 +116,16 @@ export default function PlanPage() {
     if (!clientId) return
     const ref = doc(db, 'clients-v2', clientId)
     const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists() && !isDirty.current) setClient({ id: snap.id, ...snap.data() } as Client)
+      if (!snap.exists()) {
+        // Client supprimé depuis un autre onglet/appareil → rediriger sans laisser l'utilisateur sur un plan fantôme
+        navigate('/missions', { replace: true })
+        return
+      }
+      if (!isDirty.current) setClient({ id: snap.id, ...snap.data() } as Client)
       setLoading(false)
     })
     return () => unsub()
-  }, [clientId])
+  }, [clientId, navigate])
 
   const plan = client?.plans.find((p) => p.id === planId) ?? null
 
@@ -202,6 +207,14 @@ export default function PlanPage() {
   function addCustomSampling(dateStr: string) {
     if (!client || !plan || !dateStr) return
     const d = new Date(dateStr + 'T12:00:00')
+    // Bloquer les doublons à la même date
+    const isDuplicate = plan.samplings.some(
+      (s) => s.plannedMonth === d.getMonth() && s.plannedDay === d.getDate()
+    )
+    if (isDuplicate) {
+      alert(`Un prélèvement est déjà prévu le ${d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}.`)
+      return
+    }
     const newSampling: Sampling = {
       id: generateId(),
       num: plan.samplings.length + 1,
