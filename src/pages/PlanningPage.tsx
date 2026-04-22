@@ -397,11 +397,6 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                                   {item.techInitiales}
                                 </span>
                               )}
-                              {item.sampling.plannedDay > 0 && (
-                                <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>
-                                  Prévu le {item.sampling.plannedDay}
-                                </span>
-                              )}
                             </div>
                           </div>
                           {/* Icône cercle +/× — remplace le bouton texte "→ Ce jour" */}
