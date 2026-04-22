@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, CheckCircle2, ExternalLink, Trash2, Plus, X, Calendar, Bell, AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useClientsListener, saveClient } from '@/hooks/useClients'
@@ -14,7 +14,7 @@ import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useEvenementsStore } from '@/stores/evenementsStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { usePreleveursStore } from '@/stores/preleveursStore'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
 import type { Client, Sampling, Verification, Maintenance, EvenementPersonnel, TypeEvenement } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
 
@@ -515,7 +515,7 @@ interface EventDetailModalProps {
 
 function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete, onChangeTech, techOptions }: EventDetailModalProps) {
   const navigate = useNavigate()
-  const connectedInitiales = useAuthStore(s => s.appUser?.initiales ?? '')
+  const connectedInitiales = useAuthStore(s => s.appUser?.initiales) ?? ''
   const [isMoving,       setIsMoving]       = useState(false)
   const [isChangingTech, setIsChangingTech] = useState(false)
   const [confirmCancel,  setConfirmCancel]  = useState(false)
@@ -931,8 +931,8 @@ export default function PlanningPage() {
   usePreleveursListener()
 
   const navigate   = useNavigate()
-  const uid        = useAuthStore(s => s.uid())
-  const initiales  = useAuthStore(s => s.initiales())
+  const uid        = useAuthStore(selectUid)
+  const initiales  = useAuthStore(selectInitiales)
   const { clients }       = useMissionsStore()
   const { verifications } = useMetrologieStore()
   const { maintenances }  = useMaintenancesStore()
@@ -1092,19 +1092,20 @@ export default function PlanningPage() {
   }, [preleveurs, eventsByDate])
 
   // Avec regroupement par client (vue mois, DayModal)
-  function filteredForDay(dateStr:string): PlanningEvent[] {
+  const filteredForDay = useCallback((dateStr:string): PlanningEvent[] => {
     let evts = eventsByDate[dateStr]??[]
     if (filterTech) evts = evts.filter(e => normTech(e.technicien)===filterTech)
     if (filterRetard) evts = evts.filter(e => e.priority === 0)
     return groupByClient(evts)
-  }
+  }, [eventsByDate, filterTech, filterRetard])
+
   // Sans regroupement (vue semaine et vue jour : chaque prélèvement visible)
-  function filteredForDayFlat(dateStr:string): PlanningEvent[] {
+  const filteredForDayFlat = useCallback((dateStr:string): PlanningEvent[] => {
     let evts = eventsByDate[dateStr]??[]
     if (filterTech) evts = evts.filter(e => normTech(e.technicien)===filterTech)
     if (filterRetard) evts = evts.filter(e => e.priority === 0)
     return sortEvts(evts)
-  }
+  }, [eventsByDate, filterTech, filterRetard])
 
 
   const totalOverdue = useMemo(() => {
@@ -1217,8 +1218,7 @@ export default function PlanningPage() {
     return days
       .map(date => ({ date, dateStr:toISO(date), events: viewMode==='semaine' ? filteredForDayFlat(toISO(date)) : filteredForDay(toISO(date)) }))
       .filter(g => g.events.length>0)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewMode, weekDays, monthStart, eventsByDate, filterTech, filterRetard])
+  }, [viewMode, weekDays, monthStart, filteredForDay, filteredForDayFlat])
 
   // ── Gestion des samplings ───────────────────────────────
 

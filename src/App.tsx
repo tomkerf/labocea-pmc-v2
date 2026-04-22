@@ -1,22 +1,37 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthInit } from '@/hooks/useAuth'
 import RequireAuth from '@/components/layout/RequireAuth'
 import AppLayout from '@/components/layout/AppLayout'
+
+// ── Chargement différé des pages (code-splitting) ───────────
+// LoginPage reste eager — elle est la première page affichée sans auth
 import LoginPage from '@/pages/LoginPage'
-import DashboardPage from '@/pages/DashboardPage'
-import MissionsPage from '@/pages/MissionsPage'
-import ClientPage from '@/pages/ClientPage'
-import PlanPage from '@/pages/PlanPage'
-import ComptePage from '@/pages/ComptePage'
-import MaterielPage from '@/pages/MaterielPage'
-import EquipementPage from '@/pages/EquipementPage'
-import MerologiePage from '@/pages/MerologiePage'
-import VerificationPage from '@/pages/VerificationPage'
-import MaintenancesPage from '@/pages/MaintenancesPage'
-import MaintenancePage from '@/pages/MaintenancePage'
-import PlanningPage from '@/pages/PlanningPage'
-import MissionDetailPage from '@/pages/MissionDetailPage'
-import DemandesPage from '@/pages/DemandesPage'
+
+const DashboardPage     = lazy(() => import('@/pages/DashboardPage'))
+const MissionsPage      = lazy(() => import('@/pages/MissionsPage'))
+const ClientPage        = lazy(() => import('@/pages/ClientPage'))
+const PlanPage          = lazy(() => import('@/pages/PlanPage'))
+const MissionDetailPage = lazy(() => import('@/pages/MissionDetailPage'))
+const MaterielPage      = lazy(() => import('@/pages/MaterielPage'))
+const EquipementPage    = lazy(() => import('@/pages/EquipementPage'))
+const MerologiePage     = lazy(() => import('@/pages/MerologiePage'))
+const VerificationPage  = lazy(() => import('@/pages/VerificationPage'))
+const MaintenancesPage  = lazy(() => import('@/pages/MaintenancesPage'))
+const MaintenancePage   = lazy(() => import('@/pages/MaintenancePage'))
+const PlanningPage      = lazy(() => import('@/pages/PlanningPage'))
+const DemandesPage      = lazy(() => import('@/pages/DemandesPage'))
+const ComptePage        = lazy(() => import('@/pages/ComptePage'))
+
+/** Spinner affiché pendant le chargement d'un chunk */
+function PageSpinner() {
+  return (
+    <div className="flex justify-center items-center py-20">
+      <div className="w-6 h-6 rounded-full border-2 animate-spin"
+        style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+    </div>
+  )
+}
 
 function AppRoutes() {
   useAuthInit()
@@ -28,20 +43,48 @@ function AppRoutes() {
 
       {/* Protégées */}
       <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
-        <Route path="/"                                  element={<DashboardPage />} />
-        <Route path="/missions"                          element={<MissionsPage />} />
-        <Route path="/missions/:clientId"                element={<ClientPage />} />
-        <Route path="/missions/:clientId/plan/:planId"                          element={<PlanPage />} />
-        <Route path="/missions/:clientId/plan/:planId/sampling/:samplingId"   element={<MissionDetailPage />} />
-        <Route path="/materiel"                          element={<MaterielPage />} />
-        <Route path="/materiel/:equipementId"            element={<EquipementPage />} />
-        <Route path="/metrologie"                        element={<MerologiePage />} />
-        <Route path="/metrologie/:verificationId"        element={<VerificationPage />} />
-        <Route path="/maintenances"                      element={<MaintenancesPage />} />
-        <Route path="/maintenances/:maintenanceId"       element={<MaintenancePage />} />
-        <Route path="/planning"                          element={<PlanningPage />} />
-        <Route path="/demandes"                          element={<DemandesPage />} />
-        <Route path="/compte"                            element={<ComptePage />} />
+        <Route path="/" element={
+          <Suspense fallback={<PageSpinner />}><DashboardPage /></Suspense>
+        } />
+        <Route path="/missions" element={
+          <Suspense fallback={<PageSpinner />}><MissionsPage /></Suspense>
+        } />
+        <Route path="/missions/:clientId" element={
+          <Suspense fallback={<PageSpinner />}><ClientPage /></Suspense>
+        } />
+        <Route path="/missions/:clientId/plan/:planId" element={
+          <Suspense fallback={<PageSpinner />}><PlanPage /></Suspense>
+        } />
+        <Route path="/missions/:clientId/plan/:planId/sampling/:samplingId" element={
+          <Suspense fallback={<PageSpinner />}><MissionDetailPage /></Suspense>
+        } />
+        <Route path="/materiel" element={
+          <Suspense fallback={<PageSpinner />}><MaterielPage /></Suspense>
+        } />
+        <Route path="/materiel/:equipementId" element={
+          <Suspense fallback={<PageSpinner />}><EquipementPage /></Suspense>
+        } />
+        <Route path="/metrologie" element={
+          <Suspense fallback={<PageSpinner />}><MerologiePage /></Suspense>
+        } />
+        <Route path="/metrologie/:verificationId" element={
+          <Suspense fallback={<PageSpinner />}><VerificationPage /></Suspense>
+        } />
+        <Route path="/maintenances" element={
+          <Suspense fallback={<PageSpinner />}><MaintenancesPage /></Suspense>
+        } />
+        <Route path="/maintenances/:maintenanceId" element={
+          <Suspense fallback={<PageSpinner />}><MaintenancePage /></Suspense>
+        } />
+        <Route path="/planning" element={
+          <Suspense fallback={<PageSpinner />}><PlanningPage /></Suspense>
+        } />
+        <Route path="/demandes" element={
+          <Suspense fallback={<PageSpinner />}><DemandesPage /></Suspense>
+        } />
+        <Route path="/compte" element={
+          <Suspense fallback={<PageSpinner />}><ComptePage /></Suspense>
+        } />
       </Route>
 
       {/* Fallback */}

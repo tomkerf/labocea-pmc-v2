@@ -102,7 +102,7 @@ export default function ClientPage() {
       methode: 'Ponctuel',
       lat: '', lng: '', gpsApprox: false,
       customMonths: [], bimensuelMonths: [],
-      defaultDay: 0, secondDay: 0, customDays: {},
+      defaultDay: 0, customDays: {},
       samplings: [],
     }
     triggerSave({ ...client, plans: [...client.plans, newPlan] })

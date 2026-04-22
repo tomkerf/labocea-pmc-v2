@@ -95,7 +95,6 @@ export interface Plan {
   customMonths: number[]
   bimensuelMonths: number[]
   defaultDay: number
-  secondDay: number        // 2e jour du mois pour Bimensuel (deux fois par mois)
   customDays: Record<string, number>
   samplings: Sampling[]
 }
