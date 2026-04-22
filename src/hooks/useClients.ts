@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import {
   collection, onSnapshot, doc,
-  setDoc, addDoc, deleteDoc, serverTimestamp, query, orderBy,
+  addDoc, deleteDoc, serverTimestamp, query, orderBy, runTransaction,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -27,14 +27,20 @@ export function useClientsListener() {
   }, [])
 }
 
-/** Sauvegarde un client existant (merge) */
+/** Sauvegarde un client existant (merge).
+ *  Utilise une transaction pour éviter de recréer un client supprimé
+ *  (zombie document — ex : auto-save d'un autre onglet après suppression). */
 export async function saveClient(client: Client, uid: string): Promise<void> {
   const ref = doc(db, COLLECTION, client.id)
-  await setDoc(ref, {
-    ...client,
-    updatedBy: uid,
-    updatedAt: serverTimestamp(),
-  }, { merge: true })
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref)
+    if (!snap.exists()) return   // Document supprimé entre-temps — on n'écrit rien
+    tx.set(ref, {
+      ...client,
+      updatedBy: uid,
+      updatedAt: serverTimestamp(),
+    }, { merge: true })
+  })
 }
 
 /** Supprime un client */
