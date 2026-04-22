@@ -5,7 +5,7 @@ import { useVerificationsListener, createVerification } from '@/hooks/useVerific
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useEquipementsStore } from '@/stores/equipementsStore'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectUid, selectPrenom, selectInitiales } from '@/stores/authStore'
 import type { Verification, Equipement } from '@/types'
 
 const TYPE_LABELS: Record<string, string> = {
@@ -48,9 +48,9 @@ export default function MerologiePage() {
   useVerificationsListener()
   useEquipementsListener()
   const navigate = useNavigate()
-  const uid = useAuthStore((s) => s.uid())
-  const prenom = useAuthStore((s) => s.prenom())
-  const initiales = useAuthStore((s) => s.initiales())
+  const uid = useAuthStore(selectUid)
+  const prenom = useAuthStore(selectPrenom)
+  const initiales = useAuthStore(selectInitiales)
   const { verifications, loading: loadingVerif } = useMetrologieStore()
   const { equipements, loading: loadingEq } = useEquipementsStore()
   const [filterStatut, setFilterStatut] = useState('')

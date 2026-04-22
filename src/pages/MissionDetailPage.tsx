@@ -4,7 +4,7 @@ import { doc, onSnapshot } from 'firebase/firestore'
 import { ChevronLeft, MapPin, Clock, CheckCircle2, Circle, Navigation, ExternalLink, Plus } from 'lucide-react'
 import { db } from '@/lib/firebase'
 import { saveClient } from '@/hooks/useClients'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectUid } from '@/stores/authStore'
 import type { Client, Sampling, SamplingStatus, ChecklistItem } from '@/types'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -34,7 +34,7 @@ export default function MissionDetailPage() {
     clientId: string; planId: string; samplingId: string
   }>()
   const navigate = useNavigate()
-  const uid = useAuthStore((s) => s.uid())
+  const uid = useAuthStore(selectUid)
 
   const [client, setClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)

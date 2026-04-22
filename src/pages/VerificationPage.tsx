@@ -6,7 +6,7 @@ import { db } from '@/lib/firebase'
 import { saveVerification } from '@/hooks/useVerifications'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectUid } from '@/stores/authStore'
 import type { Verification, TypeVerification, ResultatVerification } from '@/types'
 
 const TYPES: { value: TypeVerification; label: string }[] = [
@@ -26,7 +26,7 @@ const DEBOUNCE = 800
 export default function VerificationPage() {
   const { verificationId } = useParams<{ verificationId: string }>()
   const navigate = useNavigate()
-  const uid = useAuthStore((s) => s.uid())
+  const uid = useAuthStore(selectUid)
 
   // Charge les équipements pour la sélection
   useEquipementsListener()

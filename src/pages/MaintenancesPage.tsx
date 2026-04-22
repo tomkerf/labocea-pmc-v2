@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useMaintenancesListener, createMaintenance } from '@/hooks/useMaintenances'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectUid, selectPrenom, selectInitiales } from '@/stores/authStore'
 import type { Maintenance } from '@/types'
 
 const TYPE_LABELS: Record<string, string> = {
@@ -37,9 +37,9 @@ const TYPES_FILTER = [
 export default function MaintenancesPage() {
   useMaintenancesListener()
   const navigate = useNavigate()
-  const uid = useAuthStore((s) => s.uid())
-  const prenom = useAuthStore((s) => s.prenom())
-  const initiales = useAuthStore((s) => s.initiales())
+  const uid = useAuthStore(selectUid)
+  const prenom = useAuthStore(selectPrenom)
+  const initiales = useAuthStore(selectInitiales)
   const { maintenances, loading } = useMaintenancesStore()
   const [filterStatut, setFilterStatut] = useState('')
   const [filterType, setFilterType] = useState('')

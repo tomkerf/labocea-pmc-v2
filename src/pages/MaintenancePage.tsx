@@ -6,7 +6,7 @@ import { db } from '@/lib/firebase'
 import { saveMaintenance } from '@/hooks/useMaintenances'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectUid } from '@/stores/authStore'
 import type { Maintenance, TypeMaintenance, StatutMaintenance } from '@/types'
 
 const TYPES: { value: TypeMaintenance; label: string }[] = [
@@ -27,7 +27,7 @@ const DEBOUNCE = 800
 export default function MaintenancePage() {
   const { maintenanceId } = useParams<{ maintenanceId: string }>()
   const navigate = useNavigate()
-  const uid = useAuthStore((s) => s.uid())
+  const uid = useAuthStore(selectUid)
 
   useEquipementsListener()
   const { equipements } = useEquipementsStore()

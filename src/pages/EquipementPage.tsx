@@ -8,7 +8,7 @@ import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
 import CircleProgress from '@/components/materiel/CircleProgress'
 import type { Equipement, CategorieType, EtatType, LocalisationType, MateriauFlacon, Verification, Maintenance, FicheDeVieNote } from '@/types'
 
@@ -53,8 +53,8 @@ function calcMetroPercent(prochainEtalonnage: string): number | null {
 export default function EquipementPage() {
   const { equipementId } = useParams<{ equipementId: string }>()
   const navigate = useNavigate()
-  const uid        = useAuthStore((s) => s.uid())
-  const initiales  = useAuthStore((s) => s.initiales()) ?? ''
+  const uid        = useAuthStore(selectUid)
+  const initiales  = useAuthStore(selectInitiales)
 
   useVerificationsListener()
   useMaintenancesListener()

@@ -5,6 +5,7 @@ import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveClient } from '@/hooks/useClients'
 import { useAuthStore, selectUid } from '@/stores/authStore'
+import { toast } from '@/stores/toastStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { generateId } from '@/lib/ids'
@@ -141,6 +142,7 @@ export default function PlanPage() {
       saveTimer.current = null // le timer a tiré, on efface la ref
       setSaving(true)
       try { await saveClient(updated, uid) }
+      catch { toast.error('Échec de la sauvegarde. Vérifie ta connexion.') }
       finally {
         setSaving(false)
         // Ne réinitialiser isDirty que s'il n'y a pas de nouveau timer en attente
@@ -372,7 +374,11 @@ export default function PlanPage() {
         </h2>
         <div className="rounded-xl overflow-hidden" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
           <PlanField label="Nom du point">
-            <input value={plan.nom} onChange={(e) => updatePlan('nom', e.target.value)} className="field-input" />
+            <input value={plan.nom} onChange={(e) => updatePlan('nom', e.target.value)} className="field-input"
+              style={!plan.nom.trim() ? { borderColor: 'var(--color-danger)' } : undefined} />
+            {!plan.nom.trim() && (
+              <p className="text-xs mt-1" style={{ color: 'var(--color-danger)' }}>Le nom du point est obligatoire.</p>
+            )}
           </PlanField>
           <PlanField label="Site">
             <input value={plan.siteNom} onChange={(e) => updatePlan('siteNom', e.target.value)} className="field-input" placeholder="Nom du site" />

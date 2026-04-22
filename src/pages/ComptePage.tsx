@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { logout } from '@/hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 import { LogOut, Check } from 'lucide-react'
@@ -11,7 +11,8 @@ import type { AppUser } from '@/types'
 const DEBOUNCE = 600
 
 export default function ComptePage() {
-  const { appUser, setAppUser } = useAuthStore()
+  const appUser = useAuthStore(selectAppUser)
+  const setAppUser = useAuthStore(s => s.setAppUser)
   const navigate = useNavigate()
   const [saving, setSaving] = useState(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)

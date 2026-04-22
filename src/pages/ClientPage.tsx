@@ -5,6 +5,7 @@ import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveClient, deleteClient } from '@/hooks/useClients'
 import { useAuthStore, selectUid } from '@/stores/authStore'
+import { toast } from '@/stores/toastStore'
 import { generateId } from '@/lib/ids'
 import { isSamplingOverdue } from '@/lib/overdue'
 import type { Client, Plan, SegmentType, NouvelleDemandeType } from '@/types'
@@ -62,6 +63,8 @@ export default function ClientPage() {
       const p = (async () => {
         try {
           await saveClient(updated, uid)
+        } catch {
+          toast.error('Échec de la sauvegarde. Vérifie ta connexion.')
         } finally {
           setSaving(false)
           // Ne réinitialiser isDirty que s'il n'y a pas de nouveau timer en attente
@@ -123,8 +126,13 @@ export default function ClientPage() {
     if (savingPromise.current) {
       try { await savingPromise.current } catch { /* ignore */ }
     }
-    await deleteClient(client.id)
-    navigate('/missions')
+    try {
+      await deleteClient(client.id)
+      navigate('/missions')
+    } catch {
+      isDeleted.current = false
+      toast.error('Échec de la suppression. Réessaie.')
+    }
   }
 
   // Supprimer un plan — déclenche la confirmation inline (pas de confirm() natif)
@@ -195,7 +203,11 @@ export default function ClientPage() {
       <Section title="Informations générales">
         <Field label="Nom du client">
           <input value={client.nom} onChange={(e) => update('nom', e.target.value)}
-            className="field-input" placeholder="Nom du client" />
+            className="field-input" placeholder="Nom du client"
+            style={!client.nom.trim() ? { borderColor: 'var(--color-danger)' } : undefined} />
+          {!client.nom.trim() && (
+            <p className="text-xs mt-1" style={{ color: 'var(--color-danger)' }}>Le nom est obligatoire.</p>
+          )}
         </Field>
         <Field label="Segment">
           <select value={client.segment} onChange={(e) => update('segment', e.target.value as SegmentType)}

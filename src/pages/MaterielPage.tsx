@@ -3,7 +3,7 @@ import { Plus, Search } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useEquipementsListener, createEquipement } from '@/hooks/useEquipements'
 import { useEquipementsStore } from '@/stores/equipementsStore'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectUid } from '@/stores/authStore'
 import EquipementCard from '@/components/materiel/EquipementCard'
 import type { Equipement } from '@/types'
 
@@ -47,7 +47,7 @@ function normalizeCategorie(cat: string): string {
 export default function MaterielPage() {
   useEquipementsListener()
   const navigate = useNavigate()
-  const uid = useAuthStore((s) => s.uid())
+  const uid = useAuthStore(selectUid)
   const { equipements, loading } = useEquipementsStore()
 
   const [search, setSearch] = useState('')

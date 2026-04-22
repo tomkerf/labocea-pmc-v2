@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 
 import DonutChart from '@/components/dashboard/DonutChart'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectPrenom, selectInitiales } from '@/stores/authStore'
 import { useClientsListener } from '@/hooks/useClients'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -87,8 +87,8 @@ function StatCard({ value, label, sub, accent, warning, danger }: StatCardProps)
 
 export default function DashboardPage() {
   const navigate = useNavigate()
-  const prenom = useAuthStore((s) => s.prenom())
-  const initiales = useAuthStore((s) => s.appUser?.initiales ?? '')
+  const prenom = useAuthStore(selectPrenom)
+  const initiales = useAuthStore(selectInitiales)
 
   // Listeners temps réel
   useClientsListener()

@@ -3,12 +3,14 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Sidebar from './Sidebar'
 import TabBar from './TabBar'
-import { useAuthStore } from '@/stores/authStore'
+import ToastContainer from '@/components/ui/ToastContainer'
+import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { getAvatarColor, AVATAR_COLORS } from '@/components/ui/UserAvatar'
 
 export default function AppLayout() {
   const location = useLocation()
-  const avatarColor = useAuthStore((s) => s.appUser?.avatarColor)
+  const appUser = useAuthStore(selectAppUser)
+  const avatarColor = appUser?.avatarColor
 
   // Synchronise la couleur d'accentuation de l'app avec la couleur d'avatar du user
   useEffect(() => {
@@ -64,6 +66,9 @@ export default function AppLayout() {
 
       {/* TabBar mobile */}
       <TabBar />
+
+      {/* Toasts */}
+      <ToastContainer />
     </div>
   )
 }

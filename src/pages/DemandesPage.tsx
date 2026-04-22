@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Plus, X, Trash2 } from 'lucide-react'
 import { useDemandesListener, saveDemande, createDemande, deleteDemande } from '@/hooks/useDemandes'
 import { useDemandesStore } from '@/stores/demandesStore'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { createClient } from '@/hooks/useClients'
@@ -254,7 +254,7 @@ export default function DemandesPage() {
 
   const { demandes, loading } = useDemandesStore()
   const users = useUsersStore(s => s.users)
-  const uid = useAuthStore(s => s.uid())
+  const uid = useAuthStore(selectUid)
   const navigate = useNavigate()
 
   const [modal, setModal] = useState<Partial<Demande> | null>(null)
