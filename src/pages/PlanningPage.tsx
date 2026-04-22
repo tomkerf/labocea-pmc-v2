@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, CheckCircle2, ExternalLink, Trash2, Plus, X, Calendar, Bell } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CheckCircle2, ExternalLink, Trash2, Plus, X, Calendar, Bell, AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useClientsListener, saveClient } from '@/hooks/useClients'
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -515,8 +515,10 @@ interface EventDetailModalProps {
 
 function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete, onChangeTech, techOptions }: EventDetailModalProps) {
   const navigate = useNavigate()
-  const [isMoving,     setIsMoving]     = useState(false)
+  const connectedInitiales = useAuthStore(s => s.appUser?.initiales ?? '')
+  const [isMoving,       setIsMoving]       = useState(false)
   const [isChangingTech, setIsChangingTech] = useState(false)
+  const [confirmCancel,  setConfirmCancel]  = useState(false)
   const [moveDate,     setMoveDate]     = useState(dateStr)
   const [techInitiales, setTechInitiales] = useState(event.technicien ?? '')
   const [saving,       setSaving]       = useState(false)
@@ -535,7 +537,13 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
   }
 
   async function handleCancel() {
+    // Si l'intervention appartient à un autre technicien, demander confirmation
+    if (event.technicien && event.technicien !== '—' && event.technicien !== connectedInitiales && !confirmCancel) {
+      setConfirmCancel(true)
+      return
+    }
     setSaving(true)
+    setConfirmCancel(false)
     try { await onCancel(event); onClose() }
     finally { setSaving(false) }
   }
@@ -705,12 +713,38 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
           )}
 
           {/* Retirer du calendrier */}
-          {isPrelev && !event.isDone && (
+          {isPrelev && !event.isDone && !confirmCancel && (
             <button onClick={handleCancel} disabled={saving}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
               style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
               ↩ Retirer du calendrier
             </button>
+          )}
+
+          {/* Confirmation : retrait intervention d'un autre tech */}
+          {isPrelev && !event.isDone && confirmCancel && (
+            <div className="rounded-xl p-4 flex flex-col gap-3"
+              style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
+              <div className="flex items-start gap-2">
+                <AlertTriangle size={15} style={{ color: 'var(--color-danger)', flexShrink: 0, marginTop: 1 }} />
+                <p className="text-sm font-medium" style={{ color: 'var(--color-danger)' }}>
+                  Cette intervention appartient à <strong>{event.technicien}</strong>.
+                  Es-tu sûr de vouloir la retirer du calendrier ?
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={handleCancel} disabled={saving}
+                  className="flex-1 py-2 rounded-lg text-sm font-semibold"
+                  style={{ background: 'var(--color-danger)', color: 'white' }}>
+                  {saving ? 'Retrait…' : 'Oui, retirer'}
+                </button>
+                <button onClick={() => setConfirmCancel(false)} disabled={saving}
+                  className="flex-1 py-2 rounded-lg text-sm font-medium"
+                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                  Annuler
+                </button>
+              </div>
+            </div>
           )}
 
           {/* Supprimer événement personnel */}
