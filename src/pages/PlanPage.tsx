@@ -13,7 +13,7 @@ import type { AppUser, Client, Plan, Sampling, SamplingStatus, FrequenceType, Na
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
 
-const FREQUENCES: FrequenceType[] = ['Mensuel', 'Bimensuel', 'Trimestriel', 'Semestriel', 'Annuel']
+const FREQUENCES: FrequenceType[] = ['Mensuel', 'Bimensuel', 'Trimestriel', 'Semestriel', 'Annuel', 'Personnalisé']
 const NATURES: NatureEauType[] = ['Eau usée', 'Rivière', 'Souterraine', 'Eau pluviale', 'Eau saline', 'Boues', 'Autre']
 const METHODES: MethodeType[] = ['Ponctuel', 'Composite', 'Automatique']
 
@@ -42,8 +42,9 @@ const AUDIT_FIELDS: Partial<Record<keyof Sampling, (v: unknown) => string>> = {
 }
 
 
-/** Génère les samplings d'un plan selon sa fréquence */
+/** Génère les samplings d'un plan selon sa fréquence (non applicable en mode Personnalisé) */
 function generateSamplings(plan: Plan): Sampling[] {
+  if (plan.frequence === 'Personnalisé') return []
   const months: number[] = []
 
   if (plan.frequence === 'Mensuel') {
@@ -95,6 +96,8 @@ export default function PlanPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [selectedSampling, setSelectedSampling] = useState<string | null>(null)
+  const [addingDate, setAddingDate] = useState(false)
+  const [newDate, setNewDate] = useState('')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isDirty = useRef(false)
 
@@ -182,6 +185,36 @@ export default function PlanPage() {
     const newSamplings = generateSamplings(plan)
     const updatedPlan = { ...plan, samplings: newSamplings }
     triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updatedPlan : p) })
+  }
+
+  /** Ajoute un prélèvement à date libre (mode Personnalisé) */
+  function addCustomSampling(dateStr: string) {
+    if (!client || !plan || !dateStr) return
+    const d = new Date(dateStr + 'T12:00:00')
+    const newSampling: Sampling = {
+      id: generateId(),
+      num: plan.samplings.length + 1,
+      plannedMonth: d.getMonth(),
+      plannedDay: d.getDate(),
+      status: 'planned',
+      doneDate: '', comment: '',
+      nappe: '' as NappeType,
+      rapportPrevu: false, rapportDate: '',
+      tente: false, reportHistory: [], doneBy: '',
+    }
+    const updated = { ...plan, samplings: [...plan.samplings, newSampling].sort((a, b) => a.plannedMonth - b.plannedMonth || a.plannedDay - b.plannedDay) }
+    triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updated : p) })
+    setNewDate('')
+    setAddingDate(false)
+  }
+
+  /** Supprime un prélèvement (mode Personnalisé) */
+  function deleteSampling(samplingId: string) {
+    if (!client || !plan) return
+    if (!confirm('Supprimer ce prélèvement ?')) return
+    const updated = { ...plan, samplings: plan.samplings.filter((s) => s.id !== samplingId).map((s, i) => ({ ...s, num: i + 1 })) }
+    triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updated : p) })
+    if (selectedSampling === samplingId) setSelectedSampling(null)
   }
 
   /** Export PDF annuel du plan : synthèse de tous les prélèvements de l'année */
@@ -376,46 +409,108 @@ export default function PlanPage() {
                 <FileText size={14} /> Exporter PDF
               </button>
             )}
-            <button onClick={generateSamplingsForPlan}
-              className="text-sm px-3 py-1.5 rounded-lg font-medium"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
-              Générer
-            </button>
+            {plan.frequence === 'Personnalisé' ? (
+              /* Mode Personnalisé : bouton "+ Ajouter" au lieu de "Générer" */
+              <button
+                onClick={() => setAddingDate(v => !v)}
+                className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
+                style={{ background: 'var(--color-accent)', color: 'white' }}
+              >
+                <Plus size={14} /> Ajouter une date
+              </button>
+            ) : (
+              <button onClick={generateSamplingsForPlan}
+                className="text-sm px-3 py-1.5 rounded-lg font-medium"
+                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+                Générer
+              </button>
+            )}
           </div>
         </div>
 
+        {/* Sélecteur de date pour mode Personnalisé */}
+        {plan.frequence === 'Personnalisé' && addingDate && (
+          <div className="flex items-center gap-2 mb-4 p-3 rounded-xl"
+            style={{ background: 'var(--color-accent-light)', border: '1px solid var(--color-accent)20' }}>
+            <input
+              type="date"
+              value={newDate}
+              onChange={e => setNewDate(e.target.value)}
+              autoFocus
+              className="flex-1 px-3 py-1.5 rounded-lg text-sm"
+              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+            />
+            <button
+              onClick={() => addCustomSampling(newDate)}
+              disabled={!newDate}
+              className="px-3 py-1.5 rounded-lg text-sm font-medium"
+              style={{ background: newDate ? 'var(--color-accent)' : 'var(--color-bg-tertiary)', color: newDate ? 'white' : 'var(--color-text-tertiary)' }}
+            >
+              Confirmer
+            </button>
+            <button
+              onClick={() => { setAddingDate(false); setNewDate('') }}
+              className="px-2 py-1.5 rounded-lg text-sm"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              Annuler
+            </button>
+          </div>
+        )}
+
         {plan.samplings.length === 0 ? (
           <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-            Aucun prélèvement — clique sur "Générer" pour créer le calendrier automatiquement.
+            {plan.frequence === 'Personnalisé'
+              ? 'Aucun prélèvement — clique sur "Ajouter une date" pour créer les interventions une par une.'
+              : 'Aucun prélèvement — clique sur "Générer" pour créer le calendrier automatiquement.'}
           </p>
         ) : (
           <div className="rounded-xl overflow-hidden" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             {plan.samplings.map((s, i) => {
               const cfg = STATUS_CONFIG[s.status]
               const isSelected = selectedSampling === s.id
+              const isCustom = plan.frequence === 'Personnalisé'
+              // Libellé de la date : pour Personnalisé, affiche "15 Mars" au lieu de "Mars — j15"
+              const dateLabel = isCustom && s.plannedDay
+                ? `${s.plannedDay} ${MOIS[s.plannedMonth]}`
+                : `${MOIS[s.plannedMonth]}${s.plannedDay ? ` — j${s.plannedDay}` : ''}`
               return (
                 <div key={s.id}>
-                  <button
-                    onClick={() => setSelectedSampling(isSelected ? null : s.id)}
-                    className="w-full flex items-center gap-4 px-5 py-3 text-left transition-colors"
-                    style={{ borderBottom: '1px solid var(--color-border-subtle)', background: isSelected ? 'var(--color-accent-light)' : 'transparent' }}
-                  >
-                    <span className="text-sm font-medium w-6 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
-                      {s.num}
-                    </span>
-                    <span className="text-sm font-medium flex-1" style={{ color: 'var(--color-text-primary)' }}>
-                      {MOIS[s.plannedMonth]}{s.plannedDay ? ` — j${s.plannedDay}` : ''}
-                    </span>
-                    {s.doneDate && (
-                      <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                        {new Date(s.doneDate).toLocaleDateString('fr-FR')}
+                  <div className="flex items-center"
+                    style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                    <button
+                      onClick={() => setSelectedSampling(isSelected ? null : s.id)}
+                      className="flex-1 flex items-center gap-4 px-5 py-3 text-left transition-colors"
+                      style={{ background: isSelected ? 'var(--color-accent-light)' : 'transparent' }}
+                    >
+                      <span className="text-sm font-medium w-6 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
+                        {s.num}
                       </span>
+                      <span className="text-sm font-medium flex-1" style={{ color: 'var(--color-text-primary)' }}>
+                        {dateLabel}
+                      </span>
+                      {s.doneDate && (
+                        <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                          {new Date(s.doneDate).toLocaleDateString('fr-FR')}
+                        </span>
+                      )}
+                      <span className="text-xs px-2.5 py-1 rounded-full font-medium"
+                        style={{ background: cfg.bg, color: cfg.color }}>
+                        {cfg.label}
+                      </span>
+                    </button>
+                    {/* Bouton supprimer — visible uniquement en mode Personnalisé */}
+                    {isCustom && (
+                      <button
+                        onClick={() => deleteSampling(s.id)}
+                        className="px-3 py-3 shrink-0"
+                        style={{ color: 'var(--color-text-tertiary)' }}
+                        title="Supprimer ce prélèvement"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     )}
-                    <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-                      style={{ background: cfg.bg, color: cfg.color }}>
-                      {cfg.label}
-                    </span>
-                  </button>
+                  </div>
 
                   {/* Formulaire inline du prélèvement */}
                   {isSelected && (

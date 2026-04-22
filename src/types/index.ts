@@ -30,7 +30,7 @@ export type SegmentType =
   | 'RSDE'
 
 export type SamplingStatus = 'planned' | 'done' | 'overdue' | 'non_effectue'
-export type FrequenceType = 'Mensuel' | 'Bimensuel' | 'Trimestriel' | 'Semestriel' | 'Annuel'
+export type FrequenceType = 'Mensuel' | 'Bimensuel' | 'Trimestriel' | 'Semestriel' | 'Annuel' | 'Personnalisé'
 export type NatureEauType = 'Eau usée' | 'Rivière' | 'Souterraine' | 'Eau pluviale' | 'Eau saline' | 'Boues' | 'Autre'
 export type MethodeType = 'Ponctuel' | 'Composite' | 'Automatique'
 export type NappeType = 'haute' | 'basse' | ''
