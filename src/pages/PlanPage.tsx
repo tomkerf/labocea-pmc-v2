@@ -9,6 +9,7 @@ import { toast } from '@/stores/toastStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { generateId } from '@/lib/ids'
+import { generateSamplings } from '@/lib/samplings'
 import type { AppUser, Client, Plan, Sampling, SamplingStatus, FrequenceType, NatureEauType, MethodeType, NappeType, ChecklistItem, SamplingHistoryEntry } from '@/types'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -43,54 +44,6 @@ const AUDIT_FIELDS: Partial<Record<keyof Sampling, (v: unknown) => string>> = {
 }
 
 
-/** Génère les samplings d'un plan selon sa fréquence (non applicable en mode Personnalisé) */
-function generateSamplings(plan: Plan): Sampling[] {
-  if (plan.frequence === 'Personnalisé') return []
-  const months: number[] = []
-
-  if (plan.frequence === 'Mensuel') {
-    for (let i = 0; i < 12; i++) months.push(i)
-  } else if (plan.frequence === 'Bimensuel') {
-    // Bimensuel = deux fois par mois → 24 prélèvements/an
-    // plannedDay: 0 → tombent dans le pool, planifiés manuellement via le calendrier
-    const result: Sampling[] = []
-    for (let m = 0; m < 12; m++) {
-      result.push({ id: generateId(), num: result.length + 1, plannedMonth: m, plannedDay: 0,
-        status: 'planned' as SamplingStatus, doneDate: '', comment: '',
-        nappe: '' as NappeType, rapportPrevu: false, rapportDate: '', tente: false, reportHistory: [], doneBy: '' })
-      result.push({ id: generateId(), num: result.length + 1, plannedMonth: m, plannedDay: 0,
-        status: 'planned' as SamplingStatus, doneDate: '', comment: '',
-        nappe: '' as NappeType, rapportPrevu: false, rapportDate: '', tente: false, reportHistory: [], doneBy: '' })
-    }
-    return result
-  } else if (plan.frequence === 'Trimestriel') {
-    months.push(0, 3, 6, 9)
-  } else if (plan.frequence === 'Semestriel') {
-    months.push(0, 6)
-  } else if (plan.frequence === 'Annuel') {
-    months.push(plan.customMonths[0] ?? 0)
-  }
-
-  if (plan.customMonths.length > 0 && plan.frequence !== 'Annuel') {
-    return plan.customMonths.map((month, i) => ({
-      id: generateId(), num: i + 1,
-      plannedMonth: month,
-      plannedDay: plan.customDays[String(month)] ?? plan.defaultDay,
-      status: 'planned', doneDate: '', comment: '',
-      nappe: '' as NappeType, rapportPrevu: false, rapportDate: '',
-      tente: false, reportHistory: [], doneBy: '',
-    }))
-  }
-
-  return months.map((month, i) => ({
-    id: generateId(), num: i + 1,
-    plannedMonth: month,
-    plannedDay: plan.customDays[String(month)] ?? plan.defaultDay,
-    status: 'planned' as SamplingStatus, doneDate: '', comment: '',
-    nappe: '' as NappeType, rapportPrevu: false, rapportDate: '',
-    tente: false, reportHistory: [], doneBy: '',
-  }))
-}
 
 export default function PlanPage() {
   const { clientId, planId } = useParams<{ clientId: string; planId: string }>()
