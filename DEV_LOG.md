@@ -256,4 +256,27 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 13 — Évaluation des skills
+**22 avril 2026**
+
+### Skills évaluées et verdict
+
+| Skill | Verdict | Raison |
+|-------|---------|--------|
+| `react-vendoring` | ❌ Non pertinente | Interne à Next.js/Vercel, aucun rapport avec Vite |
+| `tailwind-design-system` | ⚠️ Moyenne | Design system déjà défini dans CLAUDE.md |
+| `cloudflare` | ✅ Installer | Workers + Wrangler + static assets — Phase 6 |
+| `vitest` | ✅ Installer | React Testing Library patterns pour les futurs tests composants |
+| `typescript` | ❌ Non pertinente | Interne à LobeChat (antd-style, @lobehub/ui) |
+| `react-spa-performance` | ✅ Installer | React 19 + Vite + Tailwind — stack exacte du projet |
+| `security-vite` | ✅ Installer | Audit env vars + sourcemaps avant déploiement prod |
+
+### Résultat
+Les 4 skills retenues (`cloudflare`, `vitest`, `react-spa-performance`, `security-vite`) sont déjà installées globalement dans `.claude/skills/` — aucune action supplémentaire requise. Activation automatique selon le contexte des demandes.
+
+### Note sécurité
+Les `VITE_FIREBASE_*` dans le bundle sont normaux (Firebase API key publique par design). La sécurité est assurée par les règles Firestore.
+
+---
+
 *Dernière mise à jour : 22 avril 2026*
