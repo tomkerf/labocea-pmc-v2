@@ -51,15 +51,13 @@ function generateSamplings(plan: Plan): Sampling[] {
     for (let i = 0; i < 12; i++) months.push(i)
   } else if (plan.frequence === 'Bimensuel') {
     // Bimensuel = deux fois par mois → 24 prélèvements/an
-    // 1er passage : defaultDay (ou j8 par défaut) — 2e passage : secondDay (ou j22 par défaut)
-    const day1 = plan.defaultDay || 8
-    const day2 = plan.secondDay  || Math.min(day1 + 14, 28)
+    // plannedDay: 0 → tombent dans le pool, planifiés manuellement via le calendrier
     const result: Sampling[] = []
     for (let m = 0; m < 12; m++) {
-      result.push({ id: generateId(), num: result.length + 1, plannedMonth: m, plannedDay: day1,
+      result.push({ id: generateId(), num: result.length + 1, plannedMonth: m, plannedDay: 0,
         status: 'planned' as SamplingStatus, doneDate: '', comment: '',
         nappe: '' as NappeType, rapportPrevu: false, rapportDate: '', tente: false, reportHistory: [], doneBy: '' })
-      result.push({ id: generateId(), num: result.length + 1, plannedMonth: m, plannedDay: day2,
+      result.push({ id: generateId(), num: result.length + 1, plannedMonth: m, plannedDay: 0,
         status: 'planned' as SamplingStatus, doneDate: '', comment: '',
         nappe: '' as NappeType, rapportPrevu: false, rapportDate: '', tente: false, reportHistory: [], doneBy: '' })
     }
@@ -363,31 +361,6 @@ export default function PlanPage() {
               {FREQUENCES.map((f) => <option key={f}>{f}</option>)}
             </select>
           </PlanField>
-          {/* Jours de prélèvement — visibles uniquement pour Bimensuel */}
-          {plan.frequence === 'Bimensuel' && (
-            <>
-              <PlanField label="1er passage (jour du mois)">
-                <input type="number" min={1} max={31} className="field-input"
-                  value={plan.defaultDay || ''}
-                  placeholder="ex : 8"
-                  onChange={(e) => {
-                    const v = parseInt(e.target.value)
-                    if (!isNaN(v) && v >= 1 && v <= 31) updatePlan('defaultDay', v)
-                    else if (e.target.value === '') updatePlan('defaultDay', 0)
-                  }} />
-              </PlanField>
-              <PlanField label="2e passage (jour du mois)">
-                <input type="number" min={1} max={31} className="field-input"
-                  value={plan.secondDay || ''}
-                  placeholder="ex : 22"
-                  onChange={(e) => {
-                    const v = parseInt(e.target.value)
-                    if (!isNaN(v) && v >= 1 && v <= 31) updatePlan('secondDay', v)
-                    else if (e.target.value === '') updatePlan('secondDay', 0)
-                  }} />
-              </PlanField>
-            </>
-          )}
           <PlanField label="Nature de l'eau">
             <select value={plan.nature} onChange={(e) => updatePlan('nature', e.target.value as NatureEauType)} className="field-input">
               {NATURES.map((n) => <option key={n}>{n}</option>)}
