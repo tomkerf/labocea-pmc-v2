@@ -188,4 +188,48 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+---
+
+## Session 11 — Code review + qualité + tests (22 avril 2026)
+
+### Bugs corrigés
+- **Zombie documents** : missions supprimées qui réapparaissaient → `runTransaction` dans `saveClient` vérifie l'existence du doc avant d'écrire (atomique)
+- **Alerte retrait intervention d'un autre technicien** : `PlanningPage` affiche un bloc de confirmation si `event.technicien !== connectedInitiales`
+- **Timeline planning du jour (dashboard)** : timezone UTC+2 donnait le mauvais jour → `localISO()` corrigé
+
+### Code review — 11 points corrigés
+| # | Point | Fix |
+|---|-------|-----|
+| CR1 | `as any` sur `serverTimestamp` dans `useAuth` | Type `NewUserDoc` avec `FieldValue` + try/catch |
+| CR2 | Pas de try/catch sur les appels Firestore au login | Bloc try/catch + console.error |
+| CR3 | `isSamplingOverdue` sans paramètre `year` → faux positifs | Paramètre `year?: number` ajouté |
+| CR4 | `generateId` avec `Math.random()` non cryptographique | `crypto.randomUUID()` |
+| CR5 | `PlanPage` pas de redirect si client supprimé | `navigate('/missions')` dans le callback `onSnapshot` |
+| CR6 | Profil vide au premier login (initiales manquantes) | `CompleteProfileModal` bloquant dans `RequireAuth` |
+| CR7 | Export PDF via `window.open + document.write` (bloqué mobile) | `Blob + URL.createObjectURL` |
+| CR8 | Pas de vérification des doublons dans `addCustomSampling` | Guard date déjà existante avant insertion |
+| CR9 | Index Firestore `orderBy('nom')` non vérifié | Index automatiques Firestore actifs — aucun index composite requis |
+| CR10 | `confirm()` natif pour suppression de plan | `confirmDeletePlanId` state + UI de confirmation inline |
+| CR11 | Getters dans `authStore` (anti-pattern Zustand) | Remplacement par sélecteurs externes (`selectUid`, `selectPrenom`…) sur 16 fichiers |
+
+### Refactors et améliorations
+- **Système de toasts** : `toastStore` (auto-dismiss 4s/6s) + `ToastContainer` — `toast.error()` sur tous les catch Firestore
+- **Validation formulaires** : bordure rouge + message d'erreur si `nom` client ou plan est vide (sans bloquer l'auto-save)
+- **`eslint-disable` supprimés** : `filteredForDay` / `filteredForDayFlat` convertis en `useCallback` avec deps correctes
+- **Code-splitting** : `React.lazy()` sur toutes les pages — bundle 924kB → 330kB (-64%)
+- **`secondDay`** : champ supprimé du type `Plan` et des défauts `addPlan()`
+
+### Tests unitaires (39 tests, tous verts)
+- `generateSamplings` extrait de `PlanPage.tsx` → `src/lib/samplings.ts` (testable)
+- 21 tests `generateSamplings` : tous les modes fréquence, customMonths, customDays, champs par défaut
+- 15 tests `isSamplingOverdue` : deadline exacte à la seconde, fév non-bissextile, paramètre `year`
+- 3 tests `generateId` : format UUID v4, unicité 1000 appels
+- Vitest 3.2.4 installé, scripts `npm test` / `npm run test:watch`
+
+### Versions figées
+- Suppression des `^` dans `package.json` (versions exactes installées)
+- `package-lock.json` commité → builds GitHub Actions reproductibles
+
+---
+
 *Dernière mise à jour : 22 avril 2026*
