@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import {
-  collection, onSnapshot, doc,
+  collection, onSnapshot, doc, getDoc,
   addDoc, deleteDoc, serverTimestamp, query, orderBy, runTransaction,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
@@ -47,9 +47,18 @@ export async function saveClient(client: Client, uid: string): Promise<void> {
   })
 }
 
-/** Supprime un client */
+/** Supprime un client et vérifie que la suppression a bien été appliquée côté serveur.
+ *  Lance une erreur si le document existe encore après la suppression
+ *  (ex : règles Firestore qui rejettent le deleteDoc en silence côté cache local). */
 export async function deleteClient(clientId: string): Promise<void> {
-  await deleteDoc(doc(db, COLLECTION, clientId))
+  const ref = doc(db, COLLECTION, clientId)
+  await deleteDoc(ref)
+  // Vérification serveur : force une lecture fraîche pour confirmer la suppression
+  const snap = await getDoc(ref)
+  if (snap.exists()) {
+    console.error('[deleteClient] Le document existe encore après deleteDoc — règles Firestore ?', clientId)
+    throw new Error('La suppression a échoué côté serveur. Vérifie les règles Firestore.')
+  }
 }
 
 /** Crée un nouveau client */

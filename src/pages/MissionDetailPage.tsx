@@ -47,11 +47,16 @@ export default function MissionDetailPage() {
     if (!clientId) return
     const ref = doc(db, 'clients-v2', clientId)
     const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists() && !isDirty.current) setClient({ id: snap.id, ...snap.data() } as Client)
+      if (!snap.exists()) {
+        // Client supprimé depuis un autre onglet/appareil → rediriger
+        navigate('/missions', { replace: true })
+        return
+      }
+      if (!isDirty.current) setClient({ id: snap.id, ...snap.data() } as Client)
       setLoading(false)
     })
     return () => unsub()
-  }, [clientId])
+  }, [clientId, navigate])
 
   const plan = client?.plans.find((p) => p.id === planId) ?? null
   const sampling = plan?.samplings.find((s) => s.id === samplingId) ?? null
