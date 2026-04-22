@@ -397,6 +397,12 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                                   {item.techInitiales}
                                 </span>
                               )}
+                              {item.sampling.plannedDay > 0 && (
+                                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+                                  style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                                  prévu j{item.sampling.plannedDay}
+                                </span>
+                              )}
                             </div>
                           </div>
                           {/* Icône cercle +/× — remplace le bouton texte "→ Ce jour" */}
