@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ───────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // ── clients-v2 ────────────────────────────────────────────
+    // Lecture et écriture réservées aux utilisateurs authentifiés (V2 uniquement).
+    // La V1 (sans auth) ne peut plus écrire dans cette collection.
+    match /clients-v2/{clientId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // ── users ─────────────────────────────────────────────────
+    // Chaque utilisateur peut lire/écrire son propre profil.
+    // Les autres utilisateurs peuvent lire les profils (pour dénormalisation noms).
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ── equipements ───────────────────────────────────────────
+    match /equipements/{equipementId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // ── verifications ─────────────────────────────────────────
+    match /verifications/{verificationId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // ── maintenances ──────────────────────────────────────────
+    match /maintenances/{maintenanceId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // ── evenements ────────────────────────────────────────────
+    match /evenements/{evenementId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // ── demandes ──────────────────────────────────────────────
+    match /demandes/{demandeId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // ── clients (V1 — archive, lecture seule) ─────────────────
+    // La collection V1 reste accessible en lecture uniquement.
+    match /clients/{clientId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+  }
+}
