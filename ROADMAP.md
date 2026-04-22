@@ -214,6 +214,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-04-18 | Phase 4 ✅ | Modules Métrologie + Maintenances complets : metrologieStore, maintenancesStore, useVerifications, useMaintenances, MerologiePage (tableau + filtres statut + calcul auto à jour/à prévoir/en retard), VerificationPage (fiche + sync prochainEtalonnage équipement), MaintenancesPage (liste + filtres statut/type), MaintenancePage (fiche + auto-update état équipement en_cours/réalisée), routes /metrologie/:id + /maintenances/:id — TypeScript 0 erreur |
 | 2026-04-18 | Phase 5 ✅ | Dashboard complet : KPIs temps réel (missions ce mois, conformité métrologie %, alertes actives, équipements à calibrer), planning du jour (prélèvements du jour avec badges statut + lien fiche), état du parc (4 compteurs avec icônes colorées), section alertes combinées métrologie+maintenances triées par urgence — TypeScript 0 erreur |
 | 2026-04-22 | Qualité ✅ | Code review 11 points corrigés, zombie documents (runTransaction), alerte retrait intervention autre tech, système toasts, validation formulaires, eslint-disable supprimés, code-splitting 924kB→330kB, tests unitaires 39 tests (generateSamplings/isSamplingOverdue/generateId), versions dépendances figées |
+| 2026-04-22 | Infra ✅ | Règles Firestore déployées (bloque V1 sans auth → fix définitif zombie docs), vérification post-delete côté serveur, redirect MissionDetailPage sur suppression client, CI staging verts (#147, #148) |
 
 ---
 

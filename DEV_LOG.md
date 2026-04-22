@@ -232,4 +232,28 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 12 — Clôture zombie bug + état des lieux
+**22 avril 2026**
+
+### Confirmation CI
+- Builds #147 et #148 verts sur staging (règles Firestore + fix post-delete)
+- Tous les commits de la session 11 bien poussés sur `origin/main`
+
+### Bug zombie documents — confirmé résolu
+- Règles Firestore déployées via `firebase deploy --only firestore:rules`
+- V1 (sans auth) bloquée en écriture sur `clients-v2` → "Abattoir Croissant" ne peut plus revenir
+- À surveiller 1-2h après la prochaine utilisation de la V1 pour confirmer
+
+### Skills évaluées
+- **Firebase skill (skillsmp.com)** : pertinente pour les règles par rôle (étape suivante), les transactions, et les listeners — à utiliser lors de l'implémentation des règles role-based
+- **backend-patterns** : peu pertinente (pas de backend Node/Express — Workers sont statiques)
+
+### Prochaines étapes identifiées
+- Phase 6 : déploiement production (`npx wrangler deploy`)
+- Règles Firestore par rôle (technicien / chargé de mission / admin)
+- Commentaire éditable dans `MissionDetailPage`
+- Page `/compte` : édition initiales/prénom
+
+---
+
 *Dernière mise à jour : 22 avril 2026*
