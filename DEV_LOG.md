@@ -279,6 +279,48 @@ Les `VITE_FIREBASE_*` dans le bundle sont normaux (Firebase API key publique par
 
 ---
 
+## Session 15 — Bugs planning + UX mobile
+**23 avril 2026**
+
+### Bugs corrigés
+
+**1. Décalage dates J1/J2 après validation (PlanningPage)**
+- Cause : `dateStr = s.doneDate || toISO(...)` — le `doneDate` écrasait `plannedDay` pour le positionnement dans la grille, décalant J1+J2 d'un jour après validation
+- Fix : toujours utiliser `plannedDay` pour positionner, `doneDate` uniquement pour l'affichage
+- Fichier : `src/pages/PlanningPage.tsx` ligne 991
+
+**2. Swipe gauche/droite en vue jour mobile**
+- Feature : navigation entre jours par swipe, identique à Apple Calendar
+- Seuil 50px horizontal, ignore les swipes verticaux (scroll)
+- Fichier : `src/pages/PlanningPage.tsx` — `handleTouchStart` / `handleTouchEnd`
+
+**3. CheckCircle2 sur prélèvements réalisés (planning desktop)**
+- Remplace le `✓` texte 9px par `CheckCircle2` size=11 cohérent avec le mobile
+- Fichier : `src/pages/PlanningPage.tsx` ligne 1424
+
+**4. Événements planning en ton gris neutre**
+- Les rappels/réunions/autres utilisaient `getTechColor` → bleu pour THK
+- Fix : `statusBg: var(--color-bg-tertiary)`, `statusColor: var(--color-text-tertiary)`
+- Fichier : `src/pages/PlanningPage.tsx` (2 endroits : boucle principale + vue mois)
+
+**5. Badge "Réalisé" en vert dans le planning**
+- Les prélèvements done affichaient le badge en bleu (couleur technicien)
+- Fix : `isDone` → forcer `--color-success-light` / `--color-success`
+- En bonus : `overdue` → `--color-danger-light` / `--color-danger` (cohérence)
+- Fichier : `src/pages/PlanningPage.tsx`
+
+### Setup .claude/
+- Création `.claude/skills/reprendre/` et `.claude/skills/fin-session/` — skills Cowork pour démarrer/clôturer les sessions
+- Création `.claude/settings.json` — permissions bash
+- Note : `settings.json` ne gère pas les "comportements automatiques" décrits initialement — uniquement permissions et hooks
+
+### Prochaines étapes
+- Déploiement production (Phase 6)
+- Règles Firestore par rôle
+- Vérifier que `/reprendre` et `/fin-session` fonctionnent après redémarrage Cowork
+
+---
+
 ## Session 14 — Bug planning du jour (J2)
 **23 avril 2026**
 

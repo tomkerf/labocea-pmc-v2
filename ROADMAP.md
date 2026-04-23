@@ -215,6 +215,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-04-18 | Phase 5 ✅ | Dashboard complet : KPIs temps réel (missions ce mois, conformité métrologie %, alertes actives, équipements à calibrer), planning du jour (prélèvements du jour avec badges statut + lien fiche), état du parc (4 compteurs avec icônes colorées), section alertes combinées métrologie+maintenances triées par urgence — TypeScript 0 erreur |
 | 2026-04-22 | Qualité ✅ | Code review 11 points corrigés, zombie documents (runTransaction), alerte retrait intervention autre tech, système toasts, validation formulaires, eslint-disable supprimés, code-splitting 924kB→330kB, tests unitaires 39 tests (generateSamplings/isSamplingOverdue/generateId), versions dépendances figées |
 | 2026-04-22 | Infra ✅ | Règles Firestore déployées (bloque V1 sans auth → fix définitif zombie docs), vérification post-delete côté serveur, redirect MissionDetailPage sur suppression client, CI staging verts (#147, #148) |
+| 2026-04-23 | UX ✅ | Bug J1/J2 planning (doneDate écrasait plannedDay), swipe mobile vue jour, CheckCircle2 desktop, événements gris, badge Réalisé vert, setup .claude/skills/ |
 
 ---
 
