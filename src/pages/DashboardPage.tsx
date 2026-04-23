@@ -188,10 +188,16 @@ export default function DashboardPage() {
   clients.forEach((client) => {
     if (initiales && client.preleveur && client.preleveur !== initiales) return
     client.plans.forEach((plan) => {
+      // Détecte un offset J2, J3… dans le nom du plan (ex : "Bilan 24h J2" → offset 1 jour)
+      const planNom = `${plan.nom || ''} ${plan.siteNom || ''}`
+      const jMatch = planNom.match(/\bJ(\d+)\b/)
+      const dayOffset = jMatch ? parseInt(jMatch[1]) - 1 : 0
+
       plan.samplings.forEach((s: Sampling) => {
-        const plannedDate = s.doneDate
+        const baseDate = s.doneDate
           ? s.doneDate
-          : localISO(new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay || 1))
+          : localISO(new Date(new Date().getFullYear(), s.plannedMonth, (s.plannedDay || 1) + dayOffset))
+        const plannedDate = baseDate
         if (isToday(plannedDate)) {
           jourItems.push({
             kind: 'sampling',
