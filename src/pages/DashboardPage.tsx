@@ -198,6 +198,14 @@ export default function DashboardPage() {
           ? s.doneDate
           : localISO(new Date(new Date().getFullYear(), s.plannedMonth, (s.plannedDay || 1) + dayOffset))
         const plannedDate = baseDate
+        // DEBUG — à supprimer après diagnostic
+        if (client.nom.toLowerCase().includes('rsde') || client.nom.toLowerCase().includes('châteaulin')) {
+          console.log('[PLANNING DEBUG]', {
+            client: client.nom, plan: plan.nom, siteNom: plan.siteNom,
+            plannedMonth: s.plannedMonth, plannedDay: s.plannedDay, doneDate: s.doneDate,
+            status: s.status, dayOffset, plannedDate, todayISO, isToday: isToday(plannedDate),
+          })
+        }
         if (isToday(plannedDate)) {
           jourItems.push({
             kind: 'sampling',
