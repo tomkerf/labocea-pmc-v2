@@ -292,7 +292,7 @@ Le planning du jour n'affichait qu'un seul prélèvement (Boues STEP) au lieu de
 - `isToday: false` → exclu du planning
 
 ### Cause racine
-Les bilans 24h ont deux interventions : J1 (mise en place, hier) et J2 (récupération, aujourd'hui). En V2, le sampling est stocké avec `plannedDay = J1` (hier). La logique de matching date exacte excluait ces prélèvements du planning du jour.
+Les bilans 24h (méthode automatique) ont deux interventions : J1 (installation) et J2 (désinstallation + validation). Le prélèvement est stocké avec `plannedDay = J1`. C'est en J2 que le technicien revient récupérer l'échantillon et valide le prélèvement. La logique de matching date exacte excluait ces prélèvements du planning du jour J2.
 
 ### Fix appliqué
 Calcul de `yesterdayISO` + condition élargie :
