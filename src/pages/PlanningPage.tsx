@@ -1018,11 +1018,14 @@ export default function PlanningPage() {
           const statusLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[s.status] ?? SAMPLING_LABEL.planned
           const priority = overdue ? 0 : s.status === 'non_effectue' ? 1 : s.status === 'planned' ? 2 : 3
           const tc = getTechColor(client.preleveur || '')
+          const isDone = s.status === 'done'
+          const statusBg    = isDone ? 'var(--color-success-light)' : overdue ? 'var(--color-danger-light)' : tc.bg
+          const statusColor = isDone ? 'var(--color-success)'       : overdue ? 'var(--color-danger)'       : tc.color
           const common = {
             type: 'prelevement' as const,
-            statusLabel, statusBg: tc.bg, statusColor: tc.color, priority,
+            statusLabel, statusBg, statusColor, priority,
             link:`/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
-            isDone: s.status==='done', technicien: client.preleveur||'—',
+            isDone, technicien: client.preleveur||'—',
             plannedTime: s.plannedTime, clientId:client.id, planId:plan.id, samplingId:s.id,
           }
           // Jour 1 (ou jour unique pour les méthodes ponctuelles / composite)
