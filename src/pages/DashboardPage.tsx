@@ -157,6 +157,7 @@ export default function DashboardPage() {
   // ── Planning du jour = prélèvements + événements d'aujourd'hui ──
 
   const todayISO = localISO(new Date())
+  const yesterdayISO = localISO(new Date(Date.now() - 86_400_000))
   const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes()
 
   const EVENEMENT_CFG: Record<string, { label: string; bg: string; color: string; dot: string }> = {
@@ -198,15 +199,9 @@ export default function DashboardPage() {
           ? s.doneDate
           : localISO(new Date(new Date().getFullYear(), s.plannedMonth, (s.plannedDay || 1) + dayOffset))
         const plannedDate = baseDate
-        // DEBUG — à supprimer après diagnostic
-        if (client.nom.toLowerCase().includes('rsde') || client.nom.toLowerCase().includes('châteaulin')) {
-          console.log('[PLANNING DEBUG]', {
-            client: client.nom, plan: plan.nom, siteNom: plan.siteNom,
-            plannedMonth: s.plannedMonth, plannedDay: s.plannedDay, doneDate: s.doneDate,
-            status: s.status, dayOffset, plannedDate, todayISO, isToday: isToday(plannedDate),
-          })
-        }
-        if (isToday(plannedDate)) {
+        // Un prélèvement d'hier encore "planned" est un J2 à faire aujourd'hui
+        const isJ2Today = plannedDate === yesterdayISO && s.status === 'planned'
+        if (isToday(plannedDate) || isJ2Today) {
           jourItems.push({
             kind: 'sampling',
             time: s.plannedTime ?? '',
