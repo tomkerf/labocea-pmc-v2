@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useRef } from 'react'
 import { ChevronLeft, ChevronRight, CheckCircle2, ExternalLink, Trash2, Plus, X, Calendar, Bell, AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useClientsListener, saveClient } from '@/hooks/useClients'
@@ -953,6 +953,28 @@ export default function PlanningPage() {
   const [ctxMenu,             setCtxMenu]             = useState<{ dateStr: string; x: number; y: number } | null>(null)
   const [eventDetail, setEventDetail] = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
 
+  // ── Swipe vue Jour (mobile) ─────────────────────────────
+  const swipeStartX = useRef<number | null>(null)
+  const swipeStartY = useRef<number | null>(null)
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    swipeStartX.current = e.touches[0].clientX
+    swipeStartY.current = e.touches[0].clientY
+  }, [])
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (swipeStartX.current === null || swipeStartY.current === null) return
+    const dx = e.changedTouches[0].clientX - swipeStartX.current
+    const dy = e.changedTouches[0].clientY - swipeStartY.current
+    // Swipe horizontal uniquement (ignore si principalement vertical = scroll)
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      if (dx < 0) setSelectedDate(d => addDays(d, 1))   // ← swipe gauche = jour suivant
+      else        setSelectedDate(d => addDays(d, -1))  // → swipe droit = jour précédent
+    }
+    swipeStartX.current = null
+    swipeStartY.current = null
+  }, [])
+
   // ── Drag-to-create ──────────────────────────────────────
   const [dragStart,   setDragStart]   = useState<string|null>(null)
   const [dragEnd,     setDragEnd]     = useState<string|null>(null)
@@ -1608,7 +1630,9 @@ export default function PlanningPage() {
           return Math.ceil((((d.getTime() - y.getTime()) / 86400000) + 1) / 7)
         })()
         return (
-          <div className="flex-1 overflow-hidden flex flex-col relative">
+          <div className="flex-1 overflow-hidden flex flex-col relative"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}>
 
             {/* Sous-titre : numéro de semaine */}
             <div className="px-4 py-1.5 shrink-0 flex items-center gap-2"
