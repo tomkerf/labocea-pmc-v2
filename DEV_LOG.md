@@ -279,4 +279,36 @@ Les `VITE_FIREBASE_*` dans le bundle sont normaux (Firebase API key publique par
 
 ---
 
+## Session 14 — Bug planning du jour (J2)
+**23 avril 2026**
+
+### Problème
+Le planning du jour n'affichait qu'un seul prélèvement (Boues STEP) au lieu des 3 attendus pour RSDE Step Châteaulin. Les plans "Entrée STEP" et "Sortie STEP" étaient absents.
+
+### Diagnostic (debug log console)
+- `plan.nom = "Entrée STEP"` — "J2" n'est pas dans le nom du plan → regex `/\bJ(\d+)\b/` n'a pas matché
+- `plannedDay: 22` (hier), `plannedMonth: 3` (avril) → `plannedDate = "2026-04-22"` ≠ `todayISO = "2026-04-23"`
+- `status: "planned"`, `doneDate: ""` → prélèvement non fait, planifié hier
+- `isToday: false` → exclu du planning
+
+### Cause racine
+Les bilans 24h ont deux interventions : J1 (mise en place, hier) et J2 (récupération, aujourd'hui). En V2, le sampling est stocké avec `plannedDay = J1` (hier). La logique de matching date exacte excluait ces prélèvements du planning du jour.
+
+### Fix appliqué
+Calcul de `yesterdayISO` + condition élargie :
+```typescript
+const isJ2Today = plannedDate === yesterdayISO && s.status === 'planned'
+if (isToday(plannedDate) || isJ2Today) { ... }
+```
+Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujourd'hui.
+
+### Commit
+`fix: planning du jour — inclure prélèvements J2 (planned hier)`
+
+---
+
+*Dernière mise à jour : 23 avril 2026*
+
+---
+
 *Dernière mise à jour : 22 avril 2026*
