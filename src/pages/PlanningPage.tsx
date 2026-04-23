@@ -988,7 +988,11 @@ export default function PlanningPage() {
           // Exclure les samplings non planifiés (pool) — plannedDay = 0 ou absent
           if (!s.plannedDay && !s.doneDate) return
           const overdue = isSamplingOverdue(s)
-          const dateStr = s.doneDate || toISO(new Date(year, s.plannedMonth, s.plannedDay))
+          // Positionnement dans la grille = toujours plannedDay (jamais doneDate)
+          // doneDate sert uniquement à l'affichage "réalisé le X", pas au positionnement
+          const dateStr = s.plannedDay
+            ? toISO(new Date(year, s.plannedMonth, s.plannedDay))
+            : s.doneDate  // fallback pool bimensuel sans plannedDay
           const statusLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[s.status] ?? SAMPLING_LABEL.planned
           const priority = overdue ? 0 : s.status === 'non_effectue' ? 1 : s.status === 'planned' ? 2 : 3
           const tc = getTechColor(client.preleveur || '')
