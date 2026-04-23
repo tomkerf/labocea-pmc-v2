@@ -1072,11 +1072,11 @@ export default function PlanningPage() {
     })
 
     evenements.forEach((ev:EvenementPersonnel) => {
-      const tc = getTechColor(ev.createdByInitiales||'')
       const evObj: PlanningEvent = {
         id:ev.id, type:'evenement', priority: 2,
         title:ev.titre, subtitle: EVENEMENT_LABEL[ev.type]??'Autre',
-        statusLabel: EVENEMENT_LABEL[ev.type]??'Autre', statusBg:tc.bg, statusColor:tc.color,
+        statusLabel: EVENEMENT_LABEL[ev.type]??'Autre',
+        statusBg: 'var(--color-bg-tertiary)', statusColor: 'var(--color-text-tertiary)',
         link:'', isDone:false, technicien:ev.createdByInitiales||'—',
         plannedTime:ev.heure||undefined, evenementData:ev,
       }
@@ -1820,7 +1820,7 @@ export default function PlanningPage() {
                         title: ev.titre,
                         subtitle: EVENEMENT_LABEL[ev.type] ?? 'Autre',
                         statusLabel: EVENEMENT_LABEL[ev.type] ?? 'Autre',
-                        statusBg: tc.bg, statusColor: tc.color,
+                        statusBg: 'var(--color-bg-tertiary)', statusColor: 'var(--color-text-tertiary)',
                         link: '', isDone: false,
                         technicien: ev.createdByInitiales || '—',
                         evenementData: ev,
