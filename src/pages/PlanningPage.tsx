@@ -1421,7 +1421,7 @@ export default function PlanningPage() {
         {/* Ligne 1 : indicateur (✓ ou dot) + client + tech + heure */}
         <div className="flex items-center gap-1">
           {event.isDone
-            ? <span className="shrink-0 text-[9px] font-bold leading-none" style={{ color: event.statusColor }}>✓</span>
+            ? <CheckCircle2 size={11} className="shrink-0" style={{ color: 'var(--color-success)' }} />
             : <span className="shrink-0 w-[6px] h-[6px] rounded-full" style={{ background: event.statusColor }} />
           }
           <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
