@@ -1,6 +1,9 @@
-# Commande : reprendre
+---
+name: reprendre
+description: "Reprendre le développement de Labocea PMC V2. Lit le contexte du projet et propose la prochaine étape. Utiliser en début de session."
+---
 
-Lis d'abord les fichiers suivants dans cet ordre :
+Lis ces fichiers dans l'ordre :
 1. `CLAUDE.md` — spec complète du projet
 2. `ROADMAP.md` — état d'avancement et prochaines étapes
 3. `DEV_LOG.md` — dernière session et contexte récent
