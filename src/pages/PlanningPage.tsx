@@ -102,6 +102,19 @@ function buildMonthGrid(ms: Date): (Date|null)[] {
 }
 
 
+// Grille mini-calendrier 7 colonnes (lun-dim complet)
+function buildMiniGrid(ms: Date): (Date|null)[] {
+  const y = ms.getFullYear(), m = ms.getMonth()
+  const dim = new Date(y, m+1, 0).getDate()
+  const firstDow = ms.getDay() // 0=dim
+  const offset = firstDow === 0 ? 6 : firstDow - 1
+  const cells: (Date|null)[] = []
+  for (let i = 0; i < offset; i++) cells.push(null)
+  for (let d = 1; d <= dim; d++) cells.push(new Date(y, m, d))
+  while (cells.length % 7) cells.push(null)
+  return cells
+}
+
 // ── Helpers vue Jour ────────────────────────────────────────
 
 function parseHHMM(hhmm: string): number {
@@ -1731,6 +1744,88 @@ export default function PlanningPage() {
     )
   }
 
+  // ── MiniCalendar (sidebar desktop) ─────────────────────
+
+  function MiniCalendar() {
+    const refDate = viewMode === 'mois' ? monthStart : viewMode === 'semaine' ? weekStart : selectedDate
+    const [miniMonth, setMiniMonth] = useState(() => startOfMonth(refDate))
+    const todayISO = toISO(today)
+    const DAYS = ['L','M','M','J','V','S','D']
+    const cells = buildMiniGrid(miniMonth)
+    const weekEndISO = toISO(addDays(weekStart, 6))
+
+    function jumpToDate(d: Date) {
+      const iso = toISO(d)
+      setWeekStart(startOfWeek(d))
+      setMonthStart(startOfMonth(d))
+      setSelectedDate(d)
+      if (viewMode === 'jour') setViewMode('semaine')
+      setSelectedDay(null)
+      // Sync mini month si on déborde
+      if (iso < toISO(miniMonth) || iso >= toISO(addMonths(miniMonth, 1))) {
+        setMiniMonth(startOfMonth(d))
+      }
+    }
+
+    return (
+      <div className="px-3 pt-2 pb-4 shrink-0">
+        {/* Nav mois */}
+        <div className="flex items-center justify-between mb-2">
+          <button onClick={() => setMiniMonth(m => addMonths(m, -1))}
+            className="p-1 rounded-md"
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            style={{ color: 'var(--color-text-tertiary)' }}>
+            <ChevronLeft size={13} />
+          </button>
+          <span className="text-[11px] font-semibold capitalize" style={{ color: 'var(--color-text-primary)' }}>
+            {MOIS_LONG[miniMonth.getMonth()].slice(0,4)}. {miniMonth.getFullYear()}
+          </span>
+          <button onClick={() => setMiniMonth(m => addMonths(m, 1))}
+            className="p-1 rounded-md"
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            style={{ color: 'var(--color-text-tertiary)' }}>
+            <ChevronRight size={13} />
+          </button>
+        </div>
+        {/* En-têtes jours */}
+        <div className="grid grid-cols-7 mb-0.5">
+          {DAYS.map((d, i) => (
+            <span key={i} className="text-center text-[9px] font-semibold"
+              style={{ color: 'var(--color-text-tertiary)' }}>{d}</span>
+          ))}
+        </div>
+        {/* Grille jours */}
+        <div className="grid grid-cols-7 gap-y-0.5">
+          {cells.map((d, i) => {
+            if (!d) return <span key={i} />
+            const iso = toISO(d)
+            const isToday = iso === todayISO
+            const inWeek = viewMode === 'semaine' && iso >= toISO(weekStart) && iso <= weekEndISO
+            const inMonth = viewMode === 'mois' && d.getMonth() === monthStart.getMonth() && d.getFullYear() === monthStart.getFullYear()
+            const isSelected = viewMode === 'jour' && iso === toISO(selectedDate)
+            const highlighted = inWeek || inMonth || isSelected
+            return (
+              <button key={i} onClick={() => jumpToDate(d)}
+                className="flex items-center justify-center text-[11px] rounded-full mx-auto"
+                style={{
+                  width: 22, height: 22,
+                  background: isToday
+                    ? 'var(--color-accent)'
+                    : highlighted ? 'var(--color-accent-light)' : 'transparent',
+                  color: isToday ? 'white' : highlighted ? 'var(--color-accent)' : 'var(--color-text-primary)',
+                  fontWeight: isToday || highlighted ? 600 : 400,
+                }}>
+                {d.getDate()}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
   // ── Render ──────────────────────────────────────────────
 
   return (
@@ -1820,6 +1915,21 @@ export default function PlanningPage() {
           </div>
         )}
       </div>
+
+      {/* ── Corps : sidebar mini-calendrier (desktop) + contenu principal ── */}
+      <div className="flex flex-1 overflow-hidden">
+
+      {/* Sidebar mini-calendrier — desktop uniquement */}
+      <div className="hidden md:flex flex-col w-[176px] shrink-0"
+        style={{ borderRight: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
+        <div className="flex-1" /> {/* pousse le calendrier en bas */}
+        <div style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
+          <MiniCalendar />
+        </div>
+      </div>
+
+      {/* Contenu principal */}
+      <div className="flex flex-col flex-1 overflow-hidden">
 
       {/* ── Bandeau "à planifier" — visible en vue mois/semaine quand le pool n'est pas vide ── */}
       {viewMode !== 'jour' && monthPoolCount > 0 && (
@@ -2279,6 +2389,9 @@ export default function PlanningPage() {
           }}
         />
       )}
+
+      </div>{/* fin contenu principal */}
+      </div>{/* fin corps sidebar+contenu */}
 
       {/* ── EventDetailModal ── */}
       {eventDetail && (
