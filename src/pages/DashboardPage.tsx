@@ -499,7 +499,7 @@ export default function DashboardPage() {
           event={eventDetail.event}
           dateStr={eventDetail.dateStr}
           onClose={() => setEventDetail(null)}
-          onCancel={async (ev) => {
+          onCancel={async (ev, reason) => {
             if (!uid || !ev.clientId || !ev.planId || !ev.samplingId) return
             const client = clients.find((c: Client) => c.id === ev.clientId)
             if (!client) return
@@ -507,13 +507,16 @@ export default function DashboardPage() {
               ...client,
               plans: client.plans.map((plan: Plan) => plan.id !== ev.planId ? plan : {
                 ...plan,
-                samplings: plan.samplings.map((s: Sampling) =>
-                  s.id !== ev.samplingId ? s : { ...s, plannedDay: 0 }
-                ),
+                samplings: plan.samplings.map((s: Sampling) => {
+                  if (s.id !== ev.samplingId) return s
+                  const fromDate = `${new Date().getFullYear()}-${String(s.plannedMonth + 1).padStart(2, '0')}-${String(s.plannedDay).padStart(2, '0')}`
+                  const historyEntry = { from: fromDate, to: '', by: uid, reason, at: new Date().toISOString() }
+                  return { ...s, plannedDay: 0, motif: reason, reportHistory: [...(s.reportHistory ?? []), historyEntry] }
+                }),
               }),
             }, uid)
           }}
-          onMove={async (ev, newDate) => {
+          onMove={async (ev, newDate, reason) => {
             if (!uid || !ev.clientId || !ev.planId || !ev.samplingId) return
             const client = clients.find((c: Client) => c.id === ev.clientId)
             if (!client) return
@@ -522,9 +525,12 @@ export default function DashboardPage() {
               ...client,
               plans: client.plans.map((plan: Plan) => plan.id !== ev.planId ? plan : {
                 ...plan,
-                samplings: plan.samplings.map((s: Sampling) =>
-                  s.id !== ev.samplingId ? s : { ...s, plannedDay }
-                ),
+                samplings: plan.samplings.map((s: Sampling) => {
+                  if (s.id !== ev.samplingId) return s
+                  const fromDate = `${new Date().getFullYear()}-${String(s.plannedMonth + 1).padStart(2, '0')}-${String(s.plannedDay).padStart(2, '0')}`
+                  const historyEntry = { from: fromDate, to: newDate, by: uid, reason, at: new Date().toISOString() }
+                  return { ...s, plannedDay, reportHistory: [...(s.reportHistory ?? []), historyEntry] }
+                }),
               }),
             }, uid)
           }}

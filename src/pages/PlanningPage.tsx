@@ -1252,8 +1252,8 @@ export default function PlanningPage() {
 
   // ── Gestion des samplings ───────────────────────────────
 
-  // Retire un sampling du calendrier → remet plannedDay à 0, il revient dans le pool
-  async function handleCancelSampling(event: PlanningEvent) {
+  // Retire un sampling du calendrier → remet plannedDay à 0, log le motif dans reportHistory
+  async function handleCancelSampling(event: PlanningEvent, reason: string) {
     if (!uid || !event.clientId || !event.planId || !event.samplingId) return
     const client = clients.find((c: Client) => c.id === event.clientId)
     if (!client) return
@@ -1261,15 +1261,18 @@ export default function PlanningPage() {
       ...client,
       plans: client.plans.map(plan => plan.id !== event.planId ? plan : {
         ...plan,
-        samplings: plan.samplings.map((s: Sampling) =>
-          s.id !== event.samplingId ? s : { ...s, plannedDay: 0 }
-        )
+        samplings: plan.samplings.map((s: Sampling) => {
+          if (s.id !== event.samplingId) return s
+          const fromDate = toISO(new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay))
+          const historyEntry = { from: fromDate, to: '', by: uid, reason, at: new Date().toISOString() }
+          return { ...s, plannedDay: 0, motif: reason, reportHistory: [...(s.reportHistory ?? []), historyEntry] }
+        })
       })
     }, uid)
   }
 
-  // Déplace un sampling vers une nouvelle date (change uniquement le plannedDay)
-  async function handleMoveEvent(event: PlanningEvent, newDate: string) {
+  // Déplace un sampling vers une nouvelle date, log le motif dans reportHistory
+  async function handleMoveEvent(event: PlanningEvent, newDate: string, reason: string) {
     if (!uid || !event.clientId || !event.planId || !event.samplingId) return
     const client = clients.find((c: Client) => c.id === event.clientId)
     if (!client) return
@@ -1278,9 +1281,12 @@ export default function PlanningPage() {
       ...client,
       plans: client.plans.map(plan => plan.id !== event.planId ? plan : {
         ...plan,
-        samplings: plan.samplings.map((s: Sampling) =>
-          s.id !== event.samplingId ? s : { ...s, plannedDay }
-        )
+        samplings: plan.samplings.map((s: Sampling) => {
+          if (s.id !== event.samplingId) return s
+          const fromDate = toISO(new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay))
+          const historyEntry = { from: fromDate, to: newDate, by: uid, reason, at: new Date().toISOString() }
+          return { ...s, plannedDay, reportHistory: [...(s.reportHistory ?? []), historyEntry] }
+        })
       })
     }, uid)
   }

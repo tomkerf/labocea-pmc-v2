@@ -31,8 +31,8 @@ interface EventDetailModalProps {
   event: ModalEvent
   dateStr: string
   onClose: () => void
-  onCancel: (event: ModalEvent) => Promise<void>
-  onMove: (event: ModalEvent, newDate: string) => Promise<void>
+  onCancel: (event: ModalEvent, reason: string) => Promise<void>
+  onMove: (event: ModalEvent, newDate: string, reason: string) => Promise<void>
   onDelete: (event: ModalEvent) => void
   onChangeTech: (event: ModalEvent, initiales: string) => Promise<void>
   techOptions: TechOption[]
@@ -47,6 +47,8 @@ export function EventDetailModal({
   const [isChangingTech, setIsChangingTech] = useState(false)
   const [confirmCancel,  setConfirmCancel]  = useState(false)
   const [moveDate,       setMoveDate]       = useState(dateStr)
+  const [moveReason,     setMoveReason]     = useState('')
+  const [cancelReason,   setCancelReason]   = useState('')
   const [techInitiales,  setTechInitiales]  = useState(event.technicien ?? '')
   const [saving,         setSaving]         = useState(false)
 
@@ -57,9 +59,9 @@ export function EventDetailModal({
     .toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
 
   async function handleMove() {
-    if (!moveDate || saving) return
+    if (!moveDate || !moveReason.trim() || saving) return
     setSaving(true)
-    try { await onMove(event, moveDate); onClose() }
+    try { await onMove(event, moveDate, moveReason.trim()); onClose() }
     finally { setSaving(false) }
   }
 
@@ -68,9 +70,10 @@ export function EventDetailModal({
       setConfirmCancel(true)
       return
     }
+    if (!cancelReason.trim()) return  // motif obligatoire
     setSaving(true)
     setConfirmCancel(false)
-    try { await onCancel(event); onClose() }
+    try { await onCancel(event, cancelReason.trim()); onClose() }
     finally { setSaving(false) }
   }
 
@@ -137,9 +140,9 @@ export function EventDetailModal({
 
         {/* Panneau déplacer */}
         {isMoving && (
-          <div className="px-5 py-3.5 flex items-end gap-3"
+          <div className="px-5 py-3.5 flex flex-col gap-2.5"
             style={{ background: 'var(--color-bg-tertiary)', borderBottom: '1px solid var(--color-border-subtle)' }}>
-            <div className="flex-1">
+            <div>
               <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                 Nouvelle date
               </label>
@@ -147,9 +150,20 @@ export function EventDetailModal({
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
             </div>
-            <button onClick={handleMove} disabled={!moveDate || saving}
-              className="px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: 'var(--color-accent)', color: 'white', opacity: (!moveDate || saving) ? 0.5 : 1 }}>
+            <div>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                Motif du report <span style={{ color: 'var(--color-danger)' }}>*</span>
+              </label>
+              <textarea
+                value={moveReason} onChange={e => setMoveReason(e.target.value)}
+                placeholder="Ex : météo défavorable, client indisponible…"
+                rows={2}
+                className="w-full px-3 py-2 rounded-lg text-sm resize-none"
+                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+            </div>
+            <button onClick={handleMove} disabled={!moveDate || !moveReason.trim() || saving}
+              className="px-4 py-2 rounded-lg text-sm font-medium self-end"
+              style={{ background: 'var(--color-accent)', color: 'white', opacity: (!moveDate || !moveReason.trim() || saving) ? 0.5 : 1 }}>
               {saving ? '…' : 'Déplacer'}
             </button>
           </div>
@@ -222,11 +236,24 @@ export function EventDetailModal({
           )}
 
           {isPrelev && !event.isDone && !confirmCancel && (
-            <button onClick={handleCancel} disabled={saving}
-              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
-              style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
-              ↩ Retirer du calendrier
-            </button>
+            <div className="flex flex-col gap-2">
+              <div>
+                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                  Motif du retrait <span style={{ color: 'var(--color-danger)' }}>*</span>
+                </label>
+                <textarea
+                  value={cancelReason} onChange={e => setCancelReason(e.target.value)}
+                  placeholder="Ex : reporté à une date ultérieure, annulé par le client…"
+                  rows={2}
+                  className="w-full px-3 py-2 rounded-lg text-sm resize-none"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+              </div>
+              <button onClick={handleCancel} disabled={saving || !cancelReason.trim()}
+                className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
+                style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)', opacity: !cancelReason.trim() ? 0.5 : 1 }}>
+                ↩ Retirer du calendrier
+              </button>
+            </div>
           )}
 
           {isPrelev && !event.isDone && confirmCancel && (

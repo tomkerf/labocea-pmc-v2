@@ -207,16 +207,21 @@ export default function PlanPage() {
       overdue: 'En retard', non_effectue: 'Non effectué',
     }
 
+    const fmtDate = (iso: string) => {
+      if (!iso) return '—'
+      try { return new Date(iso + (iso.length === 10 ? 'T12:00:00' : '')).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) }
+      catch { return iso }
+    }
+
     const rows = plan.samplings.map((s) => {
       const techUser = users.find((u) => u.uid === s.doneBy)
       const techLabel = techUser ? `${techUser.prenom} ${techUser.nom}` : (s.doneBy ? s.doneBy : '—')
-      const dateLabel = s.doneDate
-        ? new Date(s.doneDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
-        : '—'
+      const dateLabel = s.doneDate ? fmtDate(s.doneDate) : '—'
       const statusLabel = statusLabels[s.status] ?? s.status
-      const motifLabel = s.motif?.trim() || '—'
+      // Motif = dernier motif saisi (reportHistory en priorité, puis s.motif)
+      const lastHistory = s.reportHistory?.length ? s.reportHistory[s.reportHistory.length - 1] : null
+      const motifLabel = lastHistory?.reason || s.motif?.trim() || '—'
 
-      // couleur statut
       const statusColor: Record<string, string> = {
         done: '#34c759', overdue: '#ff3b30', non_effectue: '#ff9f0a', planned: '#8e8e93',
       }
@@ -231,6 +236,41 @@ export default function PlanPage() {
         <td style="color:#6e6e73">${motifLabel}</td>
       </tr>`
     }).join('')
+
+    // Historique des reports / retraits (toutes entrées de reportHistory)
+    const historyRows = plan.samplings.flatMap((s) =>
+      (s.reportHistory ?? []).map((h) => {
+        const byUser = users.find((u) => u.uid === h.by)
+        const byLabel = byUser ? `${byUser.prenom} ${byUser.nom}` : (h.by || '—')
+        const action = h.to ? 'Report' : 'Retrait'
+        const detail = h.to
+          ? `${fmtDate(h.from)} → ${fmtDate(h.to)}`
+          : `Retiré du ${fmtDate(h.from)}`
+        const atLabel = h.at ? new Date(h.at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
+        return `<tr>
+          <td style="color:#6e6e73;text-align:center">${s.num}</td>
+          <td style="font-weight:500">${action}</td>
+          <td>${detail}</td>
+          <td style="color:#6e6e73">${h.reason || '—'}</td>
+          <td>${byLabel}</td>
+          <td style="color:#6e6e73">${atLabel}</td>
+        </tr>`
+      })
+    ).join('')
+
+    const historySection = historyRows ? `
+      <h2 style="font-size:15px;font-weight:600;margin:36px 0 12px">Historique des reports et retraits</h2>
+      <table>
+        <thead><tr>
+          <th style="width:32px;text-align:center">N°</th>
+          <th>Action</th>
+          <th>Dates</th>
+          <th>Motif</th>
+          <th>Par</th>
+          <th>Le</th>
+        </tr></thead>
+        <tbody>${historyRows}</tbody>
+      </table>` : ''
 
     const now = new Date()
     const exportDate = now.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
@@ -281,6 +321,7 @@ export default function PlanPage() {
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
+      ${historySection}
       <p class="footer">Document généré automatiquement par Labocea PMC V2</p>
       <script>window.onload = () => { window.print() }<\/script>
       </body></html>`
