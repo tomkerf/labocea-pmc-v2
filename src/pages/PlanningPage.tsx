@@ -1745,84 +1745,106 @@ export default function PlanningPage() {
     )
   }
 
-  // ── MiniCalendar (sidebar desktop) ─────────────────────
+  // ── MiniCalendar multi-mois (sidebar overlay desktop) ──
 
-  function MiniCalendar() {
+  function MiniCalendarPanel() {
     const refDate = viewMode === 'mois' ? monthStart : viewMode === 'semaine' ? weekStart : selectedDate
-    const [miniMonth, setMiniMonth] = useState(() => startOfMonth(refDate))
-    const todayISO = toISO(today)
-    const DAYS = ['L','M','M','J','V','S','D']
-    const cells = buildMiniGrid(miniMonth)
+    const [baseMonth, setBaseMonth] = useState(() => startOfMonth(refDate))
+    const todayISO   = toISO(today)
     const weekEndISO = toISO(addDays(weekStart, 6))
+    const DAYS = ['L','M','M','J','V','S','D']
+    const N_MONTHS = 3
 
     function jumpToDate(d: Date) {
-      const iso = toISO(d)
       setWeekStart(startOfWeek(d))
       setMonthStart(startOfMonth(d))
       setSelectedDate(d)
       if (viewMode === 'jour') setViewMode('semaine')
       setSelectedDay(null)
-      // Sync mini month si on déborde
-      if (iso < toISO(miniMonth) || iso >= toISO(addMonths(miniMonth, 1))) {
-        setMiniMonth(startOfMonth(d))
-      }
+      setShowMiniCal(false)
+    }
+
+    function MonthGrid({ offset }: { offset: number }) {
+      const ms   = addMonths(baseMonth, offset)
+      const cells = buildMiniGrid(ms)
+      const label = MOIS_LONG[ms.getMonth()] + ' ' + ms.getFullYear()
+      return (
+        <div className="px-3 pt-3 pb-2">
+          {/* Titre mois */}
+          <p className="text-[11px] font-semibold mb-2 capitalize text-center"
+            style={{ color: 'var(--color-text-primary)' }}>{label}</p>
+          {/* En-têtes jours (1 seule fois, sur le 1er mois) */}
+          {offset === 0 && (
+            <div className="grid grid-cols-7 mb-1">
+              {DAYS.map((d, i) => (
+                <span key={i} className="text-center text-[9px] font-semibold"
+                  style={{ color: 'var(--color-text-tertiary)' }}>{d}</span>
+              ))}
+            </div>
+          )}
+          {/* Grille */}
+          <div className="grid grid-cols-7 gap-y-0.5">
+            {cells.map((d, i) => {
+              if (!d) return <span key={i} />
+              const iso = toISO(d)
+              const isToday     = iso === todayISO
+              const inWeek      = viewMode === 'semaine' && iso >= toISO(weekStart) && iso <= weekEndISO
+              const inMonth     = viewMode === 'mois' && d.getMonth() === monthStart.getMonth() && d.getFullYear() === monthStart.getFullYear()
+              const isSelected  = viewMode === 'jour' && iso === toISO(selectedDate)
+              const highlighted = inWeek || inMonth || isSelected
+              return (
+                <button key={i} onClick={() => jumpToDate(d)}
+                  className="flex items-center justify-center rounded-full mx-auto"
+                  style={{
+                    width: 22, height: 22,
+                    fontSize: 11,
+                    background: isToday ? 'var(--color-accent)' : highlighted ? 'var(--color-accent-light)' : 'transparent',
+                    color: isToday ? 'white' : highlighted ? 'var(--color-accent)' : 'var(--color-text-primary)',
+                    fontWeight: isToday || highlighted ? 600 : 400,
+                  }}>
+                  {d.getDate()}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )
     }
 
     return (
-      <div className="px-3 pt-2 pb-4 shrink-0">
-        {/* Nav mois */}
-        <div className="flex items-center justify-between mb-2">
-          <button onClick={() => setMiniMonth(m => addMonths(m, -1))}
-            className="p-1 rounded-md"
+      <div className="flex flex-col h-full overflow-y-auto">
+        {/* Navigation globale */}
+        <div className="flex items-center justify-between px-3 pt-3 pb-1 shrink-0"
+          style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+          <button onClick={() => setBaseMonth(m => addMonths(m, -1))}
+            className="p-1.5 rounded-md"
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            style={{ color: 'var(--color-text-tertiary)' }}>
+            style={{ color: 'var(--color-text-secondary)' }}>
             <ChevronLeft size={13} />
           </button>
-          <span className="text-[11px] font-semibold capitalize" style={{ color: 'var(--color-text-primary)' }}>
-            {MOIS_LONG[miniMonth.getMonth()].slice(0,4)}. {miniMonth.getFullYear()}
-          </span>
-          <button onClick={() => setMiniMonth(m => addMonths(m, 1))}
-            className="p-1 rounded-md"
+          <button onClick={() => setBaseMonth(startOfMonth(today))}
+            className="text-[10px] font-medium px-2 py-0.5 rounded"
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            style={{ color: 'var(--color-text-tertiary)' }}>
+            style={{ color: 'var(--color-text-secondary)' }}>
+            Aujourd'hui
+          </button>
+          <button onClick={() => setBaseMonth(m => addMonths(m, 1))}
+            className="p-1.5 rounded-md"
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            style={{ color: 'var(--color-text-secondary)' }}>
             <ChevronRight size={13} />
           </button>
         </div>
-        {/* En-têtes jours */}
-        <div className="grid grid-cols-7 mb-0.5">
-          {DAYS.map((d, i) => (
-            <span key={i} className="text-center text-[9px] font-semibold"
-              style={{ color: 'var(--color-text-tertiary)' }}>{d}</span>
-          ))}
-        </div>
-        {/* Grille jours */}
-        <div className="grid grid-cols-7 gap-y-0.5">
-          {cells.map((d, i) => {
-            if (!d) return <span key={i} />
-            const iso = toISO(d)
-            const isToday = iso === todayISO
-            const inWeek = viewMode === 'semaine' && iso >= toISO(weekStart) && iso <= weekEndISO
-            const inMonth = viewMode === 'mois' && d.getMonth() === monthStart.getMonth() && d.getFullYear() === monthStart.getFullYear()
-            const isSelected = viewMode === 'jour' && iso === toISO(selectedDate)
-            const highlighted = inWeek || inMonth || isSelected
-            return (
-              <button key={i} onClick={() => jumpToDate(d)}
-                className="flex items-center justify-center text-[11px] rounded-full mx-auto"
-                style={{
-                  width: 22, height: 22,
-                  background: isToday
-                    ? 'var(--color-accent)'
-                    : highlighted ? 'var(--color-accent-light)' : 'transparent',
-                  color: isToday ? 'white' : highlighted ? 'var(--color-accent)' : 'var(--color-text-primary)',
-                  fontWeight: isToday || highlighted ? 600 : 400,
-                }}>
-                {d.getDate()}
-              </button>
-            )
-          })}
-        </div>
+        {/* Mois empilés */}
+        {Array.from({ length: N_MONTHS }, (_, i) => (
+          <div key={i}>
+            {i > 0 && <div style={{ height: 1, background: 'var(--color-border-subtle)', margin: '0 12px' }} />}
+            <MonthGrid offset={i} />
+          </div>
+        ))}
       </div>
     )
   }
@@ -1938,10 +1960,7 @@ export default function PlanningPage() {
           transition: 'transform 200ms ease',
           pointerEvents: showMiniCal ? 'auto' : 'none',
         }}>
-        <div className="flex-1" />
-        <div style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
-          <MiniCalendar />
-        </div>
+        <MiniCalendarPanel />
       </div>
 
       {/* Backdrop overlay (ferme au clic extérieur) */}
