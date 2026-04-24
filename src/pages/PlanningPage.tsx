@@ -507,8 +507,8 @@ interface EventDetailModalProps {
   event: PlanningEvent
   dateStr: string
   onClose: () => void
-  onCancel: (event: PlanningEvent) => Promise<void>
-  onMove: (event: PlanningEvent, newDate: string) => Promise<void>
+  onCancel: (event: PlanningEvent, reason: string) => Promise<void>
+  onMove: (event: PlanningEvent, newDate: string, reason: string) => Promise<void>
   onDelete: (event: PlanningEvent) => void
   onChangeTech: (event: PlanningEvent, initiales: string) => Promise<void>
   techOptions: TechOption[]
