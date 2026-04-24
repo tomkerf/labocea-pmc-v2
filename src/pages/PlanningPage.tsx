@@ -1113,8 +1113,9 @@ export default function PlanningPage() {
   const [selectedDay,         setSelectedDay]         = useState<string|null>(null)
   const [dayModalInitialTab,  setDayModalInitialTab]  = useState<'pool'|'evt'>('pool')
   const [ctxMenu,             setCtxMenu]             = useState<{ dateStr: string; x: number; y: number } | null>(null)
-  const [eventDetail, setEventDetail] = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
-  const [ghostDetail, setGhostDetail] = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
+  const [eventDetail,   setEventDetail]   = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
+  const [ghostDetail,   setGhostDetail]   = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
+  const [showMiniCal,   setShowMiniCal]   = useState(false)
 
   function handleSelectEvent(event: PlanningEvent, dateStr: string) {
     if (event.isGhost) setGhostDetail({ event, dateStr })
@@ -1829,7 +1830,7 @@ export default function PlanningPage() {
   // ── Render ──────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
 
       {/* En-tête navigation */}
       <div className="flex flex-col shrink-0"
@@ -1855,6 +1856,16 @@ export default function PlanningPage() {
               className="hidden md:block px-2.5 py-1 rounded-lg text-xs font-medium ml-1"
               style={{ background:'var(--color-bg-tertiary)', color:'var(--color-text-secondary)', border:'1px solid var(--color-border-subtle)' }}>
               Aujourd'hui
+            </button>
+            <button onClick={() => setShowMiniCal(v => !v)}
+              className="hidden md:flex items-center justify-center w-7 h-7 rounded-lg ml-1"
+              style={{
+                background: showMiniCal ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)',
+                color: showMiniCal ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                border: '1px solid var(--color-border-subtle)',
+              }}
+              title="Mini-calendrier">
+              <Calendar size={13} />
             </button>
           </div>
 
@@ -1916,20 +1927,28 @@ export default function PlanningPage() {
         )}
       </div>
 
-      {/* ── Corps : sidebar mini-calendrier (desktop) + contenu principal ── */}
-      <div className="flex flex-1 overflow-hidden">
-
-      {/* Sidebar mini-calendrier — desktop uniquement */}
-      <div className="hidden md:flex flex-col w-[176px] shrink-0"
-        style={{ borderRight: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
-        <div className="flex-1" /> {/* pousse le calendrier en bas */}
+      {/* ── Panneau mini-calendrier overlay (desktop) ── */}
+      <div
+        className="hidden md:flex flex-col absolute z-30 top-0 left-0 bottom-0 w-[220px]"
+        style={{
+          background: 'var(--color-bg-secondary)',
+          boxShadow: showMiniCal ? 'var(--shadow-modal)' : 'none',
+          borderRight: '1px solid var(--color-border-subtle)',
+          transform: showMiniCal ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 200ms ease',
+          pointerEvents: showMiniCal ? 'auto' : 'none',
+        }}>
+        <div className="flex-1" />
         <div style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
           <MiniCalendar />
         </div>
       </div>
 
-      {/* Contenu principal */}
-      <div className="flex flex-col flex-1 overflow-hidden">
+      {/* Backdrop overlay (ferme au clic extérieur) */}
+      {showMiniCal && (
+        <div className="hidden md:block absolute inset-0 z-20"
+          onClick={() => setShowMiniCal(false)} />
+      )}
 
       {/* ── Bandeau "à planifier" — visible en vue mois/semaine quand le pool n'est pas vide ── */}
       {viewMode !== 'jour' && monthPoolCount > 0 && (
@@ -2389,9 +2408,6 @@ export default function PlanningPage() {
           }}
         />
       )}
-
-      </div>{/* fin contenu principal */}
-      </div>{/* fin corps sidebar+contenu */}
 
       {/* ── EventDetailModal ── */}
       {eventDetail && (
