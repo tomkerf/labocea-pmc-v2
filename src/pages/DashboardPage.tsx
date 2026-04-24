@@ -1,8 +1,11 @@
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import DonutChart from '@/components/dashboard/DonutChart'
-import { useAuthStore, selectPrenom, selectInitiales } from '@/stores/authStore'
-import { useClientsListener } from '@/hooks/useClients'
+import { EventDetailModal } from '@/components/EventDetailModal'
+import type { ModalEvent, TechOption } from '@/components/EventDetailModal'
+import { useAuthStore, selectPrenom, selectInitiales, selectUid } from '@/stores/authStore'
+import { useClientsListener, saveClient } from '@/hooks/useClients'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useEquipementsStore } from '@/stores/equipementsStore'
@@ -10,7 +13,7 @@ import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
-import { useEvenementsListener } from '@/hooks/useEvenements'
+import { useEvenementsListener, deleteEvenement } from '@/hooks/useEvenements'
 import { useEvenementsStore } from '@/stores/evenementsStore'
 import type { Sampling, Verification, Maintenance, Equipement, Client, Plan, EvenementPersonnel } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
@@ -89,6 +92,7 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const prenom = useAuthStore(selectPrenom)
   const initiales = useAuthStore(selectInitiales)
+  const uid = useAuthStore(selectUid)
 
   // Listeners temps réel
   useClientsListener()
@@ -98,6 +102,9 @@ export default function DashboardPage() {
   useEvenementsListener()
 
   const { clients } = useMissionsStore()
+
+  // État de la modale d'intervention
+  const [eventDetail, setEventDetail] = useState<{ event: ModalEvent; dateStr: string } | null>(null)
   const { equipements } = useEquipementsStore()
   const { verifications } = useMetrologieStore()
   const { maintenances } = useMaintenancesStore()
@@ -179,10 +186,16 @@ export default function DashboardPage() {
     return { label: 'À faire', bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }
   }
 
+  // techOptions dérivées des clients (pour le sélecteur dans la modale)
+  const techOptions = useMemo((): TechOption[] => {
+    const codes = new Set(clients.map((c: Client) => c.preleveur).filter(Boolean) as string[])
+    return Array.from(codes).sort().map(code => ({ code, label: code }))
+  }, [clients])
+
   // Prélèvements du jour
   type JourItem =
-    | { kind: 'sampling'; time: string; title: string; sub: string; badge: { label: string; bg: string; color: string }; dot: string; link: string }
-    | { kind: 'evenement'; time: string; title: string; sub: string; badge: { label: string; bg: string; color: string }; dot: string }
+    | { kind: 'sampling'; time: string; title: string; sub: string; badge: { label: string; bg: string; color: string }; dot: string; modalEvent: ModalEvent }
+    | { kind: 'evenement'; time: string; title: string; sub: string; badge: { label: string; bg: string; color: string }; dot: string; modalEvent: ModalEvent }
 
   const jourItems: JourItem[] = []
 
@@ -208,14 +221,31 @@ export default function DashboardPage() {
             : s.status === 'overdue'
             ? 'var(--color-danger)'
             : 'var(--color-accent)'
+          const sub = [plan.siteNom, plan.nom].filter(Boolean).join(' · ') || '—'
+          const modalEvent: ModalEvent = {
+            id: s.id,
+            type: 'prelevement',
+            title: client.nom,
+            subtitle: sub,
+            statusLabel: badge.label,
+            statusBg: badge.bg,
+            statusColor: samplingDot,
+            link: `/missions/${client.id}/plan/${plan.id}`,
+            isDone: s.status === 'done',
+            technicien: client.preleveur || '—',
+            clientId: client.id,
+            planId: plan.id,
+            samplingId: s.id,
+            plannedTime: s.plannedTime,
+          }
           jourItems.push({
             kind: 'sampling',
             time: s.plannedTime ?? '',
             title: client.nom,
-            sub: [plan.siteNom, plan.nom].filter(Boolean).join(' · ') || '—',
+            sub,
             badge,
             dot: samplingDot,
-            link: `/missions/${client.id}/plan/${plan.id}`,
+            modalEvent,
           })
         }
       })
@@ -236,13 +266,28 @@ export default function DashboardPage() {
     })
     .forEach((ev: EvenementPersonnel) => {
       const cfg = EVENEMENT_CFG[ev.type] ?? EVENEMENT_CFG.autre
+      const evSub = [ev.createdByInitiales, ev.notes].filter(Boolean).join(' · ') || cfg.label
+      const evModalEvent: ModalEvent = {
+        id: ev.id,
+        type: 'evenement',
+        title: ev.titre,
+        subtitle: evSub,
+        statusLabel: cfg.label,
+        statusBg: cfg.bg,
+        statusColor: cfg.color,
+        link: '',
+        isDone: false,
+        technicien: ev.createdByInitiales || '—',
+        evenementData: ev,
+      }
       jourItems.push({
         kind: 'evenement',
         time: ev.heure ?? '',
         title: ev.titre,
-        sub: [ev.createdByInitiales, ev.notes].filter(Boolean).join(' · ') || cfg.label,
+        sub: evSub,
         badge: { label: cfg.label, bg: cfg.bg, color: cfg.color },
         dot: cfg.dot,
+        modalEvent: evModalEvent,
       })
     })
 
@@ -370,7 +415,7 @@ export default function DashboardPage() {
               style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
               {jourItems.slice(0, 8).map((item, i) => (
                 <div key={i}
-                  onClick={() => item.kind === 'sampling' ? navigate(item.link) : navigate('/planning')}
+                  onClick={() => setEventDetail({ event: item.modalEvent, dateStr: todayISO })}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer"
                   style={{ borderBottom: i < jourItems.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
@@ -447,6 +492,54 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* ── EventDetailModal ── */}
+      {eventDetail && (
+        <EventDetailModal
+          key={eventDetail.event.id}
+          event={eventDetail.event}
+          dateStr={eventDetail.dateStr}
+          onClose={() => setEventDetail(null)}
+          onCancel={async (ev) => {
+            if (!uid || !ev.clientId || !ev.planId || !ev.samplingId) return
+            const client = clients.find((c: Client) => c.id === ev.clientId)
+            if (!client) return
+            await saveClient({
+              ...client,
+              plans: client.plans.map((plan: Plan) => plan.id !== ev.planId ? plan : {
+                ...plan,
+                samplings: plan.samplings.map((s: Sampling) =>
+                  s.id !== ev.samplingId ? s : { ...s, plannedDay: 0 }
+                ),
+              }),
+            }, uid)
+          }}
+          onMove={async (ev, newDate) => {
+            if (!uid || !ev.clientId || !ev.planId || !ev.samplingId) return
+            const client = clients.find((c: Client) => c.id === ev.clientId)
+            if (!client) return
+            const plannedDay = new Date(newDate + 'T12:00:00').getDate()
+            await saveClient({
+              ...client,
+              plans: client.plans.map((plan: Plan) => plan.id !== ev.planId ? plan : {
+                ...plan,
+                samplings: plan.samplings.map((s: Sampling) =>
+                  s.id !== ev.samplingId ? s : { ...s, plannedDay }
+                ),
+              }),
+            }, uid)
+          }}
+          onDelete={(ev) => {
+            if (ev.evenementData) deleteEvenement(ev.evenementData.id)
+          }}
+          onChangeTech={async (ev, initiales_) => {
+            if (!uid || !ev.clientId) return
+            const client = clients.find((c: Client) => c.id === ev.clientId)
+            if (!client) return
+            await saveClient({ ...client, preleveur: initiales_ }, uid)
+          }}
+          techOptions={techOptions}
+        />
+      )}
     </div>
   )
 }
