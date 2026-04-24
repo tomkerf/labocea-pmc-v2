@@ -30,7 +30,7 @@ interface PlanningEvent {
   statusColor: string
   link: string
   isDone: boolean
-  priority: number        // 0=retard, 1=non_effectue, 2=planifié, 3=réalisé
+  priority: number        // 0=retard, 1=non_effectue, 2=planifié, 3=réalisé, 4=fantôme
   technicien: string
   count?: number          // nb prélèvements regroupés (même client, même jour)
   plannedTime?: string
@@ -39,6 +39,13 @@ interface PlanningEvent {
   samplingId?: string
   maintenanceData?: Maintenance
   evenementData?: EvenementPersonnel
+  // Fantôme (historique report / retrait)
+  isGhost?: boolean
+  ghostAction?: 'retiré' | 'reporté'
+  ghostNewDate?: string   // date de destination si reporté
+  ghostReason?: string
+  ghostBy?: string
+  ghostAt?: string
 }
 
 interface PoolItem {
@@ -499,6 +506,120 @@ function CellContextMenu({ x, y, onClose, onPlanifier, onEvenement }: {
   )
 }
 
+// ── GhostDetailModal ────────────────────────────────────────
+
+function GhostDetailModal({ event, onClose }: { event: PlanningEvent; onClose: () => void }) {
+  const navigate = useNavigate()
+
+  const fmtDate = (iso?: string) => {
+    if (!iso) return '—'
+    const d = new Date(iso.length > 10 ? iso : iso + 'T12:00:00')
+    return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  }
+
+  const fmtDateTime = (iso?: string) => {
+    if (!iso) return '—'
+    const d = new Date(iso)
+    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+      + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  }
+
+  const isRetrait = event.ghostAction === 'retiré'
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.4)' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="w-full md:max-w-sm flex flex-col rounded-t-[20px] md:rounded-2xl"
+        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)', maxHeight: '90dvh', overflow: 'hidden' }}>
+
+        {/* Handle mobile */}
+        <div className="md:hidden flex justify-center pt-2.5 pb-1 shrink-0">
+          <div className="w-9 h-1 rounded-full" style={{ background: 'var(--color-border)' }} />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-start gap-3 px-5 pt-4 pb-4">
+          <span className="w-2.5 h-2.5 rounded-full shrink-0 mt-1.5" style={{ background: 'var(--color-neutral)' }} />
+          <div className="flex-1 min-w-0">
+            <p className="text-base font-semibold leading-snug" style={{ color: 'var(--color-text-primary)', textDecoration: isRetrait ? 'line-through' : 'none' }}>
+              {event.title}
+            </p>
+            {event.subtitle && event.subtitle !== '—' && (
+              <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                {event.subtitle}
+              </p>
+            )}
+            <div className="flex items-center gap-1.5 mt-2">
+              <span className="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                {isRetrait ? '↩ Retiré du calendrier' : '→ Reporté'}
+              </span>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg shrink-0 mt-0.5"
+            style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
+            <X size={15} />
+          </button>
+        </div>
+
+        <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
+
+        {/* Détails */}
+        <div className="px-5 py-4 flex flex-col gap-3 overflow-y-auto"
+          style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
+
+          {event.ghostNewDate && !isRetrait && (
+            <div>
+              <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Reporté au</p>
+              <p className="text-sm font-medium capitalize" style={{ color: 'var(--color-text-primary)' }}>
+                {fmtDate(event.ghostNewDate)}
+              </p>
+            </div>
+          )}
+
+          {event.ghostReason && (
+            <div>
+              <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Motif</p>
+              <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                {event.ghostReason}
+              </p>
+            </div>
+          )}
+
+          {event.ghostBy && (
+            <div>
+              <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Par</p>
+              <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{event.ghostBy}</p>
+            </div>
+          )}
+
+          {event.ghostAt && (
+            <div>
+              <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Le</p>
+              <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{fmtDateTime(event.ghostAt)}</p>
+            </div>
+          )}
+
+          {/* Lien vers la mission */}
+          {event.clientId && event.planId && event.samplingId && (
+            <button
+              onClick={() => {
+                onClose()
+                setTimeout(() => navigate(`/missions/${event.clientId}/plan/${event.planId}/sampling/${event.samplingId}`), 50)
+              }}
+              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full mt-1"
+              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+              <ExternalLink size={15} />
+              Voir la mission
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── EventDetailModal ────────────────────────────────────────
 
 interface TechOption { code: string; label: string }
@@ -520,9 +641,11 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
   const [isMoving,       setIsMoving]       = useState(false)
   const [isChangingTech, setIsChangingTech] = useState(false)
   const [confirmCancel,  setConfirmCancel]  = useState(false)
-  const [moveDate,     setMoveDate]     = useState(dateStr)
-  const [techInitiales, setTechInitiales] = useState(event.technicien ?? '')
-  const [saving,       setSaving]       = useState(false)
+  const [moveDate,       setMoveDate]       = useState(dateStr)
+  const [moveReason,     setMoveReason]     = useState('')
+  const [cancelReason,   setCancelReason]   = useState('')
+  const [techInitiales,  setTechInitiales]  = useState(event.technicien ?? '')
+  const [saving,         setSaving]         = useState(false)
 
   const isPrelev = event.type === 'prelevement'
   const isEvt    = event.type === 'evenement'
@@ -531,9 +654,9 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
     .toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
 
   async function handleMove() {
-    if (!moveDate || saving) return
+    if (!moveDate || !moveReason.trim() || saving) return
     setSaving(true)
-    try { await onMove(event, moveDate); onClose() }
+    try { await onMove(event, moveDate, moveReason.trim()); onClose() }
     finally { setSaving(false) }
   }
 
@@ -543,9 +666,10 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
       setConfirmCancel(true)
       return
     }
+    if (!cancelReason.trim()) return  // motif obligatoire
     setSaving(true)
     setConfirmCancel(false)
-    try { await onCancel(event); onClose() }
+    try { await onCancel(event, cancelReason.trim()); onClose() }
     finally { setSaving(false) }
   }
 
@@ -612,9 +736,9 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
 
         {/* Panneau déplacer — inline */}
         {isMoving && (
-          <div className="px-5 py-3.5 flex items-end gap-3"
+          <div className="px-5 py-3.5 flex flex-col gap-2.5"
             style={{ background: 'var(--color-bg-tertiary)', borderBottom: '1px solid var(--color-border-subtle)' }}>
-            <div className="flex-1">
+            <div>
               <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                 Nouvelle date
               </label>
@@ -622,9 +746,20 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
             </div>
-            <button onClick={handleMove} disabled={!moveDate || saving}
-              className="px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: 'var(--color-accent)', color: 'white', opacity: (!moveDate || saving) ? 0.5 : 1 }}>
+            <div>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                Motif du report <span style={{ color: 'var(--color-danger)' }}>*</span>
+              </label>
+              <textarea
+                value={moveReason} onChange={e => setMoveReason(e.target.value)}
+                placeholder="Ex : météo défavorable, client indisponible…"
+                rows={2}
+                className="w-full px-3 py-2 rounded-lg text-sm resize-none"
+                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+            </div>
+            <button onClick={handleMove} disabled={!moveDate || !moveReason.trim() || saving}
+              className="px-4 py-2 rounded-lg text-sm font-medium self-end"
+              style={{ background: 'var(--color-accent)', color: 'white', opacity: (!moveDate || !moveReason.trim() || saving) ? 0.5 : 1 }}>
               {saving ? '…' : 'Déplacer'}
             </button>
           </div>
@@ -715,11 +850,24 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
 
           {/* Retirer du calendrier */}
           {isPrelev && !event.isDone && !confirmCancel && (
-            <button onClick={handleCancel} disabled={saving}
-              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
-              style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
-              ↩ Retirer du calendrier
-            </button>
+            <div className="flex flex-col gap-2">
+              <div>
+                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                  Motif du retrait <span style={{ color: 'var(--color-danger)' }}>*</span>
+                </label>
+                <textarea
+                  value={cancelReason} onChange={e => setCancelReason(e.target.value)}
+                  placeholder="Ex : reporté à une date ultérieure, annulé par le client…"
+                  rows={2}
+                  className="w-full px-3 py-2 rounded-lg text-sm resize-none"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+              </div>
+              <button onClick={handleCancel} disabled={saving || !cancelReason.trim()}
+                className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
+                style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)', opacity: !cancelReason.trim() ? 0.5 : 1 }}>
+                ↩ Retirer du calendrier
+              </button>
+            </div>
           )}
 
           {/* Confirmation : retrait intervention d'un autre tech */}
@@ -953,6 +1101,12 @@ export default function PlanningPage() {
   const [dayModalInitialTab,  setDayModalInitialTab]  = useState<'pool'|'evt'>('pool')
   const [ctxMenu,             setCtxMenu]             = useState<{ dateStr: string; x: number; y: number } | null>(null)
   const [eventDetail, setEventDetail] = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
+  const [ghostDetail, setGhostDetail] = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
+
+  function handleSelectEvent(event: PlanningEvent, dateStr: string) {
+    if (event.isGhost) setGhostDetail({ event, dateStr })
+    else setEventDetail({ event, dateStr })
+  }
 
   // ── Swipe vue Jour (mobile) ─────────────────────────────
   const swipeStartX = useRef<number | null>(null)
@@ -1046,6 +1200,42 @@ export default function PlanningPage() {
               subtitle: `${baseSub} · Bilan 24h J2`,
             })
           }
+        })
+      })
+    })
+
+    // ── Fantômes (reportHistory) ─────────────────────────────
+    clients.forEach((client: Client) => {
+      client.plans.forEach(plan => {
+        const baseSub = [plan.nom, plan.siteNom].filter(Boolean).join(' · ') || '—'
+        plan.samplings.forEach((s: Sampling) => {
+          if (!s.reportHistory?.length) return
+          s.reportHistory.forEach((h, idx) => {
+            if (!h.from) return
+            const ghostAction: 'retiré' | 'reporté' = h.to === '' ? 'retiré' : 'reporté'
+            add(h.from, {
+              id: `${s.id}_ghost_${idx}`,
+              type: 'prelevement' as const,
+              title: client.nom,
+              subtitle: baseSub,
+              statusLabel: ghostAction === 'retiré' ? 'Retiré' : 'Reporté',
+              statusBg: 'transparent',
+              statusColor: 'var(--color-text-tertiary)',
+              link: `/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
+              isDone: false,
+              priority: 4,
+              technicien: client.preleveur || '—',
+              clientId: client.id,
+              planId: plan.id,
+              samplingId: s.id,
+              isGhost: true,
+              ghostAction,
+              ghostNewDate: h.to || undefined,
+              ghostReason: h.reason,
+              ghostBy: h.by,
+              ghostAt: h.at,
+            })
+          })
         })
       })
     })
@@ -1420,6 +1610,38 @@ export default function PlanningPage() {
       if (event.type !== 'evenement') navigate(event.link)
     }
 
+    // ── Rendu fantôme ──────────────────────────────────────
+    if (event.isGhost) {
+      const ghostLabel = event.ghostAction === 'retiré'
+        ? '↩ Retiré'
+        : (() => {
+            if (!event.ghostNewDate) return '→ Reporté'
+            const d = new Date(event.ghostNewDate + 'T12:00:00')
+            return `→ ${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}`
+          })()
+      return (
+        <button
+          onClick={handleClick}
+          onMouseDown={e => e.stopPropagation()}
+          className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
+          style={{ opacity: 0.45, cursor: 'pointer', border: '1px dashed var(--color-border)' }}
+          title={`${event.title} — ${event.ghostAction} · ${event.ghostReason ?? ''}`}
+        >
+          <div className="flex items-center gap-1">
+            <span className="shrink-0 w-[6px] h-[6px] rounded-full" style={{ background: 'var(--color-neutral)' }} />
+            <span className="flex-1 truncate text-[11px]"
+              style={{ color: 'var(--color-text-tertiary)', textDecoration: event.ghostAction === 'retiré' ? 'line-through' : 'none' }}>
+              {event.title}
+            </span>
+            <span className="shrink-0 text-[9px] px-1 rounded"
+              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' }}>
+              {ghostLabel}
+            </span>
+          </div>
+        </button>
+      )
+    }
+
     return (
       <button
         onClick={handleClick}
@@ -1668,7 +1890,7 @@ export default function PlanningPage() {
                     <span className="text-xs py-1" style={{ color: 'var(--color-text-tertiary)' }}>Aucune intervention planifiée</span>
                   ) : allDayEvts.map(evt => (
                     <button key={evt.id}
-                      onClick={() => setEventDetail({ event: evt, dateStr })}
+                      onClick={() => handleSelectEvent(evt, dateStr)}
                       className="flex items-center gap-1.5 px-2 py-1 rounded-[5px] text-left"
                       style={{ background: evt.statusBg }}>
                       <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: evt.statusColor }} />
@@ -1737,7 +1959,7 @@ export default function PlanningPage() {
                     const W      = 1 / evt.totalCols
                     return (
                       <button key={evt.id}
-                        onClick={() => setEventDetail({ event: evt, dateStr })}
+                        onClick={() => handleSelectEvent(evt, dateStr)}
                         className="absolute text-left rounded-lg px-2 py-1 overflow-hidden"
                         style={{
                           top: top + 1, height: height - 2,
@@ -1839,7 +2061,7 @@ export default function PlanningPage() {
                         <button
                           key={ev.id}
                           onMouseDown={e => e.stopPropagation()}
-                          onClick={() => setEventDetail({ event: evObj, dateStr: ev.date })}
+                          onClick={() => handleSelectEvent(evObj, ev.date)}
                           className="text-left px-2 rounded flex items-center gap-1 truncate"
                           style={{
                             gridColumn: `${colStart + 1} / ${colEnd + 2}`,
@@ -1888,7 +2110,7 @@ export default function PlanningPage() {
                       minHeight: 120,
                       userSelect: 'none',
                     }}>
-                    {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => goToDay(dateStr)} onSelect={e => setEventDetail({ event: e, dateStr })} />)}
+                    {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => goToDay(dateStr)} onSelect={e => handleSelectEvent(e, dateStr)} />)}
                     <div className="mt-auto pt-1 flex justify-end pr-0.5">
                       <Plus size={10} className="opacity-20 group-hover:opacity-60 transition-opacity"
                         style={{ color: 'var(--color-text-tertiary)' }} />
@@ -1966,7 +2188,7 @@ export default function PlanningPage() {
                       <Plus size={10} className="opacity-25 group-hover:opacity-70 transition-opacity"
                         style={{ color: 'var(--color-text-tertiary)' }} />
                     </div>
-                    {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact onExpand={() => goToDay(dateStr)} onSelect={e => setEventDetail({ event: e, dateStr })} />)}
+                    {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact onExpand={() => goToDay(dateStr)} onSelect={e => handleSelectEvent(e, dateStr)} />)}
                     {evts.length>MAX && (
                       <span className="text-[10px] pl-1 mt-0.5" style={{ color:'var(--color-text-tertiary)' }}>
                         +{evts.length-MAX} autres
@@ -2018,7 +2240,7 @@ export default function PlanningPage() {
                   </div>
                   <div className="rounded-xl overflow-hidden"
                     style={{ background:'var(--color-bg-secondary)', border:'1px solid var(--color-border-subtle)', boxShadow:'var(--shadow-card)' }}>
-                    {events.map((evt,i) => <EventRow key={evt.id} event={evt} isLast={i===events.length-1} onSelect={e => setEventDetail({ event: e, dateStr })} />)}
+                    {events.map((evt,i) => <EventRow key={evt.id} event={evt} isLast={i===events.length-1} onSelect={e => handleSelectEvent(e, dateStr)} />)}
                   </div>
                 </div>
               )
@@ -2070,6 +2292,14 @@ export default function PlanningPage() {
           onDelete={handleDeleteEvent}
           onChangeTech={handleChangeTechnicien}
           techOptions={techOptions}
+        />
+      )}
+
+      {/* ── GhostDetailModal ── */}
+      {ghostDetail && (
+        <GhostDetailModal
+          event={ghostDetail.event}
+          onClose={() => setGhostDetail(null)}
         />
       )}
 
