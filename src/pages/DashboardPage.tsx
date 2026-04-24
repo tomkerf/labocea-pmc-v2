@@ -161,7 +161,7 @@ export default function DashboardPage() {
   const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes()
 
   const EVENEMENT_CFG: Record<string, { label: string; bg: string; color: string; dot: string }> = {
-    rappel:  { label: 'Rappel',  bg: 'var(--color-accent-light)',  color: 'var(--color-accent)',   dot: 'var(--color-accent)'   },
+    rappel:  { label: 'Rappel',  bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' },
     reunion: { label: 'Réunion', bg: '#F3EEFF',                    color: '#7C3AED',               dot: '#7C3AED'               },
     rapport: { label: 'Rapport', bg: 'var(--color-warning-light)', color: 'var(--color-warning)',  dot: 'var(--color-warning)'  },
     autre:   { label: 'Autre',   bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' },
@@ -181,7 +181,7 @@ export default function DashboardPage() {
 
   // Prélèvements du jour
   type JourItem =
-    | { kind: 'sampling'; time: string; title: string; sub: string; badge: { label: string; bg: string; color: string }; link: string }
+    | { kind: 'sampling'; time: string; title: string; sub: string; badge: { label: string; bg: string; color: string }; dot: string; link: string }
     | { kind: 'evenement'; time: string; title: string; sub: string; badge: { label: string; bg: string; color: string }; dot: string }
 
   const jourItems: JourItem[] = []
@@ -202,12 +202,19 @@ export default function DashboardPage() {
         // Un prélèvement d'hier encore "planned" est un J2 à faire aujourd'hui
         const isJ2Today = plannedDate === yesterdayISO && s.status === 'planned'
         if (isToday(plannedDate) || isJ2Today) {
+          const badge = getSamplingBadge(s)
+          const samplingDot = s.status === 'done'
+            ? 'var(--color-success)'
+            : s.status === 'overdue'
+            ? 'var(--color-danger)'
+            : 'var(--color-accent)'
           jourItems.push({
             kind: 'sampling',
             time: s.plannedTime ?? '',
             title: client.nom,
             sub: [plan.siteNom, plan.nom].filter(Boolean).join(' · ') || '—',
-            badge: getSamplingBadge(s),
+            badge,
+            dot: samplingDot,
             link: `/missions/${client.id}/plan/${plan.id}`,
           })
         }
@@ -377,7 +384,7 @@ export default function DashboardPage() {
                     </span>
                   ) : (
                     <span className="shrink-0 w-2 h-2 rounded-full mt-0.5"
-                      style={{ background: item.kind === 'evenement' ? item.dot : 'var(--color-text-tertiary)' }} />
+                      style={{ background: item.dot }} />
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium leading-snug" style={{ color: 'var(--color-text-primary)' }}>{item.title}</p>
