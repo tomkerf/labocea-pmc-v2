@@ -127,6 +127,51 @@ function isMultiDay(e: PlanningEvent): boolean {
   return ev.dateFin > ev.date
 }
 
+// Retire le suffixe _j2, _j3… pour retrouver l'ID de base du prélèvement
+function baseSamplingId(id: string): string {
+  return id.replace(/_j\d+$/, '')
+}
+
+// Construit la matrice de lignes alignées pour la vue semaine.
+// weekRows[rowIdx][dayIdx] = PlanningEvent ou null (spacer)
+// Les événements J1/J2 du même prélèvement partagent la même ligne.
+function buildWeekRows(
+  dayISOs: string[],
+  getEvents: (dateStr: string) => PlanningEvent[],
+): (PlanningEvent | null)[][] {
+  const dayCount = dayISOs.length
+  const eventsByDay = dayISOs.map(d => getEvents(d).filter(e => !isMultiDay(e)))
+
+  const placed = new Set<string>()
+  const rows: (PlanningEvent | null)[][] = []
+
+  for (let dayIdx = 0; dayIdx < dayCount; dayIdx++) {
+    for (const evt of eventsByDay[dayIdx]) {
+      if (placed.has(evt.id)) continue
+      placed.add(evt.id)
+
+      const row: (PlanningEvent | null)[] = Array(dayCount).fill(null)
+      row[dayIdx] = evt
+
+      // Cherche un événement apparié dans les jours suivants (même base ID)
+      const base = baseSamplingId(evt.id)
+      for (let d2 = dayIdx + 1; d2 < dayCount; d2++) {
+        const partner = eventsByDay[d2].find(
+          e2 => !placed.has(e2.id) && baseSamplingId(e2.id) === base && e2.id !== evt.id
+        )
+        if (partner) {
+          row[d2] = partner
+          placed.add(partner.id)
+        }
+      }
+
+      rows.push(row)
+    }
+  }
+
+  return rows
+}
+
 function sortEvts(evts: PlanningEvent[]): PlanningEvent[] {
   return evts.slice().sort((a,b) => {
     if (!a.plannedTime && !b.plannedTime) return 0
@@ -1249,6 +1294,12 @@ export default function PlanningPage() {
       .filter(g => g.events.length>0)
   }, [viewMode, weekDays, monthStart, filteredForDay, filteredForDayFlat])
 
+  // Matrice lignes alignées pour la vue semaine (J1 face à J2)
+  const weekRows = useMemo(() => {
+    if (viewMode !== 'semaine') return []
+    return buildWeekRows(weekDays.map(toISO), filteredForDayFlat)
+  }, [viewMode, weekDays, filteredForDayFlat])
+
   // ── Gestion des samplings ───────────────────────────────
 
   // Retire un sampling du calendrier → remet plannedDay à 0, il revient dans le pool
@@ -1862,7 +1913,6 @@ export default function PlanningPage() {
               onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
               {weekDays.map((day,i) => {
                 const dateStr = toISO(day)
-                const evts = filteredForDayFlat(dateStr).filter(e => !isMultiDay(e))
                 const isToday = sameDay(day,today)
                 const inDrag = isInDrag(dateStr)
                 return (
@@ -1881,7 +1931,12 @@ export default function PlanningPage() {
                       minHeight: 120,
                       userSelect: 'none',
                     }}>
-                    {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => goToDay(dateStr)} onSelect={e => setEventDetail({ event: e, dateStr })} />)}
+                    {weekRows.map((row, rowIdx) => {
+                      const evt = row[i]
+                      return evt
+                        ? <EventPill key={evt.id} event={evt} onExpand={() => goToDay(dateStr)} onSelect={e => setEventDetail({ event: e, dateStr })} />
+                        : <div key={`sp-${rowIdx}`} aria-hidden style={{ minHeight: 32 }} />
+                    })}
                     <div className="mt-auto pt-1 flex justify-end pr-0.5">
                       <Plus size={10} className="opacity-20 group-hover:opacity-60 transition-opacity"
                         style={{ color: 'var(--color-text-tertiary)' }} />
