@@ -48,7 +48,7 @@ export default function AppLayout() {
         </header>
 
         {/* Pages avec transition */}
-        <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
+        <div className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-0">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
