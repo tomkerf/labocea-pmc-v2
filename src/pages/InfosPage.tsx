@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import {
   Search, X, Plus, ChevronDown, ChevronRight,
   User, Key, MapPin, FileText, Phone, Mail, Copy, Eye, EyeOff, Pencil, Trash2,
@@ -7,6 +7,15 @@ import { useClientsListener, saveClient } from '@/hooks/useClients'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import type { Client, TerrainEntry, TerrainType } from '@/types'
+
+// ── Helpers ───────────────────────────────────────────────────
+
+/** Supprime les champs undefined d'un objet — Firestore les rejette */
+function stripUndef<T extends object>(obj: T): T {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => v !== undefined && v !== '')
+  ) as T
+}
 
 // ── Config types ──────────────────────────────────────────────
 
@@ -200,11 +209,12 @@ interface FormProps {
   entry?: Partial<TerrainEntry>
   clients: Client[]
   defaultClientId?: string
+  error?: string | null
   onSave: (clientId: string, entry: TerrainEntry) => void
   onClose: () => void
 }
 
-function EntryForm({ entry, clients, defaultClientId, onSave, onClose }: FormProps) {
+function EntryForm({ entry, clients, defaultClientId, error, onSave, onClose }: FormProps) {
   const isEdit = !!entry?.id
   const [type,     setType]     = useState<TerrainType>(entry?.type ?? 'contact')
   const [clientId, setClientId] = useState(defaultClientId ?? clients[0]?.id ?? '')
@@ -219,19 +229,19 @@ function EntryForm({ entry, clients, defaultClientId, onSave, onClose }: FormPro
   const [notes,    setNotes]    = useState(entry?.notes ?? '')
 
   function handleSave() {
-    const base: TerrainEntry = {
-      id:   entry?.id ?? crypto.randomUUID(),
+    const specific =
+      type === 'contact' ? { nom: nom.trim(), role: role.trim(), tel: tel.trim(), tel2: tel2.trim(), email: email.trim() }
+      : type === 'acces'  ? { libelle: libelle.trim(), code: code.trim() }
+      :                     { libelle: libelle.trim(), contenu: contenu.trim() }
+
+    const base = stripUndef({
+      id:        entry?.id ?? crypto.randomUUID(),
       type,
       createdAt: entry?.createdAt ?? new Date().toISOString(),
-      notes: notes.trim() || undefined,
-    }
-    if (type === 'contact') {
-      Object.assign(base, { nom: nom.trim(), role: role.trim() || undefined, tel: tel.trim() || undefined, tel2: tel2.trim() || undefined, email: email.trim() || undefined })
-    } else if (type === 'acces') {
-      Object.assign(base, { libelle: libelle.trim(), code: code.trim() })
-    } else {
-      Object.assign(base, { libelle: libelle.trim() || undefined, contenu: contenu.trim() || undefined })
-    }
+      notes:     notes.trim(),
+      ...specific,
+    }) as TerrainEntry
+
     onSave(clientId, base)
   }
 
@@ -388,6 +398,14 @@ function EntryForm({ entry, clients, defaultClientId, onSave, onClose }: FormPro
             </div>
           )}
 
+          {/* Erreur */}
+          {error && (
+            <p className="text-xs px-3 py-2 rounded-lg"
+              style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+              {error}
+            </p>
+          )}
+
           {/* Bouton */}
           <button onClick={handleSave} disabled={!canSave}
             className="w-full py-2.5 rounded-lg text-sm font-medium"
@@ -414,6 +432,7 @@ export default function InfosPage() {
   const [filter,   setFilter]   = useState<TerrainType | 'all'>('all')
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [modal,    setModal]    = useState<null | 'new' | { entry: TerrainEntry; clientId: string }>(null)
+  const [saveErr,  setSaveErr]  = useState<string | null>(null)
 
   // Toutes les entrées terrain, enrichies du client
   const allEntries = useMemo(() => {
@@ -459,17 +478,22 @@ export default function InfosPage() {
     setExpanded(prev => ({ ...prev, [clientId]: !prev[clientId] }))
   }
 
-  async function handleSave(clientId: string, entry: TerrainEntry) {
+  const handleSave = useCallback(async (clientId: string, entry: TerrainEntry) => {
     const client = clients.find((c: Client) => c.id === clientId)
     if (!client || !uid) return
-    const terrain = client.terrain ?? []
-    const exists  = terrain.find(t => t.id === entry.id)
-    const updated = exists
-      ? terrain.map(t => t.id === entry.id ? entry : t)
-      : [...terrain, entry]
-    await saveClient({ ...client, terrain: updated }, uid)
-    setModal(null)
-  }
+    setSaveErr(null)
+    try {
+      const terrain = client.terrain ?? []
+      const exists  = terrain.find(t => t.id === entry.id)
+      const updated = exists
+        ? terrain.map(t => t.id === entry.id ? entry : t)
+        : [...terrain, entry]
+      await saveClient({ ...client, terrain: updated }, uid)
+      setModal(null)
+    } catch (err) {
+      setSaveErr(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde.')
+    }
+  }, [clients, uid])
 
   async function handleDelete(clientId: string, entryId: string) {
     const client = clients.find((c: Client) => c.id === clientId)
@@ -653,8 +677,9 @@ export default function InfosPage() {
           entry={modal === 'new' ? undefined : modal.entry}
           clients={clients}
           defaultClientId={modal === 'new' ? undefined : modal.clientId}
+          error={saveErr}
           onSave={handleSave}
-          onClose={() => setModal(null)}
+          onClose={() => { setModal(null); setSaveErr(null) }}
         />
       )}
     </div>
