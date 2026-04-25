@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, AlertTriangle } from 'lucide-react'
 import type { Client } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
 
@@ -66,10 +66,7 @@ export default function ClientCard({ client }: Props) {
             {client.nom}
           </span>
           {counts.overdue > 0 && (
-            <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0"
-              style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
-              {counts.overdue} en retard
-            </span>
+            <AlertTriangle size={14} strokeWidth={2} className="shrink-0" style={{ color: 'var(--color-danger)' }} />
           )}
         </div>
         <div className="flex items-center gap-3 mt-0.5">
@@ -89,9 +86,11 @@ export default function ClientCard({ client }: Props) {
       <div className="text-right shrink-0">
         {next ? (
           <>
-            <p className="text-xs font-medium"
+            <p className="text-xs font-medium flex items-center justify-end gap-1"
               style={{ color: next.overdue ? 'var(--color-danger)' : 'var(--color-text-secondary)' }}>
-              {next.overdue ? '⚠ En retard' : 'Prochain'}
+              {next.overdue
+                ? <AlertTriangle size={12} strokeWidth={2} />
+                : 'Prochain'}
             </p>
             <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
               {next.label}
