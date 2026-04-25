@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle, FileDown, Loader2 } from 'lucide-react'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveClient, deleteClient } from '@/hooks/useClients'
@@ -8,6 +8,7 @@ import { useAuthStore, selectUid } from '@/stores/authStore'
 import { toast } from '@/stores/toastStore'
 import { generateId } from '@/lib/ids'
 import { isSamplingOverdue } from '@/lib/overdue'
+import { exportClientPdf } from '@/lib/exportPdf'
 import type { Client, Plan, SegmentType, NouvelleDemandeType } from '@/types'
 
 const SEGMENTS: SegmentType[] = ['SRA', 'Réseau de mesure', 'RSDE']
@@ -25,6 +26,7 @@ export default function ClientPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [confirmDeletePlanId, setConfirmDeletePlanId] = useState<string | null>(null)
   const [sitesInput, setSitesInput] = useState('')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -172,6 +174,23 @@ export default function ClientPage() {
         </h1>
         <div className="flex items-center gap-3">
           {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
+
+          {/* Export PDF */}
+          <button
+            onClick={async () => {
+              setExporting(true)
+              try { exportClientPdf(client) }
+              catch { toast.error('Erreur lors de la génération du PDF.') }
+              finally { setExporting(false) }
+            }}
+            disabled={exporting}
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
+            style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
+            {exporting
+              ? <Loader2 size={13} className="animate-spin" />
+              : <FileDown size={13} />}
+            PDF
+          </button>
           {!confirmDelete ? (
             <button onClick={() => setConfirmDelete(true)}
               className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
