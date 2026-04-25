@@ -523,6 +523,14 @@ function CellContextMenu({ x, y, onClose, onPlanifier, onEvenement }: {
 
 function GhostDetailModal({ event, onClose }: { event: PlanningEvent; onClose: () => void }) {
   const navigate = useNavigate()
+  const users    = useUsersStore(s => s.users)
+
+  const resolveUser = (uid?: string) => {
+    if (!uid) return null
+    const u = users.find(u => u.uid === uid)
+    if (!u) return uid  // fallback uid si non trouvé
+    return `${u.prenom} ${u.nom}`
+  }
 
   const fmtDate = (iso?: string) => {
     if (!iso) return '—'
@@ -603,7 +611,7 @@ function GhostDetailModal({ event, onClose }: { event: PlanningEvent; onClose: (
           {event.ghostBy && (
             <div>
               <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Par</p>
-              <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{event.ghostBy}</p>
+              <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{resolveUser(event.ghostBy)}</p>
             </div>
           )}
 
