@@ -155,6 +155,11 @@ export default function DashboardPage() {
         plan.samplings.forEach((s: Sampling) => {
           if (!s.rapportPrevu || s.rapportDate) return
           if (s.status !== 'done' || !s.doneDate) return
+          // Filtrer par technicien : doneBy (uid) en priorité, sinon preleveur du client
+          const estMonRapport = s.doneBy
+            ? s.doneBy === uid
+            : client.preleveur === initiales
+          if (!estMonRapport) return
           const msDay = 1000 * 60 * 60 * 24
           const joursDepuis = Math.floor((new Date(todayISO).getTime() - new Date(s.doneDate).getTime()) / msDay)
           result.push({
