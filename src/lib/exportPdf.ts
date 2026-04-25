@@ -153,26 +153,59 @@ export function exportClientPdf(client: Client): void {
     doc.text(meta, MARGIN + CONTENT_W - metaW - 3, y + 5.5)
     y += 11
 
-    // Tableau prélèvements
-    const rows = plan.samplings
-      .sort((a, b) => {
-        if (a.plannedMonth !== b.plannedMonth) return a.plannedMonth - b.plannedMonth
-        return a.plannedDay - b.plannedDay
-      })
-      .map(s => [
+    // ── Construction des lignes avec sous-lignes pour reports ──
+    type RowMeta = { isReport: boolean; status?: SamplingStatus }
+    const rowsMeta: RowMeta[] = []
+    const rows: string[][] = []
+
+    const sorted = [...plan.samplings].sort((a, b) => {
+      if (a.plannedMonth !== b.plannedMonth) return a.plannedMonth - b.plannedMonth
+      return a.plannedDay - b.plannedDay
+    })
+
+    for (const s of sorted) {
+      // Motif : affiché pour annulations et prélèvements non effectués
+      const motifNote = [
+        s.tente ? '⚑ Tenté' : '',
+        s.motif  ? `Motif : ${s.motif}` : '',
+        s.comment ? s.comment : '',
+      ].filter(Boolean).join(' — ') || '—'
+
+      rows.push([
         String(s.num),
         formatPlannedDate(s),
         formatDoneDate(s.doneDate),
         STATUS_LABEL[s.status] ?? s.status,
-        s.rapportPrevu ? (s.rapportDate ? formatDoneDate(s.rapportDate) : 'Oui') : 'Non',
+        s.rapportPrevu ? (s.rapportDate ? formatDoneDate(s.rapportDate) : 'Prévu') : 'Non',
         s.nappe || '—',
-        s.comment || '—',
+        motifNote,
       ])
+      rowsMeta.push({ isReport: false, status: s.status })
+
+      // Sous-lignes : historique des reports
+      if (s.reportHistory && s.reportHistory.length > 0) {
+        for (const r of s.reportHistory) {
+          const fromFmt = formatDoneDate(r.from) || r.from
+          const toFmt   = formatDoneDate(r.to)   || r.to
+          const at      = r.at ? new Date(r.at).toLocaleDateString('fr-FR') : ''
+          rows.push([
+            '',
+            `↳ ${fromFmt}`,
+            `→ ${toFmt}`,
+            'Reporté',
+            at,
+            '',
+            r.reason || '—',
+          ])
+          rowsMeta.push({ isReport: true })
+        }
+      }
+    }
 
     autoTable(doc, {
       startY: y,
       margin: { left: MARGIN, right: MARGIN },
-      head: [['N°', 'Prévu', 'Réalisé', 'Statut', 'Rapport', 'Nappe', 'Commentaire']],
+      head: [['N°', 'Prévu', 'Réalisé', 'Statut', 'Rapport', 'Nappe', 'Motif / Commentaire']],
       body: rows,
       styles: {
         font: 'helvetica',
@@ -193,28 +226,37 @@ export function exportClientPdf(client: Client): void {
         0: { cellWidth: 8,  halign: 'center' },
         1: { cellWidth: 18 },
         2: { cellWidth: 22 },
-        3: { cellWidth: 26 },
-        4: { cellWidth: 22 },
-        5: { cellWidth: 14 },
+        3: { cellWidth: 24 },
+        4: { cellWidth: 20 },
+        5: { cellWidth: 12 },
         6: { cellWidth: 'auto' },
       },
-      alternateRowStyles: { fillColor: [250, 250, 252] },
-      // Colorise la cellule Statut selon la valeur
+      // Pas d'alternance automatique — on gère manuellement
+      alternateRowStyles: {},
       didParseCell(data) {
-        if (data.section === 'body' && data.column.index === 3) {
-          const s = plan.samplings.sort((a, b) => {
-            if (a.plannedMonth !== b.plannedMonth) return a.plannedMonth - b.plannedMonth
-            return a.plannedDay - b.plannedDay
-          })[data.row.index]
-          if (s) {
-            data.cell.styles.fillColor = STATUS_COLOR[s.status] ?? [255, 255, 255]
-            data.cell.styles.textColor = STATUS_TEXT_COLOR[s.status] ?? DARK
+        if (data.section !== 'body') return
+        const meta = rowsMeta[data.row.index]
+        if (!meta) return
+
+        if (meta.isReport) {
+          // Sous-ligne report : fond crème, texte gris, italique
+          data.cell.styles.fillColor = [255, 252, 240]
+          data.cell.styles.textColor = [120, 100, 60]
+          data.cell.styles.fontStyle = 'italic'
+          data.cell.styles.fontSize  = 7
+        } else {
+          // Ligne normale : alternance subtile
+          data.cell.styles.fillColor = data.row.index % 2 === 0 ? [255, 255, 255] : [250, 250, 252]
+
+          // Colonne Statut colorée
+          if (data.column.index === 3 && meta.status) {
+            data.cell.styles.fillColor = STATUS_COLOR[meta.status]  ?? [255, 255, 255]
+            data.cell.styles.textColor = STATUS_TEXT_COLOR[meta.status] ?? DARK
             data.cell.styles.fontStyle = 'bold'
           }
         }
       },
       didDrawPage(data) {
-        // Pagination en pied de page
         const pageCount = doc.internal.pages.length - 1
         doc.setFont('helvetica', 'normal')
         doc.setFontSize(7)
