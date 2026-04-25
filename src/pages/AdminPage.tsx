@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc, Timestamp } from 'firebase/firestore'
 import { ShieldAlert, UserPlus, Check, Loader2, ChevronLeft, Mail, Lock, User, Hash } from 'lucide-react'
-import { authSecondary, db } from '@/lib/firebase'
+import { authSecondary, dbSecondary } from '@/lib/firebase'
 import { useAuthStore, selectRole } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { useUsersListener } from '@/hooks/useUsers'
@@ -150,11 +150,9 @@ function CreateUserForm() {
       const cred = await createUserWithEmailAndPassword(authSecondary, email, password)
       const uid  = cred.user.uid
 
-      // Déconnecter l'instance secondaire immédiatement
-      await authSecondary.signOut()
-
-      // Créer le document Firestore users/{uid}
-      await setDoc(doc(db, 'users', uid), {
+      // Créer le document Firestore users/{uid} via l'instance secondaire
+      // (le nouveau user est encore authentifié → satisfait la règle request.auth.uid == uid)
+      await setDoc(doc(dbSecondary, 'users', uid), {
         uid,
         prenom,
         nom,
@@ -165,6 +163,9 @@ function CreateUserForm() {
         createdAt:   Timestamp.now(),
         lastLoginAt: Timestamp.now(),
       })
+
+      // Déconnecter l'instance secondaire après l'écriture
+      await authSecondary.signOut()
 
       setSuccess(true)
       reset()

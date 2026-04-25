@@ -25,3 +25,4 @@ export const db   = getFirestore(app)
 // sans déconnecter l'utilisateur admin courant
 const secondaryApp = initializeApp(firebaseConfig, 'secondary')
 export const authSecondary = getAuth(secondaryApp)
+export const dbSecondary   = getFirestore(secondaryApp)
