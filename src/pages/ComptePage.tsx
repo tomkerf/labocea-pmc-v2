@@ -2,18 +2,27 @@ import { useState, useRef } from 'react'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { logout } from '@/hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, Check, X } from 'lucide-react'
+import { LogOut, Check, X, RefreshCw } from 'lucide-react'
 import { doc, setDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import UserAvatar, { AVATAR_COLORS, getAvatarColor } from '@/components/ui/UserAvatar'
+import UserAvatar, { AVATAR_COLORS, getAvatarColor, dicebearUrl } from '@/components/ui/UserAvatar'
 import type { AppUser } from '@/types'
 
-const EMOJI_LIST = [
-  '🌊','💧','🐟','🦆','🌿','🌱','🌲','🏔️',
-  '⛰️','🗺️','🧪','⚗️','🔬','🌡️','📊','🧭',
-  '🏕️','🌍','🦅','🐊','🌺','🦋','🎯','⚙️',
-  '🔭','🏗️','🌾','🦭','🐋','🦈','🌊','🧲',
+// Pool de seeds — mots nature/eau/terrain pour des avatars variés
+const SEED_POOL = [
+  'rivière','océan','cascade','source','marée','torrent','delta','estuaire',
+  'falaise','montagne','forêt','prairie','bruyère','tourbière','marais','lande',
+  'algue','corail','baleine','dauphin','loutre','héron','cygne','truite',
+  'granite','basalte','limon','argile','calcaire','schiste','quartzite','silex',
+  'brume','aurore','solstice','équinoxe','zénith','vortex','prisma','nebula',
+  'atlas','boussole','sextant','niveau','balance','jauge','sonde','capteur',
 ]
+
+function pickSeeds(n = 16, exclude?: string): string[] {
+  const pool = exclude ? SEED_POOL.filter(s => s !== exclude) : [...SEED_POOL]
+  const shuffled = pool.sort(() => Math.random() - 0.5)
+  return shuffled.slice(0, n)
+}
 
 const DEBOUNCE = 600
 
@@ -22,6 +31,11 @@ export default function ComptePage() {
   const setAppUser = useAuthStore(s => s.setAppUser)
   const navigate = useNavigate()
   const [saving, setSaving] = useState(false)
+  const [seeds, setSeeds] = useState<string[]>(() => {
+    const initial = pickSeeds(16, appUser?.avatarSeed)
+    // Si l'user a déjà un seed, le mettre en premier
+    return appUser?.avatarSeed ? [appUser.avatarSeed, ...initial.slice(0, 15)] : initial
+  })
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   async function handleLogout() {
@@ -37,11 +51,11 @@ export default function ComptePage() {
       setSaving(true)
       try {
         await setDoc(doc(db, 'users', updated.uid), {
-          prenom:       updated.prenom,
-          nom:          updated.nom,
-          initiales:    updated.initiales,
-          avatarColor:  updated.avatarColor  ?? null,
-          avatarEmoji:  updated.avatarEmoji  ?? null,
+          prenom:      updated.prenom,
+          nom:         updated.nom,
+          initiales:   updated.initiales,
+          avatarColor: updated.avatarColor ?? null,
+          avatarSeed:  updated.avatarSeed  ?? null,
         }, { merge: true })
       } finally {
         setSaving(false)
@@ -49,17 +63,21 @@ export default function ComptePage() {
     }, DEBOUNCE)
   }
 
-  async function handleEmojiSelect(emoji: string) {
+  async function handleSeedSelect(seed: string) {
     if (!appUser) return
-    const next = emoji === appUser.avatarEmoji ? '' : emoji   // clic sur le même = désélectionner
-    const updated = { ...appUser, avatarEmoji: next || undefined }
+    const next = seed === appUser.avatarSeed ? undefined : seed  // reclic = retirer
+    const updated = { ...appUser, avatarSeed: next }
     setSaving(true)
     try {
-      await setDoc(doc(db, 'users', appUser.uid), { avatarEmoji: next || null }, { merge: true })
+      await setDoc(doc(db, 'users', appUser.uid), { avatarSeed: next ?? null }, { merge: true })
       setAppUser(updated)
     } finally {
       setSaving(false)
     }
+  }
+
+  function refreshSeeds() {
+    setSeeds(pickSeeds(16, appUser?.avatarSeed))
   }
 
   function update(field: keyof AppUser, value: string) {
@@ -105,7 +123,7 @@ export default function ComptePage() {
           <UserAvatar
             initiales={appUser?.initiales}
             color={appUser?.avatarColor}
-            emoji={appUser?.avatarEmoji}
+            avatarSeed={appUser?.avatarSeed}
             size={48}
           />
           <div>
@@ -157,16 +175,16 @@ export default function ComptePage() {
 
         {/* Aperçu */}
         <div className="flex items-center gap-3 mb-4 pb-4" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <UserAvatar initiales={appUser?.initiales} color={appUser?.avatarColor} emoji={appUser?.avatarEmoji} size={48} />
+          <UserAvatar initiales={appUser?.initiales} color={appUser?.avatarColor} avatarSeed={appUser?.avatarSeed} size={48} />
           <div>
             <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
               {appUser?.prenom || appUser?.nom ? `${appUser?.prenom} ${appUser?.nom}`.trim() : 'Nom non renseigné'}
             </p>
             <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Aperçu</p>
           </div>
-          {appUser?.avatarEmoji && (
+          {appUser?.avatarSeed && (
             <button
-              onClick={() => handleEmojiSelect(appUser.avatarEmoji!)}
+              onClick={() => handleSeedSelect(appUser.avatarSeed!)}
               className="ml-auto flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg"
               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
               <X size={11} strokeWidth={2} />
@@ -201,32 +219,43 @@ export default function ComptePage() {
           })}
         </div>
 
-        {/* Emoji */}
-        <p className="text-xs font-semibold uppercase mb-2.5"
-          style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>
-          Emoji (optionnel)
-        </p>
+        {/* Avatars illustrés */}
+        <div className="flex items-center justify-between mb-2.5">
+          <p className="text-xs font-semibold uppercase"
+            style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>
+            Avatar illustré (optionnel)
+          </p>
+          <button onClick={refreshSeeds}
+            className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg"
+            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+            <RefreshCw size={11} strokeWidth={2} />
+            Autres
+          </button>
+        </div>
         <div className="grid grid-cols-8 gap-1.5">
-          {EMOJI_LIST.map((em) => {
-            const isSelected = appUser?.avatarEmoji === em
+          {seeds.map((seed) => {
+            const isSelected = appUser?.avatarSeed === seed
             return (
-              <button key={em} onClick={() => handleEmojiSelect(em)}
-                className="flex items-center justify-center rounded-lg text-lg transition-all"
+              <button key={seed} onClick={() => handleSeedSelect(seed)}
+                title={seed}
                 style={{
-                  height: 36,
-                  background: isSelected ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)',
+                  borderRadius: '50%',
                   outline: isSelected ? '2px solid var(--color-accent)' : '2px solid transparent',
-                  outlineOffset: 1,
-                  transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+                  outlineOffset: 2,
+                  padding: 0,
                   cursor: 'pointer',
+                  transform: isSelected ? 'scale(1.12)' : 'scale(1)',
+                  transition: 'transform 0.1s, outline 0.1s',
+                  background: 'transparent',
                 }}>
-                {em}
+                <img src={dicebearUrl(seed)} alt={seed} width={36} height={36}
+                  style={{ borderRadius: '50%', display: 'block' }} />
               </button>
             )
           })}
         </div>
         <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
-          Cliquer sur le même emoji pour le retirer.
+          Cliquer sur le même avatar pour le retirer.
         </p>
       </div>
 

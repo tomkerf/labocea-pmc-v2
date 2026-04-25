@@ -19,17 +19,40 @@ export function getAvatarColor(color?: string): string {
   return color ?? DEFAULT_AVATAR_COLOR
 }
 
+const DICEBEAR_BASE = 'https://api.dicebear.com/9.x/notionists/svg'
+
+export function dicebearUrl(seed: string): string {
+  return `${DICEBEAR_BASE}?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf,f4d9bb`
+}
+
 interface UserAvatarProps {
   initiales?: string
   color?: string
-  emoji?: string
+  avatarSeed?: string
   size?: number   // px
   fontSize?: number
 }
 
-export default function UserAvatar({ initiales, color, emoji, size = 40, fontSize }: UserAvatarProps) {
+export default function UserAvatar({ initiales, color, avatarSeed, size = 40, fontSize }: UserAvatarProps) {
   const bg = getAvatarColor(color)
   const fs = fontSize ?? Math.round(size * 0.38)
+
+  if (avatarSeed) {
+    return (
+      <img
+        src={dicebearUrl(avatarSeed)}
+        alt="avatar"
+        width={size}
+        height={size}
+        style={{
+          borderRadius: '50%',
+          flexShrink: 0,
+          userSelect: 'none',
+          display: 'block',
+        }}
+      />
+    )
+  }
 
   return (
     <div
@@ -37,20 +60,19 @@ export default function UserAvatar({ initiales, color, emoji, size = 40, fontSiz
         width: size,
         height: size,
         borderRadius: '50%',
-        background: emoji ? 'var(--color-bg-tertiary)' : bg,
+        background: bg,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
         color: 'white',
         fontWeight: 600,
-        fontSize: emoji ? Math.round(size * 0.52) : fs,
-        letterSpacing: emoji ? 0 : '0.02em',
+        fontSize: fs,
+        letterSpacing: '0.02em',
         userSelect: 'none',
-        border: emoji ? '1px solid var(--color-border-subtle)' : 'none',
       }}
     >
-      {emoji || initiales || '?'}
+      {initiales || '?'}
     </div>
   )
 }

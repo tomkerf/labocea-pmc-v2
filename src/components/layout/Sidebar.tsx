@@ -73,7 +73,7 @@ export default function Sidebar() {
               <UserAvatar
                 initiales={appUser?.initiales}
                 color={appUser?.avatarColor}
-                emoji={appUser?.avatarEmoji}
+                avatarSeed={appUser?.avatarSeed}
                 size={20}
                 fontSize={8}
               />
