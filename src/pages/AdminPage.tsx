@@ -77,16 +77,16 @@ export default function AdminPage() {
         {/* Section : utilisateurs existants */}
         <section>
           <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Comptes existants ({users.length})
+            Comptes existants ({uniqueUsers.length})
           </h2>
           <div className="flex flex-col rounded-xl overflow-hidden"
             style={{ border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
-            {users.length === 0 && (
+            {uniqueUsers.length === 0 && (
               <p className="px-5 py-4 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
                 Aucun utilisateur trouvé.
               </p>
             )}
-            {users.map((u, i) => (
+            {uniqueUsers.map((u, i) => (
               <div key={u.uid}
                 className="flex items-center gap-4 px-5 py-3.5"
                 style={{ borderTop: i > 0 ? '1px solid var(--color-border-subtle)' : 'none' }}>
