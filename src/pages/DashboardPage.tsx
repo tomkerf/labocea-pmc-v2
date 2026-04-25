@@ -11,11 +11,9 @@ import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMetrologieStore } from '@/stores/metrologieStore'
-import { useMaintenancesListener } from '@/hooks/useMaintenances'
-import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useEvenementsListener, deleteEvenement } from '@/hooks/useEvenements'
 import { useEvenementsStore } from '@/stores/evenementsStore'
-import type { Sampling, Verification, Maintenance, Equipement, Client, Plan, EvenementPersonnel } from '@/types'
+import type { Sampling, Verification, Equipement, Client, Plan, EvenementPersonnel } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
 
 // ── Helpers ────────────────────────────────────────────────
@@ -98,7 +96,6 @@ export default function DashboardPage() {
   useClientsListener()
   useEquipementsListener()
   useVerificationsListener()
-  useMaintenancesListener()
   useEvenementsListener()
 
   const { clients } = useMissionsStore()
@@ -107,7 +104,7 @@ export default function DashboardPage() {
   const [eventDetail, setEventDetail] = useState<{ event: ModalEvent; dateStr: string } | null>(null)
   const { equipements } = useEquipementsStore()
   const { verifications } = useMetrologieStore()
-  const { maintenances } = useMaintenancesStore()
+
   const { evenements } = useEvenementsStore()
 
   // ── KPIs ──────────────────────────────────────────────────
@@ -130,23 +127,6 @@ export default function DashboardPage() {
     return !verifications.some((v: Verification) => v.equipementId === e.id)
   })
 
-  // Alertes métrologie — deux sources : verifications + équipements orphelins
-  // (en retard = diff < 0, à prévoir = 0 ≤ diff < 30j)
-  const alertesMetroVerif = verifications.filter((v: Verification) => {
-    if (!v.prochainControle) return false
-    return daysDiff(v.prochainControle) < 30
-  })
-  const alertesMetroEq = equipementsWithoutVerif.filter((e: Equipement) =>
-    daysDiff(e.prochainEtalonnage) < 30
-  )
-  const alertesMetro = [...alertesMetroVerif, ...alertesMetroEq]
-
-  // Maintenances actives (planifiée ou en cours)
-  const maintenancesActives = maintenances.filter(
-    (m: Maintenance) => m.statut === 'planifiee' || m.statut === 'en_cours'
-  )
-
-  const alertesTotal = alertesMetro.length + maintenancesActives.length
 
   // À calibrer : verifications OU équipements orphelins avec échéance dans 0–30j
   const aCalibrrer = [
@@ -160,6 +140,52 @@ export default function DashboardPage() {
       return d >= 0 && d < 30
     }),
   ].length
+
+  // ── Rapports à envoyer ─────────────────────────────────────────
+
+  const rapportsAFaire = useMemo(() => {
+    const todayISO = new Date().toISOString().slice(0, 10)
+    const result: {
+      clientId: string; planId: string; samplingId: string
+      clientNom: string; siteNom: string; planNom: string
+      doneDate: string; joursDepuis: number; enRetard: boolean
+    }[] = []
+    clients.forEach((client: Client) => {
+      client.plans.forEach((plan: Plan) => {
+        plan.samplings.forEach((s: Sampling) => {
+          if (!s.rapportPrevu || s.rapportDate) return
+          if (s.status !== 'done' || !s.doneDate) return
+          const msDay = 1000 * 60 * 60 * 24
+          const joursDepuis = Math.floor((new Date(todayISO).getTime() - new Date(s.doneDate).getTime()) / msDay)
+          result.push({
+            clientId: client.id, planId: plan.id, samplingId: s.id,
+            clientNom: client.nom,
+            siteNom: plan.siteNom || plan.nom || '—',
+            planNom: plan.nom || '—',
+            doneDate: s.doneDate,
+            joursDepuis,
+            enRetard: joursDepuis > 30,
+          })
+        })
+      })
+    })
+    return result.sort((a, b) => b.joursDepuis - a.joursDepuis)
+  }, [clients])
+
+  async function markRapportEnvoye(clientId: string, planId: string, samplingId: string) {
+    const client = clients.find((c: Client) => c.id === clientId)
+    if (!client || !uid) return
+    const today = new Date().toISOString().slice(0, 10)
+    await saveClient({
+      ...client,
+      plans: client.plans.map((plan: Plan) => plan.id !== planId ? plan : {
+        ...plan,
+        samplings: plan.samplings.map((s: Sampling) =>
+          s.id !== samplingId ? s : { ...s, rapportDate: today }
+        ),
+      }),
+    }, uid)
+  }
 
   // ── Planning du jour = prélèvements + événements d'aujourd'hui ──
 
@@ -327,37 +353,6 @@ export default function DashboardPage() {
     )
   )
 
-  const alertesCombinees: { label: string; detail: string; link: string; isUrgent: boolean }[] = [
-    ...(prelevementsEnRetard.length > 0 ? [{
-      label: `${prelevementsEnRetard.length} prélèvement${prelevementsEnRetard.length > 1 ? 's' : ''} en retard`,
-      detail: prelevementsEnRetard.slice(0, 2).map((p) => p.clientNom).join(', ')
-        + (prelevementsEnRetard.length > 2 ? `… +${prelevementsEnRetard.length - 2}` : ''),
-      link: '/planning',
-      isUrgent: true,
-    }] : []),
-    ...alertesMetroVerif.map((v: Verification) => ({
-      label: v.equipementNom || 'Équipement',
-      detail: daysDiff(v.prochainControle) < 0
-        ? `Étalonnage en retard de ${Math.abs(daysDiff(v.prochainControle))}j`
-        : `Étalonnage dans ${daysDiff(v.prochainControle)}j`,
-      link: `/metrologie/${v.id}`,
-      isUrgent: daysDiff(v.prochainControle) < 0,
-    })),
-    ...alertesMetroEq.map((e: Equipement) => ({
-      label: e.nom || 'Équipement',
-      detail: daysDiff(e.prochainEtalonnage) < 0
-        ? `Étalonnage en retard de ${Math.abs(daysDiff(e.prochainEtalonnage))}j`
-        : `Étalonnage dans ${daysDiff(e.prochainEtalonnage)}j`,
-      link: `/materiel/${e.id}`,
-      isUrgent: daysDiff(e.prochainEtalonnage) < 0,
-    })),
-    ...maintenancesActives.map((m: Maintenance) => ({
-      label: m.equipementNom || 'Équipement',
-      detail: m.statut === 'en_cours' ? 'Maintenance en cours' : `Maintenance planifiée le ${m.datePrevue ? new Date(m.datePrevue).toLocaleDateString('fr-FR') : '—'}`,
-      link: `/maintenances/${m.id}`,
-      isUrgent: m.statut === 'en_cours',
-    })),
-  ].sort((a, b) => (b.isUrgent ? 1 : 0) - (a.isUrgent ? 1 : 0)).slice(0, 8)
 
   // ── Render ─────────────────────────────────────────────────
 
@@ -390,10 +385,11 @@ export default function DashboardPage() {
           accent={conformitePct !== null && conformitePct >= 80}
         />
         <StatCard
-          value={alertesTotal}
-          label="Alertes actives"
-          sub={alertesTotal > 0 ? `${alertesMetro.length} métrologie · ${maintenancesActives.length} maintenance` : 'Tout est à jour'}
-          danger={alertesTotal > 0}
+          value={rapportsAFaire.length}
+          label="Rapports à envoyer"
+          sub={rapportsAFaire.length > 0 ? `${rapportsAFaire.filter(r => r.enRetard).length} en retard` : 'Tout est à jour'}
+          danger={rapportsAFaire.some(r => r.enRetard)}
+          warning={rapportsAFaire.length > 0 && !rapportsAFaire.some(r => r.enRetard)}
         />
         <StatCard
           value={aCalibrrer}
@@ -465,32 +461,60 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Alertes */}
-      {alertesCombinees.length > 0 && (
-        <div className="mb-6">
-          <SectionTitle>Alertes importantes</SectionTitle>
+      {/* Rapports */}
+      <div className="mb-6">
+        <SectionTitle>Rapports à envoyer</SectionTitle>
+        {rapportsAFaire.length === 0 ? (
+          <div className="rounded-xl px-5 py-4 text-sm"
+            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)', color: 'var(--color-text-secondary)' }}>
+            ✓ Tous les rapports ont été envoyés.
+          </div>
+        ) : (
           <div className="rounded-xl overflow-hidden"
             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-            {alertesCombinees.map(({ label, detail, link, isUrgent }, i) => (
-              <button key={link + i}
-                onClick={() => navigate(link)}
-                className="w-full flex items-center gap-4 px-5 py-3.5 text-left transition-colors"
-                style={{ borderBottom: i < alertesCombinees.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-              >
-                <span className="shrink-0 w-2 h-2 rounded-full"
-                  style={{ background: isUrgent ? 'var(--color-danger)' : 'var(--color-warning)' }} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{label}</p>
-                  <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{detail}</p>
+            {rapportsAFaire.slice(0, 8).map((r, i) => {
+              const fmtDate = new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+              const dotColor = r.enRetard ? 'var(--color-danger)' : r.joursDepuis > 15 ? 'var(--color-warning)' : 'var(--color-success)'
+              const tagBg    = r.enRetard ? 'var(--color-danger-light)' : r.joursDepuis > 15 ? 'var(--color-warning-light)' : 'var(--color-success-light)'
+              const tagColor = r.enRetard ? 'var(--color-danger)' : r.joursDepuis > 15 ? 'var(--color-warning)' : 'var(--color-success)'
+              const tagLabel = r.enRetard ? `+${r.joursDepuis}j` : `${r.joursDepuis}j`
+              return (
+                <div key={r.samplingId}
+                  className="flex items-center gap-3 px-4 py-3"
+                  style={{ borderBottom: i < rapportsAFaire.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
+                  <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: dotColor }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                      {r.clientNom}
+                    </p>
+                    <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                      {r.siteNom} · intervention le {fmtDate}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                    style={{ background: tagBg, color: tagColor }}>
+                    {tagLabel}
+                  </span>
+                  <button
+                    onClick={() => markRapportEnvoye(r.clientId, r.planId, r.samplingId)}
+                    className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium"
+                    style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-accent)', (e.currentTarget.style.color = 'white'))}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-accent-light)', (e.currentTarget.style.color = 'var(--color-accent)'))}
+                  >
+                    Envoyé ✓
+                  </button>
                 </div>
-                <span className="text-xs" style={{ color: 'var(--color-accent)' }}>→</span>
-              </button>
-            ))}
+              )
+            })}
+            {rapportsAFaire.length > 8 && (
+              <div className="px-4 py-2.5 text-xs" style={{ color: 'var(--color-text-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
+                + {rapportsAFaire.length - 8} autres rapports à envoyer
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* ── EventDetailModal ── */}
       {eventDetail && (
