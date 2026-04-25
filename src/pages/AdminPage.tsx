@@ -90,7 +90,7 @@ export default function AdminPage() {
               <div key={u.uid}
                 className="flex items-center gap-4 px-5 py-3.5"
                 style={{ borderTop: i > 0 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                <UserAvatar initiales={u.initiales} color={u.avatarColor} size={36} fontSize={13} />
+                <UserAvatar initiales={u.initiales} color={u.avatarColor} emoji={u.avatarEmoji} size={36} fontSize={13} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
                     {u.prenom} {u.nom}

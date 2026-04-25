@@ -2,11 +2,18 @@ import { useState, useRef } from 'react'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { logout } from '@/hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, Check } from 'lucide-react'
+import { LogOut, Check, X } from 'lucide-react'
 import { doc, setDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import UserAvatar, { AVATAR_COLORS, getAvatarColor } from '@/components/ui/UserAvatar'
 import type { AppUser } from '@/types'
+
+const EMOJI_LIST = [
+  '🌊','💧','🐟','🦆','🌿','🌱','🌲','🏔️',
+  '⛰️','🗺️','🧪','⚗️','🔬','🌡️','📊','🧭',
+  '🏕️','🌍','🦅','🐊','🌺','🦋','🎯','⚙️',
+  '🔭','🏗️','🌾','🦭','🐋','🦈','🌊','🧲',
+]
 
 const DEBOUNCE = 600
 
@@ -30,15 +37,29 @@ export default function ComptePage() {
       setSaving(true)
       try {
         await setDoc(doc(db, 'users', updated.uid), {
-          prenom: updated.prenom,
-          nom: updated.nom,
-          initiales: updated.initiales,
-          avatarColor: updated.avatarColor ?? null,
+          prenom:       updated.prenom,
+          nom:          updated.nom,
+          initiales:    updated.initiales,
+          avatarColor:  updated.avatarColor  ?? null,
+          avatarEmoji:  updated.avatarEmoji  ?? null,
         }, { merge: true })
       } finally {
         setSaving(false)
       }
     }, DEBOUNCE)
+  }
+
+  async function handleEmojiSelect(emoji: string) {
+    if (!appUser) return
+    const next = emoji === appUser.avatarEmoji ? '' : emoji   // clic sur le même = désélectionner
+    const updated = { ...appUser, avatarEmoji: next || undefined }
+    setSaving(true)
+    try {
+      await setDoc(doc(db, 'users', appUser.uid), { avatarEmoji: next || null }, { merge: true })
+      setAppUser(updated)
+    } finally {
+      setSaving(false)
+    }
   }
 
   function update(field: keyof AppUser, value: string) {
@@ -84,6 +105,7 @@ export default function ComptePage() {
           <UserAvatar
             initiales={appUser?.initiales}
             color={appUser?.avatarColor}
+            emoji={appUser?.avatarEmoji}
             size={48}
           />
           <div>
@@ -129,54 +151,83 @@ export default function ComptePage() {
         </div>
       </div>
 
-      {/* Sélecteur de couleur d'avatar */}
+      {/* Sélecteur d'avatar */}
       <div className="rounded-xl mb-4 px-5 py-4"
         style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-        <p className="text-sm font-medium mb-3" style={{ color: 'var(--color-text-primary)' }}>
-          Couleur de l'avatar
+
+        {/* Aperçu */}
+        <div className="flex items-center gap-3 mb-4 pb-4" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+          <UserAvatar initiales={appUser?.initiales} color={appUser?.avatarColor} emoji={appUser?.avatarEmoji} size={48} />
+          <div>
+            <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+              {appUser?.prenom || appUser?.nom ? `${appUser?.prenom} ${appUser?.nom}`.trim() : 'Nom non renseigné'}
+            </p>
+            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Aperçu</p>
+          </div>
+          {appUser?.avatarEmoji && (
+            <button
+              onClick={() => handleEmojiSelect(appUser.avatarEmoji!)}
+              className="ml-auto flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg"
+              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+              <X size={11} strokeWidth={2} />
+              Retirer
+            </button>
+          )}
+        </div>
+
+        {/* Couleur */}
+        <p className="text-xs font-semibold uppercase mb-2.5"
+          style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>
+          Couleur d'accentuation
         </p>
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap gap-2.5 mb-5">
           {AVATAR_COLORS.map(({ id, value, label }) => {
             const isSelected = value === currentColor
             return (
-              <button
-                key={id}
-                title={label}
-                onClick={() => handleColorSelect(value)}
+              <button key={id} title={label} onClick={() => handleColorSelect(value)}
                 style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
+                  width: 30, height: 30, borderRadius: '50%',
                   background: value,
-                  border: '3px solid transparent',
                   outline: isSelected ? `2px solid ${value}` : '2px solid transparent',
                   outlineOffset: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'transform 0.1s, outline 0.1s',
                   transform: isSelected ? 'scale(1.15)' : 'scale(1)',
                   cursor: 'pointer',
-                }}
-              >
-                {isSelected && <Check size={14} color="white" strokeWidth={3} />}
+                }}>
+                {isSelected && <Check size={13} color="white" strokeWidth={3} />}
               </button>
             )
           })}
         </div>
 
-        {/* Aperçu */}
-        <div className="flex items-center gap-3 mt-4 pt-4" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
-          <UserAvatar initiales={appUser?.initiales} color={appUser?.avatarColor} size={40} />
-          <div>
-            <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-              {appUser?.prenom || appUser?.nom
-                ? `${appUser?.prenom} ${appUser?.nom}`.trim()
-                : 'Nom non renseigné'}
-            </p>
-            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Aperçu</p>
-          </div>
+        {/* Emoji */}
+        <p className="text-xs font-semibold uppercase mb-2.5"
+          style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>
+          Emoji (optionnel)
+        </p>
+        <div className="grid grid-cols-8 gap-1.5">
+          {EMOJI_LIST.map((em) => {
+            const isSelected = appUser?.avatarEmoji === em
+            return (
+              <button key={em} onClick={() => handleEmojiSelect(em)}
+                className="flex items-center justify-center rounded-lg text-lg transition-all"
+                style={{
+                  height: 36,
+                  background: isSelected ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)',
+                  outline: isSelected ? '2px solid var(--color-accent)' : '2px solid transparent',
+                  outlineOffset: 1,
+                  transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+                  cursor: 'pointer',
+                }}>
+                {em}
+              </button>
+            )
+          })}
         </div>
+        <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
+          Cliquer sur le même emoji pour le retirer.
+        </p>
       </div>
 
       {/* Déconnexion */}

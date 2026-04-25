@@ -22,11 +22,12 @@ export function getAvatarColor(color?: string): string {
 interface UserAvatarProps {
   initiales?: string
   color?: string
+  emoji?: string
   size?: number   // px
   fontSize?: number
 }
 
-export default function UserAvatar({ initiales, color, size = 40, fontSize }: UserAvatarProps) {
+export default function UserAvatar({ initiales, color, emoji, size = 40, fontSize }: UserAvatarProps) {
   const bg = getAvatarColor(color)
   const fs = fontSize ?? Math.round(size * 0.38)
 
@@ -36,19 +37,20 @@ export default function UserAvatar({ initiales, color, size = 40, fontSize }: Us
         width: size,
         height: size,
         borderRadius: '50%',
-        background: bg,
+        background: emoji ? 'var(--color-bg-tertiary)' : bg,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
         color: 'white',
         fontWeight: 600,
-        fontSize: fs,
-        letterSpacing: '0.02em',
+        fontSize: emoji ? Math.round(size * 0.52) : fs,
+        letterSpacing: emoji ? 0 : '0.02em',
         userSelect: 'none',
+        border: emoji ? '1px solid var(--color-border-subtle)' : 'none',
       }}
     >
-      {initiales || '?'}
+      {emoji || initiales || '?'}
     </div>
   )
 }

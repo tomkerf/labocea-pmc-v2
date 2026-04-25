@@ -17,6 +17,7 @@ export interface AppUser {
   email: string
   role: UserRole
   avatarColor?: string
+  avatarEmoji?: string   // si défini, affiché à la place des initiales
   createdAt: Timestamp
   lastLoginAt: Timestamp
 }
