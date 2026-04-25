@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword, deleteUser } from 'firebase/auth'
 import { doc, setDoc, Timestamp } from 'firebase/firestore'
 import { ShieldAlert, UserPlus, Check, Loader2, ChevronLeft, Mail, Lock, User, Hash } from 'lucide-react'
 import { authSecondary, dbSecondary } from '@/lib/firebase'
@@ -34,6 +34,17 @@ export default function AdminPage() {
   const role      = useAuthStore(selectRole)
   const { users } = useUsersStore()
   useUsersListener()
+
+  // Dédoublonnage par email — garde le doc le plus récent (createdAt) en cas de doublon
+  const uniqueUsers = Object.values(
+    users.reduce<Record<string, typeof users[0]>>((acc, u) => {
+      const key = u.email.toLowerCase()
+      if (!acc[key] || (u.createdAt?.toMillis() ?? 0) > (acc[key].createdAt?.toMillis() ?? 0)) {
+        acc[key] = u
+      }
+      return acc
+    }, {})
+  ).sort((a, b) => a.nom.localeCompare(b.nom))
 
   // Redirection si pas admin
   if (role && role !== 'admin') {
@@ -150,19 +161,26 @@ function CreateUserForm() {
       const cred = await createUserWithEmailAndPassword(authSecondary, email, password)
       const uid  = cred.user.uid
 
-      // Créer le document Firestore users/{uid} via l'instance secondaire
-      // (le nouveau user est encore authentifié → satisfait la règle request.auth.uid == uid)
-      await setDoc(doc(dbSecondary, 'users', uid), {
-        uid,
-        prenom,
-        nom,
-        initiales: initiales.toUpperCase(),
-        email,
-        role,
-        avatarColor: randomColor(),
-        createdAt:   Timestamp.now(),
-        lastLoginAt: Timestamp.now(),
-      })
+      try {
+        // Créer le document Firestore users/{uid} via l'instance secondaire
+        // (le nouveau user est encore authentifié → satisfait la règle request.auth.uid == uid)
+        await setDoc(doc(dbSecondary, 'users', uid), {
+          uid,
+          prenom,
+          nom,
+          initiales: initiales.toUpperCase(),
+          email,
+          role,
+          avatarColor: randomColor(),
+          createdAt:   Timestamp.now(),
+          lastLoginAt: Timestamp.now(),
+        })
+      } catch (firestoreErr) {
+        // Rollback : supprimer le compte Auth créé pour éviter un utilisateur orphelin
+        await deleteUser(cred.user).catch(() => {})
+        await authSecondary.signOut().catch(() => {})
+        throw firestoreErr
+      }
 
       // Déconnecter l'instance secondaire après l'écriture
       await authSecondary.signOut()
