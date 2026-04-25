@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
+import { FlaskConical } from 'lucide-react'
 import Sidebar from './Sidebar'
 import TabBar from './TabBar'
 import ToastContainer from '@/components/ui/ToastContainer'
@@ -9,7 +10,11 @@ import { getAvatarColor, AVATAR_COLORS } from '@/components/ui/UserAvatar'
 
 export default function AppLayout() {
   const location = useLocation()
+  const navigate = useNavigate()
   const appUser = useAuthStore(selectAppUser)
+
+  // Masquer le bouton sur la page asservissement elle-même
+  const showAsservBtn = !location.pathname.startsWith('/outils')
   const avatarColor = appUser?.avatarColor
 
   // Synchronise la couleur d'accentuation de l'app avec la couleur d'avatar du user
@@ -66,6 +71,24 @@ export default function AppLayout() {
 
       {/* TabBar mobile */}
       <TabBar />
+
+      {/* Bouton flottant Asservissement — mobile uniquement */}
+      {showAsservBtn && (
+        <button
+          onClick={() => navigate('/outils/asservissement')}
+          className="md:hidden fixed z-40 flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg"
+          style={{
+            bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
+            right: '16px',
+            background: 'var(--color-bg-secondary)',
+            border: '1px solid var(--color-border)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+            color: 'var(--color-accent)',
+          }}>
+          <FlaskConical size={15} strokeWidth={2} />
+          <span className="text-xs font-semibold">Asservissement</span>
+        </button>
+      )}
 
       {/* Toasts */}
       <ToastContainer />
