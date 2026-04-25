@@ -190,9 +190,9 @@ export function exportClientPdf(client: Client): void {
           const at      = r.at ? new Date(r.at).toLocaleDateString('fr-FR') : ''
           rows.push([
             '',
-            `↳ ${fromFmt}`,
-            `→ ${toFmt}`,
-            'Reporté',
+            `De : ${fromFmt}`,
+            `Vers : ${toFmt}`,
+            'Reporte',
             at,
             '',
             r.reason || '—',
@@ -224,9 +224,9 @@ export function exportClientPdf(client: Client): void {
       },
       columnStyles: {
         0: { cellWidth: 8,  halign: 'center' },
-        1: { cellWidth: 18 },
-        2: { cellWidth: 22 },
-        3: { cellWidth: 24 },
+        1: { cellWidth: 24 },
+        2: { cellWidth: 24 },
+        3: { cellWidth: 22 },
         4: { cellWidth: 20 },
         5: { cellWidth: 12 },
         6: { cellWidth: 'auto' },
