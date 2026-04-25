@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge, Hammer, Inbox, ShieldAlert } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
@@ -14,6 +14,7 @@ const navItems: { to: string; icon?: React.ElementType; label: string; end?: boo
   { to: '/materiel',     icon: Wrench,          label: 'Matériel'               },
   { to: '/metrologie',   icon: Gauge,           label: 'Métrologie'             },
   { to: '/maintenances', icon: Hammer,          label: 'Maintenances'           },
+  { to: '/infos',        icon: BookOpen,        label: 'Infos terrain'          },
   { to: '/compte',                              label: 'Mon compte', isAccount: true },
 ]
 

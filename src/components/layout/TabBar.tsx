@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Plus, X, UserPlus, Hammer, Gauge } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, BookOpen, Wrench, Plus, X, UserPlus, Hammer, Gauge } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 
 const navItems: { to: string; icon: React.ElementType; label: string; end?: boolean; badge?: boolean }[] = [
   { to: '/',         icon: LayoutDashboard, label: 'Accueil',  end: true },
   { to: '/missions', icon: ClipboardList,   label: 'Missions', badge: true },
-  { to: '/planning', icon: CalendarDays,    label: 'Planning'            },
   { to: '/materiel', icon: Wrench,          label: 'Matériel'            },
+  { to: '/infos',    icon: BookOpen,        label: 'Infos'               },
 ]
 
 const actions = [

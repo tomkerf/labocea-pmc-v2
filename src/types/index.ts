@@ -99,6 +99,29 @@ export interface Plan {
   samplings: Sampling[]
 }
 
+// --- Infos terrain ---
+
+export type TerrainType = 'contact' | 'acces' | 'site' | 'note'
+
+export interface TerrainEntry {
+  id: string
+  type: TerrainType
+  // contact
+  nom?: string
+  role?: string
+  tel?: string
+  tel2?: string
+  email?: string
+  // acces
+  libelle?: string
+  code?: string
+  // site / note
+  contenu?: string
+  // commun
+  notes?: string
+  createdAt?: string
+}
+
 export interface Client {
   id: string
   annee: string
@@ -122,6 +145,7 @@ export interface Client {
   partPMC: number
   partSousTraitance: number
   plans: Plan[]
+  terrain?: TerrainEntry[]
   _v2ts?: Timestamp
   createdBy: string
   updatedBy: string
