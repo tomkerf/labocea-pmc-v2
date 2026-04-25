@@ -22,6 +22,7 @@ const MaintenancePage   = lazy(() => import('@/pages/MaintenancePage'))
 const PlanningPage      = lazy(() => import('@/pages/PlanningPage'))
 const DemandesPage      = lazy(() => import('@/pages/DemandesPage'))
 const ComptePage        = lazy(() => import('@/pages/ComptePage'))
+const AdminPage         = lazy(() => import('@/pages/AdminPage'))
 
 /** Spinner affiché pendant le chargement d'un chunk */
 function PageSpinner() {
@@ -84,6 +85,9 @@ function AppRoutes() {
         } />
         <Route path="/compte" element={
           <Suspense fallback={<PageSpinner />}><ComptePage /></Suspense>
+        } />
+        <Route path="/admin" element={
+          <Suspense fallback={<PageSpinner />}><AdminPage /></Suspense>
         } />
       </Route>
 

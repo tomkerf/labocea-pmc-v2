@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge, Hammer, Inbox } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge, Hammer, Inbox, ShieldAlert } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
-import { useAuthStore, selectAppUser } from '@/stores/authStore'
+import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import UserAvatar from '@/components/ui/UserAvatar'
 
@@ -20,6 +20,7 @@ const navItems: { to: string; icon?: React.ElementType; label: string; end?: boo
 export default function Sidebar() {
   const { clients } = useMissionsStore()
   const appUser = useAuthStore(selectAppUser)
+  const role    = useAuthStore(selectRole)
 
   const overdueCount = useMemo(() => {
     let count = 0
@@ -55,7 +56,7 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5">
-        {navItems.map(({ to, icon: Icon, label, end, badge, isAccount }) => (
+        {[...navItems, ...(role === 'admin' ? [{ to: '/admin', icon: ShieldAlert, label: 'Admin', end: false, badge: false, isAccount: false }] : [])].map(({ to, icon: Icon, label, end, badge, isAccount }) => (
           <NavLink
             key={to}
             to={to}
