@@ -281,7 +281,7 @@ function EntryForm({ entry, clients, defaultClientId, error, onSave, onClose }: 
         </div>
 
         <div className="overflow-y-auto flex-1 px-5 py-5 flex flex-col gap-4"
-          style={{ paddingBottom: 'calc(20px + env(safe-area-inset-bottom,0px))' }}>
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
 
           {/* Type */}
           <div>
