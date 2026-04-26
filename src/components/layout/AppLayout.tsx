@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Menu, FlaskConical } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import Sidebar from './Sidebar'
 import MobileDrawer from './MobileDrawer'
 import ToastContainer from '@/components/ui/ToastContainer'
@@ -10,12 +10,10 @@ import { getAvatarColor, AVATAR_COLORS } from '@/components/ui/UserAvatar'
 
 export default function AppLayout() {
   const location  = useLocation()
-  const navigate  = useNavigate()
   const appUser   = useAuthStore(selectAppUser)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  const showAsservBtn = !location.pathname.startsWith('/outils')
-  const avatarColor   = appUser?.avatarColor
+  const avatarColor = appUser?.avatarColor
 
   // Fermer le drawer à chaque changement de route
   useEffect(() => { setDrawerOpen(false) }, [location.pathname])
@@ -85,24 +83,6 @@ export default function AppLayout() {
           </AnimatePresence>
         </div>
       </main>
-
-      {/* Bouton flottant Asservissement — mobile uniquement */}
-      {showAsservBtn && (
-        <button
-          onClick={() => navigate('/outils/asservissement')}
-          className="md:hidden fixed z-30 flex items-center gap-2 px-4 py-2.5 rounded-full"
-          style={{
-            bottom: 'calc(16px + env(safe-area-inset-bottom, 0px))',
-            right: '16px',
-            background: 'var(--color-bg-secondary)',
-            border: '1px solid var(--color-border)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-            color: 'var(--color-accent)',
-          }}>
-          <FlaskConical size={15} strokeWidth={2} />
-          <span className="text-xs font-semibold">Asservissement</span>
-        </button>
-      )}
 
       {/* Toasts */}
       <ToastContainer />

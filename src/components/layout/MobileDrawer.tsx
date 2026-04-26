@@ -1,31 +1,18 @@
 import { useEffect } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge,
-  Hammer, Inbox, BookOpen, ShieldAlert, X, UserPlus, Gauge as GaugeIcon, Hammer as HammerIcon,
+  LayoutDashboard, CalendarDays, Wrench, BookOpen, ShieldAlert, X, FlaskConical,
 } from 'lucide-react'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
-import { useMissionsStore } from '@/stores/missionsStore'
-import { isSamplingOverdue } from '@/lib/overdue'
 import UserAvatar from '@/components/ui/UserAvatar'
-import { useMemo } from 'react'
 
 const NAV_ITEMS = [
-  { to: '/',             icon: LayoutDashboard, label: 'Tableau de bord', end: true  },
-  { to: '/demandes',     icon: Inbox,           label: 'Demandes'                    },
-  { to: '/missions',     icon: ClipboardList,   label: 'Missions',   badge: true     },
-  { to: '/planning',     icon: CalendarDays,    label: 'Planning'                    },
-  { to: '/materiel',     icon: Wrench,          label: 'Matériel'                    },
-  { to: '/metrologie',   icon: Gauge,           label: 'Métrologie'                  },
-  { to: '/maintenances', icon: Hammer,          label: 'Maintenances'                },
-  { to: '/infos',        icon: BookOpen,        label: 'Infos terrain'               },
-]
-
-const ACTIONS = [
-  { label: 'Nouveau client',       icon: UserPlus,   path: '/missions?new=1',     color: 'var(--color-accent)'  },
-  { label: 'Nouvelle maintenance', icon: HammerIcon, path: '/maintenances?new=1', color: 'var(--color-warning)' },
-  { label: 'Nouvelle métrologie',  icon: GaugeIcon,  path: '/metrologie?new=1',   color: 'var(--color-success)' },
+  { to: '/',           icon: LayoutDashboard, label: 'Tableau de bord', end: true },
+  { to: '/planning',   icon: CalendarDays,    label: 'Planning'                   },
+  { to: '/materiel',   icon: Wrench,          label: 'Matériel'                   },
+  { to: '/infos',      icon: BookOpen,        label: 'Infos terrain'              },
+  { to: '/outils/asservissement', icon: FlaskConical, label: 'Asservissement'     },
 ]
 
 interface Props {
@@ -34,25 +21,8 @@ interface Props {
 }
 
 export default function MobileDrawer({ open, onClose }: Props) {
-  const appUser  = useAuthStore(selectAppUser)
-  const role     = useAuthStore(selectRole)
-  const navigate = useNavigate()
-  const { clients } = useMissionsStore()
-
-  const overdueCount = useMemo(() => {
-    let count = 0
-    for (const client of clients)
-      for (const plan of client.plans)
-        for (const s of plan.samplings)
-          if (isSamplingOverdue(s, Number(client.annee) || undefined)) count++
-    return count
-  }, [clients])
-
-  // Fermer sur navigation
-  function handleNav(to: string) {
-    navigate(to)
-    onClose()
-  }
+  const appUser = useAuthStore(selectAppUser)
+  const role    = useAuthStore(selectRole)
 
   // Bloquer le scroll du body
   useEffect(() => {
@@ -122,7 +92,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
 
             {/* Navigation */}
             <nav className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5">
-              {allItems.map(({ to, icon: Icon, label, end, badge, isAccount }: any) => (
+              {allItems.map(({ to, icon: Icon, label, end, isAccount }: any) => (
                 <NavLink
                   key={to}
                   to={to}
@@ -147,34 +117,8 @@ export default function MobileDrawer({ open, onClose }: Props) {
                     <Icon size={18} strokeWidth={1.8} />
                   ) : null}
                   <span className="flex-1">{label}</span>
-                  {badge && overdueCount > 0 && (
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                      style={{ background: 'var(--color-danger)', color: 'white', minWidth: 18, textAlign: 'center' }}>
-                      {overdueCount}
-                    </span>
-                  )}
                 </NavLink>
               ))}
-
-              {/* Section Créer */}
-              <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
-                <p className="text-[10px] font-semibold uppercase px-3 pb-1.5"
-                  style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-                  Créer
-                </p>
-                {ACTIONS.map(({ label, icon: Icon, path, color }) => (
-                  <button key={path}
-                    onClick={() => handleNav(path)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left"
-                    style={{ color: 'var(--color-text-secondary)' }}>
-                    <span className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ background: `${color}22` }}>
-                      <Icon size={14} style={{ color }} />
-                    </span>
-                    {label}
-                  </button>
-                ))}
-              </div>
             </nav>
 
             {/* Pied : infos utilisateur */}
