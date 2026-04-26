@@ -35,16 +35,8 @@ export default function AdminPage() {
   const { users } = useUsersStore()
   useUsersListener()
 
-  // Dédoublonnage par email — garde le doc le plus récent (createdAt) en cas de doublon
-  const uniqueUsers = Object.values(
-    users.reduce<Record<string, typeof users[0]>>((acc, u) => {
-      const key = u.email.toLowerCase()
-      if (!acc[key] || (u.createdAt?.toMillis() ?? 0) > (acc[key].createdAt?.toMillis() ?? 0)) {
-        acc[key] = u
-      }
-      return acc
-    }, {})
-  ).sort((a, b) => a.nom.localeCompare(b.nom))
+  // Dédoublonnage géré dans le store — users est déjà propre
+  const uniqueUsers = users
 
   // Redirection si pas admin
   if (role && role !== 'admin') {
