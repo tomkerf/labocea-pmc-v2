@@ -187,11 +187,11 @@ export function exportClientPdf(client: Client): void {
         for (const r of s.reportHistory) {
           const fromFmt = formatDoneDate(r.from) || r.from
           const toFmt   = formatDoneDate(r.to)   || r.to
-          const at      = r.at ? new Date(r.at).toLocaleDateString('fr-FR') : ''
+          const at      = r.at ? formatDoneDate(new Date(r.at).toISOString().slice(0, 10)) : ''
           rows.push([
-            '',
-            `De : ${fromFmt}`,
-            `Vers : ${toFmt}`,
+            '>',
+            fromFmt,
+            toFmt,
             'Reporte',
             at,
             '',
@@ -244,6 +244,8 @@ export function exportClientPdf(client: Client): void {
           data.cell.styles.textColor = [120, 100, 60]
           data.cell.styles.fontStyle = 'italic'
           data.cell.styles.fontSize  = 7
+          // Colonne N° : centrer le ">"
+          if (data.column.index === 0) data.cell.styles.halign = 'center'
         } else {
           // Ligne normale : alternance subtile
           data.cell.styles.fillColor = data.row.index % 2 === 0 ? [255, 255, 255] : [250, 250, 252]
