@@ -335,11 +335,11 @@ export default function ClientPage() {
           const clientYear = Number(client.annee) || undefined
 
           // Grouper par siteNom en préservant l'ordre d'apparition
-          const groups = client.plans.reduce<{ siteNom: string; plans: typeof client.plans }[]>((acc, plan) => {
-            const key = plan.siteNom || ''
-            const g = acc.find(x => x.siteNom === key)
+          const groups = client.plans.reduce<{ key: string; siteNom: string; plans: typeof client.plans }[]>((acc, plan) => {
+            const key = (plan.siteNom || '').trim().toLowerCase()
+            const g = acc.find(x => x.key === key)
             if (g) g.plans.push(plan)
-            else acc.push({ siteNom: key, plans: [plan] })
+            else acc.push({ key, siteNom: (plan.siteNom || '').trim(), plans: [plan] })
             return acc
           }, [])
 
@@ -350,7 +350,7 @@ export default function ClientPage() {
             <div className="rounded-xl overflow-hidden"
               style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
               {groups.map((group, gi) => (
-                <div key={group.siteNom || `site-${gi}`}>
+                <div key={group.key || `site-${gi}`}>
                   {/* En-tête de site — affiché seulement si plusieurs sites */}
                   {showSiteHeaders && (
                     <div className="px-5 py-2 flex items-center gap-2"
