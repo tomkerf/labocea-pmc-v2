@@ -13,7 +13,9 @@ import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useEvenementsListener, deleteEvenement } from '@/hooks/useEvenements'
 import { useEvenementsStore } from '@/stores/evenementsStore'
-import type { Sampling, Verification, Equipement, Client, Plan, EvenementPersonnel } from '@/types'
+import { useMaintenancesListener } from '@/hooks/useMaintenances'
+import { useMaintenancesStore } from '@/stores/maintenancesStore'
+import type { Sampling, Verification, Equipement, Client, Plan, EvenementPersonnel, Maintenance } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
 
 // ── Helpers ────────────────────────────────────────────────
@@ -97,6 +99,7 @@ export default function DashboardPage() {
   useEquipementsListener()
   useVerificationsListener()
   useEvenementsListener()
+  useMaintenancesListener()
 
   const { clients } = useMissionsStore()
 
@@ -106,6 +109,7 @@ export default function DashboardPage() {
   const { verifications } = useMetrologieStore()
 
   const { evenements } = useEvenementsStore()
+  const { maintenances } = useMaintenancesStore()
 
   // ── KPIs ──────────────────────────────────────────────────
 
@@ -342,10 +346,11 @@ export default function DashboardPage() {
 
   // Prélèvements en retard
   const prelevementsEnRetard: { clientNom: string; siteNom: string; planNom: string; clientId: string; planId: string; samplingId: string }[] = []
-  clients.forEach((client: Client) =>
+  clients.forEach((client: Client) => {
+    const clientYear = Number(client.annee) || undefined
     client.plans.forEach((plan: Plan) =>
       plan.samplings.forEach((s: Sampling) => {
-        if (isSamplingOverdue(s))
+        if (isSamplingOverdue(s, clientYear))
           prelevementsEnRetard.push({
             clientNom: client.nom,
             siteNom: plan.siteNom,
@@ -356,7 +361,17 @@ export default function DashboardPage() {
           })
       })
     )
-  )
+  })
+
+  // Maintenances actives : en cours ou planifiées (date passée ou dans 14j)
+  const maintenancesActives = maintenances.filter((m: Maintenance) => {
+    if (m.statut === 'en_cours') return true
+    if (m.statut === 'planifiee') {
+      const d = daysDiff(m.datePrevue)
+      return d <= 14
+    }
+    return false
+  }).slice(0, 8)
 
 
   // ── Render ─────────────────────────────────────────────────
@@ -520,6 +535,84 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Prélèvements en retard */}
+      {prelevementsEnRetard.length > 0 && (
+        <div className="mb-6">
+          <SectionTitle>Prélèvements en retard</SectionTitle>
+          <div className="rounded-xl overflow-hidden"
+            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            {prelevementsEnRetard.slice(0, 6).map((r, i) => (
+              <div
+                key={r.samplingId}
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer"
+                style={{ borderBottom: i < Math.min(prelevementsEnRetard.length, 6) - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                onClick={() => navigate(`/missions/${r.clientId}/plan/${r.planId}`)}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              >
+                <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: 'var(--color-danger)' }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{r.clientNom}</p>
+                  <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                    {[r.siteNom, r.planNom].filter(Boolean).join(' · ')}
+                  </p>
+                </div>
+                <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+                  En retard
+                </span>
+              </div>
+            ))}
+            {prelevementsEnRetard.length > 6 && (
+              <div className="px-4 py-2.5 text-xs" style={{ color: 'var(--color-text-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
+                + {prelevementsEnRetard.length - 6} autres prélèvements en retard
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Maintenances actives */}
+      {maintenancesActives.length > 0 && (
+        <div className="mb-6">
+          <SectionTitle>Maintenances</SectionTitle>
+          <div className="rounded-xl overflow-hidden"
+            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            {maintenancesActives.map((m: Maintenance, i: number) => {
+              const enCours  = m.statut === 'en_cours'
+              const enRetard = m.statut === 'planifiee' && daysDiff(m.datePrevue) < 0
+              const dotColor   = enCours ? 'var(--color-accent)' : enRetard ? 'var(--color-danger)' : 'var(--color-warning)'
+              const badgeBg    = enCours ? 'var(--color-accent-light)' : enRetard ? 'var(--color-danger-light)' : 'var(--color-warning-light)'
+              const badgeColor = enCours ? 'var(--color-accent)' : enRetard ? 'var(--color-danger)' : 'var(--color-warning)'
+              const badgeLabel = enCours ? 'En cours' : enRetard ? 'En retard' : `Dans ${daysDiff(m.datePrevue)}j`
+              const typeLabel  = m.type === 'preventive' ? 'Préventive' : m.type === 'corrective' ? 'Corrective' : 'Panne'
+              return (
+                <div
+                  key={m.id}
+                  className="flex items-center gap-3 px-4 py-3 cursor-pointer"
+                  style={{ borderBottom: i < maintenancesActives.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                  onClick={() => navigate(`/maintenances/${m.id}`)}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: dotColor }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{m.equipementNom || '—'}</p>
+                    <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                      {typeLabel}{m.description ? ` · ${m.description}` : ''}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                    style={{ background: badgeBg, color: badgeColor }}>
+                    {badgeLabel}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── EventDetailModal ── */}
       {eventDetail && (
