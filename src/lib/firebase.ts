@@ -5,7 +5,12 @@
 
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import {
+  initializeFirestore,
+  getFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+} from 'firebase/firestore'
 
 const firebaseConfig = {
   apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
@@ -19,7 +24,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig)
 
 export const auth = getAuth(app)
-export const db   = getFirestore(app)
+
+// Persistance IndexedDB — lectures offline depuis le cache, écritures
+// mises en file et synchronisées dès que le réseau revient.
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager(),
+  }),
+})
 
 // Instance secondaire — utilisée uniquement pour créer des comptes
 // sans déconnecter l'utilisateur admin courant
