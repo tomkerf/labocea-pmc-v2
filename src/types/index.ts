@@ -97,6 +97,7 @@ export interface Plan {
   bimensuelMonths: number[]
   defaultDay: number
   customDays: Record<string, number>
+  notes?: string        // commentaire libre sur le point de prélèvement
   samplings: Sampling[]
 }
 

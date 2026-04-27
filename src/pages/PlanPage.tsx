@@ -422,6 +422,15 @@ export default function PlanPage() {
               </span>
             </label>
           </PlanField>
+          <PlanField label="Commentaire">
+            <textarea
+              value={plan.notes ?? ''}
+              onChange={(e) => updatePlan('notes', e.target.value)}
+              className="field-input resize-none w-full"
+              rows={3}
+              placeholder="Accès, particularités du site, consignes terrain…"
+            />
+          </PlanField>
           <PlanField label="Conditions météo" last>
             <label className="flex items-center gap-2 mt-1 cursor-pointer">
               <input
