@@ -265,9 +265,10 @@ interface DayModalProps {
   initiales: string
   onValidatePool: (item: PoolItem, date: string) => Promise<void>
   initialTab?: 'pool'|'evt'
+  holidays: Record<string, string>
 }
 
-function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, initialTab }: DayModalProps) {
+function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, initialTab, holidays }: DayModalProps) {
   const [activeTab,   setActiveTab]   = useState<'pool'|'evt'>(initialTab ?? 'pool')
   const [poolValidId, setPoolValidId] = useState<string|null>(null)
   const [poolDate,    setPoolDate]    = useState(dateStr)
@@ -479,24 +480,35 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                           </span>
                         </button>
                         {/* Panneau date inline */}
-                        {isValidating && (
-                          <div className="px-4 py-3 flex items-end gap-3"
+                        {isValidating && (() => {
+                          const poolHoliday = holidays[poolDate]
+                          return (
+                          <div className="px-4 py-3 flex flex-col gap-2"
                             style={{ background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
-                            <div className="flex-1">
-                              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
-                                Planifier le
-                              </label>
-                              <input type="date" value={poolDate} onChange={e => setPoolDate(e.target.value)}
-                                className="w-full px-3 py-2 rounded-lg text-sm"
-                                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+                            <div className="flex items-end gap-3">
+                              <div className="flex-1">
+                                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                                  Planifier le
+                                </label>
+                                <input type="date" value={poolDate} onChange={e => setPoolDate(e.target.value)}
+                                  className="w-full px-3 py-2 rounded-lg text-sm"
+                                  style={{ background: 'var(--color-bg-secondary)', border: `1px solid ${poolHoliday ? 'var(--color-danger)' : 'var(--color-border)'}`, color: 'var(--color-text-primary)' }} />
+                              </div>
+                              <button onClick={() => handleValidatePool(item)} disabled={poolSaving || !poolDate || !!poolHoliday}
+                                className="px-4 py-2 rounded-lg text-sm font-medium"
+                                style={{ background: poolHoliday ? 'var(--color-bg-tertiary)' : 'var(--color-success)', color: poolHoliday ? 'var(--color-text-tertiary)' : 'white', opacity: poolSaving ? 0.6 : 1, cursor: poolHoliday ? 'not-allowed' : 'pointer' }}>
+                                {poolSaving ? '…' : 'Confirmer'}
+                              </button>
                             </div>
-                            <button onClick={() => handleValidatePool(item)} disabled={poolSaving || !poolDate}
-                              className="px-4 py-2 rounded-lg text-sm font-medium"
-                              style={{ background: 'var(--color-success)', color: 'white', opacity: poolSaving ? 0.6 : 1 }}>
-                              {poolSaving ? '…' : 'Confirmer'}
-                            </button>
+                            {poolHoliday && (
+                              <p className="text-xs flex items-center gap-1.5" style={{ color: 'var(--color-danger)' }}>
+                                <span>⛔</span>
+                                <span>{poolHoliday} — planification impossible sur un jour férié.</span>
+                              </p>
+                            )}
                           </div>
-                        )}
+                          )
+                        })()}
                       </div>
                     )
                   })}
@@ -513,15 +525,16 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
 
 // ── CellContextMenu ─────────────────────────────────────────
 
-function CellContextMenu({ x, y, onClose, onPlanifier, onEvenement }: {
+function CellContextMenu({ x, y, onClose, onPlanifier, onEvenement, holidayName }: {
   x: number; y: number
   onClose: () => void
   onPlanifier: () => void
   onEvenement: () => void
+  holidayName?: string
 }) {
   // Ajuste la position pour rester dans l'écran
   const safeX = Math.min(x, window.innerWidth  - 220)
-  const safeY = Math.min(y, window.innerHeight - 110)
+  const safeY = Math.min(y, window.innerHeight - 130)
 
   return (
     <div className="fixed inset-0 z-[55]" onClick={onClose} onContextMenu={e => { e.preventDefault(); onClose() }}>
@@ -535,13 +548,20 @@ function CellContextMenu({ x, y, onClose, onPlanifier, onEvenement }: {
           minWidth: 210,
         }}
         onClick={e => e.stopPropagation()}>
+        {holidayName && (
+          <div className="flex items-center gap-2 px-4 py-2.5 text-xs font-medium"
+            style={{ background: 'rgba(255,59,48,0.06)', color: '#FF3B30', borderBottom: '1px solid var(--color-border-subtle)' }}>
+            ⛔ {holidayName}
+          </div>
+        )}
         <button
-          onClick={() => { onPlanifier(); onClose() }}
+          onClick={() => { if (!holidayName) { onPlanifier(); onClose() } }}
+          disabled={!!holidayName}
           className="flex items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium"
-          style={{ color: 'var(--color-text-primary)' }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+          style={{ color: holidayName ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)', cursor: holidayName ? 'not-allowed' : 'pointer' }}
+          onMouseEnter={e => { if (!holidayName) e.currentTarget.style.background = 'var(--color-bg-tertiary)' }}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-          <Calendar size={15} style={{ color: 'var(--color-accent)' }} />
+          <Calendar size={15} style={{ color: holidayName ? 'var(--color-text-tertiary)' : 'var(--color-accent)' }} />
           Planifier un prélèvement
         </button>
         <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
@@ -1611,6 +1631,7 @@ export default function PlanningPage() {
   // Planifie un sampling à un jour précis du mois (sans le marquer "fait")
   async function handleValidatePool(item: PoolItem, date: string) {
     if (!uid) return
+    if (holidays[date]) return // jour férié — bloqué
     const client = clients.find((c: Client) => c.id === item.clientId)
     if (!client) return
     const plannedDay = new Date(date + 'T12:00:00').getDate()
@@ -2497,6 +2518,7 @@ export default function PlanningPage() {
           initiales={initiales}
           onValidatePool={handleValidatePool}
           initialTab={dayModalInitialTab}
+          holidays={holidays}
         />
       )}
 
@@ -2506,6 +2528,7 @@ export default function PlanningPage() {
           x={ctxMenu.x}
           y={ctxMenu.y}
           onClose={() => setCtxMenu(null)}
+          holidayName={holidays[ctxMenu.dateStr]}
           onPlanifier={() => {
             setDayModalInitialTab('pool')
             setSelectedDay(ctxMenu.dateStr)
