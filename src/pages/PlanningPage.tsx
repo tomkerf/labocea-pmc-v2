@@ -37,6 +37,7 @@ interface PlanningEvent {
   clientId?: string
   planId?: string
   samplingId?: string
+  meteo?: string
   maintenanceData?: Maintenance
   evenementData?: EvenementPersonnel
   // Fantôme (historique report / retrait)
@@ -56,6 +57,7 @@ interface PoolItem {
   planNom: string
   siteNom: string
   techInitiales: string
+  meteo: string
 }
 
 type ViewMode = 'jour' | 'semaine' | 'mois'
@@ -424,6 +426,13 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                                   prévu j{item.sampling.plannedDay}
                                 </span>
                               )}
+                              {item.meteo === 'pluie' && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                                  style={{ background: '#EFF6FF', color: '#3B82F6' }}
+                                  title="Prélèvement à réaliser par temps de pluie">
+                                  🌧 Pluie
+                                </span>
+                              )}
                             </div>
                           </div>
                           {/* Icône cercle +/× — remplace le bouton texte "→ Ce jour" */}
@@ -740,6 +749,12 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
                 <span className="text-[11px] px-2 py-0.5 rounded font-semibold"
                   style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
                   {event.plannedTime}
+                </span>
+              )}
+              {event.meteo === 'pluie' && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: '#EFF6FF', color: '#3B82F6' }}>
+                  🌧 Temps de pluie
                 </span>
               )}
             </div>
@@ -1204,6 +1219,7 @@ export default function PlanningPage() {
             link:`/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
             isDone, technicien: client.preleveur||'—',
             plannedTime: s.plannedTime, clientId:client.id, planId:plan.id, samplingId:s.id,
+            meteo: plan.meteo || '',
           }
           // Jour 1 (ou jour unique pour les méthodes ponctuelles / composite)
           add(dateStr, {
@@ -1401,6 +1417,7 @@ export default function PlanningPage() {
               planNom: plan.nom,
               siteNom: plan.siteNom,
               techInitiales: client.preleveur || '—',
+              meteo: plan.meteo || '',
             })
           }
         })

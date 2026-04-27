@@ -410,7 +410,7 @@ export default function PlanPage() {
               inputMode="decimal"
             />
           </PlanField>
-          <PlanField label="GPS approximatif" last>
+          <PlanField label="GPS approximatif">
             <label className="flex items-center gap-2 mt-1 cursor-pointer">
               <input
                 type="checkbox"
@@ -419,6 +419,18 @@ export default function PlanPage() {
               />
               <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
                 {plan.gpsApprox ? 'Oui — position approchée' : 'Non — position précise'}
+              </span>
+            </label>
+          </PlanField>
+          <PlanField label="Conditions météo" last>
+            <label className="flex items-center gap-2 mt-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={plan.meteo === 'pluie'}
+                onChange={(e) => updatePlan('meteo', e.target.checked ? 'pluie' : '')}
+              />
+              <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                {plan.meteo === 'pluie' ? '🌧 Temps de pluie requis' : 'Pas de contrainte météo'}
               </span>
             </label>
           </PlanField>
