@@ -10,8 +10,8 @@ import UserAvatar from '@/components/ui/UserAvatar'
 const NAV_ITEMS = [
   { to: '/',           icon: LayoutDashboard, label: 'Tableau de bord', end: true },
   { to: '/planning',   icon: CalendarDays,    label: 'Planning'                   },
-  { to: '/materiel',   icon: Wrench,          label: 'Matériel'                   },
   { to: '/infos',      icon: BookOpen,        label: 'Infos terrain'              },
+  { to: '/materiel',   icon: Wrench,          label: 'Matériel'                   },
   { to: '/outils/asservissement', icon: FlaskConical, label: 'Asservissement'     },
   { to: '/outils/tuyaux',        icon: Pipette,      label: 'Tuyaux'             },
 ]

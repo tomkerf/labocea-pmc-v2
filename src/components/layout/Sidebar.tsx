@@ -11,10 +11,10 @@ const navItems: { to: string; icon?: React.ElementType; label: string; end?: boo
   { to: '/demandes',     icon: Inbox,           label: 'Demandes'               },
   { to: '/missions',     icon: ClipboardList,   label: 'Missions',        badge: true },
   { to: '/planning',     icon: CalendarDays,    label: 'Planning'               },
+  { to: '/infos',        icon: BookOpen,        label: 'Infos terrain'          },
   { to: '/materiel',     icon: Wrench,          label: 'Matériel'               },
   { to: '/metrologie',   icon: Gauge,           label: 'Métrologie'             },
   { to: '/maintenances', icon: Hammer,          label: 'Maintenances'           },
-  { to: '/infos',              icon: BookOpen,  label: 'Infos terrain'          },
   { to: '/outils/tuyaux',     icon: Pipette,   label: 'Tuyaux'                 },
   { to: '/compte',                             label: 'Mon compte', isAccount: true },
 ]
