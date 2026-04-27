@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle, FileDown, Loader2 } from 'lucide-react'
+import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle, FileDown, Loader2, GripVertical } from 'lucide-react'
+import {
+  DndContext, closestCenter, PointerSensor, TouchSensor,
+  useSensor, useSensors, type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext, verticalListSortingStrategy,
+  useSortable, arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveClient, deleteClient } from '@/hooks/useClients'
@@ -29,6 +38,10 @@ export default function ClientPage() {
   const [exporting, setExporting] = useState(false)
   const [confirmDeletePlanId, setConfirmDeletePlanId] = useState<string | null>(null)
   const [sitesInput, setSitesInput] = useState('')
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor,   { activationConstraint: { delay: 180, tolerance: 5 } }),
+  )
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isDirty = useRef(false)
   const isDeleted = useRef(false)
@@ -83,6 +96,15 @@ export default function ClientPage() {
   function update(field: keyof Client, value: unknown) {
     if (!client) return
     triggerSave({ ...client, [field]: value })
+  }
+
+  function handleReorder(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id || !client) return
+    const oldIndex = client.plans.findIndex((p) => p.id === active.id)
+    const newIndex  = client.plans.findIndex((p) => p.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
+    triggerSave({ ...client, plans: arrayMove(client.plans, oldIndex, newIndex) })
   }
 
   // Gestion des sites (liste libre) — état local pour ne pas casser le curseur
@@ -331,115 +353,29 @@ export default function ClientPage() {
           <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
             Aucun point — clique sur "Ajouter" pour créer le premier.
           </p>
-        ) : (() => {
-          const clientYear = Number(client.annee) || undefined
-
-          // Grouper par siteNom en préservant l'ordre d'apparition
-          const groups = client.plans.reduce<{ key: string; siteNom: string; plans: typeof client.plans }[]>((acc, plan) => {
-            const key = (plan.siteNom || '').trim().toLowerCase()
-            const g = acc.find(x => x.key === key)
-            if (g) g.plans.push(plan)
-            else acc.push({ key, siteNom: (plan.siteNom || '').trim(), plans: [plan] })
-            return acc
-          }, [])
-
-          // N'afficher les en-têtes de site que s'il y a plusieurs sites distincts
-          const showSiteHeaders = groups.length > 1
-
-          return (
-            <div className="rounded-xl overflow-hidden"
-              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-              {groups.map((group, gi) => (
-                <div key={group.key || `site-${gi}`}>
-                  {/* En-tête de site — affiché seulement si plusieurs sites */}
-                  {showSiteHeaders && (
-                    <div className="px-5 py-2 flex items-center gap-2"
-                      style={{
-                        background: 'var(--color-bg-tertiary)',
-                        borderTop: gi > 0 ? '2px solid var(--color-border)' : 'none',
-                        borderBottom: '1px solid var(--color-border-subtle)',
-                      }}>
-                      <span className="text-xs font-semibold uppercase"
-                        style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.05em' }}>
-                        {group.siteNom || 'Site non renseigné'}
-                      </span>
-                      <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                        · {group.plans.length} point{group.plans.length > 1 ? 's' : ''}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Plans du groupe */}
-                  {group.plans.map((plan, pi) => {
-                    const overdueCount = plan.samplings.filter((s) => isSamplingOverdue(s, clientYear)).length
-                    const isConfirmingDelete = confirmDeletePlanId === plan.id
-                    const isLast = pi === group.plans.length - 1 && gi === groups.length - 1
-                    return (
-                      <div key={plan.id}
-                        style={{ borderBottom: !isLast ? '1px solid var(--color-border-subtle)' : 'none' }}
-                        className="flex flex-col px-5 py-3 gap-2">
-                        <div className="flex items-center gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                                {plan.nom || 'Point sans nom'}
-                              </p>
-                              {overdueCount > 0 && (
-                                <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0 flex items-center gap-1"
-                                  style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
-                                  <AlertTriangle size={10} />
-                                  {overdueCount} en retard
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
-                              {/* En mode groupé, on masque le siteNom déjà affiché dans l'en-tête */}
-                              {[showSiteHeaders ? null : plan.siteNom, plan.frequence, plan.nature].filter(Boolean).join(' · ')}
-                            </p>
-                          </div>
-                          <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0"
-                            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                            {plan.samplings.length} prélèv.
-                          </span>
-                          <button onClick={() => navigate(`/missions/${client.id}/plan/${plan.id}`)}
-                            className="shrink-0 flex items-center gap-1 text-sm font-medium"
-                            style={{ color: 'var(--color-accent)' }}>
-                            Ouvrir <ChevronRight size={14} />
-                          </button>
-                          <button onClick={() => requestDeletePlan(plan.id)} className="shrink-0 p-1 rounded"
-                            style={{ color: isConfirmingDelete ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}
-                            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
-                            onMouseLeave={(e) => { if (!isConfirmingDelete) e.currentTarget.style.color = 'var(--color-text-tertiary)' }}>
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                        {/* Confirmation inline */}
-                        {isConfirmingDelete && (
-                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                            style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
-                            <AlertTriangle size={13} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-                            <span className="text-xs font-medium flex-1" style={{ color: 'var(--color-danger)' }}>
-                              Supprimer ce point et tous ses prélèvements ?
-                            </span>
-                            <button onClick={confirmDeletePlan}
-                              className="text-xs font-semibold px-2.5 py-1 rounded"
-                              style={{ background: 'var(--color-danger)', color: 'white' }}>
-                              Supprimer
-                            </button>
-                            <button onClick={() => setConfirmDeletePlanId(null)}
-                              className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                              Annuler
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              ))}
-            </div>
-          )
-        })()}
+        ) : (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorder}>
+            <SortableContext items={client.plans.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+              <div className="rounded-xl overflow-hidden"
+                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                {client.plans.map((plan, i) => (
+                  <SortablePlanRow
+                    key={plan.id}
+                    plan={plan}
+                    clientYear={Number(client.annee) || undefined}
+                    clientId={client.id}
+                    isLast={i === client.plans.length - 1}
+                    isConfirmingDelete={confirmDeletePlanId === plan.id}
+                    onOpen={() => navigate(`/missions/${client.id}/plan/${plan.id}`)}
+                    onDelete={() => requestDeletePlan(plan.id)}
+                    onConfirmDelete={confirmDeletePlan}
+                    onCancelDelete={() => setConfirmDeletePlanId(null)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
       </div>
     </div>
   )
@@ -458,6 +394,111 @@ function Section({ title, children }: { title: string; children: React.ReactNode
         style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         {children}
       </div>
+    </div>
+  )
+}
+
+// ── Ligne de plan sortable ────────────────────────────────────
+
+interface SortablePlanRowProps {
+  plan: Plan
+  clientYear: number | undefined
+  clientId: string
+  isLast: boolean
+  isConfirmingDelete: boolean
+  onOpen: () => void
+  onDelete: () => void
+  onConfirmDelete: () => void
+  onCancelDelete: () => void
+}
+
+function SortablePlanRow({
+  plan, clientYear, isLast, isConfirmingDelete,
+  onOpen, onDelete, onConfirmDelete, onCancelDelete,
+}: SortablePlanRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: plan.id })
+
+  const overdueCount = (plan.samplings ?? []).filter((s) => isSamplingOverdue(s, clientYear)).length
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        borderBottom: !isLast ? '1px solid var(--color-border-subtle)' : 'none',
+        background: isDragging ? 'var(--color-accent-light)' : 'transparent',
+      }}
+      className="flex flex-col px-3 py-3 gap-2"
+    >
+      <div className="flex items-center gap-2">
+        {/* Poignée drag */}
+        <button
+          {...attributes} {...listeners}
+          className="shrink-0 p-1 rounded touch-none"
+          style={{ color: 'var(--color-text-tertiary)', cursor: isDragging ? 'grabbing' : 'grab' }}
+          title="Glisser pour réorganiser"
+          tabIndex={-1}
+        >
+          <GripVertical size={15} strokeWidth={1.8} />
+        </button>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+              {plan.nom || 'Point sans nom'}
+            </p>
+            {overdueCount > 0 && (
+              <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0 flex items-center gap-1"
+                style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+                <AlertTriangle size={10} />
+                {overdueCount} en retard
+              </span>
+            )}
+          </div>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+            {[plan.siteNom, plan.frequence, plan.nature].filter(Boolean).join(' · ')}
+          </p>
+        </div>
+
+        <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0"
+          style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+          {(plan.samplings ?? []).length} prélèv.
+        </span>
+        <button onClick={onOpen}
+          className="shrink-0 flex items-center gap-1 text-sm font-medium"
+          style={{ color: 'var(--color-accent)' }}>
+          Ouvrir <ChevronRight size={14} />
+        </button>
+        <button onClick={onDelete} className="shrink-0 p-1 rounded"
+          style={{ color: isConfirmingDelete ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
+          onMouseLeave={(e) => { if (!isConfirmingDelete) e.currentTarget.style.color = 'var(--color-text-tertiary)' }}>
+          <Trash2 size={14} />
+        </button>
+      </div>
+
+      {/* Confirmation suppression inline */}
+      {isConfirmingDelete && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg"
+          style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
+          <AlertTriangle size={13} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+          <span className="text-xs font-medium flex-1" style={{ color: 'var(--color-danger)' }}>
+            Supprimer ce point et tous ses prélèvements ?
+          </span>
+          <button onClick={onConfirmDelete}
+            className="text-xs font-semibold px-2.5 py-1 rounded"
+            style={{ background: 'var(--color-danger)', color: 'white' }}>
+            Supprimer
+          </button>
+          <button onClick={onCancelDelete}
+            className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+            Annuler
+          </button>
+        </div>
+      )}
     </div>
   )
 }
