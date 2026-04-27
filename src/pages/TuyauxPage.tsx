@@ -359,8 +359,8 @@ export default function TuyauxPage() {
           </p>
         </div>
         <button onClick={() => setEditing({})}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
-          style={{ background: 'var(--color-accent)', color: 'white' }}>
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium"
+          style={{ background: 'var(--color-accent)', color: 'white', borderRadius: 'var(--radius-sm)' }}>
           <Plus size={15} /> Nouveau tuyau
         </button>
       </div>
@@ -410,8 +410,8 @@ export default function TuyauxPage() {
             Ajoutez un lot de tubes pour gérer vos tuyaux de prélèvement.
           </p>
           <button onClick={() => setEditing({})}
-            className="px-5 py-2 rounded-xl text-sm font-medium"
-            style={{ background: 'var(--color-accent)', color: 'white' }}>
+            className="px-5 py-2 text-sm font-medium"
+            style={{ background: 'var(--color-accent)', color: 'white', borderRadius: 'var(--radius-sm)' }}>
             + Ajouter un premier tuyau
           </button>
         </div>
@@ -438,34 +438,46 @@ export default function TuyauxPage() {
               {items.map(t => {
                 const ds = fmtDate(t.dateCreation)
                 return (
-                  <div key={t.id} className="rounded-xl overflow-hidden flex flex-col"
-                    style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-                    {/* Header carte */}
-                    <div className="px-4 pt-4 pb-3 relative" style={{ background: mc.bg, borderBottom: `1px solid ${mc.border}` }}>
-                      <div className="absolute left-0 top-0 bottom-0 w-1 rounded-r" style={{ background: mc.text }} />
-                      <div className="flex items-start justify-between gap-2 pl-2">
-                        <div>
-                          <p className="text-lg font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
+                  <div key={t.id} className="flex flex-col"
+                    style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-card)', overflow: 'hidden' }}>
+
+                    {/* Header — blanc, pas de couleur de fond */}
+                    <div className="px-4 pt-4 pb-3"
+                      style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-base font-bold tracking-tight truncate"
+                            style={{ color: 'var(--color-text-primary)' }}>
                             {t.refLabo || '—'}
                           </p>
                           {t.objet && (
-                            <p className="text-xs mt-0.5 font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t.objet}</p>
+                            <p className="text-xs mt-0.5 truncate"
+                              style={{ color: 'var(--color-text-secondary)' }}>
+                              {t.objet}
+                            </p>
                           )}
                         </div>
-                        {t.annee && (
-                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
-                            style={{ background: mc.border, color: mc.text }}>
-                            {t.annee}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {t.annee && (
+                            <span className="text-xs font-medium px-2 py-0.5 rounded-full"
+                              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+                              {t.annee}
+                            </span>
+                          )}
+                          {/* Badge matériau — couleur uniquement dans le badge */}
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full"
+                            style={{ background: mc.bg, color: mc.text, border: `1px solid ${mc.border}` }}>
+                            {mat}
                           </span>
-                        )}
+                        </div>
                       </div>
                     </div>
 
                     {/* Corps */}
                     <div className="px-4 py-3 flex flex-col gap-1.5 flex-1">
-                      {t.materiel && <Row label="Matériel" value={t.materiel} mono />}
-                      {ds         && <Row label="Créé"     value={ds} />}
-                      {t.fournisseur && <Row label="Fourn."  value={t.fournisseur} />}
+                      {t.materiel    && <Row label="Matériel" value={t.materiel} mono />}
+                      {ds            && <Row label="Créé"     value={ds} />}
+                      {t.fournisseur && <Row label="Fourn."   value={t.fournisseur} />}
                       {(t.marque || t.numSerie || t.type) && (
                         <div className="flex flex-wrap gap-1 mt-1">
                           {t.marque   && <Tag>{t.marque}</Tag>}
@@ -474,7 +486,8 @@ export default function TuyauxPage() {
                         </div>
                       )}
                       {t.notes && (
-                        <p className="text-xs italic mt-1 pt-2" style={{ color: 'var(--color-text-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
+                        <p className="text-xs italic mt-1 pt-2"
+                          style={{ color: 'var(--color-text-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
                           {t.notes}
                         </p>
                       )}
@@ -482,20 +495,20 @@ export default function TuyauxPage() {
 
                     {/* Footer actions */}
                     <div className="flex gap-2 px-4 py-2.5"
-                      style={{ borderTop: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-tertiary)' }}>
+                      style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
                       <button onClick={() => setEditing(t)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium"
-                        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>
+                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium"
+                        style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', borderRadius: 'var(--radius-sm)' }}>
                         <Pencil size={12} /> Modifier
                       </button>
                       <button onClick={() => printLabel(t)} title="Imprimer étiquette"
-                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-                        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>
+                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium"
+                        style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', borderRadius: 'var(--radius-sm)' }}>
                         <Printer size={12} /> Étiquette
                       </button>
                       <button onClick={() => setConfirmDel(t.id)}
-                        className="flex items-center justify-center px-2.5 py-1.5 rounded-lg"
-                        style={{ background: 'none', border: '1px solid var(--color-border)', color: 'var(--color-text-tertiary)' }}>
+                        className="flex items-center justify-center px-2.5 py-1.5"
+                        style={{ background: 'none', border: '1px solid var(--color-border)', color: 'var(--color-text-tertiary)', borderRadius: 'var(--radius-sm)' }}>
                         <Trash2 size={12} />
                       </button>
                     </div>
