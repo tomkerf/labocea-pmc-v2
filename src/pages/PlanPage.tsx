@@ -510,8 +510,8 @@ export default function PlanPage() {
           </p>
         ) : (
           <div className="rounded-xl overflow-hidden" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-            {plan.samplings.map((s, i) => {
-              const cfg = STATUS_CONFIG[s.status]
+            {(plan.samplings ?? []).map((s, i) => {
+              const cfg = STATUS_CONFIG[s.status] ?? STATUS_CONFIG['planned']
               const isSelected = selectedSampling === s.id
               const isCustom = plan.frequence === 'Personnalisé'
               // Libellé de la date : pour Personnalisé, affiche "15 Mars" au lieu de "Mars — j15"

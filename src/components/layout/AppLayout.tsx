@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Menu } from 'lucide-react'
 import Sidebar from './Sidebar'
 import MobileDrawer from './MobileDrawer'
+import ErrorBoundary from './ErrorBoundary'
 import ToastContainer from '@/components/ui/ToastContainer'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { getAvatarColor, AVATAR_COLORS } from '@/components/ui/UserAvatar'
@@ -78,7 +79,9 @@ export default function AppLayout() {
               transition={{ duration: 0.15, ease: 'easeOut' }}
               className="h-full"
             >
-              <Outlet />
+              <ErrorBoundary key={location.pathname}>
+                <Outlet />
+              </ErrorBoundary>
             </motion.div>
           </AnimatePresence>
         </div>
