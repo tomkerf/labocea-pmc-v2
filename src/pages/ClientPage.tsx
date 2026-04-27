@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle, FileDown, Loader2, GripVertical } from 'lucide-react'
+import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle, FileDown, Loader2, GripVertical, Minus } from 'lucide-react'
 import {
   DndContext, closestCenter, PointerSensor, TouchSensor,
   useSensor, useSensors, type DragEndEvent,
@@ -133,6 +133,28 @@ export default function ClientPage() {
       samplings: [],
     }
     triggerSave({ ...client, plans: [...client.plans, newPlan] })
+  }
+
+  // Nouveau séparateur
+  function addSeparator() {
+    if (!client) return
+    const sep: Plan = {
+      id: generateId(),
+      separator: true,
+      nom: '',
+      siteNom: '', frequence: 'Mensuel', meteo: '', nature: 'Souterraine',
+      methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
+      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
+      samplings: [],
+    }
+    triggerSave({ ...client, plans: [...client.plans, sep] })
+  }
+
+  // Mise à jour du label d'un séparateur
+  function handleSeparatorLabel(planId: string, label: string) {
+    if (!client) return
+    const plans = client.plans.map((p) => p.id === planId ? { ...p, nom: label } : p)
+    triggerSave({ ...client, plans })
   }
 
   // Supprimer le client
@@ -342,11 +364,19 @@ export default function ClientPage() {
           <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             Points de prélèvement
           </h2>
-          <button onClick={addPlan}
-            className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
-            style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-            <Plus size={14} /> Ajouter
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={addSeparator}
+              className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
+              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
+              title="Ajouter un séparateur de section">
+              <Minus size={14} /> Séparateur
+            </button>
+            <button onClick={addPlan}
+              className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
+              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+              <Plus size={14} /> Ajouter
+            </button>
+          </div>
         </div>
 
         {client.plans.length === 0 ? (
@@ -359,18 +389,29 @@ export default function ClientPage() {
               <div className="rounded-xl overflow-hidden"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
                 {client.plans.map((plan, i) => (
-                  <SortablePlanRow
-                    key={plan.id}
-                    plan={plan}
-                    clientYear={Number(client.annee) || undefined}
-                    clientId={client.id}
-                    isLast={i === client.plans.length - 1}
-                    isConfirmingDelete={confirmDeletePlanId === plan.id}
-                    onOpen={() => navigate(`/missions/${client.id}/plan/${plan.id}`)}
-                    onDelete={() => requestDeletePlan(plan.id)}
-                    onConfirmDelete={confirmDeletePlan}
-                    onCancelDelete={() => setConfirmDeletePlanId(null)}
-                  />
+                  plan.separator
+                    ? <SortableSeparatorRow
+                        key={plan.id}
+                        plan={plan}
+                        isLast={i === client.plans.length - 1}
+                        onDelete={() => requestDeletePlan(plan.id)}
+                        onConfirmDelete={confirmDeletePlan}
+                        onCancelDelete={() => setConfirmDeletePlanId(null)}
+                        isConfirmingDelete={confirmDeletePlanId === plan.id}
+                        onLabelChange={(label) => handleSeparatorLabel(plan.id, label)}
+                      />
+                    : <SortablePlanRow
+                        key={plan.id}
+                        plan={plan}
+                        clientYear={Number(client.annee) || undefined}
+                        clientId={client.id}
+                        isLast={i === client.plans.length - 1}
+                        isConfirmingDelete={confirmDeletePlanId === plan.id}
+                        onOpen={() => navigate(`/missions/${client.id}/plan/${plan.id}`)}
+                        onDelete={() => requestDeletePlan(plan.id)}
+                        onConfirmDelete={confirmDeletePlan}
+                        onCancelDelete={() => setConfirmDeletePlanId(null)}
+                      />
                 ))}
               </div>
             </SortableContext>
@@ -394,6 +435,98 @@ function Section({ title, children }: { title: string; children: React.ReactNode
         style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         {children}
       </div>
+    </div>
+  )
+}
+
+// ── Séparateur sortable ───────────────────────────────────────
+
+interface SortableSeparatorRowProps {
+  plan: Plan
+  isLast: boolean
+  isConfirmingDelete: boolean
+  onDelete: () => void
+  onConfirmDelete: () => void
+  onCancelDelete: () => void
+  onLabelChange: (label: string) => void
+}
+
+function SortableSeparatorRow({
+  plan, isLast, isConfirmingDelete,
+  onDelete, onConfirmDelete, onCancelDelete, onLabelChange,
+}: SortableSeparatorRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: plan.id })
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.4 : 1,
+        borderBottom: !isLast ? '1px solid var(--color-border-subtle)' : 'none',
+      }}
+    >
+      <div className="flex items-center gap-2 px-3 py-2">
+        {/* Poignée drag */}
+        <button
+          {...attributes} {...listeners}
+          className="shrink-0 p-1 rounded touch-none"
+          style={{ color: 'var(--color-text-tertiary)', cursor: isDragging ? 'grabbing' : 'grab' }}
+          tabIndex={-1}
+        >
+          <GripVertical size={15} strokeWidth={1.8} />
+        </button>
+
+        {/* Ligne + label éditable */}
+        <div className="flex-1 flex items-center gap-3">
+          <div className="flex-1 h-px" style={{ background: 'var(--color-border)' }} />
+          <input
+            value={plan.nom}
+            onChange={(e) => onLabelChange(e.target.value)}
+            placeholder="Section…"
+            className="bg-transparent border-none outline-none text-center"
+            style={{
+              color: 'var(--color-text-tertiary)',
+              fontSize: '11px',
+              fontWeight: 500,
+              minWidth: '40px',
+              width: `${Math.max(60, (plan.nom.length || 4) * 7 + 24)}px`,
+              letterSpacing: '0.03em',
+            }}
+          />
+          <div className="flex-1 h-px" style={{ background: 'var(--color-border)' }} />
+        </div>
+
+        {/* Supprimer */}
+        <button onClick={onDelete} className="shrink-0 p-1 rounded"
+          style={{ color: isConfirmingDelete ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
+          onMouseLeave={(e) => { if (!isConfirmingDelete) e.currentTarget.style.color = 'var(--color-text-tertiary)' }}>
+          <Trash2 size={14} />
+        </button>
+      </div>
+
+      {/* Confirmation suppression inline */}
+      {isConfirmingDelete && (
+        <div className="flex items-center gap-2 mx-3 mb-2 px-3 py-2 rounded-lg"
+          style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
+          <AlertTriangle size={13} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+          <span className="text-xs font-medium flex-1" style={{ color: 'var(--color-danger)' }}>
+            Supprimer ce séparateur ?
+          </span>
+          <button onClick={onConfirmDelete}
+            className="text-xs font-semibold px-2.5 py-1 rounded"
+            style={{ background: 'var(--color-danger)', color: 'white' }}>
+            Supprimer
+          </button>
+          <button onClick={onCancelDelete}
+            className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+            Annuler
+          </button>
+        </div>
+      )}
     </div>
   )
 }

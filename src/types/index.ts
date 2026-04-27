@@ -98,6 +98,7 @@ export interface Plan {
   defaultDay: number
   customDays: Record<string, number>
   notes?: string        // commentaire libre sur le point de prélèvement
+  separator?: boolean   // si true, cet élément est un séparateur visuel (pas un vrai plan)
   samplings: Sampling[]
 }
 
