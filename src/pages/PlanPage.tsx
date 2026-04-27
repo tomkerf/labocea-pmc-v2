@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, Trash2, FileText } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, FileText, Camera, X, Loader2 } from 'lucide-react'
+import { uploadSamplingPhoto, deleteSamplingPhoto } from '@/lib/uploadPhoto'
+import { toast } from '@/stores/toastStore'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveClient } from '@/hooks/useClients'
 import { useAuthStore, selectUid } from '@/stores/authStore'
-import { toast } from '@/stores/toastStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { generateId } from '@/lib/ids'
@@ -572,6 +573,8 @@ export default function PlanPage() {
                         sampling={s}
                         onUpdate={(field, val) => updateSampling(s.id, field, val)}
                         users={users}
+                        clientId={clientId!}
+                        planId={planId!}
                       />
                     </div>
                   )}
@@ -591,10 +594,33 @@ interface SamplingFormProps {
   sampling: Sampling
   onUpdate: (field: keyof Sampling, value: unknown) => void
   users?: AppUser[]
+  clientId: string
+  planId: string
 }
 
-function SamplingForm({ sampling, onUpdate, users = [] }: SamplingFormProps) {
-  const [newTask, setNewTask] = useState('')
+function SamplingForm({ sampling, onUpdate, users = [], clientId, planId }: SamplingFormProps) {
+  const [newTask, setNewTask]   = useState('')
+  const [uploading, setUploading] = useState(false)
+
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const url = await uploadSamplingPhoto(file, clientId, planId, sampling.id)
+      onUpdate('photos', [...(sampling.photos ?? []), url])
+    } catch {
+      toast.error('Échec de l\'envoi de la photo. Vérifie ta connexion.')
+    } finally {
+      setUploading(false)
+      e.target.value = ''   // reset input pour pouvoir ré-uploader le même fichier
+    }
+  }
+
+  async function handlePhotoDelete(url: string) {
+    onUpdate('photos', (sampling.photos ?? []).filter((u) => u !== url))
+    await deleteSamplingPhoto(url)
+  }
   const checklist: ChecklistItem[] = sampling.checklist ?? []
 
   function addTask() {
@@ -791,6 +817,64 @@ function SamplingForm({ sampling, onUpdate, users = [] }: SamplingFormProps) {
           />
         </div>
       )}
+
+      {/* Photos terrain */}
+      <div className="sm:col-span-2">
+        <label className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+          Photos terrain
+        </label>
+
+        {/* Grille des photos */}
+        {(sampling.photos ?? []).length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {(sampling.photos ?? []).map((url, i) => (
+              <div key={url}
+                className="relative rounded-lg overflow-hidden shrink-0"
+                style={{ width: 80, height: 80, border: '1px solid var(--color-border)' }}>
+                <img
+                  src={url}
+                  alt={`Photo ${i + 1}`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <button
+                  onClick={() => handlePhotoDelete(url)}
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(0,0,0,0.55)', color: 'white' }}
+                  title="Supprimer cette photo"
+                >
+                  <X size={10} strokeWidth={3} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Bouton appareil photo */}
+        <label
+          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer"
+          style={{
+            background: 'var(--color-bg-tertiary)',
+            border: '1px solid var(--color-border)',
+            color: uploading ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)',
+            opacity: uploading ? 0.6 : 1,
+            pointerEvents: uploading ? 'none' : 'auto',
+          }}
+        >
+          {uploading
+            ? <Loader2 size={14} className="animate-spin" />
+            : <Camera size={14} />}
+          {uploading ? 'Envoi en cours…' : 'Ajouter une photo'}
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={handlePhotoChange}
+            disabled={uploading}
+          />
+        </label>
+      </div>
     </div>
   )
 }

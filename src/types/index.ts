@@ -80,6 +80,8 @@ export interface Sampling {
   motif?: string
   /** Journal d'audit : chaque modification de champ sensible est tracée ici */
   history?: SamplingHistoryEntry[]
+  /** URLs Firebase Storage des photos prises sur le terrain */
+  photos?: string[]
 }
 
 export interface Plan {
