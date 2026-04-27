@@ -203,7 +203,7 @@ export default function ClientPage() {
   if (!client) return <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Client introuvable.</div>
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="p-4 sm:p-6 max-w-2xl pb-10">
       {/* Nav retour */}
       <button onClick={() => navigate('/missions')}
         className="flex items-center gap-1 text-sm mb-6"

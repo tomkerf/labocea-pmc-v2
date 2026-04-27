@@ -342,7 +342,7 @@ export default function PlanPage() {
   if (!client || !plan) return <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Point introuvable.</div>
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="p-4 sm:p-6 max-w-2xl pb-10">
       {/* Retour */}
       <button onClick={() => navigate(`/missions/${clientId}`)}
         className="flex items-center gap-1 text-sm mb-6" style={{ color: 'var(--color-accent)' }}>
@@ -448,7 +448,7 @@ export default function PlanPage() {
 
       {/* Calendrier des prélèvements */}
       <div className="mt-8">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             Prélèvements {new Date().getFullYear()}
           </h2>
@@ -459,11 +459,11 @@ export default function PlanPage() {
                 className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
                 style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
               >
-                <FileText size={14} /> Exporter PDF
+                <FileText size={14} />
+                <span className="hidden sm:inline">Exporter PDF</span>
               </button>
             )}
             {plan.frequence === 'Personnalisé' ? (
-              /* Mode Personnalisé : bouton "+ Ajouter" au lieu de "Générer" */
               <button
                 onClick={() => setAddingDate(v => !v)}
                 className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
@@ -614,7 +614,7 @@ function SamplingForm({ sampling, onUpdate, users = [] }: SamplingFormProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
       <div>
         <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Statut</label>
         <select value={sampling.status}
@@ -720,7 +720,7 @@ function SamplingForm({ sampling, onUpdate, users = [] }: SamplingFormProps) {
         </div>
       )}
 
-      <div className="col-span-2">
+      <div className="sm:col-span-2">
         <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Commentaire</label>
         <input value={sampling.comment}
           onChange={(e) => onUpdate('comment', e.target.value)}
@@ -729,7 +729,7 @@ function SamplingForm({ sampling, onUpdate, users = [] }: SamplingFormProps) {
       </div>
 
       {/* Checklist */}
-      <div className="col-span-2">
+      <div className="sm:col-span-2">
         <label className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
           Checklist terrain
         </label>
@@ -751,11 +751,11 @@ function SamplingForm({ sampling, onUpdate, users = [] }: SamplingFormProps) {
                   {item.label}
                 </span>
                 <button onClick={() => deleteTask(item.id)}
-                  className="shrink-0 p-1 rounded"
-                  style={{ color: 'var(--color-text-tertiary)' }}
+                  className="shrink-0 flex items-center justify-center rounded"
+                  style={{ color: 'var(--color-text-tertiary)', minWidth: 44, minHeight: 44 }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
-                  <Trash2 size={13} />
+                  <Trash2 size={15} />
                 </button>
               </div>
             ))}
@@ -779,7 +779,7 @@ function SamplingForm({ sampling, onUpdate, users = [] }: SamplingFormProps) {
 
       {/* Motif — visible uniquement si le prélèvement n'a pas été réalisé */}
       {(sampling.status === 'non_effectue' || sampling.status === 'overdue') && (
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
             Motif de non-réalisation
           </label>
