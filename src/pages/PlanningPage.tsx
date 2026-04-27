@@ -69,6 +69,37 @@ const JOURS_LONG  = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'
 const MOIS_LONG   = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
                      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
 
+// ── Jours fériés français ────────────────────────────────────
+function easterDate(year: number): Date {
+  const a = year % 19, b = Math.floor(year / 100), c = year % 100
+  const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25)
+  const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30
+  const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7
+  const m = Math.floor((a + 11 * h + 22 * l) / 451)
+  const month = Math.floor((h + l - 7 * m + 114) / 31) - 1
+  const day   = ((h + l - 7 * m + 114) % 31) + 1
+  return new Date(year, month, day)
+}
+
+function getFrenchHolidays(year: number): Record<string, string> {
+  const easter = easterDate(year)
+  const add = (d: Date, n: number) => { const r = new Date(d); r.setDate(r.getDate() + n); return r }
+  const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  return {
+    [fmt(new Date(year,  0,  1))]: 'Jour de l\'an',
+    [fmt(add(easter,      1))]:    'Lundi de Pâques',
+    [fmt(new Date(year,  4,  1))]: 'Fête du Travail',
+    [fmt(new Date(year,  4,  8))]: 'Victoire 1945',
+    [fmt(add(easter,     39))]:    'Ascension',
+    [fmt(add(easter,     50))]:    'Lundi de Pentecôte',
+    [fmt(new Date(year,  6, 14))]: 'Fête Nationale',
+    [fmt(new Date(year,  7, 15))]: 'Assomption',
+    [fmt(new Date(year, 10,  1))]: 'Toussaint',
+    [fmt(new Date(year, 10, 11))]: 'Armistice',
+    [fmt(new Date(year, 11, 25))]: 'Noël',
+  }
+}
+
 function startOfWeek(d: Date): Date {
   const r = new Date(d); const day = r.getDay()
   r.setDate(r.getDate() + (day === 0 ? -6 : 1 - day)); r.setHours(0,0,0,0); return r
@@ -1126,6 +1157,12 @@ export default function PlanningPage() {
   const preleveurs        = usePreleveursStore(s => s.preleveurs)
 
   const today = new Date(); today.setHours(0,0,0,0)
+
+  // Jours fériés — recalculés chaque année (couvre l'année courante + suivante)
+  const holidays = useMemo(() => ({
+    ...getFrenchHolidays(today.getFullYear()),
+    ...getFrenchHolidays(today.getFullYear() + 1),
+  }), [today.getFullYear()])
 
   const [viewMode,    setViewMode]    = useState<ViewMode>('semaine')
   const [weekStart,   setWeekStart]   = useState(() => startOfWeek(today))
@@ -2197,20 +2234,30 @@ export default function PlanningPage() {
               style={{ borderBottom:'1px solid var(--color-border-subtle)' }}>
               {weekDays.map((day,i) => {
                 const isToday = sameDay(day,today)
+                const holidayName = holidays[toISO(day)]
                 return (
                   <div key={i} className="py-2 px-2 text-center"
-                    style={{ borderRight: i<4?'1px solid var(--color-border-subtle)':'none' }}>
+                    style={{
+                      borderRight: i<4?'1px solid var(--color-border-subtle)':'none',
+                      background: holidayName ? 'rgba(255,59,48,0.04)' : 'transparent',
+                    }}>
                     <div className="text-[10px] font-medium uppercase mb-1"
                       style={{ color:'var(--color-text-tertiary)', letterSpacing:'0.04em' }}>
                       {JOURS_COURT[i]}
                     </div>
                     <div className="w-7 h-7 flex items-center justify-center rounded-full mx-auto text-sm font-semibold"
                       style={{
-                        background: isToday ? '#FF3B30' : 'transparent',
-                        color: isToday ? 'white' : 'var(--color-text-primary)',
+                        background: isToday ? '#FF3B30' : holidayName ? 'rgba(255,59,48,0.12)' : 'transparent',
+                        color: isToday ? 'white' : holidayName ? '#FF3B30' : 'var(--color-text-primary)',
                       }}>
                       {day.getDate()}
                     </div>
+                    {holidayName && (
+                      <div className="text-[9px] mt-0.5 truncate px-0.5 font-medium"
+                        style={{ color: '#FF3B30' }}>
+                        {holidayName}
+                      </div>
+                    )}
                   </div>
                 )
               })}
@@ -2334,6 +2381,7 @@ export default function PlanningPage() {
                 const evts = filteredForDay(dateStr)
                 const isToday = sameDay(day,today)
                 const inDrag = isInDrag(dateStr)
+                const holidayName = holidays[dateStr]
                 const MAX = 3
                 return (
                   <div key={i}
@@ -2346,7 +2394,8 @@ export default function PlanningPage() {
                       borderBottom:'1px solid var(--color-border-subtle)',
                       background: inDrag
                         ? 'rgba(0,113,227,0.1)'
-                        : isToday ? 'rgba(255,59,48,0.04)' : 'transparent',
+                        : isToday ? 'rgba(255,59,48,0.04)'
+                        : holidayName ? 'rgba(255,59,48,0.03)' : 'transparent',
                       outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
                       outlineOffset: '-1px',
                       minHeight: 90,
@@ -2356,14 +2405,20 @@ export default function PlanningPage() {
                       <span className="flex items-center gap-1">
                         <span className="w-[22px] h-[22px] flex items-center justify-center rounded-full text-[11px] font-semibold"
                           style={{
-                            background: isToday ? '#FF3B30' : 'transparent',
-                            color: isToday ? 'white' : 'var(--color-text-secondary)',
+                            background: isToday ? '#FF3B30' : holidayName ? 'rgba(255,59,48,0.12)' : 'transparent',
+                            color: isToday ? 'white' : holidayName ? '#FF3B30' : 'var(--color-text-secondary)',
                           }}>
                           {day.getDate()}
                         </span>
-                        {day.getDate()===1 && (
+                        {day.getDate()===1 && !holidayName && (
                           <span className="text-[10px] font-normal" style={{ color:'var(--color-text-tertiary)' }}>
                             {MOIS_LONG[day.getMonth()].slice(0,3).toLowerCase()}.
+                          </span>
+                        )}
+                        {holidayName && (
+                          <span className="text-[9px] font-medium truncate max-w-[70px]"
+                            style={{ color: '#FF3B30' }}>
+                            {holidayName}
                           </span>
                         )}
                       </span>
