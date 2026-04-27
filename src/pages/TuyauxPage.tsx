@@ -116,117 +116,148 @@ function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProps) {
     })
   }
 
-  const fieldCls = 'w-full px-3 py-2 rounded-lg text-sm field-input'
-  const fieldBox = 'rounded-lg px-3 py-2 text-sm'
-  const fieldStyle = {
-    background: 'var(--color-bg-secondary)',
+  // Wrapper bordé qui contient un field-input transparent — pattern du design system
+  const wrap = {
+    background: 'var(--color-bg-tertiary)',
     border: '1px solid var(--color-border)',
-    color: 'var(--color-text-primary)',
-    width: '100%',
+    borderRadius: 'var(--radius-sm)',
+    padding: '8px 11px',
   } as const
+
+  const lbl = { color: 'var(--color-text-secondary)' } as const
+
+  const F = ({ label, req, children }: { label: string; req?: boolean; children: React.ReactNode }) => (
+    <div className="flex flex-col gap-1">
+      <label className="text-xs font-medium" style={lbl}>
+        {label}{req && <span className="ml-0.5" style={{ color: 'var(--color-danger)' }}>*</span>}
+      </label>
+      {children}
+    </div>
+  )
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
       onClick={onClose}>
-      <div className="w-full max-w-xl rounded-2xl overflow-y-auto max-h-[90vh]"
-        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)' }}
+      <div className="w-full max-w-xl rounded-xl overflow-hidden"
+        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
         onClick={e => e.stopPropagation()}>
+
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4"
+        <div className="flex items-center justify-between px-5 py-4 shrink-0"
           style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
           <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             {tuyau.id ? 'Modifier le tuyau' : 'Nouveau tuyau'}
           </h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg"
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full text-sm"
             style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
             ✕
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 flex flex-col gap-4">
+        <div className="px-5 py-4 flex flex-col gap-3 overflow-y-auto">
+
           {/* Ligne 1 : Réf + Matériau + Objet */}
           <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
-                Réf Labo <span style={{ color: 'var(--color-danger)' }}>*</span>
-              </label>
-              <input value={refLabo} onChange={e => setRefLabo(e.target.value.toUpperCase())}
-                placeholder="Q25TFE1" className={`${fieldCls} font-bold tracking-widest`}
-                style={fieldStyle} autoFocus />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Matériau</label>
-              <select value={materiau} onChange={e => setMateriau(e.target.value as MateriauTuyau)}
-                className={fieldBox} style={fieldStyle}>
-                {MATERIAUX.map(m => <option key={m} value={m}>{m}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Objet</label>
-              <input value={objet} onChange={e => setObjet(e.target.value)}
-                placeholder="RSDE DZ, SRA…" className={fieldCls} style={fieldStyle} />
-            </div>
+            <F label="Réf Labo" req>
+              <div style={{ ...wrap, borderColor: refLabo ? 'var(--color-border)' : undefined }}>
+                <input value={refLabo} onChange={e => setRefLabo(e.target.value.toUpperCase())}
+                  placeholder="Q25TFE1"
+                  className="field-input text-sm font-bold tracking-widest"
+                  autoFocus />
+              </div>
+            </F>
+            <F label="Matériau">
+              <div style={wrap}>
+                <select value={materiau} onChange={e => setMateriau(e.target.value as MateriauTuyau)}
+                  className="field-input text-sm">
+                  {MATERIAUX.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+            </F>
+            <F label="Objet">
+              <div style={wrap}>
+                <input value={objet} onChange={e => setObjet(e.target.value)}
+                  placeholder="RSDE DZ, SRA…" className="field-input text-sm" />
+              </div>
+            </F>
           </div>
 
           {/* Ligne 2 : Code matériel + Date création */}
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Code matériel</label>
-              <input value={materiel} onChange={e => setMateriel(e.target.value)}
-                placeholder="PLV07 / FLC22" className={fieldCls} style={fieldStyle} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date création</label>
-              <input type="date" value={dateCreation} onChange={e => setDateCreation(e.target.value)}
-                className={fieldCls} style={fieldStyle} />
-            </div>
+            <F label="Code matériel">
+              <div style={wrap}>
+                <input value={materiel} onChange={e => setMateriel(e.target.value)}
+                  placeholder="PLV07 / FLC22" className="field-input text-sm" />
+              </div>
+            </F>
+            <F label="Date création">
+              <div style={wrap}>
+                <input type="date" value={dateCreation} onChange={e => setDateCreation(e.target.value)}
+                  className="field-input text-sm" />
+              </div>
+            </F>
           </div>
 
           {/* Ligne 3 : Marque + N° série + Type */}
           <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Marque</label>
-              <input value={marque} onChange={e => setMarque(e.target.value)} className={fieldCls} style={fieldStyle} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>N° de série</label>
-              <input value={numSerie} onChange={e => setNumSerie(e.target.value)} className={fieldCls} style={fieldStyle} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Type</label>
-              <input value={type} onChange={e => setType(e.target.value)} className={fieldCls} style={fieldStyle} />
-            </div>
+            <F label="Marque">
+              <div style={wrap}>
+                <input value={marque} onChange={e => setMarque(e.target.value)}
+                  className="field-input text-sm" />
+              </div>
+            </F>
+            <F label="N° de série">
+              <div style={wrap}>
+                <input value={numSerie} onChange={e => setNumSerie(e.target.value)}
+                  className="field-input text-sm" />
+              </div>
+            </F>
+            <F label="Type">
+              <div style={wrap}>
+                <input value={type} onChange={e => setType(e.target.value)}
+                  className="field-input text-sm" />
+              </div>
+            </F>
           </div>
 
           {/* Fournisseur */}
-          <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Fournisseur</label>
-            <input value={fournisseur} onChange={e => setFournisseur(e.target.value)}
-              placeholder="SEFI Quimper" className={fieldCls} style={fieldStyle} />
-          </div>
+          <F label="Fournisseur">
+            <div style={wrap}>
+              <input value={fournisseur} onChange={e => setFournisseur(e.target.value)}
+                placeholder="SEFI Quimper" className="field-input text-sm" />
+            </div>
+          </F>
 
           {/* Notes */}
-          <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Notes</label>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
-              placeholder="Observations, lot de campagne…"
-              className={`${fieldCls} resize-y`} style={fieldStyle} />
-          </div>
+          <F label="Notes">
+            <div style={{ ...wrap, padding: '8px 11px' }}>
+              <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
+                placeholder="Observations, lot de campagne…"
+                className="field-input text-sm resize-none" />
+            </div>
+          </F>
+        </div>
 
-          {/* Actions */}
-          <div className="flex gap-2 pt-1">
-            <button onClick={onClose} className="flex-1 px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
-              Annuler
-            </button>
-            <button onClick={handleSave} disabled={!canSave}
-              className="flex-1 px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: canSave ? 'var(--color-accent)' : 'var(--color-bg-tertiary)', color: canSave ? 'white' : 'var(--color-text-tertiary)', cursor: canSave ? 'pointer' : 'not-allowed' }}>
-              {tuyau.id ? 'Enregistrer' : 'Créer le tuyau'}
-            </button>
-          </div>
+        {/* Footer actions */}
+        <div className="flex gap-2 px-5 py-4 shrink-0"
+          style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
+          <button onClick={onClose}
+            className="flex-1 px-4 py-2 rounded-lg text-sm font-medium"
+            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+            Annuler
+          </button>
+          <button onClick={handleSave} disabled={!canSave}
+            className="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-opacity"
+            style={{
+              background: 'var(--color-accent)',
+              color: 'white',
+              opacity: canSave ? 1 : 0.4,
+              cursor: canSave ? 'pointer' : 'not-allowed',
+            }}>
+            {tuyau.id ? 'Enregistrer' : 'Créer le tuyau'}
+          </button>
         </div>
       </div>
     </div>
