@@ -25,6 +25,7 @@ const ComptePage        = lazy(() => import('@/pages/ComptePage'))
 const AdminPage             = lazy(() => import('@/pages/AdminPage'))
 const AsservissementPage    = lazy(() => import('@/pages/AsservissementPage'))
 const InfosPage             = lazy(() => import('@/pages/InfosPage'))
+const TuyauxPage            = lazy(() => import('@/pages/TuyauxPage'))
 
 /** Spinner affiché pendant le chargement d'un chunk */
 function PageSpinner() {
@@ -93,6 +94,9 @@ function AppRoutes() {
         } />
         <Route path="/outils/asservissement" element={
           <Suspense fallback={<PageSpinner />}><AsservissementPage /></Suspense>
+        } />
+        <Route path="/outils/tuyaux" element={
+          <Suspense fallback={<PageSpinner />}><TuyauxPage /></Suspense>
         } />
         <Route path="/infos" element={
           <Suspense fallback={<PageSpinner />}><InfosPage /></Suspense>

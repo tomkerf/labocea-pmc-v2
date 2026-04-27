@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, CalendarDays, Wrench, BookOpen, ShieldAlert, X, FlaskConical,
+  LayoutDashboard, CalendarDays, Wrench, BookOpen, ShieldAlert, X, FlaskConical, Pipette,
 } from 'lucide-react'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import UserAvatar from '@/components/ui/UserAvatar'
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { to: '/materiel',   icon: Wrench,          label: 'Matériel'                   },
   { to: '/infos',      icon: BookOpen,        label: 'Infos terrain'              },
   { to: '/outils/asservissement', icon: FlaskConical, label: 'Asservissement'     },
+  { to: '/outils/tuyaux',        icon: Pipette,      label: 'Tuyaux'             },
 ]
 
 interface Props {
@@ -54,25 +55,29 @@ export default function MobileDrawer({ open, onClose }: Props) {
 
           {/* Drawer */}
           <motion.div
-            className="md:hidden fixed top-0 left-0 bottom-0 z-50 flex flex-col"
+            className="md:hidden fixed top-0 right-0 bottom-0 z-50 flex flex-col"
             style={{
               width: 280,
               background: 'rgba(255,255,255,0.97)',
               backdropFilter: 'blur(16px)',
-              borderRight: '1px solid var(--color-border-subtle)',
-              boxShadow: '4px 0 32px rgba(0,0,0,0.12)',
+              borderLeft: '1px solid var(--color-border-subtle)',
+              boxShadow: '-4px 0 32px rgba(0,0,0,0.12)',
               paddingBottom: 'env(safe-area-inset-bottom, 0px)',
             }}
-            initial={{ x: -280 }}
+            initial={{ x: 280 }}
             animate={{ x: 0 }}
-            exit={{ x: -280 }}
+            exit={{ x: 280 }}
             transition={{ type: 'spring', stiffness: 320, damping: 32 }}
           >
             {/* En-tête */}
             <div className="flex items-center justify-between px-4 h-14 shrink-0"
               style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+              <button onClick={onClose}
+                className="p-1.5 rounded-lg"
+                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                <X size={16} strokeWidth={2} />
+              </button>
               <div className="flex items-center gap-2.5">
-                <img src="/logo.png" alt="Labocea" className="w-7 h-7 object-contain" />
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                     Labocea PMC
@@ -82,12 +87,8 @@ export default function MobileDrawer({ open, onClose }: Props) {
                     V2
                   </span>
                 </div>
+                <img src="/logo.png" alt="Labocea" className="w-7 h-7 object-contain" />
               </div>
-              <button onClick={onClose}
-                className="p-1.5 rounded-lg"
-                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                <X size={16} strokeWidth={2} />
-              </button>
             </div>
 
             {/* Navigation */}

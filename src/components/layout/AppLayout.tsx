@@ -41,14 +41,22 @@ export default function AppLayout() {
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* TopBar */}
         <header
-          className="flex items-center gap-3 px-4 h-14 shrink-0"
+          className="flex items-center px-4 h-14 shrink-0"
           style={{
             background: 'rgba(255,255,255,0.85)',
             backdropFilter: 'blur(12px)',
             borderBottom: '1px solid var(--color-border-subtle)',
           }}
         >
-          {/* Burger — mobile */}
+          {/* Titre app — mobile */}
+          <div className="md:hidden flex items-center gap-2 flex-1">
+            <img src="/logo.png" alt="Labocea" className="w-6 h-6 object-contain" />
+            <span className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              Labocea PMC
+            </span>
+          </div>
+
+          {/* Burger — mobile, à droite */}
           <button
             className="md:hidden p-2 rounded-xl"
             style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}
@@ -57,14 +65,6 @@ export default function AppLayout() {
           >
             <Menu size={18} strokeWidth={2} />
           </button>
-
-          {/* Titre app — mobile */}
-          <div className="md:hidden flex items-center gap-2">
-            <img src="/logo.png" alt="Labocea" className="w-6 h-6 object-contain" />
-            <span className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-              Labocea PMC
-            </span>
-          </div>
         </header>
 
         {/* Pages avec transition — plus de padding-bottom pour tab bar */}

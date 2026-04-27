@@ -298,3 +298,25 @@ export interface Maintenance {
   createdAt: Timestamp
   updatedAt: Timestamp
 }
+
+// --- Tuyaux de prélèvement ---
+
+export type MateriauTuyau = 'VINYL (tricoclair)' | 'TEFLON' | 'SILICONE' | 'INOX' | 'POLYÉTHYLÈNE' | 'AUTRE'
+
+export interface Tuyau {
+  id: string
+  refLabo: string       // ex : "Q25TFE1"
+  materiau: MateriauTuyau
+  annee: number
+  objet: string         // ex : "RSDE DZ", "SRA"
+  materiel: string      // code équipement (PLV07, FLC22…)
+  dateCreation: string  // ISO date
+  marque: string
+  numSerie: string
+  type: string
+  fournisseur: string
+  notes: string
+  createdBy: string     // uid
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
