@@ -392,13 +392,14 @@ export default function ClientPage() {
                   if (item.kind === 'header') {
                     return (
                       <div key={item.key}
-                        className="px-4 pb-1"
+                        className="px-4 py-1.5"
                         style={{
-                          paddingTop: displayIdx === 0 ? '10px' : '10px',
+                          background: 'var(--color-bg-tertiary)',
                           borderTop: displayIdx === 0 ? 'none' : '1px solid var(--color-border-subtle)',
+                          borderBottom: '1px solid var(--color-border-subtle)',
                         }}>
                         <span className="text-xs font-semibold uppercase"
-                          style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+                          style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.05em' }}>
                           {item.site}
                         </span>
                       </div>
