@@ -48,6 +48,11 @@ service cloud.firestore {
       allow read, write: if isAuthenticated();
     }
 
+    // ── tuyaux ───────────────────────────────────────────────────
+    match /tuyaux/{tuyauId} {
+      allow read, write: if isAuthenticated();
+    }
+
     // ── clients (V1 — archive, lecture seule) ─────────────────
     // La collection V1 reste accessible en lecture uniquement.
     match /clients/{clientId} {
