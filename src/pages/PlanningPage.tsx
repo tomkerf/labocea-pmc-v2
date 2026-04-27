@@ -1695,6 +1695,9 @@ export default function PlanningPage() {
             ? <CheckCircle2 size={11} className="shrink-0" style={{ color: 'var(--color-success)' }} />
             : <span className="shrink-0 w-[6px] h-[6px] rounded-full" style={{ background: event.statusColor }} />
           }
+          {event.meteo === 'pluie' && (
+            <span className="shrink-0 text-[10px]" title="Prélèvement par temps de pluie">🌧</span>
+          )}
           <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
             {event.title}
           </span>
@@ -1753,6 +1756,12 @@ export default function PlanningPage() {
                 <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
                   style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
                   {event.technicien}
+                </span>
+              )}
+              {event.meteo === 'pluie' && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                  style={{ background: '#EFF6FF', color: '#3B82F6' }}>
+                  🌧 Pluie
                 </span>
               )}
             </div>
