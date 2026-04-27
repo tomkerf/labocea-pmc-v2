@@ -388,12 +388,29 @@ export default function ClientPage() {
             <SortableContext items={client.plans.map((p) => p.id)} strategy={verticalListSortingStrategy}>
               <div className="rounded-xl overflow-hidden"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-                {client.plans.map((plan, i) => (
-                  plan.separator
+                {buildDisplayItems(client.plans).map((item, displayIdx) => {
+                  if (item.kind === 'header') {
+                    return (
+                      <div key={item.key}
+                        className="px-4 pb-1"
+                        style={{
+                          paddingTop: displayIdx === 0 ? '10px' : '10px',
+                          borderTop: displayIdx === 0 ? 'none' : '1px solid var(--color-border-subtle)',
+                        }}>
+                        <span className="text-xs font-semibold uppercase"
+                          style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+                          {item.site}
+                        </span>
+                      </div>
+                    )
+                  }
+                  const { plan, origIdx } = item
+                  const isLast = origIdx === client.plans.length - 1
+                  return plan.separator
                     ? <SortableSeparatorRow
                         key={plan.id}
                         plan={plan}
-                        isLast={i === client.plans.length - 1}
+                        isLast={isLast}
                         onDelete={() => requestDeletePlan(plan.id)}
                         onConfirmDelete={confirmDeletePlan}
                         onCancelDelete={() => setConfirmDeletePlanId(null)}
@@ -405,14 +422,14 @@ export default function ClientPage() {
                         plan={plan}
                         clientYear={Number(client.annee) || undefined}
                         clientId={client.id}
-                        isLast={i === client.plans.length - 1}
+                        isLast={isLast}
                         isConfirmingDelete={confirmDeletePlanId === plan.id}
                         onOpen={() => navigate(`/missions/${client.id}/plan/${plan.id}`)}
                         onDelete={() => requestDeletePlan(plan.id)}
                         onConfirmDelete={confirmDeletePlan}
                         onCancelDelete={() => setConfirmDeletePlanId(null)}
                       />
-                ))}
+                })}
               </div>
             </SortableContext>
           </DndContext>
@@ -420,6 +437,27 @@ export default function ClientPage() {
       </div>
     </div>
   )
+}
+
+// ── Helper : liste d'affichage avec headers de site ─────────
+
+type DisplayHeader = { kind: 'header'; site: string; key: string }
+type DisplayPlan   = { kind: 'plan';   plan: Plan; origIdx: number }
+type DisplayItem   = DisplayHeader | DisplayPlan
+
+function buildDisplayItems(plans: Plan[]): DisplayItem[] {
+  const result: DisplayItem[] = []
+  let lastSite = ''
+  let headerCount = 0
+  plans.forEach((plan, origIdx) => {
+    // Les séparateurs manuels n'influencent pas les headers de site automatiques
+    if (!plan.separator && plan.siteNom && plan.siteNom !== lastSite) {
+      result.push({ kind: 'header', site: plan.siteNom, key: `hdr-${plan.siteNom}-${headerCount++}` })
+      lastSite = plan.siteNom
+    }
+    result.push({ kind: 'plan', plan, origIdx })
+  })
+  return result
 }
 
 // ── Composants utilitaires ──────────────────────────────────
