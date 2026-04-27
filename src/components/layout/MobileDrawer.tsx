@@ -2,18 +2,20 @@ import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, CalendarDays, Wrench, BookOpen, ShieldAlert, X, FlaskConical, Pipette,
+  LayoutDashboard, ClipboardList, CalendarDays, Wrench, BookOpen, ShieldAlert, X, FlaskConical, Pipette, TestTube2,
 } from 'lucide-react'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import UserAvatar from '@/components/ui/UserAvatar'
 
 const NAV_ITEMS = [
   { to: '/',           icon: LayoutDashboard, label: 'Tableau de bord', end: true },
+  { to: '/missions',   icon: ClipboardList,   label: 'Missions'                   },
   { to: '/planning',   icon: CalendarDays,    label: 'Planning'                   },
   { to: '/infos',      icon: BookOpen,        label: 'Infos terrain'              },
   { to: '/materiel',   icon: Wrench,          label: 'Matériel'                   },
   { to: '/outils/asservissement', icon: FlaskConical, label: 'Asservissement'     },
   { to: '/outils/tuyaux',        icon: Pipette,      label: 'Tuyaux'             },
+  { to: '/outils/bilan24h',      icon: TestTube2,    label: 'Bilan 24h'          },
 ]
 
 interface Props {
