@@ -205,7 +205,7 @@ export default function DashboardPage() {
   const EVENEMENT_CFG: Record<string, { label: string; bg: string; color: string; dot: string }> = {
     rappel:  { label: 'Rappel',  bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' },
     reunion: { label: 'Réunion', bg: '#F3EEFF',                    color: '#7C3AED',               dot: '#7C3AED'               },
-    rapport: { label: 'Rapport', bg: 'var(--color-warning-light)', color: 'var(--color-warning)',  dot: 'var(--color-text-tertiary)' },
+    rapport: { label: 'Rapport', bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' },
     autre:   { label: 'Autre',   bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' },
   }
 
