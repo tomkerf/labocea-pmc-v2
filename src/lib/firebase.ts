@@ -10,6 +10,7 @@ import {
   getFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
+  memoryLocalCache,
 } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
@@ -28,11 +29,22 @@ export const auth = getAuth(app)
 
 // Persistance IndexedDB — lectures offline depuis le cache, écritures
 // mises en file et synchronisées dès que le réseau revient.
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager(),
-  }),
-})
+// Fallback mémoire si l'IndexedDB est corrompu (ex: première ouverture après
+// un changement de schéma Firestore ou cache navigateur dégradé).
+function buildDb() {
+  try {
+    return initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    })
+  } catch {
+    console.warn('[Firebase] Cache IndexedDB indisponible — fallback mémoire')
+    return initializeFirestore(app, { localCache: memoryLocalCache() })
+  }
+}
+
+export const db = buildDb()
 
 export const storage = getStorage(app)
 
