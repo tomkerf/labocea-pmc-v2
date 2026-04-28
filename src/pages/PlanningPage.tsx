@@ -1266,7 +1266,8 @@ export default function PlanningPage() {
             : s.doneDate  // fallback pool bimensuel sans plannedDay
           const statusLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[s.status] ?? SAMPLING_LABEL.planned
           const priority = overdue ? 0 : s.status === 'non_effectue' ? 1 : s.status === 'planned' ? 2 : 3
-          const tc = getTechColor(client.preleveur || '')
+          const technicien = s.assignedTo || client.preleveur || ''
+          const tc = getTechColor(technicien)
           const isDone = s.status === 'done'
           const statusBg    = isDone ? 'var(--color-success-light)' : overdue ? 'var(--color-danger-light)' : tc.bg
           const statusColor = isDone ? 'var(--color-success)'       : overdue ? 'var(--color-danger)'       : tc.color
@@ -1274,7 +1275,7 @@ export default function PlanningPage() {
             type: 'prelevement' as const,
             statusLabel, statusBg, statusColor, priority,
             link:`/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
-            isDone, technicien: client.preleveur||'—',
+            isDone, technicien: technicien || '—',
             plannedTime: s.plannedTime, clientId:client.id, planId:plan.id, samplingId:s.id,
             meteo: plan.meteo || '',
           }
@@ -1319,7 +1320,7 @@ export default function PlanningPage() {
               link: `/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
               isDone: false,
               priority: 4,
-              technicien: client.preleveur || '—',
+              technicien: s.assignedTo || client.preleveur || '—',
               clientId: client.id,
               planId: plan.id,
               samplingId: s.id,
@@ -1582,12 +1583,21 @@ export default function PlanningPage() {
     if (event.evenementData) deleteEvenement(event.evenementData.id)
   }
 
-  // Change le technicien assigné à un client (client.preleveur = initiales)
+  // Change le technicien assigné à UN seul prélèvement (sampling.assignedTo)
+  // Ne modifie pas client.preleveur pour ne pas affecter les autres prélèvements
   async function handleChangeTechnicien(event: PlanningEvent, initiales_: string) {
-    if (!uid || !event.clientId) return
+    if (!uid || !event.clientId || !event.planId || !event.samplingId) return
     const client = clients.find((c: Client) => c.id === event.clientId)
     if (!client) return
-    await saveClient({ ...client, preleveur: initiales_ }, uid)
+    await saveClient({
+      ...client,
+      plans: client.plans.map(plan => plan.id !== event.planId ? plan : {
+        ...plan,
+        samplings: plan.samplings.map((s: Sampling) =>
+          s.id !== event.samplingId ? s : { ...s, assignedTo: initiales_ }
+        ),
+      }),
+    }, uid)
   }
 
   // Crée un événement personnel (avec dateFin optionnelle)

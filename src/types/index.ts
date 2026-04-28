@@ -82,6 +82,9 @@ export interface Sampling {
   history?: SamplingHistoryEntry[]
   /** URLs Firebase Storage des photos prises sur le terrain */
   photos?: string[]
+  /** Technicien assigné à CE prélèvement spécifiquement (initiales).
+   *  Si absent, on utilise client.preleveur comme valeur par défaut. */
+  assignedTo?: string
 }
 
 export interface Plan {
