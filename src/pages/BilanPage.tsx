@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, FileText } from 'lucide-react'
+import { ChevronLeft, FileText, Plus, Trash2 } from 'lucide-react'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -31,7 +31,16 @@ interface TempResult {
   tD: number; tFn: number; tMn: number; tMx: number
 }
 
-type TabId = 'identification' | 'volume' | 'vitesse' | 'pesee' | 'temperature' | 'synthese'
+interface AnalyseRow {
+  id: string
+  parametre: string
+  unite: string
+  resultat: string
+  seuil: string
+  typeComp: 'max' | 'min'  // ≤ seuil (max) ou ≥ seuil (min)
+}
+
+type TabId = 'identification' | 'volume' | 'vitesse' | 'pesee' | 'temperature' | 'analyses' | 'synthese'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Calculs
@@ -429,27 +438,161 @@ function TabTemperature({ fields, set }: { fields: Record<string, string>; set: 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Onglet Analyses
+// ─────────────────────────────────────────────────────────────────────────────
+
+function analyseConforme(row: AnalyseRow): boolean | null {
+  const r = parseFloat(row.resultat)
+  const s = parseFloat(row.seuil)
+  if (isNaN(r) || isNaN(s)) return null
+  return row.typeComp === 'max' ? r <= s : r >= s
+}
+
+function TabAnalyses({ rows, setRows }: {
+  rows: AnalyseRow[]
+  setRows: (r: AnalyseRow[]) => void
+}) {
+  function addRow() {
+    setRows([...rows, { id: crypto.randomUUID(), parametre: '', unite: 'mg/L', resultat: '', seuil: '', typeComp: 'max' }])
+  }
+  function removeRow(id: string) {
+    setRows(rows.filter(r => r.id !== id))
+  }
+  function updateRow(id: string, field: keyof AnalyseRow, value: string) {
+    setRows(rows.map(r => r.id === id ? { ...r, [field]: value } : r))
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Card>
+        <NormInfo text="Résultats d'analyses du laboratoire — Seuils définis par l'arrêté préfectoral du site" />
+        <p className="text-xs mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Saisir les paramètres analysés sur l'échantillon composite 24h. Les seuils sont ceux de l'autorisation de rejet du site.
+        </p>
+
+        {/* En-têtes colonnes */}
+        {rows.length > 0 && (
+          <div className="grid gap-2 mb-2 px-1" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 80px 32px' }}>
+            {['Paramètre', 'Unité', 'Résultat', 'Seuil', 'Type', ''].map((h, i) => (
+              <span key={i} className="text-[10px] font-semibold uppercase tracking-wide"
+                style={{ color: 'var(--color-text-tertiary)' }}>{h}</span>
+            ))}
+          </div>
+        )}
+
+        {/* Lignes */}
+        <div className="flex flex-col gap-2">
+          {rows.map(row => {
+            const conf = analyseConforme(row)
+            return (
+              <div key={row.id} className="grid gap-2 items-center p-2 rounded-lg"
+                style={{
+                  gridTemplateColumns: '2fr 1fr 1fr 1fr 80px 32px',
+                  background: conf === true ? 'var(--color-success-light)' : conf === false ? 'var(--color-danger-light)' : 'var(--color-bg-tertiary)',
+                  border: `1px solid ${conf === true ? 'var(--color-success)' : conf === false ? 'var(--color-danger)' : 'var(--color-border)'}`,
+                }}>
+                <input
+                  type="text" value={row.parametre} placeholder="Ex: DCO"
+                  onChange={e => updateRow(row.id, 'parametre', e.target.value)}
+                  className="px-2 py-1.5 rounded text-sm w-full"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', outline: 'none' }}
+                />
+                <input
+                  type="text" value={row.unite} placeholder="mg/L"
+                  onChange={e => updateRow(row.id, 'unite', e.target.value)}
+                  className="px-2 py-1.5 rounded text-sm w-full text-center"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', outline: 'none' }}
+                />
+                <input
+                  type="number" inputMode="decimal" value={row.resultat} placeholder="0"
+                  onChange={e => updateRow(row.id, 'resultat', e.target.value)}
+                  className="px-2 py-1.5 rounded text-sm w-full text-right font-semibold"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', outline: 'none' }}
+                />
+                <input
+                  type="number" inputMode="decimal" value={row.seuil} placeholder="0"
+                  onChange={e => updateRow(row.id, 'seuil', e.target.value)}
+                  className="px-2 py-1.5 rounded text-sm w-full text-right"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-tertiary)', outline: 'none' }}
+                />
+                <select
+                  value={row.typeComp}
+                  onChange={e => updateRow(row.id, 'typeComp', e.target.value as 'max' | 'min')}
+                  className="px-1 py-1.5 rounded text-xs w-full"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', outline: 'none' }}>
+                  <option value="max">≤ seuil</option>
+                  <option value="min">≥ seuil</option>
+                </select>
+                <button onClick={() => removeRow(row.id)}
+                  className="flex items-center justify-center rounded p-1"
+                  style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+                  <Trash2 size={14} strokeWidth={1.8} />
+                </button>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Bouton ajout */}
+        <button onClick={addRow}
+          className="mt-4 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium w-full justify-center"
+          style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)', border: '1px dashed var(--color-accent)' }}>
+          <Plus size={15} strokeWidth={2} />
+          Ajouter un paramètre
+        </button>
+      </Card>
+
+      {/* Résumé conformité analyses */}
+      {rows.length > 0 && rows.some(r => analyseConforme(r) !== null) && (
+        <Card>
+          <SectionTitle>Résultats</SectionTitle>
+          {rows.filter(r => r.parametre).map(row => {
+            const conf = analyseConforme(row)
+            const op = row.typeComp === 'max' ? '≤' : '≥'
+            return (
+              <ResultRow
+                key={row.id}
+                label={`${row.parametre} (${op} ${row.seuil} ${row.unite})`}
+                val={row.resultat ? `${row.resultat} ${row.unite}` : '—'}
+                ok={conf ?? undefined}
+              />
+            )
+          })}
+        </Card>
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Onglet Synthèse
 // ─────────────────────────────────────────────────────────────────────────────
 
 function TabSynthese({
-  fields, volRes, vitRes, pesRes, tmpRes
+  fields, volRes, vitRes, pesRes, tmpRes, analyses
 }: {
   fields: Record<string, string>
   volRes: VolumeResult | null
   vitRes: VitesseResult | null
   pesRes: PeseeResult | null
   tmpRes: TempResult | null
+  analyses: AnalyseRow[]
 }) {
   const f = (k: string) => fields[k] ?? '—'
   const allDone = volRes && vitRes && pesRes && tmpRes
   const allConf = allDone && volRes.conforme && vitRes.conforme && pesRes.conforme && tmpRes.conforme
+
+  const analysesWithResult = analyses.filter(r => r.parametre && analyseConforme(r) !== null)
+  const analysesConf = analysesWithResult.length > 0
+    ? analysesWithResult.every(r => analyseConforme(r) === true)
+    : null
 
   const items = [
     { label: 'Volume Unitaire', sub: 'FD T90-523-2 § 6.3.1', conf: volRes?.conforme ?? null },
     { label: 'Vitesse Aspiration', sub: 'FD T90-523-2 § 6.3.2', conf: vitRes?.conforme ?? null },
     { label: 'Pesée Volume Global', sub: 'FD T90-523-2 § 6.3.3', conf: pesRes?.conforme ?? null },
     { label: 'Température', sub: 'ISO 5667-3/10', conf: tmpRes?.conforme ?? null },
+    ...(analysesWithResult.length > 0 ? [{ label: 'Analyses laboratoire', sub: 'Arrêté préfectoral', conf: analysesConf }] : []),
   ]
 
   function generatePDF() {
@@ -519,6 +662,26 @@ function TabSynthese({
         <tr><td>Max. (≤ 8 °C)</td><td>${tmpRes.tMx.toFixed(1)} °C</td><td style="${tmpRes.tMx <= 8 ? ok : ko}">${tmpRes.tMx <= 8 ? '✅' : '❌'}</td></tr>
       </table>`)
     }
+    if (analysesWithResult.length > 0) {
+      const ok = 'color:#065f46;font-weight:bold'
+      const ko = 'color:#991b1b;font-weight:bold'
+      win.document.write(`<h2>Résultats d'analyses</h2><table>
+        <tr><th>Paramètre</th><th>Résultat</th><th>Seuil</th><th>Statut</th></tr>`)
+      analysesWithResult.forEach(row => {
+        const conf = analyseConforme(row)
+        const op = row.typeComp === 'max' ? '≤' : '≥'
+        win.document.write(`<tr>
+          <td>${row.parametre}</td>
+          <td>${row.resultat} ${row.unite}</td>
+          <td>${op} ${row.seuil} ${row.unite}</td>
+          <td style="${conf ? ok : ko}">${conf ? '✅ CONFORME' : '❌ NON CONFORME'}</td>
+        </tr>`)
+      })
+      win.document.write(`</table>`)
+      if (analysesConf !== null) {
+        win.document.write(`<p style="${analysesConf ? ok : ko}"><strong>Conclusion analyses : ${analysesConf ? '✅ CONFORMES' : '❌ NON CONFORMES'} aux seuils de l\'arrêté</strong></p>`)
+      }
+    }
     win.document.write(`<p style="margin-top:32px"><strong>Signature opérateur :</strong> ___________________________</p>
       <button onclick="window.print()" style="margin-top:20px;padding:10px 20px;background:#0c6b6b;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px">🖨️ Imprimer / Sauvegarder PDF</button>
       </body></html>`)
@@ -563,6 +726,25 @@ function TabSynthese({
         ))}
       </div>
 
+      {/* Analyses */}
+      {analysesWithResult.length > 0 && (
+        <Card>
+          <SectionTitle>Analyses laboratoire</SectionTitle>
+          {analysesWithResult.map(row => {
+            const conf = analyseConforme(row)
+            const op = row.typeComp === 'max' ? '≤' : '≥'
+            return (
+              <ResultRow
+                key={row.id}
+                label={`${row.parametre} (${op} ${row.seuil} ${row.unite})`}
+                val={`${row.resultat} ${row.unite}`}
+                ok={conf ?? undefined}
+              />
+            )
+          })}
+        </Card>
+      )}
+
       {/* Bouton PDF */}
       <button onClick={generatePDF}
         className="flex items-center justify-center gap-2 w-full py-3 rounded-[var(--radius-md)] font-semibold text-sm"
@@ -584,6 +766,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'vitesse',        label: '💨 Vitesse' },
   { id: 'pesee',          label: '⚖️ Pesée' },
   { id: 'temperature',    label: '🌡️ Temp.' },
+  { id: 'analyses',       label: '🔬 Analyses' },
   { id: 'synthese',       label: '📊 Synthèse' },
 ]
 
@@ -616,6 +799,9 @@ export default function BilanPage() {
   const [temp, setTemp] = useState<Record<string, string>>({})
   const setTempField = (k: string, v: string) => setTemp(p => ({ ...p, [k]: v }))
 
+  // Analyses
+  const [analyses, setAnalyses] = useState<AnalyseRow[]>([])
+
   // Résultats calculés
   const volRes = calcVolume(vTheo, vD, vF)
   const vitRes = calcVitesse(distD, distF, tD, tF)
@@ -623,11 +809,17 @@ export default function BilanPage() {
   const tmpRes = calcTemp(temp['tD'] ?? '', temp['tFn'] ?? '', temp['tMn'] ?? '', temp['tMx'] ?? '')
 
   // Statut par onglet pour le dot de conformité
+  const analysesWithResult = analyses.filter(r => r.parametre && analyseConforme(r) !== null)
+  const analysesConf = analysesWithResult.length > 0
+    ? analysesWithResult.every(r => analyseConforme(r) === true)
+    : null
+
   const tabConf: Partial<Record<TabId, boolean | null>> = {
     volume:      volRes?.conforme ?? null,
     vitesse:     vitRes?.conforme ?? null,
     pesee:       pesRes?.conforme ?? null,
     temperature: tmpRes?.conforme ?? null,
+    analyses:    analysesConf,
     synthese:    volRes && vitRes && pesRes && tmpRes
                    ? (volRes.conforme && vitRes.conforme && pesRes.conforme && tmpRes.conforme)
                    : null,
@@ -681,7 +873,8 @@ export default function BilanPage() {
         {tab === 'vitesse'        && <TabVitesse distD={distD} setDistD={setDistD} distF={distF} setDistF={setDistF} tD={tD} setTD={setTD} tF={tF} setTF={setTF} />}
         {tab === 'pesee'          && <TabPesee fields={pesee} set={setPeseeField} />}
         {tab === 'temperature'    && <TabTemperature fields={temp} set={setTempField} />}
-        {tab === 'synthese'       && <TabSynthese fields={ident} volRes={volRes} vitRes={vitRes} pesRes={pesRes} tmpRes={tmpRes} />}
+        {tab === 'analyses'       && <TabAnalyses rows={analyses} setRows={setAnalyses} />}
+        {tab === 'synthese'       && <TabSynthese fields={ident} volRes={volRes} vitRes={vitRes} pesRes={pesRes} tmpRes={tmpRes} analyses={analyses} />}
       </div>
 
     </div>
