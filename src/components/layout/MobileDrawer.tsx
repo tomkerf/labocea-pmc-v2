@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, ClipboardList, CalendarDays, Wrench, BookOpen, ShieldAlert, X, FlaskConical, Pipette,
+  LayoutDashboard, ClipboardList, CalendarDays, Wrench, BookOpen, ShieldAlert, X, FlaskConical, Pipette, HelpCircle,
 } from 'lucide-react'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import UserAvatar from '@/components/ui/UserAvatar'
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { to: '/materiel',   icon: Wrench,          label: 'Matériel'                   },
   { to: '/outils/asservissement', icon: FlaskConical, label: 'Asservissement'     },
   { to: '/outils/tuyaux',        icon: Pipette,      label: 'Tuyaux'             },
+  { to: '/aide',                 icon: HelpCircle,   label: 'Mode d\'emploi'     },
 ]
 
 interface Props {
