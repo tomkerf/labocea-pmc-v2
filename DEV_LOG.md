@@ -349,8 +349,136 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 
 ---
 
-*Dernière mise à jour : 23 avril 2026*
+## Session 16 — Planning avancé (UX + PDF + fantômes)
+**24 avril 2026**
+
+### Fonctionnalités
+- **Motif obligatoire** sur report/retrait d'intervention — saisie de raison bloquante avant validation
+- **Historique des motifs** exporté dans le PDF (reportHistory visible dans le compte-rendu)
+- **Fantômes visuels** dans le planning : les prélèvements retirés/reportés laissent une trace grisée sur leur date d'origine
+- **Modale intervention** dans le widget planning du jour (dashboard) — accessible sans quitter le tableau de bord
+- **Mini-calendrier** en bas de la sidebar planning (desktop) + overlay rétractable (bouton dans le header) — 3 mois empilés
+
+### Bugs corrigés
+- Inversion couleurs dot widget planning du jour
+- EventDetailModalProps mis à jour avec les signatures `reason`
+- Fix uid → nom technicien dans la modale fantôme
+- Alignement J1/J2 face à face en vue semaine (feat + revert — trop ambigu visuellement)
 
 ---
 
-*Dernière mise à jour : 22 avril 2026*
+## Session 17 — Admin + Export PDF + Avatar + Mobile
+**25 avril 2026**
+
+### Fonctionnalités
+- **Page Admin** : création de comptes utilisateurs (email/password) directement depuis l'app, avec écriture Firestore avant signOut du compte secondaire
+- **Export PDF historique** complet par client : motifs d'annulation, reports, historique de reports, colonnes élargies, caractères ASCII
+- **Widget rapports** : filtré sur le technicien connecté uniquement
+- **Page Infos terrain** : contacts, codes d'accès, notes par site — accessible depuis la fiche client
+- **Avatar** : sélecteur emoji dans Mon compte, affiché dans la sidebar et les modales ; alternative DiceBear (style Notionists) évaluée
+- **Calculateur asservissement 24h** : bouton flottant mobile, design system Apple
+
+### Bugs corrigés
+- Retards mobile : triangle seul sans texte + padding bottom safe-area
+- Asservissement : conformité design system
+- Remplace Missions par Planning dans la tab bar mobile (priorité terrain)
+- Rollback Auth si écriture Firestore échoue lors de la création de compte
+- Dédoublonnage users par email dans AdminPage
+- InfosPage : strip `undefined` avant Firestore + try/catch sur save
+
+---
+
+## Session 18 — Navigation mobile + Groupement par site + PDF
+**26 avril 2026**
+
+### Fonctionnalités
+- **Groupement par site** dans la fiche client : les plans sont regroupés sous leur `siteNom` (normalisation trim + lowercase)
+- **Burger menu latéral mobile** : remplace la tab bar du bas — drawer avec 5 onglets + Asservissement intégré
+
+### Bugs corrigés
+- Normaliser `siteNom` (trim + lowercase) pour éviter les doublons de groupe
+- Dédoublonnage users dans le store — corrige le sélecteur préleveur
+- PDF reports : suppression des préfixes De:/Vers: qui causaient des retours à la ligne
+
+---
+
+## Session 19 — Météo, Fériés, Tuyaux, DnD, Photos, Offline
+**27 avril 2026**
+
+### Fonctionnalités
+- **Condition météo pluie** : config plan + badge pill dans le planning (liste, modale, vue jour)
+- **Jours fériés français** : affichage automatique dans le planning (semaine + mois), planification bloquée sur jours fériés
+- **Module Tuyaux de prélèvement** : port complet V1→V2 (liste, form, firestore.rules, design system)
+- **Drag & Drop** : réorganisation des points de prélèvement dans un plan par glisser-déposer
+- **Séparateurs de section** et headers de site automatiques entre les points (compatibles DnD)
+- **Champ commentaire** dans la config du point de prélèvement
+- **Photos terrain** : upload/delete de photos depuis un prélèvement (stockage Firebase Storage)
+- **Persistance Firestore IndexedDB** : fonctionnement hors connexion partielle — données mises en cache dans IndexedDB
+
+### Dashboard
+- Bloc **prélèvements en retard** + alertes maintenances actives dans le tableau de bord
+- SamplingForm mobile : 1 colonne, touch targets ≥ 44px
+
+### Bugs corrigés
+- Écran blanc PlanPage : STATUS_CONFIG fallback + ErrorBoundary
+- ErrorBoundary : rechargement auto si chunk JS introuvable après déploiement (code-splitting)
+- Réaffichage headers de site automatiques (rétrocompatibles DnD)
+- Fix style headers de site : fond grisé, séparateurs nets
+- Navigation mobile : remet onglet Missions + Bilan 24h dans le drawer
+
+---
+
+## Session 20 — Finitions + Technicien par prélèvement
+**28 avril 2026**
+
+### Fonctionnalités
+- **`assignedTo` par prélèvement** : le champ technicien est stocké sur le sampling lui-même — changement de technicien n'écrase plus `client.preleveur`
+
+### Refactors
+- **Bilan 24h retiré de PMC v2** — sera implémenté dans `labocea-app-rapports` (app dédiée)
+
+### Bugs corrigés
+- Dot planning 'rapport' en gris neutre (badge suffit, dot coloré inutile)
+- Badge Rapport en gris neutre dans le planning du jour
+- Fallback mémoire si cache IndexedDB Firestore corrompu (évite l'écran blanc au démarrage)
+
+---
+
+## Session 21 — Planning UX + congés + jours fériés
+**29 avril 2026**
+
+### Dashboard
+- **Sections repliables** : "Rapports à envoyer" et "Prélèvements en retard" deviennent des accordéons avec ChevronDown + badge de comptage (orange / rouge)
+
+### ClientPage — Verrouillage des plans
+- **Bouton lock/unlock** : empêche le réordonnancement accidentel des plans (DnD désactivé)
+- Les boutons Séparateur et Ajouter sont masqués quand verrouillé
+- Grip DnD : opacité 0.3 + curseur par défaut en mode verrouillé
+
+### Planning — Couleurs techniciens
+- **Trigrammes tech** dans les pills : couleur = même que le dot du technicien (badge `bg tech+18`, texte `tech color`)
+
+### Planning — Type Congé/RTT
+- Ajout du type `'conge'` dans `TypeEvenement` (`src/types/index.ts`)
+- Congé/RTT disponible dans **DayModal** (clic simple) et **DragCreateModal** (glisser)
+- Style pill congé : fond `--color-bg-tertiary`, emoji 🏖️, trigramme tech coloré
+- **Titre optionnel** pour les congés — défaut automatique "Congé/RTT" si champ vide
+- Bouton Enregistrer activé immédiatement dès sélection congé (pas besoin de titre)
+
+### Planning — Bandes all-day supprimées
+- `isMultiDay()` retourne toujours `false` → plus de bande spanning all-day
+- Tous les événements (y compris congés multi-jours) s'affichent en pill dans leur colonne respective
+- Congés multi-jours : déjà expandus par jour dans `eventsByDate` → une pill par colonne automatiquement
+
+### Planning — Pills fantômes
+- Fond `--color-bg-tertiary` (plus visible)
+- Texte italique + préfixe `→`
+- Badge technicien sur fond `--color-border`
+
+### Planning — Overlay jours fériés
+- Fond grisé `rgba(0,0,0,0.04)` + emoji 🏖️ centré en `::after`
+- Taille emoji 48px, opacité 0.25
+
+---
+
+*Dernière mise à jour : 29 avril 2026*

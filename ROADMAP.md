@@ -216,6 +216,12 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-04-22 | Qualité ✅ | Code review 11 points corrigés, zombie documents (runTransaction), alerte retrait intervention autre tech, système toasts, validation formulaires, eslint-disable supprimés, code-splitting 924kB→330kB, tests unitaires 39 tests (generateSamplings/isSamplingOverdue/generateId), versions dépendances figées |
 | 2026-04-22 | Infra ✅ | Règles Firestore déployées (bloque V1 sans auth → fix définitif zombie docs), vérification post-delete côté serveur, redirect MissionDetailPage sur suppression client, CI staging verts (#147, #148) |
 | 2026-04-23 | UX ✅ | Bug J1/J2 planning (doneDate écrasait plannedDay), swipe mobile vue jour, CheckCircle2 desktop, événements gris, badge Réalisé vert, setup .claude/skills/ |
+| 2026-04-24 | Planning ✅ | Motif obligatoire report/retrait, fantômes visuels, modale intervention dans widget dashboard, mini-calendrier sidebar + overlay (3 mois), historique motifs dans PDF |
+| 2026-04-25 | Features ✅ | Page Admin (création comptes), export PDF historique complet, page Infos terrain, avatar emoji, calculateur asservissement 24h mobile, widget rapports filtré technicien |
+| 2026-04-26 | Mobile ✅ | Burger menu latéral mobile (remplace tab bar), groupement plans par site dans fiche client, dédoublonnage users, fix PDF |
+| 2026-04-27 | Features ✅ | Météo pluie (config + planning), jours fériés français, module Tuyaux V1→V2, DnD points de prélèvement, photos terrain, persistance IndexedDB offline, dashboard alertes retard |
+| 2026-04-28 | Finitions ✅ | assignedTo par prélèvement (technicien sans écraser client.preleveur), fallback mémoire IndexedDB, Bilan 24h retiré (→ labocea-app-rapports), badges planning gris rapport |
+| 2026-04-29 | UX ✅ | Dashboard sections repliables (rapports/retards), lock/unlock plans ClientPage, trigrammes tech colorés dans pills planning, type Congé/RTT (DayModal + DragCreateModal), titre congé optionnel, suppression bandes all-day, pills fantômes plus visibles, overlay jours fériés 🏖️ |
 
 ---
 
