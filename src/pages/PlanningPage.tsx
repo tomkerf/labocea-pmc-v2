@@ -1016,7 +1016,7 @@ function DragCreateModal({
   onSave: (titre: string, type: TypeEvenement, dateDebut: string, dateFin: string, heure: string, notes: string) => Promise<void>
 }) {
   const [titre,    setTitre]    = useState('')
-  const [type,     setType]     = useState<TypeEvenement>('autre')
+  const [type,     setType]     = useState<TypeEvenement>(dateDebut !== dateFin ? 'conge' : 'autre')
   const [debut,    setDebut]    = useState(dateDebut)
   const [fin,      setFin]      = useState(dateFin)
   const [heure,    setHeure]    = useState('')
@@ -1026,10 +1026,11 @@ function DragCreateModal({
   const isMultiDay = debut !== fin
 
   const TYPES: { value: TypeEvenement; label: string; emoji: string }[] = [
-    { value: 'rappel',  label: 'Rappel',   emoji: '🔔' },
-    { value: 'reunion', label: 'Réunion',  emoji: '👥' },
-    { value: 'rapport', label: 'Rapport',  emoji: '📋' },
-    { value: 'autre',   label: 'Autre',    emoji: '📌' },
+    { value: 'rappel',  label: 'Rappel',      emoji: '🔔' },
+    { value: 'reunion', label: 'Réunion',     emoji: '👥' },
+    { value: 'rapport', label: 'Rapport',     emoji: '📋' },
+    { value: 'conge',   label: 'Congé/RTT',   emoji: '🏖️' },
+    { value: 'autre',   label: 'Autre',       emoji: '📌' },
   ]
 
   async function handleSave() {
@@ -1094,7 +1095,7 @@ function DragCreateModal({
             }} />
 
           {/* Type */}
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-5 gap-1.5">
             {TYPES.map(t => (
               <button key={t.value} onClick={() => setType(t.value)}
                 className="flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl text-[11px] font-medium"
