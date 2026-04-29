@@ -1503,85 +1503,108 @@ export default function PlanningPage() {
     })
   }, [selectedDay, clients])
 
-  // ── Événements multi-jours qui s'étirent sur la semaine (style Apple Calendar) ──
-  const weekSpanning = useMemo(() => {
+  // ── Bande "toute la journée" — multi-jours + bilans 24h (style Apple Calendar) ──
+  // Un seul tableau unifié : événements perso multi-jours ET paires J1→J2 bilan 24h.
+  // Chaque item est une barre qui s'étire sur gridColumn colStart+1 / colEnd+2.
+  // L'algorithme de row-packing tourne une seule fois pour tous les items.
+  const allDayItems = useMemo(() => {
     if (viewMode !== 'semaine') return []
-    const weekStartISO = toISO(weekStart)
-    const weekEndISO   = toISO(weekDays[4])
     const weekDayISOs  = weekDays.map(toISO)
+    const weekStartISO = weekDayISOs[0]
+    const weekEndISO   = weekDayISOs[4]
 
-    const spans = evenements
+    type RawItem = {
+      key: string
+      colStart: number
+      colEnd: number
+      bg: string
+      color: string
+      label: string
+      badge?: string
+      onClick: () => void
+      tooltip: string
+    }
+
+    const rawItems: RawItem[] = []
+
+    // 1. Événements personnels avec dateFin (multi-jours)
+    evenements
       .filter(ev => {
         if (!ev.dateFin || ev.dateFin <= ev.date) return false
         if (filterTech && normTech(ev.createdByInitiales || '') !== filterTech) return false
         return ev.date <= weekEndISO && ev.dateFin >= weekStartISO
       })
-      .map(ev => {
+      .forEach(ev => {
         const tc = getTechColor(ev.createdByInitiales || '')
         const startClamped = ev.date < weekStartISO ? weekStartISO : ev.date
         const endClamped   = ev.dateFin! > weekEndISO ? weekEndISO : ev.dateFin!
         const colStart = weekDayISOs.findIndex(d => d >= startClamped)
         let colEnd = -1
         for (let i = 4; i >= 0; i--) { if (weekDayISOs[i] <= endClamped) { colEnd = i; break } }
-        if (colStart === -1 || colEnd === -1 || colStart > colEnd) return null
-        return { ev, tc, colStart, colEnd }
+        if (colStart === -1 || colEnd === -1 || colStart > colEnd) return
+        const evObj: PlanningEvent = {
+          id: ev.id, type: 'evenement', priority: 2,
+          title: ev.titre,
+          subtitle: EVENEMENT_LABEL[ev.type] ?? 'Autre',
+          statusLabel: EVENEMENT_LABEL[ev.type] ?? 'Autre',
+          statusBg: 'var(--color-bg-tertiary)', statusColor: 'var(--color-text-tertiary)',
+          link: '', isDone: false,
+          technicien: ev.createdByInitiales || '—',
+          evenementData: ev,
+        }
+        rawItems.push({
+          key: ev.id,
+          colStart, colEnd,
+          bg: tc.bg, color: tc.color,
+          label: ev.titre,
+          badge: ev.createdByInitiales || undefined,
+          onClick: () => handleSelectEvent(evObj, ev.date),
+          tooltip: `${ev.titre} (${ev.date} → ${ev.dateFin})`,
+        })
       })
-      .filter((s): s is { ev: EvenementPersonnel; tc: { color: string; bg: string }; colStart: number; colEnd: number } => s !== null)
 
-    // Répartition sur plusieurs lignes pour éviter les chevauchements
-    const rowEnds: number[] = []
-    return spans.map(s => {
-      let row = rowEnds.findIndex(end => end <= s.colStart)
-      if (row === -1) row = rowEnds.length
-      rowEnds[row] = s.colEnd + 1
-      return { ...s, row }
-    })
-  }, [evenements, viewMode, weekStart, weekDays, filterTech])
-
-  // ── Bilans 24h J1→J2 (bande dédiée vue semaine) ─────────
-  const weekBilans24h = useMemo(() => {
-    if (viewMode !== 'semaine') return []
-    const weekDayISOs = weekDays.map(toISO)
-    const weekStartISO = weekDayISOs[0]
-    const weekEndISO   = weekDayISOs[4]
-
-    const rawPairs: Array<{
-      evJ1: PlanningEvent; evJ2: PlanningEvent | null
-      dateJ1: string; dateJ2: string
-      colJ1: number; colJ2: number
-    }> = []
-
+    // 2. Paires Bilan 24h J1→J2 → une seule barre étendue (comme Apple Calendar)
     Object.entries(eventsByDate).forEach(([dateStr, evts]) => {
       evts.forEach(ev => {
         if (!ev.dateFin || ev.isJ2Continuation) return
         if (filterTech && normTech(ev.technicien) !== filterTech) return
         const dateJ1 = dateStr
         const dateJ2 = ev.dateFin
-        // Exclure si aucun des deux jours n'est dans la semaine lun-ven
         if (dateJ1 > weekEndISO && dateJ2 > weekEndISO) return
         if (dateJ1 < weekStartISO && dateJ2 < weekStartISO) return
         const colJ1 = weekDayISOs.indexOf(dateJ1)
         const colJ2 = weekDayISOs.indexOf(dateJ2)
         if (colJ1 === -1 && colJ2 === -1) return
+        const validCols = [colJ1, colJ2].filter(c => c !== -1)
+        const colStart = Math.min(...validCols)
+        const colEnd   = Math.max(...validCols)
+        const tc = getTechColor(ev.technicien)
         const evJ2 = eventsByDate[dateJ2]?.find(
           e => e.isJ2Continuation && e.samplingId === ev.samplingId
         ) ?? null
-        rawPairs.push({ evJ1: ev, evJ2, dateJ1, dateJ2, colJ1, colJ2 })
+        const bothDone = ev.isDone && (evJ2?.isDone ?? false)
+        rawItems.push({
+          key: `bilan_${ev.id}`,
+          colStart, colEnd,
+          bg:    bothDone ? 'var(--color-success-light)' : tc.bg,
+          color: bothDone ? 'var(--color-success)'       : tc.color,
+          label: ev.title,
+          badge: 'J1→J2',
+          onClick: () => handleSelectEvent(ev, dateJ1),
+          tooltip: `${ev.title} — Bilan 24h (${dateJ1} → ${dateJ2})`,
+        })
       })
     })
 
-    // Répartition sur plusieurs lignes pour éviter les chevauchements
+    // Row-packing — une seule passe pour tous les items
     const rowEnds: number[] = []
-    return rawPairs.map(p => {
-      const cols = [p.colJ1, p.colJ2].filter(c => c !== -1)
-      const lo = cols.reduce((a, b) => Math.min(a, b), 99)
-      const hi = cols.reduce((a, b) => Math.max(a, b), -1)
-      let row = rowEnds.findIndex(end => end <= lo)
+    return rawItems.map(item => {
+      let row = rowEnds.findIndex(end => end <= item.colStart)
       if (row === -1) row = rowEnds.length
-      rowEnds[row] = hi + 1
-      return { ...p, row }
+      rowEnds[row] = item.colEnd + 1
+      return { ...item, row }
     })
-  }, [eventsByDate, viewMode, weekDays, filterTech])
+  }, [evenements, eventsByDate, viewMode, weekDays, filterTech])
 
   // ── Liste période (mobile) ──────────────────────────────
 
@@ -2352,9 +2375,9 @@ export default function PlanningPage() {
               })}
             </div>
 
-            {/* ── Bande "toute la journée" — événements multi-jours ── */}
-            {weekSpanning.length > 0 && (() => {
-              const numRows = Math.max(...weekSpanning.map(s => s.row)) + 1
+            {/* ── Bande "toute la journée" — multi-jours + bilans 24h (style Apple Calendar) ── */}
+            {allDayItems.length > 0 && (() => {
+              const numRows = Math.max(...allDayItems.map(s => s.row)) + 1
               return (
                 <div className="shrink-0"
                   style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 2px' }}>
@@ -2364,101 +2387,28 @@ export default function PlanningPage() {
                     gridTemplateRows: `repeat(${numRows}, 18px)`,
                     gap: '2px 0',
                   }}>
-                    {weekSpanning.map(({ ev, tc, colStart, colEnd, row }) => {
-                      const evObj: PlanningEvent = {
-                        id: ev.id, type: 'evenement', priority: 2,
-                        title: ev.titre,
-                        subtitle: EVENEMENT_LABEL[ev.type] ?? 'Autre',
-                        statusLabel: EVENEMENT_LABEL[ev.type] ?? 'Autre',
-                        statusBg: 'var(--color-bg-tertiary)', statusColor: 'var(--color-text-tertiary)',
-                        link: '', isDone: false,
-                        technicien: ev.createdByInitiales || '—',
-                        evenementData: ev,
-                      }
-                      return (
-                        <button
-                          key={ev.id}
-                          onMouseDown={e => e.stopPropagation()}
-                          onClick={() => handleSelectEvent(evObj, ev.date)}
-                          className="text-left px-2 rounded flex items-center gap-1 truncate"
-                          style={{
-                            gridColumn: `${colStart + 1} / ${colEnd + 2}`,
-                            gridRow: row + 1,
-                            background: tc.bg,
-                            color: tc.color,
-                            marginLeft: 1,
-                            marginRight: 1,
-                          }}
-                          title={`${ev.titre} (${ev.date} → ${ev.dateFin})`}
-                        >
-                          <span className="text-[11px] font-medium truncate">{ev.titre}</span>
-                          {ev.createdByInitiales && (
-                            <span className="shrink-0 text-[9px] opacity-60">{ev.createdByInitiales}</span>
-                          )}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              )
-            })()}
-
-            {/* ── Bande Bilans 24h J1→J2 ── */}
-            {weekBilans24h.length > 0 && (() => {
-              const numRows = Math.max(...weekBilans24h.map(p => p.row)) + 1
-              return (
-                <div className="shrink-0"
-                  style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 2px' }}>
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(5, 1fr)',
-                    gridTemplateRows: `repeat(${numRows}, 20px)`,
-                    gap: '2px 0',
-                  }}>
-                    {weekBilans24h.flatMap(({ evJ1, evJ2, dateJ1, dateJ2, colJ1, colJ2, row }) => {
-                      const tc = getTechColor(evJ1.technicien)
-                      const pills = []
-                      if (colJ1 !== -1) {
-                        pills.push(
-                          <button key={`${evJ1.id}_j1`}
-                            onMouseDown={e => e.stopPropagation()}
-                            onClick={() => handleSelectEvent(evJ1, dateJ1)}
-                            className="text-left px-1.5 rounded flex items-center gap-1 truncate"
-                            style={{
-                              gridColumn: colJ1 + 1,
-                              gridRow: row + 1,
-                              background: evJ1.isDone ? 'var(--color-success-light)' : tc.bg,
-                              color: evJ1.isDone ? 'var(--color-success)' : tc.color,
-                              margin: '0 1px',
-                            }}
-                            title={`${evJ1.title} — Bilan 24h J1`}>
-                            <span className="text-[10px] font-bold shrink-0 opacity-60">J1</span>
-                            <span className="text-[11px] font-medium truncate">{evJ1.title}</span>
-                          </button>
-                        )
-                      }
-                      if (colJ2 !== -1 && evJ2) {
-                        pills.push(
-                          <button key={`${evJ1.id}_j2`}
-                            onMouseDown={e => e.stopPropagation()}
-                            onClick={() => handleSelectEvent(evJ2, dateJ2)}
-                            className="text-left px-1.5 rounded flex items-center gap-1 truncate"
-                            style={{
-                              gridColumn: colJ2 + 1,
-                              gridRow: row + 1,
-                              background: evJ2.isDone ? 'var(--color-success-light)' : tc.bg,
-                              color: evJ2.isDone ? 'var(--color-success)' : tc.color,
-                              margin: '0 1px',
-                              opacity: 0.8,
-                            }}
-                            title={`${evJ2.title} — Bilan 24h J2`}>
-                            <span className="text-[10px] font-bold shrink-0 opacity-60">J2</span>
-                            <span className="text-[11px] font-medium truncate">{evJ2.title}</span>
-                          </button>
-                        )
-                      }
-                      return pills
-                    })}
+                    {allDayItems.map(({ key, colStart, colEnd, row, bg, color, label, badge, onClick, tooltip }) => (
+                      <button
+                        key={key}
+                        onMouseDown={e => e.stopPropagation()}
+                        onClick={onClick}
+                        className="text-left px-2 rounded flex items-center gap-1 truncate"
+                        style={{
+                          gridColumn: `${colStart + 1} / ${colEnd + 2}`,
+                          gridRow: row + 1,
+                          background: bg,
+                          color,
+                          marginLeft: 1,
+                          marginRight: 1,
+                        }}
+                        title={tooltip}
+                      >
+                        <span className="text-[11px] font-medium truncate">{label}</span>
+                        {badge && (
+                          <span className="shrink-0 text-[9px] opacity-60">{badge}</span>
+                        )}
+                      </button>
+                    ))}
                   </div>
                 </div>
               )
