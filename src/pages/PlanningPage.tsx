@@ -242,7 +242,7 @@ const EVENEMENT_LABEL: Record<TypeEvenement, string> = {
 // ── Couleurs par technicien ──────────────────────────────────
 const TECH_COLORS: Record<string, { color: string; bg: string }> = {
   'THK': { color: '#0071E3', bg: '#EBF4FF' },
-  'ROD': { color: '#FF9F0A', bg: '#FFF4E3' },
+  'ROD': { color: '#34C759', bg: '#EAF8EE' },
 }
 const TECH_PALETTE = [
   { color: '#32ADE6', bg: '#E5F5FD' },
@@ -2397,15 +2397,14 @@ export default function PlanningPage() {
                           gridColumn: `${colStart + 1} / ${colEnd + 2}`,
                           gridRow: row + 1,
                           background: bg,
-                          color,
                           marginLeft: 1,
                           marginRight: 1,
                         }}
                         title={tooltip}
                       >
-                        <span className="text-[11px] font-medium truncate">{label}</span>
+                        <span className="text-[11px] font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
                         {badge && (
-                          <span className="shrink-0 text-[9px] opacity-60">{badge}</span>
+                          <span className="shrink-0 text-[9px]" style={{ color }}>{badge}</span>
                         )}
                       </button>
                     ))}

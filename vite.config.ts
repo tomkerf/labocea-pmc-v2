@@ -12,6 +12,7 @@ export default defineConfig({
     },
   },
   build: {
+    emptyOutDir: false,
     rollupOptions: {
       external: ['set-cookie-parser'],
     },
