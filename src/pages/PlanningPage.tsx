@@ -1788,10 +1788,11 @@ export default function PlanningPage() {
 
     // ── Rendu fantôme ──────────────────────────────────────
     if (event.isGhost) {
-      const ghostLabel = event.ghostAction === 'retiré'
-        ? '↩ Retiré'
+      const isRetrait = event.ghostAction === 'retiré'
+      const ghostLabel = isRetrait
+        ? '↩ retiré'
         : (() => {
-            if (!event.ghostNewDate) return '→ Reporté'
+            if (!event.ghostNewDate) return '→ reporté'
             const d = new Date(event.ghostNewDate + 'T12:00:00')
             return `→ ${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}`
           })()
@@ -1800,17 +1801,25 @@ export default function PlanningPage() {
           onClick={handleClick}
           onMouseDown={e => e.stopPropagation()}
           className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
-          style={{ opacity: 0.45, cursor: 'pointer', border: '1px dashed var(--color-border)' }}
-          title={`${event.title} — ${event.ghostAction} · ${event.ghostReason ?? ''}`}
+          style={{
+            cursor: 'pointer',
+            border: '1px dashed var(--color-border)',
+            background: 'var(--color-bg-tertiary)',
+          }}
+          title={`${event.title} — ${event.ghostAction}${event.ghostReason ? ' · ' + event.ghostReason : ''}`}
         >
           <div className="flex items-center gap-1">
-            <span className="shrink-0 w-[6px] h-[6px] rounded-full" style={{ background: 'var(--color-neutral)' }} />
-            <span className="flex-1 truncate text-[11px]"
-              style={{ color: 'var(--color-text-tertiary)', textDecoration: event.ghostAction === 'retiré' ? 'line-through' : 'none' }}>
+            <span className="shrink-0 text-[9px]">{isRetrait ? '↩' : '→'}</span>
+            <span className="flex-1 truncate text-[10px]"
+              style={{
+                color: 'var(--color-text-secondary)',
+                textDecoration: isRetrait ? 'line-through' : 'none',
+                fontStyle: 'italic',
+              }}>
               {event.title}
             </span>
-            <span className="shrink-0 text-[9px] px-1 rounded"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' }}>
+            <span className="shrink-0 text-[9px] font-medium px-1 rounded"
+              style={{ background: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
               {ghostLabel}
             </span>
           </div>
