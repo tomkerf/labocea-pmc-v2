@@ -297,10 +297,12 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
   }
 
   async function handleCreateEvt() {
-    if (!evtTitre.trim() || !uid) return
+    const isConge = evtType === 'conge'
+    const titre = evtTitre.trim() || (isConge ? 'Congé/RTT' : '')
+    if (!titre || !uid) return
     setEvtSaving(true)
     try {
-      await createEvenement(evtTitre.trim(), dateStr, evtType, evtHeure, evtNotes, uid, initiales)
+      await createEvenement(titre, dateStr, evtType, evtHeure, evtNotes, uid, initiales)
       setEvtTitre(''); setEvtHeure(''); setEvtNotes('')
       onClose()
     } finally { setEvtSaving(false) }
@@ -369,15 +371,16 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
           <div className="px-4 py-4 space-y-3 flex-1 overflow-y-auto">
             <input
               autoFocus
-              placeholder="Titre de l'événement"
+              placeholder={evtType === 'conge' ? 'Titre (optionnel)' : 'Titre de l\'événement'}
               value={evtTitre}
               onChange={e => setEvtTitre(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleCreateEvt()}
               className="w-full px-3 py-2.5 rounded-xl text-sm"
               style={{
                 background: 'var(--color-bg-secondary)',
-                border: '1px solid var(--color-border)',
+                border: `1px solid ${evtType === 'conge' && !evtTitre.trim() ? 'var(--color-border-subtle)' : 'var(--color-border)'}`,
                 color: 'var(--color-text-primary)',
+                opacity: evtType === 'conge' && !evtTitre.trim() ? 0.6 : 1,
               }} />
             <div className="grid grid-cols-5 gap-1.5">
               {EVENEMENT_TYPES.map(t => (
@@ -399,14 +402,19 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
             <textarea rows={2} placeholder="Notes (optionnel)" value={evtNotes} onChange={e => setEvtNotes(e.target.value)}
               className="w-full px-3 py-2 rounded-lg text-sm resize-none"
               style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
-            <button onClick={handleCreateEvt} disabled={!evtTitre.trim() || evtSaving}
-              className="w-full py-3 rounded-xl text-sm font-semibold"
-              style={{
-                background: evtTitre.trim() ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
-                color: evtTitre.trim() ? 'white' : 'var(--color-text-tertiary)',
-              }}>
-              {evtSaving ? 'Enregistrement…' : 'Créer l\'événement'}
-            </button>
+            {(() => {
+              const canCreate = evtType === 'conge' ? true : !!evtTitre.trim()
+              return (
+                <button onClick={handleCreateEvt} disabled={!canCreate || evtSaving}
+                  className="w-full py-3 rounded-xl text-sm font-semibold"
+                  style={{
+                    background: canCreate ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
+                    color: canCreate ? 'white' : 'var(--color-text-tertiary)',
+                  }}>
+                  {evtSaving ? 'Enregistrement…' : 'Créer l\'événement'}
+                </button>
+              )
+            })()}
           </div>
         )}
 
@@ -1034,10 +1042,11 @@ function DragCreateModal({
   ]
 
   async function handleSave() {
-    if (!titre.trim()) return
+    const effectiveTitre = titre.trim() || (type === 'conge' ? 'Congé/RTT' : '')
+    if (!effectiveTitre) return
     setSaving(true)
     try {
-      await onSave(titre.trim(), type, debut, isMultiDay ? fin : '', heure, notes)
+      await onSave(effectiveTitre, type, debut, isMultiDay ? fin : '', heure, notes)
       onClose()
     } finally {
       setSaving(false)
@@ -1083,15 +1092,16 @@ function DragCreateModal({
           {/* Titre */}
           <input
             autoFocus
-            placeholder="Titre de l'événement"
+            placeholder={type === 'conge' ? 'Titre (optionnel)' : 'Titre de l\'événement'}
             value={titre}
             onChange={e => setTitre(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSave()}
             className="w-full px-3 py-2.5 rounded-xl text-sm"
             style={{
               background: 'var(--color-bg-tertiary)',
-              border: '1px solid var(--color-border)',
+              border: `1px solid ${type === 'conge' && !titre.trim() ? 'var(--color-border-subtle)' : 'var(--color-border)'}`,
               color: 'var(--color-text-primary)',
+              opacity: type === 'conge' && !titre.trim() ? 0.6 : 1,
             }} />
 
           {/* Type */}
@@ -1153,14 +1163,19 @@ function DragCreateModal({
           </div>
 
           {/* Bouton sauvegarder */}
-          <button onClick={handleSave} disabled={!titre.trim() || saving}
-            className="w-full py-3 rounded-xl text-sm font-semibold"
-            style={{
-              background: titre.trim() ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
-              color: titre.trim() ? 'white' : 'var(--color-text-tertiary)',
-            }}>
-            {saving ? 'Enregistrement…' : 'Créer l\'événement'}
-          </button>
+          {(() => {
+            const canSave = type === 'conge' ? true : !!titre.trim()
+            return (
+              <button onClick={handleSave} disabled={!canSave || saving}
+                className="w-full py-3 rounded-xl text-sm font-semibold"
+                style={{
+                  background: canSave ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
+                  color: canSave ? 'white' : 'var(--color-text-tertiary)',
+                }}>
+                {saving ? 'Enregistrement…' : 'Créer l\'événement'}
+              </button>
+            )
+          })()}
         </div>
       </div>
     </div>
