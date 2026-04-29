@@ -247,7 +247,7 @@ export interface Demande {
 
 // --- Événements personnels (planning) ---
 
-export type TypeEvenement = 'rappel' | 'reunion' | 'rapport' | 'autre'
+export type TypeEvenement = 'rappel' | 'reunion' | 'rapport' | 'autre' | 'conge'
 
 export interface EvenementPersonnel {
   id: string
