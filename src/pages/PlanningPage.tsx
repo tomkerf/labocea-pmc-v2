@@ -1843,7 +1843,7 @@ export default function PlanningPage() {
           )}
           {hasTech && (
             <span className="shrink-0 text-[9px] font-semibold px-1 rounded"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+              style={{ background: dotColor + '18', color: dotColor }}>
               {event.technicien}
             </span>
           )}
