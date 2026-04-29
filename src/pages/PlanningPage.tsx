@@ -1520,7 +1520,8 @@ export default function PlanningPage() {
       bg: string
       color: string
       label: string
-      badge?: string
+      badge?: string   // initiales tech
+      tag?: string     // ex: "J1→J2" pour les bilans
       onClick: () => void
       tooltip: string
     }
@@ -1589,7 +1590,8 @@ export default function PlanningPage() {
           bg:    bothDone ? 'var(--color-success-light)' : tc.bg,
           color: bothDone ? 'var(--color-success)'       : tc.color,
           label: ev.title,
-          badge: 'J1→J2',
+          badge: ev.technicien || undefined,
+          tag: 'J1→J2',
           onClick: () => handleSelectEvent(ev, dateJ1),
           tooltip: `${ev.title} — Bilan 24h (${dateJ1} → ${dateJ2})`,
         })
@@ -2387,7 +2389,7 @@ export default function PlanningPage() {
                     gridTemplateRows: `repeat(${numRows}, 18px)`,
                     gap: '2px 0',
                   }}>
-                    {allDayItems.map(({ key, colStart, colEnd, row, bg, color, label, badge, onClick, tooltip }) => (
+                    {allDayItems.map(({ key, colStart, colEnd, row, bg, color, label, badge, tag, onClick, tooltip }) => (
                       <button
                         key={key}
                         onMouseDown={e => e.stopPropagation()}
@@ -2403,8 +2405,11 @@ export default function PlanningPage() {
                         title={tooltip}
                       >
                         <span className="text-[11px] font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
+                        {tag && (
+                          <span className="shrink-0 text-[9px]" style={{ color }}>{tag}</span>
+                        )}
                         {badge && (
-                          <span className="shrink-0 text-[9px]" style={{ color }}>{badge}</span>
+                          <span className="shrink-0 text-[9px] opacity-60" style={{ color: 'var(--color-text-secondary)' }}>{badge}</span>
                         )}
                       </button>
                     ))}
