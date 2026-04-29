@@ -178,12 +178,8 @@ function assignColumns(
 
 // Événement EvenementPersonnel qui couvre plusieurs jours → bande all-day
 // Les bilans 24h (prelevement avec dateFin / isJ2Continuation) restent dans leur colonne
-function isMultiDay(e: PlanningEvent): boolean {
-  if (e.type === 'prelevement') return false   // bilans 24h → colonne normale
-  const ev = e.evenementData
-  if (!ev || !ev.dateFin) return false
-  if (ev.type === 'conge') return false        // congés → pill dans chaque colonne
-  return ev.dateFin > ev.date
+function isMultiDay(_e: PlanningEvent): boolean {
+  return false  // tout s'affiche en pill dans sa colonne — pas de bande all-day
 }
 
 
@@ -1830,8 +1826,6 @@ export default function PlanningPage() {
 
     // Congé/RTT — traitement spécial
     const isConge = event.type === 'evenement' && event.evenementData?.type === 'conge'
-
-    // Couleur du dot — tech pour prélèvement/événement, statut pour maintenance/vérif
     const techColor = getTechColor(event.technicien).color
     const dotColor = event.type === 'prelevement'
       ? event.priority === 0 ? 'var(--color-danger)'   // overdue → rouge
@@ -1857,6 +1851,12 @@ export default function PlanningPage() {
             <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
               {event.title || 'Congé/RTT'}
             </span>
+            {hasTech && (
+              <span className="shrink-0 text-[9px] font-semibold px-1 rounded"
+                style={{ background: techColor + '18', color: techColor }}>
+                {event.technicien}
+              </span>
+            )}
           </div>
         </div>
       )
