@@ -1802,6 +1802,9 @@ export default function PlanningPage() {
       )
     }
 
+    // Congé/RTT — traitement spécial
+    const isConge = event.type === 'evenement' && event.evenementData?.type === 'conge'
+
     // Couleur du dot — tech pour prélèvement/événement, statut pour maintenance/vérif
     const techColor = getTechColor(event.technicien).color
     const dotColor = event.type === 'prelevement'
@@ -1814,6 +1817,24 @@ export default function PlanningPage() {
     // Badges bilan 24h
     const isJ1 = event.type === 'prelevement' && !!event.dateFin
     const isJ2 = event.isJ2Continuation === true
+
+    // Congé : pill gris clair, texte muted, emoji 🏖️ à la place du dot
+    if (isConge) {
+      return (
+        <div
+          className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
+          style={{ background: 'var(--color-bg-tertiary)', cursor: 'default', opacity: 0.85 }}
+          title={event.title}
+        >
+          <div className="flex items-center gap-1">
+            <span className="shrink-0 text-[10px]">🏖️</span>
+            <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+              {event.title || 'Congé/RTT'}
+            </span>
+          </div>
+        </div>
+      )
+    }
 
     return (
       <button
