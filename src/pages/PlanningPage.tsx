@@ -47,6 +47,9 @@ interface PlanningEvent {
   ghostReason?: string
   ghostBy?: string
   ghostAt?: string
+  // Bilan 24h spanning J1→J2
+  dateFin?: string          // présent sur J1 uniquement — date du J2
+  isJ2Continuation?: boolean // vrai sur J2 — masqué des colonnes semaine/mois
 }
 
 interface PoolItem {
@@ -175,6 +178,7 @@ function assignColumns(
 
 // Événement EvenementPersonnel qui couvre plusieurs jours
 function isMultiDay(e: PlanningEvent): boolean {
+  if (e.dateFin || e.isJ2Continuation) return true
   const ev = e.evenementData
   if (!ev || !ev.dateFin) return false
   return ev.dateFin > ev.date
@@ -1279,21 +1283,30 @@ export default function PlanningPage() {
             plannedTime: s.plannedTime, clientId:client.id, planId:plan.id, samplingId:s.id,
             meteo: plan.meteo || '',
           }
-          // Jour 1 (ou jour unique pour les méthodes ponctuelles / composite)
-          add(dateStr, {
-            ...common,
-            id: s.id,
-            title: client.nom,
-            subtitle: isAuto ? `${baseSub} · Bilan 24h J1` : baseSub,
-          })
-          // Méthode Automatique = bilan 24h → occupe aussi le lendemain (J2)
+          // Méthode Automatique = bilan 24h → J1 + J2 le lendemain
           if (isAuto) {
             const dateStr2 = toISO(addDays(new Date(dateStr + 'T12:00:00'), 1))
+            add(dateStr, {
+              ...common,
+              id: s.id,
+              title: client.nom,
+              subtitle: `${baseSub} · Bilan 24h J1`,
+              dateFin: dateStr2,
+            })
             add(dateStr2, {
               ...common,
               id: `${s.id}_j2`,
               title: client.nom,
               subtitle: `${baseSub} · Bilan 24h J2`,
+              isJ2Continuation: true,
+            })
+          } else {
+            // Jour unique (ponctuel / composite)
+            add(dateStr, {
+              ...common,
+              id: s.id,
+              title: client.nom,
+              subtitle: baseSub,
             })
           }
         })
@@ -1524,6 +1537,51 @@ export default function PlanningPage() {
       return { ...s, row }
     })
   }, [evenements, viewMode, weekStart, weekDays, filterTech])
+
+  // ── Bilans 24h J1→J2 (bande dédiée vue semaine) ─────────
+  const weekBilans24h = useMemo(() => {
+    if (viewMode !== 'semaine') return []
+    const weekDayISOs = weekDays.map(toISO)
+    const weekStartISO = weekDayISOs[0]
+    const weekEndISO   = weekDayISOs[4]
+
+    const rawPairs: Array<{
+      evJ1: PlanningEvent; evJ2: PlanningEvent | null
+      dateJ1: string; dateJ2: string
+      colJ1: number; colJ2: number
+    }> = []
+
+    Object.entries(eventsByDate).forEach(([dateStr, evts]) => {
+      evts.forEach(ev => {
+        if (!ev.dateFin || ev.isJ2Continuation) return
+        if (filterTech && normTech(ev.technicien) !== filterTech) return
+        const dateJ1 = dateStr
+        const dateJ2 = ev.dateFin
+        // Exclure si aucun des deux jours n'est dans la semaine lun-ven
+        if (dateJ1 > weekEndISO && dateJ2 > weekEndISO) return
+        if (dateJ1 < weekStartISO && dateJ2 < weekStartISO) return
+        const colJ1 = weekDayISOs.indexOf(dateJ1)
+        const colJ2 = weekDayISOs.indexOf(dateJ2)
+        if (colJ1 === -1 && colJ2 === -1) return
+        const evJ2 = eventsByDate[dateJ2]?.find(
+          e => e.isJ2Continuation && e.samplingId === ev.samplingId
+        ) ?? null
+        rawPairs.push({ evJ1: ev, evJ2, dateJ1, dateJ2, colJ1, colJ2 })
+      })
+    })
+
+    // Répartition sur plusieurs lignes pour éviter les chevauchements
+    const rowEnds: number[] = []
+    return rawPairs.map(p => {
+      const cols = [p.colJ1, p.colJ2].filter(c => c !== -1)
+      const lo = cols.reduce((a, b) => Math.min(a, b), 99)
+      const hi = cols.reduce((a, b) => Math.max(a, b), -1)
+      let row = rowEnds.findIndex(end => end <= lo)
+      if (row === -1) row = rowEnds.length
+      rowEnds[row] = hi + 1
+      return { ...p, row }
+    })
+  }, [eventsByDate, viewMode, weekDays, filterTech])
 
   // ── Liste période (mobile) ──────────────────────────────
 
@@ -2339,6 +2397,67 @@ export default function PlanningPage() {
                           )}
                         </button>
                       )
+                    })}
+                  </div>
+                </div>
+              )
+            })()}
+
+            {/* ── Bande Bilans 24h J1→J2 ── */}
+            {weekBilans24h.length > 0 && (() => {
+              const numRows = Math.max(...weekBilans24h.map(p => p.row)) + 1
+              return (
+                <div className="shrink-0"
+                  style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 2px' }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(5, 1fr)',
+                    gridTemplateRows: `repeat(${numRows}, 20px)`,
+                    gap: '2px 0',
+                  }}>
+                    {weekBilans24h.flatMap(({ evJ1, evJ2, dateJ1, dateJ2, colJ1, colJ2, row }) => {
+                      const tc = getTechColor(evJ1.technicien)
+                      const pills = []
+                      if (colJ1 !== -1) {
+                        pills.push(
+                          <button key={`${evJ1.id}_j1`}
+                            onMouseDown={e => e.stopPropagation()}
+                            onClick={() => handleSelectEvent(evJ1, dateJ1)}
+                            className="text-left px-1.5 rounded flex items-center gap-1 truncate"
+                            style={{
+                              gridColumn: colJ1 + 1,
+                              gridRow: row + 1,
+                              background: evJ1.isDone ? 'var(--color-success-light)' : tc.bg,
+                              color: evJ1.isDone ? 'var(--color-success)' : tc.color,
+                              margin: '0 1px',
+                            }}
+                            title={`${evJ1.title} — Bilan 24h J1`}>
+                            <span className="text-[10px] font-bold shrink-0 opacity-60">J1</span>
+                            <span className="text-[11px] font-medium truncate">{evJ1.title}</span>
+                          </button>
+                        )
+                      }
+                      if (colJ2 !== -1 && evJ2) {
+                        pills.push(
+                          <button key={`${evJ1.id}_j2`}
+                            onMouseDown={e => e.stopPropagation()}
+                            onClick={() => handleSelectEvent(evJ2, dateJ2)}
+                            className="text-left px-1.5 rounded flex items-center gap-1 truncate"
+                            style={{
+                              gridColumn: colJ2 + 1,
+                              gridRow: row + 1,
+                              background: evJ2.isDone ? 'var(--color-success-light)' : tc.bg,
+                              color: evJ2.isDone ? 'var(--color-success)' : tc.color,
+                              margin: '0 1px',
+                              opacity: 0.8,
+                            }}
+                            title={`${evJ2.title} — Bilan 24h J2`}>
+                            <span className="text-[10px] font-bold shrink-0 opacity-60">J2</span>
+                            <span className="text-[11px] font-medium truncate">{evJ2.title}</span>
+                          </button>
+                        )
+                      }
+                      return pills
                     })}
                   </div>
                 </div>
