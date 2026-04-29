@@ -182,6 +182,7 @@ function isMultiDay(e: PlanningEvent): boolean {
   if (e.type === 'prelevement') return false   // bilans 24h → colonne normale
   const ev = e.evenementData
   if (!ev || !ev.dateFin) return false
+  if (ev.type === 'conge') return false        // congés → pill dans chaque colonne
   return ev.dateFin > ev.date
 }
 
