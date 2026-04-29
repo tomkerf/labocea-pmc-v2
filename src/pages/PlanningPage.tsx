@@ -176,9 +176,10 @@ function assignColumns(
   return assigned
 }
 
-// Événement EvenementPersonnel qui couvre plusieurs jours
+// Événement EvenementPersonnel qui couvre plusieurs jours → bande all-day
+// Les bilans 24h (prelevement avec dateFin / isJ2Continuation) restent dans leur colonne
 function isMultiDay(e: PlanningEvent): boolean {
-  if (e.dateFin || e.isJ2Continuation) return true
+  if (e.type === 'prelevement') return false   // bilans 24h → colonne normale
   const ev = e.evenementData
   if (!ev || !ev.dateFin) return false
   return ev.dateFin > ev.date
@@ -236,20 +237,22 @@ const MAINTENANCE_LABEL: Record<string, string> = {
   planifiee: 'Planifiée', en_cours: 'En cours', realisee: 'Réalisée', abandonnee: 'Abandonnée',
 }
 const EVENEMENT_LABEL: Record<TypeEvenement, string> = {
-  rappel: 'Rappel', reunion: 'Réunion', rapport: 'Rapport', autre: 'Autre',
+  rappel: 'Rappel', reunion: 'Réunion', rapport: 'Rapport', autre: 'Autre', conge: 'Congé/RTT',
 }
 
 // ── Couleurs par technicien ──────────────────────────────────
+// Règle : ne pas utiliser les couleurs de statut du planning
+//   danger #FF3B30, success #34C759, warning #FF9F0A, accent #0071E3, neutral #8E8E93
 const TECH_COLORS: Record<string, { color: string; bg: string }> = {
-  'THK': { color: '#0071E3', bg: '#EBF4FF' },
-  'ROD': { color: '#34C759', bg: '#EAF8EE' },
+  'THK': { color: '#0071E3', bg: '#E8F1FB' },  // bleu accent (ok, distinct des statuts)
+  'ROD': { color: '#00C7BE', bg: '#E0F7F6' },  // teal (distinct du vert success)
 }
 const TECH_PALETTE = [
-  { color: '#32ADE6', bg: '#E5F5FD' },
-  { color: '#34C759', bg: '#EAF8EE' },
-  { color: '#AF52DE', bg: '#F5EEFF' },
-  { color: '#FF6B6B', bg: '#FFEEED' },
-  { color: '#5AC8FA', bg: '#E8F7FD' },
+  { color: '#AF52DE', bg: '#F5EEFF' },  // violet
+  { color: '#5856D6', bg: '#EEEEFF' },  // indigo
+  { color: '#FF2D55', bg: '#FFEEF2' },  // rose (distinct du rouge danger)
+  { color: '#32ADE6', bg: '#E5F5FD' },  // bleu ciel
+  { color: '#FF6B6B', bg: '#FFF0F0' },  // saumon
 ]
 function getTechColor(initiales: string): { color: string; bg: string } {
   if (TECH_COLORS[initiales]) return TECH_COLORS[initiales]
@@ -309,10 +312,11 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
   ]
 
   const EVENEMENT_TYPES: { value: TypeEvenement; label: string; emoji: string }[] = [
-    { value: 'rappel',  label: 'Rappel',  emoji: '🔔' },
-    { value: 'reunion', label: 'Réunion', emoji: '👥' },
-    { value: 'rapport', label: 'Rapport', emoji: '📋' },
-    { value: 'autre',   label: 'Autre',   emoji: '📌' },
+    { value: 'rappel',  label: 'Rappel',      emoji: '🔔' },
+    { value: 'reunion', label: 'Réunion',     emoji: '👥' },
+    { value: 'rapport', label: 'Rapport',     emoji: '📋' },
+    { value: 'conge',   label: 'Congé/RTT',   emoji: '🏖️' },
+    { value: 'autre',   label: 'Autre',       emoji: '📌' },
   ]
 
   return (
@@ -375,7 +379,7 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                 border: '1px solid var(--color-border)',
                 color: 'var(--color-text-primary)',
               }} />
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-5 gap-1.5">
               {EVENEMENT_TYPES.map(t => (
                 <button key={t.value} onClick={() => setEvtType(t.value)}
                   className="flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl text-[11px] font-medium"
@@ -1564,40 +1568,6 @@ export default function PlanningPage() {
         })
       })
 
-    // 2. Paires Bilan 24h J1→J2 → une seule barre étendue (comme Apple Calendar)
-    Object.entries(eventsByDate).forEach(([dateStr, evts]) => {
-      evts.forEach(ev => {
-        if (!ev.dateFin || ev.isJ2Continuation) return
-        if (filterTech && normTech(ev.technicien) !== filterTech) return
-        const dateJ1 = dateStr
-        const dateJ2 = ev.dateFin
-        if (dateJ1 > weekEndISO && dateJ2 > weekEndISO) return
-        if (dateJ1 < weekStartISO && dateJ2 < weekStartISO) return
-        const colJ1 = weekDayISOs.indexOf(dateJ1)
-        const colJ2 = weekDayISOs.indexOf(dateJ2)
-        if (colJ1 === -1 && colJ2 === -1) return
-        const validCols = [colJ1, colJ2].filter(c => c !== -1)
-        const colStart = Math.min(...validCols)
-        const colEnd   = Math.max(...validCols)
-        const tc = getTechColor(ev.technicien)
-        const evJ2 = eventsByDate[dateJ2]?.find(
-          e => e.isJ2Continuation && e.samplingId === ev.samplingId
-        ) ?? null
-        const bothDone = ev.isDone && (evJ2?.isDone ?? false)
-        rawItems.push({
-          key: `bilan_${ev.id}`,
-          colStart, colEnd,
-          bg:    bothDone ? 'var(--color-success-light)' : tc.bg,
-          color: bothDone ? 'var(--color-success)'       : tc.color,
-          label: ev.title,
-          badge: ev.technicien || undefined,
-          tag: 'J1→J2',
-          onClick: () => handleSelectEvent(ev, dateJ1),
-          tooltip: `${ev.title} — Bilan 24h (${dateJ1} → ${dateJ2})`,
-        })
-      })
-    })
-
     // Row-packing — une seule passe pour tous les items
     const rowEnds: number[] = []
     return rawItems.map(item => {
@@ -1832,19 +1802,32 @@ export default function PlanningPage() {
       )
     }
 
+    // Couleur du dot — tech pour prélèvement/événement, statut pour maintenance/vérif
+    const techColor = getTechColor(event.technicien).color
+    const dotColor = event.type === 'prelevement'
+      ? event.priority === 0 ? 'var(--color-danger)'   // overdue → rouge
+      : event.priority === 1 ? 'var(--color-neutral)'  // non_effectué → gris
+      : techColor                                        // planifié → couleur tech
+      : event.type === 'evenement' ? techColor
+      : event.statusColor  // maintenance / vérification
+
+    // Badges bilan 24h
+    const isJ1 = event.type === 'prelevement' && !!event.dateFin
+    const isJ2 = event.isJ2Continuation === true
+
     return (
       <button
         onClick={handleClick}
         onMouseDown={e => e.stopPropagation()}
         className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
-        style={{ background: event.statusBg, cursor: isGrouped ? 'zoom-in' : event.type === 'evenement' ? 'default' : 'pointer' }}
+        style={{ background: 'var(--color-bg-secondary)', cursor: isGrouped ? 'zoom-in' : event.type === 'evenement' ? 'default' : 'pointer' }}
         title={isGrouped ? `${event.title} — ${event.count} prélèvements (cliquer pour détails)` : `${event.title} — ${event.subtitle} (${event.technicien})`}
       >
-        {/* Ligne 1 : indicateur (✓ ou dot) + client + tech + heure */}
+        {/* Ligne 1 : dot (ou ✓) + titre + badges */}
         <div className="flex items-center gap-1">
           {event.isDone
             ? <CheckCircle2 size={11} className="shrink-0" style={{ color: 'var(--color-success)' }} />
-            : <span className="shrink-0 w-[6px] h-[6px] rounded-full" style={{ background: event.statusColor }} />
+            : <span className="shrink-0 w-[6px] h-[6px] rounded-full" style={{ background: dotColor }} />
           }
           {event.meteo === 'pluie' && (
             <span className="shrink-0 text-[10px]" title="Prélèvement par temps de pluie">🌧</span>
@@ -1852,6 +1835,12 @@ export default function PlanningPage() {
           <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
             {event.title}
           </span>
+          {(isJ1 || isJ2) && (
+            <span className="shrink-0 text-[8px] font-bold px-1 rounded"
+              style={{ background: dotColor + '22', color: dotColor }}>
+              {isJ1 ? 'J1' : 'J2'}
+            </span>
+          )}
           {hasTech && (
             <span className="shrink-0 text-[9px] font-semibold px-1 rounded"
               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
@@ -1870,7 +1859,7 @@ export default function PlanningPage() {
             </span>
           )}
         </div>
-        {/* Ligne 2 : nom du point (masquée en vue mois) */}
+        {/* Ligne 2 : sous-titre (masqué en vue mois) */}
         {hasSubtitle && (
           <div className="text-[10px] truncate pl-[14px]" style={{ color: 'var(--color-text-secondary)' }}>
             {event.subtitle}
@@ -2423,10 +2412,11 @@ export default function PlanningPage() {
               onMouseUp={handleDragMouseUp}
               onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
               {weekDays.map((day,i) => {
-                const dateStr = toISO(day)
-                const evts = filteredForDayFlat(dateStr).filter(e => !isMultiDay(e))
-                const isToday = sameDay(day,today)
-                const inDrag = isInDrag(dateStr)
+                const dateStr  = toISO(day)
+                const evts     = filteredForDayFlat(dateStr).filter(e => !isMultiDay(e))
+                const inDrag   = isInDrag(dateStr)
+                const isHoliday = !!holidays[dateStr]
+                const hasConge  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'conge') ?? false
                 return (
                   <div key={i}
                     className="p-1.5 flex flex-col gap-1 cursor-crosshair group"
@@ -2434,15 +2424,18 @@ export default function PlanningPage() {
                     onMouseEnter={() => handleDragMouseEnter(dateStr)}
                     onContextMenu={e => { e.preventDefault(); setCtxMenu({ dateStr, x: e.clientX, y: e.clientY }) }}
                     style={{
+                      position: 'relative',
                       borderRight: i<4?'1px solid var(--color-border-subtle)':'none',
-                      background: inDrag
-                        ? 'rgba(0,113,227,0.1)'
-                        : isToday ? 'rgba(255,59,48,0.04)' : 'transparent',
+                      background: inDrag ? 'rgba(0,113,227,0.1)' : 'var(--color-bg-secondary)',
                       outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
                       outlineOffset: '-1px',
                       minHeight: 120,
                       userSelect: 'none',
                     }}>
+                    {/* Overlay jour férié */}
+                    {isHoliday && !inDrag && <div className="holiday-overlay" />}
+                    {/* Overlay congé/RTT */}
+                    {!isHoliday && hasConge && !inDrag && <div className="conge-overlay" />}
                     {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => goToDay(dateStr)} onSelect={e => handleSelectEvent(e, dateStr)} />)}
                     <div className="mt-auto pt-1 flex justify-end pr-0.5">
                       <Plus size={10} className="opacity-20 group-hover:opacity-60 transition-opacity"
@@ -2486,6 +2479,7 @@ export default function PlanningPage() {
                 const isToday = sameDay(day,today)
                 const inDrag = isInDrag(dateStr)
                 const holidayName = holidays[dateStr]
+                const hasCongeM   = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'conge') ?? false
                 const MAX = 3
                 return (
                   <div key={i}
@@ -2494,17 +2488,19 @@ export default function PlanningPage() {
                     onMouseEnter={() => handleDragMouseEnter(dateStr)}
                     onContextMenu={e => { e.preventDefault(); setCtxMenu({ dateStr, x: e.clientX, y: e.clientY }) }}
                     style={{
+                      position: 'relative',
                       borderRight:(i%5)<4?'1px solid var(--color-border-subtle)':'none',
                       borderBottom:'1px solid var(--color-border-subtle)',
-                      background: inDrag
-                        ? 'rgba(0,113,227,0.1)'
-                        : isToday ? 'rgba(255,59,48,0.04)'
-                        : holidayName ? 'rgba(255,59,48,0.03)' : 'transparent',
+                      background: inDrag ? 'rgba(0,113,227,0.1)' : 'var(--color-bg-secondary)',
                       outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
                       outlineOffset: '-1px',
                       minHeight: 90,
                       userSelect: 'none',
                     }}>
+                    {/* Overlay jour férié */}
+                    {holidayName && !inDrag && <div className="holiday-overlay" />}
+                    {/* Overlay congé/RTT */}
+                    {!holidayName && hasCongeM && !inDrag && <div className="conge-overlay" />}
                     <div className="flex items-center justify-between mb-0.5 px-0.5">
                       <span className="flex items-center gap-1">
                         <span className="w-[22px] h-[22px] flex items-center justify-center rounded-full text-[11px] font-semibold"

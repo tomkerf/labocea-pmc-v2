@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle, FileDown, Loader2, GripVertical, Minus } from 'lucide-react'
+import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle, FileDown, Loader2, GripVertical, Minus, Lock, Unlock } from 'lucide-react'
 import {
   DndContext, closestCenter, PointerSensor, TouchSensor,
   useSensor, useSensors, type DragEndEvent,
@@ -38,6 +38,7 @@ export default function ClientPage() {
   const [exporting, setExporting] = useState(false)
   const [confirmDeletePlanId, setConfirmDeletePlanId] = useState<string | null>(null)
   const [sitesInput, setSitesInput] = useState('')
+  const [plansLocked, setPlansLocked] = useState(false)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor,   { activationConstraint: { delay: 180, tolerance: 5 } }),
@@ -365,17 +366,33 @@ export default function ClientPage() {
             Points de prélèvement
           </h2>
           <div className="flex items-center gap-2">
-            <button onClick={addSeparator}
+            {/* Bouton verrouillage — masque les contrôles de réorganisation */}
+            <button
+              onClick={() => setPlansLocked(l => !l)}
               className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
-              title="Ajouter un séparateur de section">
-              <Minus size={14} /> Séparateur
+              style={{
+                background: plansLocked ? 'var(--color-warning-light)' : 'var(--color-bg-tertiary)',
+                color: plansLocked ? 'var(--color-warning)' : 'var(--color-text-tertiary)',
+                border: `1px solid ${plansLocked ? 'var(--color-warning)' : 'var(--color-border)'}`,
+              }}
+              title={plansLocked ? 'Déverrouiller la réorganisation' : 'Verrouiller la réorganisation'}>
+              {plansLocked ? <Lock size={14} /> : <Unlock size={14} />}
             </button>
-            <button onClick={addPlan}
-              className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
-              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-              <Plus size={14} /> Ajouter
-            </button>
+            {!plansLocked && (
+              <>
+                <button onClick={addSeparator}
+                  className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
+                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
+                  title="Ajouter un séparateur de section">
+                  <Minus size={14} /> Séparateur
+                </button>
+                <button onClick={addPlan}
+                  className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
+                  style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                  <Plus size={14} /> Ajouter
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -412,6 +429,7 @@ export default function ClientPage() {
                         key={plan.id}
                         plan={plan}
                         isLast={isLast}
+                        locked={plansLocked}
                         onDelete={() => requestDeletePlan(plan.id)}
                         onConfirmDelete={confirmDeletePlan}
                         onCancelDelete={() => setConfirmDeletePlanId(null)}
@@ -424,6 +442,7 @@ export default function ClientPage() {
                         clientYear={Number(client.annee) || undefined}
                         clientId={client.id}
                         isLast={isLast}
+                        locked={plansLocked}
                         isConfirmingDelete={confirmDeletePlanId === plan.id}
                         onOpen={() => navigate(`/missions/${client.id}/plan/${plan.id}`)}
                         onDelete={() => requestDeletePlan(plan.id)}
@@ -484,6 +503,7 @@ interface SortableSeparatorRowProps {
   plan: Plan
   isLast: boolean
   isConfirmingDelete: boolean
+  locked?: boolean
   onDelete: () => void
   onConfirmDelete: () => void
   onCancelDelete: () => void
@@ -491,7 +511,7 @@ interface SortableSeparatorRowProps {
 }
 
 function SortableSeparatorRow({
-  plan, isLast, isConfirmingDelete,
+  plan, isLast, isConfirmingDelete, locked,
   onDelete, onConfirmDelete, onCancelDelete, onLabelChange,
 }: SortableSeparatorRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -510,9 +530,9 @@ function SortableSeparatorRow({
       <div className="flex items-center gap-2 px-3 py-2">
         {/* Poignée drag */}
         <button
-          {...attributes} {...listeners}
+          {...(!locked ? { ...attributes, ...listeners } : {})}
           className="shrink-0 p-1 rounded touch-none"
-          style={{ color: 'var(--color-text-tertiary)', cursor: isDragging ? 'grabbing' : 'grab' }}
+          style={{ color: 'var(--color-text-tertiary)', cursor: locked ? 'default' : isDragging ? 'grabbing' : 'grab', opacity: locked ? 0.3 : 1 }}
           tabIndex={-1}
         >
           <GripVertical size={15} strokeWidth={1.8} />
@@ -578,6 +598,7 @@ interface SortablePlanRowProps {
   clientId: string
   isLast: boolean
   isConfirmingDelete: boolean
+  locked?: boolean
   onOpen: () => void
   onDelete: () => void
   onConfirmDelete: () => void
@@ -585,7 +606,7 @@ interface SortablePlanRowProps {
 }
 
 function SortablePlanRow({
-  plan, clientYear, isLast, isConfirmingDelete,
+  plan, clientYear, isLast, isConfirmingDelete, locked,
   onOpen, onDelete, onConfirmDelete, onCancelDelete,
 }: SortablePlanRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -608,10 +629,10 @@ function SortablePlanRow({
       <div className="flex items-center gap-2">
         {/* Poignée drag */}
         <button
-          {...attributes} {...listeners}
+          {...(!locked ? { ...attributes, ...listeners } : {})}
           className="shrink-0 p-1 rounded touch-none"
-          style={{ color: 'var(--color-text-tertiary)', cursor: isDragging ? 'grabbing' : 'grab' }}
-          title="Glisser pour réorganiser"
+          style={{ color: 'var(--color-text-tertiary)', cursor: locked ? 'default' : isDragging ? 'grabbing' : 'grab', opacity: locked ? 0.3 : 1 }}
+          title={locked ? 'Réorganisation verrouillée' : 'Glisser pour réorganiser'}
           tabIndex={-1}
         >
           <GripVertical size={15} strokeWidth={1.8} />

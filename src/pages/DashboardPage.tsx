@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ChevronDown } from 'lucide-react'
 
 import DonutChart from '@/components/dashboard/DonutChart'
 import { EventDetailModal } from '@/components/EventDetailModal'
@@ -105,6 +106,10 @@ export default function DashboardPage() {
 
   // État de la modale d'intervention
   const [eventDetail, setEventDetail] = useState<{ event: ModalEvent; dateStr: string } | null>(null)
+
+  // Sections repliables
+  const [rapportsOpen,  setRapportsOpen]  = useState(true)
+  const [retardOpen,    setRetardOpen]    = useState(true)
   const { equipements } = useEquipementsStore()
   const { verifications } = useMetrologieStore()
 
@@ -483,93 +488,143 @@ export default function DashboardPage() {
 
       {/* Rapports */}
       <div className="mb-6">
-        <SectionTitle>Rapports à envoyer</SectionTitle>
-        {rapportsAFaire.length === 0 ? (
-          <div className="rounded-xl px-5 py-4 text-sm"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)', color: 'var(--color-text-secondary)' }}>
-            ✓ Tous les rapports ont été envoyés.
-          </div>
-        ) : (
-          <div className="rounded-xl overflow-hidden"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-            {rapportsAFaire.slice(0, 8).map((r, i) => {
-              const fmtDate = new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
-              const dotColor = r.enRetard ? 'var(--color-danger)' : r.joursDepuis > 15 ? 'var(--color-warning)' : 'var(--color-success)'
-              const tagBg    = r.enRetard ? 'var(--color-danger-light)' : r.joursDepuis > 15 ? 'var(--color-warning-light)' : 'var(--color-success-light)'
-              const tagColor = r.enRetard ? 'var(--color-danger)' : r.joursDepuis > 15 ? 'var(--color-warning)' : 'var(--color-success)'
-              const tagLabel = r.enRetard ? `+${r.joursDepuis}j` : `${r.joursDepuis}j`
-              return (
-                <div key={r.samplingId}
-                  className="flex items-center gap-3 px-4 py-3"
-                  style={{ borderBottom: i < rapportsAFaire.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                  <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: dotColor }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                      {r.clientNom}
-                    </p>
-                    <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                      {r.siteNom} · intervention le {fmtDate}
-                    </p>
+        <button
+          onClick={() => setRapportsOpen(o => !o)}
+          className="flex items-center gap-2 mb-3 w-full text-left"
+        >
+          <span className="text-xs font-semibold uppercase"
+            style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+            Rapports à envoyer
+          </span>
+          {rapportsAFaire.length > 0 && (
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+              style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+              {rapportsAFaire.length}
+            </span>
+          )}
+          <ChevronDown
+            size={14}
+            strokeWidth={2}
+            style={{
+              color: 'var(--color-text-tertiary)',
+              marginLeft: 'auto',
+              transform: rapportsOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+              transition: 'transform 0.2s ease',
+            }}
+          />
+        </button>
+        {rapportsOpen && (
+          rapportsAFaire.length === 0 ? (
+            <div className="rounded-xl px-5 py-4 text-sm"
+              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)', color: 'var(--color-text-secondary)' }}>
+              ✓ Tous les rapports ont été envoyés.
+            </div>
+          ) : (
+            <div className="rounded-xl overflow-hidden"
+              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+              {rapportsAFaire.slice(0, 8).map((r, i) => {
+                const fmtDate = new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+                const dotColor = r.enRetard ? 'var(--color-danger)' : r.joursDepuis > 15 ? 'var(--color-warning)' : 'var(--color-success)'
+                const tagBg    = r.enRetard ? 'var(--color-danger-light)' : r.joursDepuis > 15 ? 'var(--color-warning-light)' : 'var(--color-success-light)'
+                const tagColor = r.enRetard ? 'var(--color-danger)' : r.joursDepuis > 15 ? 'var(--color-warning)' : 'var(--color-success)'
+                const tagLabel = r.enRetard ? `+${r.joursDepuis}j` : `${r.joursDepuis}j`
+                return (
+                  <div key={r.samplingId}
+                    className="flex items-center gap-3 px-4 py-3"
+                    style={{ borderBottom: i < rapportsAFaire.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
+                    <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: dotColor }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                        {r.clientNom}
+                      </p>
+                      <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                        {r.siteNom} · intervention le {fmtDate}
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                      style={{ background: tagBg, color: tagColor }}>
+                      {tagLabel}
+                    </span>
+                    <button
+                      onClick={() => markRapportEnvoye(r.clientId, r.planId, r.samplingId)}
+                      className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium"
+                      style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-accent)', (e.currentTarget.style.color = 'white'))}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-accent-light)', (e.currentTarget.style.color = 'var(--color-accent)'))}
+                    >
+                      Envoyé ✓
+                    </button>
                   </div>
-                  <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                    style={{ background: tagBg, color: tagColor }}>
-                    {tagLabel}
-                  </span>
-                  <button
-                    onClick={() => markRapportEnvoye(r.clientId, r.planId, r.samplingId)}
-                    className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium"
-                    style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-accent)', (e.currentTarget.style.color = 'white'))}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-accent-light)', (e.currentTarget.style.color = 'var(--color-accent)'))}
-                  >
-                    Envoyé ✓
-                  </button>
+                )
+              })}
+              {rapportsAFaire.length > 8 && (
+                <div className="px-4 py-2.5 text-xs" style={{ color: 'var(--color-text-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
+                  + {rapportsAFaire.length - 8} autres rapports à envoyer
                 </div>
-              )
-            })}
-            {rapportsAFaire.length > 8 && (
-              <div className="px-4 py-2.5 text-xs" style={{ color: 'var(--color-text-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
-                + {rapportsAFaire.length - 8} autres rapports à envoyer
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )
         )}
       </div>
 
       {/* Prélèvements en retard */}
       {prelevementsEnRetard.length > 0 && (
         <div className="mb-6">
-          <SectionTitle>Prélèvements en retard</SectionTitle>
-          <div className="rounded-xl overflow-hidden"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-            {prelevementsEnRetard.slice(0, 6).map((r, i) => (
-              <div
-                key={r.samplingId}
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                style={{ borderBottom: i < Math.min(prelevementsEnRetard.length, 6) - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
-                onClick={() => navigate(`/missions/${r.clientId}/plan/${r.planId}`)}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-              >
-                <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: 'var(--color-danger)' }} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{r.clientNom}</p>
-                  <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                    {[r.siteNom, r.planNom].filter(Boolean).join(' · ')}
-                  </p>
+          <button
+            onClick={() => setRetardOpen(o => !o)}
+            className="flex items-center gap-2 mb-3 w-full text-left"
+          >
+            <span className="text-xs font-semibold uppercase"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Prélèvements en retard
+            </span>
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+              style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+              {prelevementsEnRetard.length}
+            </span>
+            <ChevronDown
+              size={14}
+              strokeWidth={2}
+              style={{
+                color: 'var(--color-text-tertiary)',
+                marginLeft: 'auto',
+                transform: retardOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+                transition: 'transform 0.2s ease',
+              }}
+            />
+          </button>
+          {retardOpen && (
+            <div className="rounded-xl overflow-hidden"
+              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+              {prelevementsEnRetard.slice(0, 6).map((r, i) => (
+                <div
+                  key={r.samplingId}
+                  className="flex items-center gap-3 px-4 py-3 cursor-pointer"
+                  style={{ borderBottom: i < Math.min(prelevementsEnRetard.length, 6) - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                  onClick={() => navigate(`/missions/${r.clientId}/plan/${r.planId}`)}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: 'var(--color-danger)' }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{r.clientNom}</p>
+                    <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                      {[r.siteNom, r.planNom].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                    style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+                    En retard
+                  </span>
                 </div>
-                <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                  style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
-                  En retard
-                </span>
-              </div>
-            ))}
-            {prelevementsEnRetard.length > 6 && (
-              <div className="px-4 py-2.5 text-xs" style={{ color: 'var(--color-text-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
-                + {prelevementsEnRetard.length - 6} autres prélèvements en retard
-              </div>
-            )}
-          </div>
+              ))}
+              {prelevementsEnRetard.length > 6 && (
+                <div className="px-4 py-2.5 text-xs" style={{ color: 'var(--color-text-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
+                  + {prelevementsEnRetard.length - 6} autres prélèvements en retard
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
