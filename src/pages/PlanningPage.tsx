@@ -1923,7 +1923,7 @@ export default function PlanningPage() {
         {/* Ligne 1 : dot (ou ✓) + titre + badges */}
         <div className="flex items-center gap-1">
           {event.isDone
-            ? <CheckCircle2 size={11} className="shrink-0" style={{ color: 'var(--color-success)' }} />
+            ? <CheckCircle2 size={11} className="shrink-0" style={{ color: dotColor }} />
             : <span className="shrink-0 w-[6px] h-[6px] rounded-full" style={{ background: dotColor }} />
           }
           {event.meteo === 'pluie' && (
@@ -1972,7 +1972,8 @@ export default function PlanningPage() {
     event: PlanningEvent; isLast: boolean
     onSelect?: (event: PlanningEvent) => void
   }) {
-    const dotColor = event.statusColor
+    const techColor = getTechColor(event.technicien).color
+    const dotColor  = event.statusColor
 
     return (
       <div style={{ borderBottom: isLast?'none':'1px solid var(--color-border-subtle)' }}>
@@ -2008,7 +2009,7 @@ export default function PlanningPage() {
             {event.statusLabel}
           </span>
           {event.isDone
-            ? <CheckCircle2 size={18} className="shrink-0" style={{ color:'var(--color-success)' }} />
+            ? <CheckCircle2 size={18} className="shrink-0" style={{ color: techColor }} />
             : <ChevronRight size={15} className="shrink-0" style={{ color:'var(--color-text-tertiary)' }} />
           }
         </button>
