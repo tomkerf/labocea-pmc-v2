@@ -1530,13 +1530,16 @@ export default function PlanningPage() {
     })
   }, [selectedDay, clients])
 
-  // ── Bande bilan 24h — J1 + J2 alignés dans une grille 5 colonnes ──────────
-  // Chaque ligne contient une paire J1/J2. Le row-index est calculé pour garantir
-  // que J1 et J2 partagent exactement la même ligne (face à face visuellement).
+  // ── Bande bilan 24h — J1 + J2 dans un groupe spanning ──────────────────────
+  // Chaque groupe = une paire J1/J2 entourée d'une bordure commune (colspan).
+  // Le row-index garantit que deux paires distinctes ne se chevauchent pas.
   const bilanBand = useMemo(() => {
     if (viewMode !== 'semaine') return []
     const wISOs = weekDays.map(toISO)
-    type BilanItem = { colIdx: number; event: PlanningEvent }
+
+    type BilanItem  = { colIdx: number; event: PlanningEvent }
+    type BilanGroup = { colStart: number; colEnd: number; techColor: string; items: BilanItem[] }
+
     const pairs: { j1Col: number; j2Col: number; j1: PlanningEvent; j2: PlanningEvent | null }[] = []
 
     wISOs.forEach((dateStr, colIdx) => {
@@ -1554,18 +1557,26 @@ export default function PlanningPage() {
 
     // Assigner les lignes : J1 et J2 forcément sur la même ligne
     const colRowNext = new Array(5).fill(0) as number[]
-    const rows: BilanItem[][] = []
+    const rows: BilanGroup[][] = []
 
     pairs.forEach(({ j1Col, j2Col, j1, j2 }) => {
       let rowIdx = colRowNext[j1Col]
       if (j2Col !== -1) rowIdx = Math.max(rowIdx, colRowNext[j2Col])
       if (!rows[rowIdx]) rows[rowIdx] = []
-      rows[rowIdx].push({ colIdx: j1Col, event: j1 })
+
+      const tc = getTechColor(j1.technicien).color
+      const hasPair = j2Col !== -1 && j2 !== null
+
+      rows[rowIdx].push({
+        colStart:  j1Col,
+        colEnd:    hasPair ? j2Col : j1Col,
+        techColor: tc,
+        items: hasPair
+          ? [{ colIdx: j1Col, event: j1 }, { colIdx: j2Col, event: j2! }]
+          : [{ colIdx: j1Col, event: j1 }],
+      })
       colRowNext[j1Col] = rowIdx + 1
-      if (j2Col !== -1 && j2) {
-        rows[rowIdx].push({ colIdx: j2Col, event: j2 })
-        colRowNext[j2Col] = rowIdx + 1
-      }
+      if (hasPair) colRowNext[j2Col] = rowIdx + 1
     })
 
     return rows
@@ -2464,26 +2475,35 @@ export default function PlanningPage() {
               })}
             </div>
 
-            {/* ── Bande bilan 24h — J1 + J2 face à face ── */}
+            {/* ── Bande bilan 24h — groupe J1+J2 avec bordure commune (colspan) ── */}
             {bilanBand.length > 0 && (
-              <div className="shrink-0" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', paddingTop: 2, paddingBottom: 2 }}>
+              <div className="shrink-0" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 0' }}>
                 {bilanBand.map((row, rowIdx) => {
                   const wISOs = weekDays.map(toISO)
                   return (
-                    <div key={rowIdx} className="grid grid-cols-5">
-                      {[0,1,2,3,4].map(col => {
-                        const item = row.find(x => x.colIdx === col)
-                        return (
-                          <div key={col} className="px-1.5 py-0.5" style={{ borderRight: col < 4 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                            {item && (
+                    <div key={rowIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', padding: '0 2px' }}>
+                      {row.map((group, gIdx) => (
+                        <div key={gIdx}
+                          style={{
+                            gridColumn: `${group.colStart + 1} / ${group.colEnd + 2}`,
+                            display: 'flex',
+                            gap: 2,
+                            border: `1px solid ${group.techColor}45`,
+                            borderRadius: 7,
+                            padding: '1px 2px',
+                            margin: '0 3px',
+                            background: group.techColor + '08',
+                          }}>
+                          {group.items.map(item => (
+                            <div key={item.event.id} style={{ flex: 1, minWidth: 0 }}>
                               <EventPill
                                 event={item.event}
-                                onSelect={e => handleSelectEvent(e, wISOs[col])}
+                                onSelect={e => handleSelectEvent(e, wISOs[item.colIdx])}
                               />
-                            )}
-                          </div>
-                        )
-                      })}
+                            </div>
+                          ))}
+                        </div>
+                      ))}
                     </div>
                   )
                 })}
