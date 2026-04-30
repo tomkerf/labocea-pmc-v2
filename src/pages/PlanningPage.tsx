@@ -1606,10 +1606,11 @@ export default function PlanningPage() {
 
     const rawItems: RawItem[] = []
 
-    // 1. Événements personnels avec dateFin (multi-jours)
+    // 1. Événements personnels avec dateFin (multi-jours) — sauf congés (pills par colonne)
     evenements
       .filter(ev => {
         if (!ev.dateFin || ev.dateFin <= ev.date) return false
+        if (ev.type === 'conge') return false   // congés → pills individuelles dans chaque colonne
         if (filterTech && normTech(ev.createdByInitiales || '') !== filterTech) return false
         return ev.date <= weekEndISO && ev.dateFin >= weekStartISO
       })
