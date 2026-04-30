@@ -1917,7 +1917,7 @@ export default function PlanningPage() {
         onClick={handleClick}
         onMouseDown={e => e.stopPropagation()}
         className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
-        style={{ background: 'var(--color-bg-secondary)', cursor: isGrouped ? 'zoom-in' : event.type === 'evenement' ? 'default' : 'pointer' }}
+        style={{ background: 'var(--color-bg-secondary)', border: `1px solid ${techColor}30`, cursor: isGrouped ? 'zoom-in' : event.type === 'evenement' ? 'default' : 'pointer' }}
         title={isGrouped ? `${event.title} — ${event.count} prélèvements (cliquer pour détails)` : `${event.title} — ${event.subtitle} (${event.technicien})`}
       >
         {/* Ligne 1 : dot (ou ✓) + titre + badges */}
