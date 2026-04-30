@@ -178,8 +178,11 @@ function assignColumns(
 
 // Événement EvenementPersonnel qui couvre plusieurs jours → bande all-day
 // Les bilans 24h (prelevement avec dateFin / isJ2Continuation) restent dans leur colonne
-function isMultiDay(_e: PlanningEvent): boolean {
-  return false  // tout s'affiche en pill dans sa colonne — pas de bande all-day
+function isMultiDay(e: PlanningEvent): boolean {
+  // Bilans 24h → bande dédiée pour alignement J1/J2 face à face
+  if (e.type === 'prelevement' && !!e.dateFin) return true  // J1
+  if (e.isJ2Continuation === true) return true               // J2
+  return false  // tout le reste reste dans sa colonne
 }
 
 
@@ -1527,10 +1530,50 @@ export default function PlanningPage() {
     })
   }, [selectedDay, clients])
 
-  // ── Bande "toute la journée" — multi-jours + bilans 24h (style Apple Calendar) ──
-  // Un seul tableau unifié : événements perso multi-jours ET paires J1→J2 bilan 24h.
-  // Chaque item est une barre qui s'étire sur gridColumn colStart+1 / colEnd+2.
-  // L'algorithme de row-packing tourne une seule fois pour tous les items.
+  // ── Bande bilan 24h — J1 + J2 alignés dans une grille 5 colonnes ──────────
+  // Chaque ligne contient une paire J1/J2. Le row-index est calculé pour garantir
+  // que J1 et J2 partagent exactement la même ligne (face à face visuellement).
+  const bilanBand = useMemo(() => {
+    if (viewMode !== 'semaine') return []
+    const wISOs = weekDays.map(toISO)
+    type BilanItem = { colIdx: number; event: PlanningEvent }
+    const pairs: { j1Col: number; j2Col: number; j1: PlanningEvent; j2: PlanningEvent | null }[] = []
+
+    wISOs.forEach((dateStr, colIdx) => {
+      ;(eventsByDate[dateStr] ?? []).forEach(e => {
+        if (e.type !== 'prelevement' || !e.dateFin) return
+        if (filterTech && normTech(e.technicien) !== filterTech) return
+        const j2DateStr = e.dateFin
+        const j2Col     = wISOs.indexOf(j2DateStr)
+        const j2        = j2Col !== -1
+          ? (eventsByDate[j2DateStr] ?? []).find(x => x.isJ2Continuation && x.samplingId === e.samplingId) ?? null
+          : null
+        pairs.push({ j1Col: colIdx, j2Col: j2 ? j2Col : -1, j1: e, j2 })
+      })
+    })
+
+    // Assigner les lignes : J1 et J2 forcément sur la même ligne
+    const colRowNext = new Array(5).fill(0) as number[]
+    const rows: BilanItem[][] = []
+
+    pairs.forEach(({ j1Col, j2Col, j1, j2 }) => {
+      let rowIdx = colRowNext[j1Col]
+      if (j2Col !== -1) rowIdx = Math.max(rowIdx, colRowNext[j2Col])
+      if (!rows[rowIdx]) rows[rowIdx] = []
+      rows[rowIdx].push({ colIdx: j1Col, event: j1 })
+      colRowNext[j1Col] = rowIdx + 1
+      if (j2Col !== -1 && j2) {
+        rows[rowIdx].push({ colIdx: j2Col, event: j2 })
+        colRowNext[j2Col] = rowIdx + 1
+      }
+    })
+
+    return rows
+  }, [viewMode, weekDays, eventsByDate, filterTech])
+
+  // ── Bande "toute la journée" — multi-jours (style Apple Calendar) ──────────
+  // Événements personnels avec dateFin s'étirant sur plusieurs colonnes.
+  // L'algorithme de row-packing évite les chevauchements.
   const allDayItems = useMemo(() => {
     if (viewMode !== 'semaine') return []
     const weekDayISOs  = weekDays.map(toISO)
@@ -2420,7 +2463,33 @@ export default function PlanningPage() {
               })}
             </div>
 
-            {/* ── Bande "toute la journée" — multi-jours + bilans 24h (style Apple Calendar) ── */}
+            {/* ── Bande bilan 24h — J1 + J2 face à face ── */}
+            {bilanBand.length > 0 && (
+              <div className="shrink-0" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', paddingTop: 2, paddingBottom: 2 }}>
+                {bilanBand.map((row, rowIdx) => {
+                  const wISOs = weekDays.map(toISO)
+                  return (
+                    <div key={rowIdx} className="grid grid-cols-5">
+                      {[0,1,2,3,4].map(col => {
+                        const item = row.find(x => x.colIdx === col)
+                        return (
+                          <div key={col} className="px-1.5 py-0.5" style={{ borderRight: col < 4 ? '1px solid var(--color-border-subtle)' : 'none' }}>
+                            {item && (
+                              <EventPill
+                                event={item.event}
+                                onSelect={e => handleSelectEvent(e, wISOs[col])}
+                              />
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* ── Bande "toute la journée" — multi-jours (style Apple Calendar) ── */}
             {allDayItems.length > 0 && (() => {
               const numRows = Math.max(...allDayItems.map(s => s.row)) + 1
               return (
