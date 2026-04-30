@@ -185,7 +185,14 @@ function isMultiDay(_e: PlanningEvent): boolean {
 
 function sortEvts(evts: PlanningEvent[]): PlanningEvent[] {
   return evts.slice().sort((a,b) => {
-    if (!a.plannedTime && !b.plannedTime) return 0
+    if (!a.plannedTime && !b.plannedTime) {
+      // Bilan 24h : J2 avant J1 (le technicien passe en J2 avant de faire J1)
+      const aIsJ2 = a.isJ2Continuation === true
+      const bIsJ2 = b.isJ2Continuation === true
+      if (aIsJ2 && !bIsJ2) return -1
+      if (!aIsJ2 && bIsJ2) return 1
+      return 0
+    }
     if (!a.plannedTime) return -1   // sans heure → en haut
     if (!b.plannedTime) return 1
     if (a.plannedTime && b.plannedTime) return a.plannedTime.localeCompare(b.plannedTime)
