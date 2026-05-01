@@ -165,50 +165,77 @@ function ChargeEquipe() {
     setRefDate(d)
   }
 
-  // Calcul de la charge par technicien
-  type Row = { tech: string; ponctuel: number; piezo: number; bilan: number; totalH: number }
+  // Calcul de la charge par technicien — planifié vs réalisé
+  type Counts = { ponctuel: number; piezo: number; bilan: number }
+  type Row = {
+    tech: string
+    done:    Counts   // status === 'done'
+    planned: Counts   // status planifié / en retard
+    doneH:    number
+    plannedH: number
+    totalH:   number
+  }
 
   const rows: Row[] = useMemo(() => {
-    const map: Record<string, { ponctuel: number; piezo: number; bilan: number }> = {}
+    const map: Record<string, { done: Counts; planned: Counts }> = {}
 
-    const add = (tech: string, nature: string, methode: string) => {
-      if (!map[tech]) map[tech] = { ponctuel: 0, piezo: 0, bilan: 0 }
-      if      (methode === 'Automatique') map[tech].bilan++
-      else if (nature  === 'Souterraine') map[tech].piezo++
-      else                                map[tech].ponctuel++
+    const add = (tech: string, nature: string, methode: string, isDone: boolean) => {
+      if (!map[tech]) map[tech] = {
+        done:    { ponctuel: 0, piezo: 0, bilan: 0 },
+        planned: { ponctuel: 0, piezo: 0, bilan: 0 },
+      }
+      const bucket = isDone ? map[tech].done : map[tech].planned
+      if      (methode === 'Automatique') bucket.bilan++
+      else if (nature  === 'Souterraine') bucket.piezo++
+      else                                bucket.ponctuel++
     }
+
+    const countH = (c: Counts) => c.ponctuel * 0.25 + c.piezo * 1 + c.bilan * 2
 
     clients.forEach(client => {
       client.plans.forEach(plan => {
         if (plan.separator) return
         plan.samplings.forEach(s => {
-          if (s.status === 'done' || s.status === 'non_effectue') return
+          if (s.status === 'non_effectue') return   // ignoré dans tous les cas
 
-          // Vue mois : inclure les prélèvements non datés (pool) s'ils sont dans le bon mois
-          // Vue semaine : exclure les prélèvements sans jour précis
+          const isDone = s.status === 'done'
+
+          // Positionnement dans la période
           if (viewMode === 'semaine') {
-            if (!s.plannedDay) return
-            const date = new Date(currentYear, s.plannedMonth, s.plannedDay)
+            // Pour les réalisés : utiliser doneDate si disponible
+            const dateStr = isDone && s.doneDate
+              ? s.doneDate
+              : s.plannedDay
+                ? `${currentYear}-${String(s.plannedMonth + 1).padStart(2,'0')}-${String(s.plannedDay).padStart(2,'0')}`
+                : null
+            if (!dateStr) return
+            const date = new Date(dateStr + 'T12:00:00')
             if (date < start || date > end) return
           } else {
-            // Mois : matcher sur plannedMonth uniquement (pool inclus)
-            if (s.plannedMonth !== start.getMonth()) return
+            // Mois : réalisés → sur doneDate, planifiés → sur plannedMonth
+            if (isDone) {
+              if (!s.doneDate) return
+              const d = new Date(s.doneDate + 'T12:00:00')
+              if (d < start || d > end) return
+            } else {
+              if (s.plannedMonth !== start.getMonth()) return
+            }
           }
 
           const tech = s.assignedTo || client.preleveur || '—'
-          add(tech, plan.nature, plan.methode)
+          add(tech, plan.nature, plan.methode, isDone)
         })
       })
     })
 
     return Object.entries(map)
-      .map(([tech, c]) => ({
-        tech,
-        ...c,
-        totalH: c.ponctuel * 0.25 + c.piezo * 1 + c.bilan * 2,
-      }))
+      .map(([tech, { done, planned }]) => {
+        const doneH    = countH(done)
+        const plannedH = countH(planned)
+        return { tech, done, planned, doneH, plannedH, totalH: doneH + plannedH }
+      })
       .sort((a, b) => b.totalH - a.totalH)
-  }, [clients, start, end, currentYear])
+  }, [clients, start, end, currentYear, viewMode])
 
   const maxH = rows.length > 0 ? Math.max(...rows.map(r => r.totalH)) : 1
 
@@ -285,32 +312,39 @@ function ChargeEquipe() {
             {/* En-tête colonnes */}
             <div className="grid px-5 py-2"
               style={{
-                gridTemplateColumns: '120px 1fr 70px 70px 70px 64px',
+                gridTemplateColumns: '90px 1fr 72px 72px 64px',
                 borderBottom: '1px solid var(--color-border-subtle)',
               }}>
-              {['Technicien', '', 'Ponctuel', 'Piézo', 'Bilan 24h', 'Total'].map((h, i) => (
+              {[
+                { label: 'Technicien', align: 'left' },
+                { label: '',           align: 'left' },
+                { label: 'Réalisé',    align: 'center' },
+                { label: 'À faire',    align: 'center' },
+                { label: 'Total',      align: 'center' },
+              ].map((h, i) => (
                 <span key={i} className="text-[11px] font-semibold uppercase"
-                  style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em',
-                    textAlign: i >= 2 ? 'center' : 'left' }}>
-                  {h}
+                  style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em', textAlign: h.align as 'left' | 'center' }}>
+                  {h.label}
                 </span>
               ))}
             </div>
 
             {/* Lignes */}
             {rows.map((row, i) => {
-              const pct = maxH > 0 ? row.totalH / maxH : 0
-              const barColor = pct > 0.75
+              const donePct    = maxH > 0 ? row.doneH    / maxH : 0
+              const plannedPct = maxH > 0 ? row.plannedH / maxH : 0
+              // Couleur de la portion "à faire" selon charge restante vs max
+              const remainColor = plannedPct > 0.6
                 ? 'var(--color-danger)'
-                : pct > 0.4
+                : plannedPct > 0.3
                   ? 'var(--color-warning)'
-                  : 'var(--color-success)'
+                  : 'var(--color-accent)'
 
               return (
                 <div key={row.tech}
                   className="grid items-center px-5 py-3"
                   style={{
-                    gridTemplateColumns: '120px 1fr 70px 70px 70px 64px',
+                    gridTemplateColumns: '90px 1fr 72px 72px 64px',
                     borderTop: i > 0 ? '1px solid var(--color-border-subtle)' : 'none',
                   }}>
                   {/* Initiales */}
@@ -318,26 +352,34 @@ function ChargeEquipe() {
                     {row.tech}
                   </span>
 
-                  {/* Barre de charge */}
-                  <div className="h-1.5 rounded-full mx-2" style={{ background: 'var(--color-bg-tertiary)' }}>
-                    <div className="h-full rounded-full transition-all"
-                      style={{ width: `${Math.round(pct * 100)}%`, background: barColor }} />
+                  {/* Barre bicolore : vert = réalisé, couleur = à faire */}
+                  <div className="h-2 rounded-full mx-2 overflow-hidden flex"
+                    style={{ background: 'var(--color-bg-tertiary)' }}>
+                    {row.doneH > 0 && (
+                      <div className="h-full shrink-0"
+                        style={{ width: `${Math.round(donePct * 100)}%`, background: 'var(--color-success)' }} />
+                    )}
+                    {row.plannedH > 0 && (
+                      <div className="h-full shrink-0"
+                        style={{ width: `${Math.round(plannedPct * 100)}%`, background: remainColor, opacity: 0.75 }} />
+                    )}
                   </div>
 
-                  {/* Compteurs */}
-                  <span className="text-sm text-center" style={{ color: 'var(--color-text-secondary)' }}>
-                    {row.ponctuel || '—'}
-                  </span>
-                  <span className="text-sm text-center" style={{ color: 'var(--color-text-secondary)' }}>
-                    {row.piezo || '—'}
-                  </span>
-                  <span className="text-sm text-center" style={{ color: 'var(--color-text-secondary)' }}>
-                    {row.bilan || '—'}
+                  {/* Réalisé */}
+                  <span className="text-sm font-medium text-center"
+                    style={{ color: row.doneH > 0 ? 'var(--color-success)' : 'var(--color-text-tertiary)' }}>
+                    {row.doneH > 0 ? formatH(row.doneH) : '—'}
                   </span>
 
-                  {/* Total heures */}
+                  {/* À faire */}
+                  <span className="text-sm font-medium text-center"
+                    style={{ color: row.plannedH > 0 ? remainColor : 'var(--color-text-tertiary)' }}>
+                    {row.plannedH > 0 ? formatH(row.plannedH) : '—'}
+                  </span>
+
+                  {/* Total */}
                   <span className="text-sm font-semibold text-center"
-                    style={{ color: barColor }}>
+                    style={{ color: 'var(--color-text-primary)' }}>
                     {formatH(row.totalH)}
                   </span>
                 </div>
@@ -345,30 +387,36 @@ function ChargeEquipe() {
             })}
 
             {/* Pied — total équipe */}
-            <div className="grid items-center px-5 py-3"
-              style={{
-                gridTemplateColumns: '120px 1fr 70px 70px 70px 64px',
-                borderTop: '1px solid var(--color-border)',
-                background: 'var(--color-bg-primary)',
-              }}>
-              <span className="text-xs font-semibold uppercase"
-                style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>
-                Total équipe
-              </span>
-              <span />
-              <span className="text-xs font-semibold text-center" style={{ color: 'var(--color-text-secondary)' }}>
-                {rows.reduce((s, r) => s + r.ponctuel, 0) || '—'}
-              </span>
-              <span className="text-xs font-semibold text-center" style={{ color: 'var(--color-text-secondary)' }}>
-                {rows.reduce((s, r) => s + r.piezo, 0) || '—'}
-              </span>
-              <span className="text-xs font-semibold text-center" style={{ color: 'var(--color-text-secondary)' }}>
-                {rows.reduce((s, r) => s + r.bilan, 0) || '—'}
-              </span>
-              <span className="text-xs font-semibold text-center" style={{ color: 'var(--color-text-primary)' }}>
-                {formatH(rows.reduce((s, r) => s + r.totalH, 0))}
-              </span>
-            </div>
+            {(() => {
+              const totDone    = rows.reduce((s, r) => s + r.doneH,    0)
+              const totPlanned = rows.reduce((s, r) => s + r.plannedH, 0)
+              return (
+                <div className="grid items-center px-5 py-3"
+                  style={{
+                    gridTemplateColumns: '90px 1fr 72px 72px 64px',
+                    borderTop: '1px solid var(--color-border)',
+                    background: 'var(--color-bg-primary)',
+                  }}>
+                  <span className="text-xs font-semibold uppercase"
+                    style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>
+                    Total équipe
+                  </span>
+                  <span />
+                  <span className="text-xs font-semibold text-center"
+                    style={{ color: totDone > 0 ? 'var(--color-success)' : 'var(--color-text-tertiary)' }}>
+                    {totDone > 0 ? formatH(totDone) : '—'}
+                  </span>
+                  <span className="text-xs font-semibold text-center"
+                    style={{ color: 'var(--color-text-secondary)' }}>
+                    {totPlanned > 0 ? formatH(totPlanned) : '—'}
+                  </span>
+                  <span className="text-xs font-semibold text-center"
+                    style={{ color: 'var(--color-text-primary)' }}>
+                    {formatH(totDone + totPlanned)}
+                  </span>
+                </div>
+              )
+            })()}
           </>
         )}
       </div>
