@@ -38,7 +38,7 @@ export default function ClientPage() {
   const [exporting, setExporting] = useState(false)
   const [confirmDeletePlanId, setConfirmDeletePlanId] = useState<string | null>(null)
   const [sitesInput, setSitesInput] = useState('')
-  const [plansLocked, setPlansLocked] = useState(false)
+  const [plansLocked, setPlansLocked] = useState(true)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor,   { activationConstraint: { delay: 180, tolerance: 5 } }),
@@ -371,11 +371,11 @@ export default function ClientPage() {
               onClick={() => setPlansLocked(l => !l)}
               className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
               style={{
-                background: plansLocked ? 'var(--color-warning-light)' : 'var(--color-bg-tertiary)',
-                color: plansLocked ? 'var(--color-warning)' : 'var(--color-text-tertiary)',
-                border: `1px solid ${plansLocked ? 'var(--color-warning)' : 'var(--color-border)'}`,
+                background: plansLocked ? 'var(--color-bg-tertiary)' : 'var(--color-accent-light)',
+                color: plansLocked ? 'var(--color-text-tertiary)' : 'var(--color-accent)',
+                border: `1px solid ${plansLocked ? 'var(--color-border)' : 'var(--color-accent)'}`,
               }}
-              title={plansLocked ? 'Déverrouiller la réorganisation' : 'Verrouiller la réorganisation'}>
+              title={plansLocked ? 'Déverrouiller pour réorganiser' : 'Verrouiller la réorganisation'}>
               {plansLocked ? <Lock size={14} /> : <Unlock size={14} />}
             </button>
             {!plansLocked && (
