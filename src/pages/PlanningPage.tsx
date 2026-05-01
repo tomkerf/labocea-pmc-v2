@@ -436,10 +436,16 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
                   <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Tout est planifié ce mois ✓</p>
                 </div>
-              ) : (
-                <div className="rounded-xl overflow-hidden"
-                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-                  {pool.map((item, i) => {
+              ) : (() => {
+                const planifie   = pool.filter(x => x.sampling.plannedDay > 0)
+                const aplanifier = pool.filter(x => x.sampling.plannedDay === 0)
+                type Group = { label: string; items: typeof pool }
+                const groups: Group[] = [
+                  { label: 'Planifié',    items: planifie },
+                  { label: 'À planifier', items: aplanifier },
+                ].filter(g => g.items.length > 0)
+
+                const renderItem = (item: typeof pool[0], i: number, list: typeof pool) => {
                     const overdue = isSamplingOverdue(item.sampling)
                     const cfgLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[item.sampling.status] ?? SAMPLING_LABEL.planned
                     const cfgColor = overdue ? 'var(--color-danger)' : item.sampling.status === 'non_effectue' ? 'var(--color-warning)' : item.sampling.status === 'done' ? 'var(--color-success)' : 'var(--color-text-secondary)'
@@ -534,9 +540,26 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                       })()}
                     </div>
                   )
-                })}
-              </div>
-            ))}
+                }
+
+                return (
+                  <div className="flex flex-col gap-4">
+                    {groups.map(group => (
+                      <div key={group.label}>
+                        <p className="text-[11px] font-semibold uppercase tracking-wider mb-1.5 px-1"
+                          style={{ color: 'var(--color-text-tertiary)' }}>
+                          {group.label} · {group.items.length}
+                        </p>
+                        <div className="rounded-xl overflow-hidden"
+                          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                          {group.items.map((item, i) => renderItem(item, i, group.items))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()
+            )}
 
           </div>
         </div>
