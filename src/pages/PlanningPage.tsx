@@ -445,7 +445,7 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                   { label: 'À planifier', items: aplanifier },
                 ].filter(g => g.items.length > 0)
 
-                const renderItem = (item: typeof pool[0], i: number, list: typeof pool) => {
+                const renderItem = (item: typeof pool[0], i: number, groupItems: typeof pool) => {
                     const overdue = isSamplingOverdue(item.sampling)
                     const cfgLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[item.sampling.status] ?? SAMPLING_LABEL.planned
                     const cfgColor = overdue ? 'var(--color-danger)' : item.sampling.status === 'non_effectue' ? 'var(--color-warning)' : item.sampling.status === 'done' ? 'var(--color-success)' : 'var(--color-text-secondary)'
@@ -454,7 +454,7 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                     const isValidating = poolValidId === item.sampling.id
                     return (
                       <div key={item.sampling.id}
-                        style={{ borderBottom: i < pool.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
+                        style={{ borderBottom: i < groupItems.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
                         {/* Ligne — tap = ouvrir sélecteur de date */}
                         <button className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
                           onClick={() => isValidating
