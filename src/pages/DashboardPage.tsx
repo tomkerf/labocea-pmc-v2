@@ -234,7 +234,7 @@ export default function DashboardPage() {
 
   // Prélèvements du jour
   type JourItem =
-    | { kind: 'sampling'; time: string; title: string; sub: string; badge: { label: string; bg: string; color: string }; dot: string; modalEvent: ModalEvent }
+    | { kind: 'sampling'; time: string; title: string; sub: string; badge: { label: string; bg: string; color: string }; dot: string; meteo: string; modalEvent: ModalEvent }
     | { kind: 'evenement'; time: string; title: string; sub: string; badge: { label: string; bg: string; color: string }; dot: string; modalEvent: ModalEvent }
 
   const jourItems: JourItem[] = []
@@ -287,6 +287,7 @@ export default function DashboardPage() {
             sub,
             badge,
             dot: samplingDot,
+            meteo: plan.meteo || '',
             modalEvent,
           })
         }
@@ -458,6 +459,9 @@ export default function DashboardPage() {
                     <p className="text-sm font-medium leading-snug" style={{ color: 'var(--color-text-primary)' }}>{item.title}</p>
                     <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{item.sub}</p>
                   </div>
+                  {'meteo' in item && item.meteo === 'pluie' && (
+                    <span title="Prélèvement temps de pluie" className="shrink-0 text-base leading-none">🌧</span>
+                  )}
                   <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
                     style={{ background: item.badge.bg, color: item.badge.color }}>{item.badge.label}</span>
                 </div>
