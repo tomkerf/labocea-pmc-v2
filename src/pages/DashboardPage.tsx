@@ -353,7 +353,7 @@ export default function DashboardPage() {
   // ── Alertes combinées triées par urgence ───────────────────
 
   // Prélèvements en retard
-  const prelevementsEnRetard: { clientNom: string; siteNom: string; planNom: string; clientId: string; planId: string; samplingId: string }[] = []
+  const prelevementsEnRetard: { clientNom: string; siteNom: string; planNom: string; clientId: string; planId: string; samplingId: string; meteo: string }[] = []
   clients.forEach((client: Client) => {
     const clientYear = Number(client.annee) || undefined
     client.plans.forEach((plan: Plan) =>
@@ -366,6 +366,7 @@ export default function DashboardPage() {
             clientId: client.id,
             planId: plan.id,
             samplingId: s.id,
+            meteo: plan.meteo || '',
           })
       })
     )
@@ -616,6 +617,9 @@ export default function DashboardPage() {
                         {[r.siteNom, r.planNom].filter(Boolean).join(' · ')}
                       </p>
                     </div>
+                    {r.meteo === 'pluie' && (
+                      <span title="Prélèvement temps de pluie" className="shrink-0 text-base leading-none">🌧</span>
+                    )}
                     <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"
                       style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
                       En retard
