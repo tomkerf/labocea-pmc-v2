@@ -524,7 +524,8 @@ export default function DashboardPage() {
           ) : (
             <div className="rounded-xl overflow-hidden"
               style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-              {rapportsAFaire.slice(0, 8).map((r, i) => {
+              <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+              {rapportsAFaire.map((r, i) => {
                 const fmtDate = new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
                 const dotColor = r.enRetard ? 'var(--color-danger)' : r.joursDepuis > 15 ? 'var(--color-warning)' : 'var(--color-success)'
                 const tagBg    = r.enRetard ? 'var(--color-danger-light)' : r.joursDepuis > 15 ? 'var(--color-warning-light)' : 'var(--color-success-light)'
@@ -559,11 +560,7 @@ export default function DashboardPage() {
                   </div>
                 )
               })}
-              {rapportsAFaire.length > 8 && (
-                <div className="px-4 py-2.5 text-xs" style={{ color: 'var(--color-text-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
-                  + {rapportsAFaire.length - 8} autres rapports à envoyer
-                </div>
-              )}
+              </div>
             </div>
           )
         )}
@@ -598,33 +595,30 @@ export default function DashboardPage() {
           {retardOpen && (
             <div className="rounded-xl overflow-hidden"
               style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-              {prelevementsEnRetard.slice(0, 6).map((r, i) => (
-                <div
-                  key={r.samplingId}
-                  className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                  style={{ borderBottom: i < Math.min(prelevementsEnRetard.length, 6) - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
-                  onClick={() => navigate(`/missions/${r.clientId}/plan/${r.planId}`)}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                >
-                  <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: 'var(--color-danger)' }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{r.clientNom}</p>
-                    <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                      {[r.siteNom, r.planNom].filter(Boolean).join(' · ')}
-                    </p>
+              <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+                {prelevementsEnRetard.map((r, i) => (
+                  <div
+                    key={r.samplingId}
+                    className="flex items-center gap-3 px-4 py-3 cursor-pointer"
+                    style={{ borderBottom: i < prelevementsEnRetard.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                    onClick={() => navigate(`/missions/${r.clientId}/plan/${r.planId}`)}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: 'var(--color-danger)' }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{r.clientNom}</p>
+                      <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                        {[r.siteNom, r.planNom].filter(Boolean).join(' · ')}
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                      style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+                      En retard
+                    </span>
                   </div>
-                  <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                    style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
-                    En retard
-                  </span>
-                </div>
-              ))}
-              {prelevementsEnRetard.length > 6 && (
-                <div className="px-4 py-2.5 text-xs" style={{ color: 'var(--color-text-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
-                  + {prelevementsEnRetard.length - 6} autres prélèvements en retard
-                </div>
-              )}
+                ))}
+              </div>
             </div>
           )}
         </div>
