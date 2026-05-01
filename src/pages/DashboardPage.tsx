@@ -108,8 +108,8 @@ export default function DashboardPage() {
   const [eventDetail, setEventDetail] = useState<{ event: ModalEvent; dateStr: string } | null>(null)
 
   // Sections repliables
-  const [rapportsOpen,  setRapportsOpen]  = useState(true)
-  const [retardOpen,    setRetardOpen]    = useState(true)
+  const [rapportsOpen,  setRapportsOpen]  = useState(false)
+  const [retardOpen,    setRetardOpen]    = useState(false)
   const { equipements } = useEquipementsStore()
   const { verifications } = useMetrologieStore()
 
