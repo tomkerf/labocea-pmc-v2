@@ -61,7 +61,6 @@ interface PoolItem {
   siteNom: string
   techInitiales: string
   meteo: string
-  category: 'retard' | 'planifie' | 'aplanifier'
 }
 
 type ViewMode = 'jour' | 'semaine' | 'mois'
@@ -437,31 +436,10 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
                   <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Tout est planifié ce mois ✓</p>
                 </div>
-              ) : (() => {
-                const CATS: { key: PoolItem['category']; label: string; color: string; bg: string }[] = [
-                  { key: 'retard',     label: 'En retard',    color: 'var(--color-danger)',          bg: 'var(--color-danger-light)' },
-                  { key: 'planifie',   label: 'Planifié',     color: 'var(--color-accent)',           bg: 'var(--color-accent-light)' },
-                  { key: 'aplanifier', label: 'À planifier',  color: 'var(--color-text-secondary)',   bg: 'var(--color-bg-tertiary)' },
-                ]
-                return (
-                <div className="flex flex-col gap-3">
-                  {CATS.map(cat => {
-                    const items = pool.filter(x => x.category === cat.key)
-                    if (items.length === 0) return null
-                    return (
-                      <div key={cat.key}>
-                        {/* Header section */}
-                        <div className="flex items-center gap-2 mb-1.5 px-1">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: cat.color }}>
-                            {cat.label}
-                          </span>
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: cat.bg, color: cat.color }}>
-                            {items.length}
-                          </span>
-                        </div>
-                        <div className="rounded-xl overflow-hidden"
-                          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-                          {items.map((item, i) => {
+              ) : (
+                <div className="rounded-xl overflow-hidden"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                  {pool.map((item, i) => {
                     const overdue = isSamplingOverdue(item.sampling)
                     const cfgLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[item.sampling.status] ?? SAMPLING_LABEL.planned
                     const cfgColor = overdue ? 'var(--color-danger)' : item.sampling.status === 'non_effectue' ? 'var(--color-warning)' : item.sampling.status === 'done' ? 'var(--color-success)' : 'var(--color-text-secondary)'
@@ -551,19 +529,13 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                                 <span>{poolHoliday} — planification impossible sur un jour férié.</span>
                               </p>
                             )}
-                          </div>
-                          )
-                        })()}
-                      </div>
-                    )
-                  })}
                         </div>
-                      </div>
-                    )
-                  })}
-                </div>
-                )
-              })()
+                        )
+                      })()}
+                    </div>
+                  )
+                })}
+              </div>
             )}
 
           </div>
@@ -1528,44 +1500,31 @@ export default function PlanningPage() {
 
   const poolSamplings = useMemo((): PoolItem[] => {
     if (!selectedDay) return []
-    const currentMonth = new Date(selectedDay + 'T12:00:00').getMonth()
+    const month = new Date(selectedDay + 'T12:00:00').getMonth()
     const result: PoolItem[] = []
-
     clients.forEach((client: Client) => {
       client.plans.forEach(plan => {
         plan.samplings.forEach((s: Sampling) => {
-          if (s.status === 'done') return
-          const isCurrentMonth = s.plannedMonth === currentMonth
-          const isPrevMonth    = s.plannedMonth < currentMonth
-          if (!isCurrentMonth && !isPrevMonth) return
-
-          const overdue = isSamplingOverdue(s)
-          // Les samplings des mois précédents non faits sont forcément en retard
-          const category: PoolItem['category'] =
-            overdue || isPrevMonth ? 'retard'
-            : s.plannedDay > 0     ? 'planifie'
-            :                        'aplanifier'
-
-          result.push({
-            sampling: s,
-            clientId: client.id,
-            clientNom: client.nom,
-            planId: plan.id,
-            planNom: plan.nom,
-            siteNom: plan.siteNom,
-            techInitiales: client.preleveur || '—',
-            meteo: plan.meteo || '',
-            category,
-          })
+          if (s.plannedMonth === month && s.status !== 'done') {
+            result.push({
+              sampling: s,
+              clientId: client.id,
+              clientNom: client.nom,
+              planId: plan.id,
+              planNom: plan.nom,
+              siteNom: plan.siteNom,
+              techInitiales: client.preleveur || '—',
+              meteo: plan.meteo || '',
+            })
+          }
         })
       })
     })
-
-    // Tri : retard → planifié → à planifier, puis par client
-    const catOrder: Record<PoolItem['category'], number> = { retard: 0, planifie: 1, aplanifier: 2 }
+    // Tri : en retard en premier, puis par client
     return result.sort((a, b) => {
-      const catDiff = catOrder[a.category] - catOrder[b.category]
-      if (catDiff !== 0) return catDiff
+      const aOvr = isSamplingOverdue(a.sampling) ? 0 : 1
+      const bOvr = isSamplingOverdue(b.sampling) ? 0 : 1
+      if (aOvr !== bOvr) return aOvr - bOvr
       return a.clientNom.localeCompare(b.clientNom)
     })
   }, [selectedDay, clients])
