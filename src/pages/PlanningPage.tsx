@@ -536,7 +536,7 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                   )
                 })}
               </div>
-            )}
+            ))}
 
           </div>
         </div>
