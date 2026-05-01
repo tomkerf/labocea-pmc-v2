@@ -38,6 +38,7 @@ interface PlanningEvent {
   planId?: string
   samplingId?: string
   meteo?: string
+  analysesSousTraitees?: boolean
   maintenanceData?: Maintenance
   evenementData?: EvenementPersonnel
   // Fantôme (historique report / retrait)
@@ -62,6 +63,7 @@ interface PoolItem {
   frequence: string
   techInitiales: string
   meteo: string
+  analysesSousTraitees: boolean
 }
 
 type ViewMode = 'jour' | 'semaine' | 'mois'
@@ -102,6 +104,15 @@ function getFrenchHolidays(year: number): Record<string, string> {
     [fmt(new Date(year, 10, 11))]: 'Armistice',
     [fmt(new Date(year, 11, 25))]: 'Noël',
   }
+}
+
+/** Retourne le nom du jour férié si dateStr est la veille, sinon null */
+function isVeilleJourFerie(dateStr: string): string | null {
+  const d    = new Date(dateStr + 'T12:00:00')
+  const next = new Date(d); next.setDate(next.getDate() + 1)
+  const nextStr = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`
+  const holidays = getFrenchHolidays(next.getFullYear())
+  return holidays[nextStr] ?? null
 }
 
 function startOfWeek(d: Date): Date {
@@ -498,6 +509,13 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                                   style={{ background: '#EFF6FF', color: '#3B82F6' }}
                                   title="Prélèvement à réaliser par temps de pluie">
                                   🌧 Pluie
+                                </span>
+                              )}
+                              {item.analysesSousTraitees && isVeilleJourFerie(dateStr) && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                                  style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}
+                                  title={`Analyses sous-traitées — veille de ${isVeilleJourFerie(dateStr)}`}>
+                                  ⚠️ Veille de férié
                                 </span>
                               )}
                             </div>
@@ -1337,6 +1355,7 @@ export default function PlanningPage() {
             isDone, technicien: technicien || '—',
             plannedTime: s.plannedTime, clientId:client.id, planId:plan.id, samplingId:s.id,
             meteo: plan.meteo || '',
+            analysesSousTraitees: plan.analysesSousTraitees ?? false,
           }
           // Méthode Automatique = bilan 24h → J1 + J2 le lendemain
           if (isAuto) {
@@ -1545,6 +1564,7 @@ export default function PlanningPage() {
               frequence: plan.frequence || '',
               techInitiales: client.preleveur || '—',
               meteo: plan.meteo || '',
+              analysesSousTraitees: plan.analysesSousTraitees ?? false,
             })
           }
         })
@@ -1862,8 +1882,8 @@ export default function PlanningPage() {
 
   // ── EventPill (calendrier desktop) ─────────────────────
 
-  function EventPill({ event, compact, onExpand, onSelect }: {
-    event: PlanningEvent; compact?: boolean; onExpand?: () => void
+  function EventPill({ event, compact, dateStr, onExpand, onSelect }: {
+    event: PlanningEvent; compact?: boolean; dateStr?: string; onExpand?: () => void
     onSelect?: (event: PlanningEvent) => void
   }) {
     // compact = true en vue mois : une seule ligne, pas de sous-titre
@@ -1933,6 +1953,11 @@ export default function PlanningPage() {
     const isJ1 = event.type === 'prelevement' && !!event.dateFin
     const isJ2 = event.isJ2Continuation === true
 
+    // Veille de jour férié — uniquement pour les plans sous-traités
+    const veilleFerrieNom = event.analysesSousTraitees && dateStr && !event.isDone
+      ? isVeilleJourFerie(dateStr)
+      : null
+
     // Congé : pill gris clair, texte muted, emoji 🏖️ à la place du dot
     if (isConge) {
       return (
@@ -1973,6 +1998,9 @@ export default function PlanningPage() {
           }
           {event.meteo === 'pluie' && (
             <span className="shrink-0 text-[10px]" title="Prélèvement par temps de pluie">🌧</span>
+          )}
+          {veilleFerrieNom && (
+            <span className="shrink-0 text-[10px]" title={`Analyses sous-traitées — veille de ${veilleFerrieNom}`}>⚠️</span>
           )}
           <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
             {event.title}
@@ -2532,6 +2560,7 @@ export default function PlanningPage() {
                             <div key={item.event.id} style={{ flex: 1, minWidth: 0 }}>
                               <EventPill
                                 event={item.event}
+                                dateStr={wISOs[item.colIdx]}
                                 onSelect={e => handleSelectEvent(e, wISOs[item.colIdx])}
                               />
                             </div>
@@ -2614,7 +2643,7 @@ export default function PlanningPage() {
                     {isHoliday && !inDrag && <div className="holiday-overlay" />}
                     {/* Overlay congé/RTT */}
                     {!isHoliday && hasConge && !inDrag && <div className="conge-overlay" />}
-                    {evts.map(evt => <EventPill key={evt.id} event={evt} onExpand={() => goToDay(dateStr)} onSelect={e => handleSelectEvent(e, dateStr)} />)}
+                    {evts.map(evt => <EventPill key={evt.id} event={evt} dateStr={dateStr} onExpand={() => goToDay(dateStr)} onSelect={e => handleSelectEvent(e, dateStr)} />)}
                     <div className="mt-auto pt-1 flex justify-end pr-0.5">
                       <Plus size={10} className="opacity-20 group-hover:opacity-60 transition-opacity"
                         style={{ color: 'var(--color-text-tertiary)' }} />
@@ -2703,7 +2732,7 @@ export default function PlanningPage() {
                       <Plus size={10} className="opacity-25 group-hover:opacity-70 transition-opacity"
                         style={{ color: 'var(--color-text-tertiary)' }} />
                     </div>
-                    {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact onExpand={() => goToDay(dateStr)} onSelect={e => handleSelectEvent(e, dateStr)} />)}
+                    {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact dateStr={dateStr} onExpand={() => goToDay(dateStr)} onSelect={e => handleSelectEvent(e, dateStr)} />)}
                     {evts.length>MAX && (
                       <span className="text-[10px] pl-1 mt-0.5" style={{ color:'var(--color-text-tertiary)' }}>
                         +{evts.length-MAX} autres

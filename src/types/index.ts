@@ -102,8 +102,9 @@ export interface Plan {
   bimensuelMonths: number[]
   defaultDay: number
   customDays: Record<string, number>
-  notes?: string        // commentaire libre sur le point de prélèvement
-  separator?: boolean   // si true, cet élément est un séparateur visuel (pas un vrai plan)
+  notes?: string               // commentaire libre sur le point de prélèvement
+  analysesSousTraitees?: boolean // si true, analyses confiées à un sous-traitant (ex : RSDE, CORPEP)
+  separator?: boolean          // si true, cet élément est un séparateur visuel (pas un vrai plan)
   samplings: Sampling[]
 }
 

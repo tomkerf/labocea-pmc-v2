@@ -3,7 +3,7 @@
 // Sections : planifier une intervention, bilans 24h, statuts
 // ============================================================
 
-import { CalendarDays, CheckCircle2, Clock, XCircle, AlertTriangle, ChevronRight, Droplets, ClipboardList } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Clock, XCircle, AlertTriangle, ChevronRight, Droplets, ClipboardList, FolderPlus, MapPin } from 'lucide-react'
 
 // ── Composants locaux ────────────────────────────────────────
 
@@ -92,6 +92,121 @@ export default function AidePage() {
           Guide à destination des techniciens — planification des interventions.
         </p>
       </div>
+
+      {/* ── 0. Créer une mission ── */}
+      <Section icon={FolderPlus} title="Créer une mission client">
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Une mission regroupe un client, ses sites de prélèvement et ses plans d'échantillonnage.
+          Voici comment en créer une de A à Z.
+        </p>
+
+        <div className="flex flex-col gap-4 mb-4">
+
+          {/* Bloc : Nouveau client */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-2"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Étape 1 — Créer le client
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={1}>
+                <span>Va sur la page <strong>Missions</strong> et clique sur <strong>+ Nouveau client</strong> (bouton en haut à droite).</span>
+              </Step>
+              <Step num={2}>
+                <span>
+                  Remplis la fiche client : <strong>nom</strong>, <strong>interlocuteur</strong>, <strong>segment</strong> (AEP, Eaux usées, Réseaux de mesure…),
+                  <strong> technicien assigné</strong> (initiales), <strong>numéro de devis</strong> et <strong>sites</strong> concernés.
+                  Les champs sont sauvegardés automatiquement à chaque modification.
+                </span>
+              </Step>
+            </div>
+          </div>
+
+          {/* Séparateur */}
+          <div style={{ borderTop: '1px solid var(--color-border-subtle)' }} />
+
+          {/* Bloc : Nouveau plan */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-2"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Étape 2 — Créer un plan de prélèvement
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={3}>
+                <span>
+                  Dans la fiche client, clique sur <strong>+ Nouveau plan</strong>. Un plan correspond à un site
+                  et une fréquence d'intervention (mensuel, trimestriel, semestriel, annuel…).
+                </span>
+              </Step>
+              <Step num={4}>
+                <span>
+                  Renseigne les paramètres du plan : <strong>nom du site</strong>, <strong>fréquence</strong>,
+                  <strong> nature de l'eau</strong> (AEP, Rivière, Eau usée…), <strong>méthode</strong> (ponctuel, composite, automatique)
+                  et <strong>conditions météo</strong> (temps de pluie si applicable).
+                </span>
+              </Step>
+              <Step num={5}>
+                <span>
+                  Saisis les <strong>coordonnées GPS</strong> du point de prélèvement si disponibles
+                  (latitude / longitude). Une case à cocher indique si les coordonnées sont approximatives.
+                  Ces informations s'affichent ensuite dans la fiche d'intervention sur le terrain.
+                </span>
+              </Step>
+              <Step num={6}>
+                <span>
+                  L'application <strong>génère automatiquement le calendrier des prélèvements</strong> pour l'année
+                  en cours selon la fréquence choisie. Chaque prélèvement est créé avec le statut{' '}
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                    style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                    Planifié
+                  </span>.
+                </span>
+              </Step>
+            </div>
+          </div>
+
+          {/* Séparateur */}
+          <div style={{ borderTop: '1px solid var(--color-border-subtle)' }} />
+
+          {/* Bloc : Personnalisation */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-2"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Étape 3 — Ajuster les points du calendrier
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={7}>
+                <span>
+                  Dans la fiche plan, tu vois le calendrier annuel avec chaque prélèvement représenté par une <strong>pill</strong>.
+                  Clique sur une pill pour ouvrir sa fiche et modifier le jour prévu, le statut ou ajouter un commentaire.
+                </span>
+              </Step>
+              <Step num={8}>
+                <span>
+                  Pour les plans <strong>trimestriels</strong> ou <strong>bimestriels</strong>, tu peux choisir les mois actifs
+                  (ex : janvier, avril, juillet, octobre) et définir un jour différent par mois si nécessaire.
+                </span>
+              </Step>
+              <Step num={9}>
+                <span>
+                  Tu peux <strong>déplacer un prélèvement</strong> vers un autre jour depuis la vue Planning
+                  (glisser-déposer la pill). Le changement est sauvegardé immédiatement.
+                </span>
+              </Step>
+            </div>
+          </div>
+        </div>
+
+        {/* Astuce GPS */}
+        <div className="flex gap-2 px-3 py-2.5 rounded-lg"
+          style={{ background: 'var(--color-accent-light)' }}>
+          <MapPin size={15} strokeWidth={2} className="shrink-0 mt-0.5" style={{ color: 'var(--color-accent)' }} />
+          <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+            <strong>Plusieurs sites pour un même client</strong> — crée un plan par site.
+            Chaque plan a sa propre fréquence, ses propres coordonnées GPS et son calendrier indépendant.
+          </p>
+        </div>
+      </Section>
 
       {/* ── 1. Planifier une intervention ── */}
       <Section icon={CalendarDays} title="Planifier une intervention">

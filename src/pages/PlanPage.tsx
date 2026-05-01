@@ -432,7 +432,7 @@ export default function PlanPage() {
               placeholder="Accès, particularités du site, consignes terrain…"
             />
           </PlanField>
-          <PlanField label="Conditions météo" last>
+          <PlanField label="Conditions météo">
             <label className="flex items-center gap-2 mt-1 cursor-pointer">
               <input
                 type="checkbox"
@@ -441,6 +441,20 @@ export default function PlanPage() {
               />
               <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
                 {plan.meteo === 'pluie' ? '🌧 Temps de pluie requis' : 'Pas de contrainte météo'}
+              </span>
+            </label>
+          </PlanField>
+          <PlanField label="Analyses" last>
+            <label className="flex items-center gap-2 mt-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!!plan.analysesSousTraitees}
+                onChange={(e) => updatePlan('analysesSousTraitees', e.target.checked)}
+              />
+              <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                {plan.analysesSousTraitees
+                  ? '⚠️ Analyses sous-traitées — ne pas prélever la veille d\'un jour férié'
+                  : 'Analyses en interne (labo Labocea)'}
               </span>
             </label>
           </PlanField>
