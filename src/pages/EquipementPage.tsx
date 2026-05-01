@@ -4,7 +4,7 @@ import { ChevronLeft, Trash2, AlertTriangle, Gauge, Wrench, Package, Clock, Plus
 import { doc, onSnapshot, deleteDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveEquipement } from '@/hooks/useEquipements'
-import { useVerificationsListener } from '@/hooks/useVerifications'
+import { useVerificationsListener, saveVerification } from '@/hooks/useVerifications'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
@@ -281,7 +281,14 @@ export default function EquipementPage() {
           const notes = (equipement.ficheDeVieNotes ?? []).filter((n) => n.id !== id)
           update('ficheDeVieNotes', notes)
         }}
+        onAddVerification={async (verif) => {
+          if (!uid) return
+          await saveVerification(verif, uid)
+        }}
         initiales={initiales}
+        uid={uid}
+        equipementId={equipementId!}
+        equipementNom={equipement.nom}
       />
     </div>
   )
@@ -407,18 +414,30 @@ function exportFicheDeViePDF(
   setTimeout(() => w.print(), 400)
 }
 
-function FicheDeVie({ equipement, verifications, maintenances, onAddNote, onDeleteNote, initiales }: {
+function FicheDeVie({ equipement, verifications, maintenances, onAddNote, onDeleteNote, onAddVerification, initiales, uid, equipementId, equipementNom }: {
   equipement: Equipement
   verifications: Verification[]
   maintenances: Maintenance[]
   onAddNote: (note: FicheDeVieNote) => void
   onDeleteNote: (id: string) => void
+  onAddVerification: (v: Verification) => Promise<void>
   initiales: string
+  uid: string
+  equipementId: string
+  equipementNom: string
 }) {
-  const [showForm, setShowForm] = useState(false)
-  const [formDate, setFormDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [showForm,  setShowForm]  = useState(false)
+  const [showVerif, setShowVerif] = useState(false)
+  const [formDate,  setFormDate]  = useState(() => new Date().toISOString().slice(0, 10))
   const [formTitre, setFormTitre] = useState('')
   const [formNotes, setFormNotes] = useState('')
+  // Formulaire vérification
+  const [verifDate,     setVerifDate]     = useState(() => new Date().toISOString().slice(0, 10))
+  const [verifType,     setVerifType]     = useState<'etalonnage_interne'|'verification_externe'|'controle_terrain'>('etalonnage_interne')
+  const [verifResultat, setVerifResultat] = useState<'conforme'|'non_conforme'|'a_reprendre'>('conforme')
+  const [verifRemarques, setVerifRemarques] = useState('')
+  const [verifProchain, setVerifProchain] = useState('')
+  const [verifSaving,  setVerifSaving]   = useState(false)
 
   function handleAddNote() {
     if (!formTitre.trim()) return
@@ -431,6 +450,28 @@ function FicheDeVie({ equipement, verifications, maintenances, onAddNote, onDele
     }
     onAddNote(note)
     setFormTitre(''); setFormNotes(''); setShowForm(false)
+  }
+
+  async function handleAddVerification() {
+    if (!verifDate || verifSaving) return
+    setVerifSaving(true)
+    const verif: Verification = {
+      id: crypto.randomUUID(),
+      equipementId,
+      equipementNom,
+      type: verifType,
+      date: verifDate,
+      resultat: verifResultat,
+      remarques: verifRemarques.trim(),
+      prochainControle: verifProchain,
+      technicienUid: uid,
+      technicienNom: initiales,
+      documentUrl: '',
+      createdAt: new Date().toISOString(),
+    }
+    await onAddVerification(verif)
+    setVerifRemarques(''); setVerifProchain(''); setShowVerif(false)
+    setVerifSaving(false)
   }
 
   // Calcul ancienneté
@@ -483,11 +524,18 @@ function FicheDeVie({ equipement, verifications, maintenances, onAddNote, onDele
             <FileText size={12} /> Exporter PDF
           </button>
           <button
-            onClick={() => setShowForm((v) => !v)}
+            onClick={() => { setShowVerif(v => !v); setShowForm(false) }}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
+            style={{ background: showVerif ? 'var(--color-success-light)' : 'var(--color-bg-tertiary)', color: showVerif ? 'var(--color-success)' : 'var(--color-text-secondary)', border: '1px solid var(--color-border-subtle)' }}
+          >
+            <Gauge size={12} /> Vérification
+          </button>
+          <button
+            onClick={() => { setShowForm(v => !v); setShowVerif(false) }}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
             style={{ background: showForm ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)', color: showForm ? 'var(--color-accent)' : 'var(--color-text-secondary)', border: '1px solid var(--color-border-subtle)' }}
           >
-            <Plus size={12} /> Ajouter une note
+            <Plus size={12} /> Note
           </button>
         </div>
       </div>
@@ -542,6 +590,58 @@ function FicheDeVie({ equipement, verifications, maintenances, onAddNote, onDele
               style={{ background: 'var(--color-accent)', color: 'white', opacity: formTitre.trim() ? 1 : 0.5 }}
             >
               Enregistrer
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Formulaire vérification rapide */}
+      {showVerif && (
+        <div className="rounded-xl p-4 mb-3"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-success)', boxShadow: 'var(--shadow-card)' }}>
+          <p className="text-xs font-semibold mb-3" style={{ color: 'var(--color-success)' }}>Nouvelle vérification</p>
+          <div className="flex gap-3 mb-2 flex-wrap">
+            <div>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Type</label>
+              <select value={verifType} onChange={e => setVerifType(e.target.value as typeof verifType)} className="field-input">
+                <option value="etalonnage_interne">Étalonnage interne</option>
+                <option value="verification_externe">Vérification externe</option>
+                <option value="controle_terrain">Contrôle terrain</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Date</label>
+              <input type="date" value={verifDate} onChange={e => setVerifDate(e.target.value)} className="field-input" />
+            </div>
+            <div>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Résultat</label>
+              <select value={verifResultat} onChange={e => setVerifResultat(e.target.value as typeof verifResultat)} className="field-input">
+                <option value="conforme">Conforme</option>
+                <option value="non_conforme">Non conforme</option>
+                <option value="a_reprendre">À reprendre</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Prochain contrôle</label>
+              <input type="date" value={verifProchain} onChange={e => setVerifProchain(e.target.value)} className="field-input" />
+            </div>
+          </div>
+          <div className="mb-3">
+            <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Remarques (optionnel)</label>
+            <textarea value={verifRemarques} onChange={e => setVerifRemarques(e.target.value)} rows={2}
+              placeholder="Observations, dérives constatées…"
+              className="field-input w-full resize-none" />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button onClick={() => setShowVerif(false)}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium"
+              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+              Annuler
+            </button>
+            <button onClick={handleAddVerification} disabled={!verifDate || verifSaving}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium"
+              style={{ background: 'var(--color-success)', color: 'white', opacity: !verifDate || verifSaving ? 0.5 : 1 }}>
+              {verifSaving ? '…' : 'Enregistrer'}
             </button>
           </div>
         </div>
