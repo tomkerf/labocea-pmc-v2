@@ -703,7 +703,9 @@ export default function DashboardPage() {
             if (!uid || !ev.clientId || !ev.planId || !ev.samplingId) return
             const client = clients.find((c: Client) => c.id === ev.clientId)
             if (!client) return
-            const plannedDay = new Date(newDate + 'T12:00:00').getDate()
+            const newDateObj_   = new Date(newDate + 'T12:00:00')
+            const plannedDay   = newDateObj_.getDate()
+            const plannedMonth = newDateObj_.getMonth()
             await saveClient({
               ...client,
               plans: client.plans.map((plan: Plan) => plan.id !== ev.planId ? plan : {
@@ -712,7 +714,7 @@ export default function DashboardPage() {
                   if (s.id !== ev.samplingId) return s
                   const fromDate = `${new Date().getFullYear()}-${String(s.plannedMonth + 1).padStart(2, '0')}-${String(s.plannedDay).padStart(2, '0')}`
                   const historyEntry = { from: fromDate, to: newDate, by: uid, reason, at: new Date().toISOString() }
-                  return { ...s, plannedDay, reportHistory: [...(s.reportHistory ?? []), historyEntry] }
+                  return { ...s, plannedDay, plannedMonth, reportHistory: [...(s.reportHistory ?? []), historyEntry] }
                 }),
               }),
             }, uid)

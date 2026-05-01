@@ -1720,7 +1720,9 @@ export default function PlanningPage() {
     if (!uid || !event.clientId || !event.planId || !event.samplingId) return
     const client = clients.find((c: Client) => c.id === event.clientId)
     if (!client) return
-    const plannedDay = new Date(newDate + 'T12:00:00').getDate()
+    const newDateObj   = new Date(newDate + 'T12:00:00')
+    const plannedDay   = newDateObj.getDate()
+    const plannedMonth = newDateObj.getMonth()
     await saveClient({
       ...client,
       plans: client.plans.map(plan => plan.id !== event.planId ? plan : {
@@ -1729,7 +1731,7 @@ export default function PlanningPage() {
           if (s.id !== event.samplingId) return s
           const fromDate = toISO(new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay))
           const historyEntry = { from: fromDate, to: newDate, by: uid, reason, at: new Date().toISOString() }
-          return { ...s, plannedDay, reportHistory: [...(s.reportHistory ?? []), historyEntry] }
+          return { ...s, plannedDay, plannedMonth, reportHistory: [...(s.reportHistory ?? []), historyEntry] }
         })
       })
     }, uid)
@@ -1801,13 +1803,15 @@ export default function PlanningPage() {
     if (holidays[date]) return // jour férié — bloqué
     const client = clients.find((c: Client) => c.id === item.clientId)
     if (!client) return
-    const plannedDay = new Date(date + 'T12:00:00').getDate()
+    const poolDateObj  = new Date(date + 'T12:00:00')
+    const plannedDay   = poolDateObj.getDate()
+    const plannedMonth = poolDateObj.getMonth()
     await saveClient({
       ...client,
       plans: client.plans.map(plan => plan.id !== item.planId ? plan : {
         ...plan,
         samplings: plan.samplings.map((s: Sampling) =>
-          s.id !== item.sampling.id ? s : { ...s, plannedDay }
+          s.id !== item.sampling.id ? s : { ...s, plannedDay, plannedMonth }
         )
       })
     }, uid)
