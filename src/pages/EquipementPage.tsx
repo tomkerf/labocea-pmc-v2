@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Trash2, AlertTriangle, Gauge, Wrench, Package, Clock, Plus, FileText, StickyNote } from 'lucide-react'
-import { doc, onSnapshot, deleteDoc } from 'firebase/firestore'
+import { doc, onSnapshot, deleteDoc, Timestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveEquipement } from '@/hooks/useEquipements'
 import { useVerificationsListener, saveVerification } from '@/hooks/useVerifications'
@@ -286,7 +286,7 @@ export default function EquipementPage() {
           await saveVerification(verif, uid)
         }}
         initiales={initiales}
-        uid={uid}
+        uid={uid ?? ''}
         equipementId={equipementId!}
         equipementNom={equipement.nom}
       />
@@ -467,7 +467,7 @@ function FicheDeVie({ equipement, verifications, maintenances, onAddNote, onDele
       technicienUid: uid,
       technicienNom: initiales,
       documentUrl: '',
-      createdAt: new Date().toISOString(),
+      createdAt: Timestamp.now(),
     }
     await onAddVerification(verif)
     setVerifRemarques(''); setVerifProchain(''); setShowVerif(false)
