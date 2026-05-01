@@ -108,8 +108,9 @@ export default function DashboardPage() {
   const [eventDetail, setEventDetail] = useState<{ event: ModalEvent; dateStr: string } | null>(null)
 
   // Sections repliables
-  const [rapportsOpen,  setRapportsOpen]  = useState(false)
-  const [retardOpen,    setRetardOpen]    = useState(false)
+  const [rapportsOpen,      setRapportsOpen]      = useState(false)
+  const [retardOpen,        setRetardOpen]        = useState(false)
+  const [maintenancesOpen,  setMaintenancesOpen]  = useState(false)
   const { equipements } = useEquipementsStore()
   const { verifications } = useMetrologieStore()
 
@@ -635,7 +636,30 @@ export default function DashboardPage() {
       {/* Maintenances actives */}
       {maintenancesActives.length > 0 && (
         <div className="mb-6">
-          <SectionTitle>Maintenances</SectionTitle>
+          <button
+            onClick={() => setMaintenancesOpen(o => !o)}
+            className="flex items-center gap-2 mb-3 w-full text-left"
+          >
+            <span className="text-xs font-semibold uppercase"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Maintenances
+            </span>
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+              {maintenancesActives.length}
+            </span>
+            <ChevronDown
+              size={14}
+              strokeWidth={2}
+              style={{
+                color: 'var(--color-text-tertiary)',
+                marginLeft: 'auto',
+                transform: maintenancesOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+                transition: 'transform 0.2s ease',
+              }}
+            />
+          </button>
+          {maintenancesOpen && (
           <div className="rounded-xl overflow-hidden"
             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             <div style={{ maxHeight: 280, overflowY: 'auto' }}>
@@ -672,6 +696,7 @@ export default function DashboardPage() {
             })}
             </div>
           </div>
+          )}
         </div>
       )}
 
