@@ -470,9 +470,11 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                             </p>
                             <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
                               {item.planNom}{item.siteNom ? ` · ${item.siteNom}` : ''}
-                              <span className="ml-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                                — {MOIS_LONG[item.sampling.plannedMonth]} n°{item.sampling.num}
-                              </span>
+                              {item.frequence && (
+                                <span className="ml-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                                  — {item.frequence}
+                                </span>
+                              )}
                             </p>
                             <div className="flex items-center gap-1.5 mt-1.5">
                               <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
