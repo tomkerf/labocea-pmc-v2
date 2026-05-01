@@ -183,9 +183,18 @@ function ChargeEquipe() {
         if (plan.separator) return
         plan.samplings.forEach(s => {
           if (s.status === 'done' || s.status === 'non_effectue') return
-          if (!s.plannedDay) return
-          const date = new Date(currentYear, s.plannedMonth, s.plannedDay)
-          if (date < start || date > end) return
+
+          // Vue mois : inclure les prélèvements non datés (pool) s'ils sont dans le bon mois
+          // Vue semaine : exclure les prélèvements sans jour précis
+          if (viewMode === 'semaine') {
+            if (!s.plannedDay) return
+            const date = new Date(currentYear, s.plannedMonth, s.plannedDay)
+            if (date < start || date > end) return
+          } else {
+            // Mois : matcher sur plannedMonth uniquement (pool inclus)
+            if (s.plannedMonth !== start.getMonth()) return
+          }
+
           const tech = s.assignedTo || client.preleveur || '—'
           add(tech, plan.nature, plan.methode)
         })
