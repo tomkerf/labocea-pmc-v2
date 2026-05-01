@@ -630,6 +630,7 @@ export default function DashboardPage() {
           <SectionTitle>Maintenances</SectionTitle>
           <div className="rounded-xl overflow-hidden"
             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            <div style={{ maxHeight: 280, overflowY: 'auto' }}>
             {maintenancesActives.map((m: Maintenance, i: number) => {
               const enCours  = m.statut === 'en_cours'
               const enRetard = m.statut === 'planifiee' && daysDiff(m.datePrevue) < 0
@@ -661,6 +662,7 @@ export default function DashboardPage() {
                 </div>
               )
             })}
+            </div>
           </div>
         </div>
       )}
