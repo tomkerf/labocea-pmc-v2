@@ -5,7 +5,7 @@ import { ChevronDown } from 'lucide-react'
 import DonutChart from '@/components/dashboard/DonutChart'
 import { EventDetailModal } from '@/components/EventDetailModal'
 import type { ModalEvent, TechOption } from '@/components/EventDetailModal'
-import { useAuthStore, selectPrenom, selectInitiales, selectUid } from '@/stores/authStore'
+import { useAuthStore, selectPrenom, selectInitiales, selectUid, selectRole } from '@/stores/authStore'
 import { useClientsListener, saveClient } from '@/hooks/useClients'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -94,6 +94,9 @@ export default function DashboardPage() {
   const prenom = useAuthStore(selectPrenom)
   const initiales = useAuthStore(selectInitiales)
   const uid = useAuthStore(selectUid)
+  const role = useAuthStore(selectRole)
+  // Le chargé de mission et l'admin voient tous les techniciens (pas de filtre)
+  const isGeneraliste = role === 'charge_mission' || role === 'admin'
 
   // Listeners temps réel
   useClientsListener()
@@ -165,11 +168,11 @@ export default function DashboardPage() {
         plan.samplings.forEach((s: Sampling) => {
           if (!s.rapportPrevu || s.rapportDate) return
           if (s.status !== 'done' || !s.doneDate) return
-          // Filtrer par technicien : doneBy (uid) en priorité, sinon preleveur du client
-          const estMonRapport = s.doneBy
-            ? s.doneBy === uid
-            : client.preleveur === initiales
-          if (!estMonRapport) return
+          // Filtrer par technicien sauf pour le chargé de mission / admin
+          if (!isGeneraliste) {
+            const estMonRapport = s.doneBy ? s.doneBy === uid : client.preleveur === initiales
+            if (!estMonRapport) return
+          }
           const msDay = 1000 * 60 * 60 * 24
           const joursDepuis = Math.floor((new Date(todayISO).getTime() - new Date(s.doneDate).getTime()) / msDay)
           result.push({
@@ -241,7 +244,7 @@ export default function DashboardPage() {
   const jourItems: JourItem[] = []
 
   clients.forEach((client) => {
-    if (initiales && client.preleveur && client.preleveur !== initiales) return
+    if (!isGeneraliste && initiales && client.preleveur && client.preleveur !== initiales) return
     client.plans.forEach((plan) => {
       // Détecte un offset J2, J3… dans le nom du plan (ex : "Bilan 24h J2" → offset 1 jour)
       const planNom = `${plan.nom || ''} ${plan.siteNom || ''}`
@@ -299,8 +302,8 @@ export default function DashboardPage() {
   // Événements du jour (date ≤ today ≤ dateFin ou date === today)
   evenements
     .filter((ev: EvenementPersonnel) => {
-      // Filtrer par technicien connecté
-      if (initiales && ev.createdByInitiales && ev.createdByInitiales !== initiales) return false
+      // Filtrer par technicien connecté (sauf généraliste)
+      if (!isGeneraliste && initiales && ev.createdByInitiales && ev.createdByInitiales !== initiales) return false
       if (ev.dateFin && ev.dateFin > ev.date) {
         // Événement multi-jours : today doit être dans la plage
         return ev.date <= todayISO && ev.dateFin >= todayISO
