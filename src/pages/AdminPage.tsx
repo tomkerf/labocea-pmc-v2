@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createUserWithEmailAndPassword, deleteUser } from 'firebase/auth'
 import { doc, setDoc, Timestamp } from 'firebase/firestore'
-import { ShieldAlert, UserPlus, Check, Loader2, ChevronLeft, Mail, Lock, User, Hash } from 'lucide-react'
+import { ShieldAlert, UserPlus, Check, Loader2, ChevronLeft, ChevronRight, Mail, Lock, User, Hash, BarChart2, Clock } from 'lucide-react'
 import { authSecondary, dbSecondary } from '@/lib/firebase'
 import { useAuthStore, selectRole } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
+import { useMissionsStore } from '@/stores/missionsStore'
 import { useUsersListener } from '@/hooks/useUsers'
+import { useClientsListener } from '@/hooks/useClients'
 import type { UserRole } from '@/types'
 import UserAvatar from '@/components/ui/UserAvatar'
 
@@ -27,6 +29,28 @@ function randomColor() {
   return AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)]
 }
 
+// ── Helpers charge ────────────────────────────────────────────
+
+const MOIS_COURT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun',
+                    'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
+
+function formatH(h: number): string {
+  if (h === 0) return '—'
+  const hh  = Math.floor(h)
+  const min = Math.round((h - hh) * 60)
+  if (min === 0) return `${hh}h`
+  if (hh === 0)  return `${min}min`
+  return `${hh}h${String(min).padStart(2, '0')}`
+}
+
+function startOfWeekMon(d: Date): Date {
+  const r = new Date(d)
+  const day = r.getDay()                        // 0=dim
+  r.setDate(r.getDate() - (day === 0 ? 6 : day - 1))
+  r.setHours(0, 0, 0, 0)
+  return r
+}
+
 // ── Composant principal ───────────────────────────────────────
 
 export default function AdminPage() {
@@ -34,6 +58,7 @@ export default function AdminPage() {
   const role      = useAuthStore(selectRole)
   const { users } = useUsersStore()
   useUsersListener()
+  useClientsListener()
 
   // Dédoublonnage géré dans le store — users est déjà propre
   const uniqueUsers = users
@@ -63,6 +88,9 @@ export default function AdminPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-8">
+        {/* Section : charge équipe */}
+        <ChargeEquipe />
+
         {/* Section : créer un compte */}
         <CreateUserForm />
 
@@ -105,6 +133,237 @@ export default function AdminPage() {
         </section>
       </div>
     </div>
+  )
+}
+
+// ── Charge équipe ─────────────────────────────────────────────
+
+function ChargeEquipe() {
+  const { clients }                       = useMissionsStore()
+  const [viewMode, setViewMode]           = useState<'semaine' | 'mois'>('mois')
+  const [refDate,  setRefDate]            = useState(() => new Date())
+  const currentYear                       = new Date().getFullYear()
+
+  // Bornes de la période sélectionnée
+  const { start, end, label } = useMemo(() => {
+    if (viewMode === 'mois') {
+      const y = refDate.getFullYear(), m = refDate.getMonth()
+      const s = new Date(y, m, 1)
+      const e = new Date(y, m + 1, 0)
+      return { start: s, end: e, label: `${MOIS_COURT[m]} ${y}` }
+    }
+    const s = startOfWeekMon(refDate)
+    const e = new Date(s); e.setDate(e.getDate() + 6)
+    const fmt = (d: Date) => `${d.getDate()}/${d.getMonth() + 1}`
+    return { start: s, end: e, label: `${fmt(s)} – ${fmt(e)}/${e.getFullYear()}` }
+  }, [viewMode, refDate])
+
+  const navigate_ = (dir: -1 | 1) => {
+    const d = new Date(refDate)
+    if (viewMode === 'mois') d.setMonth(d.getMonth() + dir)
+    else                     d.setDate(d.getDate() + dir * 7)
+    setRefDate(d)
+  }
+
+  // Calcul de la charge par technicien
+  type Row = { tech: string; ponctuel: number; piezo: number; bilan: number; totalH: number }
+
+  const rows: Row[] = useMemo(() => {
+    const map: Record<string, { ponctuel: number; piezo: number; bilan: number }> = {}
+
+    const add = (tech: string, nature: string, methode: string) => {
+      if (!map[tech]) map[tech] = { ponctuel: 0, piezo: 0, bilan: 0 }
+      if      (methode === 'Automatique') map[tech].bilan++
+      else if (nature  === 'Souterraine') map[tech].piezo++
+      else                                map[tech].ponctuel++
+    }
+
+    clients.forEach(client => {
+      client.plans.forEach(plan => {
+        if (plan.separator) return
+        plan.samplings.forEach(s => {
+          if (s.status === 'done' || s.status === 'non_effectue') return
+          if (!s.plannedDay) return
+          const date = new Date(currentYear, s.plannedMonth, s.plannedDay)
+          if (date < start || date > end) return
+          const tech = s.assignedTo || client.preleveur || '—'
+          add(tech, plan.nature, plan.methode)
+        })
+      })
+    })
+
+    return Object.entries(map)
+      .map(([tech, c]) => ({
+        tech,
+        ...c,
+        totalH: c.ponctuel * 0.25 + c.piezo * 1 + c.bilan * 2,
+      }))
+      .sort((a, b) => b.totalH - a.totalH)
+  }, [clients, start, end, currentYear])
+
+  const maxH = rows.length > 0 ? Math.max(...rows.map(r => r.totalH)) : 1
+
+  return (
+    <section>
+      <h2 className="text-sm font-semibold mb-3"
+        style={{ color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        Charge équipe
+      </h2>
+
+      <div className="rounded-xl overflow-hidden"
+        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+
+        {/* Toolbar */}
+        <div className="flex items-center justify-between px-5 py-3.5"
+          style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+
+          {/* Onglets Semaine / Mois */}
+          <div className="flex gap-1 p-1 rounded-lg" style={{ background: 'var(--color-bg-tertiary)' }}>
+            {(['semaine', 'mois'] as const).map(v => (
+              <button key={v}
+                onClick={() => { setViewMode(v); setRefDate(new Date()) }}
+                className="px-3 py-1 rounded-md text-xs font-medium transition-colors"
+                style={{
+                  background: viewMode === v ? 'var(--color-bg-secondary)' : 'transparent',
+                  color:      viewMode === v ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+                  boxShadow:  viewMode === v ? 'var(--shadow-card)' : 'none',
+                }}>
+                {v.charAt(0).toUpperCase() + v.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Navigateur période */}
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate_(-1)}
+              className="p-1 rounded-md"
+              style={{ color: 'var(--color-text-secondary)', background: 'var(--color-bg-tertiary)' }}>
+              <ChevronLeft size={15} />
+            </button>
+            <span className="text-sm font-medium w-32 text-center"
+              style={{ color: 'var(--color-text-primary)' }}>
+              {label}
+            </span>
+            <button onClick={() => navigate_(1)}
+              className="p-1 rounded-md"
+              style={{ color: 'var(--color-text-secondary)', background: 'var(--color-bg-tertiary)' }}>
+              <ChevronRight size={15} />
+            </button>
+          </div>
+        </div>
+
+        {/* Légende durées */}
+        <div className="flex items-center gap-4 px-5 py-2.5"
+          style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-primary)' }}>
+          <div className="flex items-center gap-1.5">
+            <Clock size={11} style={{ color: 'var(--color-text-tertiary)' }} />
+            <span className="text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>
+              Ponctuel = 15 min · Piézomètre = 1h · Bilan 24h = 2h
+            </span>
+          </div>
+        </div>
+
+        {/* Tableau */}
+        {rows.length === 0 ? (
+          <div className="px-5 py-8 text-center">
+            <BarChart2 size={24} className="mx-auto mb-2" style={{ color: 'var(--color-text-tertiary)' }} />
+            <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+              Aucune intervention planifiée sur cette période.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* En-tête colonnes */}
+            <div className="grid px-5 py-2"
+              style={{
+                gridTemplateColumns: '120px 1fr 70px 70px 70px 64px',
+                borderBottom: '1px solid var(--color-border-subtle)',
+              }}>
+              {['Technicien', '', 'Ponctuel', 'Piézo', 'Bilan 24h', 'Total'].map((h, i) => (
+                <span key={i} className="text-[11px] font-semibold uppercase"
+                  style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em',
+                    textAlign: i >= 2 ? 'center' : 'left' }}>
+                  {h}
+                </span>
+              ))}
+            </div>
+
+            {/* Lignes */}
+            {rows.map((row, i) => {
+              const pct = maxH > 0 ? row.totalH / maxH : 0
+              const barColor = pct > 0.75
+                ? 'var(--color-danger)'
+                : pct > 0.4
+                  ? 'var(--color-warning)'
+                  : 'var(--color-success)'
+
+              return (
+                <div key={row.tech}
+                  className="grid items-center px-5 py-3"
+                  style={{
+                    gridTemplateColumns: '120px 1fr 70px 70px 70px 64px',
+                    borderTop: i > 0 ? '1px solid var(--color-border-subtle)' : 'none',
+                  }}>
+                  {/* Initiales */}
+                  <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                    {row.tech}
+                  </span>
+
+                  {/* Barre de charge */}
+                  <div className="h-1.5 rounded-full mx-2" style={{ background: 'var(--color-bg-tertiary)' }}>
+                    <div className="h-full rounded-full transition-all"
+                      style={{ width: `${Math.round(pct * 100)}%`, background: barColor }} />
+                  </div>
+
+                  {/* Compteurs */}
+                  <span className="text-sm text-center" style={{ color: 'var(--color-text-secondary)' }}>
+                    {row.ponctuel || '—'}
+                  </span>
+                  <span className="text-sm text-center" style={{ color: 'var(--color-text-secondary)' }}>
+                    {row.piezo || '—'}
+                  </span>
+                  <span className="text-sm text-center" style={{ color: 'var(--color-text-secondary)' }}>
+                    {row.bilan || '—'}
+                  </span>
+
+                  {/* Total heures */}
+                  <span className="text-sm font-semibold text-center"
+                    style={{ color: barColor }}>
+                    {formatH(row.totalH)}
+                  </span>
+                </div>
+              )
+            })}
+
+            {/* Pied — total équipe */}
+            <div className="grid items-center px-5 py-3"
+              style={{
+                gridTemplateColumns: '120px 1fr 70px 70px 70px 64px',
+                borderTop: '1px solid var(--color-border)',
+                background: 'var(--color-bg-primary)',
+              }}>
+              <span className="text-xs font-semibold uppercase"
+                style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>
+                Total équipe
+              </span>
+              <span />
+              <span className="text-xs font-semibold text-center" style={{ color: 'var(--color-text-secondary)' }}>
+                {rows.reduce((s, r) => s + r.ponctuel, 0) || '—'}
+              </span>
+              <span className="text-xs font-semibold text-center" style={{ color: 'var(--color-text-secondary)' }}>
+                {rows.reduce((s, r) => s + r.piezo, 0) || '—'}
+              </span>
+              <span className="text-xs font-semibold text-center" style={{ color: 'var(--color-text-secondary)' }}>
+                {rows.reduce((s, r) => s + r.bilan, 0) || '—'}
+              </span>
+              <span className="text-xs font-semibold text-center" style={{ color: 'var(--color-text-primary)' }}>
+                {formatH(rows.reduce((s, r) => s + r.totalH, 0))}
+              </span>
+            </div>
+          </>
+        )}
+      </div>
+    </section>
   )
 }
 
