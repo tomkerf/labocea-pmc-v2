@@ -248,9 +248,11 @@ export default function DashboardPage() {
       const dayOffset = jMatch ? parseInt(jMatch[1]) - 1 : 0
 
       plan.samplings.forEach((s: Sampling) => {
+        // Exclure les prélèvements non planifiés (pool — plannedDay = 0)
+        if (!s.plannedDay && !s.doneDate) return
         const baseDate = s.doneDate
           ? s.doneDate
-          : localISO(new Date(new Date().getFullYear(), s.plannedMonth, (s.plannedDay || 1) + dayOffset))
+          : localISO(new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay + dayOffset))
         const plannedDate = baseDate
         // Un prélèvement d'hier encore "planned" est un J2 à faire aujourd'hui
         const isJ2Today = plannedDate === yesterdayISO && s.status === 'planned'
