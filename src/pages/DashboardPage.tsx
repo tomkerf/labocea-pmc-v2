@@ -363,7 +363,7 @@ export default function DashboardPage() {
     const clientYear = Number(client.annee) || undefined
     client.plans.forEach((plan: Plan) =>
       plan.samplings.forEach((s: Sampling) => {
-        if (isSamplingOverdue(s, clientYear))
+        if (isSamplingOverdue(s, clientYear) && plan.meteo !== 'pluie')
           prelevementsEnRetard.push({
             clientNom: client.nom,
             siteNom: plan.siteNom,
