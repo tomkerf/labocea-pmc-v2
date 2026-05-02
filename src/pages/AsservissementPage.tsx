@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronDown, ClipboardList } from 'lucide-react'
+import { ChevronLeft, ChevronDown, ClipboardList, Copy, Check } from 'lucide-react'
 
 // ── Constantes ────────────────────────────────────────────────
 
@@ -15,87 +15,15 @@ const REGLE = [
   "Conformité : ISO 5667, FD T90-523, Arrêté du 21/07/2015",
 ]
 
+const PRESETS_V24H  = [50, 100, 200, 500, 1000]
+const PRESETS_FLACON = [5, 10, 20, 30]
+
 type WarnType = 'ok' | 'warn' | 'error' | 'info'
 interface Warn { type: WarnType; txt: string }
 interface Result {
   nbP: string; freq: string; periode: string
   vTot: string; vEP: string; vu: string
-  taux: string; warns: Warn[]; mode: string
-}
-
-// ── Helpers UI ────────────────────────────────────────────────
-
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="text-xs font-semibold mb-1.5"
-      style={{ color: 'var(--color-text-secondary)' }}>
-      {children}
-    </div>
-  )
-}
-
-function FieldHint({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-xs mb-2" style={{ color: 'var(--color-text-tertiary)' }}>
-      {children}
-    </p>
-  )
-}
-
-function NumInput({ value, onChange, unit, min, max, step }: {
-  value: string; onChange: (v: string) => void
-  unit: string; min?: number; max?: number; step?: number
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <input
-        type="number"
-        inputMode="decimal"
-        value={value}
-        min={min} max={max} step={step}
-        onChange={e => onChange(e.target.value)}
-        className="asserv-inp flex-1 px-3 py-2.5 rounded-lg text-right text-base font-semibold"
-        style={{
-          background: 'var(--color-bg-secondary)',
-          border: '1px solid var(--color-border)',
-          color: 'var(--color-text-primary)',
-          outline: 'none',
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      />
-      <span className="text-sm font-medium w-8 shrink-0"
-        style={{ color: 'var(--color-text-tertiary)' }}>
-        {unit}
-      </span>
-    </div>
-  )
-}
-
-function Card({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="rounded-[var(--radius-md)] p-5"
-      style={{
-        background: 'var(--color-bg-secondary)',
-        border: '1px solid var(--color-border-subtle)',
-        boxShadow: 'var(--shadow-card)',
-      }}>
-      {children}
-    </div>
-  )
-}
-
-function SectionTitle({ num, children }: { num: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-2.5 mb-5">
-      <span className="text-xs font-semibold tabular-nums"
-        style={{ color: 'var(--color-text-tertiary)' }}>
-        {num}
-      </span>
-      <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-        {children}
-      </span>
-    </div>
-  )
+  taux: string; warns: Warn[]
 }
 
 // ── Calcul ────────────────────────────────────────────────────
@@ -126,17 +54,127 @@ function calcResult(v24h: string, vFlacon: string, vUnit: string, mode: string, 
   if (Vu > 100)    warns.push({ type: 'warn', txt: 'Volume unitaire > 100 mL : risque de volume total excessif.' })
   if (freq < 4)    warns.push({ type: 'warn', txt: 'Fréquence < 4/h : précision insuffisante.' })
   if (freq > 6)    warns.push({ type: 'info', txt: 'Fréquence > 6/h : vérifiez la capacité du flacon.' })
-  if (periode < 3) warns.push({ type: 'warn', txt: "Période < 3 min : risque d'omissions (limites techniques)." })
+  if (periode < 3) warns.push({ type: 'warn', txt: "Période < 3 min : risque d'omissions." })
   if (vTot < 7)    warns.push({ type: 'info', txt: `Volume total ${vTot.toFixed(1)}L < 7L : homogénéisation difficile.` })
   if (vTot > 10 && vTot <= Vfl) warns.push({ type: 'info', txt: `Volume total ${vTot.toFixed(1)}L > 10L : privilégiez 7-10L.` })
-  if (mode === 'auto') warns.push({ type: 'ok', txt: 'Paramètres optimisés pour 4-6 prélèvements/h · Stratégie n°5.' })
+  if (mode === 'auto') warns.push({ type: 'ok', txt: 'Paramètres optimisés · Stratégie n°5.' })
   else warns.push({ type: 'info', txt: `Programmez ${vEP.toFixed(3)} m³ écoulés entre prélèvements.` })
 
   return {
     nbP: nbP.toFixed(0), freq: freq.toFixed(1), periode: periode.toFixed(1),
     vTot: vTot.toFixed(1), vEP: vEP.toFixed(3), vu: Vu.toFixed(0),
-    taux: ((vTot / Vfl) * 100).toFixed(0), warns, mode,
+    taux: ((vTot / Vfl) * 100).toFixed(0), warns,
   }
+}
+
+// ── Stepper ───────────────────────────────────────────────────
+// Boutons ± larges (52px) pour usage terrain avec gants
+// Long-press accélère l'incrément
+
+function Stepper({ label, hint, value, onChange, unit, step, min, max }: {
+  label: string; hint?: string; value: string; onChange: (v: string) => void
+  unit: string; step: number; min: number; max: number
+}) {
+  const num     = parseFloat(value) || 0
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const adjust = useCallback((dir: 1 | -1, multiplier = 1) => {
+    onChange(String(Math.min(max, Math.max(min, parseFloat((num + dir * step * multiplier).toFixed(6))))))
+  }, [num, step, min, max, onChange])
+
+  const startPress = (dir: 1 | -1) => {
+    adjust(dir)
+    timerRef.current = setTimeout(() => {
+      intervalRef.current = setInterval(() => adjust(dir, 3), 120)
+    }, 500)
+  }
+  const stopPress = () => {
+    if (timerRef.current)  clearTimeout(timerRef.current)
+    if (intervalRef.current) clearInterval(intervalRef.current)
+  }
+
+  // Nettoyage si le composant démonte pendant un long-press
+  useEffect(() => stopPress, [])
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          {label}
+        </span>
+        {hint && (
+          <span className="text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>{hint}</span>
+        )}
+      </div>
+      <div className="flex items-center rounded-xl overflow-hidden"
+        style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-secondary)' }}>
+        {/* Bouton − */}
+        <button
+          onPointerDown={() => startPress(-1)} onPointerUp={stopPress}
+          onPointerLeave={stopPress} onContextMenu={e => e.preventDefault()}
+          className="flex items-center justify-center shrink-0 select-none"
+          style={{ width: 52, height: 52, background: 'var(--color-bg-tertiary)',
+            fontSize: 24, fontWeight: 300, color: 'var(--color-text-secondary)',
+            borderRight: '1px solid var(--color-border)' }}>
+          −
+        </button>
+
+        {/* Valeur + unité — input direct possible */}
+        <div className="flex-1 flex items-center justify-center gap-1 px-2">
+          <input
+            type="number" inputMode="decimal"
+            value={value}
+            onChange={e => onChange(e.target.value)}
+            className="asserv-inp text-center font-bold"
+            style={{
+              width: '100%', height: 52, border: 'none', background: 'transparent',
+              fontSize: 22, color: 'var(--color-text-primary)',
+              fontVariantNumeric: 'tabular-nums', outline: 'none',
+            }}
+          />
+          <span className="text-sm font-medium shrink-0" style={{ color: 'var(--color-text-tertiary)' }}>
+            {unit}
+          </span>
+        </div>
+
+        {/* Bouton + */}
+        <button
+          onPointerDown={() => startPress(1)} onPointerUp={stopPress}
+          onPointerLeave={stopPress} onContextMenu={e => e.preventDefault()}
+          className="flex items-center justify-center shrink-0 select-none"
+          style={{ width: 52, height: 52, background: 'var(--color-bg-tertiary)',
+            fontSize: 24, fontWeight: 300, color: 'var(--color-accent)',
+            borderLeft: '1px solid var(--color-border)' }}>
+          +
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Chips de presets ──────────────────────────────────────────
+
+function Chips({ values, current, unit, onSelect }: {
+  values: number[]; current: string; unit: string; onSelect: (v: string) => void
+}) {
+  const cur = parseFloat(current)
+  return (
+    <div className="flex gap-2 mt-2 flex-wrap">
+      {values.map(v => (
+        <button key={v}
+          onClick={() => onSelect(String(v))}
+          className="px-3 py-1.5 rounded-full text-xs font-semibold"
+          style={{
+            background: Math.abs(cur - v) < 0.001 ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
+            color:      Math.abs(cur - v) < 0.001 ? 'white'               : 'var(--color-text-secondary)',
+            border: `1px solid ${Math.abs(cur - v) < 0.001 ? 'var(--color-accent)' : 'var(--color-border)'}`,
+          }}>
+          {v} {unit}
+        </button>
+      ))}
+    </div>
+  )
 }
 
 // ── Page ──────────────────────────────────────────────────────
@@ -150,15 +188,26 @@ export default function AsservissementPage() {
   const [mode,    setMode]    = useState<'auto' | 'manuel'>('auto')
   const [vEntre,  setVEntre]  = useState('1.0')
   const [regleOpen, setRegleOpen] = useState(false)
+  const [copied,    setCopied]    = useState(false)
 
   const res = calcResult(v24h, vFlacon, vUnit, mode, vEntre)
 
-  const tauxNum = res ? parseInt(res.taux) : 0
+  const tauxNum   = res ? parseInt(res.taux) : 0
   const tauxColor = tauxNum > 95 ? 'var(--color-danger)'
     : tauxNum > 85 ? 'var(--color-warning)'
     : 'var(--color-text-primary)'
 
-  // Suppression des spinners sur les inputs number
+  const hasError = res?.warns.some(w => w.type === 'error') ?? false
+
+  const handleCopy = () => {
+    if (!res) return
+    navigator.clipboard.writeText(res.vEP).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  // Suppression spinners
   useEffect(() => {
     if (document.getElementById('asserv-nospinner')) return
     const s = document.createElement('style')
@@ -169,212 +218,169 @@ export default function AsservissementPage() {
   }, [])
 
   const stats = res ? [
-    { label: 'Fréquence',          val: res.freq,    unit: '/h'  },
-    { label: 'Période',            val: res.periode, unit: 'min' },
-    { label: 'Nb prélèv. / 24h',  val: res.nbP,     unit: ''    },
-    { label: 'Vol. unitaire',      val: res.vu,      unit: 'mL'  },
-    { label: 'Vol. total',         val: res.vTot,    unit: 'L'   },
-    { label: 'Remplissage',        val: res.taux,    unit: '%', danger: tauxNum > 85 },
+    { label: 'Fréquence',         val: res.freq,    unit: '/h'  },
+    { label: 'Période',           val: res.periode, unit: 'min' },
+    { label: 'Nb prélèv. / 24h', val: res.nbP,     unit: ''    },
+    { label: 'Vol. total',        val: res.vTot,    unit: 'L'   },
+    { label: 'Remplissage',       val: res.taux,    unit: '%', danger: tauxNum > 85 },
   ] : []
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-bg-primary)' }}>
+    <div className="min-h-screen pb-32" style={{ background: 'var(--color-bg-primary)' }}>
 
-      {/* Header — même style que les autres pages */}
+      {/* Header sticky */}
       <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3"
         style={{
-          background: 'var(--color-bg-primary)',
+          background: 'rgba(245,245,247,0.92)',
           backdropFilter: 'blur(12px)',
           borderBottom: '1px solid var(--color-border-subtle)',
         }}>
         <button onClick={() => navigate(-1)}
-          className="p-1.5 rounded-lg"
+          className="p-1.5 rounded-lg shrink-0"
           style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
           <ChevronLeft size={18} strokeWidth={1.8} />
         </button>
-        <div>
-          <h1 className="text-base font-semibold leading-tight"
+        <div className="flex-1 min-w-0">
+          <h1 className="text-base font-semibold leading-tight truncate"
             style={{ color: 'var(--color-text-primary)' }}>
-            Prélèvements automatiques 24h
+            Asservissement 24h
           </h1>
-          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-            Asservissement au débit · ISO 5667
+          <p className="text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>
+            ISO 5667 · Stratégie n°5
           </p>
         </div>
+        {/* Badge mode actif */}
+        <span className="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-full"
+          style={{
+            background: mode === 'auto' ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)',
+            color:      mode === 'auto' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+          }}>
+          {mode === 'auto' ? 'Auto' : 'Manuel'}
+        </span>
       </div>
 
-      <div className="px-4 py-5 flex flex-col gap-4">
+      <div className="px-4 pt-4 flex flex-col gap-4">
 
-        {/* 01 — Rejet */}
-        <Card>
-          <SectionTitle num="01">Rejet 24h</SectionTitle>
-          <FieldLabel>Volume de rejet estimé</FieldLabel>
-          <FieldHint>Volume total rejeté sur 24h par la station</FieldHint>
-          <NumInput value={v24h} onChange={setV24h} unit="m³" min={0} max={10000} step={1} />
-        </Card>
-
-        {/* 02 — Configuration */}
-        <Card>
-          <SectionTitle num="02">Configuration</SectionTitle>
-
-          {/* Mode toggle — style segmented control */}
-          <div className="flex gap-1 p-1 rounded-lg mb-5"
-            style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border-subtle)' }}>
-            {(['auto', 'manuel'] as const).map(m => (
-              <button key={m} onClick={() => setMode(m)}
-                className="flex-1 py-2 rounded-md text-xs font-medium transition-all"
-                style={{
-                  background: mode === m ? 'var(--color-bg-secondary)' : 'transparent',
-                  color: mode === m ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
-                  boxShadow: mode === m ? 'var(--shadow-card)' : 'none',
-                }}>
-                {m === 'auto' ? 'Automatique' : 'Manuel'}
-              </button>
-            ))}
-          </div>
-
-          {mode === 'manuel' && (
-            <div className="mb-4">
-              <FieldLabel>Volume écoulé entre prélèvements</FieldLabel>
-              <FieldHint>Valeur à programmer sur le préleveur</FieldHint>
-              <NumInput value={vEntre} onChange={setVEntre} unit="m³" min={0.01} max={100} step={0.1} />
-            </div>
-          )}
-
-          <div className="mb-4">
-            <FieldLabel>Capacité du flacon</FieldLabel>
-            <NumInput value={vFlacon} onChange={setVFlacon} unit="L" min={0} max={200} step={0.5} />
-          </div>
-
-          <div>
-            <FieldLabel>Volume unitaire</FieldLabel>
-            <FieldHint>Recommandé : 50-100 mL</FieldHint>
-            <NumInput value={vUnit} onChange={setVUnit} unit="mL" min={10} max={200} step={5} />
-          </div>
-        </Card>
-
-        {/* 03 — Résultats */}
-        {res && (
-          <Card>
-            <div className="flex items-center gap-2.5 mb-5">
-              <span className="text-xs font-semibold tabular-nums"
-                style={{ color: 'var(--color-text-tertiary)' }}>03</span>
-              <span className="text-sm font-semibold flex-1"
-                style={{ color: 'var(--color-text-primary)' }}>Recommandations</span>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded"
-                style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-                Stratégie n°5
-              </span>
-            </div>
-
-            {/* Volume principal — sobre, juste les chiffres */}
-            <div className="rounded-[var(--radius-md)] px-5 py-6 mb-4 text-center"
+        {/* Mode toggle — gros boutons */}
+        <div className="flex gap-1.5 p-1.5 rounded-xl"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+          {(['auto', 'manuel'] as const).map(m => (
+            <button key={m} onClick={() => setMode(m)}
+              className="flex-1 py-3 rounded-lg text-sm font-semibold transition-all"
               style={{
-                background: 'var(--color-bg-tertiary)',
-                border: '1px solid var(--color-border-subtle)',
+                background: mode === m ? 'var(--color-accent)' : 'transparent',
+                color: mode === m ? 'white' : 'var(--color-text-secondary)',
               }}>
-              <p className="text-xs font-medium mb-3"
-                style={{ color: 'var(--color-text-secondary)' }}>
-                Volume entre prélèvements
-              </p>
-              <div className="flex items-baseline justify-center gap-1.5">
-                <span className="text-5xl font-bold tabular-nums"
-                  style={{ color: 'var(--color-accent)', letterSpacing: '-0.02em' }}>
-                  {res.vEP}
-                </span>
-                <span className="text-lg font-medium"
-                  style={{ color: 'var(--color-text-secondary)' }}>
-                  m³
+              {m === 'auto' ? '⚡ Automatique' : '✎ Manuel'}
+            </button>
+          ))}
+        </div>
+
+        {/* Rejet 24h */}
+        <div className="rounded-xl p-4"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          <Stepper
+            label="Rejet 24h"
+            hint="Volume total rejeté"
+            value={v24h} onChange={setV24h}
+            unit="m³" step={10} min={1} max={99999}
+          />
+          <Chips values={PRESETS_V24H} current={v24h} unit="m³" onSelect={setV24h} />
+        </div>
+
+        {/* Flacon + Volume unitaire */}
+        <div className="rounded-xl p-4 flex flex-col gap-4"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          <div>
+            <Stepper
+              label="Capacité du flacon"
+              value={vFlacon} onChange={setVFlacon}
+              unit="L" step={1} min={1} max={200}
+            />
+            <Chips values={PRESETS_FLACON} current={vFlacon} unit="L" onSelect={setVFlacon} />
+          </div>
+
+          <div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: 16 }}>
+            <Stepper
+              label="Volume unitaire"
+              hint="50–100 mL recommandés"
+              value={vUnit} onChange={setVUnit}
+              unit="mL" step={5} min={10} max={200}
+            />
+          </div>
+        </div>
+
+        {/* Volume entre prélèvements — uniquement en mode manuel */}
+        {mode === 'manuel' && (
+          <div className="rounded-xl p-4"
+            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            <Stepper
+              label="Volume écoulé entre prélèvements"
+              hint="Valeur à programmer"
+              value={vEntre} onChange={setVEntre}
+              unit="m³" step={0.1} min={0.01} max={100}
+            />
+          </div>
+        )}
+
+        {/* Résultats détaillés (stats + avertissements) */}
+        {res && (
+          <div className="rounded-xl overflow-hidden"
+            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            {/* Stats */}
+            {stats.map((s, i) => (
+              <div key={s.label}
+                className="flex items-center justify-between px-4 py-3"
+                style={{ borderBottom: i < stats.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
+                <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{s.label}</span>
+                <span className="text-sm font-semibold tabular-nums"
+                  style={{ color: 'danger' in s && s.danger ? tauxColor : 'var(--color-text-primary)' }}>
+                  {s.val}
+                  {s.unit && <span className="text-xs font-normal ml-0.5" style={{ color: 'var(--color-text-tertiary)' }}>{s.unit}</span>}
                 </span>
               </div>
-              <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
-                Valeur à programmer sur le préleveur asservi
-              </p>
-            </div>
+            ))}
 
-            {/* Stats — tableau simple, pas de couleurs sur les bordures */}
-            <div className="rounded-[var(--radius-md)] overflow-hidden mb-4"
-              style={{ border: '1px solid var(--color-border-subtle)' }}>
-              {stats.map((s, i) => (
-                <div key={s.label}
-                  className="flex items-center justify-between px-4 py-3"
-                  style={{
-                    borderBottom: i < stats.length - 1 ? '1px solid var(--color-border-subtle)' : 'none',
-                    background: i % 2 === 0 ? 'var(--color-bg-secondary)' : 'var(--color-bg-tertiary)',
-                  }}>
-                  <span className="text-xs font-medium"
-                    style={{ color: 'var(--color-text-secondary)' }}>
-                    {s.label}
-                  </span>
-                  <span className="text-sm font-semibold tabular-nums"
-                    style={{ color: 'danger' in s && s.danger ? tauxColor : 'var(--color-text-primary)' }}>
-                    {s.val}{s.unit && <span className="text-xs font-normal ml-0.5"
-                      style={{ color: 'var(--color-text-tertiary)' }}>{s.unit}</span>}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Alertes — badges statut */}
-            <div className="flex flex-col gap-1.5">
-              {res.warns.map((w, i) => {
-                const bg = w.type === 'ok'    ? 'var(--color-success-light)'
-                  : w.type === 'error'  ? 'var(--color-danger-light)'
-                  : w.type === 'warn'   ? 'var(--color-warning-light)'
-                  : 'var(--color-bg-tertiary)'
-                const color = w.type === 'ok'   ? 'var(--color-success)'
-                  : w.type === 'error' ? 'var(--color-danger)'
-                  : w.type === 'warn'  ? 'var(--color-warning)'
-                  : 'var(--color-text-secondary)'
-                const dot = w.type === 'ok' ? '✓' : w.type === 'error' ? '✕' : '•'
-                return (
-                  <div key={i} className="flex items-start gap-2 px-3 py-2.5 rounded-lg"
-                    style={{ background: bg }}>
-                    <span className="text-xs font-bold shrink-0 mt-px" style={{ color }}>{dot}</span>
-                    <span className="text-xs leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
-                      {w.txt}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </Card>
+            {/* Avertissements */}
+            {res.warns.length > 0 && (
+              <div className="px-4 py-3 flex flex-col gap-1.5"
+                style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
+                {res.warns.map((w, i) => {
+                  const bg    = w.type === 'ok' ? 'var(--color-success-light)' : w.type === 'error' ? 'var(--color-danger-light)' : w.type === 'warn' ? 'var(--color-warning-light)' : 'var(--color-bg-tertiary)'
+                  const color = w.type === 'ok' ? 'var(--color-success)'       : w.type === 'error' ? 'var(--color-danger)'       : w.type === 'warn' ? 'var(--color-warning)'       : 'var(--color-text-secondary)'
+                  const dot   = w.type === 'ok' ? '✓' : w.type === 'error' ? '✕' : '•'
+                  return (
+                    <div key={i} className="flex items-start gap-2 px-3 py-2 rounded-lg" style={{ background: bg }}>
+                      <span className="text-xs font-bold shrink-0 mt-px" style={{ color }}>{dot}</span>
+                      <span className="text-xs leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>{w.txt}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         )}
 
         {/* Réglementation — accordéon */}
-        <div className="rounded-[var(--radius-md)] overflow-hidden"
-          style={{
-            background: 'var(--color-bg-secondary)',
-            border: '1px solid var(--color-border-subtle)',
-            boxShadow: 'var(--shadow-card)',
-          }}>
+        <div className="rounded-xl overflow-hidden mb-2"
+          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
           <button
             onClick={() => setRegleOpen(v => !v)}
-            className="w-full flex items-center gap-3 px-5 py-4 text-left">
-            <ClipboardList size={16} strokeWidth={1.8} className="shrink-0"
+            className="w-full flex items-center gap-3 px-4 py-3.5 text-left">
+            <ClipboardList size={15} strokeWidth={1.8} className="shrink-0"
               style={{ color: 'var(--color-text-tertiary)' }} />
-            <span className="text-sm font-medium flex-1"
-              style={{ color: 'var(--color-text-primary)' }}>
+            <span className="text-sm font-medium flex-1" style={{ color: 'var(--color-text-primary)' }}>
               Réglementation & bonnes pratiques
             </span>
-            <ChevronDown size={15} strokeWidth={2}
-              style={{
-                color: 'var(--color-text-tertiary)',
-                transform: regleOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s ease',
-              }} />
+            <ChevronDown size={14} strokeWidth={2}
+              style={{ color: 'var(--color-text-tertiary)', transform: regleOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
           </button>
-
           {regleOpen && (
-            <div className="px-5 pb-5"
-              style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
+            <div className="px-4 pb-4" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
               <div className="flex flex-col pt-1">
                 {REGLE.map((t, i) => (
                   <div key={i} className="flex gap-3 py-2.5 text-xs leading-relaxed"
-                    style={{
-                      borderBottom: i < REGLE.length - 1 ? '1px solid var(--color-border-subtle)' : 'none',
-                      color: 'var(--color-text-secondary)',
-                    }}>
+                    style={{ borderBottom: i < REGLE.length - 1 ? '1px solid var(--color-border-subtle)' : 'none', color: 'var(--color-text-secondary)' }}>
                     <span className="text-xs font-semibold tabular-nums shrink-0 mt-px"
                       style={{ color: 'var(--color-text-tertiary)' }}>
                       {String(i + 1).padStart(2, '0')}
@@ -383,8 +389,7 @@ export default function AsservissementPage() {
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] mt-4 text-center"
-                style={{ color: 'var(--color-text-tertiary)' }}>
+              <p className="text-[10px] mt-3 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
                 Agence de l'Eau RMC / INSA Lyon (2010) · À titre indicatif
               </p>
             </div>
@@ -392,6 +397,65 @@ export default function AsservissementPage() {
         </div>
 
       </div>
+
+      {/* ── Barre sticky résultat ── */}
+      {/* Toujours visible en bas — valeur à programmer sur le préleveur */}
+      <div
+        className="fixed bottom-0 left-0 right-0 px-4 pt-3"
+        style={{
+          background: 'rgba(255,255,255,0.96)',
+          backdropFilter: 'blur(16px)',
+          borderTop: '1px solid var(--color-border-subtle)',
+          boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
+          paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
+        }}>
+        {res && !hasError ? (
+          <div className="flex items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
+                Volume à programmer
+              </p>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-4xl font-bold tabular-nums"
+                  style={{ color: 'var(--color-accent)', letterSpacing: '-0.02em' }}>
+                  {res.vEP}
+                </span>
+                <span className="text-lg font-medium" style={{ color: 'var(--color-text-secondary)' }}>m³</span>
+                <span className="text-xs ml-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                  · {res.nbP} prélèv. · {res.freq}/h
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1.5 px-4 py-3 rounded-xl font-semibold text-sm shrink-0"
+              style={{
+                background: copied ? 'var(--color-success)' : 'var(--color-accent)',
+                color: 'white',
+                minWidth: 88,
+                justifyContent: 'center',
+              }}>
+              {copied
+                ? <><Check size={15} /> Copié</>
+                : <><Copy size={15} /> Copier</>
+              }
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center py-2">
+            {hasError ? (
+              <p className="text-sm font-medium" style={{ color: 'var(--color-danger)' }}>
+                ✕ Configuration invalide — vérifiez les paramètres
+              </p>
+            ) : (
+              <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+                Renseignez le rejet 24h pour calculer
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
     </div>
   )
 }
