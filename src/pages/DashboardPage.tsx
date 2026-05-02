@@ -114,6 +114,7 @@ export default function DashboardPage() {
   const [rapportsOpen,      setRapportsOpen]      = useState(false)
   const [retardOpen,        setRetardOpen]        = useState(false)
   const [maintenancesOpen,  setMaintenancesOpen]  = useState(false)
+  const [pluieOpen,         setPluieOpen]         = useState(false)
   const { equipements } = useEquipementsStore()
   const { verifications } = useMetrologieStore()
 
@@ -376,6 +377,42 @@ export default function DashboardPage() {
     )
   })
 
+  // Prélèvements temps de pluie — planifiés et non réalisés
+  const MOIS_COURT_DB = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc']
+  type PluieItem = {
+    clientNom: string; siteNom: string; planNom: string
+    clientId: string; planId: string; samplingId: string
+    plannedMonth: number; plannedDay: number; overdue: boolean
+  }
+  const prelevementsPluie: PluieItem[] = []
+  clients.forEach((client: Client) => {
+    if (!isGeneraliste && initiales && client.preleveur && client.preleveur !== initiales) return
+    const clientYear = Number(client.annee) || undefined
+    client.plans.forEach((plan: Plan) => {
+      if (plan.meteo !== 'pluie') return
+      plan.samplings.forEach((s: Sampling) => {
+        if (s.status === 'done' || s.status === 'non_effectue') return
+        prelevementsPluie.push({
+          clientNom: client.nom,
+          siteNom: plan.siteNom,
+          planNom: plan.nom,
+          clientId: client.id,
+          planId: plan.id,
+          samplingId: s.id,
+          plannedMonth: s.plannedMonth,
+          plannedDay: s.plannedDay,
+          overdue: isSamplingOverdue(s, clientYear),
+        })
+      })
+    })
+  })
+  // Tri : en retard d'abord, puis chronologique
+  prelevementsPluie.sort((a, b) => {
+    if (a.overdue !== b.overdue) return a.overdue ? -1 : 1
+    if (a.plannedMonth !== b.plannedMonth) return a.plannedMonth - b.plannedMonth
+    return a.plannedDay - b.plannedDay
+  })
+
   // Maintenances actives : en cours ou planifiées (date passée ou dans 14j)
   const maintenancesActives = maintenances.filter((m: Maintenance) => {
     if (m.statut === 'en_cours') return true
@@ -627,6 +664,70 @@ export default function DashboardPage() {
                     <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"
                       style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
                       En retard
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Prélèvements temps de pluie */}
+      {prelevementsPluie.length > 0 && (
+        <div className="mb-6">
+          <button
+            onClick={() => setPluieOpen(o => !o)}
+            className="flex items-center gap-2 mb-3 w-full text-left"
+          >
+            <span className="text-xs font-semibold uppercase"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              🌧 Temps de pluie
+            </span>
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+              style={{ background: '#EFF6FF', color: '#3B82F6' }}>
+              {prelevementsPluie.length}
+            </span>
+            <ChevronDown
+              size={14}
+              strokeWidth={2}
+              style={{
+                color: 'var(--color-text-tertiary)',
+                marginLeft: 'auto',
+                transform: pluieOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+                transition: 'transform 0.2s ease',
+              }}
+            />
+          </button>
+          {pluieOpen && (
+            <div className="rounded-xl overflow-hidden"
+              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+              <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+                {prelevementsPluie.map((r, i) => (
+                  <div
+                    key={r.samplingId}
+                    className="flex items-center gap-3 px-4 py-3 cursor-pointer"
+                    style={{ borderBottom: i < prelevementsPluie.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                    onClick={() => navigate(`/missions/${r.clientId}/plan/${r.planId}`)}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <span className="shrink-0 text-base leading-none">🌧</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{r.clientNom}</p>
+                      <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                        {[r.siteNom, r.planNom].filter(Boolean).join(' · ')}
+                      </p>
+                    </div>
+                    {/* Date prévue */}
+                    <span className="shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full"
+                      style={{
+                        background: r.overdue ? 'var(--color-danger-light)' : 'var(--color-bg-tertiary)',
+                        color:      r.overdue ? 'var(--color-danger)'       : 'var(--color-text-secondary)',
+                      }}>
+                      {r.plannedDay > 0
+                        ? `${r.overdue ? '⚠ ' : ''}${MOIS_COURT_DB[r.plannedMonth]} j${r.plannedDay}`
+                        : MOIS_COURT_DB[r.plannedMonth]}
                     </span>
                   </div>
                 ))}
