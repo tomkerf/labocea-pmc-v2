@@ -279,5 +279,15 @@ export function exportClientExcel(client: Client): void {
   const safeName = client.nom.replace(/[^a-zA-Z0-9À-ÿ _-]/g, '').trim().replace(/\s+/g, '_')
   const filename = `PMC_${safeName}_${client.annee}.xlsx`
 
-  XLSX.writeFile(wb, filename)
+  // Download manuel — plus fiable que XLSX.writeFile selon l'environnement
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+  const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }

@@ -243,8 +243,9 @@ export default function ClientPage() {
               try {
                 const { exportClientExcel } = await import('@/lib/exportExcel')
                 exportClientExcel(client)
-              } catch {
-                toast.error('Erreur lors de la génération du fichier Excel.')
+              } catch (err) {
+                console.error('[Excel export]', err)
+                toast.error('Erreur Excel : ' + (err instanceof Error ? err.message : String(err)))
               }
             }}
             className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
