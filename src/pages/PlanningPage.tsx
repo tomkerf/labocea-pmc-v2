@@ -2236,16 +2236,25 @@ export default function PlanningPage() {
             </button>
           </div>
 
-          {/* Toggle vue */}
-          <div className="flex rounded-lg overflow-hidden"
-            style={{ border:'1px solid var(--color-border-subtle)', background:'var(--color-bg-tertiary)' }}>
-            {(['jour','semaine','mois'] as ViewMode[]).map(m => (
-              <button key={m} onClick={() => switchView(m)}
-                className="px-3 py-1.5 text-xs font-medium capitalize"
-                style={{ background:viewMode===m?'var(--color-accent)':'transparent', color:viewMode===m?'white':'var(--color-text-secondary)' }}>
-                {m}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            {/* Toggle vue */}
+            <div className="flex rounded-lg overflow-hidden"
+              style={{ border:'1px solid var(--color-border-subtle)', background:'var(--color-bg-tertiary)' }}>
+              {(['jour','semaine','mois'] as ViewMode[]).map(m => (
+                <button key={m} onClick={() => switchView(m)}
+                  className="px-3 py-1.5 text-xs font-medium capitalize"
+                  style={{ background:viewMode===m?'var(--color-accent)':'transparent', color:viewMode===m?'white':'var(--color-text-secondary)' }}>
+                  {m}
+                </button>
+              ))}
+            </div>
+            {/* Vue équipe */}
+            <button onClick={() => navigate('/planning/equipe')}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium"
+              style={{ background:'var(--color-bg-tertiary)', color:'var(--color-text-secondary)', border:'1px solid var(--color-border-subtle)' }}
+              title="Vue planning équipe">
+              👥
+            </button>
           </div>
         </div>
 
