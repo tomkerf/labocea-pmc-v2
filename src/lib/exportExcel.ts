@@ -57,7 +57,7 @@ function autoWidth(ws: XLSX.WorkSheet, rows: string[][]): void {
 function buildRecap(client: Client): XLSX.WorkSheet {
   const plans = (client.plans ?? []).filter(p => !p.separator)
   const allSamplings = plans.flatMap(p =>
-    p.samplings.map(s => ({ s, p }))
+    (p.samplings ?? []).map(s => ({ s, p }))
   )
   const done = allSamplings.filter(({ s }) => s.status === 'done').length
   const planned = allSamplings.filter(({ s }) => resolveStatus(s, client.annee) === 'planned').length
@@ -102,8 +102,8 @@ function buildRecap(client: Client): XLSX.WorkSheet {
       p.nature,
       p.methode,
       p.frequence,
-      p.samplings.length,
-      p.samplings.filter(s => s.status === 'done').length,
+      (p.samplings ?? []).length,
+      (p.samplings ?? []).filter(s => s.status === 'done').length,
       p.analysesSousTraitees ? 'Sous-traitées' : 'Labocea',
     ]),
   ]
@@ -135,7 +135,7 @@ function buildPrelev(client: Client): XLSX.WorkSheet {
   const dataRows: (string | number)[][] = []
 
   for (const plan of (client.plans ?? []).filter(p => !p.separator)) {
-    for (const s of plan.samplings) {
+    for (const s of (plan.samplings ?? [])) {
       const status = resolveStatus(s, client.annee)
       dataRows.push([
         plan.nom,
@@ -185,7 +185,7 @@ function buildRapports(client: Client): XLSX.WorkSheet {
   const dataRows: (string | number)[][] = []
 
   for (const plan of (client.plans ?? []).filter(p => !p.separator)) {
-    for (const s of plan.samplings.filter(s => s.rapportPrevu)) {
+    for (const s of (plan.samplings ?? []).filter(s => s.rapportPrevu)) {
       let statutRapport = 'À envoyer'
       if (s.rapportDate) statutRapport = 'Envoyé'
       else if (s.status !== 'done') statutRapport = 'Prélèvement non réalisé'
