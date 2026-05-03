@@ -3,7 +3,7 @@
 // Sections : planifier une intervention, bilans 24h, statuts
 // ============================================================
 
-import { CalendarDays, CheckCircle2, Clock, XCircle, AlertTriangle, ChevronRight, Droplets, ClipboardList, FolderPlus, MapPin } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Clock, XCircle, AlertTriangle, ChevronRight, Droplets, ClipboardList, FolderPlus, MapPin, FlaskConical } from 'lucide-react'
 
 // ── Composants locaux ────────────────────────────────────────
 
@@ -358,6 +358,55 @@ export default function AidePage() {
           Le motif de non-réalisation est tracé dans l'historique du prélèvement et visible
           par le chargé de mission lors de la préparation des rapports clients.
         </Note>
+      </Section>
+
+      {/* ── 4. Analyses sous-traitées ── */}
+      <Section icon={FlaskConical} title="Analyses sous-traitées — contrainte jours fériés">
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Certains plans (ex : RSDE, CORPEP) sont analysés par un laboratoire externe.
+          Le transport prend 24h — un prélèvement la veille d'un jour férié ne respecterait pas
+          le délai légal d'analyse.
+        </p>
+
+        <div className="flex flex-col gap-3 mb-4">
+          <Step num={1}>
+            <span>
+              Dans la fiche plan (<strong>Missions → Client → Plan</strong>), descends jusqu'à la section{' '}
+              <strong>Configuration</strong>. La case <strong>Analyses</strong> est en bas, après "Conditions météo".
+              Coche-la pour les plans dont les analyses sont sous-traitées.
+            </span>
+          </Step>
+          <Step num={2}>
+            <span>
+              Une fois cochée, l'app détecte automatiquement quand un prélèvement de ce plan
+              tombe <strong>la veille d'un jour férié français</strong> (Pâques, Ascension, 14 juillet, Noël…).
+            </span>
+          </Step>
+          <Step num={3}>
+            <span>
+              Dans le Planning (vue Semaine ou Mois), ces prélèvements affichent une icône{' '}
+              <span className="font-semibold">⚠️</span> sur la pill, avec le tooltip{' '}
+              <em>"Analyses sous-traitées — veille de [nom du jour férié]"</em>.
+              Dans le panneau latéral <strong>À planifier</strong>, un badge orange{' '}
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+                ⚠️ Veille de férié
+              </span>{' '}
+              s'affiche également.
+            </span>
+          </Step>
+        </div>
+
+        {/* Astuce */}
+        <div className="flex gap-2 px-3 py-2.5 rounded-lg"
+          style={{ background: 'var(--color-accent-light)' }}>
+          <ChevronRight size={15} strokeWidth={2} className="shrink-0 mt-0.5" style={{ color: 'var(--color-accent)' }} />
+          <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+            <strong>L'icône ⚠️ ne bloque pas le prélèvement</strong> — c'est un avertissement visuel.
+            Si tu dois quand même prélever ce jour-là (accords spécifiques avec le labo sous-traitant),
+            tu peux l'ignorer. Pense à le noter dans le commentaire du prélèvement.
+          </p>
+        </div>
       </Section>
 
     </div>

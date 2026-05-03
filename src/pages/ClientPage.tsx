@@ -236,6 +236,22 @@ export default function ClientPage() {
               : <FileDown size={13} />}
             PDF
           </button>
+
+          {/* Export Excel (chargement différé pour ne pas alourdir le bundle initial) */}
+          <button
+            onClick={async () => {
+              try {
+                const { exportClientExcel } = await import('@/lib/exportExcel')
+                exportClientExcel(client)
+              } catch {
+                toast.error('Erreur lors de la génération du fichier Excel.')
+              }
+            }}
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
+            style={{ color: '#217346', background: '#E8F5EC' }}>
+            <FileDown size={13} />
+            Excel
+          </button>
           {!confirmDelete ? (
             <button onClick={() => setConfirmDelete(true)}
               className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
