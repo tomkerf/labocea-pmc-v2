@@ -270,8 +270,17 @@ export function exportClientExcel(client: Client): void {
   // Feuille 4+ — Calendrier par plan (1 feuille par plan, max 8 plans)
   const plans = (client.plans ?? []).filter(p => !p.separator)
   const plansFeuilles = plans.slice(0, 8)
+  const usedNames = new Set(['Récapitulatif', 'Prélèvements', 'Rapports'])
   for (const plan of plansFeuilles) {
-    const sheetName = plan.siteNom.replace(/[:\\/?*[\]]/g, '').slice(0, 28) || plan.nom.slice(0, 28)
+    let base = (plan.siteNom || plan.nom).replace(/[:\\/?*[\]]/g, '').trim().slice(0, 26)
+    if (!base) base = 'Plan'
+    let sheetName = base
+    if (usedNames.has(sheetName)) {
+      let i = 2
+      while (usedNames.has(`${base}-${i}`)) i++
+      sheetName = `${base}-${i}`
+    }
+    usedNames.add(sheetName)
     XLSX.utils.book_append_sheet(wb, buildCalendrier(client, plan), sheetName)
   }
 
