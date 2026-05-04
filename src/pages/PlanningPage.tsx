@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useRef } from 'react'
-import { ChevronLeft, ChevronRight, CheckCircle2, ExternalLink, Trash2, Plus, X, Calendar, Bell, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ChevronDown, CheckCircle2, ExternalLink, Trash2, Plus, X, Calendar, Bell, AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useClientsListener, saveClient } from '@/hooks/useClients'
 import { useEquipementsListener } from '@/hooks/useEquipements'
