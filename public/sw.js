@@ -8,9 +8,13 @@ const CACHE_VERSION = 'pmc-v2'
 const CACHE_ASSETS  = `${CACHE_VERSION}-assets`
 const CACHE_NAV     = `${CACHE_VERSION}-nav`
 
-// ── Install : skip waiting pour prendre effet immédiatement ──
-self.addEventListener('install', () => {
-  self.skipWaiting()
+// ── Install : précache /index.html + skip waiting ─────────────
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE_NAV)
+      .then(c => c.add('/index.html'))
+      .then(() => self.skipWaiting())
+  )
 })
 
 // ── Activate : purge les anciens caches ───────────────────────
