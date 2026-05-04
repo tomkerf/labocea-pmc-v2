@@ -304,7 +304,7 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
   const [evtHeure,    setEvtHeure]    = useState('')
   const [evtNotes,    setEvtNotes]    = useState('')
   const [evtSaving,   setEvtSaving]   = useState(false)
-  const [openGroups,  setOpenGroups]  = useState<Record<string, boolean>>({ 'Planifié': true, 'À planifier': true })
+  const [openGroups,  setOpenGroups]  = useState<Record<string, boolean>>({ 'En retard': true, 'Planifié': true, 'À planifier': true })
 
   const date     = new Date(dateStr + 'T12:00:00')
   const dayLabel = date.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
@@ -450,10 +450,13 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                   <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Tout est planifié ce mois ✓</p>
                 </div>
               ) : (() => {
-                const planifie   = pool.filter(x => x.sampling.plannedDay > 0)
-                const aplanifier = pool.filter(x => x.sampling.plannedDay === 0)
+                const enRetard   = pool.filter(x => isSamplingOverdue(x.sampling))
+                const retardIds  = new Set(enRetard.map(x => x.sampling.id))
+                const planifie   = pool.filter(x => x.sampling.plannedDay > 0 && !retardIds.has(x.sampling.id))
+                const aplanifier = pool.filter(x => x.sampling.plannedDay === 0 && !retardIds.has(x.sampling.id))
                 type Group = { label: string; items: typeof pool }
                 const groups: Group[] = [
+                  { label: 'En retard',   items: enRetard },
                   { label: 'Planifié',    items: planifie },
                   { label: 'À planifier', items: aplanifier },
                 ].filter(g => g.items.length > 0)
@@ -578,7 +581,7 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                             className="w-full flex items-center justify-between px-1 py-1 mb-1.5"
                             onClick={() => setOpenGroups(prev => ({ ...prev, [group.label]: !isOpen }))}>
                             <p className="text-[11px] font-semibold uppercase tracking-wider"
-                              style={{ color: 'var(--color-text-tertiary)' }}>
+                              style={{ color: group.label === 'En retard' ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}>
                               {group.label} · {group.items.length}
                             </p>
                             <ChevronDown size={14}
