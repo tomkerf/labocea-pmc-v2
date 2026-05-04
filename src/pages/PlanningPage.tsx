@@ -287,6 +287,7 @@ interface DayModalProps {
   dateStr: string
   onClose: () => void
   pool: PoolItem[]
+  overduePool: PoolItem[]
   uid: string | null
   initiales: string
   onValidatePool: (item: PoolItem, date: string) => Promise<void>
@@ -294,7 +295,7 @@ interface DayModalProps {
   holidays: Record<string, string>
 }
 
-function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, initialTab, holidays }: DayModalProps) {
+function DayModal({ dateStr, onClose, pool, overduePool, uid, initiales, onValidatePool, initialTab, holidays }: DayModalProps) {
   const [activeTab,   setActiveTab]   = useState<'pool'|'evt'>(initialTab ?? 'pool')
   const [poolValidId, setPoolValidId] = useState<string|null>(null)
   const [poolDate,    setPoolDate]    = useState(dateStr)
@@ -328,8 +329,9 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
     } finally { setEvtSaving(false) }
   }
 
+  const totalPool = pool.length + overduePool.filter(x => !pool.some(p => p.sampling.id === x.sampling.id)).length
   const TABS = [
-    { id: 'pool' as const, label: 'Interventions à planifier', count: pool.length },
+    { id: 'pool' as const, label: 'Interventions à planifier', count: totalPool },
     { id: 'evt'  as const, label: 'Événement',                 count: 0 },
   ]
 
@@ -444,19 +446,19 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
 
             {/* ── Onglet : À planifier ── */}
             {activeTab === 'pool' && (
-              pool.length === 0 ? (
+              pool.length === 0 && overduePool.length === 0 ? (
                 <div className="rounded-xl py-8 text-center"
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
                   <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Tout est planifié ce mois ✓</p>
                 </div>
               ) : (() => {
-                const enRetard   = pool.filter(x => isSamplingOverdue(x.sampling))
-                const retardIds  = new Set(enRetard.map(x => x.sampling.id))
-                const planifie   = pool.filter(x => x.sampling.plannedDay > 0 && !retardIds.has(x.sampling.id))
-                const aplanifier = pool.filter(x => x.sampling.plannedDay === 0 && !retardIds.has(x.sampling.id))
+                // "En retard" = liste globale tous mois (même logique que Dashboard)
+                const overdueIds = new Set(overduePool.map(x => x.sampling.id))
+                const planifie   = pool.filter(x => x.sampling.plannedDay > 0 && !overdueIds.has(x.sampling.id))
+                const aplanifier = pool.filter(x => x.sampling.plannedDay === 0 && !overdueIds.has(x.sampling.id))
                 type Group = { label: string; items: typeof pool }
                 const groups: Group[] = [
-                  { label: 'En retard',   items: enRetard },
+                  { label: 'En retard',   items: overduePool },
                   { label: 'Planifié',    items: planifie },
                   { label: 'À planifier', items: aplanifier },
                 ].filter(g => g.items.length > 0)
@@ -1619,6 +1621,33 @@ export default function PlanningPage() {
       return a.clientNom.localeCompare(b.clientNom)
     })
   }, [selectedDay, clients])
+
+  // Prélèvements en retard — TOUS mois confondus (identique au Dashboard)
+  const overduePool = useMemo((): PoolItem[] => {
+    const result: PoolItem[] = []
+    clients.forEach((client: Client) => {
+      const clientYear = Number(client.annee) || undefined
+      client.plans.forEach(plan => {
+        plan.samplings.forEach((s: Sampling) => {
+          if (isSamplingOverdue(s, clientYear)) {
+            result.push({
+              sampling: s,
+              clientId: client.id,
+              clientNom: client.nom,
+              planId: plan.id,
+              planNom: plan.nom,
+              siteNom: plan.siteNom,
+              frequence: plan.frequence || '',
+              techInitiales: s.assignedTo || client.preleveur || '—',
+              meteo: plan.meteo || '',
+              analysesSousTraitees: plan.analysesSousTraitees ?? false,
+            })
+          }
+        })
+      })
+    })
+    return result.sort((a, b) => a.clientNom.localeCompare(b.clientNom))
+  }, [clients])
 
   // ── Bande bilan 24h — J1 + J2 dans un groupe spanning ──────────────────────
   // Chaque groupe = une paire J1/J2 entourée d'une bordure commune (colspan).
@@ -2850,6 +2879,7 @@ export default function PlanningPage() {
           dateStr={selectedDay}
           onClose={() => setSelectedDay(null)}
           pool={poolSamplings}
+          overduePool={overduePool}
           uid={uid}
           initiales={initiales}
           onValidatePool={handleValidatePool}
