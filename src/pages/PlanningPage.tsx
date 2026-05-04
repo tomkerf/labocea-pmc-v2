@@ -305,7 +305,7 @@ function DayModal({ dateStr, onClose, pool, overduePool, uid, initiales, onValid
   const [evtHeure,    setEvtHeure]    = useState('')
   const [evtNotes,    setEvtNotes]    = useState('')
   const [evtSaving,   setEvtSaving]   = useState(false)
-  const [openGroups,  setOpenGroups]  = useState<Record<string, boolean>>({ 'En retard': true, 'Planifié': true, 'À planifier': true })
+  const [openGroups,  setOpenGroups]  = useState<Record<string, boolean>>({ 'En retard': false, 'Planifié': false, 'À planifier': false })
 
   const date     = new Date(dateStr + 'T12:00:00')
   const dayLabel = date.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
