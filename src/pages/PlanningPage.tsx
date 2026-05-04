@@ -590,14 +590,29 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                           </button>
                           {/* Liste avec scroll interne limité à 35vh */}
                           {isOpen && (
-                            <div className="overflow-y-auto rounded-xl"
-                              style={{
-                                maxHeight: '35vh',
-                                background: 'var(--color-bg-secondary)',
-                                border: '1px solid var(--color-border-subtle)',
-                                boxShadow: 'var(--shadow-card)',
-                              }}>
-                              {group.items.map((item, i) => renderItem(item, i, group.items))}
+                            <div style={{ position: 'relative' }}>
+                              <div className="overflow-y-auto rounded-xl"
+                                style={{
+                                  maxHeight: '35vh',
+                                  background: 'var(--color-bg-secondary)',
+                                  border: '1px solid var(--color-border-subtle)',
+                                  boxShadow: 'var(--shadow-card)',
+                                }}>
+                                {group.items.map((item, i) => renderItem(item, i, group.items))}
+                              </div>
+                              {/* Gradient fade — invite au scroll */}
+                              {group.items.length > 3 && (
+                                <div style={{
+                                  position: 'absolute',
+                                  bottom: 1,
+                                  left: 1,
+                                  right: 1,
+                                  height: 48,
+                                  background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.95))',
+                                  borderRadius: '0 0 11px 11px',
+                                  pointerEvents: 'none',
+                                }} />
+                              )}
                             </div>
                           )}
                         </div>
