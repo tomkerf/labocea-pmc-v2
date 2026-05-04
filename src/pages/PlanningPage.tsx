@@ -827,7 +827,7 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
     .toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
 
   async function handleMove() {
-    if (!moveDate || !moveReason.trim() || saving) return
+    if (!moveDate || saving) return
     setSaving(true)
     try { await onMove(event, moveDate, moveReason.trim()); onClose() }
     finally { setSaving(false) }
