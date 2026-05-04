@@ -245,7 +245,8 @@ export default function DashboardPage() {
   const jourItems: JourItem[] = []
 
   clients.forEach((client) => {
-    if (!isGeneraliste && initiales && client.preleveur && client.preleveur !== initiales) return
+    // Planning du jour = toujours filtré par technicien connecté (même admin)
+    // Le filtre s'applique au niveau du prélèvement : assignedTo prime sur client.preleveur
     client.plans.forEach((plan) => {
       // Détecte un offset J2, J3… dans le nom du plan (ex : "Bilan 24h J2" → offset 1 jour)
       const planNom = `${plan.nom || ''} ${plan.siteNom || ''}`
@@ -255,8 +256,8 @@ export default function DashboardPage() {
       plan.samplings.forEach((s: Sampling) => {
         // Exclure les prélèvements non planifiés (pool — plannedDay = 0)
         if (!s.plannedDay && !s.doneDate) return
-        // Filtre au niveau du prélèvement : si assignedTo est défini, il prime sur client.preleveur
-        if (!isGeneraliste && initiales) {
+        // Filtrer par technicien connecté (assignedTo prime sur client.preleveur)
+        if (initiales) {
           const techSampling = s.assignedTo || client.preleveur
           if (techSampling && techSampling !== initiales) return
         }
