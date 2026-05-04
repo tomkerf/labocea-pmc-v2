@@ -438,8 +438,9 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
           </div>
         )}
 
-        {/* Contenu — flex column pour que les accordéons se partagent la hauteur */}
-        <div className="flex-1 flex flex-col overflow-hidden px-4 py-3 gap-0 min-h-0">
+        {/* Contenu scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-4 py-4">
 
             {/* ── Onglet : À planifier ── */}
             {activeTab === 'pool' && (
@@ -567,16 +568,15 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                 }
 
                 return (
-                  <div className="flex flex-col gap-2 h-full">
+                  <div className="flex flex-col gap-4">
                     {groups.map(group => {
                       const isOpen = openGroups[group.label] !== false
                       return (
-                        <div key={group.label} className="flex flex-col min-h-0" style={{ flex: isOpen ? '1 1 0' : '0 0 auto' }}>
-                          {/* En-tête accordéon */}
+                        <div key={group.label}>
+                          {/* En-tête accordéon cliquable */}
                           <button
-                            className="w-full flex items-center justify-between px-1 py-1.5 rounded-lg"
-                            onClick={() => setOpenGroups(prev => ({ ...prev, [group.label]: !isOpen }))}
-                            style={{ background: 'transparent' }}>
+                            className="w-full flex items-center justify-between px-1 py-1 mb-1.5"
+                            onClick={() => setOpenGroups(prev => ({ ...prev, [group.label]: !isOpen }))}>
                             <p className="text-[11px] font-semibold uppercase tracking-wider"
                               style={{ color: 'var(--color-text-tertiary)' }}>
                               {group.label} · {group.items.length}
@@ -588,10 +588,15 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
                                 transition: 'transform 200ms ease',
                               }} />
                           </button>
-                          {/* Liste scrollable */}
+                          {/* Liste avec scroll interne limité à 35vh */}
                           {isOpen && (
-                            <div className="overflow-y-auto rounded-xl flex-1"
-                              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                            <div className="overflow-y-auto rounded-xl"
+                              style={{
+                                maxHeight: '35vh',
+                                background: 'var(--color-bg-secondary)',
+                                border: '1px solid var(--color-border-subtle)',
+                                boxShadow: 'var(--shadow-card)',
+                              }}>
                               {group.items.map((item, i) => renderItem(item, i, group.items))}
                             </div>
                           )}
@@ -603,6 +608,7 @@ function DayModal({ dateStr, onClose, pool, uid, initiales, onValidatePool, init
               })()
             )}
 
+          </div>
         </div>
       </div>
     </div>
