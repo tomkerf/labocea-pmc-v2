@@ -200,6 +200,9 @@ function isMultiDay(e: PlanningEvent): boolean {
 
 function sortEvts(evts: PlanningEvent[]): PlanningEvent[] {
   return evts.slice().sort((a,b) => {
+    // Fantômes toujours en bas
+    if (a.isGhost && !b.isGhost) return 1
+    if (!a.isGhost && b.isGhost) return -1
     if (!a.plannedTime && !b.plannedTime) {
       // Bilan 24h : J2 avant J1 (le technicien passe en J2 avant de faire J1)
       const aIsJ2 = a.isJ2Continuation === true
@@ -217,8 +220,9 @@ function sortEvts(evts: PlanningEvent[]): PlanningEvent[] {
 
 // Regroupe les prélèvements du même client sur un même jour en une seule pill
 function groupByClient(evts: PlanningEvent[]): PlanningEvent[] {
-  const prelev = evts.filter(e => e.type === 'prelevement')
-  const others = evts.filter(e => e.type !== 'prelevement')
+  const ghosts = evts.filter(e => e.isGhost)
+  const prelev  = evts.filter(e => e.type === 'prelevement' && !e.isGhost)
+  const others  = evts.filter(e => e.type !== 'prelevement')
 
   const groups = new Map<string, PlanningEvent[]>()
   prelev.forEach(e => {
@@ -243,7 +247,8 @@ function groupByClient(evts: PlanningEvent[]): PlanningEvent[] {
     merged.push({ ...worst, subtitle, count: group.length, link: `/missions/${worst.clientId}` })
   })
 
-  return sortEvts([...merged, ...others])
+  // Fantômes toujours en fin de liste (sortEvts les pousse en bas aussi)
+  return sortEvts([...merged, ...others, ...ghosts])
 }
 
 const SAMPLING_LABEL: Record<string, string> = {
