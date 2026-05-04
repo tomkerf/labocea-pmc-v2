@@ -839,7 +839,7 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
       setConfirmCancel(true)
       return
     }
-    if (!cancelReason.trim()) return  // motif obligatoire
+    // motif facultatif
     setSaving(true)
     setConfirmCancel(false)
     try { await onCancel(event, cancelReason.trim()); onClose() }
@@ -927,7 +927,7 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
             </div>
             <div>
               <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
-                Motif du report <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Motif du report <span style={{ color: 'var(--color-text-tertiary)', fontWeight: 400 }}>(optionnel)</span>
               </label>
               <textarea
                 value={moveReason} onChange={e => setMoveReason(e.target.value)}
@@ -936,9 +936,9 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
                 className="w-full px-3 py-2 rounded-lg text-sm resize-none"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
             </div>
-            <button onClick={handleMove} disabled={!moveDate || !moveReason.trim() || saving}
+            <button onClick={handleMove} disabled={!moveDate || saving}
               className="px-4 py-2 rounded-lg text-sm font-medium self-end"
-              style={{ background: 'var(--color-accent)', color: 'white', opacity: (!moveDate || !moveReason.trim() || saving) ? 0.5 : 1 }}>
+              style={{ background: 'var(--color-accent)', color: 'white', opacity: (!moveDate || saving) ? 0.5 : 1 }}>
               {saving ? '…' : 'Déplacer'}
             </button>
           </div>
@@ -1032,7 +1032,7 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
             <div className="flex flex-col gap-2">
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
-                  Motif du retrait <span style={{ color: 'var(--color-danger)' }}>*</span>
+                  Motif du retrait <span style={{ color: 'var(--color-text-tertiary)', fontWeight: 400 }}>(optionnel)</span>
                 </label>
                 <textarea
                   value={cancelReason} onChange={e => setCancelReason(e.target.value)}
@@ -1041,9 +1041,9 @@ function EventDetailModal({ event, dateStr, onClose, onCancel, onMove, onDelete,
                   className="w-full px-3 py-2 rounded-lg text-sm resize-none"
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
               </div>
-              <button onClick={handleCancel} disabled={saving || !cancelReason.trim()}
+              <button onClick={handleCancel} disabled={saving}
                 className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
-                style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)', opacity: !cancelReason.trim() ? 0.5 : 1 }}>
+                style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)', opacity: saving ? 0.5 : 1 }}>
                 ↩ Retirer du calendrier
               </button>
             </div>
