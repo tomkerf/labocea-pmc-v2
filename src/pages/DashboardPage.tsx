@@ -255,6 +255,11 @@ export default function DashboardPage() {
       plan.samplings.forEach((s: Sampling) => {
         // Exclure les prélèvements non planifiés (pool — plannedDay = 0)
         if (!s.plannedDay && !s.doneDate) return
+        // Filtre au niveau du prélèvement : si assignedTo est défini, il prime sur client.preleveur
+        if (!isGeneraliste && initiales) {
+          const techSampling = s.assignedTo || client.preleveur
+          if (techSampling && techSampling !== initiales) return
+        }
         const baseDate = s.doneDate
           ? s.doneDate
           : localISO(new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay + dayOffset))
