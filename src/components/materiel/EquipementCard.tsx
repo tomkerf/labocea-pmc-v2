@@ -126,8 +126,12 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
           {[equipement.marque, equipement.modele].filter(Boolean).join(' ') || '—'}
         </p>
         <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-          {CATEGORIE_LABELS[equipement.categorie] ?? equipement.categorie}
-          {equipement.numSerie ? ` · ${equipement.numSerie}` : ''}
+          {[
+            CATEGORIE_LABELS[equipement.categorie] ?? equipement.categorie,
+            equipement.numSerie,
+            equipement.poids,
+            equipement.materiau ? equipement.materiau.charAt(0).toUpperCase() + equipement.materiau.slice(1) : '',
+          ].filter(Boolean).join(' · ')}
         </p>
       </div>
 
