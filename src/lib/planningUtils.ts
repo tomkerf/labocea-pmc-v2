@@ -297,3 +297,10 @@ export function groupByClient(evts: PlanningEvent[]): PlanningEvent[] {
   // Fantômes toujours en fin de liste (sortEvts les pousse en bas aussi)
   return sortEvts([...merged, ...others, ...ghosts])
 }
+
+/** Extrait les initiales du technicien — ex: "Thomas THK" → "THK" */
+export function normTech(s: string): string {
+  if (!s || s === '—') return s
+  const parts = s.trim().split(' ')
+  return parts[parts.length - 1]
+}
