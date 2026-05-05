@@ -62,6 +62,7 @@ export default function PlanPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [selectedSampling, setSelectedSampling] = useState<string | null>(null)
+  const [pdfPreview,      setPdfPreview]      = useState<string | null>(null)
   const [addingDate, setAddingDate] = useState(false)
   const [newDate, setNewDate] = useState('')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -197,9 +198,9 @@ export default function PlanPage() {
     if (selectedSampling === samplingId) setSelectedSampling(null)
   }
 
-  /** Export PDF annuel du plan : synthèse de tous les prélèvements de l'année */
-  function exportAnnualReport() {
-    if (!client || !plan) return
+  /** Construit le HTML du rapport annuel (sans auto-print pour la prévisualisation) */
+  function buildReportHtml(withPrintScript = false): string {
+    if (!client || !plan) return ''
     const year = new Date().getFullYear()
     const title = `Suivi des prélèvements ${year} — ${plan.nom} — ${client.nom}`
 
@@ -324,10 +325,22 @@ export default function PlanPage() {
       </table>
       ${historySection}
       <p class="footer">Document généré automatiquement par Labocea PMC V2</p>
-      <script>window.onload = () => { window.print() }<\/script>
+      ${withPrintScript ? '<script>window.onload = () => { window.print() }<\/script>' : ''}
       </body></html>`
 
-    // Blob + URL.createObjectURL — compatible tous navigateurs et mobile Safari
+    return html
+  }
+
+  /** Ouvre la prévisualisation PDF */
+  function openPdfPreview() {
+    const html = buildReportHtml(false)
+    if (html) setPdfPreview(html)
+  }
+
+  /** Déclenche le téléchargement / impression réelle */
+  function exportAnnualReport() {
+    const html = buildReportHtml(true)
+    if (!html) return
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -335,7 +348,6 @@ export default function PlanPage() {
     a.target = '_blank'
     a.rel = 'noopener'
     a.click()
-    // Libérer la mémoire après ouverture
     setTimeout(() => URL.revokeObjectURL(url), 10_000)
   }
 
@@ -470,12 +482,12 @@ export default function PlanPage() {
           <div className="flex items-center gap-2">
             {plan.samplings.length > 0 && (
               <button
-                onClick={exportAnnualReport}
+                onClick={openPdfPreview}
                 className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
                 style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
               >
                 <FileText size={14} />
-                <span className="hidden sm:inline">Exporter PDF</span>
+                <span className="hidden sm:inline">Aperçu PDF</span>
               </button>
             )}
             {plan.frequence === 'Personnalisé' ? (
@@ -598,6 +610,53 @@ export default function PlanPage() {
           </div>
         )}
       </div>
+
+      {/* ── Modale de prévisualisation PDF ───────────────────── */}
+      {pdfPreview && (
+        <div
+          className="fixed inset-0 z-[80] flex flex-col"
+          style={{ background: 'rgba(0,0,0,0.6)' }}
+          onClick={() => setPdfPreview(null)}
+        >
+          <div
+            className="flex flex-col m-4 md:m-8 rounded-2xl overflow-hidden flex-1"
+            style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)', maxHeight: 'calc(100dvh - 32px)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3 shrink-0"
+              style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                Aperçu du rapport PDF
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={exportAnnualReport}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium"
+                  style={{ background: 'var(--color-accent)', color: 'white' }}
+                >
+                  <FileText size={14} />
+                  Imprimer / Télécharger
+                </button>
+                <button
+                  onClick={() => setPdfPreview(null)}
+                  className="p-1.5 rounded-lg"
+                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' }}
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            </div>
+            {/* Iframe preview */}
+            <iframe
+              srcDoc={pdfPreview}
+              className="flex-1 w-full"
+              style={{ border: 'none', background: 'white' }}
+              title="Aperçu PDF"
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
