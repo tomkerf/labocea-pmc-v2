@@ -129,6 +129,7 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
           {[
             CATEGORIE_LABELS[equipement.categorie] ?? equipement.categorie,
             equipement.numSerie,
+            equipement.volume,
             equipement.poids,
             equipement.materiau ? equipement.materiau.charAt(0).toUpperCase() + equipement.materiau.slice(1) : '',
           ].filter(Boolean).join(' · ')}
