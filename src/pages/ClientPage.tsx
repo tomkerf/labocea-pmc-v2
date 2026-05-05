@@ -17,7 +17,9 @@ import { useAuthStore, selectUid } from '@/stores/authStore'
 import { toast } from '@/stores/toastStore'
 import { generateId } from '@/lib/ids'
 import { isSamplingOverdue } from '@/lib/overdue'
-import { exportClientPdf, buildClientPdfBlobUrl } from '@/lib/exportPdf'
+import { buildClientReportHtml } from '@/lib/exportClientHtml'
+import { useUsersListener } from '@/hooks/useUsers'
+import { useUsersStore } from '@/stores/usersStore'
 import type { Client, Plan, SegmentType, NouvelleDemandeType } from '@/types'
 
 const SEGMENTS: SegmentType[] = ['SRA', 'Réseau de mesure', 'RSDE']
@@ -30,12 +32,14 @@ export default function ClientPage() {
   const { clientId } = useParams<{ clientId: string }>()
   const navigate = useNavigate()
   const uid = useAuthStore(selectUid)
+  useUsersListener()
+  const users = useUsersStore(s => s.users)
 
   const [client, setClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null)
+  const [pdfPreview, setPdfPreview] = useState<string | null>(null)
   const [confirmDeletePlanId, setConfirmDeletePlanId] = useState<string | null>(null)
   const [sitesInput, setSitesInput] = useState('')
   const [plansLocked, setPlansLocked] = useState(true)
@@ -223,8 +227,8 @@ export default function ClientPage() {
           {/* Aperçu PDF */}
           <button
             onClick={() => {
-              try { setPdfPreviewUrl(buildClientPdfBlobUrl(client)) }
-              catch { toast.error('Erreur lors de la génération du PDF.') }
+              try { setPdfPreview(buildClientReportHtml(client, users)) }
+              catch { toast.error('Erreur lors de la génération du rapport.') }
             }}
             className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
             style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
@@ -468,12 +472,12 @@ export default function ClientPage() {
         )}
       </div>
 
-      {/* ── Modale de prévisualisation PDF ───────────────────── */}
-      {pdfPreviewUrl && (
+      {/* ── Modale de prévisualisation rapport ───────────────── */}
+      {pdfPreview && (
         <div
           className="fixed inset-0 z-[80] flex flex-col"
           style={{ background: 'rgba(0,0,0,0.6)' }}
-          onClick={() => { URL.revokeObjectURL(pdfPreviewUrl); setPdfPreviewUrl(null) }}
+          onClick={() => setPdfPreview(null)}
         >
           <div
             className="flex flex-col m-4 md:m-8 rounded-2xl overflow-hidden flex-1"
@@ -483,19 +487,23 @@ export default function ClientPage() {
             <div className="flex items-center justify-between px-5 py-3 shrink-0"
               style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
               <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                Aperçu du rapport PDF
+                Aperçu du rapport
               </p>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => { exportClientPdf(client); }}
+                  onClick={() => {
+                    const html = buildClientReportHtml(client, users, true)
+                    const w = window.open('', '_blank')
+                    if (w) { w.document.write(html); w.document.close() }
+                  }}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium"
                   style={{ background: 'var(--color-accent)', color: 'white' }}
                 >
                   <FileDown size={14} />
-                  Télécharger
+                  Imprimer / Télécharger
                 </button>
                 <button
-                  onClick={() => { URL.revokeObjectURL(pdfPreviewUrl); setPdfPreviewUrl(null) }}
+                  onClick={() => setPdfPreview(null)}
                   className="p-1.5 rounded-lg"
                   style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' }}
                 >
@@ -504,10 +512,10 @@ export default function ClientPage() {
               </div>
             </div>
             <iframe
-              src={pdfPreviewUrl}
+              srcDoc={pdfPreview}
               className="flex-1 w-full"
               style={{ border: 'none' }}
-              title="Aperçu PDF"
+              title="Aperçu rapport"
             />
           </div>
         </div>
