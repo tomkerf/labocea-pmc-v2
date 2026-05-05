@@ -15,27 +15,28 @@ import { useEvenementsStore } from '@/stores/evenementsStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { usePreleveursStore } from '@/stores/preleveursStore'
 import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
-import type { Client, Sampling, Verification, Maintenance, EvenementPersonnel, TypeEvenement } from '@/types'
-import { isSamplingOverdue } from '@/lib/overdue'
+import type { Client, Sampling, TypeEvenement } from '@/types'
 import {
   // Types
-  type PlanningEvent, type PoolItem, type ViewMode, type TechOption,
+  type PlanningEvent, type PoolItem, type ViewMode,
   // Constantes
   JOURS_COURT, JOURS_LONG, MOIS_LONG,
-  SAMPLING_LABEL, MAINTENANCE_LABEL, EVENEMENT_LABEL,
+  EVENEMENT_LABEL,
   // Fonctions pure
-  getTechColor,
-  getFrenchHolidays, isVeilleJourFerie,
+  getTechColor, normTech,
+  getFrenchHolidays,
   startOfWeek, startOfMonth, addDays, addMonths, toISO, sameDay,
   buildMonthGrid, buildMiniGrid,
   parseHHMM, assignColumns, isMultiDay,
   sortEvts, groupByClient,
 } from '@/lib/planningUtils'
+import { usePlanningData } from '@/hooks/usePlanningData'
 import DayModal          from '@/components/planning/DayModal'
 import CellContextMenu   from '@/components/planning/CellContextMenu'
 import GhostDetailModal  from '@/components/planning/GhostDetailModal'
 import EventDetailModal  from '@/components/planning/EventDetailModal'
 import DragCreateModal   from '@/components/planning/DragCreateModal'
+import EventPill         from '@/components/planning/EventPill'
 
 // ── Composant principal ─────────────────────────────────────
 
@@ -119,182 +120,12 @@ export default function PlanningPage() {
   const weekDays  = useMemo(() => Array.from({length:5},(_,i) => addDays(weekStart,i)), [weekStart])
   const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])
 
-  // ── Index date → events ─────────────────────────────────
-
-  const eventsByDate = useMemo(() => {
-    const map: Record<string,PlanningEvent[]> = {}
-    const year = new Date().getFullYear()
-    const add = (dateStr:string, e:PlanningEvent) => {
-      if (!dateStr) return
-      if (!map[dateStr]) map[dateStr] = []
-      map[dateStr].push(e)
-    }
-
-    clients.forEach((client: Client) => {
-      client.plans.forEach(plan => {
-        const isAuto = plan.methode === 'Automatique'
-        const baseSub = [plan.nom, plan.siteNom].filter(Boolean).join(' · ') || '—'
-        plan.samplings.forEach((s:Sampling) => {
-          // Exclure les samplings non planifiés (pool) — plannedDay = 0 ou absent
-          if (!s.plannedDay && !s.doneDate) return
-          const overdue = isSamplingOverdue(s)
-          // Positionnement dans la grille = toujours plannedDay (jamais doneDate)
-          // doneDate sert uniquement à l'affichage "réalisé le X", pas au positionnement
-          const dateStr = s.plannedDay
-            ? toISO(new Date(year, s.plannedMonth, s.plannedDay))
-            : s.doneDate  // fallback pool bimensuel sans plannedDay
-          const statusLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[s.status] ?? SAMPLING_LABEL.planned
-          const priority = overdue ? 0 : s.status === 'non_effectue' ? 1 : s.status === 'planned' ? 2 : 3
-          const technicien = s.assignedTo || client.preleveur || ''
-          const tc = getTechColor(technicien)
-          const isDone = s.status === 'done'
-          const statusBg    = isDone ? 'var(--color-success-light)' : overdue ? 'var(--color-danger-light)' : tc.bg
-          const statusColor = isDone ? 'var(--color-success)'       : overdue ? 'var(--color-danger)'       : tc.color
-          const common = {
-            type: 'prelevement' as const,
-            statusLabel, statusBg, statusColor, priority,
-            link:`/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
-            isDone, technicien: technicien || '—',
-            plannedTime: s.plannedTime, clientId:client.id, planId:plan.id, samplingId:s.id,
-            meteo: plan.meteo || '',
-            analysesSousTraitees: plan.analysesSousTraitees ?? false,
-          }
-          // Méthode Automatique = bilan 24h → J1 + J2 le lendemain
-          if (isAuto) {
-            const dateStr2 = toISO(addDays(new Date(dateStr + 'T12:00:00'), 1))
-            add(dateStr, {
-              ...common,
-              id: s.id,
-              title: client.nom,
-              subtitle: `${baseSub} · Bilan 24h J1`,
-              dateFin: dateStr2,
-            })
-            add(dateStr2, {
-              ...common,
-              id: `${s.id}_j2`,
-              title: client.nom,
-              subtitle: `${baseSub} · Bilan 24h J2`,
-              isJ2Continuation: true,
-            })
-          } else {
-            // Jour unique (ponctuel / composite)
-            add(dateStr, {
-              ...common,
-              id: s.id,
-              title: client.nom,
-              subtitle: baseSub,
-            })
-          }
-        })
-      })
-    })
-
-    // ── Fantômes (reportHistory) ─────────────────────────────
-    clients.forEach((client: Client) => {
-      client.plans.forEach(plan => {
-        const baseSub = [plan.nom, plan.siteNom].filter(Boolean).join(' · ') || '—'
-        plan.samplings.forEach((s: Sampling) => {
-          if (!s.reportHistory?.length) return
-          s.reportHistory.forEach((h, idx) => {
-            if (!h.from) return
-            const ghostAction: 'retiré' | 'reporté' = h.to === '' ? 'retiré' : 'reporté'
-            add(h.from, {
-              id: `${s.id}_ghost_${idx}`,
-              type: 'prelevement' as const,
-              title: client.nom,
-              subtitle: baseSub,
-              statusLabel: ghostAction === 'retiré' ? 'Retiré' : 'Reporté',
-              statusBg: 'transparent',
-              statusColor: 'var(--color-text-tertiary)',
-              link: `/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
-              isDone: false,
-              priority: 4,
-              technicien: s.assignedTo || client.preleveur || '—',
-              clientId: client.id,
-              planId: plan.id,
-              samplingId: s.id,
-              isGhost: true,
-              ghostAction,
-              ghostNewDate: h.to || undefined,
-              ghostReason: h.reason,
-              ghostBy: h.by,
-              ghostAt: h.at,
-            })
-          })
-        })
-      })
-    })
-
-    maintenances.forEach((m:Maintenance) => {
-      const dateStr = m.dateRealisee||m.datePrevue
-      const tc = getTechColor('')   // maintenances : couleur neutre (pas d'initiales dispo)
-      add(dateStr, {
-        id:m.id, type:'maintenance', priority: m.statut==='realisee' ? 3 : 2,
-        title:m.equipementNom||'Équipement',
-        subtitle: m.type==='preventive'?'Maintenance préventive':m.type==='corrective'?'Maintenance corrective':'Panne',
-        statusLabel: MAINTENANCE_LABEL[m.statut]??'Planifiée', statusBg:tc.bg, statusColor:tc.color,
-        link:`/maintenances/${m.id}`, isDone:m.statut==='realisee', technicien:m.technicienNom||'—',
-        maintenanceData:m,
-      })
-    })
-
-    verifications.forEach((v:Verification) => {
-      if (!v.prochainControle) return
-      const tc = getTechColor('')
-      add(v.prochainControle, {
-        id:v.id, type:'verification', priority: 2,
-        title:v.equipementNom||'Équipement',
-        subtitle: v.type==='etalonnage_interne'?'Étalonnage interne':v.type==='verification_externe'?'Vérification externe':'Contrôle terrain',
-        statusLabel:'Métrologie', statusBg:tc.bg, statusColor:tc.color,
-        link:`/metrologie/${v.id}`, isDone:false, technicien:v.technicienNom||'—',
-      })
-    })
-
-    evenements.forEach((ev:EvenementPersonnel) => {
-      const evObj: PlanningEvent = {
-        id:ev.id, type:'evenement', priority: 2,
-        title:ev.titre, subtitle: EVENEMENT_LABEL[ev.type]??'Autre',
-        statusLabel: EVENEMENT_LABEL[ev.type]??'Autre',
-        statusBg: 'var(--color-bg-tertiary)', statusColor: 'var(--color-text-tertiary)',
-        link:'', isDone:false, technicien:ev.createdByInitiales||'—',
-        plannedTime:ev.heure||undefined, evenementData:ev,
-      }
-      // Étendre sur toute la plage date → dateFin (si multi-jours)
-      if (ev.dateFin && ev.dateFin > ev.date) {
-        let cur = ev.date
-        while (cur <= ev.dateFin) {
-          add(cur, { ...evObj, id: `${ev.id}_${cur}` })
-          const d = new Date(cur + 'T12:00:00')
-          d.setDate(d.getDate() + 1)
-          cur = toISO(d)
-        }
-      } else {
-        add(ev.date, evObj)
-      }
-    })
-
-    return map
-  }, [clients, maintenances, verifications, evenements])
+  // ── Calculs dérivés des données Firestore ───────────────
+  const { eventsByDate, allTechs, totalOverdue, techOptions, poolSamplings, overduePool } = usePlanningData({
+    clients, maintenances, verifications, evenements, users, preleveurs, selectedDay,
+  })
 
   // ── Filtrage technicien ─────────────────────────────────
-
-  // Extrait les initiales (dernier mot après espace) — ex: "Thomas THK" → "THK"
-  function normTech(s: string): string {
-    if (!s || s === '—') return s
-    const parts = s.trim().split(' ')
-    return parts[parts.length - 1]
-  }
-
-  // Liste des techs : préleveurs V1 en priorité, complétée par ceux présents dans les events
-  const allTechs = useMemo(() => {
-    if (preleveurs.length > 0) {
-      return preleveurs.map(p => p.code).sort()
-    }
-    // Fallback : extraire depuis les événements du planning
-    const s = new Set<string>()
-    Object.values(eventsByDate).flat().forEach(e => { if (e.technicien && e.technicien !== '—') s.add(normTech(e.technicien)) })
-    return Array.from(s).sort()
-  }, [preleveurs, eventsByDate])
 
   // Avec regroupement par client (vue mois, DayModal)
   const filteredForDay = useCallback((dateStr:string): PlanningEvent[] => {
@@ -312,25 +143,6 @@ export default function PlanningPage() {
     return sortEvts(evts)
   }, [eventsByDate, filterTech, filterRetard])
 
-
-  const totalOverdue = useMemo(() => {
-    let n=0
-    clients.forEach((c:Client) => c.plans.forEach(p => p.samplings.forEach((s:Sampling) => { if (isSamplingOverdue(s)) n++ })))
-    return n
-  }, [clients])
-
-  // Liste unifiée de tous les techniciens : préleveurs V1 + users V2 + codes présents dans clients
-  const techOptions = useMemo((): TechOption[] => {
-    const map = new Map<string, string>()
-    // 1. Préleveurs V1 (nom complet connu)
-    preleveurs.forEach(p => map.set(p.code, `${p.nom} (${p.code})`))
-    // 2. Utilisateurs V2 pas encore dans V1
-    users.forEach(u => { if (u.initiales && !map.has(u.initiales)) map.set(u.initiales, `${u.prenom} ${u.nom} (${u.initiales})`) })
-    // 3. Codes issus des clients (fallback si pas de fiche)
-    clients.forEach((c: Client) => { if (c.preleveur && !map.has(normTech(c.preleveur))) map.set(normTech(c.preleveur), normTech(c.preleveur)) })
-    return Array.from(map.entries()).map(([code, label]) => ({ code, label })).sort((a, b) => a.code.localeCompare(b.code))
-  }, [preleveurs, users, clients])
-
   // Nombre de samplings non faits dans le mois visible — pour le bandeau "à planifier"
   const monthPoolCount = useMemo(() => {
     const refDate = viewMode === 'mois' ? monthStart : viewMode === 'semaine' ? weekStart : selectedDate
@@ -345,68 +157,6 @@ export default function PlanningPage() {
     })
     return count
   }, [clients, viewMode, monthStart, weekStart, selectedDate])
-
-  // ── Pool samplings non faits du mois sélectionné ────────
-
-  const poolSamplings = useMemo((): PoolItem[] => {
-    if (!selectedDay) return []
-    const month = new Date(selectedDay + 'T12:00:00').getMonth()
-    const result: PoolItem[] = []
-    clients.forEach((client: Client) => {
-      client.plans.forEach(plan => {
-        plan.samplings.forEach((s: Sampling) => {
-          if (s.plannedMonth === month && s.status !== 'done') {
-            result.push({
-              sampling: s,
-              clientId: client.id,
-              clientNom: client.nom,
-              planId: plan.id,
-              planNom: plan.nom,
-              siteNom: plan.siteNom,
-              frequence: plan.frequence || '',
-              techInitiales: client.preleveur || '—',
-              meteo: plan.meteo || '',
-              analysesSousTraitees: plan.analysesSousTraitees ?? false,
-            })
-          }
-        })
-      })
-    })
-    // Tri : en retard en premier, puis par client
-    return result.sort((a, b) => {
-      const aOvr = isSamplingOverdue(a.sampling) ? 0 : 1
-      const bOvr = isSamplingOverdue(b.sampling) ? 0 : 1
-      if (aOvr !== bOvr) return aOvr - bOvr
-      return a.clientNom.localeCompare(b.clientNom)
-    })
-  }, [selectedDay, clients])
-
-  // Prélèvements en retard — TOUS mois confondus (identique au Dashboard)
-  const overduePool = useMemo((): PoolItem[] => {
-    const result: PoolItem[] = []
-    clients.forEach((client: Client) => {
-      const clientYear = Number(client.annee) || undefined
-      client.plans.forEach(plan => {
-        plan.samplings.forEach((s: Sampling) => {
-          if (isSamplingOverdue(s, clientYear)) {
-            result.push({
-              sampling: s,
-              clientId: client.id,
-              clientNom: client.nom,
-              planId: plan.id,
-              planNom: plan.nom,
-              siteNom: plan.siteNom,
-              frequence: plan.frequence || '',
-              techInitiales: s.assignedTo || client.preleveur || '—',
-              meteo: plan.meteo || '',
-              analysesSousTraitees: plan.analysesSousTraitees ?? false,
-            })
-          }
-        })
-      })
-    })
-    return result.sort((a, b) => a.clientNom.localeCompare(b.clientNom))
-  }, [clients])
 
   // ── Bande bilan 24h — J1 + J2 dans un groupe spanning ──────────────────────
   // Chaque groupe = une paire J1/J2 entourée d'une bordure commune (colspan).
@@ -708,165 +458,6 @@ export default function PlanningPage() {
       return `${weekStart.getDate()}–${end.getDate()} ${MOIS_LONG[weekStart.getMonth()]} ${weekStart.getFullYear()}`
     return `${weekStart.getDate()} ${MOIS_LONG[weekStart.getMonth()]} – ${end.getDate()} ${MOIS_LONG[end.getMonth()]} ${end.getFullYear()}`
   })() : `${MOIS_LONG[monthStart.getMonth()]} ${monthStart.getFullYear()}`
-
-  // ── EventPill (calendrier desktop) ─────────────────────
-
-  function EventPill({ event, compact, dateStr, onExpand, onSelect }: {
-    event: PlanningEvent; compact?: boolean; dateStr?: string; onExpand?: () => void
-    onSelect?: (event: PlanningEvent) => void
-  }) {
-    // compact = true en vue mois : une seule ligne, pas de sous-titre
-    const isGrouped = (event.count ?? 0) > 1
-    const hasSubtitle = !compact && event.subtitle && event.subtitle !== '—'
-    const hasTech = event.technicien && event.technicien !== '—'
-
-    function handleClick(e: React.MouseEvent) {
-      e.stopPropagation()
-      if (isGrouped && onExpand) { onExpand(); return }
-      if (onSelect) { onSelect(event); return }
-      if (event.type !== 'evenement') navigate(event.link)
-    }
-
-    // ── Rendu fantôme ──────────────────────────────────────
-    if (event.isGhost) {
-      const isRetrait = event.ghostAction === 'retiré'
-      const ghostLabel = isRetrait
-        ? '↩ retiré'
-        : (() => {
-            if (!event.ghostNewDate) return '→ reporté'
-            const d = new Date(event.ghostNewDate + 'T12:00:00')
-            return `→ ${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}`
-          })()
-      return (
-        <button
-          onClick={handleClick}
-          onMouseDown={e => e.stopPropagation()}
-          className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
-          style={{
-            cursor: 'pointer',
-            border: '1px dashed var(--color-border)',
-            background: 'var(--color-bg-tertiary)',
-          }}
-          title={`${event.title} — ${event.ghostAction}${event.ghostReason ? ' · ' + event.ghostReason : ''}`}
-        >
-          <div className="flex items-center gap-1">
-            <span className="shrink-0 text-[9px]">{isRetrait ? '↩' : '→'}</span>
-            <span className="flex-1 truncate text-[10px]"
-              style={{
-                color: 'var(--color-text-secondary)',
-                textDecoration: isRetrait ? 'line-through' : 'none',
-                fontStyle: 'italic',
-              }}>
-              {event.title}
-            </span>
-            <span className="shrink-0 text-[9px] font-medium px-1 rounded"
-              style={{ background: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
-              {ghostLabel}
-            </span>
-          </div>
-        </button>
-      )
-    }
-
-    // Congé/RTT — traitement spécial
-    const isConge = event.type === 'evenement' && event.evenementData?.type === 'conge'
-    const techColor = getTechColor(event.technicien).color
-    const dotColor = event.type === 'prelevement'
-      ? event.priority === 0 ? 'var(--color-danger)'   // overdue → rouge
-      : event.priority === 1 ? 'var(--color-neutral)'  // non_effectué → gris
-      : techColor                                        // planifié → couleur tech
-      : event.type === 'evenement' ? techColor
-      : event.statusColor  // maintenance / vérification
-
-    // Badges bilan 24h
-    const isJ1 = event.type === 'prelevement' && !!event.dateFin
-    const isJ2 = event.isJ2Continuation === true
-
-    // Veille de jour férié — uniquement pour les plans sous-traités
-    const veilleFerrieNom = event.analysesSousTraitees && dateStr && !event.isDone
-      ? isVeilleJourFerie(dateStr)
-      : null
-
-    // Congé : pill gris clair, texte muted, emoji 🏖️ à la place du dot
-    if (isConge) {
-      return (
-        <div
-          className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
-          style={{ background: 'var(--color-bg-tertiary)', cursor: 'default', opacity: 0.85 }}
-          title={event.title}
-        >
-          <div className="flex items-center gap-1">
-            <span className="shrink-0 text-[10px]">🏖️</span>
-            <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-              {event.title || 'Congé/RTT'}
-            </span>
-            {hasTech && (
-              <span className="shrink-0 text-[9px] font-semibold px-1 rounded"
-                style={{ background: techColor + '18', color: techColor }}>
-                {event.technicien}
-              </span>
-            )}
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <button
-        onClick={handleClick}
-        onMouseDown={e => e.stopPropagation()}
-        className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
-        style={{ background: 'var(--color-bg-secondary)', border: `1px solid ${techColor}30`, cursor: isGrouped ? 'zoom-in' : event.type === 'evenement' ? 'default' : 'pointer' }}
-        title={isGrouped ? `${event.title} — ${event.count} prélèvements (cliquer pour détails)` : `${event.title} — ${event.subtitle} (${event.technicien})`}
-      >
-        {/* Ligne 1 : dot (ou ✓) + titre + badges */}
-        <div className="flex items-center gap-1">
-          {event.isDone
-            ? <CheckCircle2 size={11} className="shrink-0" style={{ color: dotColor }} />
-            : <span className="shrink-0 w-[6px] h-[6px] rounded-full" style={{ background: dotColor }} />
-          }
-          {event.meteo === 'pluie' && (
-            <span className="shrink-0 text-[10px]" title="Prélèvement par temps de pluie">🌧</span>
-          )}
-          {veilleFerrieNom && (
-            <span className="shrink-0 text-[10px]" title={`Analyses sous-traitées — veille de ${veilleFerrieNom}`}>⚠️</span>
-          )}
-          <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
-            {event.title}
-          </span>
-          {(isJ1 || isJ2) && (
-            <span className="shrink-0 text-[8px] font-bold px-1 rounded"
-              style={{ background: dotColor + '22', color: dotColor }}>
-              {isJ1 ? 'J1' : 'J2'}
-            </span>
-          )}
-          {hasTech && (
-            <span className="shrink-0 text-[9px] font-semibold px-1 rounded"
-              style={{ background: dotColor + '18', color: dotColor }}>
-              {event.technicien}
-            </span>
-          )}
-          {isGrouped && (
-            <span className="shrink-0 text-[9px] font-bold px-1 rounded"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-              ×{event.count}
-            </span>
-          )}
-          {event.plannedTime && (
-            <span className="shrink-0 text-[9px]" style={{ color: 'var(--color-text-tertiary)' }}>
-              {event.plannedTime}
-            </span>
-          )}
-        </div>
-        {/* Ligne 2 : sous-titre (masqué en vue mois) */}
-        {hasSubtitle && (
-          <div className="text-[10px] truncate pl-[14px]" style={{ color: 'var(--color-text-secondary)' }}>
-            {event.subtitle}
-          </div>
-        )}
-      </button>
-    )
-  }
 
   // ── EventRow (liste mobile + desktop) ──────────────────
 
