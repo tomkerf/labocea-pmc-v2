@@ -52,9 +52,9 @@ function today(): string {
   return new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
 }
 
-// ── Export principal ──────────────────────────────────────────
+// ── Construction du document jsPDF ───────────────────────────
 
-export function exportClientPdf(client: Client): void {
+function buildClientPdfDoc(client: Client): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const W = doc.internal.pageSize.getWidth()
   const MARGIN = 15
@@ -291,7 +291,20 @@ export function exportClientPdf(client: Client): void {
     MARGIN, doc.internal.pageSize.getHeight() - 8
   )
 
-  // ── Téléchargement ──
+  return doc
+}
+
+// ── Export principal (téléchargement direct) ──────────────────
+
+export function exportClientPdf(client: Client): void {
+  const doc = buildClientPdfDoc(client)
   const filename = `PMC_${client.nom.replace(/[^a-zA-Z0-9]/g, '_')}_${client.annee}.pdf`
   doc.save(filename)
+}
+
+// ── Génère un blob URL pour prévisualisation (iframe) ─────────
+
+export function buildClientPdfBlobUrl(client: Client): string {
+  const doc = buildClientPdfDoc(client)
+  return doc.output('bloburl') as unknown as string
 }

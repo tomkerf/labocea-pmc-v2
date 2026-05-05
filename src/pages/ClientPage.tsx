@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle, FileDown, Loader2, GripVertical, Minus, Lock, Unlock } from 'lucide-react'
+import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle, FileDown, GripVertical, Minus, Lock, Unlock, X } from 'lucide-react'
 import {
   DndContext, closestCenter, PointerSensor, TouchSensor,
   useSensor, useSensors, type DragEndEvent,
@@ -17,7 +17,7 @@ import { useAuthStore, selectUid } from '@/stores/authStore'
 import { toast } from '@/stores/toastStore'
 import { generateId } from '@/lib/ids'
 import { isSamplingOverdue } from '@/lib/overdue'
-import { exportClientPdf } from '@/lib/exportPdf'
+import { exportClientPdf, buildClientPdfBlobUrl } from '@/lib/exportPdf'
 import type { Client, Plan, SegmentType, NouvelleDemandeType } from '@/types'
 
 const SEGMENTS: SegmentType[] = ['SRA', 'Réseau de mesure', 'RSDE']
@@ -35,7 +35,7 @@ export default function ClientPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [exporting, setExporting] = useState(false)
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null)
   const [confirmDeletePlanId, setConfirmDeletePlanId] = useState<string | null>(null)
   const [sitesInput, setSitesInput] = useState('')
   const [plansLocked, setPlansLocked] = useState(true)
@@ -220,20 +220,15 @@ export default function ClientPage() {
         <div className="flex items-center gap-3">
           {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
 
-          {/* Export PDF */}
+          {/* Aperçu PDF */}
           <button
-            onClick={async () => {
-              setExporting(true)
-              try { exportClientPdf(client) }
+            onClick={() => {
+              try { setPdfPreviewUrl(buildClientPdfBlobUrl(client)) }
               catch { toast.error('Erreur lors de la génération du PDF.') }
-              finally { setExporting(false) }
             }}
-            disabled={exporting}
             className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
             style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
-            {exporting
-              ? <Loader2 size={13} className="animate-spin" />
-              : <FileDown size={13} />}
+            <FileDown size={13} />
             PDF
           </button>
 
@@ -472,6 +467,51 @@ export default function ClientPage() {
           </DndContext>
         )}
       </div>
+
+      {/* ── Modale de prévisualisation PDF ───────────────────── */}
+      {pdfPreviewUrl && (
+        <div
+          className="fixed inset-0 z-[80] flex flex-col"
+          style={{ background: 'rgba(0,0,0,0.6)' }}
+          onClick={() => { URL.revokeObjectURL(pdfPreviewUrl); setPdfPreviewUrl(null) }}
+        >
+          <div
+            className="flex flex-col m-4 md:m-8 rounded-2xl overflow-hidden flex-1"
+            style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)', maxHeight: 'calc(100dvh - 32px)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-3 shrink-0"
+              style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                Aperçu du rapport PDF
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => { exportClientPdf(client); }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium"
+                  style={{ background: 'var(--color-accent)', color: 'white' }}
+                >
+                  <FileDown size={14} />
+                  Télécharger
+                </button>
+                <button
+                  onClick={() => { URL.revokeObjectURL(pdfPreviewUrl); setPdfPreviewUrl(null) }}
+                  className="p-1.5 rounded-lg"
+                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' }}
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            </div>
+            <iframe
+              src={pdfPreviewUrl}
+              className="flex-1 w-full"
+              style={{ border: 'none' }}
+              title="Aperçu PDF"
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
