@@ -138,7 +138,7 @@ export default function DashboardPage() {
   // Équipements sans enregistrement de vérification (même logique que MerologiePage)
   const equipementsWithoutVerif = equipements.filter((e: Equipement) => {
     if (!e.prochainEtalonnage) return false
-    return !verifications.some((v: Verification) => v.equipementId === e.id)
+    return !verifications.some((v: Verification) => v.equipementId === e.id || v.equipementNom === e.nom)
   })
 
 

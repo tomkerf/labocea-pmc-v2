@@ -62,7 +62,7 @@ export default function MerologiePage() {
   // Equipment with prochainEtalonnage but no verification record
   const equipementsWithoutVerif = equipements.filter((eq: Equipement) => {
     if (!eq.prochainEtalonnage) return false
-    return !verifications.some((v: Verification) => v.equipementId === eq.id)
+    return !verifications.some((v: Verification) => v.equipementId === eq.id || v.equipementNom === eq.nom)
   })
 
   // Build unified rows
