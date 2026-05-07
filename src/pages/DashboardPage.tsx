@@ -142,16 +142,14 @@ export default function DashboardPage() {
   })
 
 
-  // À calibrer : verifications OU équipements orphelins avec échéance dans 0–30j
+  // À calibrer : verifications OU équipements orphelins avec échéance passée ou dans 30j
   const aCalibrrer = [
     ...verifications.filter((v: Verification) => {
       if (!v.prochainControle) return false
-      const d = daysDiff(v.prochainControle)
-      return d >= 0 && d < 30
+      return daysDiff(v.prochainControle) < 30
     }),
     ...equipementsWithoutVerif.filter((e: Equipement) => {
-      const d = daysDiff(e.prochainEtalonnage)
-      return d >= 0 && d < 30
+      return daysDiff(e.prochainEtalonnage) < 30
     }),
   ].length
 
@@ -530,6 +528,7 @@ export default function DashboardPage() {
                 { value: aCalibrrer,               color: 'var(--color-warning)', label: 'À calibrer'      },
                 { value: parcEtat.en_maintenance,  color: 'var(--color-accent)',  label: 'En maintenance'  },
                 { value: parcEtat.hors_service,    color: 'var(--color-danger)',  label: 'Hors service'    },
+                { value: parcEtat.prete,           color: 'var(--color-neutral)', label: 'Prêté'           },
               ]}
             />
           </div>
