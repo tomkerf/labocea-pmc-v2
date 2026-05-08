@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useRef } from 'react'
-import { ChevronLeft, ChevronRight, CheckCircle2, Plus, Calendar } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Calendar } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useClientsListener, saveClient } from '@/hooks/useClients'
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -26,7 +26,7 @@ import {
   getTechColor, normTech,
   getFrenchHolidays,
   startOfWeek, startOfMonth, addDays, addMonths, toISO, sameDay,
-  buildMonthGrid, buildMiniGrid,
+  buildMonthGrid,
   sortEvts, groupByClient, filterEvents,
 } from '@/lib/planningUtils'
 import { usePlanningData } from '@/hooks/usePlanningData'
