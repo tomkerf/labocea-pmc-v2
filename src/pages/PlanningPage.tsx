@@ -19,6 +19,7 @@ import type { Client, Sampling, TypeEvenement } from '@/types'
 import {
   // Types
   type PlanningEvent, type PoolItem, type ViewMode,
+  type BilanGroup, type AllDayItem,
   // Constantes
   JOURS_LONG, MOIS_LONG,
   EVENEMENT_LABEL,
@@ -162,9 +163,6 @@ export default function PlanningPage() {
     if (viewMode !== 'semaine') return []
     const wISOs = weekDays.map(toISO)
 
-    type BilanItem  = { colIdx: number; event: PlanningEvent }
-    type BilanGroup = { colStart: number; colEnd: number; techColor: string; items: BilanItem[] }
-
     const pairs: { j1Col: number; j2Col: number; j1: PlanningEvent; j2: PlanningEvent | null }[] = []
 
     wISOs.forEach((dateStr, colIdx) => {
@@ -216,20 +214,7 @@ export default function PlanningPage() {
     const weekStartISO = weekDayISOs[0]
     const weekEndISO   = weekDayISOs[4]
 
-    type RawItem = {
-      key: string
-      colStart: number
-      colEnd: number
-      bg: string
-      color: string
-      label: string
-      badge?: string   // initiales tech
-      tag?: string     // ex: "J1→J2" pour les bilans
-      onClick: () => void
-      tooltip: string
-    }
-
-    const rawItems: RawItem[] = []
+    const rawItems: Omit<AllDayItem, 'row'>[] = []
 
     // 1. Événements personnels avec dateFin (multi-jours) — sauf congés (pills par colonne)
     evenements

@@ -1,28 +1,11 @@
 import { Plus } from 'lucide-react'
 import {
-  type PlanningEvent,
+  type PlanningEvent, type BilanGroup, type AllDayItem,
   JOURS_COURT,
   toISO, sameDay,
   isMultiDay, sortEvts, filterEvents,
 } from '@/lib/planningUtils'
 import EventPill from '@/components/planning/EventPill'
-
-type BilanItem  = { colIdx: number; event: PlanningEvent }
-type BilanGroup = { colStart: number; colEnd: number; techColor: string; items: BilanItem[] }
-
-type AllDayItem = {
-  key: string
-  colStart: number
-  colEnd: number
-  row: number
-  bg: string
-  color: string
-  label: string
-  badge?: string
-  tag?: string
-  onClick: () => void
-  tooltip: string
-}
 
 interface WeekViewProps {
   weekDays:             Date[]
@@ -58,6 +41,10 @@ export default function WeekView({
   function filteredForDayFlat(dateStr: string): PlanningEvent[] {
     return sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard))
   }
+
+  const allDayNumRows = allDayItems.length > 0
+    ? Math.max(...allDayItems.map(s => s.row)) + 1
+    : 0
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
@@ -132,17 +119,15 @@ export default function WeekView({
       )}
 
       {/* ── Bande "toute la journée" — multi-jours (style Apple Calendar) ── */}
-      {allDayItems.length > 0 && (() => {
-        const numRows = Math.max(...allDayItems.map(s => s.row)) + 1
-        return (
-          <div className="shrink-0"
-            style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 2px' }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(5, 1fr)',
-              gridTemplateRows: `repeat(${numRows}, 18px)`,
-              gap: '2px 0',
-            }}>
+      {allDayItems.length > 0 && (
+        <div className="shrink-0"
+          style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 2px' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(5, 1fr)',
+            gridTemplateRows: `repeat(${allDayNumRows}, 18px)`,
+            gap: '2px 0',
+          }}>
               {allDayItems.map(({ key, colStart, colEnd, row, bg, color, label, badge, tag, onClick, tooltip }) => (
                 <button
                   key={key}
@@ -169,8 +154,8 @@ export default function WeekView({
               ))}
             </div>
           </div>
-        )
-      })()}
+        </div>
+      )}
 
       {/* Colonnes événements */}
       <div className="grid grid-cols-5 flex-1 overflow-y-auto select-none"

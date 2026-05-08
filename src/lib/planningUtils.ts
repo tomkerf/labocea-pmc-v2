@@ -305,6 +305,25 @@ export function normTech(s: string): string {
   return parts[parts.length - 1]
 }
 
+// ── Types partagés entre PlanningPage et WeekView ──────────────────────────
+
+export type BilanItem  = { colIdx: number; event: PlanningEvent }
+export type BilanGroup = { colStart: number; colEnd: number; techColor: string; items: BilanItem[] }
+
+export type AllDayItem = {
+  key:      string
+  colStart: number
+  colEnd:   number
+  row:      number
+  bg:       string
+  color:    string
+  label:    string
+  badge?:   string
+  tag?:     string
+  onClick:  () => void
+  tooltip:  string
+}
+
 export function filterEvents(
   evts: PlanningEvent[],
   filterTech: string,
