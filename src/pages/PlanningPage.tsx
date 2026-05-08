@@ -20,14 +20,13 @@ import {
   // Types
   type PlanningEvent, type PoolItem, type ViewMode,
   // Constantes
-  JOURS_COURT, JOURS_LONG, MOIS_LONG,
+  JOURS_LONG, MOIS_LONG,
   EVENEMENT_LABEL,
   // Fonctions pure
   getTechColor, normTech,
   getFrenchHolidays,
   startOfWeek, startOfMonth, addDays, addMonths, toISO, sameDay,
   buildMonthGrid, buildMiniGrid,
-  parseHHMM, assignColumns, isMultiDay,
   sortEvts, groupByClient,
 } from '@/lib/planningUtils'
 import { usePlanningData } from '@/hooks/usePlanningData'
@@ -36,7 +35,6 @@ import CellContextMenu   from '@/components/planning/CellContextMenu'
 import GhostDetailModal  from '@/components/planning/GhostDetailModal'
 import EventDetailModal  from '@/components/planning/EventDetailModal'
 import DragCreateModal   from '@/components/planning/DragCreateModal'
-import EventPill         from '@/components/planning/EventPill'
 import DayView          from '@/components/planning/DayView'
 import WeekView         from '@/components/planning/WeekView'
 import MonthView        from '@/components/planning/MonthView'
@@ -115,9 +113,9 @@ export default function PlanningPage() {
 
   function dragRangeMin() { return dragStart && dragEnd ? (dragStart < dragEnd ? dragStart : dragEnd) : null }
   function dragRangeMax() { return dragStart && dragEnd ? (dragStart > dragEnd ? dragStart : dragEnd) : null }
-  function isInDrag(dateStr: string) {
+  function isInDrag(dateStr: string): boolean {
     const mn = dragRangeMin(); const mx = dragRangeMax()
-    return isDragging && mn && mx && dateStr >= mn && dateStr <= mx
+    return !!(isDragging && mn && mx && dateStr >= mn && dateStr <= mx)
   }
 
   const weekDays  = useMemo(() => Array.from({length:5},(_,i) => addDays(weekStart,i)), [weekStart])
