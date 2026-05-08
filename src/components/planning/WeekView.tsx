@@ -154,7 +154,6 @@ export default function WeekView({
               ))}
             </div>
           </div>
-        </div>
       )}
 
       {/* Colonnes événements */}
