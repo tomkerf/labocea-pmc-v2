@@ -37,6 +37,9 @@ import GhostDetailModal  from '@/components/planning/GhostDetailModal'
 import EventDetailModal  from '@/components/planning/EventDetailModal'
 import DragCreateModal   from '@/components/planning/DragCreateModal'
 import EventPill         from '@/components/planning/EventPill'
+import DayView          from '@/components/planning/DayView'
+import WeekView         from '@/components/planning/WeekView'
+import MonthView        from '@/components/planning/MonthView'
 
 // ── Composant principal ─────────────────────────────────────
 
@@ -760,418 +763,67 @@ export default function PlanningPage() {
       )}
 
       {/* ── VUE JOUR (toutes tailles) ── */}
-      {viewMode === 'jour' && (() => {
-        const D_START = 7, D_END = 20, PX_H = 64, PX_M = PX_H / 60
-        const dateStr = toISO(selectedDate)
-        const allEvts = sortEvts((() => {
-          let evts = eventsByDate[dateStr] ?? []
-          if (filterTech)   evts = evts.filter(e => normTech(e.technicien) === filterTech)
-          if (filterRetard) evts = evts.filter(e => e.statusColor === 'var(--color-danger)' || e.statusLabel === 'En retard')
-          return evts
-        })())
-        const allDayEvts = allEvts.filter(e => !e.plannedTime)
-        const timedEvts  = assignColumns(
-          allEvts.filter(e => !!e.plannedTime)
-            .map(e => ({ ...e, startMin: parseHHMM(e.plannedTime!), durationMin: 60 }))
-        )
-        const now    = new Date()
-        const nowMin = now.getHours() * 60 + now.getMinutes()
-        const showNow = sameDay(selectedDate, today) && nowMin >= D_START * 60 && nowMin <= D_END * 60
-        const weekNum = (() => {
-          const d = new Date(Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()))
-          d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
-          const y = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-          return Math.ceil((((d.getTime() - y.getTime()) / 86400000) + 1) / 7)
-        })()
-        return (
-          <div className="flex-1 overflow-hidden flex flex-col relative"
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}>
-
-            {/* Sous-titre : numéro de semaine */}
-            <div className="px-4 py-1.5 shrink-0 flex items-center gap-2"
-              style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
-              <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                Semaine {weekNum}
-              </span>
-              {allEvts.length > 0 && (
-                <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                  · {allEvts.length} intervention{allEvts.length > 1 ? 's' : ''}
-                </span>
-              )}
-            </div>
-
-            {/* Section "Toute la journée" */}
-            <div className="shrink-0" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
-              <div className="flex">
-                <div className="w-14 shrink-0 flex items-start justify-end pr-2 pt-2 pb-1">
-                  <span className="text-[10px] font-medium" style={{ color: 'var(--color-text-tertiary)' }}>Jour</span>
-                </div>
-                <div className="flex-1 py-1.5 pr-3 flex flex-col gap-1" style={{ minHeight: 36 }}>
-                  {allDayEvts.length === 0 ? (
-                    <span className="text-xs py-1" style={{ color: 'var(--color-text-tertiary)' }}>Aucune intervention planifiée</span>
-                  ) : allDayEvts.map(evt => (
-                    <button key={evt.id}
-                      onClick={() => handleSelectEvent(evt, dateStr)}
-                      className="flex items-center gap-1.5 px-2 py-1 rounded-[5px] text-left"
-                      style={{ background: evt.statusBg }}>
-                      <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: evt.statusColor }} />
-                      <span className="text-[11px] font-medium flex-1 truncate" style={{ color: 'var(--color-text-primary)' }}>
-                        {evt.title}
-                      </span>
-                      <span className="text-[10px] truncate max-w-[160px]" style={{ color: 'var(--color-text-secondary)' }}>
-                        {evt.subtitle}
-                      </span>
-                      {evt.technicien && evt.technicien !== '—' && (
-                        <span className="text-[9px] px-1 rounded shrink-0"
-                          style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                          {evt.technicien}
-                        </span>
-                      )}
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium shrink-0"
-                        style={{ background: evt.statusColor + '22', color: evt.statusColor }}>
-                        {evt.statusLabel}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Grille horaire */}
-            <div className="flex-1 overflow-y-auto" style={{ background: 'var(--color-bg-primary)' }}>
-              <div className="relative" style={{ height: (D_END - D_START) * PX_H }}>
-
-                {/* Lignes horaires */}
-                {Array.from({ length: D_END - D_START }, (_, i) => (
-                  <div key={i} className="absolute left-0 right-0"
-                    style={{ top: i * PX_H, height: PX_H, borderTop: '1px solid var(--color-border-subtle)' }}>
-                    <div className="absolute w-14 pr-2 text-right -top-2.5">
-                      <span className="text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>
-                        {String(D_START + i).padStart(2, '0')}h
-                      </span>
-                    </div>
-                    {/* Demi-heure */}
-                    <div className="absolute right-0 border-t opacity-40"
-                      style={{ left: 56, top: PX_H / 2, borderColor: 'var(--color-border-subtle)', borderStyle: 'dashed' }} />
-                  </div>
-                ))}
-
-                {/* Indicateur heure actuelle */}
-                {showNow && (
-                  <div className="absolute flex items-center z-10 pointer-events-none"
-                    style={{ top: (nowMin - D_START * 60) * PX_M, left: 56 - 5, right: 0 }}>
-                    <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: '#FF3B30' }} />
-                    <div className="flex-1" style={{ height: 2, background: '#FF3B30' }} />
-                  </div>
-                )}
-
-                {/* Événements horodatés */}
-                <div className="absolute inset-0" style={{ left: 56 }}>
-                  {timedEvts.length === 0 ? (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <p className="text-xs text-center px-4" style={{ color: 'var(--color-text-tertiary)' }}>
-                        Aucun événement horodaté
-                        <br />Utilisez "+ Événement" pour en ajouter
-                      </p>
-                    </div>
-                  ) : timedEvts.map(evt => {
-                    const top    = (evt.startMin - D_START * 60) * PX_M
-                    const height = Math.max(evt.durationMin * PX_M, 28)
-                    const W      = 1 / evt.totalCols
-                    return (
-                      <button key={evt.id}
-                        onClick={() => handleSelectEvent(evt, dateStr)}
-                        className="absolute text-left rounded-lg px-2 py-1 overflow-hidden"
-                        style={{
-                          top: top + 1, height: height - 2,
-                          left: `calc(${evt.col * W * 100}% + 2px)`,
-                          width: `calc(${W * 100}% - 4px)`,
-                          background: evt.statusBg,
-                          border: `1.5px solid ${evt.statusColor}50`,
-                        }}>
-                        <div className="flex items-center gap-1">
-                          <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: evt.statusColor }} />
-                          <span className="text-[11px] font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
-                            {evt.title}
-                          </span>
-                        </div>
-                        {height >= 38 && (
-                          <p className="text-[10px] truncate pl-[13px] mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
-                            {evt.plannedTime} · {evt.subtitle}
-                          </p>
-                        )}
-                      </button>
-                    )
-                  })}
-                </div>
-
-              </div>
-            </div>
-
-            {/* FAB Planifier — flottant bas droite */}
-            <button
-              onClick={() => setSelectedDay(dateStr)}
-              className="absolute bottom-6 right-6 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-lg"
-              style={{
-                background: 'var(--color-accent)',
-                color: 'white',
-                boxShadow: '0 4px 16px rgba(0,113,227,0.35)',
-                zIndex: 20,
-              }}>
-              <Plus size={16} strokeWidth={2.5} />
-              Planifier
-            </button>
-
-          </div>
-        )
-      })()}
+      {viewMode === 'jour' && (
+        <DayView
+          selectedDate={selectedDate}
+          today={today}
+          eventsByDate={eventsByDate}
+          filterTech={filterTech}
+          filterRetard={filterRetard}
+          handleTouchStart={handleTouchStart}
+          handleTouchEnd={handleTouchEnd}
+          handleSelectEvent={handleSelectEvent}
+          setSelectedDay={setSelectedDay}
+        />
+      )}
 
       {/* ── DESKTOP : vue calendrier grille ── */}
       <div className={viewMode === 'jour' ? 'hidden' : 'hidden md:flex flex-col flex-1 overflow-hidden'}>
 
         {viewMode==='semaine' && (
-          <div className="flex flex-col flex-1 overflow-hidden">
-            {/* En-têtes colonnes */}
-            <div className="grid grid-cols-5 shrink-0"
-              style={{ borderBottom:'1px solid var(--color-border-subtle)' }}>
-              {weekDays.map((day,i) => {
-                const isToday = sameDay(day,today)
-                const holidayName = holidays[toISO(day)]
-                return (
-                  <div key={i} className="py-2 px-2 text-center"
-                    style={{
-                      borderRight: i<4?'1px solid var(--color-border-subtle)':'none',
-                      background: holidayName ? 'rgba(255,59,48,0.04)' : 'transparent',
-                    }}>
-                    <div className="text-[10px] font-medium uppercase mb-1"
-                      style={{ color:'var(--color-text-tertiary)', letterSpacing:'0.04em' }}>
-                      {JOURS_COURT[i]}
-                    </div>
-                    <div className="w-7 h-7 flex items-center justify-center rounded-full mx-auto text-sm font-semibold"
-                      style={{
-                        background: isToday ? '#FF3B30' : holidayName ? 'rgba(255,59,48,0.12)' : 'transparent',
-                        color: isToday ? 'white' : holidayName ? '#FF3B30' : 'var(--color-text-primary)',
-                      }}>
-                      {day.getDate()}
-                    </div>
-                    {holidayName && (
-                      <div className="text-[9px] mt-0.5 truncate px-0.5 font-medium"
-                        style={{ color: '#FF3B30' }}>
-                        {holidayName}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* ── Bande bilan 24h — groupe J1+J2 avec bordure commune (colspan) ── */}
-            {bilanBand.length > 0 && (
-              <div className="shrink-0" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 0' }}>
-                {bilanBand.map((row, rowIdx) => {
-                  const wISOs = weekDays.map(toISO)
-                  return (
-                    <div key={rowIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', padding: '0 2px' }}>
-                      {row.map((group, gIdx) => (
-                        <div key={gIdx}
-                          style={{
-                            gridColumn: `${group.colStart + 1} / ${group.colEnd + 2}`,
-                            display: 'flex',
-                            gap: 2,
-                            border: `1px solid ${group.techColor}45`,
-                            borderRadius: 7,
-                            padding: '1px 2px',
-                            margin: '0 3px',
-                            background: group.techColor + '08',
-                          }}>
-                          {group.items.map(item => (
-                            <div key={item.event.id} style={{ flex: 1, minWidth: 0 }}>
-                              <EventPill
-                                event={item.event}
-                                dateStr={wISOs[item.colIdx]}
-                                onSelect={e => handleSelectEvent(e, wISOs[item.colIdx])}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-
-            {/* ── Bande "toute la journée" — multi-jours (style Apple Calendar) ── */}
-            {allDayItems.length > 0 && (() => {
-              const numRows = Math.max(...allDayItems.map(s => s.row)) + 1
-              return (
-                <div className="shrink-0"
-                  style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 2px' }}>
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(5, 1fr)',
-                    gridTemplateRows: `repeat(${numRows}, 18px)`,
-                    gap: '2px 0',
-                  }}>
-                    {allDayItems.map(({ key, colStart, colEnd, row, bg, color, label, badge, tag, onClick, tooltip }) => (
-                      <button
-                        key={key}
-                        onMouseDown={e => e.stopPropagation()}
-                        onClick={onClick}
-                        className="text-left px-2 rounded flex items-center gap-1 truncate"
-                        style={{
-                          gridColumn: `${colStart + 1} / ${colEnd + 2}`,
-                          gridRow: row + 1,
-                          background: bg,
-                          marginLeft: 1,
-                          marginRight: 1,
-                        }}
-                        title={tooltip}
-                      >
-                        <span className="text-[11px] font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
-                        {tag && (
-                          <span className="shrink-0 text-[9px]" style={{ color }}>{tag}</span>
-                        )}
-                        {badge && (
-                          <span className="shrink-0 text-[9px] opacity-60" style={{ color: 'var(--color-text-secondary)' }}>{badge}</span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )
-            })()}
-
-            {/* Colonnes événements */}
-            <div className="grid grid-cols-5 flex-1 overflow-y-auto select-none"
-              onMouseUp={handleDragMouseUp}
-              onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
-              {weekDays.map((day,i) => {
-                const dateStr  = toISO(day)
-                const evts     = filteredForDayFlat(dateStr).filter(e => !isMultiDay(e))
-                const inDrag   = isInDrag(dateStr)
-                const isHoliday = !!holidays[dateStr]
-                const hasConge  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'conge') ?? false
-                return (
-                  <div key={i}
-                    className="p-1.5 flex flex-col gap-1 cursor-crosshair group"
-                    onMouseDown={e => handleDragMouseDown(e, dateStr)}
-                    onMouseEnter={() => handleDragMouseEnter(dateStr)}
-                    onContextMenu={e => { e.preventDefault(); setCtxMenu({ dateStr, x: e.clientX, y: e.clientY }) }}
-                    style={{
-                      position: 'relative',
-                      borderRight: i<4?'1px solid var(--color-border-subtle)':'none',
-                      background: inDrag ? 'rgba(0,113,227,0.1)' : 'var(--color-bg-secondary)',
-                      outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
-                      outlineOffset: '-1px',
-                      minHeight: 120,
-                      userSelect: 'none',
-                    }}>
-                    {/* Overlay jour férié */}
-                    {isHoliday && !inDrag && <div className="holiday-overlay" />}
-                    {/* Overlay congé/RTT */}
-                    {!isHoliday && hasConge && !inDrag && <div className="conge-overlay" />}
-                    {evts.map(evt => <EventPill key={evt.id} event={evt} dateStr={dateStr} onExpand={() => goToDay(dateStr)} onSelect={e => handleSelectEvent(e, dateStr)} />)}
-                    <div className="mt-auto pt-1 flex justify-end pr-0.5">
-                      <Plus size={10} className="opacity-20 group-hover:opacity-60 transition-opacity"
-                        style={{ color: 'var(--color-text-tertiary)' }} />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+          <WeekView
+            weekDays={weekDays}
+            today={today}
+            holidays={holidays}
+            eventsByDate={eventsByDate}
+            bilanBand={bilanBand}
+            allDayItems={allDayItems}
+            filterTech={filterTech}
+            filterRetard={filterRetard}
+            isDragging={isDragging}
+            handleDragMouseDown={handleDragMouseDown}
+            handleDragMouseEnter={handleDragMouseEnter}
+            handleDragMouseUp={handleDragMouseUp}
+            setIsDragging={setIsDragging}
+            setDragStart={setDragStart}
+            setDragEnd={setDragEnd}
+            handleSelectEvent={handleSelectEvent}
+            goToDay={goToDay}
+            setCtxMenu={setCtxMenu}
+            isInDrag={isInDrag}
+          />
         )}
 
         {viewMode==='mois' && (
-          <div className="flex flex-col flex-1 overflow-hidden">
-            {/* En-têtes jours */}
-            <div className="grid grid-cols-5 shrink-0"
-              style={{ borderBottom:'1px solid var(--color-border-subtle)' }}>
-              {JOURS_COURT.map((j,i) => (
-                <div key={j} className="py-2 text-center text-[10px] font-medium uppercase"
-                  style={{ color:'var(--color-text-tertiary)', letterSpacing:'0.04em',
-                    borderRight:i<4?'1px solid var(--color-border-subtle)':'none' }}>
-                  {j}
-                </div>
-              ))}
-            </div>
-            {/* Grille */}
-            <div className="grid grid-cols-5 flex-1 overflow-y-auto select-none"
-              style={{ gridAutoRows:'1fr' }}
-              onMouseUp={handleDragMouseUp}
-              onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
-              {monthGrid.map((day,i) => {
-                if (!day) return (
-                  <div key={i} style={{
-                    borderRight:(i%5)<4?'1px solid var(--color-border-subtle)':'none',
-                    borderBottom:'1px solid var(--color-border-subtle)',
-                    background:'rgba(0,0,0,0.015)',
-                  }} />
-                )
-                const dateStr = toISO(day)
-                const evts = filteredForDay(dateStr)
-                const isToday = sameDay(day,today)
-                const inDrag = isInDrag(dateStr)
-                const holidayName = holidays[dateStr]
-                const hasCongeM   = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'conge') ?? false
-                const MAX = 3
-                return (
-                  <div key={i}
-                    className="p-1 flex flex-col gap-0.5 cursor-crosshair group"
-                    onMouseDown={e => handleDragMouseDown(e, dateStr)}
-                    onMouseEnter={() => handleDragMouseEnter(dateStr)}
-                    onContextMenu={e => { e.preventDefault(); setCtxMenu({ dateStr, x: e.clientX, y: e.clientY }) }}
-                    style={{
-                      position: 'relative',
-                      borderRight:(i%5)<4?'1px solid var(--color-border-subtle)':'none',
-                      borderBottom:'1px solid var(--color-border-subtle)',
-                      background: inDrag ? 'rgba(0,113,227,0.1)' : 'var(--color-bg-secondary)',
-                      outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
-                      outlineOffset: '-1px',
-                      minHeight: 90,
-                      userSelect: 'none',
-                    }}>
-                    {/* Overlay jour férié */}
-                    {holidayName && !inDrag && <div className="holiday-overlay" />}
-                    {/* Overlay congé/RTT */}
-                    {!holidayName && hasCongeM && !inDrag && <div className="conge-overlay" />}
-                    <div className="flex items-center justify-between mb-0.5 px-0.5">
-                      <span className="flex items-center gap-1">
-                        <span className="w-[22px] h-[22px] flex items-center justify-center rounded-full text-[11px] font-semibold"
-                          style={{
-                            background: isToday ? '#FF3B30' : holidayName ? 'rgba(255,59,48,0.12)' : 'transparent',
-                            color: isToday ? 'white' : holidayName ? '#FF3B30' : 'var(--color-text-secondary)',
-                          }}>
-                          {day.getDate()}
-                        </span>
-                        {day.getDate()===1 && !holidayName && (
-                          <span className="text-[10px] font-normal" style={{ color:'var(--color-text-tertiary)' }}>
-                            {MOIS_LONG[day.getMonth()].slice(0,3).toLowerCase()}.
-                          </span>
-                        )}
-                        {holidayName && (
-                          <span className="text-[9px] font-medium truncate max-w-[70px]"
-                            style={{ color: '#FF3B30' }}>
-                            {holidayName}
-                          </span>
-                        )}
-                      </span>
-                      <Plus size={10} className="opacity-25 group-hover:opacity-70 transition-opacity"
-                        style={{ color: 'var(--color-text-tertiary)' }} />
-                    </div>
-                    {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact dateStr={dateStr} onExpand={() => goToDay(dateStr)} onSelect={e => handleSelectEvent(e, dateStr)} />)}
-                    {evts.length>MAX && (
-                      <span className="text-[10px] pl-1 mt-0.5" style={{ color:'var(--color-text-tertiary)' }}>
-                        +{evts.length-MAX} autres
-                      </span>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+          <MonthView
+            monthGrid={monthGrid}
+            today={today}
+            holidays={holidays}
+            eventsByDate={eventsByDate}
+            filterTech={filterTech}
+            filterRetard={filterRetard}
+            isDragging={isDragging}
+            handleDragMouseDown={handleDragMouseDown}
+            handleDragMouseEnter={handleDragMouseEnter}
+            handleDragMouseUp={handleDragMouseUp}
+            setIsDragging={setIsDragging}
+            setDragStart={setDragStart}
+            setDragEnd={setDragEnd}
+            handleSelectEvent={handleSelectEvent}
+            goToDay={goToDay}
+            setCtxMenu={setCtxMenu}
+            isInDrag={isInDrag}
+          />
         )}
       </div>
 
