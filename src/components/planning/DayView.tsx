@@ -28,7 +28,7 @@ export default function DayView({
   const allEvts = sortEvts((() => {
     let evts = eventsByDate[dateStr] ?? []
     if (filterTech)   evts = evts.filter(e => normTech(e.technicien) === filterTech)
-    if (filterRetard) evts = evts.filter(e => e.statusColor === 'var(--color-danger)' || e.statusLabel === 'En retard')
+    if (filterRetard) evts = evts.filter(e => e.priority === 0)
     return evts
   })())
   const allDayEvts = allEvts.filter(e => !e.plannedTime)

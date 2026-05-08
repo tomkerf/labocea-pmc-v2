@@ -35,9 +35,11 @@ import CellContextMenu   from '@/components/planning/CellContextMenu'
 import GhostDetailModal  from '@/components/planning/GhostDetailModal'
 import EventDetailModal  from '@/components/planning/EventDetailModal'
 import DragCreateModal   from '@/components/planning/DragCreateModal'
-import DayView          from '@/components/planning/DayView'
-import WeekView         from '@/components/planning/WeekView'
-import MonthView        from '@/components/planning/MonthView'
+import DayView            from '@/components/planning/DayView'
+import WeekView           from '@/components/planning/WeekView'
+import MonthView          from '@/components/planning/MonthView'
+import EventRow           from '@/components/planning/EventRow'
+import MiniCalendarPanel  from '@/components/planning/MiniCalendarPanel'
 
 // ── Composant principal ─────────────────────────────────────
 
@@ -460,160 +462,6 @@ export default function PlanningPage() {
     return `${weekStart.getDate()} ${MOIS_LONG[weekStart.getMonth()]} – ${end.getDate()} ${MOIS_LONG[end.getMonth()]} ${end.getFullYear()}`
   })() : `${MOIS_LONG[monthStart.getMonth()]} ${monthStart.getFullYear()}`
 
-  // ── EventRow (liste mobile + desktop) ──────────────────
-
-  function EventRow({ event, isLast, onSelect }: {
-    event: PlanningEvent; isLast: boolean
-    onSelect?: (event: PlanningEvent) => void
-  }) {
-    const techColor = getTechColor(event.technicien).color
-    const dotColor  = event.statusColor
-
-    return (
-      <div style={{ borderBottom: isLast?'none':'1px solid var(--color-border-subtle)' }}>
-        <button className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
-          onClick={() => onSelect ? onSelect(event) : (event.link && navigate(event.link))}>
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: dotColor }} />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate" style={{ color:'var(--color-text-primary)' }}>{event.title}</p>
-            <p className="text-xs mt-0.5 truncate" style={{ color:'var(--color-text-secondary)' }}>{event.subtitle}</p>
-            <div className="flex items-center gap-1.5 mt-1">
-              {event.plannedTime && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold"
-                  style={{ background:'var(--color-accent-light)', color:'var(--color-accent)' }}>
-                  {event.plannedTime}
-                </span>
-              )}
-              {event.technicien&&event.technicien!=='—' && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                  {event.technicien}
-                </span>
-              )}
-              {event.meteo === 'pluie' && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                  style={{ background: '#EFF6FF', color: '#3B82F6' }}>
-                  🌧 Pluie
-                </span>
-              )}
-            </div>
-          </div>
-          <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
-            style={{ background:event.statusBg, color:event.statusColor }}>
-            {event.statusLabel}
-          </span>
-          {event.isDone
-            ? <CheckCircle2 size={18} className="shrink-0" style={{ color: techColor }} />
-            : <ChevronRight size={15} className="shrink-0" style={{ color:'var(--color-text-tertiary)' }} />
-          }
-        </button>
-      </div>
-    )
-  }
-
-  // ── MiniCalendar multi-mois (sidebar overlay desktop) ──
-
-  function MiniCalendarPanel() {
-    const refDate = viewMode === 'mois' ? monthStart : viewMode === 'semaine' ? weekStart : selectedDate
-    const [baseMonth, setBaseMonth] = useState(() => startOfMonth(refDate))
-    const todayISO   = toISO(today)
-    const weekEndISO = toISO(addDays(weekStart, 6))
-    const DAYS = ['L','M','M','J','V','S','D']
-    const N_MONTHS = 3
-
-    function jumpToDate(d: Date) {
-      setWeekStart(startOfWeek(d))
-      setMonthStart(startOfMonth(d))
-      setSelectedDate(d)
-      if (viewMode === 'jour') setViewMode('semaine')
-      setSelectedDay(null)
-      setShowMiniCal(false)
-    }
-
-    function MonthGrid({ offset }: { offset: number }) {
-      const ms   = addMonths(baseMonth, offset)
-      const cells = buildMiniGrid(ms)
-      const label = MOIS_LONG[ms.getMonth()] + ' ' + ms.getFullYear()
-      return (
-        <div className="px-3 pt-3 pb-2">
-          {/* Titre mois */}
-          <p className="text-[11px] font-semibold mb-2 capitalize text-center"
-            style={{ color: 'var(--color-text-primary)' }}>{label}</p>
-          {/* En-têtes jours (1 seule fois, sur le 1er mois) */}
-          {offset === 0 && (
-            <div className="grid grid-cols-7 mb-1">
-              {DAYS.map((d, i) => (
-                <span key={i} className="text-center text-[9px] font-semibold"
-                  style={{ color: 'var(--color-text-tertiary)' }}>{d}</span>
-              ))}
-            </div>
-          )}
-          {/* Grille */}
-          <div className="grid grid-cols-7 gap-y-0.5">
-            {cells.map((d, i) => {
-              if (!d) return <span key={i} />
-              const iso = toISO(d)
-              const isToday     = iso === todayISO
-              const inWeek      = viewMode === 'semaine' && iso >= toISO(weekStart) && iso <= weekEndISO
-              const inMonth     = viewMode === 'mois' && d.getMonth() === monthStart.getMonth() && d.getFullYear() === monthStart.getFullYear()
-              const isSelected  = viewMode === 'jour' && iso === toISO(selectedDate)
-              const highlighted = inWeek || inMonth || isSelected
-              return (
-                <button key={i} onClick={() => jumpToDate(d)}
-                  className="flex items-center justify-center rounded-full mx-auto"
-                  style={{
-                    width: 22, height: 22,
-                    fontSize: 11,
-                    background: isToday ? 'var(--color-accent)' : highlighted ? 'var(--color-accent-light)' : 'transparent',
-                    color: isToday ? 'white' : highlighted ? 'var(--color-accent)' : 'var(--color-text-primary)',
-                    fontWeight: isToday || highlighted ? 600 : 400,
-                  }}>
-                  {d.getDate()}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <div className="flex flex-col h-full overflow-y-auto">
-        {/* Navigation globale */}
-        <div className="flex items-center justify-between px-3 pt-3 pb-1 shrink-0"
-          style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <button onClick={() => setBaseMonth(m => addMonths(m, -1))}
-            className="p-1.5 rounded-md"
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            style={{ color: 'var(--color-text-secondary)' }}>
-            <ChevronLeft size={13} />
-          </button>
-          <button onClick={() => setBaseMonth(startOfMonth(today))}
-            className="text-[10px] font-medium px-2 py-0.5 rounded"
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            style={{ color: 'var(--color-text-secondary)' }}>
-            Aujourd'hui
-          </button>
-          <button onClick={() => setBaseMonth(m => addMonths(m, 1))}
-            className="p-1.5 rounded-md"
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            style={{ color: 'var(--color-text-secondary)' }}>
-            <ChevronRight size={13} />
-          </button>
-        </div>
-        {/* Mois empilés */}
-        {Array.from({ length: N_MONTHS }, (_, i) => (
-          <div key={i}>
-            {i > 0 && <div style={{ height: 1, background: 'var(--color-border-subtle)', margin: '0 12px' }} />}
-            <MonthGrid offset={i} />
-          </div>
-        ))}
-      </div>
-    )
-  }
 
   // ── Render ──────────────────────────────────────────────
 
@@ -735,7 +583,19 @@ export default function PlanningPage() {
           transition: 'transform 200ms ease',
           pointerEvents: showMiniCal ? 'auto' : 'none',
         }}>
-        <MiniCalendarPanel />
+        <MiniCalendarPanel
+          viewMode={viewMode}
+          monthStart={monthStart}
+          weekStart={weekStart}
+          selectedDate={selectedDate}
+          today={today}
+          setWeekStart={setWeekStart}
+          setMonthStart={setMonthStart}
+          setSelectedDate={setSelectedDate}
+          setViewMode={setViewMode}
+          setSelectedDay={setSelectedDay}
+          setShowMiniCal={setShowMiniCal}
+        />
       </div>
 
       {/* Backdrop overlay (ferme au clic extérieur) */}
