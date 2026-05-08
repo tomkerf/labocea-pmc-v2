@@ -304,3 +304,13 @@ export function normTech(s: string): string {
   const parts = s.trim().split(' ')
   return parts[parts.length - 1]
 }
+
+export function filterEvents(
+  evts: PlanningEvent[],
+  filterTech: string,
+  filterRetard: boolean,
+): PlanningEvent[] {
+  if (filterTech)   evts = evts.filter(e => normTech(e.technicien) === filterTech)
+  if (filterRetard) evts = evts.filter(e => e.priority === 0)
+  return evts
+}

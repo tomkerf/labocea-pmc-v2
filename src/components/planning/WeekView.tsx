@@ -2,8 +2,8 @@ import { Plus } from 'lucide-react'
 import {
   type PlanningEvent,
   JOURS_COURT,
-  normTech, toISO, sameDay,
-  isMultiDay, sortEvts,
+  toISO, sameDay,
+  isMultiDay, sortEvts, filterEvents,
 } from '@/lib/planningUtils'
 import EventPill from '@/components/planning/EventPill'
 
@@ -56,10 +56,7 @@ export default function WeekView({
 }: WeekViewProps) {
 
   function filteredForDayFlat(dateStr: string): PlanningEvent[] {
-    let evts = eventsByDate[dateStr] ?? []
-    if (filterTech)   evts = evts.filter(e => normTech(e.technicien) === filterTech)
-    if (filterRetard) evts = evts.filter(e => e.priority === 0)
-    return sortEvts(evts)
+    return sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard))
   }
 
   return (

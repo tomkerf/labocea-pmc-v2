@@ -2,8 +2,8 @@ import { Plus } from 'lucide-react'
 import {
   type PlanningEvent,
   JOURS_COURT, MOIS_LONG,
-  normTech, toISO, sameDay,
-  groupByClient,
+  toISO, sameDay,
+  groupByClient, filterEvents,
 } from '@/lib/planningUtils'
 import EventPill from '@/components/planning/EventPill'
 
@@ -36,10 +36,7 @@ export default function MonthView({
 }: MonthViewProps) {
 
   function filteredForDay(dateStr: string): PlanningEvent[] {
-    let evts = eventsByDate[dateStr] ?? []
-    if (filterTech)   evts = evts.filter(e => normTech(e.technicien) === filterTech)
-    if (filterRetard) evts = evts.filter(e => e.priority === 0)
-    return groupByClient(evts)
+    return groupByClient(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard))
   }
 
   return (

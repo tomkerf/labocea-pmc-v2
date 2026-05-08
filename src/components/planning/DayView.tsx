@@ -1,8 +1,8 @@
 import { Plus } from 'lucide-react'
 import {
   type PlanningEvent,
-  normTech, toISO, sameDay,
-  parseHHMM, assignColumns, sortEvts,
+  toISO, sameDay,
+  parseHHMM, assignColumns, sortEvts, filterEvents,
 } from '@/lib/planningUtils'
 
 interface DayViewProps {
@@ -25,12 +25,7 @@ export default function DayView({
 }: DayViewProps) {
   const D_START = 7, D_END = 20, PX_H = 64, PX_M = PX_H / 60
   const dateStr = toISO(selectedDate)
-  const allEvts = sortEvts((() => {
-    let evts = eventsByDate[dateStr] ?? []
-    if (filterTech)   evts = evts.filter(e => normTech(e.technicien) === filterTech)
-    if (filterRetard) evts = evts.filter(e => e.priority === 0)
-    return evts
-  })())
+  const allEvts = sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard))
   const allDayEvts = allEvts.filter(e => !e.plannedTime)
   const timedEvts  = assignColumns(
     allEvts.filter(e => !!e.plannedTime)

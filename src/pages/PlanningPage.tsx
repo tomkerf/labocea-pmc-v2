@@ -27,7 +27,7 @@ import {
   getFrenchHolidays,
   startOfWeek, startOfMonth, addDays, addMonths, toISO, sameDay,
   buildMonthGrid, buildMiniGrid,
-  sortEvts, groupByClient,
+  sortEvts, groupByClient, filterEvents,
 } from '@/lib/planningUtils'
 import { usePlanningData } from '@/hooks/usePlanningData'
 import DayModal          from '@/components/planning/DayModal'
@@ -59,7 +59,7 @@ export default function PlanningPage() {
   const users             = useUsersStore(s => s.users)
   const preleveurs        = usePreleveursStore(s => s.preleveurs)
 
-  const today = new Date(); today.setHours(0,0,0,0)
+  const today = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d }, [])
 
   // Jours fériés — recalculés chaque année (couvre l'année courante + suivante)
   const holidays = useMemo(() => ({
@@ -131,20 +131,14 @@ export default function PlanningPage() {
   // ── Filtrage technicien ─────────────────────────────────
 
   // Avec regroupement par client (vue mois, DayModal)
-  const filteredForDay = useCallback((dateStr:string): PlanningEvent[] => {
-    let evts = eventsByDate[dateStr]??[]
-    if (filterTech) evts = evts.filter(e => normTech(e.technicien)===filterTech)
-    if (filterRetard) evts = evts.filter(e => e.priority === 0)
-    return groupByClient(evts)
-  }, [eventsByDate, filterTech, filterRetard])
+  const filteredForDay = useCallback((dateStr:string): PlanningEvent[] =>
+    groupByClient(filterEvents(eventsByDate[dateStr]??[], filterTech, filterRetard))
+  , [eventsByDate, filterTech, filterRetard])
 
   // Sans regroupement (vue semaine et vue jour : chaque prélèvement visible)
-  const filteredForDayFlat = useCallback((dateStr:string): PlanningEvent[] => {
-    let evts = eventsByDate[dateStr]??[]
-    if (filterTech) evts = evts.filter(e => normTech(e.technicien)===filterTech)
-    if (filterRetard) evts = evts.filter(e => e.priority === 0)
-    return sortEvts(evts)
-  }, [eventsByDate, filterTech, filterRetard])
+  const filteredForDayFlat = useCallback((dateStr:string): PlanningEvent[] =>
+    sortEvts(filterEvents(eventsByDate[dateStr]??[], filterTech, filterRetard))
+  , [eventsByDate, filterTech, filterRetard])
 
   // Nombre de samplings non faits dans le mois visible — pour le bandeau "à planifier"
   const monthPoolCount = useMemo(() => {
@@ -282,7 +276,7 @@ export default function PlanningPage() {
       rowEnds[row] = item.colEnd + 1
       return { ...item, row }
     })
-  }, [evenements, eventsByDate, viewMode, weekDays, filterTech])
+  }, [evenements, viewMode, weekDays, filterTech])
 
   // ── Liste période (mobile) ──────────────────────────────
 
