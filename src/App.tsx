@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthInit } from '@/hooks/useAuth'
 import RequireAuth from '@/components/layout/RequireAuth'
+import RequireAdmin from '@/components/layout/RequireAdmin'
 import AppLayout from '@/components/layout/AppLayout'
 
 // ── Chargement différé des pages (code-splitting) ───────────
@@ -95,7 +96,7 @@ function AppRoutes() {
           <Suspense fallback={<PageSpinner />}><ComptePage /></Suspense>
         } />
         <Route path="/admin" element={
-          <Suspense fallback={<PageSpinner />}><AdminPage /></Suspense>
+          <RequireAdmin><Suspense fallback={<PageSpinner />}><AdminPage /></Suspense></RequireAdmin>
         } />
         <Route path="/outils/asservissement" element={
           <Suspense fallback={<PageSpinner />}><AsservissementPage /></Suspense>

@@ -8,6 +8,11 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return isAuthenticated() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
     // ── clients-v2 ────────────────────────────────────────────
     // Lecture et écriture réservées aux utilisateurs authentifiés (V2 uniquement).
     // La V1 (sans auth) ne peut plus écrire dans cette collection.
@@ -16,11 +21,12 @@ service cloud.firestore {
     }
 
     // ── users ─────────────────────────────────────────────────
-    // Chaque utilisateur peut lire/écrire son propre profil.
-    // Les autres utilisateurs peuvent lire les profils (pour dénormalisation noms).
+    // Lecture : tout utilisateur authentifié (dénormalisation noms/initiales).
+    // Écriture propre profil : tout utilisateur authentifié.
+    // Écriture profil tiers (création/suppression comptes) : admin uniquement.
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
     }
 
     // ── equipements ───────────────────────────────────────────
