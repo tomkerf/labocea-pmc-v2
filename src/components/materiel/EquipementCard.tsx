@@ -57,6 +57,13 @@ const ETAT_CONFIG: Record<string, { label: string; bg: string; color: string }> 
   prete:           { label: 'Prêté',           bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)' },
 }
 
+function calcMetroTooltip(prochainEtalonnage: string): string {
+  const days = Math.round((new Date(prochainEtalonnage).getTime() - Date.now()) / 86400000)
+  if (days < 0) return `Étalonnage en retard de ${Math.abs(days)} jour${Math.abs(days) > 1 ? 's' : ''}`
+  if (days === 0) return "Étalonnage dû aujourd'hui"
+  return `Prochain étalonnage dans ${days} jour${days > 1 ? 's' : ''}`
+}
+
 /** Calcule le % restant avant la prochaine échéance métrologique (sur 12 mois). */
 function calcMetroPercent(prochainEtalonnage: string): number | null {
   if (!prochainEtalonnage) return null
@@ -106,7 +113,7 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
       onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-bg-secondary)')}
     >
       {/* Anneau métrologie avec icône au centre */}
-      <div className="shrink-0">
+      <div className="shrink-0" title={metroPercent !== null ? calcMetroTooltip(equipement.prochainEtalonnage) : undefined}>
         {metroPercent !== null ? (
           <CircleProgress percent={metroPercent} size={44} icon={categoryIcon} />
         ) : (

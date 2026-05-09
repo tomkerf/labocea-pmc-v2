@@ -68,6 +68,8 @@ export default function PlanningPage() {
     ...getFrenchHolidays(today.getFullYear() + 1),
   }), [today.getFullYear()])
 
+  const [showDragHint, setShowDragHint] = useState(() => !localStorage.getItem('planning_drag_hint_seen'))
+
   const [viewMode,    setViewMode]    = useState<ViewMode>('semaine')
   const [weekStart,   setWeekStart]   = useState(() => startOfWeek(today))
   const [monthStart,  setMonthStart]  = useState(() => startOfMonth(today))
@@ -589,6 +591,25 @@ export default function PlanningPage() {
               {' '}— clic droit sur un jour pour les assigner
             </span>
           </p>
+        </div>
+      )}
+
+      {/* ── Hint premier drag (affiché une seule fois) ── */}
+      {showDragHint && viewMode !== 'jour' && (
+        <div className="flex items-center justify-between gap-3 px-4 md:px-6 py-2 shrink-0"
+          style={{ background: 'var(--color-success-light)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+          <p className="text-xs" style={{ color: 'var(--color-success)' }}>
+            <span className="font-semibold">Astuce —</span> glisse sur plusieurs jours pour créer rapidement un événement (congé, rappel, réunion…)
+          </p>
+          <button
+            onClick={() => { setShowDragHint(false); localStorage.setItem('planning_drag_hint_seen', '1') }}
+            className="text-xs font-medium shrink-0 px-2 py-0.5 rounded"
+            style={{ color: 'var(--color-success)', background: 'transparent' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(52,199,89,0.15)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          >
+            OK
+          </button>
         </div>
       )}
 

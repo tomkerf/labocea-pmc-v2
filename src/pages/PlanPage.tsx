@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, Trash2, FileText, Camera, X, Loader2 } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, FileText, Camera, X, Loader2, HelpCircle } from 'lucide-react'
 import { uploadSamplingPhoto, deleteSamplingPhoto } from '@/lib/uploadPhoto'
 import { toast } from '@/stores/toastStore'
 import { doc, onSnapshot } from 'firebase/firestore'
@@ -715,7 +715,17 @@ function SamplingForm({ sampling, onUpdate, users = [], clientId, planId }: Samp
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
       <div>
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Statut</label>
+        <label className="flex items-center gap-1 text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+          Statut
+          <span className="relative group">
+            <HelpCircle size={11} className="cursor-help" style={{ color: 'var(--color-text-tertiary)' }} />
+            <div className="absolute bottom-full left-0 mb-1.5 w-60 p-2.5 rounded-lg text-xs z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{ background: 'var(--color-text-primary)', color: 'white', boxShadow: 'var(--shadow-modal)' }}>
+              <p><strong style={{ color: 'var(--color-danger)' }}>En retard</strong> — date dépassée, mais peut encore être réalisé.</p>
+              <p className="mt-1.5"><strong style={{ color: 'var(--color-warning)' }}>Non effectué</strong> — définitif. Nécessite un motif. Archive l'intervention.</p>
+            </div>
+          </span>
+        </label>
         <select value={sampling.status}
           onChange={(e) => onUpdate('status', e.target.value as SamplingStatus)}
           className="field-input w-full">
