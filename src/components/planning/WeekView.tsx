@@ -128,7 +128,7 @@ export default function WeekView({
             gridTemplateRows: `repeat(${allDayNumRows}, 18px)`,
             gap: '2px 0',
           }}>
-              {allDayItems.map(({ key, colStart, colEnd, row, bg, color, label, badge, onClick, tooltip }) => (
+              {allDayItems.map(({ key, colStart, colEnd, row, bg, label, badge, onClick, tooltip }) => (
                 <button
                   key={key}
                   onMouseDown={e => e.stopPropagation()}
