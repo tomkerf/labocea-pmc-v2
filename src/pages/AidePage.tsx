@@ -1,9 +1,8 @@
-// ============================================================
-// AidePage — Mode d'emploi à destination des techniciens
-// Sections : planifier une intervention, bilans 24h, statuts
-// ============================================================
-
-import { CalendarDays, CheckCircle2, Clock, XCircle, AlertTriangle, ChevronRight, Droplets, ClipboardList, FolderPlus, MapPin, FlaskConical } from 'lucide-react'
+import {
+  CalendarDays, CheckCircle2, Clock, XCircle, AlertTriangle,
+  ChevronRight, Droplets, ClipboardList, FolderPlus, MapPin,
+  FlaskConical, Wrench, Camera, Filter, MousePointer2,
+} from 'lucide-react'
 
 // ── Composants locaux ────────────────────────────────────────
 
@@ -13,14 +12,8 @@ function Section({ icon: Icon, title, children }: {
   children: React.ReactNode
 }) {
   return (
-    <section
-      className="rounded-xl p-6"
-      style={{
-        background: 'var(--color-bg-secondary)',
-        border: '1px solid var(--color-border-subtle)',
-        boxShadow: 'var(--shadow-card)',
-      }}
-    >
+    <section className="rounded-xl p-6"
+      style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
       <div className="flex items-center gap-3 mb-5">
         <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
           style={{ background: 'var(--color-accent-light)' }}>
@@ -38,10 +31,8 @@ function Section({ icon: Icon, title, children }: {
 function Step({ num, children }: { num: number; children: React.ReactNode }) {
   return (
     <div className="flex gap-3 items-start">
-      <span
-        className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0 mt-0.5"
-        style={{ background: 'var(--color-accent)', color: 'white' }}
-      >
+      <span className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0 mt-0.5"
+        style={{ background: 'var(--color-accent)', color: 'white' }}>
         {num}
       </span>
       <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>
@@ -55,8 +46,7 @@ function StatusBadge({ bg, color, dot, label, desc }: {
   bg: string; color: string; dot: string; label: string; desc: string
 }) {
   return (
-    <div className="flex items-start gap-3 py-3"
-      style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+    <div className="flex items-start gap-3 py-3" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0"
         style={{ background: bg, color }}>
         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dot }} />
@@ -77,6 +67,19 @@ function Note({ children }: { children: React.ReactNode }) {
   )
 }
 
+function Tip({ icon: Icon = ChevronRight, children }: { icon?: React.ElementType; children: React.ReactNode }) {
+  return (
+    <div className="flex gap-2 px-3 py-2.5 rounded-lg" style={{ background: 'var(--color-accent-light)' }}>
+      <Icon size={15} strokeWidth={2} className="shrink-0 mt-0.5" style={{ color: 'var(--color-accent)' }} />
+      <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{children}</p>
+    </div>
+  )
+}
+
+function Divider() {
+  return <div style={{ borderTop: '1px solid var(--color-border-subtle)' }} />
+}
+
 // ── Page principale ──────────────────────────────────────────
 
 export default function AidePage() {
@@ -88,249 +91,35 @@ export default function AidePage() {
         <h1 className="text-xl font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
           Mode d'emploi
         </h1>
-        <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-          Guide à destination des techniciens — planification des interventions.
+        <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+          L'app couvre six modules : <strong>Missions</strong> (clients et plans de prélèvement),
+          <strong> Planning</strong> (calendrier de l'équipe), <strong>Matériel</strong> (parc équipements),
+          <strong> Métrologie</strong> (vérifications instruments), <strong>Maintenances</strong> (interventions)
+          et <strong>Dashboard</strong> (vue synthétique du jour). Tout est sauvegardé automatiquement.
         </p>
       </div>
 
-      {/* ── 0. Créer une mission ── */}
-      <Section icon={FolderPlus} title="Créer une mission client">
-        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          Une mission regroupe un client, ses sites de prélèvement et ses plans d'échantillonnage.
-          Voici comment en créer une de A à Z.
-        </p>
-
-        <div className="flex flex-col gap-4 mb-4">
-
-          {/* Bloc : Nouveau client */}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-2"
-              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-              Étape 1 — Créer le client
-            </p>
-            <div className="flex flex-col gap-3">
-              <Step num={1}>
-                <span>Va sur la page <strong>Missions</strong> et clique sur <strong>+ Nouveau client</strong> (bouton en haut à droite).</span>
-              </Step>
-              <Step num={2}>
-                <span>
-                  Remplis la fiche client : <strong>nom</strong>, <strong>interlocuteur</strong>, <strong>segment</strong> (AEP, Eaux usées, Réseaux de mesure…),
-                  <strong> technicien assigné</strong> (initiales), <strong>numéro de devis</strong> et <strong>sites</strong> concernés.
-                  Les champs sont sauvegardés automatiquement à chaque modification.
-                </span>
-              </Step>
-            </div>
-          </div>
-
-          {/* Séparateur */}
-          <div style={{ borderTop: '1px solid var(--color-border-subtle)' }} />
-
-          {/* Bloc : Nouveau plan */}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-2"
-              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-              Étape 2 — Créer un plan de prélèvement
-            </p>
-            <div className="flex flex-col gap-3">
-              <Step num={3}>
-                <span>
-                  Dans la fiche client, clique sur <strong>+ Nouveau plan</strong>. Un plan correspond à un site
-                  et une fréquence d'intervention (mensuel, trimestriel, semestriel, annuel…).
-                </span>
-              </Step>
-              <Step num={4}>
-                <span>
-                  Renseigne les paramètres du plan : <strong>nom du site</strong>, <strong>fréquence</strong>,
-                  <strong> nature de l'eau</strong> (AEP, Rivière, Eau usée…), <strong>méthode</strong> (ponctuel, composite, automatique)
-                  et <strong>conditions météo</strong> (temps de pluie si applicable).
-                </span>
-              </Step>
-              <Step num={5}>
-                <span>
-                  Saisis les <strong>coordonnées GPS</strong> du point de prélèvement si disponibles
-                  (latitude / longitude). Une case à cocher indique si les coordonnées sont approximatives.
-                  Ces informations s'affichent ensuite dans la fiche d'intervention sur le terrain.
-                </span>
-              </Step>
-              <Step num={6}>
-                <span>
-                  L'application <strong>génère automatiquement le calendrier des prélèvements</strong> pour l'année
-                  en cours selon la fréquence choisie. Chaque prélèvement est créé avec le statut{' '}
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                    style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                    Planifié
-                  </span>.
-                </span>
-              </Step>
-            </div>
-          </div>
-
-          {/* Séparateur */}
-          <div style={{ borderTop: '1px solid var(--color-border-subtle)' }} />
-
-          {/* Bloc : Personnalisation */}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-2"
-              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-              Étape 3 — Ajuster les points du calendrier
-            </p>
-            <div className="flex flex-col gap-3">
-              <Step num={7}>
-                <span>
-                  Dans la fiche plan, tu vois le calendrier annuel avec chaque prélèvement représenté par une <strong>pill</strong>.
-                  Clique sur une pill pour ouvrir sa fiche et modifier le jour prévu, le statut ou ajouter un commentaire.
-                </span>
-              </Step>
-              <Step num={8}>
-                <span>
-                  Pour les plans <strong>trimestriels</strong> ou <strong>bimestriels</strong>, tu peux choisir les mois actifs
-                  (ex : janvier, avril, juillet, octobre) et définir un jour différent par mois si nécessaire.
-                </span>
-              </Step>
-              <Step num={9}>
-                <span>
-                  Tu peux <strong>déplacer un prélèvement</strong> vers un autre jour depuis la vue Planning
-                  (glisser-déposer la pill). Le changement est sauvegardé immédiatement.
-                </span>
-              </Step>
-            </div>
-          </div>
-        </div>
-
-        {/* Astuce GPS */}
-        <div className="flex gap-2 px-3 py-2.5 rounded-lg"
-          style={{ background: 'var(--color-accent-light)' }}>
-          <MapPin size={15} strokeWidth={2} className="shrink-0 mt-0.5" style={{ color: 'var(--color-accent)' }} />
-          <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
-            <strong>Plusieurs sites pour un même client</strong> — crée un plan par site.
-            Chaque plan a sa propre fréquence, ses propres coordonnées GPS et son calendrier indépendant.
-          </p>
-        </div>
-      </Section>
-
-      {/* ── 1. Planifier une intervention ── */}
-      <Section icon={CalendarDays} title="Planifier une intervention">
-        <div className="flex flex-col gap-3 mb-4">
-          <Step num={1}>
-            <span>Va sur la page <strong>Planning</strong> (icône calendrier dans la navigation).</span>
-          </Step>
-          <Step num={2}>
-            Les interventions planifiées par le chargé de mission apparaissent dans le calendrier.
-            En vue <strong>Semaine</strong>, chaque colonne correspond à un jour (lundi → vendredi).
-            En vue <strong>Mois</strong>, chaque case affiche le nombre d'interventions du jour.
-          </Step>
-          <Step num={3}>
-            <span>
-              Clique sur une intervention pour ouvrir sa fiche. Tu y retrouves le client, le site,
-              la nature de l'eau, la méthode, et les informations GPS si disponibles.
-            </span>
-          </Step>
-          <Step num={4}>
-            <span>
-              Après l'intervention sur le terrain, ouvre la fiche et passe le statut à{' '}
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>
-                <CheckCircle2 size={11} /> Réalisé
-              </span>
-              {' '}en saisissant la date effective du prélèvement.
-            </span>
-          </Step>
-          <Step num={5}>
-            <span>
-              Si l'intervention n'a pas pu être réalisée, passe le statut à{' '}
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                <XCircle size={11} /> Non effectué
-              </span>
-              {' '}et saisis un <strong>motif</strong> (accès impossible, conditions météo, report client…).
-            </span>
-          </Step>
-        </div>
-
-        {/* Astuce : changer de technicien */}
-        <div className="flex gap-2 px-3 py-2.5 rounded-lg"
-          style={{ background: 'var(--color-accent-light)' }}>
-          <ChevronRight size={15} strokeWidth={2} className="shrink-0 mt-0.5" style={{ color: 'var(--color-accent)' }} />
-          <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
-            <strong>Changer de technicien sur une seule intervention</strong> — dans la fiche intervention du Planning,
-            appuie sur les initiales du technicien pour modifier l'assignation.
-            Cela ne modifie que ce prélèvement, pas les autres de la même mission.
-          </p>
-        </div>
-      </Section>
-
-      {/* ── 2. Bilans 24h ── */}
-      <Section icon={Droplets} title="Bilans 24h — prélèvements J1 et J2">
-        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          Un bilan 24h génère deux interventions liées : la pose du préleveur automatique en J1
-          et la récupération en J2 (lendemain ou surlendemain).
-        </p>
-
-        <div className="flex flex-col gap-3 mb-4">
-          <Step num={1}>
-            <span>
-              Dans le Planning (vue Semaine), les bilans 24h apparaissent dans la{' '}
-              <strong>bande en haut du calendrier</strong> sous la forme d'une barre qui s'étire de J1 à J2,
-              avec le badge <span className="px-1.5 py-0.5 rounded text-[11px] font-medium"
-                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>J1→J2</span>.
-            </span>
-          </Step>
-          <Step num={2}>
-            <span>
-              <strong>J1 — Pose du préleveur</strong> : clique sur la barre pour ouvrir la fiche J1.
-              Saisis l'heure de pose, vérifie les paramètres du préleveur.
-              Passe le statut à <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>Réalisé</span> en fin de journée.
-            </span>
-          </Step>
-          <Step num={3}>
-            <span>
-              <strong>J2 — Récupération</strong> : retrouve le prélèvement J2 dans le jour suivant du Planning.
-              Passe-le à <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>Réalisé</span> après récupération du flacon.
-            </span>
-          </Step>
-          <Step num={4}>
-            <span>
-              Le rapport est lié au prélèvement J1. C'est sur la fiche J1 que tu renseignes
-              la date de rapport prévue.
-            </span>
-          </Step>
-        </div>
-
-        <Note>
-          Si J2 tombe un week-end non affiché dans le planning, retrouve la fiche depuis la page{' '}
-          <span className="font-medium">Missions → Client → Plan</span>.
-        </Note>
-      </Section>
-
-      {/* ── 3. Statuts & motifs ── */}
+      {/* ── Statuts ── */}
       <Section icon={ClipboardList} title="Statuts des prélèvements">
         <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          Chaque prélèvement passe par un cycle de statuts. Voici leur signification :
+          Chaque prélèvement a un statut. Il évolue au fil de l'intervention.
         </p>
 
         <div className="flex flex-col">
           <StatusBadge
-            bg="var(--color-bg-tertiary)"
-            color="var(--color-text-secondary)"
-            dot="var(--color-neutral)"
+            bg="var(--color-bg-tertiary)" color="var(--color-text-secondary)" dot="var(--color-neutral)"
             label="Planifié"
-            desc="L'intervention est programmée mais pas encore réalisée. Statut par défaut à la création du plan."
+            desc="Statut par défaut. L'intervention est programmée, pas encore réalisée."
           />
           <StatusBadge
-            bg="var(--color-success-light)"
-            color="var(--color-success)"
-            dot="var(--color-success)"
+            bg="var(--color-success-light)" color="var(--color-success)" dot="var(--color-success)"
             label="Réalisé"
-            desc="Le prélèvement a été effectué. La date de réalisation est enregistrée."
+            desc="Prélèvement effectué. La date de réalisation est enregistrée."
           />
           <StatusBadge
-            bg="var(--color-danger-light)"
-            color="var(--color-danger)"
-            dot="var(--color-danger)"
+            bg="var(--color-danger-light)" color="var(--color-danger)" dot="var(--color-danger)"
             label="En retard"
-            desc="La date planifiée est dépassée et le prélèvement n'a pas été validé. L'app le détecte automatiquement chaque jour."
+            desc="La date planifiée est dépassée sans validation. L'app le détecte automatiquement chaque jour. Peut encore être réalisé."
           />
           <div className="py-3">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0 mb-2"
@@ -339,74 +128,372 @@ export default function AidePage() {
               Non effectué
             </span>
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-              Le prélèvement n'a pas pu être réalisé et ne sera pas rattrapé. Un{' '}
-              <strong>motif obligatoire</strong> doit être saisi : accès impossible,
-              conditions météo défavorables, report à la demande du client, panne matériel…
+              Intervention abandonnée définitivement. Un <strong>motif obligatoire</strong> doit être saisi :
+              accès impossible, conditions météo, report client, panne matériel…
             </p>
             <div className="mt-2 flex items-start gap-2">
               <Clock size={13} className="shrink-0 mt-0.5" style={{ color: 'var(--color-text-tertiary)' }} />
               <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                Différence avec «&nbsp;En retard&nbsp;» : un prélèvement en retard peut encore être réalisé
-                (ex : intervention décalée de quelques jours). «&nbsp;Non effectué&nbsp;» est définitif
-                et archive l'intervention avec son motif.
+                «&nbsp;En retard&nbsp;» peut encore être rattrapé. «&nbsp;Non effectué&nbsp;» est définitif et archive l'intervention avec son motif.
               </p>
             </div>
           </div>
         </div>
 
         <Note>
-          Le motif de non-réalisation est tracé dans l'historique du prélèvement et visible
-          par le chargé de mission lors de la préparation des rapports clients.
+          Le motif de non-réalisation est visible par le chargé de mission lors de la préparation des rapports clients.
         </Note>
       </Section>
 
-      {/* ── 4. Analyses sous-traitées ── */}
-      <Section icon={FlaskConical} title="Analyses sous-traitées — contrainte jours fériés">
+      {/* ── Planning ── */}
+      <Section icon={CalendarDays} title="Le Planning au quotidien">
         <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          Certains plans (ex : RSDE, CORPEP) sont analysés par un laboratoire externe.
-          Le transport prend 24h — un prélèvement la veille d'un jour férié ne respecterait pas
-          le délai légal d'analyse.
+          Le Planning regroupe tous les prélèvements, maintenances et événements de l'équipe sur un calendrier commun.
+        </p>
+
+        <div className="flex flex-col gap-4">
+
+          {/* Naviguer */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Naviguer
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={1}>
+                Trois vues disponibles en haut à droite : <strong>Jour</strong>, <strong>Semaine</strong> (lun→ven) et <strong>Mois</strong>.
+                Utilise les flèches ← → pour avancer ou reculer.
+              </Step>
+              <Step num={2}>
+                Le <strong>mini-calendrier</strong> latéral (icône calendrier en haut) permet de sauter directement à une date.
+                Il affiche trois mois consécutifs. La semaine ou le mois en cours est surligné en bleu.
+              </Step>
+            </div>
+          </div>
+
+          <Divider />
+
+          {/* Valider une intervention */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Valider une intervention
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={3}>
+                Clique sur une intervention dans le calendrier pour ouvrir sa fiche.
+                Tu y retrouves le client, le site, la nature de l'eau, la méthode, et les coordonnées GPS si renseignées.
+              </Step>
+              <Step num={4}>
+                <span>
+                  Après le prélèvement sur le terrain, passe le statut à{' '}
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                    style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>
+                    <CheckCircle2 size={11} /> Réalisé
+                  </span>
+                  {' '}et saisis la date effective.
+                </span>
+              </Step>
+              <Step num={5}>
+                <span>
+                  Si l'intervention n'a pas pu être réalisée, passe à{' '}
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                    style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                    <XCircle size={11} /> Non effectué
+                  </span>
+                  {' '}et saisis un motif.
+                </span>
+              </Step>
+            </div>
+          </div>
+
+          <Divider />
+
+          {/* Créer un événement */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Créer un événement personnel
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={6}>
+                <span>
+                  En vue <strong>Semaine</strong> ou <strong>Mois</strong>, <strong>glisse sur une ou plusieurs cellules vides</strong> pour créer un événement.
+                  Une modale s'ouvre : tu peux saisir un titre, choisir le type
+                  (Congé/RTT, Rappel, Réunion, Rapport, Autre) et assigner un technicien.
+                </span>
+              </Step>
+              <Step num={7}>
+                Les <strong>congés/RTT</strong> apparaissent en overlay grisé sur les colonnes concernées, visibles par toute l'équipe.
+                Les autres types (rappel, réunion, rapport) s'affichent comme des pills dans le jour.
+              </Step>
+            </div>
+          </div>
+
+          <Divider />
+
+          {/* Filtres */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Filtres
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={8}>
+                <span>
+                  En haut du Planning, deux filtres sont disponibles :{' '}
+                  <strong>par technicien</strong> (affiche uniquement ses interventions) et{' '}
+                  <strong>retards uniquement</strong> (masque tout sauf les prélèvements en retard).
+                  Utile pour faire le point en début de semaine.
+                </span>
+              </Step>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 mt-4">
+          <Tip icon={MousePointer2}>
+            <span>
+              <strong>Changer de technicien sur une seule intervention</strong> — dans la fiche intervention,
+              appuie sur les initiales du technicien pour modifier l'assignation.
+              Cela ne modifie que ce prélèvement, pas les autres de la même mission.
+            </span>
+          </Tip>
+          <Tip icon={AlertTriangle}>
+            <span>
+              <strong>Analyses sous-traitées</strong> — si un plan a la case "Analyses" cochée,
+              une icône ⚠️ s'affiche sur les prélèvements tombant la veille d'un jour férié.
+              C'est un avertissement visuel uniquement, il ne bloque pas la saisie.
+            </span>
+          </Tip>
+        </div>
+      </Section>
+
+      {/* ── Créer une mission ── */}
+      <Section icon={FolderPlus} title="Créer une mission client">
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Une mission regroupe un client, ses sites de prélèvement et ses plans d'échantillonnage.
+        </p>
+
+        <div className="flex flex-col gap-4">
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Étape 1 — Créer le client
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={1}>
+                Va sur <strong>Missions</strong> et clique sur <strong>+ Nouveau client</strong>.
+              </Step>
+              <Step num={2}>
+                Remplis la fiche : <strong>nom</strong>, <strong>interlocuteur</strong>, <strong>segment</strong> (AEP, Eaux usées, Réseaux de mesure…),
+                <strong> technicien assigné</strong>, <strong>numéro de devis</strong> et <strong>sites</strong>.
+                Tout est sauvegardé automatiquement.
+              </Step>
+            </div>
+          </div>
+
+          <Divider />
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Étape 2 — Créer un plan de prélèvement
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={3}>
+                Dans la fiche client, clique sur <strong>+ Nouveau plan</strong>.
+                Un plan = un site + une fréquence d'intervention.
+              </Step>
+              <Step num={4}>
+                Renseigne : <strong>nom du site</strong>, <strong>fréquence</strong> (mensuel, trimestriel, semestriel, annuel…),
+                <strong> nature de l'eau</strong>, <strong>méthode</strong> (ponctuel, composite, automatique)
+                et <strong>conditions météo</strong> si applicable.
+              </Step>
+              <Step num={5}>
+                Saisis les <strong>coordonnées GPS</strong> du point de prélèvement si disponibles.
+                Elles s'affichent dans la fiche d'intervention sur le terrain.
+              </Step>
+              <Step num={6}>
+                L'app <strong>génère automatiquement le calendrier annuel</strong> selon la fréquence choisie.
+                Chaque prélèvement est créé avec le statut Planifié.
+              </Step>
+            </div>
+          </div>
+
+          <Divider />
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Étape 3 — Ajuster le calendrier
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={7}>
+                Dans la fiche plan, clique sur une pill pour modifier le jour prévu, le statut ou ajouter un commentaire.
+              </Step>
+              <Step num={8}>
+                Pour les plans <strong>trimestriels</strong> ou <strong>bimestriels</strong>, tu peux choisir les mois actifs
+                et définir un jour différent par mois si nécessaire.
+              </Step>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-3">
+          <Tip icon={MapPin}>
+            <span>
+              <strong>Plusieurs sites pour un même client</strong> — crée un plan par site.
+              Chaque plan a sa propre fréquence, ses coordonnées GPS et son calendrier indépendant.
+            </span>
+          </Tip>
+          <Tip icon={Camera}>
+            <span>
+              <strong>Photos terrain</strong> — dans la fiche d'un prélèvement (Missions → Client → Plan),
+              tu peux joindre des photos prises sur le terrain directement depuis le téléphone.
+              Elles sont stockées et consultables depuis n'importe quel appareil.
+            </span>
+          </Tip>
+        </div>
+      </Section>
+
+      {/* ── Bilans 24h ── */}
+      <Section icon={Droplets} title="Bilans 24h — prélèvements J1 et J2">
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Un bilan 24h génère deux interventions liées : la <strong>pose</strong> du préleveur automatique en J1
+          et la <strong>récupération</strong> en J2.
         </p>
 
         <div className="flex flex-col gap-3 mb-4">
           <Step num={1}>
             <span>
-              Dans la fiche plan (<strong>Missions → Client → Plan</strong>), descends jusqu'à la section{' '}
-              <strong>Configuration</strong>. La case <strong>Analyses</strong> est en bas, après "Conditions météo".
-              Coche-la pour les plans dont les analyses sont sous-traitées.
+              En vue <strong>Semaine</strong>, les bilans 24h apparaissent dans la <strong>bande en haut du calendrier</strong>,
+              sous la forme d'une barre de J1 à J2 avec le badge{' '}
+              <span className="px-1.5 py-0.5 rounded text-[11px] font-medium"
+                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>J1→J2</span>.
             </span>
           </Step>
           <Step num={2}>
             <span>
-              Une fois cochée, l'app détecte automatiquement quand un prélèvement de ce plan
-              tombe <strong>la veille d'un jour férié français</strong> (Pâques, Ascension, 14 juillet, Noël…).
+              <strong>J1 — Pose :</strong> clique sur la barre pour ouvrir la fiche. Passe le statut à{' '}
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>Réalisé</span>{' '}
+              en fin de journée.
             </span>
           </Step>
           <Step num={3}>
             <span>
-              Dans le Planning (vue Semaine ou Mois), ces prélèvements affichent une icône{' '}
-              <span className="font-semibold">⚠️</span> sur la pill, avec le tooltip{' '}
-              <em>"Analyses sous-traitées — veille de [nom du jour férié]"</em>.
-              Dans le panneau latéral <strong>À planifier</strong>, un badge orange{' '}
+              <strong>J2 — Récupération :</strong> retrouve le prélèvement J2 dans le jour suivant.
+              Passe-le à{' '}
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
-                ⚠️ Veille de férié
-              </span>{' '}
-              s'affiche également.
+                style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>Réalisé</span>{' '}
+              après récupération du flacon.
             </span>
+          </Step>
+          <Step num={4}>
+            Le rapport est lié au prélèvement J1. C'est sur la fiche J1 que tu renseignes la date de rapport prévue.
           </Step>
         </div>
 
-        {/* Astuce */}
-        <div className="flex gap-2 px-3 py-2.5 rounded-lg"
-          style={{ background: 'var(--color-accent-light)' }}>
-          <ChevronRight size={15} strokeWidth={2} className="shrink-0 mt-0.5" style={{ color: 'var(--color-accent)' }} />
-          <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
-            <strong>L'icône ⚠️ ne bloque pas le prélèvement</strong> — c'est un avertissement visuel.
-            Si tu dois quand même prélever ce jour-là (accords spécifiques avec le labo sous-traitant),
-            tu peux l'ignorer. Pense à le noter dans le commentaire du prélèvement.
-          </p>
+        <Note>
+          Si J2 tombe un week-end (non affiché dans le planning lun→ven), retrouve la fiche depuis{' '}
+          <span className="font-medium">Missions → Client → Plan</span>.
+        </Note>
+      </Section>
+
+      {/* ── Matériel ── */}
+      <Section icon={Wrench} title="Matériel — parc équipements">
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          La page <strong>Matériel</strong> liste tous les équipements terrain (multiparamètres, turbidimètres, préleveurs automatiques, débitmètres…).
+        </p>
+
+        <div className="flex flex-col gap-3 mb-4">
+          <Step num={1}>
+            Chaque équipement affiche son état (<strong>Opérationnel</strong>, <strong>En maintenance</strong>,
+            <strong> Hors service</strong>, <strong>Prêté</strong>) et un <strong>anneau de progression</strong>
+            indiquant le temps restant avant le prochain étalonnage.
+            <br />
+            <span className="text-xs mt-1 block" style={{ color: 'var(--color-text-tertiary)' }}>
+              Vert = étalonnage récent · Orange = à surveiller · Rouge = urgent
+            </span>
+          </Step>
+          <Step num={2}>
+            Clique sur un équipement pour accéder à sa fiche complète : informations techniques,
+            historique des vérifications métrologiques et des maintenances associées.
+          </Step>
+          <Step num={3}>
+            Filtre par <strong>catégorie</strong> ou <strong>état</strong> pour trouver rapidement un équipement disponible.
+          </Step>
         </div>
+
+        <Tip>
+          <span>
+            <strong>Ajouter un équipement</strong> — bouton <strong>+ Ajouter</strong> en haut de la liste.
+            Renseigne la marque, le modèle, le numéro de série et la date du prochain étalonnage.
+          </span>
+        </Tip>
+      </Section>
+
+      {/* ── Métrologie & Maintenances ── */}
+      <Section icon={FlaskConical} title="Métrologie et Maintenances">
+        <p className="text-sm mb-5" style={{ color: 'var(--color-text-secondary)' }}>
+          Deux modules distincts pour le suivi des instruments et des interventions techniques.
+        </p>
+
+        <div className="flex flex-col gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Métrologie
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={1}>
+                La page <strong>Métrologie</strong> liste tous les équipements métrologique avec leur statut :
+                <strong> À jour</strong>, <strong>À prévoir dans 30 jours</strong> ou <strong>En retard</strong>.
+                Le calcul est automatique à partir de la date du prochain contrôle saisie sur chaque équipement.
+              </Step>
+              <Step num={2}>
+                Pour saisir une vérification : clique sur <strong>+ Nouvelle vérification</strong>,
+                sélectionne l'équipement, le type (étalonnage interne, vérification externe, contrôle terrain),
+                le résultat (conforme / non conforme) et la date du prochain contrôle.
+              </Step>
+              <Step num={3}>
+                La date du prochain contrôle est automatiquement mise à jour sur la fiche équipement après chaque saisie.
+              </Step>
+            </div>
+          </div>
+
+          <Divider />
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Maintenances
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={4}>
+                La page <strong>Maintenances</strong> liste les interventions planifiées et correctives sur les équipements.
+                Filtre par équipement, type (préventive / corrective) ou statut.
+              </Step>
+              <Step num={5}>
+                Pour créer une maintenance : clique sur <strong>+ Nouvelle intervention</strong>.
+                Renseigne l'équipement, le type, la date prévue, la description et le technicien responsable.
+              </Step>
+              <Step num={6}>
+                Quand une maintenance est en cours, l'état de l'équipement passe automatiquement à{' '}
+                <strong>En maintenance</strong>. Il repasse à <strong>Opérationnel</strong> à la clôture.
+              </Step>
+            </div>
+          </div>
+        </div>
+
+        <Tip icon={Filter}>
+          <span>
+            <strong>Dashboard</strong> — la page d'accueil affiche en temps réel les équipements
+            dont l'étalonnage est dû dans les 7 jours et les maintenances en attente, avec un lien direct vers chaque fiche.
+          </span>
+        </Tip>
       </Section>
 
     </div>
