@@ -24,6 +24,62 @@ interface MiniCalendarPanelProps {
 const DAYS = ['L','M','M','J','V','S','D']
 const N_MONTHS = 3
 
+interface MonthGridProps {
+  offset:       number
+  baseMonth:    Date
+  viewMode:     ViewMode
+  monthStart:   Date
+  weekStart:    Date
+  selectedDate: Date
+  todayISO:     string
+  weekEndISO:   string
+  jumpToDate:   (d: Date) => void
+}
+
+function MonthGrid({ offset, baseMonth, viewMode, monthStart, weekStart, selectedDate, todayISO, weekEndISO, jumpToDate }: MonthGridProps) {
+  const ms    = addMonths(baseMonth, offset)
+  const cells = buildMiniGrid(ms)
+  const label = MOIS_LONG[ms.getMonth()] + ' ' + ms.getFullYear()
+  return (
+    <div className="px-3 pt-3 pb-2">
+      <p className="text-[11px] font-semibold mb-2 capitalize text-center"
+        style={{ color: 'var(--color-text-primary)' }}>{label}</p>
+      {offset === 0 && (
+        <div className="grid grid-cols-7 mb-1">
+          {DAYS.map((d, i) => (
+            <span key={d + i} className="text-center text-[9px] font-semibold"
+              style={{ color: 'var(--color-text-tertiary)' }}>{d}</span>
+          ))}
+        </div>
+      )}
+      <div className="grid grid-cols-7 gap-y-0.5">
+        {cells.map((d, i) => {
+          if (!d) return <span key={i} />
+          const iso = toISO(d)
+          const isToday     = iso === todayISO
+          const inWeek      = viewMode === 'semaine' && iso >= toISO(weekStart) && iso <= weekEndISO
+          const inMonth     = viewMode === 'mois' && d.getMonth() === monthStart.getMonth() && d.getFullYear() === monthStart.getFullYear()
+          const isSelected  = viewMode === 'jour' && iso === toISO(selectedDate)
+          const highlighted = inWeek || inMonth || isSelected
+          return (
+            <button key={iso} onClick={() => jumpToDate(d)}
+              className="flex items-center justify-center rounded-full mx-auto"
+              style={{
+                width: 22, height: 22,
+                fontSize: 11,
+                background: isToday ? 'var(--color-accent)' : highlighted ? 'var(--color-accent-light)' : 'transparent',
+                color: isToday ? 'white' : highlighted ? 'var(--color-accent)' : 'var(--color-text-primary)',
+                fontWeight: isToday || highlighted ? 600 : 400,
+              }}>
+              {d.getDate()}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function MiniCalendarPanel({
   viewMode, monthStart, weekStart, selectedDate, today,
   setWeekStart, setMonthStart, setSelectedDate, setViewMode,
@@ -41,50 +97,6 @@ export default function MiniCalendarPanel({
     if (viewMode === 'jour') setViewMode('semaine')
     setSelectedDay(null)
     setShowMiniCal(false)
-  }
-
-  function MonthGrid({ offset }: { offset: number }) {
-    const ms    = addMonths(baseMonth, offset)
-    const cells = buildMiniGrid(ms)
-    const label = MOIS_LONG[ms.getMonth()] + ' ' + ms.getFullYear()
-    return (
-      <div className="px-3 pt-3 pb-2">
-        <p className="text-[11px] font-semibold mb-2 capitalize text-center"
-          style={{ color: 'var(--color-text-primary)' }}>{label}</p>
-        {offset === 0 && (
-          <div className="grid grid-cols-7 mb-1">
-            {DAYS.map((d, i) => (
-              <span key={d + i} className="text-center text-[9px] font-semibold"
-                style={{ color: 'var(--color-text-tertiary)' }}>{d}</span>
-            ))}
-          </div>
-        )}
-        <div className="grid grid-cols-7 gap-y-0.5">
-          {cells.map((d, i) => {
-            if (!d) return <span key={i} />
-            const iso = toISO(d)
-            const isToday     = iso === todayISO
-            const inWeek      = viewMode === 'semaine' && iso >= toISO(weekStart) && iso <= weekEndISO
-            const inMonth     = viewMode === 'mois' && d.getMonth() === monthStart.getMonth() && d.getFullYear() === monthStart.getFullYear()
-            const isSelected  = viewMode === 'jour' && iso === toISO(selectedDate)
-            const highlighted = inWeek || inMonth || isSelected
-            return (
-              <button key={iso} onClick={() => jumpToDate(d)}
-                className="flex items-center justify-center rounded-full mx-auto"
-                style={{
-                  width: 22, height: 22,
-                  fontSize: 11,
-                  background: isToday ? 'var(--color-accent)' : highlighted ? 'var(--color-accent-light)' : 'transparent',
-                  color: isToday ? 'white' : highlighted ? 'var(--color-accent)' : 'var(--color-text-primary)',
-                  fontWeight: isToday || highlighted ? 600 : 400,
-                }}>
-                {d.getDate()}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -116,7 +128,17 @@ export default function MiniCalendarPanel({
       {Array.from({ length: N_MONTHS }, (_, i) => (
         <div key={i}>
           {i > 0 && <div style={{ height: 1, background: 'var(--color-border-subtle)', margin: '0 12px' }} />}
-          <MonthGrid offset={i} />
+          <MonthGrid
+            offset={i}
+            baseMonth={baseMonth}
+            viewMode={viewMode}
+            monthStart={monthStart}
+            weekStart={weekStart}
+            selectedDate={selectedDate}
+            todayISO={todayISO}
+            weekEndISO={weekEndISO}
+            jumpToDate={jumpToDate}
+          />
         </div>
       ))}
     </div>
