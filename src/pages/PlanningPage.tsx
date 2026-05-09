@@ -28,7 +28,7 @@ import {
   getFrenchHolidays,
   startOfWeek, startOfMonth, addDays, addMonths, toISO, sameDay,
   buildMonthGrid,
-  sortEvts, groupByClient, filterEvents,
+  sortEvts, groupByClient, filterEvents, getPeriodLabel,
 } from '@/lib/planningUtils'
 import { usePlanningData } from '@/hooks/usePlanningData'
 import DayModal          from '@/components/planning/DayModal'
@@ -432,14 +432,7 @@ export default function PlanningPage() {
 
   // ── Label période ───────────────────────────────────────
 
-  const periodLabel = viewMode==='jour'
-    ? `${JOURS_LONG[(selectedDate.getDay()+6)%7]} ${selectedDate.getDate()} ${MOIS_LONG[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`
-    : viewMode==='semaine' ? (() => {
-    const end = addDays(weekStart,6)
-    if (weekStart.getMonth()===end.getMonth())
-      return `${weekStart.getDate()}–${end.getDate()} ${MOIS_LONG[weekStart.getMonth()]} ${weekStart.getFullYear()}`
-    return `${weekStart.getDate()} ${MOIS_LONG[weekStart.getMonth()]} – ${end.getDate()} ${MOIS_LONG[end.getMonth()]} ${end.getFullYear()}`
-  })() : `${MOIS_LONG[monthStart.getMonth()]} ${monthStart.getFullYear()}`
+  const periodLabel = getPeriodLabel(viewMode, selectedDate, weekStart, monthStart)
 
 
   // ── Render ──────────────────────────────────────────────

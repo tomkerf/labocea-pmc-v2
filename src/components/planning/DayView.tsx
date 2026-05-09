@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react'
 import {
   type PlanningEvent,
   toISO, sameDay,
-  parseHHMM, assignColumns, sortEvts, filterEvents,
+  parseHHMM, assignColumns, sortEvts, filterEvents, getISOWeek,
 } from '@/lib/planningUtils'
 
 interface DayViewProps {
@@ -34,12 +34,7 @@ export default function DayView({
   const now    = new Date()
   const nowMin = now.getHours() * 60 + now.getMinutes()
   const showNow = sameDay(selectedDate, today) && nowMin >= D_START * 60 && nowMin <= D_END * 60
-  const weekNum = (() => {
-    const d = new Date(Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()))
-    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
-    const y = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-    return Math.ceil((((d.getTime() - y.getTime()) / 86400000) + 1) / 7)
-  })()
+  const weekNum = getISOWeek(selectedDate)
 
   return (
     <div className="flex-1 overflow-hidden flex flex-col relative"

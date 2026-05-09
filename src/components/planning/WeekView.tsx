@@ -128,7 +128,7 @@ export default function WeekView({
             gridTemplateRows: `repeat(${allDayNumRows}, 18px)`,
             gap: '2px 0',
           }}>
-              {allDayItems.map(({ key, colStart, colEnd, row, bg, color, label, badge, tag, onClick, tooltip }) => (
+              {allDayItems.map(({ key, colStart, colEnd, row, bg, color, label, badge, onClick, tooltip }) => (
                 <button
                   key={key}
                   onMouseDown={e => e.stopPropagation()}
@@ -144,9 +144,6 @@ export default function WeekView({
                   title={tooltip}
                 >
                   <span className="text-[11px] font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
-                  {tag && (
-                    <span className="shrink-0 text-[9px]" style={{ color }}>{tag}</span>
-                  )}
                   {badge && (
                     <span className="shrink-0 text-[9px] opacity-60" style={{ color: 'var(--color-text-secondary)' }}>{badge}</span>
                   )}

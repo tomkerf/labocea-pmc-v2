@@ -319,9 +319,28 @@ export type AllDayItem = {
   color:    string
   label:    string
   badge?:   string
-  tag?:     string
   onClick:  () => void
   tooltip:  string
+}
+
+export function getISOWeek(d: Date): number {
+  const utc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+  utc.setUTCDate(utc.getUTCDate() + 4 - (utc.getUTCDay() || 7))
+  const y = new Date(Date.UTC(utc.getUTCFullYear(), 0, 1))
+  return Math.ceil((((utc.getTime() - y.getTime()) / 86400000) + 1) / 7)
+}
+
+export function getPeriodLabel(viewMode: ViewMode, selectedDate: Date, weekStart: Date, monthStart: Date): string {
+  if (viewMode === 'jour') {
+    return `${JOURS_LONG[(selectedDate.getDay()+6)%7]} ${selectedDate.getDate()} ${MOIS_LONG[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`
+  }
+  if (viewMode === 'semaine') {
+    const end = addDays(weekStart, 6)
+    if (weekStart.getMonth() === end.getMonth())
+      return `${weekStart.getDate()}–${end.getDate()} ${MOIS_LONG[weekStart.getMonth()]} ${weekStart.getFullYear()}`
+    return `${weekStart.getDate()} ${MOIS_LONG[weekStart.getMonth()]} – ${end.getDate()} ${MOIS_LONG[end.getMonth()]} ${end.getFullYear()}`
+  }
+  return `${MOIS_LONG[monthStart.getMonth()]} ${monthStart.getFullYear()}`
 }
 
 export function filterEvents(
