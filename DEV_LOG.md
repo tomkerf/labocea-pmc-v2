@@ -482,3 +482,48 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 ---
 
 *Dernière mise à jour : 29 avril 2026*
+
+---
+
+## Session 22 — Dette technique planning + Sécurité + UX
+**9 mai 2026**
+
+### Qualité — Module planning (suite session 21)
+
+- **`MonthGrid` extrait au niveau module** dans `MiniCalendarPanel.tsx` — était défini dans le corps du composant parent, React le recréait à chaque render et remontait les 3 instances. Fix comportemental réel. (commit `f6c2367`)
+- **`getISOWeek()` et `getPeriodLabel()`** extraits vers `planningUtils.ts` — IIFEs inline dans DayView et PlanningPage remplacées par des fonctions nommées et testables. (commit `28ff283`)
+- **`tag` et `color` supprimés de `AllDayItem`** — champs jamais renseignés détectés par code review automatique. (commits `fb51f1f`, `d51b1dd`)
+
+### Sécurité — Rôles utilisateurs
+
+- **`RequireAdmin` composant** créé (`src/components/layout/RequireAdmin.tsx`) — vérifie `role === 'admin'`, redirige vers `/missions` sinon. Route `/admin` wrappée.
+- **Firestore rules durcies** — ajout du helper `isAdmin()` qui lit le rôle depuis `users/{uid}`. Écriture sur profil tiers (création/suppression comptes) désormais réservée aux admins. Règles déployées en production.
+
+### Mode d'emploi — réécriture complète
+
+- 6 modules documentés (était 4) : ajout Matériel et Métrologie/Maintenances
+- Sections Planning enrichies : drag-to-create, événements personnels (congés/RTT), filtres, mini-calendrier
+- Photos terrain documentées
+- Ordre revu : Statuts d'abord, Planning en 2e, Missions en 3e
+- Erreur corrigée : description du drag-and-drop inexacte retirée
+
+### UX — Aides contextuelles in-app
+
+- **Tooltip statuts** dans fiche prélèvement (`PlanPage.tsx`) — icône `?` au survol : différence "En retard" vs "Non effectué" avec couleurs
+- **Tooltip anneau métrologie** dans `EquipementCard` — CSS (sans délai navigateur), affiche "Prochain étalonnage dans X jours"
+- **Hint drag-to-create** dans Planning — bandeau vert une seule fois au premier accès, fermé via localStorage
+
+### CI — Fix historique
+
+- Commit `edc9ca6` (session 21) avait cassé le CI GitHub Actions (syntax error WeekView). Corrigé par `20cc977` dès la même session. Confirmé vert sur les commits suivants.
+
+### Prochaines étapes identifiées
+
+- Signalement de bugs in-app (bouton → Firestore `bugs/{id}` → Admin)
+- Écriture concurrente : détecter les conflits si plusieurs techs sur la même fiche
+- Refactoring pages longues : PlanPage (965 lignes), DashboardPage (890), BilanPage (882)
+- Attendre retours équipe sur staging avant déploiement prod
+
+---
+
+*Dernière mise à jour : 9 mai 2026*
