@@ -113,7 +113,13 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
       onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-bg-secondary)')}
     >
       {/* Anneau métrologie avec icône au centre */}
-      <div className="shrink-0" title={metroPercent !== null ? calcMetroTooltip(equipement.prochainEtalonnage) : undefined}>
+      <div className="relative group shrink-0">
+        {metroPercent !== null && (
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 whitespace-nowrap px-2 py-1 rounded text-xs z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-100"
+            style={{ background: 'var(--color-text-primary)', color: 'white' }}>
+            {calcMetroTooltip(equipement.prochainEtalonnage)}
+          </div>
+        )}
         {metroPercent !== null ? (
           <CircleProgress percent={metroPercent} size={44} icon={categoryIcon} />
         ) : (
