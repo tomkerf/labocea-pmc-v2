@@ -245,7 +245,7 @@ export default function PlanningPage() {
         rawItems.push({
           key: ev.id,
           colStart, colEnd,
-          bg: tc.bg, color: tc.color,
+          bg: tc.bg,
           label: ev.titre,
           badge: ev.createdByInitiales || undefined,
           onClick: () => handleSelectEvent(evObj, ev.date),

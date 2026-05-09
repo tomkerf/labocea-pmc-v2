@@ -316,7 +316,6 @@ export type AllDayItem = {
   colEnd:   number
   row:      number
   bg:       string
-  color:    string
   label:    string
   badge?:   string
   onClick:  () => void
