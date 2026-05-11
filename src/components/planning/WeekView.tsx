@@ -40,7 +40,7 @@ export default function WeekView({
 }: WeekViewProps) {
 
   function filteredForDayFlat(dateStr: string): PlanningEvent[] {
-    return sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard))
+    return sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
   }
 
   const allDayNumRows = allDayItems.length > 0

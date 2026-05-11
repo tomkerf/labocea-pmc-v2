@@ -37,7 +37,7 @@ export default function MonthView({
 }: MonthViewProps) {
 
   function filteredForDay(dateStr: string): PlanningEvent[] {
-    return groupByClient(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard))
+    return groupByClient(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
   }
 
   return (
