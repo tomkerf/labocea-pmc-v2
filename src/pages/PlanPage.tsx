@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, FileText, X } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, FileText, X } from 'lucide-react'
 import { toast } from '@/stores/toastStore'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
@@ -13,7 +13,7 @@ import { generateSamplings } from '@/lib/samplings'
 import { SamplingForm } from '@/components/plan/SamplingForm'
 import { PlanConfigSection } from '@/components/plan/PlanConfigSection'
 import { buildReportHtml } from '@/lib/reportHtml'
-import type { Client, Plan, Sampling, SamplingStatus, SamplingHistoryEntry } from '@/types'
+import type { Client, Plan, Sampling, SamplingStatus, NappeType, SamplingHistoryEntry } from '@/types'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
