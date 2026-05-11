@@ -14,6 +14,7 @@ interface MonthViewProps {
   eventsByDate:         Record<string, PlanningEvent[]>
   filterTech:           string
   filterRetard:         boolean
+  showRain:             boolean
   isDragging:           boolean
   handleDragMouseDown:  (e: React.MouseEvent, dateStr: string) => void
   handleDragMouseEnter: (dateStr: string) => void
@@ -29,7 +30,7 @@ interface MonthViewProps {
 
 export default function MonthView({
   monthGrid, today, holidays, eventsByDate,
-  filterTech, filterRetard,
+  filterTech, filterRetard, showRain,
   isDragging, handleDragMouseDown, handleDragMouseEnter, handleDragMouseUp,
   setIsDragging, setDragStart, setDragEnd,
   handleSelectEvent, goToDay, setCtxMenu, isInDrag,
@@ -71,6 +72,7 @@ export default function MonthView({
           const inDrag = isInDrag(dateStr)
           const holidayName = holidays[dateStr]
           const hasCongeM   = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'conge') ?? false
+          const isRainyDay  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
           const MAX = 3
           return (
             <div key={i}
@@ -92,6 +94,8 @@ export default function MonthView({
               {holidayName && !inDrag && <div className="holiday-overlay" />}
               {/* Overlay congé/RTT */}
               {!holidayName && hasCongeM && !inDrag && <div className="conge-overlay" />}
+              {/* Overlay pluie */}
+              {showRain && isRainyDay && !inDrag && <div className="rain-overlay" />}
               <div className="flex items-center justify-between mb-0.5 px-0.5">
                 <span className="flex items-center gap-1">
                   <span className="w-[22px] h-[22px] flex items-center justify-center rounded-full text-[11px] font-semibold"

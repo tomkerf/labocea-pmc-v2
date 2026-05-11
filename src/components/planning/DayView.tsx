@@ -11,6 +11,7 @@ interface DayViewProps {
   eventsByDate:      Record<string, PlanningEvent[]>
   filterTech:        string
   filterRetard:      boolean
+  showRain:          boolean
   handleTouchStart:  (e: React.TouchEvent) => void
   handleTouchEnd:    (e: React.TouchEvent) => void
   handleSelectEvent: (event: PlanningEvent, dateStr: string) => void
@@ -19,13 +20,13 @@ interface DayViewProps {
 
 export default function DayView({
   selectedDate, today, eventsByDate,
-  filterTech, filterRetard,
+  filterTech, filterRetard, showRain,
   handleTouchStart, handleTouchEnd,
   handleSelectEvent, setSelectedDay,
 }: DayViewProps) {
   const D_START = 7, D_END = 20, PX_H = 64, PX_M = PX_H / 60
   const dateStr = toISO(selectedDate)
-  const allEvts = sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard))
+  const allEvts = sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
   const allDayEvts = allEvts.filter(e => !e.plannedTime)
   const timedEvts  = assignColumns(
     allEvts.filter(e => !!e.plannedTime)
@@ -35,13 +36,14 @@ export default function DayView({
   const nowMin = now.getHours() * 60 + now.getMinutes()
   const showNow = sameDay(selectedDate, today) && nowMin >= D_START * 60 && nowMin <= D_END * 60
   const weekNum = getISOWeek(selectedDate)
+  const isRainyDay = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
 
   return (
     <div className="flex-1 overflow-hidden flex flex-col relative"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}>
 
-      {/* Sous-titre : numéro de semaine */}
+      {/* Sous-titre : numéro de semaine + météo */}
       <div className="px-4 py-1.5 shrink-0 flex items-center gap-2"
         style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
         <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -52,11 +54,18 @@ export default function DayView({
             · {allEvts.length} intervention{allEvts.length > 1 ? 's' : ''}
           </span>
         )}
+        {showRain && isRainyDay && (
+          <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full"
+            style={{ background: 'rgba(0,113,227,0.1)', color: '#0071E3' }}>
+            🌧️ Temps de pluie prévu
+          </span>
+        )}
       </div>
 
       {/* Section "Toute la journée" */}
-      <div className="shrink-0" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
-        <div className="flex">
+      <div className="shrink-0 relative" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
+        {showRain && isRainyDay && <div className="rain-overlay opacity-30" />}
+        <div className="flex relative z-10">
           <div className="w-14 shrink-0 flex items-start justify-end pr-2 pt-2 pb-1">
             <span className="text-[10px] font-medium" style={{ color: 'var(--color-text-tertiary)' }}>Jour</span>
           </div>
@@ -92,8 +101,9 @@ export default function DayView({
       </div>
 
       {/* Grille horaire */}
-      <div className="flex-1 overflow-y-auto" style={{ background: 'var(--color-bg-primary)' }}>
-        <div className="relative" style={{ height: (D_END - D_START) * PX_H }}>
+      <div className="flex-1 overflow-y-auto relative" style={{ background: 'var(--color-bg-primary)' }}>
+        {showRain && isRainyDay && <div className="rain-overlay" />}
+        <div className="relative z-10" style={{ height: (D_END - D_START) * PX_H }}>
 
           {/* Lignes horaires */}
           {Array.from({ length: D_END - D_START }, (_, i) => (

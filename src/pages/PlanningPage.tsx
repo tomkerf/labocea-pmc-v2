@@ -80,6 +80,7 @@ export default function PlanningPage() {
   const [filterRetard,setFilterRetard]= useState(false)
   const [selectedDay,         setSelectedDay]         = useState<string|null>(null)
   const [dayModalInitialTab,  setDayModalInitialTab]  = useState<'pool'|'evt'>('pool')
+  const [showRain,            setShowRain]            = useState(() => localStorage.getItem('planning_show_rain') === 'true')
   const [ctxMenu,             setCtxMenu]             = useState<{ dateStr: string; x: number; y: number } | null>(null)
   const [eventDetail,   setEventDetail]   = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
   const [ghostDetail,   setGhostDetail]   = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
@@ -135,14 +136,14 @@ export default function PlanningPage() {
 
   // ── Filtrage technicien ─────────────────────────────────
 
-  // Avec regroupement par client (vue mois, DayModal)
+  // With grouping by client (month view, DayModal)
   const filteredForDay = useCallback((dateStr:string): PlanningEvent[] =>
-    groupByClient(filterEvents(eventsByDate[dateStr]??[], filterTech, filterRetard))
+    groupByClient(filterEvents(eventsByDate[dateStr]??[], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
   , [eventsByDate, filterTech, filterRetard])
 
-  // Sans regroupement (vue semaine et vue jour : chaque prélèvement visible)
+  // Without grouping (week view and day view: every sampling visible)
   const filteredForDayFlat = useCallback((dateStr:string): PlanningEvent[] =>
-    sortEvts(filterEvents(eventsByDate[dateStr]??[], filterTech, filterRetard))
+    sortEvts(filterEvents(eventsByDate[dateStr]??[], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
   , [eventsByDate, filterTech, filterRetard])
 
   // Nombre de samplings non faits dans le mois visible — pour le bandeau "à planifier"
@@ -325,6 +326,17 @@ export default function PlanningPage() {
   // Supprime un événement personnel
   function handleDeleteEvent(event: PlanningEvent) {
     if (event.evenementData) deleteEvenement(event.evenementData.id)
+  }
+
+  // Alterne l'état "pluie" (météo prévue) pour un jour donné
+  async function toggleRainDay(dateStr: string) {
+    if (!uid) return
+    const existing = evenements.find(e => e.type === 'meteo' && e.date === dateStr)
+    if (existing) {
+      await deleteEvenement(existing.id)
+    } else {
+      await createEvenement('Pluie prévue', dateStr, 'meteo', '', '', uid, initiales)
+    }
   }
 
   // Change le technicien assigné à UN seul prélèvement (sampling.assignedTo)
@@ -544,6 +556,18 @@ export default function PlanningPage() {
                 ⚠ {totalOverdue} en retard
               </button>
             )}
+
+            {/* Toggle Temps de Pluie */}
+            <button onClick={() => { const v = !showRain; setShowRain(v); localStorage.setItem('planning_show_rain', String(v)) }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+              style={{
+                background: showRain ? '#0071E3' : 'rgba(0,113,227,0.1)',
+                color: showRain ? 'white' : '#0071E3',
+                border: `1px solid ${showRain ? 'transparent' : 'rgba(0,113,227,0.2)'}`
+              }}>
+              <span className="text-sm">🌧</span>
+              Temps de pluie {showRain ? 'activé' : 'off'}
+            </button>
           </div>
         )}
       </div>
@@ -623,6 +647,7 @@ export default function PlanningPage() {
           eventsByDate={eventsByDate}
           filterTech={filterTech}
           filterRetard={filterRetard}
+          showRain={showRain}
           handleTouchStart={handleTouchStart}
           handleTouchEnd={handleTouchEnd}
           handleSelectEvent={handleSelectEvent}
@@ -643,6 +668,7 @@ export default function PlanningPage() {
             allDayItems={allDayItems}
             filterTech={filterTech}
             filterRetard={filterRetard}
+            showRain={showRain}
             isDragging={isDragging}
             handleDragMouseDown={handleDragMouseDown}
             handleDragMouseEnter={handleDragMouseEnter}
@@ -665,6 +691,7 @@ export default function PlanningPage() {
             eventsByDate={eventsByDate}
             filterTech={filterTech}
             filterRetard={filterRetard}
+            showRain={showRain}
             isDragging={isDragging}
             handleDragMouseDown={handleDragMouseDown}
             handleDragMouseEnter={handleDragMouseEnter}
@@ -750,6 +777,8 @@ export default function PlanningPage() {
           y={ctxMenu.y}
           onClose={() => setCtxMenu(null)}
           holidayName={holidays[ctxMenu.dateStr]}
+          hasRain={evenements.some(e => e.type === 'meteo' && e.date === ctxMenu.dateStr)}
+          onToggleRain={() => toggleRainDay(ctxMenu.dateStr)}
           onPlanifier={() => {
             setDayModalInitialTab('pool')
             setSelectedDay(ctxMenu.dateStr)

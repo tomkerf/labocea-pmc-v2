@@ -1,10 +1,12 @@
-import { Calendar, Bell } from 'lucide-react'
+import { Calendar, Bell, CloudRain } from 'lucide-react'
 
-export default function CellContextMenu({ x, y, onClose, onPlanifier, onEvenement, holidayName }: {
+export default function CellContextMenu({ x, y, onClose, onPlanifier, onEvenement, onToggleRain, hasRain, holidayName }: {
   x: number; y: number
   onClose: () => void
   onPlanifier: () => void
   onEvenement: () => void
+  onToggleRain: () => void
+  hasRain: boolean
   holidayName?: string
 }) {
   const safeX = Math.min(x, window.innerWidth  - 220)
@@ -47,6 +49,16 @@ export default function CellContextMenu({ x, y, onClose, onPlanifier, onEvenemen
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
           <Bell size={15} style={{ color: 'var(--color-accent)' }} />
           Nouvel événement
+        </button>
+        <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
+        <button
+          onClick={() => { onToggleRain(); onClose() }}
+          className="flex items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium"
+          style={{ color: hasRain ? 'var(--color-danger)' : 'var(--color-text-primary)' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+          <CloudRain size={15} style={{ color: hasRain ? 'var(--color-danger)' : '#0071E3' }} />
+          {hasRain ? 'Retirer "Temps de pluie"' : 'Marquer "Temps de pluie"'}
         </button>
       </div>
     </div>

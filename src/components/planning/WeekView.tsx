@@ -16,6 +16,7 @@ interface WeekViewProps {
   allDayItems:          AllDayItem[]
   filterTech:           string
   filterRetard:         boolean
+  showRain:             boolean
   isDragging:           boolean
   handleDragMouseDown:  (e: React.MouseEvent, dateStr: string) => void
   handleDragMouseEnter: (dateStr: string) => void
@@ -32,7 +33,7 @@ interface WeekViewProps {
 export default function WeekView({
   weekDays, today, holidays, eventsByDate,
   bilanBand, allDayItems,
-  filterTech, filterRetard,
+  filterTech, filterRetard, showRain,
   isDragging, handleDragMouseDown, handleDragMouseEnter, handleDragMouseUp,
   setIsDragging, setDragStart, setDragEnd,
   handleSelectEvent, goToDay, setCtxMenu, isInDrag,
@@ -53,13 +54,17 @@ export default function WeekView({
         style={{ borderBottom:'1px solid var(--color-border-subtle)' }}>
         {weekDays.map((day,i) => {
           const isToday = sameDay(day,today)
-          const holidayName = holidays[toISO(day)]
+          const dateStr = toISO(day)
+          const holidayName = holidays[dateStr]
+          const isRainyDay  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
           return (
-            <div key={i} className="py-2 px-2 text-center"
+            <div key={i} className="py-2 px-2 text-center relative overflow-hidden"
               style={{
                 borderRight: i<6?'1px solid var(--color-border-subtle)':'none',
                 background: holidayName ? 'rgba(255,59,48,0.04)' : 'transparent',
               }}>
+              {/* Overlay pluie dans l'en-tête */}
+              {showRain && isRainyDay && <div className="rain-overlay opacity-30" />}
               <div className="text-[10px] font-medium uppercase mb-1"
                 style={{ color:'var(--color-text-tertiary)', letterSpacing:'0.04em' }}>
                 {JOURS_COURT[i]}
@@ -163,6 +168,7 @@ export default function WeekView({
           const inDrag   = isInDrag(dateStr)
           const isHoliday = !!holidays[dateStr]
           const hasConge  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'conge') ?? false
+          const isRainyDay = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
           return (
             <div key={i}
               className="p-1.5 flex flex-col gap-1 cursor-crosshair group"
@@ -182,6 +188,8 @@ export default function WeekView({
               {isHoliday && !inDrag && <div className="holiday-overlay" />}
               {/* Overlay congé/RTT */}
               {!isHoliday && hasConge && !inDrag && <div className="conge-overlay" />}
+              {/* Overlay pluie */}
+              {showRain && isRainyDay && !inDrag && <div className="rain-overlay" />}
               {evts.map(evt => <EventPill key={evt.id} event={evt} dateStr={dateStr} onExpand={() => goToDay(dateStr)} onSelect={e => handleSelectEvent(e, dateStr)} />)}
               <div className="mt-auto pt-1 flex justify-end pr-0.5">
                 <Plus size={10} className="opacity-20 group-hover:opacity-60 transition-opacity"

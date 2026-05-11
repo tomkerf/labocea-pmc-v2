@@ -108,6 +108,22 @@ body {
   animation: holidayFadeIn 0.35s ease-out forwards;
 }
 
+/* Overlay "temps de pluie" — pluie fine stylisée */
+.rain-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: radial-gradient(circle at 2px 2px, rgba(0, 113, 227, 0.15) 1px, transparent 0);
+  background-size: 8px 12px;
+  animation: rainMotion 10s linear infinite, holidayFadeIn 0.5s ease-out;
+}
+
+@keyframes rainMotion {
+  from { background-position: 0 0; }
+  to   { background-position: 0 100px; }
+}
+
 /* Champ texte générique — utilisé dans les formulaires */
 .field-input {
   width: 100%;
