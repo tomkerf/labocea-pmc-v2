@@ -76,7 +76,7 @@ export default function PlanningPage() {
   const [weekStart,   setWeekStart]   = useState(() => startOfWeek(today))
   const [monthStart,  setMonthStart]  = useState(() => startOfMonth(today))
   const [selectedDate,setSelectedDate]= useState(today)
-  const [filterTech,  setFilterTech]  = useState('')
+  const [filterTech,  setFilterTech]  = useState(() => localStorage.getItem('planning_filter_tech') ?? '')
   const [filterRetard,setFilterRetard]= useState(false)
   const [selectedDay,         setSelectedDay]         = useState<string|null>(null)
   const [dayModalInitialTab,  setDayModalInitialTab]  = useState<'pool'|'evt'>('pool')
@@ -125,7 +125,7 @@ export default function PlanningPage() {
     return !!(isDragging && mn && mx && dateStr >= mn && dateStr <= mx)
   }
 
-  const weekDays  = useMemo(() => Array.from({length:5},(_,i) => addDays(weekStart,i)), [weekStart])
+  const weekDays  = useMemo(() => Array.from({length:7},(_,i) => addDays(weekStart,i)), [weekStart])
   const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])
 
   // ── Calculs dérivés des données Firestore ───────────────
@@ -509,7 +509,7 @@ export default function PlanningPage() {
             {/* Filtre technicien */}
             {allTechs.length > 1 && (
               <div className="flex items-center gap-1.5 flex-wrap">
-                <button onClick={() => setFilterTech('')}
+                <button onClick={() => { setFilterTech(''); localStorage.removeItem('planning_filter_tech') }}
                   className="px-3 py-1.5 rounded-full text-xs font-medium"
                   style={{ background:!filterTech?'var(--color-accent)':'var(--color-bg-secondary)', color:!filterTech?'white':'var(--color-text-secondary)', border:`1px solid ${!filterTech?'transparent':'var(--color-border-subtle)'}` }}>
                   Tous
@@ -522,7 +522,7 @@ export default function PlanningPage() {
                     : t
                   const tc = getTechColor(t)
                   return (
-                    <button key={t} onClick={() => setFilterTech(t===filterTech?'':t)}
+                    <button key={t} onClick={() => { const v=t===filterTech?'':t; setFilterTech(v); v ? localStorage.setItem('planning_filter_tech',v) : localStorage.removeItem('planning_filter_tech') }}
                       className="px-3 py-1.5 rounded-full text-xs font-medium"
                       style={{
                         background: isActive ? tc.color : tc.bg,

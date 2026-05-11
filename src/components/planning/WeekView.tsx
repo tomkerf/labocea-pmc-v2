@@ -49,7 +49,7 @@ export default function WeekView({
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       {/* En-têtes colonnes */}
-      <div className="grid grid-cols-5 shrink-0"
+      <div className="grid grid-cols-7 shrink-0"
         style={{ borderBottom:'1px solid var(--color-border-subtle)' }}>
         {weekDays.map((day,i) => {
           const isToday = sameDay(day,today)
@@ -57,7 +57,7 @@ export default function WeekView({
           return (
             <div key={i} className="py-2 px-2 text-center"
               style={{
-                borderRight: i<4?'1px solid var(--color-border-subtle)':'none',
+                borderRight: i<6?'1px solid var(--color-border-subtle)':'none',
                 background: holidayName ? 'rgba(255,59,48,0.04)' : 'transparent',
               }}>
               <div className="text-[10px] font-medium uppercase mb-1"
@@ -88,7 +88,7 @@ export default function WeekView({
           {bilanBand.map((row, rowIdx) => {
             const wISOs = weekDays.map(toISO)
             return (
-              <div key={rowIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', padding: '0 2px' }}>
+              <div key={rowIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', padding: '0 2px' }}>
                 {row.map((group, gIdx) => (
                   <div key={gIdx}
                     style={{
@@ -124,7 +124,7 @@ export default function WeekView({
           style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 2px' }}>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(5, 1fr)',
+            gridTemplateColumns: 'repeat(7, 1fr)',
             gridTemplateRows: `repeat(${allDayNumRows}, 18px)`,
             gap: '2px 0',
           }}>
@@ -154,7 +154,7 @@ export default function WeekView({
       )}
 
       {/* Colonnes événements */}
-      <div className="grid grid-cols-5 flex-1 overflow-y-auto select-none"
+      <div className="grid grid-cols-7 flex-1 overflow-y-auto select-none"
         onMouseUp={handleDragMouseUp}
         onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
         {weekDays.map((day,i) => {
@@ -171,7 +171,7 @@ export default function WeekView({
               onContextMenu={e => { e.preventDefault(); setCtxMenu({ dateStr, x: e.clientX, y: e.clientY }) }}
               style={{
                 position: 'relative',
-                borderRight: i<4?'1px solid var(--color-border-subtle)':'none',
+                borderRight: i<6?'1px solid var(--color-border-subtle)':'none',
                 background: inDrag ? 'rgba(0,113,227,0.1)' : 'var(--color-bg-secondary)',
                 outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
                 outlineOffset: '-1px',
