@@ -42,25 +42,25 @@ export default function MonthView({
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       {/* En-têtes jours */}
-      <div className="grid grid-cols-5 shrink-0"
+      <div className="grid grid-cols-7 shrink-0"
         style={{ borderBottom:'1px solid var(--color-border-subtle)' }}>
         {JOURS_COURT.map((j,i) => (
           <div key={j} className="py-2 text-center text-[10px] font-medium uppercase"
             style={{ color:'var(--color-text-tertiary)', letterSpacing:'0.04em',
-              borderRight:i<4?'1px solid var(--color-border-subtle)':'none' }}>
+              borderRight:i<6?'1px solid var(--color-border-subtle)':'none' }}>
             {j}
           </div>
         ))}
       </div>
       {/* Grille */}
-      <div className="grid grid-cols-5 flex-1 overflow-y-auto select-none"
+      <div className="grid grid-cols-7 flex-1 overflow-y-auto select-none"
         style={{ gridAutoRows:'1fr' }}
         onMouseUp={handleDragMouseUp}
         onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
         {monthGrid.map((day,i) => {
           if (!day) return (
             <div key={i} style={{
-              borderRight:(i%5)<4?'1px solid var(--color-border-subtle)':'none',
+              borderRight:(i%7)<6?'1px solid var(--color-border-subtle)':'none',
               borderBottom:'1px solid var(--color-border-subtle)',
               background:'rgba(0,0,0,0.015)',
             }} />
@@ -80,7 +80,7 @@ export default function MonthView({
               onContextMenu={e => { e.preventDefault(); setCtxMenu({ dateStr, x: e.clientX, y: e.clientY }) }}
               style={{
                 position: 'relative',
-                borderRight:(i%5)<4?'1px solid var(--color-border-subtle)':'none',
+                borderRight:(i%7)<6?'1px solid var(--color-border-subtle)':'none',
                 borderBottom:'1px solid var(--color-border-subtle)',
                 background: inDrag ? 'rgba(0,113,227,0.1)' : 'var(--color-bg-secondary)',
                 outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',

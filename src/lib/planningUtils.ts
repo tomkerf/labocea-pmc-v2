@@ -178,22 +178,16 @@ export function sameDay(a: Date, b: Date): boolean { return toISO(a) === toISO(b
 
 // ── Grilles calendrier ───────────────────────────────────────────
 
-/** Grille mensuelle 5 colonnes (lun-ven uniquement — sans week-ends) */
+/** Grille mensuelle 7 colonnes (lun-dim) */
 export function buildMonthGrid(ms: Date): (Date|null)[] {
   const y = ms.getFullYear(), m = ms.getMonth()
   const dim = new Date(y, m+1, 0).getDate()
   const firstDow = ms.getDay() // 0=dim, 1=lun … 6=sam
-  // Décalage = position du 1er dans la grille lun-ven (0=lun, …, 4=ven)
-  // Si le 1er tombe sam/dim → 0 (les jours de WE ne sont pas affichés)
-  const offset = (firstDow >= 1 && firstDow <= 5) ? firstDow - 1 : 0
+  const offset = firstDow === 0 ? 6 : firstDow - 1
   const cells: (Date|null)[] = []
   for (let i = 0; i < offset; i++) cells.push(null)
-  for (let d = 1; d <= dim; d++) {
-    const date = new Date(y, m, d)
-    const dow = date.getDay()
-    if (dow !== 0 && dow !== 6) cells.push(date) // skip sam & dim
-  }
-  while (cells.length % 5) cells.push(null)
+  for (let d = 1; d <= dim; d++) cells.push(new Date(y, m, d))
+  while (cells.length % 7) cells.push(null)
   return cells
 }
 
