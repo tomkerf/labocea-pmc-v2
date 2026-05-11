@@ -71,7 +71,7 @@ export interface TechOption {
 
 // ── Constantes ──────────────────────────────────────────────────
 
-export const JOURS_COURT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'] // lun-ven uniquement
+export const JOURS_COURT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 export const JOURS_LONG  = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
 export const MOIS_LONG   = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
                             'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
