@@ -3,8 +3,7 @@ import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { logout } from '@/hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 import { LogOut, Check, X, RefreshCw } from 'lucide-react'
-import { doc, setDoc } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { updateUserProfile } from '@/services/userService'
 import UserAvatar, { AVATAR_COLORS, getAvatarColor, dicebearUrl } from '@/components/ui/UserAvatar'
 import type { AppUser } from '@/types'
 
@@ -50,13 +49,13 @@ export default function ComptePage() {
       if (!updated.uid) return
       setSaving(true)
       try {
-        await setDoc(doc(db, 'users', updated.uid), {
+        await updateUserProfile(updated.uid, {
           prenom:      updated.prenom,
           nom:         updated.nom,
           initiales:   updated.initiales,
           avatarColor: updated.avatarColor ?? null,
           avatarSeed:  updated.avatarSeed  ?? null,
-        }, { merge: true })
+        })
       } finally {
         setSaving(false)
       }
@@ -69,7 +68,7 @@ export default function ComptePage() {
     const updated = { ...appUser, avatarSeed: next }
     setSaving(true)
     try {
-      await setDoc(doc(db, 'users', appUser.uid), { avatarSeed: next ?? null }, { merge: true })
+      await updateUserProfile(appUser.uid, { avatarSeed: next ?? null })
       setAppUser(updated)
     } finally {
       setSaving(false)
@@ -90,7 +89,7 @@ export default function ComptePage() {
     const updated = { ...appUser, avatarColor: colorValue }
     setSaving(true)
     try {
-      await setDoc(doc(db, 'users', appUser.uid), { avatarColor: colorValue }, { merge: true })
+      await updateUserProfile(appUser.uid, { avatarColor: colorValue })
       setAppUser(updated)
     } finally {
       setSaving(false)

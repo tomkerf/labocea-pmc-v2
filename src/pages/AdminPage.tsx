@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createUserWithEmailAndPassword, deleteUser } from 'firebase/auth'
-import { doc, setDoc, Timestamp } from 'firebase/firestore'
+
 import { ShieldAlert, UserPlus, Check, Loader2, ChevronLeft, ChevronRight, Mail, Lock, User, Hash, BarChart2, Clock } from 'lucide-react'
 import { authSecondary, dbSecondary } from '@/lib/firebase'
+import { createUserDocument } from '@/services/userService'
 import { useAuthStore, selectRole } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -470,19 +471,12 @@ function CreateUserForm() {
       const uid  = cred.user.uid
 
       try {
-        // Créer le document Firestore users/{uid} via l'instance secondaire
-        // (le nouveau user est encore authentifié → satisfait la règle request.auth.uid == uid)
-        await setDoc(doc(dbSecondary, 'users', uid), {
-          uid,
-          prenom,
-          nom,
+        await createUserDocument(uid, {
+          uid, prenom, nom,
           initiales: initiales.toUpperCase(),
-          email,
-          role,
+          email, role,
           avatarColor: randomColor(),
-          createdAt:   Timestamp.now(),
-          lastLoginAt: Timestamp.now(),
-        })
+        }, dbSecondary)
       } catch (firestoreErr) {
         // Rollback : supprimer le compte Auth créé pour éviter un utilisateur orphelin
         await deleteUser(cred.user).catch(() => {})

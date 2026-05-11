@@ -7,43 +7,27 @@ import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useAuthStore, selectUid, selectPrenom, selectInitiales } from '@/stores/authStore'
-import type { Verification, Equipement } from '@/types'
+import { useMetrologieRows, calcStatut } from '@/hooks/useMetrologieRows'
+import type { Verification } from '@/types'
 
 const TYPE_LABELS: Record<string, string> = {
-  etalonnage_interne: 'Étalonnage interne',
+  etalonnage_interne:   'Étalonnage interne',
   verification_externe: 'Vérification externe',
-  controle_terrain: 'Contrôle terrain',
+  controle_terrain:     'Contrôle terrain',
 }
 
 const RESULTAT_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
-  conforme:      { label: 'Conforme',      bg: 'var(--color-success-light)', color: 'var(--color-success)' },
-  non_conforme:  { label: 'Non conforme',  bg: 'var(--color-danger-light)',  color: 'var(--color-danger)'  },
-  a_reprendre:   { label: 'À reprendre',   bg: 'var(--color-warning-light)', color: 'var(--color-warning)' },
-}
-
-/** Statut calculé selon la date du prochain contrôle */
-function calcStatut(prochainDate: string): { key: string; label: string; bg: string; color: string } {
-  if (!prochainDate) return { key: 'none', label: 'Non planifié', bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' }
-  const now = Date.now()
-  const next = new Date(prochainDate).getTime()
-  const diff = next - now
-  const days30 = 30 * 24 * 60 * 60 * 1000
-  if (diff < 0)      return { key: 'late', label: 'En retard',   bg: 'var(--color-danger-light)',  color: 'var(--color-danger)'  }
-  if (diff < days30) return { key: 'soon', label: 'À prévoir',   bg: 'var(--color-warning-light)', color: 'var(--color-warning)' }
-  return                    { key: 'ok',   label: 'À jour',       bg: 'var(--color-success-light)', color: 'var(--color-success)' }
+  conforme:     { label: 'Conforme',     bg: 'var(--color-success-light)', color: 'var(--color-success)' },
+  non_conforme: { label: 'Non conforme', bg: 'var(--color-danger-light)',  color: 'var(--color-danger)'  },
+  a_reprendre:  { label: 'À reprendre',  bg: 'var(--color-warning-light)', color: 'var(--color-warning)' },
 }
 
 const FILTERS = [
-  { value: '', label: 'Tous' },
-  { value: 'ok', label: 'À jour' },
+  { value: '',     label: 'Tous'      },
+  { value: 'ok',   label: 'À jour'    },
   { value: 'soon', label: 'À prévoir' },
   { value: 'late', label: 'En retard' },
 ]
-
-// Unified row type for the table
-type MetroRow =
-  | { kind: 'verification'; data: Verification }
-  | { kind: 'equipement'; data: Equipement }
 
 export default function MerologiePage() {
   useVerificationsListener()
@@ -60,39 +44,7 @@ export default function MerologiePage() {
   const loading = loadingVerif || loadingEq
   const technicienNom = [prenom, initiales].filter(Boolean).join(' ')
 
-  // Equipment with prochainEtalonnage but no verification record
-  const equipementsWithoutVerif = equipements.filter((eq: Equipement) => {
-    if (!eq.prochainEtalonnage) return false
-    return !verifications.some((v: Verification) => v.equipementId === eq.id || v.equipementNom === eq.nom)
-  })
-
-  // Build unified rows
-  const allRows: MetroRow[] = [
-    ...verifications.map((v): MetroRow => ({ kind: 'verification', data: v })),
-    ...equipementsWithoutVerif.map((eq): MetroRow => ({ kind: 'equipement', data: eq })),
-  ]
-
-  // Sort: en retard first, then à prévoir, then à jour, then non planifié
-  const statutOrder = { late: 0, soon: 1, ok: 2, none: 3 }
-  allRows.sort((a, b) => {
-    const dateA = a.kind === 'verification' ? a.data.prochainControle : a.data.prochainEtalonnage
-    const dateB = b.kind === 'verification' ? b.data.prochainControle : b.data.prochainEtalonnage
-    const keyA = calcStatut(dateA).key
-    const keyB = calcStatut(dateB).key
-    const orderDiff = (statutOrder[keyA as keyof typeof statutOrder] ?? 3) - (statutOrder[keyB as keyof typeof statutOrder] ?? 3)
-    if (orderDiff !== 0) return orderDiff
-    // Within same status: sort by date ascending
-    if (!dateA) return 1
-    if (!dateB) return -1
-    return new Date(dateA).getTime() - new Date(dateB).getTime()
-  })
-
-  const filtered = allRows.filter((row) => {
-    if (!filterStatut) return true
-    const date = row.kind === 'verification' ? row.data.prochainControle : row.data.prochainEtalonnage
-    const statut = calcStatut(date)
-    return statut.key === filterStatut
-  })
+  const { allRows, filtered, lateCount } = useMetrologieRows({ verifications, equipements, filterStatut })
 
   async function handleCreate() {
     if (!uid || creating) return
@@ -104,11 +56,6 @@ export default function MerologiePage() {
       setCreating(false)
     }
   }
-
-  const lateCount = allRows.filter((r) => {
-    const d = r.kind === 'verification' ? r.data.prochainControle : r.data.prochainEtalonnage
-    return calcStatut(d).key === 'late'
-  }).length
 
   return (
     <div className="p-6 max-w-2xl">
@@ -184,7 +131,7 @@ export default function MerologiePage() {
           {/* Lignes */}
           {filtered.map((row, i) => {
             if (row.kind === 'verification') {
-              const v = row.data
+              const v = row.data as Verification
               const statut = calcStatut(v.prochainControle)
               const resultatCfg = RESULTAT_CONFIG[v.resultat]
               return (
@@ -225,7 +172,6 @@ export default function MerologiePage() {
               )
             }
 
-            // Equipement row (no verification record)
             const eq = row.data
             const statut = calcStatut(eq.prochainEtalonnage)
             return (
