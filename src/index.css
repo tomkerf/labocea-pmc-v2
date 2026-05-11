@@ -108,24 +108,25 @@ body {
   animation: holidayFadeIn 0.35s ease-out forwards;
 }
 
-/* Overlay "temps de pluie" — pluie fine stylisée (streaks) */
+/* Overlay "temps de pluie" — icône centrée style jour férié */
 .rain-overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 1;
-  background-image: 
-    linear-gradient(105deg, transparent 40%, rgba(0, 113, 227, 0.15) 45%, rgba(0, 113, 227, 0.15) 55%, transparent 60%),
-    linear-gradient(105deg, transparent 40%, rgba(0, 113, 227, 0.08) 45%, rgba(0, 113, 227, 0.08) 55%, transparent 60%);
-  background-size: 12px 24px, 18px 36px;
-  background-position: 0 0, 6px 12px;
-  animation: rainMotion 0.8s linear infinite;
-  opacity: 1;
+  background: rgba(0, 113, 227, 0.04);
+  animation: holidayFadeIn 0.5s ease-out forwards;
 }
 
-@keyframes rainMotion {
-  from { background-position: 0 0, 6px 12px; }
-  to   { background-position: 100px 400px, 106px 412px; }
+.rain-overlay::after {
+  content: '🌧️';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  opacity: 0.2;
+  line-height: 1;
 }
 
 /* Champ texte générique — utilisé dans les formulaires */
