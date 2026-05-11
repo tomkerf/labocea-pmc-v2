@@ -88,7 +88,7 @@ export const MAINTENANCE_LABEL: Record<string, string> = {
 }
 
 export const EVENEMENT_LABEL: Record<TypeEvenement, string> = {
-  rappel: 'Rappel', reunion: 'Réunion', rapport: 'Rapport', autre: 'Autre', conge: 'Congé/RTT',
+  rappel: 'Rappel', reunion: 'Réunion', rapport: 'Rapport', autre: 'Autre', conge: 'Congé/RTT', meteo: 'Météo',
 }
 
 // ── Couleurs par technicien ──────────────────────────────────────
