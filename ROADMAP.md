@@ -223,6 +223,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-04-28 | Finitions ✅ | assignedTo par prélèvement (technicien sans écraser client.preleveur), fallback mémoire IndexedDB, Bilan 24h retiré (→ labocea-app-rapports), badges planning gris rapport |
 | 2026-05-08 | Refactor ✅ | Refactoring PlanningPage (extraction DayView/WeekView/MonthView/EventRow/MiniCalendar), fix build prod, déploiement staging. 3 points de dette technique identifiés et mis en TODO pour la suite (MonthGrid, filtres, props drag). |
 | 2026-05-09 | Qualité + Sécu + UX ✅ | Dette technique planning soldée (MonthGrid, getISOWeek, getPeriodLabel, AllDayItem nettoyé), protection rôles admin (RequireAdmin + Firestore rules), mode d'emploi réécrit (6 modules), aides contextuelles in-app (tooltips statuts + métrologie + hint drag). |
+| 2026-05-11 | Refactor ✅ | Refactoring massif des "God Components" (PlanPage, DashboardPage, BilanPage). Extraction des widgets, formulaires et logiques de calcul. Réduction de ~60% de la taille des pages. Déploiement staging. |
 
 ---
 

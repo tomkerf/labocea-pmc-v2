@@ -526,4 +526,46 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 
 ---
 
-*Dernière mise à jour : 9 mai 2026*
+---
+
+## Session 23 — Audit Codebase + Backlog Refactoring
+**9 mai 2026**
+
+### Audit & Architecture
+- **Revue complète du code** : Analyse de la structure (React 19, Zustand, Firestore), de la sécurité et du design system Apple-style.
+- **Diagnostic Junior vs Senior** : Identification des forces (transactions Firestore, typage strict, doc de référence) et des faiblesses architecturales (fichiers "God Components", couplage vue/logique).
+- **Création du Backlog de Refactoring** : Nouveau document `TODO_REFACTORING.md` listant les priorités techniques (découpage de `PlanPage`, `DashboardPage`, `BilanPage`, abstraction Firestore, évolutivité des données).
+
+### Documentation
+- **Mise à jour de `CLAUDE.md`** : Ajout d'une section "Dette Technique" référençant le nouveau backlog pour guider les futurs développements assistés par IA.
+- **Mise à jour de l'index de mémoire** : Référencement du backlog dans `MEMORY.md`.
+
+### Prochaines étapes
+- Commencer le découpage de `PlanPage.tsx` (priorité critique).
+- Extraire la logique métier des pages vers des hooks ou services dédiés.
+
+---
+
+## Session 24 — Refactoring God Components (Plan, Dashboard, Bilan)
+**11 mai 2026**
+
+### Refactoring & Modularité
+- **Refactoring PlanPage.tsx (975L → 428L)** :
+  - Extraction de `SamplingForm` et `PlanField` vers `src/components/plan/`.
+  - Extraction de `PlanConfigSection` vers `src/components/plan/`.
+  - Déplacement de `buildReportHtml` vers `src/lib/reportHtml.ts`.
+- **Refactoring DashboardPage.tsx (890L → 407L)** :
+  - Extraction des widgets (Pluie, Maintenances, Rapports, Retard, StatCard) vers `src/components/dashboard/`.
+- **Refactoring BilanPage.tsx (882L → 122L)** :
+  - Extraction massive de la logique de calcul vers `src/lib/bilanCalcs.ts`.
+  - Création de composants UI réutilisables dans `src/components/bilan/BilanUI.tsx`.
+  - Découpage des onglets en composants distincts (`TabIdentification`, `TabVolume`, `TabVitesse`, `TabPesee`, `TabTemperature`, `TabAnalyses`, `TabSynthese`).
+
+### Validation & Déploiement
+- **Tests de type** : Validation `npx tsc --noEmit` sans erreurs sur l'ensemble du projet.
+- **Déploiement Staging** : Version mise à jour déployée sur Cloudflare Workers.
+- **Nettoyage** : Suppression des types et fonctions redondants, nettoyage des imports.
+
+### Prochaines étapes
+- Pousser les modifications sur le dépôt distant.
+- Analyser `EquipementPage.tsx` (782L) pour un futur refactoring.

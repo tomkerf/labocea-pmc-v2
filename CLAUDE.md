@@ -3,6 +3,11 @@
 > Document de référence pour le développement de la V2 de l'application Labocea PMC.
 > À lire intégralement avant toute action de développement.
 
+## 0. État du projet et Dette Technique
+
+L'application est fonctionnellement avancée mais présente une dette technique architecturale (fichiers trop volumineux).
+**À consulter avant de coder :** [TODO_REFACTORING.md](./TODO_REFACTORING.md) pour les priorités de nettoyage.
+
 ---
 
 ## 1. Contexte et objectif de l'app
