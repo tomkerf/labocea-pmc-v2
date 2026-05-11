@@ -62,7 +62,7 @@ export default function WeekView({
             <div key={i} className="py-2 px-2 text-center relative overflow-hidden"
               style={{
                 borderRight: i<6?'1px solid var(--color-border-subtle)':'none',
-                background: holidayName ? 'rgba(255,59,48,0.04)' : isWeekend ? 'rgba(0,0,0,0.015)' : 'transparent',
+                background: holidayName ? 'rgba(255,59,48,0.04)' : isWeekend ? 'rgba(0,0,0,0.008)' : 'transparent',
               }}>
               {/* Overlay pluie dans l'en-tête */}
               {showRain && isRainyDay && <div className="rain-overlay opacity-30" />}
@@ -180,7 +180,7 @@ export default function WeekView({
               style={{
                 position: 'relative',
                 borderRight: i<6?'1px solid var(--color-border-subtle)':'none',
-                background: inDrag ? 'rgba(0,113,227,0.1)' : isWeekend ? 'rgba(0,0,0,0.025)' : 'var(--color-bg-secondary)',
+                background: inDrag ? 'rgba(0,113,227,0.1)' : isWeekend ? 'rgba(0,0,0,0.012)' : 'var(--color-bg-secondary)',
                 outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
                 outlineOffset: '-1px',
                 minHeight: 120,
