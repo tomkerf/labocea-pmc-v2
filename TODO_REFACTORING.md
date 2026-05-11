@@ -4,9 +4,10 @@ Ce document liste les dettes techniques identifiées lors de l'audit du 9 mai 20
 
 ## 1. Découpage des "God Components" (Priorité : Critique)
 Les pages suivantes sont trop volumineuses et difficiles à maintenir. Elles doivent être découpées en sous-composants atomiques.
-- [ ] **`PlanPage.tsx` (~980 lignes)** : Extraire le formulaire de prélèvement (`SamplingForm`), la logique d'audit, et les différents segments de la page (config plan, calendrier, historique).
-- [ ] **`DashboardPage.tsx` (~890 lignes)** : Extraire les widgets (KPIs, Planning du jour, État du parc, Alertes) dans des fichiers séparés.
-- [ ] **`BilanPage.tsx` (~880 lignes)** : Même logique de segmentation.
+- [x] **`PlanPage.tsx` (~980 lignes → 428L)** : SamplingForm, PlanConfigSection, buildReportHtml extraits. ✅ 2026-05-11
+- [x] **`DashboardPage.tsx` (~890 lignes → 407L)** : Widgets (KPIs, Planning du jour, État du parc, Alertes) extraits. ✅ 2026-05-11
+- [x] **`BilanPage.tsx` (~880 lignes → 122L)** : 7 onglets + lib calculs extraits. ✅ 2026-05-11
+- [x] **`EquipementPage.tsx` (~782 lignes → 158L)** : FicheDeVie + EquipementForm extraits. ✅ 2026-05-11
 
 ## 2. Architecture & Découplage (Priorité : Haute)
 - [ ] **Logique métier vs Vue** : Extraire la logique de manipulation complexe des données (ex: calculs de stats, filtrage complexe) des composants `pages/` vers des hooks spécialisés ou des utilitaires purs.
