@@ -12,7 +12,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import { saveClient, deleteClient } from '@/hooks/useClients'
+import { saveClient, deleteClient } from '@/services/clientService'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { toast } from '@/stores/toastStore'
 import { generateId } from '@/lib/ids'

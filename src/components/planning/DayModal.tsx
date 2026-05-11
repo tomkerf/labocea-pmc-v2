@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, X, Plus } from 'lucide-react'
-import { createEvenement } from '@/hooks/useEvenements'
+import { createEvenement } from '@/services/evenementService'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { SAMPLING_LABEL, isVeilleJourFerie } from '@/lib/planningUtils'
 import type { PoolItem } from '@/lib/planningUtils'

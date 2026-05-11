@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { ChevronLeft, MapPin, Clock, CheckCircle2, Circle, Navigation, ExternalLink, Plus } from 'lucide-react'
 import { db } from '@/lib/firebase'
-import { saveClient } from '@/hooks/useClients'
+import { saveClient } from '@/services/clientService'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import type { Client, Sampling, SamplingStatus, ChecklistItem } from '@/types'
 

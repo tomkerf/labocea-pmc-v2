@@ -6,7 +6,7 @@ import { useDemandesStore } from '@/stores/demandesStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
-import { createClient } from '@/hooks/useClients'
+import { createClient } from '@/services/clientService'
 import type { AppUser, Demande, DemandeStatut } from '@/types'
 
 // ── Config statuts ────────────────────────────────────────────

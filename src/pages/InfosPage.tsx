@@ -3,7 +3,8 @@ import {
   Search, X, Plus, ChevronDown, ChevronRight,
   User, Key, MapPin, FileText, Phone, Mail, Copy, Eye, EyeOff, Pencil, Trash2,
 } from 'lucide-react'
-import { useClientsListener, saveClient } from '@/hooks/useClients'
+import { useClientsListener } from '@/hooks/useClients'
+import { saveClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import type { Client, TerrainEntry, TerrainType } from '@/types'
