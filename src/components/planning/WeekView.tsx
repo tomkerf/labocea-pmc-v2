@@ -57,11 +57,12 @@ export default function WeekView({
           const dateStr = toISO(day)
           const holidayName = holidays[dateStr]
           const isRainyDay  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
+          const isWeekend   = day.getDay() === 0 || day.getDay() === 6
           return (
             <div key={i} className="py-2 px-2 text-center relative overflow-hidden"
               style={{
                 borderRight: i<6?'1px solid var(--color-border-subtle)':'none',
-                background: holidayName ? 'rgba(255,59,48,0.04)' : 'transparent',
+                background: holidayName ? 'rgba(255,59,48,0.04)' : isWeekend ? 'rgba(0,0,0,0.015)' : 'transparent',
               }}>
               {/* Overlay pluie dans l'en-tête */}
               {showRain && isRainyDay && <div className="rain-overlay opacity-30" />}
@@ -169,6 +170,7 @@ export default function WeekView({
           const isHoliday = !!holidays[dateStr]
           const hasConge  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'conge') ?? false
           const isRainyDay = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
+          const isWeekend  = day.getDay() === 0 || day.getDay() === 6
           return (
             <div key={i}
               className="p-1.5 flex flex-col gap-1 cursor-crosshair group"
@@ -178,7 +180,7 @@ export default function WeekView({
               style={{
                 position: 'relative',
                 borderRight: i<6?'1px solid var(--color-border-subtle)':'none',
-                background: inDrag ? 'rgba(0,113,227,0.1)' : 'var(--color-bg-secondary)',
+                background: inDrag ? 'rgba(0,113,227,0.1)' : isWeekend ? 'rgba(0,0,0,0.025)' : 'var(--color-bg-secondary)',
                 outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
                 outlineOffset: '-1px',
                 minHeight: 120,

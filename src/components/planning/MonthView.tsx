@@ -71,6 +71,7 @@ export default function MonthView({
           const isToday = sameDay(day,today)
           const inDrag = isInDrag(dateStr)
           const holidayName = holidays[dateStr]
+          const isWeekend   = day.getDay() === 0 || day.getDay() === 6
           const hasCongeM   = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'conge') ?? false
           const isRainyDay  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
           const MAX = 3
@@ -84,7 +85,7 @@ export default function MonthView({
                 position: 'relative',
                 borderRight:(i%7)<6?'1px solid var(--color-border-subtle)':'none',
                 borderBottom:'1px solid var(--color-border-subtle)',
-                background: inDrag ? 'rgba(0,113,227,0.1)' : 'var(--color-bg-secondary)',
+                background: inDrag ? 'rgba(0,113,227,0.1)' : isWeekend ? 'rgba(0,0,0,0.025)' : 'var(--color-bg-secondary)',
                 outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
                 outlineOffset: '-1px',
                 minHeight: 90,
