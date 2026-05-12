@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, Trash2, FileText, X } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, FileText, X, AlertTriangle } from 'lucide-react'
 import { toast } from '@/stores/toastStore'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
@@ -65,6 +65,8 @@ export default function PlanPage() {
   const [newDate, setNewDate] = useState('')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isDirty = useRef(false)
+  const [remoteChanged, setRemoteChanged] = useState<{ byName: string } | null>(null)
+  const remoteDataRef = useRef<Client | null>(null)
 
   useEffect(() => {
     if (!clientId) return
@@ -75,7 +77,17 @@ export default function PlanPage() {
         navigate('/missions', { replace: true })
         return
       }
-      if (!isDirty.current) setClient({ id: snap.id, ...snap.data() } as Client)
+      const data = { id: snap.id, ...snap.data() } as Client
+      if (isDirty.current) {
+        const remoteUid = (snap.data().updatedBy ?? '') as string
+        if (remoteUid && remoteUid !== uid) {
+          remoteDataRef.current = data
+          const remoteUser = useUsersStore.getState().users.find(u => u.uid === remoteUid)
+          setRemoteChanged({ byName: remoteUser?.prenom ?? 'un autre utilisateur' })
+        }
+      } else {
+        setClient(data)
+      }
       setLoading(false)
     })
     return () => unsub()
@@ -102,6 +114,16 @@ export default function PlanPage() {
         if (!saveTimer.current) isDirty.current = false
       }
     }, DEBOUNCE)
+  }
+
+  function handleReload() {
+    if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null }
+    isDirty.current = false
+    if (remoteDataRef.current) {
+      setClient(remoteDataRef.current)
+      remoteDataRef.current = null
+    }
+    setRemoteChanged(null)
   }
 
   function updatePlan(field: keyof Plan, value: unknown) {
@@ -223,6 +245,26 @@ export default function PlanPage() {
         className="flex items-center gap-1 text-sm mb-6" style={{ color: 'var(--color-accent)' }}>
         <ChevronLeft size={16} /> {client.nom}
       </button>
+
+      {/* Bandeau écriture concurrente */}
+      {remoteChanged && (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg px-4 py-3 text-sm"
+          style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+          <span className="flex items-center gap-1.5">
+            <AlertTriangle size={15} />
+            Modifié par <strong>{remoteChanged.byName}</strong> pendant votre édition.
+          </span>
+          <div className="flex items-center gap-3">
+            <button onClick={handleReload} className="font-semibold underline underline-offset-2">
+              Recharger
+            </button>
+            <button onClick={() => setRemoteChanged(null)}
+              style={{ color: 'var(--color-text-secondary)' }} className="text-xs">
+              Ignorer
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-between mb-6">
         <div>

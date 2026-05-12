@@ -38,6 +38,8 @@ export default function ClientPage() {
   const [client, setClient] = useState<Client | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [remoteChanged, setRemoteChanged] = useState<{ byName: string } | null>(null)
+  const remoteDataRef = useRef<Client | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [pdfPreview, setPdfPreview] = useState<string | null>(null)
   const [confirmDeletePlanId, setConfirmDeletePlanId] = useState<string | null>(null)
@@ -58,8 +60,16 @@ export default function ClientPage() {
     if (!clientId) return
     const ref = doc(db, 'clients-v2', clientId)
     const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists() && !isDirty.current) {
-        const data = { id: snap.id, ...snap.data() } as Client
+      if (!snap.exists()) { setLoading(false); return }
+      const data = { id: snap.id, ...snap.data() } as Client
+      if (isDirty.current) {
+        const remoteUid = (snap.data().updatedBy ?? '') as string
+        if (remoteUid && remoteUid !== uid) {
+          remoteDataRef.current = data
+          const remoteUser = useUsersStore.getState().users.find(u => u.uid === remoteUid)
+          setRemoteChanged({ byName: remoteUser?.prenom ?? 'un autre utilisateur' })
+        }
+      } else {
         setClient(data)
         setSitesInput(data.sites.join(', '))
       }
@@ -101,6 +111,17 @@ export default function ClientPage() {
   function update(field: keyof Client, value: unknown) {
     if (!client) return
     triggerSave({ ...client, [field]: value })
+  }
+
+  function handleReload() {
+    if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null }
+    isDirty.current = false
+    if (remoteDataRef.current) {
+      setClient(remoteDataRef.current)
+      setSitesInput(remoteDataRef.current.sites.join(', '))
+      remoteDataRef.current = null
+    }
+    setRemoteChanged(null)
   }
 
   function handleReorder(event: DragEndEvent) {
@@ -215,6 +236,26 @@ export default function ClientPage() {
         style={{ color: 'var(--color-accent)' }}>
         <ChevronLeft size={16} /> Missions
       </button>
+
+      {/* Bandeau écriture concurrente */}
+      {remoteChanged && (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg px-4 py-3 text-sm"
+          style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+          <span className="flex items-center gap-1.5">
+            <AlertTriangle size={15} />
+            Modifié par <strong>{remoteChanged.byName}</strong> pendant votre édition.
+          </span>
+          <div className="flex items-center gap-3">
+            <button onClick={handleReload} className="font-semibold underline underline-offset-2">
+              Recharger
+            </button>
+            <button onClick={() => setRemoteChanged(null)}
+              style={{ color: 'var(--color-text-secondary)' }} className="text-xs">
+              Ignorer
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Titre + statut save + suppression */}
       <div className="flex items-center justify-between mb-6">
