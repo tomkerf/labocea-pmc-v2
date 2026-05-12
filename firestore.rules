@@ -59,6 +59,14 @@ service cloud.firestore {
       allow read, write: if isAuthenticated();
     }
 
+    // ── bugs ──────────────────────────────────────────────────
+    // Création : tout utilisateur authentifié.
+    // Lecture/suppression : admin uniquement.
+    match /bugs/{bugId} {
+      allow create: if isAuthenticated();
+      allow read, update, delete: if isAdmin();
+    }
+
     // ── clients (V1 — archive, lecture seule) ─────────────────
     // La collection V1 reste accessible en lecture uniquement.
     match /clients/{clientId} {

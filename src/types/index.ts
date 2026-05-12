@@ -328,3 +328,13 @@ export interface Tuyau {
   createdAt: Timestamp
   updatedAt: Timestamp
 }
+
+export interface BugReport {
+  id: string
+  description: string
+  page: string
+  userUid: string
+  userNom: string
+  userInitiales: string
+  createdAt: Timestamp
+}

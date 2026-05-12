@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import UserAvatar from '@/components/ui/UserAvatar'
+import BugReportModal from '@/components/ui/BugReportModal'
 
 const navItems: { to: string; icon?: React.ElementType; label: string; end?: boolean; badge?: boolean; isAccount?: boolean }[] = [
   { to: '/',             icon: LayoutDashboard, label: 'Tableau de bord', end: true },
@@ -24,6 +25,7 @@ export default function Sidebar() {
   const { clients } = useMissionsStore()
   const appUser = useAuthStore(selectAppUser)
   const role    = useAuthStore(selectRole)
+  const [bugOpen, setBugOpen] = useState(false)
 
   const overdueCount = useMemo(() => {
     let count = 0
@@ -92,6 +94,21 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Bouton signalement bug */}
+      <div className="px-3 pb-4">
+        <button
+          onClick={() => setBugOpen(true)}
+          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs transition-colors"
+          style={{ color: 'var(--color-text-tertiary)' }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-text-secondary)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
+          <Bug size={14} strokeWidth={1.8} />
+          Signaler un problème
+        </button>
+      </div>
+
+      {bugOpen && <BugReportModal onClose={() => setBugOpen(false)} />}
     </aside>
   )
 }
