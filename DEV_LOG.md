@@ -584,4 +584,13 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 - **AdminPage** : section "Problèmes signalés" avec `onSnapshot` sur `bugs`, triés par date desc, visibles admin seulement.
 - **Règles Firestore** : `create` pour tout authentifié, `read/update/delete` admin uniquement — déployées sur `labocea-pmc`.
 - **Mode d'emploi** (`AidePage`) : section "Signaler un problème" ajoutée.
+
+---
+
+## Session 26 — Ajustements visuels planning
+**12 mai 2026**
+
+### Corrections CSS planning
+- **Icône pluie** : supprimée des en-têtes de dates (`.rain-overlay.opacity-30`), conservée uniquement dans les cellules de contenu (`.rain-overlay:not(.opacity-30)::after`).
+- **Icône jours fériés** : opacité ajustée de `0.25` → `0.55` (meilleure lisibilité sans être trop envahissante).
 - Analyser `EquipementPage.tsx` (782L) pour un futur refactoring.
