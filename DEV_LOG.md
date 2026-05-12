@@ -566,6 +566,22 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 - **Déploiement Staging** : Version mise à jour déployée sur Cloudflare Workers.
 - **Nettoyage** : Suppression des types et fonctions redondants, nettoyage des imports.
 
-### Prochaines étapes
-- Pousser les modifications sur le dépôt distant.
+---
+
+## Session 25 — Solidité multi-utilisateurs + Signalement de bugs
+**12 mai 2026**
+
+### Écriture concurrente — détection in-app
+- **`ClientPage.tsx` et `PlanPage.tsx`** : bandeau orange "Modifié par [prénom] pendant votre édition" quand `onSnapshot` détecte un `updatedBy` différent du `uid` courant pendant qu'`isDirty` est `true`.
+- Bouton **Recharger** : annule le timer d'auto-save, reset `isDirty`, applique les données distantes.
+- Bouton **Ignorer** : ferme le bandeau, l'auto-save écrasera au prochain tick.
+- Lookup du nom via `useUsersStore.getState()` pour éviter les closures stales.
+
+### Signalement de bugs in-app
+- **Type `BugReport`** ajouté dans `src/types/index.ts`.
+- **`BugReportModal`** : modale avec textarea description + page courante auto + user auto → écrit dans `bugs/{id}` Firestore.
+- **Sidebar** : bouton discret "Signaler un problème" en bas de la nav (icône `Bug`, desktop).
+- **AdminPage** : section "Problèmes signalés" avec `onSnapshot` sur `bugs`, triés par date desc, visibles admin seulement.
+- **Règles Firestore** : `create` pour tout authentifié, `read/update/delete` admin uniquement — déployées sur `labocea-pmc`.
+- **Mode d'emploi** (`AidePage`) : section "Signaler un problème" ajoutée.
 - Analyser `EquipementPage.tsx` (782L) pour un futur refactoring.
