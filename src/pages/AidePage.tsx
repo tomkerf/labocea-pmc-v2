@@ -1,7 +1,7 @@
 import {
   CalendarDays, CheckCircle2, Clock, XCircle, AlertTriangle,
   ChevronRight, Droplets, ClipboardList, FolderPlus, MapPin,
-  FlaskConical, Wrench, Camera, Filter, MousePointer2,
+  FlaskConical, Wrench, Camera, Filter, MousePointer2, Bug,
 } from 'lucide-react'
 
 // ── Composants locaux ────────────────────────────────────────
@@ -494,6 +494,21 @@ export default function AidePage() {
             dont l'étalonnage est dû dans les 7 jours et les maintenances en attente, avec un lien direct vers chaque fiche.
           </span>
         </Tip>
+      </Section>
+
+      <Section icon={Bug} title="Signaler un problème">
+        <div className="flex flex-col gap-3">
+          <Step num={1}>
+            En bas de la barre de navigation à gauche, clique sur <strong>Signaler un problème</strong>.
+          </Step>
+          <Step num={2}>
+            Décris ce qui ne fonctionne pas. La page où tu te trouves est jointe automatiquement.
+          </Step>
+          <Step num={3}>
+            Clique sur <strong>Envoyer</strong>. Le signalement est transmis immédiatement à l'administrateur,
+            visible dans la page <strong>Admin → Problèmes signalés</strong>.
+          </Step>
+        </div>
       </Section>
 
     </div>
