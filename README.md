@@ -1,73 +1,114 @@
-# React + TypeScript + Vite
+# Labocea PMC V2
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Application web interne de gestion opérationnelle pour l'équipe mesures de Labocea — bureau d'études environnementales spécialisé en analyses d'eau.
 
-Currently, two official plugins are available:
+## Contexte
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+L'équipe mesures de Labocea gère quotidiennement des dizaines de missions terrain : prélèvements d'eau (réseaux AEP, eaux usées, rivières, nappes), suivi métrologique des instruments de mesure, maintenance du parc matériel. Tout cela était géré via des fichiers Excel, carnets papier et emails.
 
-## React Compiler
+PMC V2 centralise l'ensemble dans un outil unique, accessible depuis le terrain (mobile) et le bureau (desktop).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Fonctionnalités
 
-## Expanding the ESLint configuration
+### Missions & planification
+- Suivi des clients et missions (création, édition, archivage)
+- Plans de prélèvement par client et par site (fréquence, méthode, GPS)
+- Calendrier des prélèvements avec statuts (planifié / fait / en retard / non effectué)
+- Vues planning : jour, semaine, mois — avec overlay météo et jours fériés
+- Suivi des rapports et historique des reports
+- Auto-save (debounce 800ms)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Matériel
+- Inventaire du parc terrain (multiparamètres, turbidimètres, préleveurs automatiques, débitmètres…)
+- Suivi état et localisation de chaque équipement
+- Liaison avec métrologie et maintenances
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Métrologie
+- Tableau de bord des vérifications périodiques et étalonnages
+- Calcul automatique du statut (à jour / à prévoir / en retard)
+- Traçabilité des certificats et techniciens
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Maintenances
+- Interventions préventives et correctives
+- Suivi statut (planifiée / en cours / réalisée)
+- Historique par équipement
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Tableau de bord
+- KPIs journaliers (missions, conformité métrologique, alertes)
+- Planning du jour en vue timeline
+- Alertes métrologie et maintenance urgentes
+- Activité récente de l'équipe
+
+### Administration
+- Gestion des utilisateurs (rôles : technicien / chargé de mission / admin)
+- Signalement de bugs in-app
+
+## Stack technique
+
+| Couche | Technologie |
+|--------|-------------|
+| Frontend | React 19 + TypeScript + Vite |
+| Routing | React Router v7 |
+| State | Zustand |
+| UI | Tailwind CSS + shadcn/ui + Framer Motion |
+| Icônes | Lucide React |
+| Backend | Firebase Auth + Firestore |
+| Déploiement | Cloudflare Workers (Wrangler) |
+| Exports | jsPDF, XLSX |
+
+## Architecture
+
+```
+src/
+├── components/       # Composants UI réutilisables
+├── hooks/            # Custom hooks (Firestore, auth, métier)
+├── pages/            # Pages par module
+│   ├── PlanningPage/ # Planning + vues jour/semaine/mois
+│   ├── ClientPage/   # Fiche client + plans
+│   ├── PlanPage/     # Fiche plan + prélèvements
+│   ├── EquipementPage/
+│   ├── MetrologiePage/
+│   ├── MaintenancePage/
+│   └── AdminPage/
+├── services/         # Accès Firestore
+├── stores/           # Zustand stores (auth, missions…)
+├── types/            # Interfaces TypeScript (Firestore)
+└── lib/              # Utilitaires
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Sécurité
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- Authentification Firebase Auth (email/password)
+- Firestore rules : accès restreint aux utilisateurs authentifiés
+- Route guards : `RequireAuth` + `RequireAdmin`
+- Détection d'écriture concurrente (bandeau d'alerte si un autre utilisateur modifie simultanément)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Environnements
+
+| Env | URL |
+|-----|-----|
+| Staging | `labocea-pmc-dev.tomkerf.workers.dev` |
+| Production | `labocea-pmc.tomkerf.workers.dev` |
+
+## Installation (développement local)
+
+```bash
+npm install
+cp .env.example .env          # renseigner les clés Firebase
+npm run dev
 ```
+
+## Déploiement
+
+```bash
+bash deploy-dev.sh            # staging
+npx wrangler deploy           # production (après validation staging)
+```
+
+## Conventions
+
+- Langue UI : **français**
+- Dates : `DD/MM/YYYY` à l'affichage, ISO 8601 en base
+- TypeScript strict — pas de `any`
+- Toujours tester sur staging avant prod
+- Ne jamais supprimer la collection `clients` (archive V1)
