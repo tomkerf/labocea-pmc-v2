@@ -9,7 +9,8 @@ Les pages suivantes sont trop volumineuses et difficiles à maintenir. Elles doi
 - [x] **`BilanPage.tsx` (~880 lignes → 122L)** : 7 onglets + lib calculs extraits. ✅ 2026-05-11
 - [x] **`EquipementPage.tsx` (~782 lignes → 158L)** : FicheDeVie + EquipementForm extraits. ✅ 2026-05-11
 
-## 2. Architecture & Découplage (Priorité : Haute)
+## 2. Architecture & Découplage (Priorité : Haute) ← PROCHAINE ÉTAPE
+- [ ] **Extraction vues planning** : DayView, WeekView, MonthView hors de `PlanningPage.tsx` vers des fichiers composants séparés (tâche #34 — skill dédié `planning-view-extraction`). Effort : high.
 - [ ] **Logique métier vs Vue** : Extraire la logique de manipulation complexe des données (ex: calculs de stats, filtrage complexe) des composants `pages/` vers des hooks spécialisés ou des utilitaires purs.
 - [ ] **Abstraction Firestore** : Centraliser davantage les appels Firestore dans des services ou hooks pour que les composants UI ne connaissent pas les détails de l'implémentation (ex: `onSnapshot`, `runTransaction`).
 
@@ -21,4 +22,4 @@ Les pages suivantes sont trop volumineuses et difficiles à maintenir. Elles doi
 - [ ] **Storybook (Optionnel)** : Pour documenter et tester les composants UI "Apple-style" de manière isolée.
 
 ---
-*Dette technique identifiée par Gemini CLI le 09/05/2026.*
+*Dette technique identifiée par Gemini CLI le 09/05/2026. Mis à jour le 14/05/2026 — §1 soldé, §2 est la prochaine priorité.*
