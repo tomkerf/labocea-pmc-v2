@@ -54,14 +54,28 @@ export default function MaterielPage() {
   const [search, setSearch] = useState('')
   const [filterCategorie, setFilterCategorie] = useState('')
   const [filterEtat, setFilterEtat] = useState('')
+  const [filterMateriau, setFilterMateriau] = useState('')
+  const [filterMarque, setFilterMarque] = useState('')
   const [creating, setCreating] = useState(false)
+
+  const isFlacon = filterCategorie === 'flacon'
+
+  const marquesFlacon = Array.from(
+    new Set(
+      equipements
+        .filter((e: Equipement) => normalizeCategorie(e.categorie) === 'flacon' && e.marque)
+        .map((e: Equipement) => e.marque)
+    )
+  ).sort()
 
   const filtered = equipements.filter((e: Equipement) => {
     const q = search.toLowerCase()
     const matchSearch = !q || e.nom.toLowerCase().includes(q) || e.marque.toLowerCase().includes(q) || e.modele.toLowerCase().includes(q) || e.numSerie.toLowerCase().includes(q)
     const matchCategorie = !filterCategorie || normalizeCategorie(e.categorie) === filterCategorie
     const matchEtat = !filterEtat || e.etat === filterEtat
-    return matchSearch && matchCategorie && matchEtat
+    const matchMateriau = !isFlacon || !filterMateriau || e.materiau === filterMateriau
+    const matchMarque = !isFlacon || !filterMarque || e.marque === filterMarque
+    return matchSearch && matchCategorie && matchEtat && matchMateriau && matchMarque
   })
 
   async function handleCreate() {
@@ -116,7 +130,7 @@ export default function MaterielPage() {
         <div className="flex gap-2">
           <select
             value={filterCategorie}
-            onChange={(e) => setFilterCategorie(e.target.value)}
+            onChange={(e) => { setFilterCategorie(e.target.value); setFilterMateriau(''); setFilterMarque('') }}
             className="flex-1 px-3 py-2 rounded-lg text-sm"
             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
           >
@@ -131,6 +145,30 @@ export default function MaterielPage() {
             {ETATS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
           </select>
         </div>
+
+        {isFlacon && (
+          <div className="flex gap-2">
+            <select
+              value={filterMateriau}
+              onChange={(e) => setFilterMateriau(e.target.value)}
+              className="flex-1 px-3 py-2 rounded-lg text-sm"
+              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
+            >
+              <option value="">Tous matériaux</option>
+              <option value="plastique">Plastique</option>
+              <option value="verre">Verre</option>
+            </select>
+            <select
+              value={filterMarque}
+              onChange={(e) => setFilterMarque(e.target.value)}
+              className="flex-1 px-3 py-2 rounded-lg text-sm"
+              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
+            >
+              <option value="">Toutes marques</option>
+              {marquesFlacon.map((m) => <option key={m} value={m}>{m}</option>)}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Liste */}
