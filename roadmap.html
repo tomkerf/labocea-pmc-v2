@@ -37,8 +37,7 @@
 
     /* Checkboxes */
     li input[type="checkbox"] { margin-right: 6px; accent-color: #0071E3; }
-    li:has(input[type="checkbox"]:checked) { color: #AEAEB2; text-decoration: line-through; }
-    li:has(input[type="checkbox"]:not(:checked)) { color: #1D1D1F; }
+    del { color: #AEAEB2; text-decoration: line-through; }
 
     /* Tables */
     table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
@@ -94,10 +93,15 @@
   <script>
     const RAW_URL = 'https://raw.githubusercontent.com/tomkerf/labocea-pmc-v2/main/ROADMAP.md'
 
-    marked.setOptions({
-      gfm: true,
-      breaks: false,
-    })
+    marked.setOptions({ gfm: true, breaks: false })
+
+    function preprocessMd(md) {
+      return md
+        .replace(/^(\s*)- \[x\] /gim, '$1- ✅ ~~')
+        .replace(/^(\s*)- \[ \] /gim, '$1- ◻ ')
+        // ferme les ~~ en fin de ligne pour les lignes commençant par ✅
+        .replace(/(- ✅ ~~.+)$/gim, '$1~~')
+    }
 
     fetch(RAW_URL + '?t=' + Date.now())
       .then(r => {
@@ -105,6 +109,7 @@
         return r.text()
       })
       .then(md => {
+        md = preprocessMd(md)
         document.getElementById('loader').style.display = 'none'
 
         const meta = document.getElementById('meta')
