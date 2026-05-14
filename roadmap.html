@@ -37,6 +37,8 @@
 
     /* Checkboxes */
     li input[type="checkbox"] { margin-right: 6px; accent-color: #0071E3; }
+    li:has(input[type="checkbox"]:checked) { color: #AEAEB2; text-decoration: line-through; }
+    li:has(input[type="checkbox"]:not(:checked)) { color: #1D1D1F; }
 
     /* Tables */
     table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
