@@ -587,6 +587,28 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 
 ---
 
+## Session 27 — Audit repo + filtres flacons
+**14 mai 2026**
+
+### Professionnalisation du repo (suite audit ChatGPT)
+- **README** entièrement réécrit : contexte métier, fonctionnalités, stack, architecture, sécurité, URLs, setup, conventions. (commit `82a9bf7`)
+- **`.env.example`** ajouté avec les 6 variables Firebase requises. (commit `d6c4601`)
+- **TODO_REFACTORING.md** mis à jour : §2 marqué "prochaine étape", extraction vues planning ajoutée avec référence au skill dédié. (commit `ee8b48f`)
+
+### Feature — Filtres flacons (MaterielPage)
+- Deux selects (matériau + marque) apparaissent conditionnellement quand la catégorie "Flacons" est sélectionnée.
+- Matériau : options statiques Plastique / Verre.
+- Marque : options dérivées dynamiquement des flacons existants en Firestore.
+- Changement de catégorie réinitialise les deux filtres. (commit `261bc66`)
+
+### Données
+- Suppression manuelle du doublon `12-SNI-08.B` en métrologie (Firestore Console) — doublon avec modèle abrégé "SOLINST 122" vs "SOLINST Sonde à interface 60m - Model 122".
+
+### Prochaine étape
+- Refactoring architecture §2 (extraction vues planning avec skill `planning-view-extraction`) — nécessite `/effort high`.
+
+---
+
 ## Session 26 — Ajustements visuels planning
 **12 mai 2026**
 
