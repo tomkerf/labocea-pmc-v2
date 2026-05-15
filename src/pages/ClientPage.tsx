@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle, FileDown, GripVertical, Minus, Lock, Unlock, X } from 'lucide-react'
 import {
@@ -10,36 +10,36 @@ import {
   useSortable, arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { doc, onSnapshot } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
-import { saveClient, deleteClient } from '@/services/clientService'
-import { useAuthStore, selectUid } from '@/stores/authStore'
 import { toast } from '@/stores/toastStore'
 import { generateId } from '@/lib/ids'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { buildClientReportHtml } from '@/lib/exportClientHtml'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
-import type { Client, Plan, SegmentType, NouvelleDemandeType } from '@/types'
+import { useClientData } from '@/hooks/useClientData'
+import type { Plan, SegmentType, NouvelleDemandeType } from '@/types'
 
 const SEGMENTS: SegmentType[] = ['SRA', 'Réseau de mesure', 'RSDE']
 const NOUVELLES_DEMANDES: NouvelleDemandeType[] = ['Annuelle', 'Avenant', 'Ponctuelle']
 
-// Debounce auto-save : 800ms après la dernière modif
-const DEBOUNCE = 800
-
 export default function ClientPage() {
   const { clientId } = useParams<{ clientId: string }>()
   const navigate = useNavigate()
-  const uid = useAuthStore(selectUid)
   useUsersListener()
   const users = useUsersStore(s => s.users)
 
-  const [client, setClient] = useState<Client | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [remoteChanged, setRemoteChanged] = useState<{ byName: string } | null>(null)
-  const remoteDataRef = useRef<Client | null>(null)
+  const {
+    client,
+    loading,
+    saving,
+    remoteChanged,
+    triggerSave,
+    update,
+    handleReload,
+    handleDeleteClient,
+    dismissRemoteChanged,
+  } = useClientData(clientId)
+
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [pdfPreview, setPdfPreview] = useState<string | null>(null)
   const [confirmDeletePlanId, setConfirmDeletePlanId] = useState<string | null>(null)
@@ -49,80 +49,7 @@ export default function ClientPage() {
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor,   { activationConstraint: { delay: 180, tolerance: 5 } }),
   )
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const isDirty = useRef(false)
-  const isDeleted = useRef(false)
-  // Référence vers le save en cours pour attendre sa fin avant de supprimer
-  const savingPromise = useRef<Promise<void> | null>(null)
 
-  // Écoute temps réel sur le document client
-  useEffect(() => {
-    if (!clientId) return
-    const ref = doc(db, 'clients-v2', clientId)
-    const unsub = onSnapshot(ref, (snap) => {
-      if (!snap.exists()) { setLoading(false); return }
-      const data = { id: snap.id, ...snap.data() } as Client
-      if (isDirty.current) {
-        const remoteUid = (snap.data().updatedBy ?? '') as string
-        if (remoteUid && remoteUid !== uid) {
-          remoteDataRef.current = data
-          const remoteUser = useUsersStore.getState().users.find(u => u.uid === remoteUid)
-          setRemoteChanged({ byName: remoteUser?.prenom ?? 'un autre utilisateur' })
-        }
-      } else {
-        setClient(data)
-        setSitesInput(data.sites.join(', '))
-      }
-      setLoading(false)
-    })
-    return () => unsub()
-  }, [clientId])
-
-  // Auto-save déclenché à chaque modif du client
-  function triggerSave(updated: Client) {
-    isDirty.current = true
-    setClient(updated)
-    if (saveTimer.current) clearTimeout(saveTimer.current)
-    saveTimer.current = setTimeout(async () => {
-      if (!uid || isDeleted.current) {
-        saveTimer.current = null
-        return
-      }
-      saveTimer.current = null // le timer a tiré, on efface la ref
-      setSaving(true)
-      const p = (async () => {
-        try {
-          await saveClient(updated, uid)
-        } catch {
-          toast.error('Échec de la sauvegarde. Vérifie ta connexion.')
-        } finally {
-          setSaving(false)
-          // Ne réinitialiser isDirty que s'il n'y a pas de nouveau timer en attente
-          // (évite d'écraser un onSnapshot qui arriverait entre deux saves)
-          if (!saveTimer.current) isDirty.current = false
-        }
-      })()
-      savingPromise.current = p
-      await p
-      savingPromise.current = null
-    }, DEBOUNCE)
-  }
-
-  function update(field: keyof Client, value: unknown) {
-    if (!client) return
-    triggerSave({ ...client, [field]: value })
-  }
-
-  function handleReload() {
-    if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null }
-    isDirty.current = false
-    if (remoteDataRef.current) {
-      setClient(remoteDataRef.current)
-      setSitesInput(remoteDataRef.current.sites.join(', '))
-      remoteDataRef.current = null
-    }
-    setRemoteChanged(null)
-  }
 
   function handleReorder(event: DragEndEvent) {
     const { active, over } = event
@@ -137,7 +64,6 @@ export default function ClientPage() {
   function handleSitesChange(raw: string) {
     setSitesInput(raw)
     if (!client) return
-    isDirty.current = true
     const parsed = raw.split(',').map((s) => s.trim()).filter(Boolean)
     triggerSave({ ...client, sites: parsed })
   }
@@ -183,30 +109,6 @@ export default function ClientPage() {
     triggerSave({ ...client, plans })
   }
 
-  // Supprimer le client
-  async function handleDeleteClient() {
-    if (!client) return
-    // Bloquer tout save futur
-    isDeleted.current = true
-    if (saveTimer.current) {
-      clearTimeout(saveTimer.current)
-      saveTimer.current = null
-    }
-    isDirty.current = false
-    // Attendre la fin du save en cours avant de supprimer pour éviter le "zombie client"
-    // (un setDoc qui se termine après le deleteDoc recrée le document)
-    if (savingPromise.current) {
-      try { await savingPromise.current } catch { /* ignore */ }
-    }
-    try {
-      await deleteClient(client.id)
-      navigate('/missions')
-    } catch {
-      isDeleted.current = false
-      toast.error('Échec de la suppression. Réessaie.')
-    }
-  }
-
   // Supprimer un plan — déclenche la confirmation inline (pas de confirm() natif)
   function requestDeletePlan(planId: string) {
     setConfirmDeletePlanId(planId)
@@ -249,7 +151,7 @@ export default function ClientPage() {
             <button onClick={handleReload} className="font-semibold underline underline-offset-2">
               Recharger
             </button>
-            <button onClick={() => setRemoteChanged(null)}
+            <button onClick={dismissRemoteChanged}
               style={{ color: 'var(--color-text-secondary)' }} className="text-xs">
               Ignorer
             </button>
