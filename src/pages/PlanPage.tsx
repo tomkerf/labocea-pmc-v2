@@ -1,19 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Plus, Trash2, FileText, X, AlertTriangle } from 'lucide-react'
-import { toast } from '@/stores/toastStore'
-import { doc, onSnapshot } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
-import { saveClient } from '@/services/clientService'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
+import { useClientData } from '@/hooks/useClientData'
 import { generateId } from '@/lib/ids'
 import { generateSamplings } from '@/lib/samplings'
 import { SamplingForm } from '@/components/plan/SamplingForm'
 import { PlanConfigSection } from '@/components/plan/PlanConfigSection'
 import { buildReportHtml } from '@/lib/reportHtml'
-import type { Client, Plan, Sampling, SamplingStatus, NappeType, SamplingHistoryEntry } from '@/types'
+import type { Plan, Sampling, SamplingStatus, NappeType, SamplingHistoryEntry } from '@/types'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
@@ -24,8 +21,6 @@ const STATUS_CONFIG: Record<SamplingStatus, { label: string; bg: string; color: 
   overdue:       { label: 'En retard',   bg: 'var(--color-danger-light)',   color: 'var(--color-danger)' },
   non_effectue:  { label: 'Non effectué',bg: 'var(--color-warning-light)',  color: 'var(--color-warning)' },
 }
-
-const DEBOUNCE = 800
 
 // ── Champs audités et leur formateur ──────────────────────────
 // Seuls les champs discrets/binaires sont audités — pas les textes libres (motif, comment)
@@ -50,81 +45,32 @@ export default function PlanPage() {
   const uid = useAuthStore(selectUid)
   useUsersListener()
   const users = useUsersStore((s) => s.users)
-  // Nom dénormalisé pour le journal d'audit
   const currentUser = users.find((u) => u.uid === uid)
   const currentUserNom = currentUser
     ? `${currentUser.prenom} ${currentUser.nom}`
     : (uid ?? '—')
 
-  const [client, setClient] = useState<Client | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const {
+    client,
+    loading,
+    saving,
+    remoteChanged,
+    triggerSave,
+    handleReload,
+    dismissRemoteChanged,
+  } = useClientData(clientId)
+
+  // Client supprimé depuis un autre onglet/appareil → rediriger
+  useEffect(() => {
+    if (!loading && !client) navigate('/missions', { replace: true })
+  }, [loading, client, navigate])
+
   const [selectedSampling, setSelectedSampling] = useState<string | null>(null)
-  const [pdfPreview,      setPdfPreview]      = useState<string | null>(null)
+  const [pdfPreview, setPdfPreview] = useState<string | null>(null)
   const [addingDate, setAddingDate] = useState(false)
   const [newDate, setNewDate] = useState('')
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const isDirty = useRef(false)
-  const [remoteChanged, setRemoteChanged] = useState<{ byName: string } | null>(null)
-  const remoteDataRef = useRef<Client | null>(null)
-
-  useEffect(() => {
-    if (!clientId) return
-    const ref = doc(db, 'clients-v2', clientId)
-    const unsub = onSnapshot(ref, (snap) => {
-      if (!snap.exists()) {
-        // Client supprimé depuis un autre onglet/appareil → rediriger sans laisser l'utilisateur sur un plan fantôme
-        navigate('/missions', { replace: true })
-        return
-      }
-      const data = { id: snap.id, ...snap.data() } as Client
-      if (isDirty.current) {
-        const remoteUid = (snap.data().updatedBy ?? '') as string
-        if (remoteUid && remoteUid !== uid) {
-          remoteDataRef.current = data
-          const remoteUser = useUsersStore.getState().users.find(u => u.uid === remoteUid)
-          setRemoteChanged({ byName: remoteUser?.prenom ?? 'un autre utilisateur' })
-        }
-      } else {
-        setClient(data)
-      }
-      setLoading(false)
-    })
-    return () => unsub()
-  }, [clientId, navigate])
 
   const plan = client?.plans.find((p) => p.id === planId) ?? null
-
-  function triggerSave(updated: Client) {
-    isDirty.current = true
-    setClient(updated)
-    if (saveTimer.current) clearTimeout(saveTimer.current)
-    saveTimer.current = setTimeout(async () => {
-      if (!uid) {
-        saveTimer.current = null
-        return
-      }
-      saveTimer.current = null // le timer a tiré, on efface la ref
-      setSaving(true)
-      try { await saveClient(updated, uid) }
-      catch { toast.error('Échec de la sauvegarde. Vérifie ta connexion.') }
-      finally {
-        setSaving(false)
-        // Ne réinitialiser isDirty que s'il n'y a pas de nouveau timer en attente
-        if (!saveTimer.current) isDirty.current = false
-      }
-    }, DEBOUNCE)
-  }
-
-  function handleReload() {
-    if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null }
-    isDirty.current = false
-    if (remoteDataRef.current) {
-      setClient(remoteDataRef.current)
-      remoteDataRef.current = null
-    }
-    setRemoteChanged(null)
-  }
 
   function updatePlan(field: keyof Plan, value: unknown) {
     if (!client || !plan) return
@@ -258,7 +204,7 @@ export default function PlanPage() {
             <button onClick={handleReload} className="font-semibold underline underline-offset-2">
               Recharger
             </button>
-            <button onClick={() => setRemoteChanged(null)}
+            <button onClick={dismissRemoteChanged}
               style={{ color: 'var(--color-text-secondary)' }} className="text-xs">
               Ignorer
             </button>
