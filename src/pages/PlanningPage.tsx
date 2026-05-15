@@ -135,7 +135,6 @@ export default function PlanningPage() {
 
   // ── Calculs calendrier (filtrage, bilanBand, allDayItems, periodList) ──
   const {
-    filteredForDay, filteredForDayFlat,
     monthPoolCount, bilanBand, allDayItems, periodList,
   } = usePlanningCalendar({
     eventsByDate, evenements, clients,
