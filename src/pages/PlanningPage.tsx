@@ -21,18 +21,17 @@ import type { Client, Sampling, TypeEvenement } from '@/types'
 import {
   // Types
   type PlanningEvent, type PoolItem, type ViewMode,
-  type BilanGroup, type AllDayItem,
   // Constantes
   JOURS_LONG, MOIS_LONG,
-  EVENEMENT_LABEL,
   // Fonctions pure
-  getTechColor, normTech,
+  getTechColor,
   getFrenchHolidays,
   startOfWeek, startOfMonth, addDays, addMonths, toISO, sameDay,
   buildMonthGrid,
-  sortEvts, groupByClient, filterEvents, getPeriodLabel,
+  getPeriodLabel,
 } from '@/lib/planningUtils'
 import { usePlanningData } from '@/hooks/usePlanningData'
+import { usePlanningCalendar } from '@/hooks/usePlanningCalendar'
 import DayModal          from '@/components/planning/DayModal'
 import CellContextMenu   from '@/components/planning/CellContextMenu'
 import GhostDetailModal  from '@/components/planning/GhostDetailModal'
@@ -134,151 +133,16 @@ export default function PlanningPage() {
     clients, maintenances, verifications, evenements, users, preleveurs, selectedDay,
   })
 
-  // ── Filtrage technicien ─────────────────────────────────
-
-  // With grouping by client (month view, DayModal)
-  const filteredForDay = useCallback((dateStr:string): PlanningEvent[] =>
-    groupByClient(filterEvents(eventsByDate[dateStr]??[], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
-  , [eventsByDate, filterTech, filterRetard])
-
-  // Without grouping (week view and day view: every sampling visible)
-  const filteredForDayFlat = useCallback((dateStr:string): PlanningEvent[] =>
-    sortEvts(filterEvents(eventsByDate[dateStr]??[], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
-  , [eventsByDate, filterTech, filterRetard])
-
-  // Nombre de samplings non faits dans le mois visible — pour le bandeau "à planifier"
-  const monthPoolCount = useMemo(() => {
-    const refDate = viewMode === 'mois' ? monthStart : viewMode === 'semaine' ? weekStart : selectedDate
-    const month = refDate.getMonth()
-    let count = 0
-    clients.forEach((c: Client) => {
-      c.plans.forEach(plan => {
-        plan.samplings.forEach((s: Sampling) => {
-          if (s.plannedMonth === month && s.status !== 'done') count++
-        })
-      })
-    })
-    return count
-  }, [clients, viewMode, monthStart, weekStart, selectedDate])
-
-  // ── Bande bilan 24h — J1 + J2 dans un groupe spanning ──────────────────────
-  // Chaque groupe = une paire J1/J2 entourée d'une bordure commune (colspan).
-  // Le row-index garantit que deux paires distinctes ne se chevauchent pas.
-  const bilanBand = useMemo(() => {
-    if (viewMode !== 'semaine') return []
-    const wISOs = weekDays.map(toISO)
-
-    const pairs: { j1Col: number; j2Col: number; j1: PlanningEvent; j2: PlanningEvent | null }[] = []
-
-    wISOs.forEach((dateStr, colIdx) => {
-      ;(eventsByDate[dateStr] ?? []).forEach(e => {
-        if (e.type !== 'prelevement' || !e.dateFin) return
-        if (filterTech && normTech(e.technicien) !== filterTech) return
-        const j2DateStr = e.dateFin
-        const j2Col     = wISOs.indexOf(j2DateStr)
-        const j2        = j2Col !== -1
-          ? (eventsByDate[j2DateStr] ?? []).find(x => x.isJ2Continuation && x.samplingId === e.samplingId) ?? null
-          : null
-        pairs.push({ j1Col: colIdx, j2Col: j2 ? j2Col : -1, j1: e, j2 })
-      })
-    })
-
-    // Assigner les lignes : J1 et J2 forcément sur la même ligne
-    const colRowNext = new Array(5).fill(0) as number[]
-    const rows: BilanGroup[][] = []
-
-    pairs.forEach(({ j1Col, j2Col, j1, j2 }) => {
-      let rowIdx = colRowNext[j1Col]
-      if (j2Col !== -1) rowIdx = Math.max(rowIdx, colRowNext[j2Col])
-      if (!rows[rowIdx]) rows[rowIdx] = []
-
-      const tc = getTechColor(j1.technicien).color
-      const hasPair = j2Col !== -1 && j2 !== null
-
-      rows[rowIdx].push({
-        colStart:  j1Col,
-        colEnd:    hasPair ? j2Col : j1Col,
-        techColor: tc,
-        items: hasPair
-          ? [{ colIdx: j1Col, event: j1 }, { colIdx: j2Col, event: j2! }]
-          : [{ colIdx: j1Col, event: j1 }],
-      })
-      colRowNext[j1Col] = rowIdx + 1
-      if (hasPair) colRowNext[j2Col] = rowIdx + 1
-    })
-
-    return rows
-  }, [viewMode, weekDays, eventsByDate, filterTech])
-
-  // ── Bande "toute la journée" — multi-jours (style Apple Calendar) ──────────
-  // Événements personnels avec dateFin s'étirant sur plusieurs colonnes.
-  // L'algorithme de row-packing évite les chevauchements.
-  const allDayItems = useMemo(() => {
-    if (viewMode !== 'semaine') return []
-    const weekDayISOs  = weekDays.map(toISO)
-    const weekStartISO = weekDayISOs[0]
-    const weekEndISO   = weekDayISOs[4]
-
-    const rawItems: Omit<AllDayItem, 'row'>[] = []
-
-    // 1. Événements personnels avec dateFin (multi-jours) — sauf congés (pills par colonne)
-    evenements
-      .filter(ev => {
-        if (!ev.dateFin || ev.dateFin <= ev.date) return false
-        if (ev.type === 'conge') return false   // congés → pills individuelles dans chaque colonne
-        if (filterTech && normTech(ev.createdByInitiales || '') !== filterTech) return false
-        return ev.date <= weekEndISO && ev.dateFin >= weekStartISO
-      })
-      .forEach(ev => {
-        const tc = getTechColor(ev.createdByInitiales || '')
-        const startClamped = ev.date < weekStartISO ? weekStartISO : ev.date
-        const endClamped   = ev.dateFin! > weekEndISO ? weekEndISO : ev.dateFin!
-        const colStart = weekDayISOs.findIndex(d => d >= startClamped)
-        let colEnd = -1
-        for (let i = 4; i >= 0; i--) { if (weekDayISOs[i] <= endClamped) { colEnd = i; break } }
-        if (colStart === -1 || colEnd === -1 || colStart > colEnd) return
-        const evObj: PlanningEvent = {
-          id: ev.id, type: 'evenement', priority: 2,
-          title: ev.titre,
-          subtitle: EVENEMENT_LABEL[ev.type] ?? 'Autre',
-          statusLabel: EVENEMENT_LABEL[ev.type] ?? 'Autre',
-          statusBg: 'var(--color-bg-tertiary)', statusColor: 'var(--color-text-tertiary)',
-          link: '', isDone: false,
-          technicien: ev.createdByInitiales || '—',
-          evenementData: ev,
-        }
-        rawItems.push({
-          key: ev.id,
-          colStart, colEnd,
-          bg: tc.bg,
-          label: ev.titre,
-          badge: ev.createdByInitiales || undefined,
-          onClick: () => handleSelectEvent(evObj, ev.date),
-          tooltip: `${ev.titre} (${ev.date} → ${ev.dateFin})`,
-        })
-      })
-
-    // Row-packing — une seule passe pour tous les items
-    const rowEnds: number[] = []
-    return rawItems.map(item => {
-      let row = rowEnds.findIndex(end => end <= item.colStart)
-      if (row === -1) row = rowEnds.length
-      rowEnds[row] = item.colEnd + 1
-      return { ...item, row }
-    })
-  }, [evenements, viewMode, weekDays, filterTech])
-
-  // ── Liste période (mobile) ──────────────────────────────
-
-  const periodList = useMemo(() => {
-    const days: Date[] = viewMode==='semaine'
-      ? weekDays
-      : Array.from({length: new Date(monthStart.getFullYear(),monthStart.getMonth()+1,0).getDate()},
-          (_,i) => new Date(monthStart.getFullYear(),monthStart.getMonth(),i+1))
-    return days
-      .map(date => ({ date, dateStr:toISO(date), events: viewMode==='semaine' ? filteredForDayFlat(toISO(date)) : filteredForDay(toISO(date)) }))
-      .filter(g => g.events.length>0)
-  }, [viewMode, weekDays, monthStart, filteredForDay, filteredForDayFlat])
+  // ── Calculs calendrier (filtrage, bilanBand, allDayItems, periodList) ──
+  const {
+    filteredForDay, filteredForDayFlat,
+    monthPoolCount, bilanBand, allDayItems, periodList,
+  } = usePlanningCalendar({
+    eventsByDate, evenements, clients,
+    viewMode, weekDays, monthStart, weekStart, selectedDate,
+    filterTech, filterRetard,
+    handleSelectEvent,
+  })
 
   // ── Gestion des samplings ───────────────────────────────
 
