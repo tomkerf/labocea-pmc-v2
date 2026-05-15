@@ -226,7 +226,8 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-11 | Refactor ✅ | Refactoring massif des "God Components" (PlanPage, DashboardPage, BilanPage). Extraction des widgets, formulaires et logiques de calcul. Réduction de ~60% de la taille des pages. Déploiement staging. |
 | 2026-05-12 | Solidité ✅ | Détection écriture concurrente (bandeau orange ClientPage + PlanPage), signalement de bugs in-app (BugReportModal + sidebar + AdminPage + règles Firestore + mode d'emploi). |
 | 2026-05-12 | Style ✅ | Icône pluie retirée des en-têtes de dates, conservée dans les cellules de pills. Opacité icône jours fériés ajustée à 0.55. |
-| 2026-05-14 | Repo + UX ✅ | README professionnel, .env.example, TODO_REFACTORING §2 priorisé, filtres matériau/marque sur flacons (MaterielPage), suppression doublon métrologie 12-SNI-08.B. |
+| 2026-05-14 | Repo + UX ✅ | README professionnel, .env.example, TODO_REFACTORING §2 priorisé, filtres matériau/marque sur flacons (MaterielPage), suppression doublon métrologie 12-SNI-08.B, roadmap.html viewer auto-update. |
+| 2026-05-15 | Refactor ✅ | Extraction vues planning (§2) constatée déjà faite. Création usePlanningCalendar — 6 calculs inline extraits de PlanningPage (828 → 692L). TODO_REFACTORING mis à jour. |
 
 ---
 

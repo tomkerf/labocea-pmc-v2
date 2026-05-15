@@ -587,6 +587,29 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 
 ---
 
+## Session 28 — Refactoring §2 : usePlanningCalendar
+**15 mai 2026**
+
+### Audit TODO_REFACTORING.md
+- Constat : tâche "Extraction vues planning" (§2) déjà accomplie lors de la session du 8 mai — `DayView.tsx`, `WeekView.tsx`, `MonthView.tsx` existaient déjà dans `src/components/planning/`.
+- TODO_REFACTORING.md mis à jour : item coché ✅ 2026-05-08.
+
+### Refactoring — usePlanningCalendar
+- Création de `src/hooks/usePlanningCalendar.ts` : extraction de 6 calculs inline depuis `PlanningPage.tsx`.
+  - `filteredForDay` — filtrage avec regroupement par client (vue mois, DayModal)
+  - `filteredForDayFlat` — filtrage sans regroupement (vue semaine, vue jour)
+  - `monthPoolCount` — nombre de samplings non faits dans le mois visible
+  - `bilanBand` — paires J1/J2 bilan 24h spanning (vue semaine)
+  - `allDayItems` — événements multi-jours bande "toute la journée" (vue semaine)
+  - `periodList` — liste chronologique pour la vue mobile
+- `PlanningPage.tsx` : **828 → 692 lignes** (-136L). Imports nettoyés (sortEvts, groupByClient, filterEvents, normTech, EVENEMENT_LABEL, BilanGroup, AllDayItem retirés).
+- TypeScript : 0 erreur. (commit `7ca3f8d`)
+
+### Prochaines étapes
+- TODO_REFACTORING §2 restant : Logique métier vs Vue (ClientPage 815L — audit à mener), Abstraction Firestore.
+
+---
+
 ## Session 27 — Audit repo + filtres flacons
 **14 mai 2026**
 
@@ -603,6 +626,10 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 
 ### Données
 - Suppression manuelle du doublon `12-SNI-08.B` en métrologie (Firestore Console) — doublon avec modèle abrégé "SOLINST 122" vs "SOLINST Sonde à interface 60m - Model 122".
+
+### Viewer roadmap HTML
+- **`roadmap.html`** ajouté à la racine : fetch `ROADMAP.md` depuis GitHub raw à chaque ouverture, rendu Apple-style.
+- Tâches `- [x]` affichées avec ✅ + texte barré gris, tâches `- [ ]` en ◻ noir — prétraitement markdown côté JS (marked.js ne rendait pas les checkboxes GFM).
 
 ### Prochaine étape
 - Refactoring architecture §2 (extraction vues planning avec skill `planning-view-extraction`) — nécessite `/effort high`.
