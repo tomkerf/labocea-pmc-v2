@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Trash2 } from 'lucide-react'
-import { doc, onSnapshot, deleteDoc, updateDoc } from 'firebase/firestore'
+import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveMaintenance } from '@/services/maintenanceService'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
-import { useAuthStore, selectUid } from '@/stores/authStore'
+import { useDocumentData } from '@/hooks/useDocumentData'
 import type { Maintenance, TypeMaintenance, StatutMaintenance } from '@/types'
 
 const TYPES: { value: TypeMaintenance; label: string }[] = [
@@ -22,51 +21,28 @@ const STATUTS: { value: StatutMaintenance; label: string }[] = [
   { value: 'abandonnee',label: 'Abandonnée' },
 ]
 
-const DEBOUNCE = 800
-
 export default function MaintenancePage() {
   const { maintenanceId } = useParams<{ maintenanceId: string }>()
   const navigate = useNavigate()
-  const uid = useAuthStore(selectUid)
 
   useEquipementsListener()
   const { equipements } = useEquipementsStore()
 
-  const [maintenance, setMaintenance] = useState<Maintenance | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    if (!maintenanceId) return
-    const ref = doc(db, 'maintenances', maintenanceId)
-    const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists()) setMaintenance({ id: snap.id, ...snap.data() } as Maintenance)
-      else setMaintenance(null)
-      setLoading(false)
-    })
-    return () => unsub()
-  }, [maintenanceId])
-
-  function triggerSave(updated: Maintenance) {
-    setMaintenance(updated)
-    if (saveTimer.current) clearTimeout(saveTimer.current)
-    saveTimer.current = setTimeout(async () => {
-      if (!uid) return
-      setSaving(true)
-      try {
-        await saveMaintenance(updated, uid)
-        // Si en_cours → état équipement = en_maintenance
-        if (updated.equipementId) {
-          if (updated.statut === 'en_cours') {
-            await updateDoc(doc(db, 'equipements', updated.equipementId), { etat: 'en_maintenance' })
-          } else if (updated.statut === 'realisee' || updated.statut === 'abandonnee') {
-            await updateDoc(doc(db, 'equipements', updated.equipementId), { etat: 'operationnel' })
-          }
-        }
-      } finally { setSaving(false) }
-    }, DEBOUNCE)
-  }
+  const { data: maintenance, loading, saving, triggerSave, handleDelete } = useDocumentData<Maintenance>({
+    collection: 'maintenances',
+    docId: maintenanceId,
+    saveFn: saveMaintenance,
+    onAfterSave: async (updated) => {
+      if (!updated.equipementId) return
+      if (updated.statut === 'en_cours') {
+        await updateDoc(doc(db, 'equipements', updated.equipementId), { etat: 'en_maintenance' })
+      } else if (updated.statut === 'realisee' || updated.statut === 'abandonnee') {
+        await updateDoc(doc(db, 'equipements', updated.equipementId), { etat: 'operationnel' })
+      }
+    },
+    deleteRedirect: '/maintenances',
+    deleteConfirmMessage: 'Supprimer cette intervention ?',
+  })
 
   function update(field: keyof Maintenance, value: unknown) {
     if (!maintenance) return
@@ -76,13 +52,6 @@ export default function MaintenancePage() {
       updated.equipementNom = eq?.nom ?? ''
     }
     triggerSave(updated)
-  }
-
-  async function handleDelete() {
-    if (!maintenanceId) return
-    if (!confirm('Supprimer cette intervention ?')) return
-    await deleteDoc(doc(db, 'maintenances', maintenanceId))
-    navigate('/maintenances')
   }
 
   if (loading) return (

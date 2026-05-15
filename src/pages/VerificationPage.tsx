@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Trash2 } from 'lucide-react'
-import { doc, onSnapshot, deleteDoc, updateDoc } from 'firebase/firestore'
+import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveVerification } from '@/services/verificationService'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
-import { useAuthStore, selectUid } from '@/stores/authStore'
+import { useDocumentData } from '@/hooks/useDocumentData'
 import type { Verification, TypeVerification, ResultatVerification } from '@/types'
 
 const TYPES: { value: TypeVerification; label: string }[] = [
@@ -21,67 +20,36 @@ const RESULTATS: { value: ResultatVerification; label: string }[] = [
   { value: 'a_reprendre',  label: 'À reprendre' },
 ]
 
-const DEBOUNCE = 800
-
 export default function VerificationPage() {
   const { verificationId } = useParams<{ verificationId: string }>()
   const navigate = useNavigate()
-  const uid = useAuthStore(selectUid)
 
-  // Charge les équipements pour la sélection
   useEquipementsListener()
   const { equipements } = useEquipementsStore()
 
-  const [verification, setVerification] = useState<Verification | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    if (!verificationId) return
-    const ref = doc(db, 'verifications', verificationId)
-    const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists()) setVerification({ id: snap.id, ...snap.data() } as Verification)
-      else setVerification(null)
-      setLoading(false)
-    })
-    return () => unsub()
-  }, [verificationId])
-
-  function triggerSave(updated: Verification) {
-    setVerification(updated)
-    if (saveTimer.current) clearTimeout(saveTimer.current)
-    saveTimer.current = setTimeout(async () => {
-      if (!uid) return
-      setSaving(true)
-      try {
-        await saveVerification(updated, uid)
-        // Mise à jour du prochainEtalonnage dans l'équipement concerné
-        if (updated.equipementId && updated.prochainControle) {
-          await updateDoc(doc(db, 'equipements', updated.equipementId), {
-            prochainEtalonnage: updated.prochainControle,
-          })
-        }
-      } finally { setSaving(false) }
-    }, DEBOUNCE)
-  }
+  const { data: verification, loading, saving, triggerSave, handleDelete } = useDocumentData<Verification>({
+    collection: 'verifications',
+    docId: verificationId,
+    saveFn: saveVerification,
+    onAfterSave: async (updated) => {
+      if (updated.equipementId && updated.prochainControle) {
+        await updateDoc(doc(db, 'equipements', updated.equipementId), {
+          prochainEtalonnage: updated.prochainControle,
+        })
+      }
+    },
+    deleteRedirect: '/metrologie',
+    deleteConfirmMessage: 'Supprimer cette vérification ?',
+  })
 
   function update(field: keyof Verification, value: unknown) {
     if (!verification) return
     const updated = { ...verification, [field]: value }
-    // Si on change d'équipement, on synchronise aussi le nom
     if (field === 'equipementId') {
       const eq = equipements.find((e) => e.id === value)
       updated.equipementNom = eq?.nom ?? ''
     }
     triggerSave(updated)
-  }
-
-  async function handleDelete() {
-    if (!verificationId) return
-    if (!confirm('Supprimer cette vérification ?')) return
-    await deleteDoc(doc(db, 'verifications', verificationId))
-    navigate('/metrologie')
   }
 
   if (loading) return (
