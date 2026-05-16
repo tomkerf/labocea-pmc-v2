@@ -56,6 +56,7 @@ interface ModalProps {
 
 function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }: ModalProps) {
   const isNew = !demande.id
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [form, setForm] = useState<Omit<Demande, 'id' | 'createdBy' | 'createdAt' | 'updatedAt'>>({
     ...EMPTY,
     ...demande,
@@ -157,13 +158,32 @@ function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }
         {/* Actions */}
         <div className="flex items-center justify-between mt-6 pt-4" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
           {onDelete && !isNew ? (
-            <button
-              onClick={() => { if (confirm('Supprimer cette demande ?')) onDelete() }}
-              className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg font-medium"
-              style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}
-            >
-              <Trash2 size={13} /> Supprimer
-            </button>
+            confirmDelete ? (
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={onDelete}
+                  className="text-sm px-3 py-1.5 rounded-lg font-medium"
+                  style={{ background: 'var(--color-danger)', color: 'white' }}
+                >
+                  Confirmer la suppression
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="text-sm px-2 py-1.5 rounded-lg"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
+                  Annuler
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg font-medium"
+                style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}
+              >
+                <Trash2 size={13} /> Supprimer
+              </button>
+            )
           ) : <div />}
 
           <div className="flex items-center gap-2">

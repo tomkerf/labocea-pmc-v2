@@ -28,7 +28,7 @@ export default function MaintenancePage() {
   useEquipementsListener()
   const { equipements } = useEquipementsStore()
 
-  const { data: maintenance, loading, saving, triggerSave, handleDelete } = useDocumentData<Maintenance>({
+  const { data: maintenance, loading, saving, triggerSave, handleDelete, confirmDelete, requestDelete, cancelDelete } = useDocumentData<Maintenance>({
     collection: 'maintenances',
     docId: maintenanceId,
     saveFn: saveMaintenance,
@@ -41,7 +41,6 @@ export default function MaintenancePage() {
       }
     },
     deleteRedirect: '/maintenances',
-    deleteConfirmMessage: 'Supprimer cette intervention ?',
   })
 
   function update(field: keyof Maintenance, value: unknown) {
@@ -86,11 +85,19 @@ export default function MaintenancePage() {
         </div>
         <div className="flex items-center gap-3">
           {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
-          <button onClick={handleDelete}
-            className="p-2 rounded-lg"
-            style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}>
-            <Trash2 size={16} />
-          </button>
+          {confirmDelete ? (
+            <div className="flex items-center gap-1.5">
+              <button onClick={handleDelete} className="text-sm px-3 py-1.5 rounded-lg font-medium"
+                style={{ background: 'var(--color-danger)', color: 'white' }}>Supprimer</button>
+              <button onClick={cancelDelete} className="text-sm px-2 py-1.5 rounded-lg"
+                style={{ color: 'var(--color-text-secondary)' }}>Annuler</button>
+            </div>
+          ) : (
+            <button onClick={requestDelete} className="p-2 rounded-lg"
+              style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}>
+              <Trash2 size={16} />
+            </button>
+          )}
         </div>
       </div>
 

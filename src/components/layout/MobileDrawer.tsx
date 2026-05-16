@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import type { LucideIcon } from 'lucide-react'
 import {
   LayoutDashboard, ClipboardList, CalendarDays, Wrench, BookOpen, ShieldAlert, X, FlaskConical, Pipette, HelpCircle,
 } from 'lucide-react'
@@ -95,7 +96,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
 
             {/* Navigation */}
             <nav className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5">
-              {allItems.map(({ to, icon: Icon, label, end, isAccount }: any) => (
+              {allItems.map(({ to, icon: Icon, label, end, isAccount }: { to: string; icon: LucideIcon | null; label: string; end?: boolean; isAccount?: boolean }) => (
                 <NavLink
                   key={to}
                   to={to}

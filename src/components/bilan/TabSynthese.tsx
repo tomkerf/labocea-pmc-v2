@@ -30,8 +30,6 @@ export function TabSynthese({
   ]
 
   function generatePDF() {
-    const win = window.open('', '_blank')
-    if (!win) return
     const now = new Date()
     const d = now.toLocaleDateString('fr-FR')
     const h = now.toLocaleTimeString('fr-FR')
@@ -39,34 +37,56 @@ export function TabSynthese({
     const ko = 'color:#991b1b;font-weight:bold'
     const vc = volRes?.conforme, vitc = vitRes?.conforme
     const pc = pesRes?.conforme, tc = tmpRes?.conforme
-    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rapport COFRAC</title>
+
+    let analysesSection = ''
+    if (analysesWithResult.length > 0) {
+      const okA = 'color:#065f46;font-weight:bold'
+      const koA = 'color:#991b1b;font-weight:bold'
+      const rows = analysesWithResult.map(row => {
+        const conf = analyseConforme(row)
+        const op = row.typeComp === 'max' ? '≤' : '≥'
+        return `<tr>
+          <td>${row.parametre}</td>
+          <td>${row.resultat} ${row.unite}</td>
+          <td>${op} ${row.seuil} ${row.unite}</td>
+          <td style="${conf ? okA : koA}">${conf ? '✅ CONFORME' : '❌ NON CONFORME'}</td>
+        </tr>`
+      }).join('')
+      const conclusion = analysesConf !== null
+        ? `<p style="${analysesConf ? okA : koA}"><strong>Conclusion analyses : ${analysesConf ? '✅ CONFORMES' : '❌ NON CONFORMES'} aux seuils de l'arrêté</strong></p>`
+        : ''
+      analysesSection = `<h2>Résultats d'analyses</h2><table>
+        <tr><th>Paramètre</th><th>Résultat</th><th>Seuil</th><th>Statut</th></tr>
+        ${rows}</table>${conclusion}`
+    }
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rapport COFRAC</title>
       <style>body{font-family:Arial,sans-serif;margin:2cm;color:#0f172a;}
       h1{color:#0c6b6b;border-bottom:3px solid #0c6b6b;padding-bottom:8px;}
       h2{color:#0c6b6b;margin-top:24px;}
       table{width:100%;border-collapse:collapse;margin:10px 0;}
       td,th{border:1px solid #c5e0e0;padding:8px 10px;}th{background:#eef9f9;text-align:left;}
-      @media print{button{display:none;}}</style></head><body>`)
-    win.document.write(`<h1>📋 RAPPORT DE CONFORMITÉ COFRAC</h1>`)
-    win.document.write(`<p><strong>Prélèvement Automatique 24h – Asservissement au Débit</strong></p>`)
-    win.document.write(`<p>Généré le : ${d} à ${h}</p>`)
-    win.document.write(`<table>
-      <tr><td style="width:180px"><strong>Client</strong></td><td>${f('client')}</td></tr>
-      <tr><td><strong>Site</strong></td><td>${f('site')}</td></tr>
-      <tr><td><strong>Convention</strong></td><td>${f('convention')}</td></tr>
-      <tr><td><strong>Opérateur</strong></td><td>${f('operateur')}</td></tr>
-      <tr><td><strong>Date vérif.</strong></td><td>${f('dateVerif')}</td></tr>
-      <tr><td><strong>Préleveur</strong></td><td>${f('preleveur')}${f('seriePrel') !== '—' ? ` (SN: ${f('seriePrel')})` : ''}</td></tr>
-    </table>`)
-    win.document.write(`<h2>Synthèse</h2><table>
-      <tr><th>Vérification</th><th>Norme</th><th>Résultat</th></tr>
-      <tr><td>Volume Unitaire</td><td>FD T90-523-2 § 6.3.1</td><td style="${vc ? ok : ko}">${vc ? '✅ CONFORME' : vc === false ? '❌ NON CONFORME' : '⏳'}</td></tr>
-      <tr><td>Vitesse Aspiration</td><td>FD T90-523-2 § 6.3.2</td><td style="${vitc ? ok : ko}">${vitc ? '✅ CONFORME' : vitc === false ? '❌ NON CONFORME' : '⏳'}</td></tr>
-      <tr><td>Pesée Volume Global</td><td>FD T90-523-2 § 6.3.3</td><td style="${pc ? ok : ko}">${pc ? '✅ CONFORME' : pc === false ? '❌ NON CONFORME' : '⏳'}</td></tr>
-      <tr><td>Température</td><td>ISO 5667-3/10</td><td style="${tc ? ok : ko}">${tc ? '✅ CONFORME' : tc === false ? '❌ NON CONFORME' : '⏳'}</td></tr>
-      <tr><th colspan="2">Résultat global</th><th style="${allConf ? ok : ko}">${allConf ? '✅ APPAREIL CONFORME' : '❌ NON CONFORME'}</th></tr>
-    </table>`)
-    if (volRes) {
-      win.document.write(`<h2>Détail Volume</h2><table>
+      @media print{button{display:none;}}</style></head><body>
+      <h1>📋 RAPPORT DE CONFORMITÉ COFRAC</h1>
+      <p><strong>Prélèvement Automatique 24h – Asservissement au Débit</strong></p>
+      <p>Généré le : ${d} à ${h}</p>
+      <table>
+        <tr><td style="width:180px"><strong>Client</strong></td><td>${f('client')}</td></tr>
+        <tr><td><strong>Site</strong></td><td>${f('site')}</td></tr>
+        <tr><td><strong>Convention</strong></td><td>${f('convention')}</td></tr>
+        <tr><td><strong>Opérateur</strong></td><td>${f('operateur')}</td></tr>
+        <tr><td><strong>Date vérif.</strong></td><td>${f('dateVerif')}</td></tr>
+        <tr><td><strong>Préleveur</strong></td><td>${f('preleveur')}${f('seriePrel') !== '—' ? ` (SN: ${f('seriePrel')})` : ''}</td></tr>
+      </table>
+      <h2>Synthèse</h2><table>
+        <tr><th>Vérification</th><th>Norme</th><th>Résultat</th></tr>
+        <tr><td>Volume Unitaire</td><td>FD T90-523-2 § 6.3.1</td><td style="${vc ? ok : ko}">${vc ? '✅ CONFORME' : vc === false ? '❌ NON CONFORME' : '⏳'}</td></tr>
+        <tr><td>Vitesse Aspiration</td><td>FD T90-523-2 § 6.3.2</td><td style="${vitc ? ok : ko}">${vitc ? '✅ CONFORME' : vitc === false ? '❌ NON CONFORME' : '⏳'}</td></tr>
+        <tr><td>Pesée Volume Global</td><td>FD T90-523-2 § 6.3.3</td><td style="${pc ? ok : ko}">${pc ? '✅ CONFORME' : pc === false ? '❌ NON CONFORME' : '⏳'}</td></tr>
+        <tr><td>Température</td><td>ISO 5667-3/10</td><td style="${tc ? ok : ko}">${tc ? '✅ CONFORME' : tc === false ? '❌ NON CONFORME' : '⏳'}</td></tr>
+        <tr><th colspan="2">Résultat global</th><th style="${allConf ? ok : ko}">${allConf ? '✅ APPAREIL CONFORME' : '❌ NON CONFORME'}</th></tr>
+      </table>
+      ${volRes ? `<h2>Détail Volume</h2><table>
         <tr><th>Paramètre</th><th>Valeur</th><th>Statut</th></tr>
         <tr><td>Moy. DÉBUT</td><td>${volRes.moyD.toFixed(1)} mL</td><td>—</td></tr>
         <tr><td>Moy. FIN</td><td>${volRes.moyFn.toFixed(1)} mL</td><td>—</td></tr>
@@ -74,10 +94,8 @@ export function TabSynthese({
         <tr><td>Fidélité DÉBUT</td><td>${volRes.fidD.toFixed(2)} %</td><td style="${volRes.fidOK ? ok : ko}">${volRes.fidOK ? '✅' : '❌'} (crit. ≤ 5 %)</td></tr>
         <tr><td>Fidélité FIN</td><td>${volRes.fidFn.toFixed(2)} %</td><td style="${volRes.fidOK ? ok : ko}">${volRes.fidOK ? '✅' : '❌'}</td></tr>
         <tr><td>Justesse</td><td>${volRes.justesse.toFixed(2)} %</td><td style="${volRes.justOK ? ok : ko}">${volRes.justOK ? '✅' : '❌'} (crit. ≤ 10 %)</td></tr>
-      </table>`)
-    }
-    if (pesRes) {
-      win.document.write(`<h2>Détail Pesée</h2><table>
+      </table>` : ''}
+      ${pesRes ? `<h2>Détail Pesée</h2><table>
         <tr><th>Paramètre</th><th>Valeur</th><th>Statut</th></tr>
         <tr><td>Nb attendus</td><td>${pesRes.nbAtt.toFixed(0)}</td><td>—</td></tr>
         <tr><td>Nb réalisés</td><td>${pesRes.nbReal.toFixed(0)}</td><td>—</td></tr>
@@ -85,41 +103,23 @@ export function TabSynthese({
         <tr><td>Vol. théorique</td><td>${pesRes.volTheo.toFixed(2)} L</td><td>—</td></tr>
         <tr><td>Vol. réel</td><td>${pesRes.volReel.toFixed(2)} L</td><td>—</td></tr>
         <tr><td>Écart vol.</td><td>${pesRes.ecartVolPct >= 0 ? '+' : ''}${pesRes.ecartVolPct.toFixed(1)} %</td><td style="${pesRes.confVol ? ok : ko}">${pesRes.confVol ? '✅' : '❌'} (crit. ≤ 10 %)</td></tr>
-      </table>`)
-    }
-    if (tmpRes) {
-      win.document.write(`<h2>Détail Température</h2><table>
+      </table>` : ''}
+      ${tmpRes ? `<h2>Détail Température</h2><table>
         <tr><th>Paramètre</th><th>Valeur</th><th>Statut</th></tr>
         <tr><td>Début</td><td>${tmpRes.tD.toFixed(1)} °C</td><td style="${tmpRes.tD >= 2 && tmpRes.tD <= 8 ? ok : ko}">${tmpRes.tD >= 2 && tmpRes.tD <= 8 ? '✅' : '❌'}</td></tr>
         <tr><td>Fin</td><td>${tmpRes.tFn.toFixed(1)} °C</td><td style="${tmpRes.tFn >= 2 && tmpRes.tFn <= 8 ? ok : ko}">${tmpRes.tFn >= 2 && tmpRes.tFn <= 8 ? '✅' : '❌'}</td></tr>
         <tr><td>Min. (≥ 2 °C)</td><td>${tmpRes.tMn.toFixed(1)} °C</td><td style="${tmpRes.tMn >= 2 ? ok : ko}">${tmpRes.tMn >= 2 ? '✅' : '❌'}</td></tr>
         <tr><td>Max. (≤ 8 °C)</td><td>${tmpRes.tMx.toFixed(1)} °C</td><td style="${tmpRes.tMx <= 8 ? ok : ko}">${tmpRes.tMx <= 8 ? '✅' : '❌'}</td></tr>
-      </table>`)
-    }
-    if (analysesWithResult.length > 0) {
-      const okA = 'color:#065f46;font-weight:bold'
-      const koA = 'color:#991b1b;font-weight:bold'
-      win.document.write(`<h2>Résultats d'analyses</h2><table>
-        <tr><th>Paramètre</th><th>Résultat</th><th>Seuil</th><th>Statut</th></tr>`)
-      analysesWithResult.forEach(row => {
-        const conf = analyseConforme(row)
-        const op = row.typeComp === 'max' ? '≤' : '≥'
-        win.document.write(`<tr>
-          <td>${row.parametre}</td>
-          <td>${row.resultat} ${row.unite}</td>
-          <td>${op} ${row.seuil} ${row.unite}</td>
-          <td style="${conf ? okA : koA}">${conf ? '✅ CONFORME' : '❌ NON CONFORME'}</td>
-        </tr>`)
-      })
-      win.document.write(`</table>`)
-      if (analysesConf !== null) {
-        win.document.write(`<p style="${analysesConf ? okA : koA}"><strong>Conclusion analyses : ${analysesConf ? '✅ CONFORMES' : '❌ NON CONFORMES'} aux seuils de l'arrêté</strong></p>`)
-      }
-    }
-    win.document.write(`<p style="margin-top:32px"><strong>Signature opérateur :</strong> ___________________________</p>
+      </table>` : ''}
+      ${analysesSection}
+      <p style="margin-top:32px"><strong>Signature opérateur :</strong> ___________________________</p>
       <button onclick="window.print()" style="margin-top:20px;padding:10px 20px;background:#0c6b6b;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px">🖨️ Imprimer / Sauvegarder PDF</button>
-      </body></html>`)
-    win.document.close()
+      </body></html>`
+
+    const blob = new Blob([html], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank')
+    setTimeout(() => URL.revokeObjectURL(url), 10000)
   }
 
   return (

@@ -27,7 +27,7 @@ export default function VerificationPage() {
   useEquipementsListener()
   const { equipements } = useEquipementsStore()
 
-  const { data: verification, loading, saving, triggerSave, handleDelete } = useDocumentData<Verification>({
+  const { data: verification, loading, saving, triggerSave, handleDelete, confirmDelete, requestDelete, cancelDelete } = useDocumentData<Verification>({
     collection: 'verifications',
     docId: verificationId,
     saveFn: saveVerification,
@@ -39,7 +39,6 @@ export default function VerificationPage() {
       }
     },
     deleteRedirect: '/metrologie',
-    deleteConfirmMessage: 'Supprimer cette vérification ?',
   })
 
   function update(field: keyof Verification, value: unknown) {
@@ -82,11 +81,19 @@ export default function VerificationPage() {
         </div>
         <div className="flex items-center gap-3">
           {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
-          <button onClick={handleDelete}
-            className="p-2 rounded-lg"
-            style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}>
-            <Trash2 size={16} />
-          </button>
+          {confirmDelete ? (
+            <div className="flex items-center gap-1.5">
+              <button onClick={handleDelete} className="text-sm px-3 py-1.5 rounded-lg font-medium"
+                style={{ background: 'var(--color-danger)', color: 'white' }}>Supprimer</button>
+              <button onClick={cancelDelete} className="text-sm px-2 py-1.5 rounded-lg"
+                style={{ color: 'var(--color-text-secondary)' }}>Annuler</button>
+            </div>
+          ) : (
+            <button onClick={requestDelete} className="p-2 rounded-lg"
+              style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}>
+              <Trash2 size={16} />
+            </button>
+          )}
         </div>
       </div>
 

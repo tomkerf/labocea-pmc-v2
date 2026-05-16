@@ -13,21 +13,23 @@ interface UseDocumentDataOptions<T> {
   saveFn: (data: T, uid: string) => Promise<void>
   onAfterSave?: (updated: T) => Promise<void>
   deleteRedirect: string
-  deleteConfirmMessage: string
 }
 
 export interface UseDocumentDataReturn<T> {
   data: T | null
   loading: boolean
   saving: boolean
+  confirmDelete: boolean
   triggerSave: (updated: T) => void
+  requestDelete: () => void
   handleDelete: () => Promise<void>
+  cancelDelete: () => void
 }
 
 export function useDocumentData<T extends { id: string }>(
   options: UseDocumentDataOptions<T>,
 ): UseDocumentDataReturn<T> {
-  const { collection, docId, saveFn, onAfterSave, deleteRedirect, deleteConfirmMessage } = options
+  const { collection, docId, saveFn, onAfterSave, deleteRedirect } = options
 
   const navigate = useNavigate()
   const uid = useAuthStore(selectUid)
@@ -35,6 +37,7 @@ export function useDocumentData<T extends { id: string }>(
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -65,9 +68,12 @@ export function useDocumentData<T extends { id: string }>(
     }, DEBOUNCE)
   }
 
+  function requestDelete() { setConfirmDelete(true) }
+  function cancelDelete() { setConfirmDelete(false) }
+
   async function handleDelete() {
     if (!docId) return
-    if (!confirm(deleteConfirmMessage)) return
+    setConfirmDelete(false)
     try {
       await deleteDoc(doc(db, collection, docId))
       navigate(deleteRedirect)
@@ -76,5 +82,5 @@ export function useDocumentData<T extends { id: string }>(
     }
   }
 
-  return { data, loading, saving, triggerSave, handleDelete }
+  return { data, loading, saving, confirmDelete, triggerSave, requestDelete, handleDelete, cancelDelete }
 }

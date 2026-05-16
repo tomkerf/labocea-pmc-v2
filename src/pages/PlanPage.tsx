@@ -10,6 +10,7 @@ import { generateSamplings } from '@/lib/samplings'
 import { SamplingForm } from '@/components/plan/SamplingForm'
 import { PlanConfigSection } from '@/components/plan/PlanConfigSection'
 import { buildReportHtml } from '@/lib/reportHtml'
+import { toast } from '@/stores/toastStore'
 import type { Plan, Sampling, SamplingStatus, NappeType, SamplingHistoryEntry } from '@/types'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -69,6 +70,8 @@ export default function PlanPage() {
   const [pdfPreview, setPdfPreview] = useState<string | null>(null)
   const [addingDate, setAddingDate] = useState(false)
   const [newDate, setNewDate] = useState('')
+  const [confirmGen, setConfirmGen] = useState(false)
+  const [confirmDelSampling, setConfirmDelSampling] = useState<string | null>(null)
 
   const plan = client?.plans.find((p) => p.id === planId) ?? null
 
@@ -120,7 +123,6 @@ export default function PlanPage() {
 
   function generateSamplingsForPlan() {
     if (!client || !plan) return
-    if (!confirm(`Générer les prélèvements pour fréquence "${plan.frequence}" ? Les prélèvements existants seront remplacés.`)) return
     const newSamplings = generateSamplings(plan)
     const updatedPlan = { ...plan, samplings: newSamplings }
     triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updatedPlan : p) })
@@ -135,7 +137,7 @@ export default function PlanPage() {
       (s) => s.plannedMonth === d.getMonth() && s.plannedDay === d.getDate()
     )
     if (isDuplicate) {
-      alert(`Un prélèvement est déjà prévu le ${d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}.`)
+      toast.error(`Un prélèvement est déjà prévu le ${d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}.`)
       return
     }
     const newSampling: Sampling = {
@@ -158,7 +160,6 @@ export default function PlanPage() {
   /** Supprime un prélèvement (mode Personnalisé) */
   function deleteSampling(samplingId: string) {
     if (!client || !plan) return
-    if (!confirm('Supprimer ce prélèvement ?')) return
     const updated = { ...plan, samplings: plan.samplings.filter((s) => s.id !== samplingId).map((s, i) => ({ ...s, num: i + 1 })) }
     triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updated : p) })
     if (selectedSampling === samplingId) setSelectedSampling(null)
@@ -251,8 +252,21 @@ export default function PlanPage() {
               >
                 <Plus size={14} /> Ajouter une date
               </button>
+            ) : confirmGen ? (
+              <div className="flex items-center gap-1.5">
+                <button onClick={() => { setConfirmGen(false); generateSamplingsForPlan() }}
+                  className="text-sm px-3 py-1.5 rounded-lg font-medium"
+                  style={{ background: 'var(--color-danger)', color: 'white' }}>
+                  Confirmer
+                </button>
+                <button onClick={() => setConfirmGen(false)}
+                  className="text-sm px-2 py-1.5 rounded-lg"
+                  style={{ color: 'var(--color-text-secondary)' }}>
+                  Annuler
+                </button>
+              </div>
             ) : (
-              <button onClick={generateSamplingsForPlan}
+              <button onClick={() => setConfirmGen(true)}
                 className="text-sm px-3 py-1.5 rounded-lg font-medium"
                 style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
                 Générer
@@ -334,14 +348,33 @@ export default function PlanPage() {
                     </button>
                     {/* Bouton supprimer — visible uniquement en mode Personnalisé */}
                     {isCustom && (
-                      <button
-                        onClick={() => deleteSampling(s.id)}
-                        className="px-3 py-3 shrink-0"
-                        style={{ color: 'var(--color-text-tertiary)' }}
-                        title="Supprimer ce prélèvement"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      confirmDelSampling === s.id ? (
+                        <div className="flex items-center gap-1 px-2">
+                          <button
+                            onClick={() => { deleteSampling(s.id); setConfirmDelSampling(null) }}
+                            className="text-xs px-2 py-1 rounded-md font-medium"
+                            style={{ background: 'var(--color-danger)', color: 'white' }}
+                          >
+                            Supprimer
+                          </button>
+                          <button
+                            onClick={() => setConfirmDelSampling(null)}
+                            className="text-xs px-1.5 py-1 rounded-md"
+                            style={{ color: 'var(--color-text-secondary)' }}
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDelSampling(s.id)}
+                          className="px-3 py-3 shrink-0"
+                          style={{ color: 'var(--color-text-tertiary)' }}
+                          title="Supprimer ce prélèvement"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )
                     )}
                   </div>
 
