@@ -179,7 +179,7 @@ function parse(md) {
       const l = lines[i].trim()
       if (!l.startsWith('|') || l.startsWith('|---') || l.startsWith('| Date')) continue
       const cols = l.split('|').map(c => c.trim()).filter(Boolean)
-      if (cols.length >= 3) journal.push({ date: cols[0], theme: cols[1].replace(/✅|⏳/g,'').trim(), desc: cols[2] })
+      if (cols.length >= 3) journal.push({ date: cols[0], rawTheme: cols[1], theme: cols[1].replace(/✅|⏳/g,'').trim(), desc: cols[2] })
     }
   }
 
@@ -187,7 +187,17 @@ function parse(md) {
 }
 
 // ── Render ───────────────────────────────────────────────────────
-function statusOf(phase) {
+function statusOf(phase, journal) {
+  // Priorité 1 : journal — cherche "Phase N ✅" ou "Phase N ⏳"
+  const n = phase.num.replace('Phase ', '').trim()
+  for (const e of journal) {
+    const raw = e.rawTheme || ''
+    if (raw.includes(`Phase ${n}`) || raw.toLowerCase().includes(`phase ${n}`)) {
+      if (raw.includes('✅')) return 'done'
+      if (raw.includes('⏳')) return 'partial'
+    }
+  }
+  // Priorité 2 : checkboxes dans le texte de la phase
   const total = phase.tasks.length
   const done  = phase.tasks.filter(t => t.done).length
   if (total === 0) return 'todo'
@@ -196,8 +206,8 @@ function statusOf(phase) {
   return 'todo'
 }
 
-function renderPhaseCard(p) {
-  const status = statusOf(p)
+function renderPhaseCard(p, journal) {
+  const status = statusOf(p, journal)
   const badgeClass = { done: 'badge-done', partial: 'badge-partial', todo: 'badge-todo' }[status]
   const badgeLabel = { done: '✅ Terminé', partial: '⏳ En cours', todo: '○ À venir' }[status]
   const tasks = p.tasks.map(t =>
@@ -239,10 +249,10 @@ function renderJournalEntryHTML(e) {
     </div>`
 }
 
-function renderTimeline(phases) {
+function renderTimeline(phases, journal) {
   const weights = [2, 4, 2, 2, 2, 1, 1]  // semaines par phase
   return phases.map((p, i) => {
-    const s = statusOf(p)
+    const s = statusOf(p, journal)
     const cls = { done: 'seg-done', partial: 'seg-partial', todo: 'seg-todo' }[s]
     const w = weights[i] ?? 1
     return `<div class="timeline-seg ${cls}" style="flex:${w}" title="${p.num} ${s === 'done' ? '✅' : s === 'partial' ? '⏳' : ''}"></div>`
@@ -252,12 +262,12 @@ function renderTimeline(phases) {
 function render(md) {
   const { phases, journal } = parse(md)
 
-  const doneCount = phases.filter(p => statusOf(p) === 'done').length
+  const doneCount = phases.filter(p => statusOf(p, journal) === 'done').length
   document.getElementById('kpi-phases').textContent = `${doneCount}/${phases.length}`
   document.getElementById('kpi-sessions').textContent = journal.length
 
-  const timelineHTML = renderTimeline(phases)
-  const phasesHTML   = phases.map(renderPhaseCard).join('')
+  const timelineHTML = renderTimeline(phases, journal)
+  const phasesHTML   = phases.map(p => renderPhaseCard(p, journal)).join('')
   const journalHTML  = [...journal].reverse().map(renderJournalEntryHTML).join('')
 
   const nextItems = [
