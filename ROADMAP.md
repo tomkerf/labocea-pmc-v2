@@ -231,6 +231,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-15 | Refactor ✅ | Abstraction Firestore §2 : useClientData + useDocumentData<T> (générique). ClientPage 815→717L, MaintenancePage 225→194L, VerificationPage 206→174L, PlanPage 470→416L. −215L au total. Staging déployé. |
 | 2026-05-16 | Refactor ✅ | §2 soldé : MissionDetailPage 368→333L via useClientData. TODO_REFACTORING §2 entièrement coché. AdminPage non refactorisée (BugsSection déjà isolée). Prochaine priorité : §3 sous-collection samplings ou §4 tests. |
 | 2026-05-16 | Qualité ✅ | Roadmap visuelle HTML (auto-fetch GitHub, journal-driven phase status, dots verts si phase done), sync checkboxes ROADMAP.md (75 tâches cochées), audit qualité pré-équipe : document.write→Blob URL (FicheDeVie + TabSynthese), confirm/alert→two-step state (PlanPage, EquipementPage, DemandesPage, useDocumentData, MaintenancePage, VerificationPage), : any→LucideIcon dans MobileDrawer. |
+| 2026-05-16 | Sécu + Qualité ✅ | Firestore rules durcies (delete→admin, validation champs), Storage rules (10MB + images), §4 tests unitaires (66 tests, jsdom, renderHook), skill tester-app, code review senior (8 issues corrigées : navigate/render, password type, saveClient throw, deleteClient simplifié, isToday timezone, aCalibrrer double comptage). |
 
 ---
 

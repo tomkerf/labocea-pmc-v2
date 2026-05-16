@@ -673,6 +673,45 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 
 ---
 
+## Session 32 — Sécurité + Qualité + Code Review Senior
+**16 mai 2026**
+
+### Firestore Security Rules
+- Règles durcies sur les collections critiques : `delete` réservé aux admins pour `clients-v2`, `equipements`, `verifications`, `maintenances`.
+- Création `hasRequiredClientFields()` : validation serveur des champs `nom` et `annee` à la création.
+- Déployé via `firebase deploy --only firestore:rules`.
+
+### §4 Tests unitaires (TODO_REFACTORING soldé)
+- Installation `@testing-library/react` + `jsdom`, vitest passé en environnement `jsdom`.
+- **27 nouveaux tests** (66 total, 5 fichiers) :
+  - `metrologie.test.ts` : `calcStatut` (7 tests) + `useMetrologieRows` (8 tests)
+  - `dashboardStats.test.ts` : `missionsCeMois`, `conformitePct`, `parcEtat`, `prelevementsEnRetard` (12 tests)
+- TODO_REFACTORING §1✅ §2✅ §3 écarté (risque 1MB théorique) §4✅ — backlog soldé.
+
+### Skill tester-app
+- Création `.claude/skills/tester-app/SKILL.md` : checklist de test manuel par module avant chaque deploy (auth, dashboard, missions, matériel, métrologie, maintenances, planning, mobile, admin, edge cases, commandes).
+
+### Code Review Senior (subagent superpowers:code-reviewer)
+Review complète de la codebase. 8 issues corrigées :
+
+**Critiques :**
+- `AdminPage` : `navigate()` pendant le rendu → déplacé dans `useEffect`
+- `AdminPage` : champ mot de passe `type="text"` → `type="password"`
+- `clientService.saveClient` : no-op silencieux si doc supprimé → `throw new Error`
+- `clientService.deleteClient` : `getDoc` post-delete supprimé (inutile, trompeur avec cache Firestore offline)
+- `storage.rules` : upload limité à 10MB + images uniquement (`contentType.matches('image/.*')`) — déployé
+
+**Importants :**
+- `dashboardUtils.isToday()` : insensible au fuseau horaire → comparaison via `localISO(new Date())`
+- `useDashboardStats.aCalibrrer` : double comptage corrigé (Set par `equipementId`/`equipementNom`)
+- Fixtures de tests : `new Date()` → `Timestamp.now()` (erreurs TypeScript à la compilation)
+
+### Prochaines étapes
+- Phase 6 : session de test avec l'équipe sur staging → corrections → déploiement production
+- Issues restantes de la review (non bloquantes) : casts Firestore non validés (§5), logique métier dans pages (§10)
+
+---
+
 ## Session 28 — Refactoring §2 : usePlanningCalendar
 **15 mai 2026**
 
