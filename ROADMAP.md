@@ -22,29 +22,29 @@ Phase 6 — Deploy & Validate À fixer après validation équipe
 **Semaines 1-2 | Objectif : l'app tourne, on peut se connecter et naviguer**
 
 ### Étape 0 — Init projet (3h)
-- [ ] `npm create vite@latest labocea-pmc-v2 -- --template react-ts`
-- [ ] Installer Tailwind CSS + configurer les tokens du design system (section 6 du CLAUDE.md)
-- [ ] Installer `react-router-dom`, `zustand`, `lucide-react`, `framer-motion`
-- [ ] Installer et configurer shadcn/ui : `npx shadcn-ui@latest init`
-- [ ] Configurer Firebase SDK (Auth + Firestore)
-- [ ] Configurer Wrangler (Cloudflare Workers)
-- [ ] Créer `deploy-dev.sh` et `deploy-prod.sh`
+- [x] `npm create vite@latest labocea-pmc-v2 -- --template react-ts`
+- [x] Installer Tailwind CSS + configurer les tokens du design system (section 6 du CLAUDE.md)
+- [x] Installer `react-router-dom`, `zustand`, `lucide-react`, `framer-motion`
+- [x] Installer et configurer shadcn/ui : `npx shadcn-ui@latest init`
+- [x] Configurer Firebase SDK (Auth + Firestore)
+- [x] Configurer Wrangler (Cloudflare Workers)
+- [x] Créer `deploy-dev.sh` et `deploy-prod.sh`
 
 ### Étape 1 — Authentification (4h)
-- [ ] Page `/login` — email + password, design Apple
-- [ ] `useAuthStore` Zustand : user, uid, role, initiales
-- [ ] Firebase Auth : signIn, signOut, onAuthStateChanged
-- [ ] Route guard global (redirect `/login` si non connecté)
-- [ ] Collection Firestore `users/{uid}` : création au premier login
-- [ ] Page `/compte` : profil + bouton déconnexion
+- [x] Page `/login` — email + password, design Apple
+- [x] `useAuthStore` Zustand : user, uid, role, initiales
+- [x] Firebase Auth : signIn, signOut, onAuthStateChanged
+- [x] Route guard global (redirect `/login` si non connecté)
+- [x] Collection Firestore `users/{uid}` : création au premier login
+- [x] Page `/compte` : profil + bouton déconnexion
 
 ### Étape 2 — Layout et navigation (5h)
-- [ ] Composant `AppLayout` : sidebar desktop + tab bar mobile
-- [ ] `Sidebar` : 5 sections (Missions / Matériel / Métrologie / Maintenances / Compte)
-- [ ] `TabBar` : visible mobile uniquement, 5 icônes + labels
-- [ ] `TopBar` : titre de page + actions contextuelles
-- [ ] Transitions de page Framer Motion (fade 150ms)
-- [ ] Déploiement staging initial : `bash deploy-dev.sh` ✓
+- [x] Composant `AppLayout` : sidebar desktop + tab bar mobile
+- [x] `Sidebar` : 5 sections (Missions / Matériel / Métrologie / Maintenances / Compte)
+- [x] `TabBar` : visible mobile uniquement, 5 icônes + labels
+- [x] `TopBar` : titre de page + actions contextuelles
+- [x] Transitions de page Framer Motion (fade 150ms)
+- [x] Déploiement staging initial : `bash deploy-dev.sh` ✓
 
 **Livrable Phase 1 :** on se connecte, on navigue entre les sections vides, l'app est en ligne sur staging.
 
@@ -56,28 +56,28 @@ Phase 6 — Deploy & Validate À fixer après validation équipe
 C'est la phase la plus longue — c'est le module le plus complexe et celui qui contient toutes les données existantes.
 
 ### Liste clients (5h)
-- [ ] Page `/missions` : liste des clients avec filtres (technicien, statut, mois, site)
-- [ ] Composant `ClientCard` : nom, segment, prochain prélèvement, badge statut
-- [ ] Lecture temps réel `onSnapshot` sur `clients-v2`
-- [ ] Bouton "Nouveau client"
+- [x] Page `/missions` : liste des clients avec filtres (technicien, statut, mois, site)
+- [x] Composant `ClientCard` : nom, segment, prochain prélèvement, badge statut
+- [x] Lecture temps réel `onSnapshot` sur `clients-v2`
+- [x] Bouton "Nouveau client"
 
 ### Fiche client (5h)
-- [ ] Page `/missions/:clientId` : informations administratives complètes
-- [ ] Formulaire `ClientForm` : tous les champs V1 (interlocuteur, devis, budget, sites…)
-- [ ] Liste des plans de prélèvement de ce client
-- [ ] Écriture Firestore avec `updatedBy` = uid connecté
+- [x] Page `/missions/:clientId` : informations administratives complètes
+- [x] Formulaire `ClientForm` : tous les champs V1 (interlocuteur, devis, budget, sites…)
+- [x] Liste des plans de prélèvement de ce client
+- [x] Écriture Firestore avec `updatedBy` = uid connecté
 
 ### Fiche plan (7h)
-- [ ] Page `/missions/:clientId/plan/:planId`
-- [ ] Formulaire `PlanForm` : fréquence, nature eau, méthode, GPS
-- [ ] Calendrier annuel des prélèvements (vue mois par mois)
-- [ ] Chaque prélèvement : badge statut coloré (planifié / fait / en retard / non effectué)
+- [x] Page `/missions/:clientId/plan/:planId`
+- [x] Formulaire `PlanForm` : fréquence, nature eau, méthode, GPS
+- [x] Calendrier annuel des prélèvements (vue mois par mois)
+- [x] Chaque prélèvement : badge statut coloré (planifié / fait / en retard / non effectué)
 
 ### Saisie prélèvement (5h)
-- [ ] Formulaire `SamplingForm` : date réalisée, statut, nappe haute/basse, rapport
-- [ ] Historique des reports de date (reportHistory)
-- [ ] Auto-save debounce 800ms
-- [ ] Marquage `doneBy` = uid de l'utilisateur connecté
+- [x] Formulaire `SamplingForm` : date réalisée, statut, nappe haute/basse, rapport
+- [x] Historique des reports de date (reportHistory)
+- [x] Auto-save debounce 800ms
+- [x] Marquage `doneBy` = uid de l'utilisateur connecté
 
 **Livrable Phase 2 :** les missions V1 sont entièrement accessibles et éditables en V2. L'équipe peut commencer à tester.
 
@@ -87,20 +87,20 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 **Semaines 7-8 | Objectif : inventaire complet du parc terrain**
 
 ### Liste équipements (4h)
-- [ ] Page `/materiel` : liste avec filtres (catégorie, état)
-- [ ] Composant `EquipementCard` : nom, N° série, état, indicateur métrologie
-- [ ] Composant `CircleProgress` : anneau SVG animé (vert/orange/rouge selon échéance)
-- [ ] Lecture temps réel `onSnapshot` sur `equipements`
+- [x] Page `/materiel` : liste avec filtres (catégorie, état)
+- [x] Composant `EquipementCard` : nom, N° série, état, indicateur métrologie
+- [x] Composant `CircleProgress` : anneau SVG animé (vert/orange/rouge selon échéance)
+- [x] Lecture temps réel `onSnapshot` sur `equipements`
 
 ### Fiche équipement (4h)
-- [ ] Page `/materiel/:equipementId`
-- [ ] Formulaire `EquipementForm` : marque, modèle, catégorie, localisation
-- [ ] Historique des vérifications métrologiques (lecture seule)
-- [ ] Historique des maintenances (lecture seule)
+- [x] Page `/materiel/:equipementId`
+- [x] Formulaire `EquipementForm` : marque, modèle, catégorie, localisation
+- [x] Historique des vérifications métrologiques (lecture seule)
+- [x] Historique des maintenances (lecture seule)
 
 ### Création équipement (2h)
-- [ ] Formulaire ajout depuis `/materiel`
-- [ ] Écriture dans `equipements/{id}` avec `createdBy`
+- [x] Formulaire ajout depuis `/materiel`
+- [x] Écriture dans `equipements/{id}` avec `createdBy`
 
 **Livrable Phase 3 :** tout le parc matériel est saisissable et visible avec les indicateurs d'alerte.
 
@@ -110,19 +110,19 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 **Semaines 9-10 | Objectif : traçabilité des vérifications et interventions**
 
 ### Métrologie (6h)
-- [ ] Page `/metrologie` : tableau statuts (à jour / à prévoir / en retard)
-- [ ] Composant `VerificationRow` : statut coloré, dates, technicien
-- [ ] Calcul automatique statut selon `prochainControle`
-- [ ] Formulaire `VerificationForm` : équipement, type, date, résultat, prochain contrôle
-- [ ] Page `/metrologie/:verificationId` : fiche détail
-- [ ] Mise à jour de `prochainEtalonnage` dans l'équipement concerné
+- [x] Page `/metrologie` : tableau statuts (à jour / à prévoir / en retard)
+- [x] Composant `VerificationRow` : statut coloré, dates, technicien
+- [x] Calcul automatique statut selon `prochainControle`
+- [x] Formulaire `VerificationForm` : équipement, type, date, résultat, prochain contrôle
+- [x] Page `/metrologie/:verificationId` : fiche détail
+- [x] Mise à jour de `prochainEtalonnage` dans l'équipement concerné
 
 ### Maintenances (6h)
-- [ ] Page `/maintenances` : liste avec filtres (équipement, type, statut)
-- [ ] Composant `MaintenanceRow`
-- [ ] Formulaire `MaintenanceForm` : type, dates, description, pièces, coût
-- [ ] Page `/maintenances/:maintenanceId` : fiche détail
-- [ ] Mise à jour automatique statut équipement (`en_maintenance` si en cours)
+- [x] Page `/maintenances` : liste avec filtres (équipement, type, statut)
+- [x] Composant `MaintenanceRow`
+- [x] Formulaire `MaintenanceForm` : type, dates, description, pièces, coût
+- [x] Page `/maintenances/:maintenanceId` : fiche détail
+- [x] Mise à jour automatique statut équipement (`en_maintenance` si en cours)
 
 **Livrable Phase 4 :** la traçabilité métrologique et les interventions sont opérationnelles. L'app est fonctionnellement complète.
 
@@ -132,19 +132,19 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 **Semaines 11-12 | Objectif : première impression premium**
 
 ### Dashboard (6h)
-- [ ] `GreetingHeader` : "Bonjour [Prénom] 👋" + date + résumé du jour
-- [ ] 4 `StatCard` : missions du mois, conformité métrologique, alertes, équipements à calibrer
-- [ ] `DayTimeline` : planning du jour en liste chronologique avec badges statut
-- [ ] `EquipementStatusSummary` : 4 compteurs (En service / À calibrer / En panne / SAV)
-- [ ] `AlertsSection` : métrologie et maintenances urgentes avec liens directs
-- [ ] `RecentActivity` : 5 dernières actions de l'équipe
+- [x] `GreetingHeader` : "Bonjour [Prénom] 👋" + date + résumé du jour
+- [x] 4 `StatCard` : missions du mois, conformité métrologique, alertes, équipements à calibrer
+- [x] `DayTimeline` : planning du jour en liste chronologique avec badges statut
+- [x] `EquipementStatusSummary` : 4 compteurs (En service / À calibrer / En panne / SAV)
+- [x] `AlertsSection` : métrologie et maintenances urgentes avec liens directs
+- [x] `RecentActivity` : 5 dernières actions de l'équipe
 
 ### Polish mobile + accessibilité (4h)
-- [ ] Vérifier tous les écrans sur 375px (iPhone SE) et 428px (iPhone Pro Max)
-- [ ] Touch targets ≥ 44px sur tous les éléments interactifs
-- [ ] Focus visible sur tous les inputs (accessibilité clavier)
-- [ ] Test cache Firestore (fonctionnement hors connexion partielle)
-- [ ] Favicon + manifest PWA basique
+- [x] Vérifier tous les écrans sur 375px (iPhone SE) et 428px (iPhone Pro Max)
+- [x] Touch targets ≥ 44px sur tous les éléments interactifs
+- [x] Focus visible sur tous les inputs (accessibilité clavier)
+- [x] Test cache Firestore (fonctionnement hors connexion partielle)
+- [x] Favicon + manifest PWA basique
 
 **Livrable Phase 5 :** l'app est visuellement complète et utilisable depuis le terrain.
 
@@ -166,15 +166,15 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 **Inspiré des mockups ChatGPT — évolution naturelle post-V2**
 
 ### Vue Planning (~3h)
-- [ ] Page `/planning` : navigation semaine (← →) avec grille Lun→Dim
-- [ ] Points colorés sur les jours ayant des interventions
-- [ ] Timeline sous la grille : prélèvements + maintenances + vérifications du jour sélectionné
-- [ ] Chaque ligne cliquable → fiche correspondante
-- [ ] Ajout de Planning dans la sidebar et TabBar
+- [x] Page `/planning` : navigation semaine (← →) avec grille Lun→Dim
+- [x] Points colorés sur les jours ayant des interventions
+- [x] Timeline sous la grille : prélèvements + maintenances + vérifications du jour sélectionné
+- [x] Chaque ligne cliquable → fiche correspondante
+- [x] Ajout de Planning dans la sidebar et TabBar
 
 ### Donut chart matériel (~2h)
-- [ ] Composant `DonutChart` SVG : 4 segments colorés (opérationnel/à calibrer/maintenance/hors service)
-- [ ] Remplacer les 4 compteurs plats du Dashboard par le donut centré sur le total
+- [x] Composant `DonutChart` SVG : 4 segments colorés (opérationnel/à calibrer/maintenance/hors service)
+- [x] Remplacer les 4 compteurs plats du Dashboard par le donut centré sur le total
 
 ---
 
@@ -228,6 +228,8 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-12 | Style ✅ | Icône pluie retirée des en-têtes de dates, conservée dans les cellules de pills. Opacité icône jours fériés ajustée à 0.55. |
 | 2026-05-14 | Repo + UX ✅ | README professionnel, .env.example, TODO_REFACTORING §2 priorisé, filtres matériau/marque sur flacons (MaterielPage), suppression doublon métrologie 12-SNI-08.B, roadmap.html viewer auto-update. |
 | 2026-05-15 | Refactor ✅ | Extraction vues planning (§2) constatée déjà faite. Création usePlanningCalendar — 6 calculs inline extraits de PlanningPage (828 → 692L). TODO_REFACTORING mis à jour. |
+| 2026-05-15 | Refactor ✅ | Abstraction Firestore §2 : useClientData + useDocumentData<T> (générique). ClientPage 815→717L, MaintenancePage 225→194L, VerificationPage 206→174L, PlanPage 470→416L. −215L au total. Staging déployé. |
+| 2026-05-16 | Refactor ✅ | §2 soldé : MissionDetailPage 368→333L via useClientData. TODO_REFACTORING §2 entièrement coché. AdminPage non refactorisée (BugsSection déjà isolée). Prochaine priorité : §3 sous-collection samplings ou §4 tests. |
 
 ---
 
