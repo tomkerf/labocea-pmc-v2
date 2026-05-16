@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roadmap — Labocea PMC V2</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+      background: #F5F5F7;
+      color: #1D1D1F;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .hero {
+      background: linear-gradient(135deg, #0071E3 0%, #005BB5 100%);
+      color: white;
+      padding: 56px 40px 48px;
+      text-align: center;
+    }
+    .hero-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 12px;
+    }
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .hero-sub {
+      font-size: 15px;
+      opacity: 0.8;
+      margin-bottom: 36px;
+    }
+
+    /* ── KPIs ── */
+    .kpi-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .kpi {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 14px;
+      padding: 14px 22px;
+      text-align: center;
+      min-width: 110px;
+    }
+    .kpi-val {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .kpi-lab {
+      font-size: 11px;
+      opacity: 0.75;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Main layout ── */
+    .main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── Section titles ── */
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6E6E73;
+      margin-bottom: 20px;
+      margin-top: 48px;
+    }
+
+    /* ── Timeline overview bar ── */
+    .timeline-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 40px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .timeline-seg {
+      flex: 1;
+      height: 8px;
+      border-radius: 0;
+      transition: opacity 0.2s;
+    }
+    .timeline-seg:first-child { border-radius: 4px 0 0 4px; }
+    .timeline-seg:last-child  { border-radius: 0 4px 4px 0; }
+    .seg-done    { background: #34C759; }
+    .seg-partial { background: #FF9F0A; }
+    .seg-todo    { background: #D2D2D7; }
+
+    /* ── Phase cards ── */
+    .phases {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .phase-card {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #E5E5EA;
+      padding: 22px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+      position: relative;
+      overflow: hidden;
+    }
+    .phase-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .phase-card.done::before   { background: #34C759; }
+    .phase-card.partial::before { background: #FF9F0A; }
+    .phase-card.todo::before   { background: #D2D2D7; }
+
+    .phase-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .phase-num {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #AEAEB2;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-done    { background: #EAF8EE; color: #28A745; }
+    .badge-partial { background: #FFF4E3; color: #D4800A; }
+    .badge-todo    { background: #F0F0F2; color: #8E8E93; }
+
+    .phase-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1D1D1F;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .phase-meta {
+      font-size: 12px;
+      color: #AEAEB2;
+      margin-bottom: 14px;
+    }
+    .phase-tasks {
+      font-size: 13px;
+      color: #6E6E73;
+      line-height: 1.7;
+      list-style: none;
+    }
+    .phase-tasks li {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+    }
+    .task-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .dot-done    { background: #34C759; }
+    .dot-partial { background: #FF9F0A; }
+    .dot-todo    { background: #D2D2D7; }
+
+    /* ── Journal de progression ── */
+    .journal {
+      position: relative;
+      padding-left: 28px;
+    }
+    .journal::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: #E5E5EA;
+      border-radius: 1px;
+    }
+    .journal-entry {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .journal-entry::before {
+      content: '';
+      position: absolute;
+      left: -25px;
+      top: 6px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #34C759;
+      border: 2px solid white;
+      box-shadow: 0 0 0 2px #34C759;
+    }
+    .journal-entry.refactor::before { background: #0071E3; box-shadow: 0 0 0 2px #0071E3; }
+    .journal-entry.qualite::before  { background: #FF9F0A; box-shadow: 0 0 0 2px #FF9F0A; }
+    .journal-entry.feature::before  { background: #AF52DE; box-shadow: 0 0 0 2px #AF52DE; }
+    .journal-entry.infra::before    { background: #FF3B30; box-shadow: 0 0 0 2px #FF3B30; }
+
+    .journal-date {
+      font-size: 11px;
+      font-weight: 600;
+      color: #AEAEB2;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 3px;
+    }
+    .journal-theme {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 100px;
+      margin-bottom: 4px;
+    }
+    .theme-phase    { background: #EAF8EE; color: #28A745; }
+    .theme-refactor { background: #E8F1FB; color: #0071E3; }
+    .theme-qualite  { background: #FFF4E3; color: #D4800A; }
+    .theme-feature  { background: #F5EEFB; color: #AF52DE; }
+    .theme-infra    { background: #FFEEED; color: #FF3B30; }
+    .theme-ux       { background: #F0F0F2; color: #6E6E73; }
+    .theme-style    { background: #F0F0F2; color: #6E6E73; }
+
+    .journal-desc {
+      font-size: 13px;
+      color: #3A3A3C;
+      line-height: 1.55;
+    }
+
+    /* ── Next steps ── */
+    .next-card {
+      background: linear-gradient(135deg, #E8F1FB 0%, #F0F5FF 100%);
+      border: 1px solid #C2D9F5;
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 12px;
+    }
+    .next-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #0071E3;
+      margin-bottom: 12px;
+    }
+    .next-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .next-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: #1D1D1F;
+    }
+    .next-num {
+      width: 22px;
+      height: 22px;
+      background: #0071E3;
+      color: white;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 12px;
+      color: #AEAEB2;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <div class="hero-label">Labocea · Équipe Mesures</div>
+  <h1>Roadmap PMC V2</h1>
+  <div class="hero-sub">Développement solo (Tom + Claude) · Mai – Juillet 2026 · ~6-8h/semaine</div>
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-val">6/7</div><div class="kpi-lab">Phases</div></div>
+    <div class="kpi"><div class="kpi-val">30</div><div class="kpi-lab">Sessions</div></div>
+    <div class="kpi"><div class="kpi-val">~70h</div><div class="kpi-lab">Estimé</div></div>
+    <div class="kpi"><div class="kpi-val">Juil.</div><div class="kpi-lab">Objectif prod</div></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ── Barre de progression ── -->
+  <p class="section-title">Avancement global</p>
+  <div class="timeline-bar">
+    <div class="timeline-seg seg-done" style="flex:2" title="Phase 1 ✅"></div>
+    <div class="timeline-seg seg-done" style="flex:4" title="Phase 2 ✅"></div>
+    <div class="timeline-seg seg-done" style="flex:2" title="Phase 3 ✅"></div>
+    <div class="timeline-seg seg-done" style="flex:2" title="Phase 4 ✅"></div>
+    <div class="timeline-seg seg-done" style="flex:2" title="Phase 5 ✅"></div>
+    <div class="timeline-seg seg-partial" style="flex:1" title="Phase 6 – en cours"></div>
+    <div class="timeline-seg seg-done" style="flex:1" title="Phase 7 ✅"></div>
+  </div>
+
+  <!-- ── Phase cards ── -->
+  <p class="section-title">Phases</p>
+  <div class="phases">
+
+    <div class="phase-card done">
+      <div class="phase-header">
+        <div class="phase-num">Phase 1</div>
+        <span class="badge badge-done">✅ Terminé</span>
+      </div>
+      <div class="phase-title">Fondations</div>
+      <div class="phase-meta">Sem. 1-2 · ~12h</div>
+      <ul class="phase-tasks">
+        <li><span class="task-dot dot-done"></span>Init Vite + React TS + Tailwind</li>
+        <li><span class="task-dot dot-done"></span>Firebase Auth + Firestore</li>
+        <li><span class="task-dot dot-done"></span>Zustand + routing</li>
+        <li><span class="task-dot dot-done"></span>Layout Sidebar + TabBar</li>
+        <li><span class="task-dot dot-done"></span>Staging Cloudflare Workers</li>
+      </ul>
+    </div>
+
+    <div class="phase-card done">
+      <div class="phase-header">
+        <div class="phase-num">Phase 2</div>
+        <span class="badge badge-done">✅ Terminé</span>
+      </div>
+      <div class="phase-title">Module Missions</div>
+      <div class="phase-meta">Sem. 3-6 · ~22h</div>
+      <ul class="phase-tasks">
+        <li><span class="task-dot dot-done"></span>Liste clients + filtres</li>
+        <li><span class="task-dot dot-done"></span>Fiche client + auto-save</li>
+        <li><span class="task-dot dot-done"></span>Plans de prélèvement</li>
+        <li><span class="task-dot dot-done"></span>Saisie prélèvement + audit</li>
+        <li><span class="task-dot dot-done"></span>Migration données V1</li>
+      </ul>
+    </div>
+
+    <div class="phase-card done">
+      <div class="phase-header">
+        <div class="phase-num">Phase 3</div>
+        <span class="badge badge-done">✅ Terminé</span>
+      </div>
+      <div class="phase-title">Module Matériel</div>
+      <div class="phase-meta">Sem. 7-8 · ~10h</div>
+      <ul class="phase-tasks">
+        <li><span class="task-dot dot-done"></span>Inventaire parc terrain</li>
+        <li><span class="task-dot dot-done"></span>Fiche équipement</li>
+        <li><span class="task-dot dot-done"></span>CircleProgress métrologie</li>
+        <li><span class="task-dot dot-done"></span>Filtres catégorie + état</li>
+      </ul>
+    </div>
+
+    <div class="phase-card done">
+      <div class="phase-header">
+        <div class="phase-num">Phase 4</div>
+        <span class="badge badge-done">✅ Terminé</span>
+      </div>
+      <div class="phase-title">Métrologie + Maintenances</div>
+      <div class="phase-meta">Sem. 9-10 · ~12h</div>
+      <ul class="phase-tasks">
+        <li><span class="task-dot dot-done"></span>Tableau vérifications COFRAC</li>
+        <li><span class="task-dot dot-done"></span>Fiches vérification + étalonnage</li>
+        <li><span class="task-dot dot-done"></span>Interventions préventives/correctives</li>
+        <li><span class="task-dot dot-done"></span>Sync état équipement</li>
+      </ul>
+    </div>
+
+    <div class="phase-card done">
+      <div class="phase-header">
+        <div class="phase-num">Phase 5</div>
+        <span class="badge badge-done">✅ Terminé</span>
+      </div>
+      <div class="phase-title">Dashboard + Polish</div>
+      <div class="phase-meta">Sem. 11-12 · ~10h</div>
+      <ul class="phase-tasks">
+        <li><span class="task-dot dot-done"></span>KPIs temps réel (4 métriques)</li>
+        <li><span class="task-dot dot-done"></span>Planning du jour (timeline)</li>
+        <li><span class="task-dot dot-done"></span>Alertes métrologie + maintenance</li>
+        <li><span class="task-dot dot-done"></span>Code splitting −64% bundle</li>
+      </ul>
+    </div>
+
+    <div class="phase-card partial">
+      <div class="phase-header">
+        <div class="phase-num">Phase 6</div>
+        <span class="badge badge-partial">⏳ En cours</span>
+      </div>
+      <div class="phase-title">Déploiement & Validation</div>
+      <div class="phase-meta">Après validation Phase 5 · ~4h</div>
+      <ul class="phase-tasks">
+        <li><span class="task-dot dot-done"></span>Staging déployé (Cloudflare Workers)</li>
+        <li><span class="task-dot dot-todo"></span>Session de test équipe (1-2 sem.)</li>
+        <li><span class="task-dot dot-todo"></span>Corrections issues terrain</li>
+        <li><span class="task-dot dot-todo"></span>Déploiement production</li>
+        <li><span class="task-dot dot-todo"></span>Communication URL prod à l'équipe</li>
+      </ul>
+    </div>
+
+    <div class="phase-card done">
+      <div class="phase-header">
+        <div class="phase-num">Phase 7</div>
+        <span class="badge badge-done">✅ Terminé</span>
+      </div>
+      <div class="phase-title">Planning + Extras</div>
+      <div class="phase-meta">Post-V2 · ~5h</div>
+      <ul class="phase-tasks">
+        <li><span class="task-dot dot-done"></span>Page Planning (vue semaine/mois/jour)</li>
+        <li><span class="task-dot dot-done"></span>Météo pluie + jours fériés</li>
+        <li><span class="task-dot dot-done"></span>Module Tuyaux</li>
+        <li><span class="task-dot dot-done"></span>Photos terrain + IndexedDB offline</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ── Next steps ── -->
+  <div class="next-card">
+    <h3>Prochaines étapes</h3>
+    <ul class="next-list">
+      <li><span class="next-num">1</span>Session de test équipe sur staging — recueillir les retours terrain</li>
+      <li><span class="next-num">2</span>§3 Évolutivité données — sous-collection <code>samplings</code> (risque 1 Mo/document)</li>
+      <li><span class="next-num">3</span>§4 Tests unitaires — couverture des hooks de données</li>
+      <li><span class="next-num">4</span>Déploiement production quand équipe valide</li>
+    </ul>
+  </div>
+
+  <!-- ── Journal ── -->
+  <p class="section-title" style="margin-top:56px">Journal de progression</p>
+  <div class="journal">
+
+    <div class="journal-entry refactor">
+      <div class="journal-date">16 mai 2026</div>
+      <span class="journal-theme theme-refactor">Refactor</span>
+      <div class="journal-desc">§2 soldé : MissionDetailPage 368→333L via useClientData. TODO_REFACTORING §2 entièrement coché. AdminPage non refactorisée (BugsSection déjà isolée).</div>
+    </div>
+
+    <div class="journal-entry refactor">
+      <div class="journal-date">15 mai 2026</div>
+      <span class="journal-theme theme-refactor">Refactor</span>
+      <div class="journal-desc">Abstraction Firestore §2 : useClientData + useDocumentData&lt;T&gt;. ClientPage 815→717L, MaintenancePage 225→194L, VerificationPage 206→174L, PlanPage 470→416L. −215L au total.</div>
+    </div>
+
+    <div class="journal-entry refactor">
+      <div class="journal-date">15 mai 2026</div>
+      <span class="journal-theme theme-refactor">Refactor</span>
+      <div class="journal-desc">Création usePlanningCalendar — 6 calculs inline extraits de PlanningPage (828→692L). TODO_REFACTORING §2 mis à jour.</div>
+    </div>
+
+    <div class="journal-entry feature">
+      <div class="journal-date">14 mai 2026</div>
+      <span class="journal-theme theme-feature">Repo + UX</span>
+      <div class="journal-desc">README professionnel, .env.example, filtres matériau/marque flacons, suppression doublon métrologie 12-SNI-08.B, roadmap.html viewer auto-update.</div>
+    </div>
+
+    <div class="journal-entry refactor">
+      <div class="journal-date">12 mai 2026</div>
+      <span class="journal-theme theme-style">Style</span>
+      <div class="journal-desc">Icône pluie retirée des en-têtes de dates. Opacité jours fériés ajustée à 0.55.</div>
+    </div>
+
+    <div class="journal-entry qualite">
+      <div class="journal-date">12 mai 2026</div>
+      <span class="journal-theme theme-qualite">Solidité</span>
+      <div class="journal-desc">Détection écriture concurrente (bandeau orange), signalement bugs in-app (BugReportModal + AdminPage + Firestore rules).</div>
+    </div>
+
+    <div class="journal-entry refactor">
+      <div class="journal-date">11 mai 2026</div>
+      <span class="journal-theme theme-refactor">Refactor</span>
+      <div class="journal-desc">Refactoring God Components (PlanPage, DashboardPage, BilanPage, EquipementPage). Réduction ~60% taille des pages. §1 soldé.</div>
+    </div>
+
+    <div class="journal-entry qualite">
+      <div class="journal-date">9 mai 2026</div>
+      <span class="journal-theme theme-qualite">Qualité + Sécu</span>
+      <div class="journal-desc">Protection rôles admin (RequireAdmin + Firestore rules), mode d'emploi réécrit, tooltips contextuels in-app.</div>
+    </div>
+
+    <div class="journal-entry refactor">
+      <div class="journal-date">8 mai 2026</div>
+      <span class="journal-theme theme-refactor">Refactor</span>
+      <div class="journal-desc">Refactoring PlanningPage : extraction DayView/WeekView/MonthView/EventRow/MiniCalendar.</div>
+    </div>
+
+    <div class="journal-entry feature">
+      <div class="journal-date">28 avril 2026</div>
+      <span class="journal-theme theme-feature">Finitions</span>
+      <div class="journal-desc">assignedTo par prélèvement, fallback mémoire IndexedDB, Bilan 24h retiré, badges planning gris rapport.</div>
+    </div>
+
+    <div class="journal-entry feature">
+      <div class="journal-date">27 avril 2026</div>
+      <span class="journal-theme theme-feature">Features</span>
+      <div class="journal-desc">Météo pluie, jours fériés français, module Tuyaux, DnD points prélèvement, photos terrain, persistance IndexedDB offline.</div>
+    </div>
+
+    <div class="journal-entry feature">
+      <div class="journal-date">26 avril 2026</div>
+      <span class="journal-theme theme-feature">Mobile</span>
+      <div class="journal-desc">Burger menu latéral mobile, groupement plans par site, dédoublonnage users.</div>
+    </div>
+
+    <div class="journal-entry feature">
+      <div class="journal-date">25 avril 2026</div>
+      <span class="journal-theme theme-feature">Features</span>
+      <div class="journal-desc">Page Admin (création comptes), export PDF historique, page Infos terrain, calculateur asservissement 24h, widget rapports.</div>
+    </div>
+
+    <div class="journal-entry feature">
+      <div class="journal-date">24 avril 2026</div>
+      <span class="journal-theme theme-feature">Planning</span>
+      <div class="journal-desc">Motif obligatoire report/retrait, modale intervention dans dashboard, mini-calendrier sidebar, historique motifs PDF.</div>
+    </div>
+
+    <div class="journal-entry feature">
+      <div class="journal-date">23 avril 2026</div>
+      <span class="journal-theme theme-ux">UX</span>
+      <div class="journal-desc">Bug J1/J2 planning, swipe mobile vue jour, badges statut, skills Claude.</div>
+    </div>
+
+    <div class="journal-entry infra">
+      <div class="journal-date">22 avril 2026</div>
+      <span class="journal-theme theme-infra">Infra</span>
+      <div class="journal-desc">Règles Firestore déployées, fix zombie documents, CI staging verts (#147, #148).</div>
+    </div>
+
+    <div class="journal-entry qualite">
+      <div class="journal-date">22 avril 2026</div>
+      <span class="journal-theme theme-qualite">Qualité</span>
+      <div class="journal-desc">Code review 11 points, system toasts, code-splitting 924kB→330kB, 39 tests unitaires, versions dépendances figées.</div>
+    </div>
+
+    <div class="journal-entry">
+      <div class="journal-date">18 avril 2026</div>
+      <span class="journal-theme theme-phase">Phases 1–5 ✅</span>
+      <div class="journal-desc">Fondations, Missions, Matériel, Métrologie, Maintenances, Dashboard — tout livré en une journée de lancement.</div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="footer">
+  Labocea PMC V2 · Mis à jour le 16 mai 2026 · Tom Kerfendal + Claude
+</div>
+
+</body>
+</html>
