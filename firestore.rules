@@ -13,11 +13,22 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    function hasRequiredClientFields() {
+      return request.resource.data.keys().hasAll(['nom', 'annee']) &&
+        request.resource.data.nom is string &&
+        request.resource.data.nom.size() > 0 &&
+        request.resource.data.annee is string &&
+        request.resource.data.annee.size() > 0;
+    }
+
     // ── clients-v2 ────────────────────────────────────────────
-    // Lecture et écriture réservées aux utilisateurs authentifiés (V2 uniquement).
-    // La V1 (sans auth) ne peut plus écrire dans cette collection.
+    // Lecture et create/update : tout utilisateur authentifié.
+    // Suppression : admin uniquement (données critiques métier).
     match /clients-v2/{clientId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && hasRequiredClientFields();
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
     }
 
     // ── users ─────────────────────────────────────────────────
@@ -30,18 +41,24 @@ service cloud.firestore {
     }
 
     // ── equipements ───────────────────────────────────────────
+    // Suppression : admin uniquement.
     match /equipements/{equipementId} {
-      allow read, write: if isAuthenticated();
+      allow read, create, update: if isAuthenticated();
+      allow delete: if isAdmin();
     }
 
     // ── verifications ─────────────────────────────────────────
+    // Suppression : admin uniquement.
     match /verifications/{verificationId} {
-      allow read, write: if isAuthenticated();
+      allow read, create, update: if isAuthenticated();
+      allow delete: if isAdmin();
     }
 
     // ── maintenances ──────────────────────────────────────────
+    // Suppression : admin uniquement.
     match /maintenances/{maintenanceId} {
-      allow read, write: if isAuthenticated();
+      allow read, create, update: if isAuthenticated();
+      allow delete: if isAdmin();
     }
 
     // ── evenements ────────────────────────────────────────────
@@ -54,7 +71,7 @@ service cloud.firestore {
       allow read, write: if isAuthenticated();
     }
 
-    // ── tuyaux ───────────────────────────────────────────────────
+    // ── tuyaux ────────────────────────────────────────────────
     match /tuyaux/{tuyauId} {
       allow read, write: if isAuthenticated();
     }
@@ -68,7 +85,6 @@ service cloud.firestore {
     }
 
     // ── clients (V1 — archive, lecture seule) ─────────────────
-    // La collection V1 reste accessible en lecture uniquement.
     match /clients/{clientId} {
       allow read: if isAuthenticated();
       allow write: if false;

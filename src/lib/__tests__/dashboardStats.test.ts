@@ -53,7 +53,7 @@ function makeEquipement(overrides: Partial<Equipement> = {}): Equipement {
     id: 'eq1', nom: 'YSI', marque: 'YSI', modele: 'Pro30', numSerie: 'SN1',
     categorie: 'multiparametre', dateAcquisition: '2024-01-01',
     etat: 'operationnel', localisation: 'labo', notes: '',
-    prochainEtalonnage: '', createdBy: 'uid1', updatedAt: new Date(),
+    prochainEtalonnage: '', createdBy: 'uid1', updatedAt: Timestamp.now(),
     ...overrides,
   }
 }
@@ -64,7 +64,7 @@ function makeVerification(overrides: Partial<Verification> = {}): Verification {
     type: 'etalonnage_interne', date: '2026-01-01',
     resultat: 'conforme', remarques: '', prochainControle: '',
     technicienUid: 'uid1', technicienNom: 'Tom', documentUrl: '',
-    createdAt: new Date(),
+    createdAt: Timestamp.now(),
     ...overrides,
   }
 }

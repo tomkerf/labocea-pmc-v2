@@ -80,12 +80,10 @@ function exportFicheDeViePDF(equipement: Equipement, entries: TimelineEntry[]) {
 </body>
 </html>`
 
-  const w = window.open('', '_blank')
-  if (!w) return
-  w.document.write(html)
-  w.document.close()
-  w.focus()
-  setTimeout(() => w.print(), 400)
+  const blob = new Blob([html], { type: 'text/html' })
+  const url = URL.createObjectURL(blob)
+  window.open(url, '_blank')
+  setTimeout(() => URL.revokeObjectURL(url), 10000)
 }
 
 function TimelineRow({ icon, iconBg, iconColor, date, title, subtitle, badge, isLast, onDelete }: {

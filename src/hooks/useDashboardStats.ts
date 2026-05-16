@@ -89,14 +89,21 @@ export function useDashboardStats({
   }, [verifications])
 
   const aCalibrrer = useMemo(() => {
-    const equipementsWithoutVerif = equipements.filter((e: Equipement) => {
+    // Équipements couverts par au moins une vérification → on utilise prochainControle de la vérif
+    const verifIds = new Set(verifications.map((v: Verification) => v.equipementId))
+    const verifNoms = new Set(verifications.map((v: Verification) => v.equipementNom))
+
+    const verifsProches = verifications.filter(
+      (v: Verification) => v.prochainControle && daysDiff(v.prochainControle) < 30
+    ).length
+
+    const equipsSansVerifProches = equipements.filter((e: Equipement) => {
       if (!e.prochainEtalonnage) return false
-      return !verifications.some((v: Verification) => v.equipementId === e.id || v.equipementNom === e.nom)
-    })
-    return [
-      ...verifications.filter((v: Verification) => v.prochainControle && daysDiff(v.prochainControle) < 30),
-      ...equipementsWithoutVerif.filter((e: Equipement) => daysDiff(e.prochainEtalonnage) < 30),
-    ].length
+      if (verifIds.has(e.id) || verifNoms.has(e.nom)) return false
+      return daysDiff(e.prochainEtalonnage) < 30
+    }).length
+
+    return verifsProches + equipsSansVerifProches
   }, [verifications, equipements])
 
   // ── Rapports à envoyer ────────────────────────────────────

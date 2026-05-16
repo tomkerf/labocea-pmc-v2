@@ -24,7 +24,7 @@ export function localISO(date: Date): string {
 
 export function isToday(dateStr: string): boolean {
   if (!dateStr) return false
-  return new Date(dateStr).toDateString() === new Date().toDateString()
+  return dateStr === localISO(new Date())
 }
 
 export function daysDiff(dateStr: string): number {

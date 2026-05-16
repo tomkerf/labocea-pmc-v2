@@ -1,5 +1,5 @@
 import {
-  collection, doc, getDoc,
+  collection, doc,
   addDoc, deleteDoc, serverTimestamp, runTransaction,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
@@ -11,19 +11,13 @@ export async function saveClient(client: Client, uid: string): Promise<void> {
   const ref = doc(db, COLLECTION, client.id)
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(ref)
-    if (!snap.exists()) return
+    if (!snap.exists()) throw new Error('Le document client a été supprimé — modifications perdues.')
     tx.set(ref, { ...client, updatedBy: uid, updatedAt: serverTimestamp() }, { merge: true })
   })
 }
 
 export async function deleteClient(clientId: string): Promise<void> {
-  const ref = doc(db, COLLECTION, clientId)
-  await deleteDoc(ref)
-  const snap = await getDoc(ref)
-  if (snap.exists()) {
-    console.error('[deleteClient] Le document existe encore après deleteDoc — règles Firestore ?', clientId)
-    throw new Error('La suppression a échoué côté serveur. Vérifie les règles Firestore.')
-  }
+  await deleteDoc(doc(db, COLLECTION, clientId))
 }
 
 export async function createClient(

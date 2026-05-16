@@ -65,11 +65,10 @@ export default function AdminPage() {
   // Dédoublonnage géré dans le store — users est déjà propre
   const uniqueUsers = users
 
-  // Redirection si pas admin
-  if (role && role !== 'admin') {
-    navigate('/', { replace: true })
-    return null
-  }
+  // Redirection si pas admin — dans useEffect pour éviter un navigate() pendant le rendu
+  useEffect(() => {
+    if (role && role !== 'admin') navigate('/', { replace: true })
+  }, [role, navigate])
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-bg-primary)' }}>
@@ -659,7 +658,7 @@ function CreateUserForm() {
           <div className="relative">
             <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
             <input
-              type="text"
+              type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="6 caractères minimum"

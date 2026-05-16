@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook } from '@testing-library/react'
+import { Timestamp } from 'firebase/firestore'
 import { calcStatut, useMetrologieRows } from '@/hooks/useMetrologieRows'
 import type { Verification, Equipement } from '@/types'
 
@@ -28,7 +29,7 @@ function makeVerif(overrides: Partial<Verification> = {}): Verification {
     technicienUid: 'uid1',
     technicienNom: 'Tom',
     documentUrl: '',
-    createdAt: new Date(),
+    createdAt: Timestamp.now(),
     ...overrides,
   }
 }
@@ -36,18 +37,18 @@ function makeVerif(overrides: Partial<Verification> = {}): Verification {
 function makeEquipement(overrides: Partial<Equipement> = {}): Equipement {
   return {
     id: 'eq2',
-    nom: 'Turbidimètre',
-    marque: 'HACH',
-    modele: 'TL2300',
+    nom: 'Multiparamètre',
+    marque: 'YSI',
+    modele: 'Pro30',
     numSerie: 'SN001',
-    categorie: 'turbidimetre',
+    categorie: 'multiparametre',
     dateAcquisition: '2024-01-01',
     etat: 'operationnel',
     localisation: 'labo',
     notes: '',
     prochainEtalonnage: futureDate(60),
     createdBy: 'uid1',
-    updatedAt: new Date(),
+    updatedAt: Timestamp.now(),
     ...overrides,
   }
 }
