@@ -1,11 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { doc, onSnapshot } from 'firebase/firestore'
 import { ChevronLeft, MapPin, Clock, CheckCircle2, Circle, Navigation, ExternalLink, Plus } from 'lucide-react'
-import { db } from '@/lib/firebase'
-import { saveClient } from '@/services/clientService'
 import { useAuthStore, selectUid } from '@/stores/authStore'
-import type { Client, Sampling, SamplingStatus, ChecklistItem } from '@/types'
+import { useClientData } from '@/hooks/useClientData'
+import type { Sampling, SamplingStatus, ChecklistItem } from '@/types'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
@@ -36,42 +34,16 @@ export default function MissionDetailPage() {
   const navigate = useNavigate()
   const uid = useAuthStore(selectUid)
 
-  const [client, setClient] = useState<Client | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [newTask, setNewTask] = useState('')
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const isDirty = useRef(false)
+  const { client, loading, saving, triggerSave } = useClientData(clientId)
 
   useEffect(() => {
-    if (!clientId) return
-    const ref = doc(db, 'clients-v2', clientId)
-    const unsub = onSnapshot(ref, (snap) => {
-      if (!snap.exists()) {
-        // Client supprimé depuis un autre onglet/appareil → rediriger
-        navigate('/missions', { replace: true })
-        return
-      }
-      if (!isDirty.current) setClient({ id: snap.id, ...snap.data() } as Client)
-      setLoading(false)
-    })
-    return () => unsub()
-  }, [clientId, navigate])
+    if (!loading && !client) navigate('/missions', { replace: true })
+  }, [loading, client, navigate])
+
+  const [newTask, setNewTask] = useState('')
 
   const plan = client?.plans.find((p) => p.id === planId) ?? null
   const sampling = plan?.samplings.find((s) => s.id === samplingId) ?? null
-
-  function triggerSave(updated: Client) {
-    isDirty.current = true
-    setClient(updated)
-    if (saveTimer.current) clearTimeout(saveTimer.current)
-    saveTimer.current = setTimeout(async () => {
-      if (!uid) return
-      setSaving(true)
-      try { await saveClient(updated, uid) }
-      finally { setSaving(false); isDirty.current = false }
-    }, 600)
-  }
 
   function updateSampling(field: keyof Sampling, value: unknown) {
     if (!client || !plan || !sampling) return
@@ -100,26 +72,19 @@ export default function MissionDetailPage() {
     setNewTask('')
   }
 
-  async function handleTerminer() {
+  function handleTerminer() {
     if (!client || !plan || !sampling || saving) return
-    setSaving(true)
     const today = new Date().toISOString().split('T')[0]
     const updatedSamplings = plan.samplings.map((s) =>
       s.id === samplingId
         ? { ...s, status: 'done' as SamplingStatus, doneDate: today, doneBy: uid ?? '' }
         : s
     )
-    const updated = {
+    triggerSave({
       ...client,
       plans: client.plans.map((p) => p.id === planId ? { ...p, samplings: updatedSamplings } : p),
-    }
-    try {
-      await saveClient(updated, uid ?? '')
-      setClient(updated)
-      navigate(-1)
-    } finally {
-      setSaving(false)
-    }
+    })
+    navigate(-1)
   }
 
   if (loading) {

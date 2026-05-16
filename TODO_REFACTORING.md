@@ -11,8 +11,8 @@ Les pages suivantes sont trop volumineuses et difficiles à maintenir. Elles doi
 
 ## 2. Architecture & Découplage (Priorité : Haute)
 - [x] **Extraction vues planning** : DayView, WeekView, MonthView extraits dans `src/components/planning/`. ✅ 2026-05-08
-- [ ] **Logique métier vs Vue** : Extraire la logique de manipulation complexe des données (ex: calculs de stats, filtrage complexe) des composants `pages/` vers des hooks spécialisés ou des utilitaires purs.
-- [ ] **Abstraction Firestore** : Centraliser davantage les appels Firestore dans des services ou hooks pour que les composants UI ne connaissent pas les détails de l'implémentation (ex: `onSnapshot`, `runTransaction`).
+- [x] **Logique métier vs Vue** : `usePlanningCalendar` (6 calculs extraits de PlanningPage), `useClientData` (listener + auto-save + conflict detection). ✅ 2026-05-15
+- [x] **Abstraction Firestore** : `useClientData` + `useDocumentData<T>` (générique). ClientPage, PlanPage, MissionDetailPage, MaintenancePage, VerificationPage refactorisées. ✅ 2026-05-16
 
 ## 3. Évolutivité des données (Priorité : Moyenne)
 - [ ] **Structure des documents Firestore** : Les `plans` et `samplings` sont actuellement imbriqués dans le document `client`. Risque de dépasser la limite de 1 Mo par document si l'historique croît. Envisager de déplacer les `samplings` dans une sous-collection `/clients-v2/{id}/samplings`.
@@ -22,4 +22,4 @@ Les pages suivantes sont trop volumineuses et difficiles à maintenir. Elles doi
 - [ ] **Storybook (Optionnel)** : Pour documenter et tester les composants UI "Apple-style" de manière isolée.
 
 ---
-*Dette technique identifiée par Gemini CLI le 09/05/2026. Mis à jour le 15/05/2026 — §1 soldé, §2 extraction planning soldée, prochaine étape : Logique métier vs Vue.*
+*Dette technique identifiée par Gemini CLI le 09/05/2026. Mis à jour le 16/05/2026 — §1 soldé, §2 soldé. Prochaine priorité : §3 Évolutivité données (sous-collection samplings) ou §4 Tests.*
