@@ -230,6 +230,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-15 | Refactor ✅ | Extraction vues planning (§2) constatée déjà faite. Création usePlanningCalendar — 6 calculs inline extraits de PlanningPage (828 → 692L). TODO_REFACTORING mis à jour. |
 | 2026-05-15 | Refactor ✅ | Abstraction Firestore §2 : useClientData + useDocumentData<T> (générique). ClientPage 815→717L, MaintenancePage 225→194L, VerificationPage 206→174L, PlanPage 470→416L. −215L au total. Staging déployé. |
 | 2026-05-16 | Refactor ✅ | §2 soldé : MissionDetailPage 368→333L via useClientData. TODO_REFACTORING §2 entièrement coché. AdminPage non refactorisée (BugsSection déjà isolée). Prochaine priorité : §3 sous-collection samplings ou §4 tests. |
+| 2026-05-16 | Qualité ✅ | Roadmap visuelle HTML (auto-fetch GitHub, journal-driven phase status, dots verts si phase done), sync checkboxes ROADMAP.md (75 tâches cochées), audit qualité pré-équipe : document.write→Blob URL (FicheDeVie + TabSynthese), confirm/alert→two-step state (PlanPage, EquipementPage, DemandesPage, useDocumentData, MaintenancePage, VerificationPage), : any→LucideIcon dans MobileDrawer. |
 
 ---
 

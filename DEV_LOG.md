@@ -587,6 +587,92 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 
 ---
 
+## Session 31 — Roadmap visuelle + Audit qualité pré-équipe
+**16 mai 2026**
+
+### roadmap-visual.html
+- Création d'un viewer HTML auto-fetch depuis GitHub raw (`ROADMAP.md`).
+- Parser custom : sections phases, checkboxes `[x]`/`[ ]`, tableau journal.
+- `statusOf()` croise le journal (emoji ✅ dans `rawTheme`) plutôt que les checkboxes (toutes `[ ]` à l'époque).
+- Si `status === 'done'`, tous les points de tâches s'affichent en vert (`allDone`).
+- Déployé sur staging via `deploy-dev.sh` (script mis à jour pour copier le fichier dans `dist/`).
+- Accessible à `https://labocea-pmc-v2-dev.tomkerf.workers.dev/roadmap-visual.html`.
+
+### Sync ROADMAP.md checkboxes
+- Audit : toutes les tâches phases 1–5 et 7 étaient `[ ]` malgré le code livré.
+- Script Python : 75 tâches passées à `[x]`. Phase 6 : seule la tâche staging cochée, les 5 restantes conservées `[ ]`.
+
+### Audit qualité — suppression des APIs natives bloquantes
+- **`document.write`** retiré de `FicheDeVie.tsx` et `TabSynthese.tsx` → remplacé par Blob URL (`URL.createObjectURL`). Fix iOS Safari (bloque `window.open + document.write`).
+- **`confirm()`** retiré de : `PlanPage` (Générer + Supprimer prélèvement), `EquipementPage`, `DemandesPage`, `useDocumentData` (hook générique), `MaintenancePage`, `VerificationPage`. Remplacé par two-step state inline (bouton → "Confirmer / Annuler").
+- **`alert()`** retiré de `PlanPage.addCustomSampling` → `toast.error()`.
+- **`: any`** retiré de `MobileDrawer.tsx` → `LucideIcon | null` typé explicitement.
+- `useDocumentData` : `deleteConfirmMessage` supprimé de l'interface, `requestDelete`/`cancelDelete`/`confirmDelete` exposés pour que les callers gèrent la confirmation dans leur JSX.
+
+### Prochaines étapes
+- §3 refactoring : sous-collection `samplings` (risque limite 1 Mo Firestore)
+- §4 tests unitaires hooks
+- Durcissement règles Firestore pour multi-utilisateurs
+- Phase 6 : déploiement production + validation équipe
+
+---
+
+## Session 30 — Refactoring §2 : soldé (MissionDetailPage + TODO_REFACTORING)
+**16 mai 2026**
+
+### Refactoring — MissionDetailPage
+
+- `useClientData` branché sur `MissionDetailPage.tsx` : listener `onSnapshot` + auto-save inline supprimés.
+- `handleTerminer` réécrit sans `setSaving`/`setClient` manuels — utilise `triggerSave` puis `navigate(-1)` immédiatement (save se déclenche en background dans les 800ms).
+- `MissionDetailPage` : **368 → 333 lignes** (−35). (commit `2219a79`)
+
+### Décision — AdminPage non refactorisée
+
+- `AdminPage.tsx` (707L) contient 1 listener Firestore dans `BugsSection` — déjà isolé dans un sous-composant dédié. Pattern correct, pas d'extraction supplémentaire justifiée.
+- La taille (707L) est due au JSX dense, pas à de la logique métier inline.
+
+### TODO_REFACTORING.md — §2 soldé
+
+- `Logique métier vs Vue` cochée ✅ : `usePlanningCalendar` + `useClientData`.
+- `Abstraction Firestore` cochée ✅ : `useClientData` + `useDocumentData<T>` couvrent ClientPage, PlanPage, MissionDetailPage, MaintenancePage, VerificationPage.
+- §1 et §2 entièrement soldés. Note de bas de page mise à jour.
+
+### Prochaines étapes
+
+- §3 Évolutivité données : sous-collection `samplings` (risque 1 Mo par document client si historique croît).
+- §4 Tests unitaires : couverture des hooks de données (`usePlanningData`, `useClientData`, etc.).
+
+---
+
+## Session 29 — Refactoring §2 : abstraction Firestore (useClientData, useDocumentData)
+**15 mai 2026**
+
+### Hooks créés
+
+- **`useClientData(clientId)`** — extrait de `ClientPage.tsx` : listener `onSnapshot` sur `clients-v2`, auto-save debounce 800ms, détection conflit concurrent (bandeau orange), `handleDeleteClient` avec attente zombie-proof. Retourne `{ client, loading, saving, remoteChanged, triggerSave, update, handleReload, handleDeleteClient, dismissRemoteChanged }`.
+- **`useDocumentData<T>(options)`** — hook générique pour les fiches simples : onSnapshot + auto-save debounce + delete. Paramétrable via `saveFn`, `onAfterSave`, `deleteRedirect`, `deleteConfirmMessage`. Utilisé par `MaintenancePage` et `VerificationPage`.
+
+### Pages refactorées
+
+| Page | Avant | Après | Δ | Commits |
+|------|-------|-------|---|---------|
+| `ClientPage.tsx` | 815L | 717L | −98 | `083a2d3` |
+| `MaintenancePage.tsx` | 225L | 194L | −31 | `08c9b29` |
+| `VerificationPage.tsx` | 206L | 174L | −32 | `08c9b29` |
+| `PlanPage.tsx` | 470L | 416L | −54 | `3be3086` |
+
+### Décisions
+
+- `PlanPage` réutilise `useClientData` directement (même collection `clients-v2`). Redirection client supprimé gérée par `useEffect(!loading && !client → navigate)`.
+- `useDocumentData` préféré à deux hooks quasi-identiques `useMaintenanceData`/`useVerificationData` — DRY + extensible.
+
+### Prochaines étapes
+
+- TODO_REFACTORING §2 restant : `MissionDetailPage` (2 appels Firestore inline), `AdminPage` (655L, 2 appels Firestore).
+- Envisager : cocher §2 "Abstraction Firestore" dans TODO_REFACTORING.md une fois AdminPage traité.
+
+---
+
 ## Session 28 — Refactoring §2 : usePlanningCalendar
 **15 mai 2026**
 
