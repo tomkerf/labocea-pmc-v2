@@ -210,8 +210,9 @@ function renderPhaseCard(p, journal) {
   const status = statusOf(p, journal)
   const badgeClass = { done: 'badge-done', partial: 'badge-partial', todo: 'badge-todo' }[status]
   const badgeLabel = { done: '✅ Terminé', partial: '⏳ En cours', todo: '○ À venir' }[status]
+  const allDone = status === 'done'
   const tasks = p.tasks.map(t =>
-    `<li><span class="task-dot ${t.done ? 'dot-done' : 'dot-todo'}"></span>${escape(t.text)}</li>`
+    `<li><span class="task-dot ${(allDone || t.done) ? 'dot-done' : 'dot-todo'}"></span>${escape(t.text)}</li>`
   ).join('')
   return `
     <div class="phase-card ${status}">
