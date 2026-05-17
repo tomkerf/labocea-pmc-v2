@@ -233,6 +233,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-16 | Qualité ✅ | Roadmap visuelle HTML (auto-fetch GitHub, journal-driven phase status, dots verts si phase done), sync checkboxes ROADMAP.md (75 tâches cochées), audit qualité pré-équipe : document.write→Blob URL (FicheDeVie + TabSynthese), confirm/alert→two-step state (PlanPage, EquipementPage, DemandesPage, useDocumentData, MaintenancePage, VerificationPage), : any→LucideIcon dans MobileDrawer. |
 | 2026-05-16 | Sécu + Qualité ✅ | Firestore rules durcies (delete→admin, validation champs), Storage rules (10MB + images), §4 tests unitaires (66 tests, jsdom, renderHook), skill tester-app, code review senior (8 issues corrigées : navigate/render, password type, saveClient throw, deleteClient simplifié, isToday timezone, aCalibrrer double comptage). |
 | 2026-05-17 | UX pré-prod ✅ | Guide utilisateur enrichi (Par où commencer, Tableau de bord, Missions rapports/suppression, Matériel localisation, Métrologie PDF), changement de mot de passe in-app (Mon compte), retrait vue planning équipe, matériaux tuyaux réduits à 3. Staging prêt pour envoi équipe. |
+| 2026-05-17 | Infra + Explore ✅ | Git débloqué (nouveau PAT + osxkeychain), 10 commits poussés. Tentative emojis KPI cards — revert. |
 
 ---
 

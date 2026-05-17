@@ -673,6 +673,27 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 
 ---
 
+## Session 34 — Infrastructure git + tentative dashboard
+**17 mai 2026**
+
+### Infrastructure git
+- Push GitHub débloqué : création d'un nouveau Personal Access Token (classic, scope `repo`) après expiration de l'ancien.
+- Trousseau macOS configuré (`credential.helper osxkeychain`) — futurs push sans saisie de token.
+- 10 commits de la session 33 poussés sur `origin/main`.
+
+### Tentative d'égayage du dashboard
+- Ajout d'emojis (📋 ✅ 📬 🔬) dans les KPI cards via prop `emoji` sur `StatCard`.
+- Revert immédiat sur demande — rendu jugé non satisfaisant.
+- Dashboard revenu à son état d'origine.
+
+### Prochaines étapes
+- Envoyer le lien staging à l'équipe : `https://labocea-pmc-v2-dev.tomkerf.workers.dev`
+- Collecter les retours (1-2 semaines)
+- Corriger les issues remontées
+- Déployer en production : `npx wrangler deploy`
+
+---
+
 ## Session 33 — Guide utilisateur + UX pré-prod
 **17 mai 2026**
 
