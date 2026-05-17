@@ -2,6 +2,7 @@ import {
   CalendarDays, CheckCircle2, Clock, XCircle, AlertTriangle,
   ChevronRight, Droplets, ClipboardList, FolderPlus, MapPin,
   FlaskConical, Wrench, Camera, Filter, MousePointer2, Bug,
+  LogIn, User, LayoutDashboard,
 } from 'lucide-react'
 
 // ── Composants locaux ────────────────────────────────────────
@@ -98,6 +99,108 @@ export default function AidePage() {
           et <strong>Dashboard</strong> (vue synthétique du jour). Tout est sauvegardé automatiquement.
         </p>
       </div>
+
+      {/* ── Par où commencer ── */}
+      <Section icon={LogIn} title="Par où commencer">
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Bienvenue sur Labocea PMC. Voici les trois étapes pour démarrer efficacement.
+        </p>
+
+        <div className="flex flex-col gap-4">
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Première connexion
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={1}>
+                Ouvre l'app et connecte-toi avec l'<strong>email et le mot de passe</strong> fournis par l'administrateur.
+                Si c'est ta première connexion, pense à changer ton mot de passe depuis <strong>Mon compte</strong>.
+              </Step>
+              <Step num={2}>
+                Tu arrives directement sur le <strong>tableau de bord</strong> — il affiche tes interventions du jour,
+                les alertes actives et l'état du parc matériel.
+              </Step>
+            </div>
+          </div>
+
+          <Divider />
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Configurer son profil
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={3}>
+                Va dans <strong>Mon compte</strong> (icône en bas de la barre de navigation).
+                Vérifie que tes <strong>initiales</strong> sont correctes — elles apparaissent sur tous tes prélèvements
+                et dans le planning de l'équipe.
+              </Step>
+              <Step num={4}>
+                Si tes initiales sont incorrectes, modifie-les et sauvegarde. Ce changement s'applique immédiatement
+                à toutes tes futures interventions.
+              </Step>
+            </div>
+          </div>
+
+          <Divider />
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Les 6 modules de l'app
+            </p>
+            <div className="flex flex-col gap-2">
+              {[
+                { label: 'Dashboard', desc: "Vue synthétique du jour — interventions, alertes, état du matériel." },
+                { label: 'Missions', desc: "Clients, plans de prélèvement et calendrier annuel par site." },
+                { label: 'Planning', desc: "Calendrier commun de l'équipe — vue Jour, Semaine ou Mois." },
+                { label: 'Matériel', desc: "Inventaire du parc terrain et suivi de l'état des équipements." },
+                { label: 'Métrologie', desc: "Vérifications et étalonnages des instruments de mesure." },
+                { label: 'Maintenances', desc: "Interventions préventives et correctives sur les équipements." },
+              ].map(({ label, desc }) => (
+                <div key={label} className="flex gap-3 py-2" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                  <span className="text-sm font-semibold w-28 shrink-0" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
+                  <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <Divider />
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Routine quotidienne
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={5}>
+                <strong>Le matin</strong> — ouvre le <strong>Dashboard</strong> pour voir les interventions du jour
+                et les alertes en cours.
+              </Step>
+              <Step num={6}>
+                <strong>Sur le terrain</strong> — ouvre le <strong>Planning</strong>, clique sur ton intervention,
+                passe-la à <strong>Réalisé</strong> et saisis la date effective.
+              </Step>
+              <Step num={7}>
+                <strong>Si quelque chose ne va pas</strong> — utilise <strong>Signaler un problème</strong>
+                en bas de la navigation. L'administrateur est notifié immédiatement.
+              </Step>
+            </div>
+          </div>
+
+        </div>
+
+        <Tip icon={User}>
+          <span>
+            <strong>Tout est sauvegardé automatiquement.</strong> Pas besoin de cliquer sur "Enregistrer" après chaque modification.
+            Un indicateur discret en haut de page confirme la sauvegarde.
+          </span>
+        </Tip>
+      </Section>
 
       {/* ── Statuts ── */}
       <Section icon={ClipboardList} title="Statuts des prélèvements">
@@ -339,6 +442,50 @@ export default function AidePage() {
               </Step>
             </div>
           </div>
+
+          <Divider />
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Étape 4 — Suivi des rapports
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={9}>
+                Sur la fiche d'un prélèvement, coche <strong>Rapport prévu</strong> pour indiquer qu'un rapport
+                doit être envoyé au client. Saisis la date prévue d'envoi.
+              </Step>
+              <Step num={10}>
+                Une fois le rapport envoyé, renseigne la <strong>date d'envoi effective</strong>.
+                Le badge passe de orange (prévu) à vert (envoyé) dans le planning.
+              </Step>
+              <Step num={11}>
+                Le <strong>Dashboard</strong> affiche un bloc "Rapports à envoyer" avec tous les rapports
+                prévus mais non encore envoyés, triés par date.
+              </Step>
+            </div>
+          </div>
+
+          <Divider />
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Archiver ou supprimer un client
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={12}>
+                Dans la fiche client, le bouton <strong>Supprimer</strong> est accessible en bas de page.
+                Une confirmation en deux étapes est demandée avant toute suppression définitive.
+              </Step>
+              <Step num={13}>
+                La suppression est <strong>irréversible</strong> et efface tous les plans et prélèvements associés.
+                Si la mission est terminée mais que tu veux garder l'historique, modifie plutôt le statut
+                du client ou laisse-le inactif dans la liste.
+              </Step>
+            </div>
+          </div>
+
         </div>
 
         <div className="mt-4 flex flex-col gap-3">
@@ -425,6 +572,15 @@ export default function AidePage() {
           <Step num={3}>
             Filtre par <strong>catégorie</strong> ou <strong>état</strong> pour trouver rapidement un équipement disponible.
           </Step>
+          <Step num={4}>
+            Pour modifier un équipement, clique sur sa fiche et édite directement les champs.
+            La <strong>localisation</strong> (Labo, Terrain, Prêté à un tiers) se met à jour en temps réel
+            pour toute l'équipe — utile pour savoir où se trouve un appareil avant de partir en mission.
+          </Step>
+          <Step num={5}>
+            Pour <strong>supprimer un équipement</strong>, ouvre sa fiche et utilise le bouton Supprimer en bas de page.
+            Une confirmation est demandée. L'historique des vérifications et maintenances associées est également supprimé.
+          </Step>
         </div>
 
         <Tip>
@@ -461,6 +617,15 @@ export default function AidePage() {
               <Step num={3}>
                 La date du prochain contrôle est automatiquement mise à jour sur la fiche équipement après chaque saisie.
               </Step>
+              <Step num={4}>
+                Tu peux joindre un <strong>certificat PDF</strong> à chaque vérification (étalonnage externe COFRAC, etc.).
+                Il est consultable depuis la fiche de vérification à tout moment.
+              </Step>
+              <Step num={5}>
+                Utilise les <strong>filtres</strong> en haut du tableau pour afficher uniquement les équipements
+                <strong> En retard</strong>, <strong>À prévoir</strong> ou <strong>À jour</strong>.
+                Pratique pour préparer la semaine de vérifications.
+              </Step>
             </div>
           </div>
 
@@ -492,6 +657,49 @@ export default function AidePage() {
           <span>
             <strong>Dashboard</strong> — la page d'accueil affiche en temps réel les équipements
             dont l'étalonnage est dû dans les 7 jours et les maintenances en attente, avec un lien direct vers chaque fiche.
+          </span>
+        </Tip>
+      </Section>
+
+      {/* ── Dashboard ── */}
+      <Section icon={LayoutDashboard} title="Le tableau de bord">
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Le tableau de bord est la première page que tu vois en ouvrant l'app.
+          Il synthétise l'essentiel de la journée en un seul écran.
+        </p>
+
+        <div className="flex flex-col gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+              style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+              Ce que tu y trouves
+            </p>
+            <div className="flex flex-col gap-3">
+              <Step num={1}>
+                <strong>4 indicateurs clés</strong> en haut : missions réalisées ce mois,
+                taux de conformité métrologique, alertes actives, et équipements à calibrer cette semaine.
+              </Step>
+              <Step num={2}>
+                <strong>Planning du jour</strong> — liste chronologique des interventions prévues aujourd'hui,
+                avec leur statut et un lien direct vers la fiche de chaque mission.
+              </Step>
+              <Step num={3}>
+                <strong>État du matériel</strong> — graphique en donut avec le nombre d'équipements
+                par état (opérationnel, à calibrer, en maintenance, hors service).
+              </Step>
+              <Step num={4}>
+                <strong>Alertes</strong> — équipements dont l'étalonnage arrive à échéance dans les 7 jours
+                et maintenances en attente. Chaque alerte est un lien cliquable vers la fiche concernée.
+              </Step>
+            </div>
+          </div>
+        </div>
+
+        <Tip icon={ChevronRight}>
+          <span>
+            <strong>Prélèvements en retard</strong> — un bloc dédié s'affiche si des prélèvements
+            sont passés sans être validés. Clique sur chacun pour accéder directement à la fiche
+            et régulariser le statut.
           </span>
         </Tip>
       </Section>
