@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback, useRef } from 'react'
 import { ChevronLeft, ChevronRight, Plus, Calendar } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import { useClientsListener } from '@/hooks/useClients'
 import { saveClient } from '@/services/clientService'
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -51,8 +50,7 @@ export default function PlanningPage() {
   useEvenementsListener(); useUsersListener()
   usePreleveursListener()
 
-  const navigate   = useNavigate()
-  const uid        = useAuthStore(selectUid)
+const uid        = useAuthStore(selectUid)
   const initiales  = useAuthStore(selectInitiales)
   const { clients }       = useMissionsStore()
   const { verifications } = useMetrologieStore()
@@ -368,13 +366,6 @@ export default function PlanningPage() {
                 </button>
               ))}
             </div>
-            {/* Vue équipe */}
-            <button onClick={() => navigate('/planning/equipe')}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background:'var(--color-bg-tertiary)', color:'var(--color-text-secondary)', border:'1px solid var(--color-border-subtle)' }}
-              title="Vue planning équipe">
-              👥
-            </button>
           </div>
         </div>
 
