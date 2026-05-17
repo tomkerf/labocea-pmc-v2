@@ -68,6 +68,7 @@ function exportFicheDeViePDF(equipement: Equipement, entries: TimelineEntry[]) {
   <dt>Catégorie</dt><dd>${equipement.categorie}</dd>
   <dt>État</dt><dd>${equipement.etat}</dd>
   <dt>Localisation</dt><dd>${equipement.localisation}</dd>
+  <dt>Site</dt><dd>${equipement.site === 'quimper' ? 'Quimper' : equipement.site === 'brest' ? 'Brest' : '—'}</dd>
   <dt>Date acquisition</dt><dd>${equipement.dateAcquisition ? fmt(equipement.dateAcquisition) : '—'}</dd>
   <dt>Prochain étalonnage</dt><dd>${equipement.prochainEtalonnage ? fmt(equipement.prochainEtalonnage) : '—'}</dd>
   <dt>Notes</dt><dd>${equipement.notes || '—'}</dd>

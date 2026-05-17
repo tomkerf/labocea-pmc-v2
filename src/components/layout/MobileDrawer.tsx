@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 import {
-  LayoutDashboard, ClipboardList, CalendarDays, Wrench, BookOpen, ShieldAlert, X, FlaskConical, Pipette, HelpCircle,
+  LayoutDashboard, ClipboardList, CalendarDays, Wrench, BookOpen, ShieldAlert, X, FlaskConical, Pipette, HelpCircle, Gauge, Hammer,
 } from 'lucide-react'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import UserAvatar from '@/components/ui/UserAvatar'
@@ -14,6 +14,8 @@ const NAV_ITEMS = [
   { to: '/planning',   icon: CalendarDays,    label: 'Planning'                   },
   { to: '/infos',      icon: BookOpen,        label: 'Infos terrain'              },
   { to: '/materiel',   icon: Wrench,          label: 'Matériel'                   },
+  { to: '/metrologie',            icon: Gauge,        label: 'Métrologie'         },
+  { to: '/maintenances',          icon: Hammer,       label: 'Maintenances'       },
   { to: '/outils/asservissement', icon: FlaskConical, label: 'Asservissement'     },
   { to: '/outils/tuyaux',        icon: Pipette,      label: 'Tuyaux'             },
   { to: '/aide',                 icon: HelpCircle,   label: 'Mode d\'emploi'     },

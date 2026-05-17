@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, Gauge } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useVerificationsListener } from '@/hooks/useVerifications'
 import { createVerification } from '@/services/verificationService'
@@ -8,6 +8,7 @@ import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useAuthStore, selectUid, selectPrenom, selectInitiales } from '@/stores/authStore'
 import { useMetrologieRows, calcStatut } from '@/hooks/useMetrologieRows'
+import CircleProgress from '@/components/materiel/CircleProgress'
 import type { Verification } from '@/types'
 
 const TYPE_LABELS: Record<string, string> = {
@@ -28,6 +29,21 @@ const FILTERS = [
   { value: 'soon', label: 'À prévoir' },
   { value: 'late', label: 'En retard' },
 ]
+
+function calcMetroPercent(prochainDate: string): number {
+  if (!prochainDate) return 0
+  const now = Date.now()
+  const next = new Date(prochainDate).getTime()
+  const msDiff = next - now
+  if (msDiff <= 0) return 0
+  return Math.min(100, Math.round((msDiff / (365 * 24 * 60 * 60 * 1000)) * 100))
+}
+
+function getMetroColor(percent: number): string {
+  if (percent >= 60) return 'var(--color-success)'
+  if (percent >= 30) return 'var(--color-warning)'
+  return 'var(--color-danger)'
+}
 
 export default function MerologiePage() {
   useVerificationsListener()
@@ -80,12 +96,12 @@ export default function MerologiePage() {
           style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
         >
           <Plus size={16} />
-          Nouvelle vérification
+          Nouvelle
         </button>
       </div>
 
-      {/* Filtres statut */}
-      <div className="flex gap-2 mb-5">
+      {/* Filtres */}
+      <div className="flex gap-2 mb-5 flex-wrap">
         {FILTERS.map((f) => (
           <button key={f.value}
             onClick={() => setFilterStatut(f.value)}
@@ -101,7 +117,7 @@ export default function MerologiePage() {
         ))}
       </div>
 
-      {/* Tableau */}
+      {/* Liste */}
       {loading ? (
         <div className="flex justify-center py-20">
           <div className="w-6 h-6 rounded-full border-2 animate-spin"
@@ -116,54 +132,58 @@ export default function MerologiePage() {
           </p>
         </div>
       ) : (
-        <div className="rounded-xl overflow-hidden"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-
-          {/* Header tableau */}
-          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-2.5"
-            style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-tertiary)' }}>
-            {['Équipement', 'Type', 'Prochain contrôle', 'Statut'].map((h) => (
-              <span key={h} className="text-xs font-semibold uppercase"
-                style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>{h}</span>
-            ))}
-          </div>
-
-          {/* Lignes */}
-          {filtered.map((row, i) => {
+        <div className="flex flex-col gap-3">
+          {filtered.map((row) => {
             if (row.kind === 'verification') {
               const v = row.data as Verification
               const statut = calcStatut(v.prochainControle)
               const resultatCfg = RESULTAT_CONFIG[v.resultat]
+              const percent = calcMetroPercent(v.prochainControle)
+              const iconColor = getMetroColor(percent)
+
               return (
                 <button key={v.id}
                   onClick={() => navigate(`/metrologie/${v.id}`)}
-                  className="w-full grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-3.5 text-left transition-colors"
-                  style={{ borderBottom: i < filtered.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                  className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
+                  style={{
+                    background: 'var(--color-bg-secondary)',
+                    border: '1px solid var(--color-border-subtle)',
+                    boxShadow: 'var(--shadow-card)',
+                  }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-bg-secondary)')}
                 >
-                  <div>
-                    <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                      {v.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }}>—</span>}
+                  <div className="shrink-0">
+                    <CircleProgress
+                      percent={percent}
+                      size={44}
+                      icon={<Gauge size={16} strokeWidth={1.8} color={iconColor} />}
+                    />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                      {v.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }}>Équipement non défini</span>}
                     </p>
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
-                      {v.date ? new Date(v.date).toLocaleDateString('fr-FR') : '—'}
+                    <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                      {TYPE_LABELS[v.type] ?? v.type}
+                    </p>
+                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                      {[
+                        v.date ? `Réalisé le ${new Date(v.date).toLocaleDateString('fr-FR')}` : null,
+                        v.prochainControle ? `Prochain : ${new Date(v.prochainControle).toLocaleDateString('fr-FR')}` : null,
+                      ].filter(Boolean).join(' · ')}
                     </p>
                   </div>
-                  <span className="text-xs self-center" style={{ color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
-                    {TYPE_LABELS[v.type] ?? v.type}
-                  </span>
-                  <span className="text-xs self-center" style={{ color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
-                    {v.prochainControle ? new Date(v.prochainControle).toLocaleDateString('fr-FR') : '—'}
-                  </span>
-                  <div className="flex flex-col gap-1 items-end self-center">
+
+                  <div className="flex flex-col items-end gap-1 shrink-0">
                     <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-                      style={{ background: statut.bg, color: statut.color, whiteSpace: 'nowrap' }}>
+                      style={{ background: statut.bg, color: statut.color }}>
                       {statut.label}
                     </span>
                     {resultatCfg && (
                       <span className="text-xs px-2 py-0.5 rounded-full"
-                        style={{ background: resultatCfg.bg, color: resultatCfg.color, whiteSpace: 'nowrap' }}>
+                        style={{ background: resultatCfg.bg, color: resultatCfg.color }}>
                         {resultatCfg.label}
                       </span>
                     )}
@@ -174,29 +194,46 @@ export default function MerologiePage() {
 
             const eq = row.data
             const statut = calcStatut(eq.prochainEtalonnage)
+            const percent = calcMetroPercent(eq.prochainEtalonnage)
+            const iconColor = getMetroColor(percent)
+
             return (
               <button key={eq.id}
                 onClick={() => navigate(`/materiel/${eq.id}`)}
-                className="w-full grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-3.5 text-left transition-colors"
-                style={{ borderBottom: i < filtered.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
+                style={{
+                  background: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border-subtle)',
+                  boxShadow: 'var(--shadow-card)',
+                }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-bg-secondary)')}
               >
-                <div>
-                  <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                    {eq.nom || <span style={{ color: 'var(--color-text-tertiary)' }}>—</span>}
+                <div className="shrink-0">
+                  <CircleProgress
+                    percent={percent}
+                    size={44}
+                    icon={<Gauge size={16} strokeWidth={1.8} color={iconColor} />}
+                  />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                    {eq.nom || <span style={{ color: 'var(--color-text-tertiary)' }}>Sans nom</span>}
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
-                    {[eq.marque, eq.modele].filter(Boolean).join(' ') || 'Aucune vérification enregistrée'}
+                  <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                    {[eq.marque, eq.modele].filter(Boolean).join(' ') || '—'}
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                    {eq.prochainEtalonnage
+                      ? `Prochain : ${new Date(eq.prochainEtalonnage).toLocaleDateString('fr-FR')}`
+                      : 'Aucune vérification enregistrée'}
                   </p>
                 </div>
-                <span className="text-xs self-center" style={{ color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>—</span>
-                <span className="text-xs self-center" style={{ color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
-                  {new Date(eq.prochainEtalonnage).toLocaleDateString('fr-FR')}
-                </span>
-                <div className="flex flex-col gap-1 items-end self-center">
+
+                <div className="shrink-0">
                   <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-                    style={{ background: statut.bg, color: statut.color, whiteSpace: 'nowrap' }}>
+                    style={{ background: statut.bg, color: statut.color }}>
                     {statut.label}
                   </span>
                 </div>

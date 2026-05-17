@@ -48,8 +48,12 @@ export default function ClientCard({ client }: Props) {
   return (
     <button
       onClick={() => navigate(`/missions/${client.id}`)}
-      className="w-full text-left flex items-center gap-4 px-5 py-4 transition-colors"
-      style={{ borderBottom: '1px solid var(--color-border-subtle)' }}
+      className="w-full text-left flex items-center gap-4 px-5 py-4 rounded-xl transition-colors"
+      style={{
+        background: 'var(--color-bg-secondary)',
+        border: '1px solid var(--color-border-subtle)',
+        boxShadow: 'var(--shadow-card)',
+      }}
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >

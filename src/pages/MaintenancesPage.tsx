@@ -1,39 +1,42 @@
 import { useState, useMemo } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, Wrench, Zap } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { createMaintenance } from '@/services/maintenanceService'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useAuthStore, selectUid, selectPrenom, selectInitiales } from '@/stores/authStore'
 import type { Maintenance } from '@/types'
+import type { LucideIcon } from 'lucide-react'
 
-const TYPE_LABELS: Record<string, string> = {
-  preventive: 'Préventive',
-  corrective: 'Corrective',
-  panne: 'Panne',
+const TYPE_CONFIG: Record<string, { label: string; icon: LucideIcon; color: string; bg: string }> = {
+  preventive: { label: 'Préventive',  icon: Wrench,         color: 'var(--color-accent)',   bg: 'var(--color-accent-light)'   },
+  corrective: { label: 'Corrective',  icon: Zap,            color: 'var(--color-warning)',  bg: 'var(--color-warning-light)'  },
+  panne:      { label: 'Panne',       icon: Wrench,         color: 'var(--color-danger)',   bg: 'var(--color-danger-light)'   },
 }
 
 const STATUT_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
-  planifiee:    { label: 'Planifiée',   bg: 'var(--color-bg-tertiary)',    color: 'var(--color-text-secondary)' },
-  en_cours:     { label: 'En cours',    bg: 'var(--color-warning-light)',  color: 'var(--color-warning)'        },
-  realisee:     { label: 'Réalisée',    bg: 'var(--color-success-light)',  color: 'var(--color-success)'        },
-  abandonnee:   { label: 'Abandonnée', bg: 'var(--color-danger-light)',   color: 'var(--color-danger)'         },
+  planifiee:  { label: 'Planifiée',  bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)' },
+  en_cours:   { label: 'En cours',   bg: 'var(--color-warning-light)', color: 'var(--color-warning)'        },
+  realisee:   { label: 'Réalisée',   bg: 'var(--color-success-light)', color: 'var(--color-success)'        },
+  abandonnee: { label: 'Abandonnée', bg: 'var(--color-danger-light)',  color: 'var(--color-danger)'         },
 }
 
 const STATUTS_FILTER = [
-  { value: '', label: 'Tous' },
-  { value: 'planifiee', label: 'Planifiée' },
-  { value: 'en_cours', label: 'En cours' },
-  { value: 'realisee', label: 'Réalisée' },
+  { value: '',           label: 'Tous'       },
+  { value: 'planifiee',  label: 'Planifiée'  },
+  { value: 'en_cours',   label: 'En cours'   },
+  { value: 'realisee',   label: 'Réalisée'   },
   { value: 'abandonnee', label: 'Abandonnée' },
 ]
 
 const TYPES_FILTER = [
-  { value: '', label: 'Tous types' },
-  { value: 'preventive', label: 'Préventive' },
-  { value: 'corrective', label: 'Corrective' },
-  { value: 'panne', label: 'Panne' },
+  { value: '',           label: 'Tous types'  },
+  { value: 'preventive', label: 'Préventive'  },
+  { value: 'corrective', label: 'Corrective'  },
+  { value: 'panne',      label: 'Panne'       },
 ]
+
+const STATUT_ORDER: Record<string, number> = { en_cours: 0, planifiee: 1, realisee: 2, abandonnee: 3 }
 
 export default function MaintenancesPage() {
   useMaintenancesListener()
@@ -49,14 +52,11 @@ export default function MaintenancesPage() {
 
   const technicienNom = [prenom, initiales].filter(Boolean).join(' ')
 
-  // Liste unique des appareils présents dans les maintenances
   const appareils = useMemo(() => {
     const s = new Set<string>()
     maintenances.forEach((m: Maintenance) => { if (m.equipementNom) s.add(m.equipementNom) })
     return Array.from(s).sort()
   }, [maintenances])
-
-  const STATUT_ORDER: Record<string, number> = { en_cours: 0, planifiee: 1, realisee: 2, abandonnee: 3 }
 
   const filtered = maintenances
     .filter((m: Maintenance) => {
@@ -69,7 +69,6 @@ export default function MaintenancesPage() {
       const sa = STATUT_ORDER[a.statut] ?? 9
       const sb = STATUT_ORDER[b.statut] ?? 9
       if (sa !== sb) return sa - sb
-      // À statut égal : date décroissante (la plus récente en haut)
       const da = a.datePrevue ?? a.dateRealisee ?? ''
       const db = b.datePrevue ?? b.dateRealisee ?? ''
       return db.localeCompare(da)
@@ -103,31 +102,36 @@ export default function MaintenancesPage() {
           style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
         >
           <Plus size={16} />
-          Nouvelle intervention
+          Nouvelle
         </button>
       </div>
 
       {/* Filtres */}
-      <div className="flex gap-2 mb-5 flex-wrap">
-        {STATUTS_FILTER.map((f) => (
-          <button key={f.value}
-            onClick={() => setFilterStatut(f.value)}
-            className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-            style={{
-              background: filterStatut === f.value ? 'var(--color-accent-light)' : 'var(--color-bg-secondary)',
-              color: filterStatut === f.value ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-              border: '1px solid var(--color-border-subtle)',
-            }}
-          >
-            {f.label}
-          </button>
-        ))}
-        <div className="flex gap-2 ml-auto">
+      <div className="flex flex-col gap-3 mb-5">
+        {/* Pills statut */}
+        <div className="flex gap-2 flex-wrap">
+          {STATUTS_FILTER.map((f) => (
+            <button key={f.value}
+              onClick={() => setFilterStatut(f.value)}
+              className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+              style={{
+                background: filterStatut === f.value ? 'var(--color-accent-light)' : 'var(--color-bg-secondary)',
+                color: filterStatut === f.value ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                border: '1px solid var(--color-border-subtle)',
+              }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Selects */}
+        <div className="flex gap-2">
           <select
             value={filterAppareil}
             onChange={(e) => setFilterAppareil(e.target.value)}
-            className="px-3 py-1.5 rounded-lg text-sm"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: filterAppareil ? 'var(--color-accent)' : 'var(--color-text-primary)' }}
+            className="flex-1 px-3 py-2 rounded-lg text-sm"
+            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
           >
             <option value="">Tous appareils</option>
             {appareils.map((a) => <option key={a} value={a}>{a}</option>)}
@@ -135,7 +139,7 @@ export default function MaintenancesPage() {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="px-3 py-1.5 rounded-lg text-sm"
+            className="flex-1 px-3 py-2 rounded-lg text-sm"
             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
           >
             {TYPES_FILTER.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
@@ -153,52 +157,63 @@ export default function MaintenancesPage() {
         <div className="text-center py-16">
           <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
             {maintenances.length === 0
-              ? 'Aucune intervention — cliquez sur "Nouvelle intervention" pour commencer.'
+              ? 'Aucune intervention — cliquez sur "Nouvelle" pour commencer.'
               : 'Aucune intervention pour ces filtres.'}
           </p>
         </div>
       ) : (
-        <div className="rounded-xl overflow-hidden"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-
-          {/* Header */}
-          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-2.5"
-            style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-tertiary)' }}>
-            {['Équipement', 'Type', 'Date prévue', 'Statut'].map((h) => (
-              <span key={h} className="text-xs font-semibold uppercase"
-                style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>{h}</span>
-            ))}
-          </div>
-
-          {/* Lignes */}
-          {filtered.map((m: Maintenance, i: number) => {
+        <div className="flex flex-col gap-3">
+          {filtered.map((m: Maintenance) => {
+            const typeCfg = TYPE_CONFIG[m.type] ?? TYPE_CONFIG.corrective
             const statutCfg = STATUT_CONFIG[m.statut] ?? STATUT_CONFIG.planifiee
+            const TypeIcon = typeCfg.icon
+            const date = m.datePrevue
+              ? new Date(m.datePrevue).toLocaleDateString('fr-FR')
+              : m.dateRealisee
+              ? new Date(m.dateRealisee).toLocaleDateString('fr-FR')
+              : null
+
             return (
-              <button key={m.id}
+              <button
+                key={m.id}
                 onClick={() => navigate(`/maintenances/${m.id}`)}
-                className="w-full grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-3.5 text-left transition-colors"
-                style={{ borderBottom: i < filtered.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
+                style={{
+                  background: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border-subtle)',
+                  boxShadow: 'var(--shadow-card)',
+                }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-bg-secondary)')}
               >
-                <div>
-                  <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-                    {m.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }}>—</span>}
+                {/* Icône type */}
+                <div className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: typeCfg.bg }}>
+                  <TypeIcon size={18} strokeWidth={1.8} color={typeCfg.color} />
+                </div>
+
+                {/* Infos */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                    {m.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }}>Équipement non défini</span>}
                   </p>
-                  <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-tertiary)' }}>
-                    {m.description || '—'}
+                  {m.description && (
+                    <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                      {m.description}
+                    </p>
+                  )}
+                  <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                    {[typeCfg.label, date].filter(Boolean).join(' · ')}
                   </p>
                 </div>
-                <span className="text-xs self-center" style={{ color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
-                  {TYPE_LABELS[m.type] ?? m.type}
-                </span>
-                <span className="text-xs self-center" style={{ color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
-                  {m.datePrevue ? new Date(m.datePrevue).toLocaleDateString('fr-FR') : '—'}
-                </span>
-                <span className="text-xs px-2.5 py-1 rounded-full font-medium self-center"
-                  style={{ background: statutCfg.bg, color: statutCfg.color, whiteSpace: 'nowrap' }}>
-                  {statutCfg.label}
-                </span>
+
+                {/* Badge statut */}
+                <div className="shrink-0">
+                  <span className="text-xs px-2.5 py-1 rounded-full font-medium"
+                    style={{ background: statutCfg.bg, color: statutCfg.color }}>
+                    {statutCfg.label}
+                  </span>
+                </div>
               </button>
             )
           })}

@@ -143,8 +143,7 @@ export default function MissionsPage() {
           </p>
         </div>
       ) : (
-        <div className="rounded-xl overflow-hidden"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        <div className="flex flex-col gap-3">
           {filtered.map((client) => (
             <ClientCard key={client.id} client={client} />
           ))}
