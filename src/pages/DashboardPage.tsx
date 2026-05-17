@@ -98,7 +98,7 @@ export default function DashboardPage() {
         <StatCard
           value={conformitePct !== null ? `${conformitePct}%` : '—'}
           label="Conformité métrologie"
-          sub={verifiTotal > 0 ? `${verifiConformes}/${verifiTotal} conformes` : 'Aucune vérification'}
+          sub={verifiTotal > 0 ? `${verifiConformes}/${verifiTotal} à jour` : 'Aucun instrument suivi'}
           warning={conformitePct !== null && conformitePct < 80}
           accent={conformitePct !== null && conformitePct >= 80}
         />
