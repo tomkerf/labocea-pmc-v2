@@ -96,18 +96,18 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
         <StatCard value={missionsCeMois} label="Missions ce mois" sub="prélèvements réalisés" accent />
         <StatCard
-          value={conformitePct !== null ? `${conformitePct}%` : '—'}
-          label="Conformité métrologie"
-          sub={verifiTotal > 0 ? `${verifiConformes}/${verifiTotal} à jour` : 'Aucun instrument suivi'}
-          warning={conformitePct !== null && conformitePct < 80}
-          accent={conformitePct !== null && conformitePct >= 80}
-        />
-        <StatCard
           value={rapportsAFaire.length}
           label="Rapports à envoyer"
           sub={rapportsAFaire.length > 0 ? `${rapportsAFaire.filter(r => r.enRetard).length} en retard` : 'Tout est à jour'}
           danger={rapportsAFaire.some(r => r.enRetard)}
           warning={rapportsAFaire.length > 0 && !rapportsAFaire.some(r => r.enRetard)}
+        />
+        <StatCard
+          value={conformitePct !== null ? `${conformitePct}%` : '—'}
+          label="Conformité métrologie"
+          sub={verifiTotal > 0 ? `${verifiConformes}/${verifiTotal} à jour` : 'Aucun instrument suivi'}
+          warning={conformitePct !== null && conformitePct < 80}
+          accent={conformitePct !== null && conformitePct >= 80}
         />
         <StatCard
           value={aCalibrrer}
