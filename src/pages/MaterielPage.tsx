@@ -207,6 +207,20 @@ export default function MaterielPage() {
         )}
       </div>
 
+      {/* Légende anneau métrologique */}
+      <div className="flex gap-4 flex-wrap mb-4">
+        {[
+          { color: 'var(--color-success)', label: 'Étalonnage à jour' },
+          { color: 'var(--color-warning)', label: 'À prévoir (< 30%)' },
+          { color: 'var(--color-danger)',  label: 'En retard / urgent' },
+        ].map(({ color, label }) => (
+          <div key={label} className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-full shrink-0" style={{ background: color }} />
+            <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{label}</span>
+          </div>
+        ))}
+      </div>
+
       {/* Liste */}
       {loading ? (
         <div className="flex justify-center py-20">

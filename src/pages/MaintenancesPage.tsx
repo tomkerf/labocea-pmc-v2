@@ -125,6 +125,22 @@ export default function MaintenancesPage() {
           ))}
         </div>
 
+        {/* Légende types */}
+        <div className="flex gap-4 flex-wrap">
+          {Object.entries(TYPE_CONFIG).map(([key, cfg]) => {
+            const Icon = cfg.icon
+            return (
+              <div key={key} className="flex items-center gap-1.5">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: cfg.bg }}>
+                  <Icon size={12} strokeWidth={2} color={cfg.color} />
+                </div>
+                <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{cfg.label}</span>
+              </div>
+            )
+          })}
+        </div>
+
         {/* Selects */}
         <div className="flex gap-2">
           <select
