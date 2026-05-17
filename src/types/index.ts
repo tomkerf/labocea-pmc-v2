@@ -309,7 +309,7 @@ export interface Maintenance {
 
 // --- Tuyaux de prélèvement ---
 
-export type MateriauTuyau = 'VINYL (tricoclair)' | 'TEFLON' | 'SILICONE' | 'INOX' | 'POLYÉTHYLÈNE' | 'AUTRE'
+export type MateriauTuyau = 'VINYL (tricoclair)' | 'TEFLON' | 'SILICONE'
 
 export interface Tuyau {
   id: string
