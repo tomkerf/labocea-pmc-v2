@@ -673,6 +673,37 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 
 ---
 
+## Session 33 — Guide utilisateur + UX pré-prod
+**17 mai 2026**
+
+### Guide utilisateur (AidePage)
+- Ajout section **"Par où commencer"** : première connexion, configuration des initiales, tableau des 6 modules, routine quotidienne (matin / terrain / signalement).
+- Ajout section **"Tableau de bord"** : explication des 4 blocs (KPIs, planning du jour, donut matériel, alertes).
+- Enrichissement **Missions** : 2 nouvelles étapes — suivi des rapports (prévu/envoyé) et suppression client irréversible.
+- Enrichissement **Matériel** : localisation temps réel (labo/terrain/prêté) et suppression équipement.
+- Enrichissement **Métrologie** : upload certificat PDF et filtres par statut.
+
+### Changement de mot de passe (ComptePage)
+- Nouveau bloc collapsible "Changer le mot de passe" dans Mon compte.
+- Réauthentification Firebase (`reauthenticateWithCredential`) avant `updatePassword`.
+- Gestion des erreurs : mauvais mot de passe actuel, mismatch confirmation, longueur < 6, trop de tentatives.
+
+### Corrections UX
+- **Tuyaux** : retrait des matériaux INOX, POLYÉTHYLÈNE et AUTRE — seuls VINYL (tricoclair), TÉFLON et SILICONE conservés (type + constante + couleurs).
+- **Planning** : retrait du bouton 👥 "Vue équipe" et de la route `/planning/equipe` (page conservée dans le code).
+
+### Décisions
+- Stratégie déploiement confirmée : URL staging partagée avec l'équipe pour tests, prod uniquement après validation retours.
+- Message de lancement staging rédigé et prêt à envoyer à l'équipe.
+
+### Prochaines étapes
+- Envoyer le lien staging à l'équipe : `https://labocea-pmc-v2-dev.tomkerf.workers.dev`
+- Collecter les retours (1-2 semaines)
+- Corriger les issues remontées
+- Déployer en production : `npx wrangler deploy`
+
+---
+
 ## Session 32 — Sécurité + Qualité + Code Review Senior
 **16 mai 2026**
 
