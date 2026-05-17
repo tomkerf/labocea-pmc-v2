@@ -673,6 +673,32 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 
 ---
 
+## Session 37 — Refonte UI : navigation mobile + pages liste en cartes
+**17 mai 2026**
+
+### Fix — Métrologie et Maintenances absents de la navigation mobile
+- **Cause racine** : `MobileDrawer.tsx` (drawer hamburger mobile) était un fichier séparé de `Sidebar.tsx` — les deux avaient des listes de navigation différentes. Métrologie et Maintenances étaient dans `Sidebar` mais pas dans `MobileDrawer`.
+- **Correction** : ajout de `Métrologie` et `Maintenances` dans `MobileDrawer.tsx`, entre Matériel et Asservissement.
+
+### Refonte — Pages liste en cartes (style Matériel)
+- **Maintenances** : tableau `grid` → cartes individuelles avec icône ronde colorée par type (bleu = préventive, orange = corrective, rouge = panne). Badge statut à droite. Filtre "Abandonnée" ne déborde plus.
+- **Métrologie** : tableau → cartes avec anneau `CircleProgress` métrologique (vert/orange/rouge selon échéance). Badges statut + résultat.
+- **Missions** : liste groupée dans un bloc → cartes séparées (`flex flex-col gap-3`). Modification dans `ClientCard` : ajout border + shadow + rounded.
+
+### Fix visuel — Icône `AlertTriangle` sur toutes les pannes
+- **Cause** : type `panne` utilisait `AlertTriangle` comme icône → visuellement alarmant même pour des pannes résolues.
+- **Correction** : icône `Wrench` rouge à la place, cohérent avec les autres types.
+
+### UX — Légendes ajoutées
+- **Maintenances** : légende des 3 types (icône + label) entre filtres et liste.
+- **Matériel** : légende de l'anneau métrologique (3 points colorés : à jour / à prévoir / urgent).
+
+### Prochaines étapes
+- Renseigner site (Quimper) et technicien sur les ~60 équipements existants
+- Envoyer le lien staging à l'équipe pour validation
+
+---
+
 ## Session 36 — Matériel : filtres technicien permanents
 **17 mai 2026**
 
