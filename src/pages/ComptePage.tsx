@@ -2,10 +2,16 @@ import { useState, useRef } from 'react'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { logout } from '@/hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, Check, X, RefreshCw } from 'lucide-react'
+import { LogOut, Check, X, RefreshCw, KeyRound, ChevronDown } from 'lucide-react'
 import { updateUserProfile } from '@/services/userService'
 import UserAvatar, { AVATAR_COLORS, getAvatarColor, dicebearUrl } from '@/components/ui/UserAvatar'
 import type { AppUser } from '@/types'
+import {
+  getAuth,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+} from 'firebase/auth'
 
 // Pool de seeds — mots nature/eau/terrain pour des avatars variés
 const SEED_POOL = [
@@ -258,6 +264,9 @@ export default function ComptePage() {
         </p>
       </div>
 
+      {/* Changer le mot de passe */}
+      <ChangePasswordSection email={appUser?.email ?? ''} />
+
       {/* Déconnexion */}
       <button
         onClick={handleLogout}
@@ -272,6 +281,120 @@ export default function ComptePage() {
         <LogOut size={16} />
         Se déconnecter
       </button>
+    </div>
+  )
+}
+
+// ── Changement de mot de passe ───────────────────────────────
+
+function ChangePasswordSection({ email }: { email: string }) {
+  const [open, setOpen] = useState(false)
+  const [current, setCurrent] = useState('')
+  const [next, setNext] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [status, setStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (next !== confirm) { setErrorMsg('Les mots de passe ne correspondent pas.'); setStatus('error'); return }
+    if (next.length < 6) { setErrorMsg('Le mot de passe doit faire au moins 6 caractères.'); setStatus('error'); return }
+
+    setStatus('saving')
+    setErrorMsg('')
+    try {
+      const auth = getAuth()
+      const user = auth.currentUser
+      if (!user || !email) throw new Error('Utilisateur non connecté.')
+      const cred = EmailAuthProvider.credential(email, current)
+      await reauthenticateWithCredential(user, cred)
+      await updatePassword(user, next)
+      setStatus('success')
+      setCurrent(''); setNext(''); setConfirm('')
+      setTimeout(() => { setStatus('idle'); setOpen(false) }, 2000)
+    } catch (err: unknown) {
+      const code = (err as { code?: string }).code
+      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+        setErrorMsg('Mot de passe actuel incorrect.')
+      } else if (code === 'auth/too-many-requests') {
+        setErrorMsg('Trop de tentatives. Réessaie dans quelques minutes.')
+      } else {
+        setErrorMsg('Une erreur est survenue. Réessaie.')
+      }
+      setStatus('error')
+    }
+  }
+
+  return (
+    <div className="rounded-xl mb-4 overflow-hidden"
+      style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full px-5 py-4 flex items-center justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <KeyRound size={16} strokeWidth={1.8} style={{ color: 'var(--color-text-secondary)' }} />
+          <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+            Changer le mot de passe
+          </span>
+        </div>
+        <ChevronDown size={16} strokeWidth={2} style={{
+          color: 'var(--color-text-tertiary)',
+          transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+          transition: 'transform 0.2s',
+        }} />
+      </button>
+
+      {open && (
+        <form onSubmit={handleSubmit} className="px-5 pb-5 flex flex-col gap-3"
+          style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
+          <div className="pt-4 flex flex-col gap-3">
+            {[
+              { label: 'Mot de passe actuel', value: current, onChange: setCurrent },
+              { label: 'Nouveau mot de passe', value: next, onChange: setNext },
+              { label: 'Confirmer', value: confirm, onChange: setConfirm },
+            ].map(({ label, value, onChange }) => (
+              <div key={label}>
+                <label className="text-xs font-medium block mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                  {label}
+                </label>
+                <input
+                  type="password"
+                  value={value}
+                  onChange={e => onChange(e.target.value)}
+                  required
+                  className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+                  style={{
+                    background: 'var(--color-bg-tertiary)',
+                    border: '1px solid var(--color-border)',
+                    color: 'var(--color-text-primary)',
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+
+          {status === 'error' && (
+            <p className="text-xs" style={{ color: 'var(--color-danger)' }}>{errorMsg}</p>
+          )}
+          {status === 'success' && (
+            <p className="text-xs" style={{ color: 'var(--color-success)' }}>Mot de passe mis à jour.</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={status === 'saving'}
+            className="text-sm font-medium px-4 py-2 rounded-lg mt-1"
+            style={{
+              background: 'var(--color-accent)',
+              color: 'white',
+              opacity: status === 'saving' ? 0.6 : 1,
+            }}
+          >
+            {status === 'saving' ? 'Mise à jour…' : 'Mettre à jour'}
+          </button>
+        </form>
+      )}
     </div>
   )
 }

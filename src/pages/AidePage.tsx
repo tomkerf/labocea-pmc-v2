@@ -116,7 +116,7 @@ export default function AidePage() {
             <div className="flex flex-col gap-3">
               <Step num={1}>
                 Ouvre l'app et connecte-toi avec l'<strong>email et le mot de passe</strong> fournis par l'administrateur.
-                Si c'est ta première connexion, pense à changer ton mot de passe depuis <strong>Mon compte</strong>.
+                Si c'est ta première connexion, pense à changer ton mot de passe depuis <strong>Mon compte → Changer le mot de passe</strong>.
               </Step>
               <Step num={2}>
                 Tu arrives directement sur le <strong>tableau de bord</strong> — il affiche tes interventions du jour,
