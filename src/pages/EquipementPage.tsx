@@ -7,6 +7,7 @@ import { saveEquipement } from '@/services/equipementService'
 import { useVerificationsListener } from '@/hooks/useVerifications'
 import { saveVerification } from '@/services/verificationService'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
+import { useUsersListener } from '@/hooks/useUsers'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
@@ -33,6 +34,7 @@ export default function EquipementPage() {
 
   useVerificationsListener()
   useMaintenancesListener()
+  useUsersListener()
   const verifications = useMetrologieStore((s) => s.verifications)
   const maintenances  = useMaintenancesStore((s) => s.maintenances)
 

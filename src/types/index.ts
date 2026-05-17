@@ -181,6 +181,7 @@ export type CategorieType = CategorieEquipement
 export type EtatEquipement = 'operationnel' | 'en_maintenance' | 'hors_service' | 'prete'
 export type EtatType = EtatEquipement
 export type LocalisationEquipement = 'labo' | 'terrain' | 'externe'
+export type SiteEquipement = 'quimper' | 'brest'
 export type LocalisationType = LocalisationEquipement
 
 export type MateriauFlacon = 'plastique' | 'verre' | ''
@@ -203,6 +204,8 @@ export interface Equipement {
   dateAcquisition: string  // ISO date
   etat: EtatEquipement
   localisation: LocalisationEquipement
+  site?: SiteEquipement
+  technicien?: string  // initiales — pour les équipements à attribution individuelle
   notes: string
   prochainEtalonnage: string  // ISO date
   ficheDeVieNotes?: FicheDeVieNote[]

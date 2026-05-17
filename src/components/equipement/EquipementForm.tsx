@@ -1,4 +1,10 @@
-import type { Equipement, CategorieType, EtatType, LocalisationType, MateriauFlacon } from '@/types'
+import { useUsersStore } from '@/stores/usersStore'
+import type { Equipement, CategorieType, EtatType, LocalisationType, SiteEquipement, MateriauFlacon } from '@/types'
+
+const CATS_AVEC_TECHNICIEN = new Set([
+  'reglet', 'thermometre', 'enregistreur', 'eprouvette',
+  'sonde_niveau', 'chronometre', 'glaciere', 'multiparametre',
+])
 
 const CATEGORIES: { value: CategorieType; label: string }[] = [
   { value: 'preleveur',     label: 'Préleveur'      },
@@ -59,6 +65,10 @@ export function EquipementForm({ equipement, update }: {
   equipement: Equipement
   update: (field: keyof Equipement, value: unknown) => void
 }) {
+  const users = useUsersStore(s => s.users)
+  const techniciens = users.filter(u => u.role !== 'charge_mission')
+  const showTechnicien = CATS_AVEC_TECHNICIEN.has(equipement.categorie)
+
   return (
     <>
       <Section title="Identification">
@@ -90,11 +100,28 @@ export function EquipementForm({ equipement, update }: {
             {ETATS.map((et) => <option key={et.value} value={et.value}>{et.label}</option>)}
           </select>
         </Field>
-        <Field label="Localisation" last>
+        <Field label="Localisation">
           <select value={equipement.localisation} onChange={(e) => update('localisation', e.target.value as LocalisationType)} className="field-input">
             {LOCALISATIONS.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
           </select>
         </Field>
+        <Field label="Site" last={!showTechnicien}>
+          <select value={equipement.site ?? ''} onChange={(e) => update('site', e.target.value as SiteEquipement)} className="field-input">
+            <option value="">— Non renseigné</option>
+            <option value="quimper">Quimper</option>
+            <option value="brest">Brest</option>
+          </select>
+        </Field>
+        {showTechnicien && (
+          <Field label="Technicien assigné" last>
+            <select value={equipement.technicien ?? ''} onChange={(e) => update('technicien', e.target.value)} className="field-input">
+              <option value="">— Non assigné</option>
+              {techniciens.map(t => (
+                <option key={t.uid} value={t.initiales}>{t.prenom} {t.nom} ({t.initiales})</option>
+              ))}
+            </select>
+          </Field>
+        )}
       </Section>
 
       <Section title="Métrologie">

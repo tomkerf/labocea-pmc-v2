@@ -2,11 +2,14 @@ import { useState } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useEquipementsListener } from '@/hooks/useEquipements'
+import { useUsersListener } from '@/hooks/useUsers'
 import { createEquipement } from '@/services/equipementService'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
+import { useUsersStore } from '@/stores/usersStore'
 import EquipementCard from '@/components/materiel/EquipementCard'
 import type { Equipement } from '@/types'
+
 
 const CATEGORIES = [
   { value: '', label: 'Toutes catégories' },
@@ -47,6 +50,7 @@ function normalizeCategorie(cat: string): string {
 
 export default function MaterielPage() {
   useEquipementsListener()
+  useUsersListener()
   const navigate = useNavigate()
   const uid = useAuthStore(selectUid)
   const { equipements, loading } = useEquipementsStore()
@@ -54,8 +58,14 @@ export default function MaterielPage() {
   const [search, setSearch] = useState('')
   const [filterCategorie, setFilterCategorie] = useState('')
   const [filterEtat, setFilterEtat] = useState('')
+  const [filterSite, setFilterSite] = useState('')
+  const [filterTechnicien, setFilterTechnicien] = useState('')
   const [filterMateriau, setFilterMateriau] = useState('')
   const [filterMarque, setFilterMarque] = useState('')
+
+  const users = useUsersStore(s => s.users)
+  const techniciens = users.filter(u => u.role !== 'charge_mission')
+
   const [creating, setCreating] = useState(false)
 
   const isFlacon = filterCategorie === 'flacon'
@@ -73,9 +83,11 @@ export default function MaterielPage() {
     const matchSearch = !q || e.nom.toLowerCase().includes(q) || e.marque.toLowerCase().includes(q) || e.modele.toLowerCase().includes(q) || e.numSerie.toLowerCase().includes(q)
     const matchCategorie = !filterCategorie || normalizeCategorie(e.categorie) === filterCategorie
     const matchEtat = !filterEtat || e.etat === filterEtat
+    const matchSite = !filterSite || e.site === filterSite
+    const matchTechnicien = !filterTechnicien || e.technicien === filterTechnicien
     const matchMateriau = !isFlacon || !filterMateriau || e.materiau === filterMateriau
     const matchMarque = !isFlacon || !filterMarque || e.marque === filterMarque
-    return matchSearch && matchCategorie && matchEtat && matchMateriau && matchMarque
+    return matchSearch && matchCategorie && matchEtat && matchSite && matchTechnicien && matchMateriau && matchMarque
   })
 
   async function handleCreate() {
@@ -143,6 +155,30 @@ export default function MaterielPage() {
             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
           >
             {ETATS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
+          </select>
+        </div>
+
+        <div className="flex gap-2">
+          <select
+            value={filterSite}
+            onChange={(e) => setFilterSite(e.target.value)}
+            className="flex-1 px-3 py-2 rounded-lg text-sm"
+            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
+          >
+            <option value="">Tous sites</option>
+            <option value="quimper">Quimper</option>
+            <option value="brest">Brest</option>
+          </select>
+          <select
+            value={filterTechnicien}
+            onChange={(e) => setFilterTechnicien(e.target.value)}
+            className="flex-1 px-3 py-2 rounded-lg text-sm"
+            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
+          >
+            <option value="">Tous techniciens</option>
+            {techniciens.map(t => (
+              <option key={t.uid} value={t.initiales}>{t.prenom} {t.nom}</option>
+            ))}
           </select>
         </div>
 
