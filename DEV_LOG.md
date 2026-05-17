@@ -673,6 +673,58 @@ Un prélèvement d'hier encore `planned` est considéré comme J2 à faire aujou
 
 ---
 
+## Session 36 — Matériel : filtres technicien permanents
+**17 mai 2026**
+
+### Fix — Technicien assigné non sélectionnable
+- **Cause racine** : `useUsersListener()` non appelé dans `EquipementPage` → store `users` vide → select vide.
+- **Correction** : ajout de `useUsersListener()` dans `EquipementPage`.
+- Même correction appliquée à `MaterielPage` pour le filtre technicien.
+- Filtre role corrigé : `role !== 'charge_mission'` au lieu de `role === 'technicien'` — les admins (Tom) sont désormais inclus.
+
+### Feature — Filtre technicien permanent sur la liste Matériel
+- Le filtre "Tous techniciens" était conditionnel (catégories avec attribution uniquement) — rendu permanent.
+- Réorganisation des filtres en deux lignes : catégorie + état / site + technicien.
+- Nettoyage : constante `CATS_AVEC_TECHNICIEN` et variable `showTechFilter` retirées de `MaterielPage` (devenues inutiles).
+
+### Prochaines étapes
+- Renseigner site (Quimper) et technicien sur les 60 équipements existants
+- Envoyer le lien staging à l'équipe
+
+---
+
+## Session 35 — Matériel : site + technicien + dashboard métrologie
+**17 mai 2026**
+
+### Fix dashboard — Conformité métrologie
+- **Cause racine** : le KPI comptait les fiches `verifications` (collection vide si aucune saisie), alors que la page Métrologie calcule les statuts depuis `prochainEtalonnage` des équipements.
+- **Correction** : `useDashboardStats` réécrit pour utiliser `calcStatut` (même logique que `useMetrologieRows`) — union vérifications + équipements sans vérif. Résultat : 79% (19/24 à jour) cohérent avec `/metrologie`.
+- Sous-texte de la carte mis à jour : "X/Y à jour" au lieu de "X/Y conformes".
+- Inversion KPI rapports ↔ conformité métrologie (ordre plus logique).
+
+### Feature — Champ Site sur les équipements
+- Nouveau type `SiteEquipement = 'quimper' | 'brest'` dans `types/index.ts`.
+- Champ `site?` optionnel ajouté à l'interface `Equipement`.
+- Select "Site" ajouté dans `EquipementForm` (section État et localisation).
+- Affiché dans la fiche PDF (`FicheDeVie`).
+- Filtre "Tous sites / Quimper / Brest" ajouté sur `MaterielPage`.
+
+### Feature — Champ Technicien assigné sur les équipements
+- Champ `technicien?` (initiales) ajouté à l'interface `Equipement`.
+- 8 catégories concernées : reglet, thermometre, enregistreur, eprouvette, sonde_niveau, chronometre, glaciere, multiparametre.
+- Select technicien conditionnel dans `EquipementForm` (rôle `technicien` uniquement depuis `usersStore`).
+- Filtre "Tous techniciens" conditionnel sur `MaterielPage` (apparaît quand la catégorie filtrée est une catégorie avec attribution).
+
+### Décisions
+- Stockage par initiales (cohérent avec `preleveur` dans les missions).
+- Filtre technicien conditionnel (pas affiché pour les catégories sans attribution individuelle).
+
+### Prochaines étapes
+- Renseigner le site et le technicien sur les 60 équipements existants (Quimper).
+- Envoyer le lien staging à l'équipe : `https://labocea-pmc-v2-dev.tomkerf.workers.dev`
+
+---
+
 ## Session 34 — Infrastructure git + tentative dashboard
 **17 mai 2026**
 
