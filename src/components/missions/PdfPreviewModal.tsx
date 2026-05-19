@@ -41,6 +41,7 @@ export function PdfPreviewModal({ html, client, users, onClose }: Props) {
             </button>
             <button
               onClick={onClose}
+              aria-label="Fermer l'aperçu"
               className="p-1.5 rounded-lg"
               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' }}
             >

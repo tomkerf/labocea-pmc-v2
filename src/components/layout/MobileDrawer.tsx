@@ -79,6 +79,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
             <div className="flex items-center justify-between px-4 h-14 shrink-0"
               style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
               <button onClick={onClose}
+                aria-label="Fermer le menu"
                 className="p-1.5 rounded-lg"
                 style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
                 <X size={16} strokeWidth={2} />

@@ -112,6 +112,7 @@ export default function TabBar() {
         <div className="flex-1 flex flex-col items-center justify-end pb-2">
           <button
             onClick={() => setOpen((v) => !v)}
+            aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
             className="w-12 h-12 rounded-full flex items-center justify-center -mt-6 transition-transform"
             style={{
               background: open ? 'var(--color-text-secondary)' : 'var(--color-accent)',

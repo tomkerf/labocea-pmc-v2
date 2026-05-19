@@ -25,6 +25,7 @@ export function ClientHeader({
   return (
     <>
       <button onClick={onBack}
+        aria-label="Retour aux missions"
         className="flex items-center gap-1 text-sm mb-6"
         style={{ color: 'var(--color-accent)' }}>
         <ChevronLeft size={16} /> Missions
