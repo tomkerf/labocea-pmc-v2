@@ -4,6 +4,34 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 39 — Rapports : groupement client/site + fixes responsive + dashboard
+**19 mai 2026**
+
+### Features
+
+- **Groupement à deux niveaux dans RapportsPage** : les sections "À envoyer" et "Envoyés" sont maintenant groupées par client (en-tête gris) puis par site géographique (sous-en-tête discret, visible seulement si plusieurs sites pour un client).
+
+- **Responsive mobile** : chaque ligne "À envoyer" passe en `flex-col` sur mobile (`sm:flex-row` sur desktop). Les boutons date/badge/Fiche/Envoyé ne débordent plus sur petits écrans.
+
+- **Widget dashboard scopé au technicien** : le widget "Rapports à envoyer" du dashboard utilisait `rapportsAFaire` (toute l'équipe pour les admins). Ajout de `rapportsAFaireMoi` dans `useDashboardStats` — toujours filtré par `uid`/`initiales` quel que soit le rôle.
+
+- **DonutChart** : `whitespace-nowrap` sur les labels de légende pour éviter le retour à la ligne "En\nmaintenance" en layout 3 colonnes.
+
+### Bug corrigé
+
+- **"Traou Mad" visible dans les rapports de LMT** : le filtre `doneBy === uid` ne couvrait pas le cas `doneBy` vide avec fallback `client.preleveur`. Corrigé via `rapportsAFaireMoi` qui applique la même logique que `useDashboardStats` en mode `isGeneraliste: false`.
+
+### Décision
+
+- Widget "Planning du lendemain" ajouté puis retiré : l'intégration dans la grid 2 colonnes cassait la mise en page (3e colonne trop étroite). `lendemainItems` reste dans le hook pour usage futur.
+
+### Prochaines étapes
+
+- Réessayer le widget "Planning du lendemain" avec un layout dédié (en dessous du planning du jour, même colonne, ou section séparée)
+- Déployer en prod après validation staging
+
+---
+
 ## Session 38 — Page Rapports + fix rapportDate
 **19 mai 2026**
 
