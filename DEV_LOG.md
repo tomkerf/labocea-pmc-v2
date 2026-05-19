@@ -4,6 +4,47 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 38 — Page Rapports + fix rapportDate
+**19 mai 2026**
+
+### Bug corrigé — double usage de `rapportDate`
+
+`rapportDate` était utilisé à la fois comme date d'envoi effectif (logique dashboard) et comme date planifiée (valeur par défaut ajoutée en session 37). Résultat : le widget dashboard ne montrait plus aucun rapport à envoyer car tous apparaissaient comme "déjà envoyés".
+
+**Cause racine :** un seul champ pour deux sémantiques distinctes.
+
+**Correction :** ajout du champ `rapportDatePrevue?: string` sur `Sampling`. `rapportDate` reste la date d'envoi effectif (vide = non envoyé). `rapportDatePrevue` stocke la date planifiée (défaut = doneDate + 1 mois). (commits `b1a35d1`, `e7ed88b`)
+
+### Feature — Onglet Rapports (`/rapports`)
+
+Nouveau 6ème onglet de navigation (sidebar desktop + drawer mobile), page `/rapports` avec :
+
+- **Section "À envoyer"** : prélèvements avec `rapportPrevu=true` et `rapportDate=''`, triés par date prévue croissante. Chaque ligne : nom client, site, date intervention, input date d'envoi prévue éditable (onBlur, pas onChange), badge délai coloré (vert/orange/rouge), bouton "Fiche" (→ fiche plan), bouton "Envoyé ✓" (loading state, désactivé pendant l'envoi).
+- **Section "Envoyés"** : prélèvements avec `rapportDate !== ''`, triés par date décroissante. Affichage de la date d'envoi effectif et du technicien.
+- **Filtre** "Mes rapports" / "Toute l'équipe" — par défaut sur "Toute l'équipe" pour les admins/chargés de mission.
+
+### Mise à jour widget dashboard
+
+Le widget `RapportsWidget` affiche maintenant la date d'envoi prévue sur chaque ligne et un lien "Voir tous les rapports →" vers `/rapports`. (commit `ee426e9`)
+
+### SamplingForm
+
+Le champ de date dans le formulaire de prélèvement affiche désormais `rapportDatePrevue` (label "Date envoi prévue") au lieu de `rapportDate`. (commit `05fae92`)
+
+### Architecture
+
+- `RapportItem` dans `useDashboardStats` enrichi avec `rapportDatePrevue` et `doneBy`
+- `rapportsEnvoyes` exposé en plus de `rapportsAFaire`
+- Note : dans `rapportsEnvoyes`, le champ `rapportDatePrevue` de `RapportItem` stocke `s.rapportDate` (date effective) — sémantique documentée dans l'interface
+
+### Prochaines étapes
+
+- Valider en staging avec l'équipe
+- Migration optionnelle : pour les prélèvements existants avec `rapportDate` non vide, `rapportDatePrevue` sera vide — l'utilisateur devra renseigner manuellement la date prévue
+- Dette technique : `RapportItem` local dans `RapportsWidget` duplique le type central (à unifier)
+
+---
+
 ## Session 1 — Init projet
 **Étape 0 — Initialisation**
 - Création projet Vite + React + TypeScript

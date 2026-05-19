@@ -237,6 +237,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-17 | Matériel + Dashboard ✅ | Fix conformité métrologie dashboard (calcul depuis statuts équipements), champ Site (Quimper/Brest) + filtre, champ Technicien assigné sur 8 catégories + filtre conditionnel. |
 | 2026-05-17 | Matériel ✅ | Fix technicien assigné (useUsersListener manquant), filtre technicien permanent sur liste matériel, admins inclus dans la liste. |
 | 2026-05-17 | UI cartes ✅ | Navigation mobile : Métrologie + Maintenances ajoutés dans MobileDrawer. Pages Maintenances, Métrologie, Missions refondues en cartes (style Matériel). Légendes types + anneau métrologique. |
+| 2026-05-19 | Page Rapports ✅ | Fix bug rapportDate (double usage → séparation rapportDatePrevue/rapportDate). Nouvel onglet /rapports : sections À envoyer + Envoyés, filtre équipe, date prévue éditable, loading state. Widget dashboard enrichi (date prévue + lien Voir tous). |
 
 ---
 
