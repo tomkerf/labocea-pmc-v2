@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 interface RapportItem {
   clientId: string; planId: string; samplingId: string
   clientNom: string; siteNom: string
   doneDate: string; joursDepuis: number; enRetard: boolean
+  rapportDatePrevue: string
 }
 
 interface RapportsWidgetProps {
@@ -14,6 +16,7 @@ interface RapportsWidgetProps {
 
 export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) {
   const [open, setOpen] = useState(false)
+  const navigate = useNavigate()
 
   return (
     <div className="mb-6">
@@ -47,7 +50,10 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             <div style={{ maxHeight: 280, overflowY: 'auto' }}>
               {rapports.map((r, i) => {
-                const fmtDate = new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+                const fmtDone = new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+                const fmtPrevue = r.rapportDatePrevue
+                  ? new Date(r.rapportDatePrevue + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+                  : '—'
                 const dotColor = r.enRetard ? 'var(--color-danger)' : r.joursDepuis > 15 ? 'var(--color-warning)' : 'var(--color-success)'
                 const tagBg    = r.enRetard ? 'var(--color-danger-light)' : r.joursDepuis > 15 ? 'var(--color-warning-light)' : 'var(--color-success-light)'
                 const tagColor = r.enRetard ? 'var(--color-danger)' : r.joursDepuis > 15 ? 'var(--color-warning)' : 'var(--color-success)'
@@ -60,7 +66,7 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{r.clientNom}</p>
                       <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                        {r.siteNom} · intervention le {fmtDate}
+                        {r.siteNom} · intervention {fmtDone} · envoi prévu {fmtPrevue}
                       </p>
                     </div>
                     <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"
@@ -79,6 +85,15 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
                   </div>
                 )
               })}
+            </div>
+            <div className="px-4 py-2.5" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
+              <button
+                onClick={() => navigate('/rapports')}
+                className="text-xs font-medium"
+                style={{ color: 'var(--color-accent)' }}
+              >
+                Voir tous les rapports →
+              </button>
             </div>
           </div>
         )
