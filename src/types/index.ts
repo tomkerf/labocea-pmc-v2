@@ -71,7 +71,8 @@ export interface Sampling {
   comment: string
   nappe: NappeType
   rapportPrevu: boolean
-  rapportDate: string
+  rapportDate: string     // date d'envoi effectif — "" si pas encore envoyé
+  rapportDatePrevue?: string    // date d'envoi prévue (défaut: doneDate + 1 mois)
   tente: boolean
   reportHistory: ReportHistory[]
   doneBy: string          // uid
