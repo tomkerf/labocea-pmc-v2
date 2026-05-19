@@ -1,26 +1,16 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, ChevronRight, Trash2, AlertTriangle, FileDown, GripVertical, Minus, Lock, Unlock, X } from 'lucide-react'
-import {
-  DndContext, closestCenter, PointerSensor, TouchSensor,
-  useSensor, useSensors, type DragEndEvent,
-} from '@dnd-kit/core'
-import {
-  SortableContext, verticalListSortingStrategy,
-  useSortable, arrayMove,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { toast } from '@/stores/toastStore'
+import { arrayMove } from '@dnd-kit/sortable'
+import type { DragEndEvent } from '@dnd-kit/core'
 import { generateId } from '@/lib/ids'
-import { isSamplingOverdue } from '@/lib/overdue'
-import { buildClientReportHtml } from '@/lib/exportClientHtml'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { useClientData } from '@/hooks/useClientData'
-import type { Plan, SegmentType, NouvelleDemandeType } from '@/types'
-
-const SEGMENTS: SegmentType[] = ['SRA', 'Réseau de mesure', 'RSDE']
-const NOUVELLES_DEMANDES: NouvelleDemandeType[] = ['Annuelle', 'Avenant', 'Ponctuelle']
+import { ClientHeader } from '@/components/missions/ClientHeader'
+import { ClientInfoForm } from '@/components/missions/ClientInfoForm'
+import { ClientPlans } from '@/components/missions/ClientPlans'
+import { PdfPreviewModal } from '@/components/missions/PdfPreviewModal'
+import type { Plan } from '@/types'
 
 export default function ClientPage() {
   const { clientId } = useParams<{ clientId: string }>()
@@ -29,15 +19,8 @@ export default function ClientPage() {
   const users = useUsersStore(s => s.users)
 
   const {
-    client,
-    loading,
-    saving,
-    remoteChanged,
-    triggerSave,
-    update,
-    handleReload,
-    handleDeleteClient,
-    dismissRemoteChanged,
+    client, loading, saving, remoteChanged,
+    triggerSave, update, handleReload, handleDeleteClient, dismissRemoteChanged,
   } = useClientData(clientId)
 
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -45,11 +28,13 @@ export default function ClientPage() {
   const [confirmDeletePlanId, setConfirmDeletePlanId] = useState<string | null>(null)
   const [sitesInput, setSitesInput] = useState('')
   const [plansLocked, setPlansLocked] = useState(true)
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor,   { activationConstraint: { delay: 180, tolerance: 5 } }),
-  )
 
+  function handleSitesChange(raw: string) {
+    setSitesInput(raw)
+    if (!client) return
+    const parsed = raw.split(',').map((s) => s.trim()).filter(Boolean)
+    triggerSave({ ...client, sites: parsed })
+  }
 
   function handleReorder(event: DragEndEvent) {
     const { active, over } = event
@@ -60,58 +45,33 @@ export default function ClientPage() {
     triggerSave({ ...client, plans: arrayMove(client.plans, oldIndex, newIndex) })
   }
 
-  // Gestion des sites (liste libre) — état local pour ne pas casser le curseur
-  function handleSitesChange(raw: string) {
-    setSitesInput(raw)
-    if (!client) return
-    const parsed = raw.split(',').map((s) => s.trim()).filter(Boolean)
-    triggerSave({ ...client, sites: parsed })
-  }
-
-  // Nouveau plan
   function addPlan() {
     if (!client) return
     const newPlan: Plan = {
-      id: generateId(),
-      nom: 'Nouveau point',
-      siteNom: '',
-      frequence: 'Mensuel',
-      meteo: '',
-      nature: 'Souterraine',
-      methode: 'Ponctuel',
+      id: generateId(), nom: 'Nouveau point', siteNom: '',
+      frequence: 'Mensuel', meteo: '', nature: 'Souterraine', methode: 'Ponctuel',
       lat: '', lng: '', gpsApprox: false,
-      customMonths: [], bimensuelMonths: [],
-      defaultDay: 0, customDays: {},
+      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
       samplings: [],
     }
     triggerSave({ ...client, plans: [...client.plans, newPlan] })
   }
 
-  // Nouveau séparateur
   function addSeparator() {
     if (!client) return
     const sep: Plan = {
-      id: generateId(),
-      separator: true,
-      nom: '',
-      siteNom: '', frequence: 'Mensuel', meteo: '', nature: 'Souterraine',
-      methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
+      id: generateId(), separator: true, nom: '', siteNom: '',
+      frequence: 'Mensuel', meteo: '', nature: 'Souterraine', methode: 'Ponctuel',
+      lat: '', lng: '', gpsApprox: false,
       customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
       samplings: [],
     }
     triggerSave({ ...client, plans: [...client.plans, sep] })
   }
 
-  // Mise à jour du label d'un séparateur
   function handleSeparatorLabel(planId: string, label: string) {
     if (!client) return
-    const plans = client.plans.map((p) => p.id === planId ? { ...p, nom: label } : p)
-    triggerSave({ ...client, plans })
-  }
-
-  // Supprimer un plan — déclenche la confirmation inline (pas de confirm() natif)
-  function requestDeletePlan(planId: string) {
-    setConfirmDeletePlanId(planId)
+    triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? { ...p, nom: label } : p) })
   }
 
   function confirmDeletePlan() {
@@ -132,586 +92,52 @@ export default function ClientPage() {
 
   return (
     <div className="p-4 sm:p-6 max-w-2xl pb-10">
-      {/* Nav retour */}
-      <button onClick={() => navigate('/missions')}
-        className="flex items-center gap-1 text-sm mb-6"
-        style={{ color: 'var(--color-accent)' }}>
-        <ChevronLeft size={16} /> Missions
-      </button>
+      <ClientHeader
+        client={client}
+        saving={saving}
+        remoteChanged={remoteChanged}
+        confirmDelete={confirmDelete}
+        users={users}
+        onBack={() => navigate('/missions')}
+        onReload={handleReload}
+        onDismissRemoteChanged={dismissRemoteChanged}
+        onSetConfirmDelete={setConfirmDelete}
+        onDelete={handleDeleteClient}
+        onPdfPreview={setPdfPreview}
+      />
 
-      {/* Bandeau écriture concurrente */}
-      {remoteChanged && (
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg px-4 py-3 text-sm"
-          style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
-          <span className="flex items-center gap-1.5">
-            <AlertTriangle size={15} />
-            Modifié par <strong>{remoteChanged.byName}</strong> pendant votre édition.
-          </span>
-          <div className="flex items-center gap-3">
-            <button onClick={handleReload} className="font-semibold underline underline-offset-2">
-              Recharger
-            </button>
-            <button onClick={dismissRemoteChanged}
-              style={{ color: 'var(--color-text-secondary)' }} className="text-xs">
-              Ignorer
-            </button>
-          </div>
-        </div>
-      )}
+      <ClientInfoForm
+        client={client}
+        sitesInput={sitesInput}
+        update={update}
+        onSitesChange={handleSitesChange}
+      />
 
-      {/* Titre + statut save + suppression */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-          {client.nom || 'Client sans nom'}
-        </h1>
-        <div className="flex items-center gap-3">
-          {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
+      <ClientPlans
+        plans={client.plans}
+        clientId={client.id}
+        clientYear={Number(client.annee) || undefined}
+        plansLocked={plansLocked}
+        confirmDeletePlanId={confirmDeletePlanId}
+        onToggleLock={() => setPlansLocked(l => !l)}
+        onAddPlan={addPlan}
+        onAddSeparator={addSeparator}
+        onReorder={handleReorder}
+        onOpen={(planId) => navigate(`/missions/${client.id}/plan/${planId}`)}
+        onRequestDelete={setConfirmDeletePlanId}
+        onConfirmDelete={confirmDeletePlan}
+        onCancelDelete={() => setConfirmDeletePlanId(null)}
+        onSeparatorLabel={handleSeparatorLabel}
+      />
 
-          {/* Aperçu PDF */}
-          <button
-            onClick={() => {
-              try { setPdfPreview(buildClientReportHtml(client, users)) }
-              catch { toast.error('Erreur lors de la génération du rapport.') }
-            }}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
-            style={{ color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}>
-            <FileDown size={13} />
-            PDF
-          </button>
-
-          {/* Export Excel (chargement différé pour ne pas alourdir le bundle initial) */}
-          <button
-            onClick={async () => {
-              try {
-                const { exportClientExcel } = await import('@/lib/exportExcel')
-                exportClientExcel(client)
-              } catch (err) {
-                console.error('[Excel export]', err)
-                toast.error('Erreur Excel : ' + (err instanceof Error ? err.message : String(err)))
-              }
-            }}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
-            style={{ color: '#217346', background: '#E8F5EC' }}>
-            <FileDown size={13} />
-            Excel
-          </button>
-          {!confirmDelete ? (
-            <button onClick={() => setConfirmDelete(true)}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
-              style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}>
-              <Trash2 size={13} /> Supprimer
-            </button>
-          ) : (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
-              style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
-              <AlertTriangle size={13} style={{ color: 'var(--color-danger)' }} />
-              <span className="text-xs font-medium" style={{ color: 'var(--color-danger)' }}>
-                Supprimer définitivement ?
-              </span>
-              <button onClick={handleDeleteClient}
-                className="text-xs font-semibold px-2 py-0.5 rounded"
-                style={{ background: 'var(--color-danger)', color: 'white' }}>
-                Oui
-              </button>
-              <button onClick={() => setConfirmDelete(false)}
-                className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                Annuler
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Bloc infos administratives */}
-      <Section title="Informations générales">
-        <Field label="Nom du client">
-          <input value={client.nom} onChange={(e) => update('nom', e.target.value)}
-            className="field-input" placeholder="Nom du client"
-            style={!client.nom.trim() ? { borderColor: 'var(--color-danger)' } : undefined} />
-          {!client.nom.trim() && (
-            <p className="text-xs mt-1" style={{ color: 'var(--color-danger)' }}>Le nom est obligatoire.</p>
-          )}
-        </Field>
-        <Field label="Segment">
-          <select value={client.segment} onChange={(e) => update('segment', e.target.value as SegmentType)}
-            className="field-input">
-            {SEGMENTS.map((s) => <option key={s}>{s}</option>)}
-          </select>
-        </Field>
-        <Field label="Type de demande">
-          <select value={client.nouvelleDemande} onChange={(e) => update('nouvelleDemande', e.target.value as NouvelleDemandeType)}
-            className="field-input">
-            {NOUVELLES_DEMANDES.map((s) => <option key={s}>{s}</option>)}
-          </select>
-        </Field>
-        <Field label="Préleveur (initiales)">
-          <input value={client.preleveur} onChange={(e) => update('preleveur', e.target.value)}
-            className="field-input" placeholder="ex: THK" />
-        </Field>
-        <Field label="Année">
-          <input value={client.annee} onChange={(e) => update('annee', e.target.value)}
-            className="field-input" placeholder="2026" />
-        </Field>
-        <Field label="Sites (séparés par virgule)" last>
-          <input value={sitesInput} onChange={(e) => handleSitesChange(e.target.value)}
-            className="field-input" placeholder="Quimper, Kerambris, Aven" />
-        </Field>
-      </Section>
-
-      {/* Interlocuteur */}
-      <Section title="Contact">
-        <Field label="Interlocuteur">
-          <input value={client.interlocuteur} onChange={(e) => update('interlocuteur', e.target.value)}
-            className="field-input" placeholder="Prénom Nom" />
-        </Field>
-        <Field label="Fonction">
-          <input value={client.fonction} onChange={(e) => update('fonction', e.target.value)}
-            className="field-input" placeholder="Directeur technique" />
-        </Field>
-        <Field label="Téléphone">
-          <input value={client.telephone} onChange={(e) => update('telephone', e.target.value)}
-            className="field-input" placeholder="02 98 …" />
-        </Field>
-        <Field label="Mobile">
-          <input value={client.mobile} onChange={(e) => update('mobile', e.target.value)}
-            className="field-input" placeholder="06 …" />
-        </Field>
-        <Field label="Email" last>
-          <input type="email" value={client.email} onChange={(e) => update('email', e.target.value)}
-            className="field-input" placeholder="contact@…" />
-        </Field>
-      </Section>
-
-      {/* Contrat */}
-      <Section title="Contrat">
-        <Field label="N° Devis">
-          <input value={client.numDevis} onChange={(e) => update('numDevis', e.target.value)}
-            className="field-input" />
-        </Field>
-        <Field label="N° Convention">
-          <input value={client.numConvention} onChange={(e) => update('numConvention', e.target.value)}
-            className="field-input" />
-        </Field>
-        <Field label="Durée contrat">
-          <input value={client.dureeContrat} onChange={(e) => update('dureeContrat', e.target.value)}
-            className="field-input" placeholder="12 mois" />
-        </Field>
-        <Field label="Montant total (€)">
-          <input type="number" value={client.montantTotal || ''} onChange={(e) => update('montantTotal', Number(e.target.value))}
-            className="field-input" />
-        </Field>
-        <Field label="Part PMC (€)">
-          <input type="number" value={client.partPMC || ''} onChange={(e) => update('partPMC', Number(e.target.value))}
-            className="field-input" />
-        </Field>
-        <Field label="Part sous-traitance (€)" last>
-          <input type="number" value={client.partSousTraitance || ''} onChange={(e) => update('partSousTraitance', Number(e.target.value))}
-            className="field-input" />
-        </Field>
-      </Section>
-
-      {/* Mission */}
-      <Section title="Description de la mission">
-        <Field label="Mission" last>
-          <textarea value={client.mission} onChange={(e) => update('mission', e.target.value)}
-            rows={3} className="field-input resize-none" placeholder="Description libre de la mission…" />
-        </Field>
-      </Section>
-
-      {/* Points de prélèvement */}
-      <div className="mt-8">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            Points de prélèvement
-          </h2>
-          <div className="flex items-center gap-2">
-            {/* Bouton verrouillage — masque les contrôles de réorganisation */}
-            <button
-              onClick={() => setPlansLocked(l => !l)}
-              className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
-              style={{
-                background: plansLocked ? 'var(--color-bg-tertiary)' : 'var(--color-accent-light)',
-                color: plansLocked ? 'var(--color-text-tertiary)' : 'var(--color-accent)',
-                border: `1px solid ${plansLocked ? 'var(--color-border)' : 'var(--color-accent)'}`,
-              }}
-              title={plansLocked ? 'Déverrouiller pour réorganiser' : 'Verrouiller la réorganisation'}>
-              {plansLocked ? <Lock size={14} /> : <Unlock size={14} />}
-            </button>
-            {!plansLocked && (
-              <>
-                <button onClick={addSeparator}
-                  className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
-                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
-                  title="Ajouter un séparateur de section">
-                  <Minus size={14} /> Séparateur
-                </button>
-                <button onClick={addPlan}
-                  className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
-                  style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-                  <Plus size={14} /> Ajouter
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {client.plans.length === 0 ? (
-          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-            Aucun point — clique sur "Ajouter" pour créer le premier.
-          </p>
-        ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleReorder}>
-            <SortableContext items={client.plans.map((p) => p.id)} strategy={verticalListSortingStrategy}>
-              <div className="rounded-xl overflow-hidden"
-                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-                {buildDisplayItems(client.plans).map((item, displayIdx) => {
-                  if (item.kind === 'header') {
-                    return (
-                      <div key={item.key}
-                        className="px-4 py-1.5"
-                        style={{
-                          background: 'var(--color-bg-tertiary)',
-                          borderTop: displayIdx === 0 ? 'none' : '1px solid var(--color-border-subtle)',
-                          borderBottom: '1px solid var(--color-border-subtle)',
-                        }}>
-                        <span className="text-xs font-semibold uppercase"
-                          style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.05em' }}>
-                          {item.site}
-                        </span>
-                      </div>
-                    )
-                  }
-                  const { plan, origIdx } = item
-                  const isLast = origIdx === client.plans.length - 1
-                  return plan.separator
-                    ? <SortableSeparatorRow
-                        key={plan.id}
-                        plan={plan}
-                        isLast={isLast}
-                        locked={plansLocked}
-                        onDelete={() => requestDeletePlan(plan.id)}
-                        onConfirmDelete={confirmDeletePlan}
-                        onCancelDelete={() => setConfirmDeletePlanId(null)}
-                        isConfirmingDelete={confirmDeletePlanId === plan.id}
-                        onLabelChange={(label) => handleSeparatorLabel(plan.id, label)}
-                      />
-                    : <SortablePlanRow
-                        key={plan.id}
-                        plan={plan}
-                        clientYear={Number(client.annee) || undefined}
-                        clientId={client.id}
-                        isLast={isLast}
-                        locked={plansLocked}
-                        isConfirmingDelete={confirmDeletePlanId === plan.id}
-                        onOpen={() => navigate(`/missions/${client.id}/plan/${plan.id}`)}
-                        onDelete={() => requestDeletePlan(plan.id)}
-                        onConfirmDelete={confirmDeletePlan}
-                        onCancelDelete={() => setConfirmDeletePlanId(null)}
-                      />
-                })}
-              </div>
-            </SortableContext>
-          </DndContext>
-        )}
-      </div>
-
-      {/* ── Modale de prévisualisation rapport ───────────────── */}
       {pdfPreview && (
-        <div
-          className="fixed inset-0 z-[80] flex flex-col"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
-          onClick={() => setPdfPreview(null)}
-        >
-          <div
-            className="flex flex-col m-4 md:m-8 rounded-2xl overflow-hidden flex-1"
-            style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)', maxHeight: 'calc(100dvh - 32px)' }}
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-5 py-3 shrink-0"
-              style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-              <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                Aperçu du rapport
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    const html = buildClientReportHtml(client, users, true)
-                    const w = window.open('', '_blank')
-                    if (w) { w.document.write(html); w.document.close() }
-                  }}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium"
-                  style={{ background: 'var(--color-accent)', color: 'white' }}
-                >
-                  <FileDown size={14} />
-                  Imprimer / Télécharger
-                </button>
-                <button
-                  onClick={() => setPdfPreview(null)}
-                  className="p-1.5 rounded-lg"
-                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' }}
-                >
-                  <X size={15} />
-                </button>
-              </div>
-            </div>
-            <iframe
-              srcDoc={pdfPreview}
-              className="flex-1 w-full"
-              style={{ border: 'none' }}
-              title="Aperçu rapport"
-            />
-          </div>
-        </div>
+        <PdfPreviewModal
+          html={pdfPreview}
+          client={client}
+          users={users}
+          onClose={() => setPdfPreview(null)}
+        />
       )}
-    </div>
-  )
-}
-
-// ── Helper : liste d'affichage avec headers de site ─────────
-
-type DisplayHeader = { kind: 'header'; site: string; key: string }
-type DisplayPlan   = { kind: 'plan';   plan: Plan; origIdx: number }
-type DisplayItem   = DisplayHeader | DisplayPlan
-
-function buildDisplayItems(plans: Plan[]): DisplayItem[] {
-  const result: DisplayItem[] = []
-  let lastSite = ''
-  let headerCount = 0
-  plans.forEach((plan, origIdx) => {
-    // Les séparateurs manuels n'influencent pas les headers de site automatiques
-    if (!plan.separator && plan.siteNom && plan.siteNom !== lastSite) {
-      result.push({ kind: 'header', site: plan.siteNom, key: `hdr-${plan.siteNom}-${headerCount++}` })
-      lastSite = plan.siteNom
-    }
-    result.push({ kind: 'plan', plan, origIdx })
-  })
-  return result
-}
-
-// ── Composants utilitaires ──────────────────────────────────
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-5">
-      <h2 className="text-xs font-semibold uppercase mb-2"
-        style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-        {title}
-      </h2>
-      <div className="rounded-xl overflow-hidden"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-        {children}
-      </div>
-    </div>
-  )
-}
-
-// ── Séparateur sortable ───────────────────────────────────────
-
-interface SortableSeparatorRowProps {
-  plan: Plan
-  isLast: boolean
-  isConfirmingDelete: boolean
-  locked?: boolean
-  onDelete: () => void
-  onConfirmDelete: () => void
-  onCancelDelete: () => void
-  onLabelChange: (label: string) => void
-}
-
-function SortableSeparatorRow({
-  plan, isLast, isConfirmingDelete, locked,
-  onDelete, onConfirmDelete, onCancelDelete, onLabelChange,
-}: SortableSeparatorRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: plan.id })
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.4 : 1,
-        borderBottom: !isLast ? '1px solid var(--color-border-subtle)' : 'none',
-      }}
-    >
-      <div className="flex items-center gap-2 px-3 py-2">
-        {/* Poignée drag */}
-        <button
-          {...(!locked ? { ...attributes, ...listeners } : {})}
-          className="shrink-0 p-1 rounded touch-none"
-          style={{ color: 'var(--color-text-tertiary)', cursor: locked ? 'default' : isDragging ? 'grabbing' : 'grab', opacity: locked ? 0.3 : 1 }}
-          tabIndex={-1}
-        >
-          <GripVertical size={15} strokeWidth={1.8} />
-        </button>
-
-        {/* Ligne + label éditable */}
-        <div className="flex-1 flex items-center gap-3">
-          <div className="flex-1 h-px" style={{ background: 'var(--color-border)' }} />
-          <input
-            value={plan.nom}
-            onChange={(e) => onLabelChange(e.target.value)}
-            placeholder="Section…"
-            className="bg-transparent border-none outline-none text-center"
-            style={{
-              color: 'var(--color-text-tertiary)',
-              fontSize: '11px',
-              fontWeight: 500,
-              minWidth: '40px',
-              width: `${Math.max(60, (plan.nom.length || 4) * 7 + 24)}px`,
-              letterSpacing: '0.03em',
-            }}
-          />
-          <div className="flex-1 h-px" style={{ background: 'var(--color-border)' }} />
-        </div>
-
-        {/* Supprimer */}
-        <button onClick={onDelete} className="shrink-0 p-1 rounded"
-          style={{ color: isConfirmingDelete ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
-          onMouseLeave={(e) => { if (!isConfirmingDelete) e.currentTarget.style.color = 'var(--color-text-tertiary)' }}>
-          <Trash2 size={14} />
-        </button>
-      </div>
-
-      {/* Confirmation suppression inline */}
-      {isConfirmingDelete && (
-        <div className="flex items-center gap-2 mx-3 mb-2 px-3 py-2 rounded-lg"
-          style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
-          <AlertTriangle size={13} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-          <span className="text-xs font-medium flex-1" style={{ color: 'var(--color-danger)' }}>
-            Supprimer ce séparateur ?
-          </span>
-          <button onClick={onConfirmDelete}
-            className="text-xs font-semibold px-2.5 py-1 rounded"
-            style={{ background: 'var(--color-danger)', color: 'white' }}>
-            Supprimer
-          </button>
-          <button onClick={onCancelDelete}
-            className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-            Annuler
-          </button>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── Ligne de plan sortable ────────────────────────────────────
-
-interface SortablePlanRowProps {
-  plan: Plan
-  clientYear: number | undefined
-  clientId: string
-  isLast: boolean
-  isConfirmingDelete: boolean
-  locked?: boolean
-  onOpen: () => void
-  onDelete: () => void
-  onConfirmDelete: () => void
-  onCancelDelete: () => void
-}
-
-function SortablePlanRow({
-  plan, clientYear, isLast, isConfirmingDelete, locked,
-  onOpen, onDelete, onConfirmDelete, onCancelDelete,
-}: SortablePlanRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: plan.id })
-
-  const overdueCount = (plan.samplings ?? []).filter((s) => isSamplingOverdue(s, clientYear)).length
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={{
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-        borderBottom: !isLast ? '1px solid var(--color-border-subtle)' : 'none',
-        background: isDragging ? 'var(--color-accent-light)' : 'transparent',
-      }}
-      className="flex flex-col px-3 py-3 gap-2"
-    >
-      <div className="flex items-center gap-2">
-        {/* Poignée drag */}
-        <button
-          {...(!locked ? { ...attributes, ...listeners } : {})}
-          className="shrink-0 p-1 rounded touch-none"
-          style={{ color: 'var(--color-text-tertiary)', cursor: locked ? 'default' : isDragging ? 'grabbing' : 'grab', opacity: locked ? 0.3 : 1 }}
-          title={locked ? 'Réorganisation verrouillée' : 'Glisser pour réorganiser'}
-          tabIndex={-1}
-        >
-          <GripVertical size={15} strokeWidth={1.8} />
-        </button>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-              {plan.nom || 'Point sans nom'}
-            </p>
-            {overdueCount > 0 && (
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0 flex items-center gap-1"
-                style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
-                <AlertTriangle size={10} />
-                {overdueCount} en retard
-              </span>
-            )}
-          </div>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
-            {[plan.siteNom, plan.frequence, plan.nature].filter(Boolean).join(' · ')}
-          </p>
-        </div>
-
-        <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0"
-          style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-          {(plan.samplings ?? []).length} prélèv.
-        </span>
-        <button onClick={onOpen}
-          className="shrink-0 flex items-center gap-1 text-sm font-medium"
-          style={{ color: 'var(--color-accent)' }}>
-          Ouvrir <ChevronRight size={14} />
-        </button>
-        <button onClick={onDelete} className="shrink-0 p-1 rounded"
-          style={{ color: isConfirmingDelete ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
-          onMouseLeave={(e) => { if (!isConfirmingDelete) e.currentTarget.style.color = 'var(--color-text-tertiary)' }}>
-          <Trash2 size={14} />
-        </button>
-      </div>
-
-      {/* Confirmation suppression inline */}
-      {isConfirmingDelete && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg"
-          style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
-          <AlertTriangle size={13} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-          <span className="text-xs font-medium flex-1" style={{ color: 'var(--color-danger)' }}>
-            Supprimer ce point et tous ses prélèvements ?
-          </span>
-          <button onClick={onConfirmDelete}
-            className="text-xs font-semibold px-2.5 py-1 rounded"
-            style={{ background: 'var(--color-danger)', color: 'white' }}>
-            Supprimer
-          </button>
-          <button onClick={onCancelDelete}
-            className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-            Annuler
-          </button>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function Field({ label, children, last }: { label: string; children: React.ReactNode; last?: boolean }) {
-  return (
-    <div className="flex items-start gap-4 px-5 py-3"
-      style={{ borderBottom: last ? 'none' : '1px solid var(--color-border-subtle)' }}>
-      <label className="text-sm shrink-0 pt-0.5" style={{ color: 'var(--color-text-secondary)', minWidth: '160px' }}>
-        {label}
-      </label>
-      <div className="flex-1">{children}</div>
     </div>
   )
 }
