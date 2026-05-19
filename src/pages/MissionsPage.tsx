@@ -7,6 +7,7 @@ import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import ClientCard from '@/components/missions/ClientCard'
+import { SkeletonList } from '@/components/ui/Skeleton'
 import type { Client } from '@/types'
 
 function hasOverdue(client: Client): boolean {
@@ -132,10 +133,7 @@ export default function MissionsPage() {
 
       {/* Liste */}
       {loading ? (
-        <div className="flex justify-center py-16">
-          <div className="w-6 h-6 rounded-full border-2 animate-spin"
-            style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
-        </div>
+        <SkeletonList count={5} variant="card" />
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>

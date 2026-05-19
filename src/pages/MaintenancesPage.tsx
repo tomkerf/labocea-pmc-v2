@@ -5,6 +5,7 @@ import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { createMaintenance } from '@/services/maintenanceService'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useAuthStore, selectUid, selectPrenom, selectInitiales } from '@/stores/authStore'
+import { SkeletonList } from '@/components/ui/Skeleton'
 import type { Maintenance } from '@/types'
 import type { LucideIcon } from 'lucide-react'
 
@@ -165,10 +166,7 @@ export default function MaintenancesPage() {
 
       {/* Liste */}
       {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="w-6 h-6 rounded-full border-2 animate-spin"
-            style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
-        </div>
+        <SkeletonList count={4} variant="card" />
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
