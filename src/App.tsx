@@ -16,7 +16,7 @@ const PlanPage          = lazy(() => import('@/pages/PlanPage'))
 const MissionDetailPage = lazy(() => import('@/pages/MissionDetailPage'))
 const MaterielPage      = lazy(() => import('@/pages/MaterielPage'))
 const EquipementPage    = lazy(() => import('@/pages/EquipementPage'))
-const MerologiePage     = lazy(() => import('@/pages/MerologiePage'))
+const MetrologiePage    = lazy(() => import('@/pages/MetrologiePage'))
 const VerificationPage  = lazy(() => import('@/pages/VerificationPage'))
 const MaintenancesPage  = lazy(() => import('@/pages/MaintenancesPage'))
 const MaintenancePage   = lazy(() => import('@/pages/MaintenancePage'))
@@ -72,7 +72,7 @@ function AppRoutes() {
           <Suspense fallback={<PageSpinner />}><EquipementPage /></Suspense>
         } />
         <Route path="/metrologie" element={
-          <Suspense fallback={<PageSpinner />}><MerologiePage /></Suspense>
+          <Suspense fallback={<PageSpinner />}><MetrologiePage /></Suspense>
         } />
         <Route path="/metrologie/:verificationId" element={
           <Suspense fallback={<PageSpinner />}><VerificationPage /></Suspense>
