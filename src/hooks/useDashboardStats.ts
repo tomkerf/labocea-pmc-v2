@@ -129,7 +129,9 @@ export function useDashboardStats({
     clients.forEach((client: Client) => {
       client.plans.forEach((plan: Plan) => {
         plan.samplings.forEach((s: Sampling) => {
-          if (!s.rapportPrevu || s.rapportDate) return
+          // rapportDate future = donnée corrompue par l'ancien bug (auto-défaut doneDate+1 mois) → traiter comme non envoyé
+          const rapportEnvoye = s.rapportDate && s.rapportDate <= todayISO
+          if (!s.rapportPrevu || rapportEnvoye) return
           if (s.status !== 'done' || !s.doneDate) return
           if (!isGeneraliste) {
             const estMonRapport = s.doneBy ? s.doneBy === uid : client.preleveur === initiales
@@ -151,11 +153,13 @@ export function useDashboardStats({
   }, [clients, isGeneraliste, uid, initiales])
 
   const rapportsEnvoyes = useMemo((): RapportItem[] => {
+    const todayISO = new Date().toISOString().slice(0, 10)
     const result: RapportItem[] = []
     clients.forEach((client: Client) => {
       client.plans.forEach((plan: Plan) => {
         plan.samplings.forEach((s: Sampling) => {
-          if (!s.rapportPrevu || !s.rapportDate) return
+          // Même garde : rapportDate future = bug résiduel, ne pas inclure dans les envoyés
+          if (!s.rapportPrevu || !s.rapportDate || s.rapportDate > todayISO) return
           if (!isGeneraliste) {
             const estMonRapport = s.doneBy ? s.doneBy === uid : client.preleveur === initiales
             if (!estMonRapport) return
