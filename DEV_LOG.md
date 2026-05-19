@@ -4,6 +4,44 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 40 — Audit dette technique : refactoring, accessibilité, skeletons
+**19 mai 2026**
+
+### Refactoring (Phase 1 audit)
+
+- **ClientPage.tsx** (717 → 142L) : extraction `ClientHeader`, `ClientInfoForm`, `ClientPlans`, `PdfPreviewModal` dans `src/components/missions/`
+- **AdminPage.tsx** (706 → 49L) : extraction `AdminChargeEquipe`, `AdminCreateUserForm`, `AdminUsersList`, `AdminBugsSection` dans `src/components/admin/`
+- **Suppression `PlanningEquipePage.tsx`** (518L, fichier orphelin non routé)
+- **Fallback route** `* → /missions` corrigé en `* → /` (dashboard)
+
+### Renommage (Phase 2 audit)
+
+- `MerologiePage.tsx` → `MetrologiePage.tsx` (faute de frappe historique)
+
+### UX (Phase 3 audit)
+
+- **Composant `Skeleton`** réutilisable (`Skeleton`, `SkeletonCard`, `SkeletonRow`, `SkeletonList`) dans `components/ui/`
+- Remplacement des spinners par des skeletons animés sur `MissionsPage`, `MaterielPage`, `MaintenancesPage`
+
+### Accessibilité (Phase 4 audit)
+
+- **Focus visible clavier** : `:focus-visible` CSS global avec outline bleu Apple (remplace `outline: none` qui rendait le focus invisible)
+- `aria-label` sur les boutons icônes critiques : retour missions, fermer modal PDF, fermer drawer mobile, FAB menu
+
+### Décisions
+
+- Store filtres (Phase 2 audit) : non implémenté — chaque page gère ses filtres localement, pas de partage entre pages, ROI nul
+- Virtualisation listes (Phase 4 audit) : non implémenté — listes <50 items en pratique pour cette app interne
+- Logging prod (Phase 4 audit) : non implémenté — seulement 4 console.* dans tout le code, tous pertinents
+- PWA/manifest (Phase 4 audit) : déjà complet et propre
+
+### Prochaines étapes
+
+- Déployer en production après validation staging
+- Phase 5 de l'audit : tests unitaires sur hooks critiques si temps disponible
+
+---
+
 ## Session 39 — Rapports : groupement client/site + fixes responsive + dashboard
 **19 mai 2026**
 

@@ -239,6 +239,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-17 | UI cartes ✅ | Navigation mobile : Métrologie + Maintenances ajoutés dans MobileDrawer. Pages Maintenances, Métrologie, Missions refondues en cartes (style Matériel). Légendes types + anneau métrologique. |
 | 2026-05-19 | Page Rapports ✅ | Fix bug rapportDate (double usage → séparation rapportDatePrevue/rapportDate). Nouvel onglet /rapports : sections À envoyer + Envoyés, filtre équipe, date prévue éditable, loading state. Widget dashboard enrichi (date prévue + lien Voir tous). |
 | 2026-05-19 | Rapports UX ✅ | Groupement À envoyer + Envoyés par client puis par site. Responsive mobile (flex-col). rapportsAFaireMoi pour widget dashboard scopé au technicien. DonutChart whitespace-nowrap. |
+| 2026-05-19 | Audit dette ✅ | ClientPage 717→142L, AdminPage 706→49L (extraction composants). PlanningEquipePage supprimée. MerologiePage→MetrologiePage. Skeletons sur 3 listes. Focus visible clavier + aria-labels. |
 
 ---
 
