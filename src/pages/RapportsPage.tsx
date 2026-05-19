@@ -25,14 +25,13 @@ export default function RapportsPage() {
   const verifications = useMetrologieStore((s) => s.verifications)
   const maintenances = useMaintenancesStore((s) => s.maintenances)
 
-  const isGeneraliste = role === 'admin' || role === 'charge_mission'
   const initiales = appUser?.initiales ?? ''
 
   const [touteEquipe, setTouteEquipe] = useState(false)
   const [sending, setSending] = useState<Set<string>>(new Set())
 
   const { rapportsAFaire, rapportsEnvoyes } = useDashboardStats({
-    clients, uid: uid ?? '', initiales, isGeneraliste: touteEquipe,
+    clients, uid: uid ?? '', initiales, isGeneraliste: touteEquipe || role === 'admin' || role === 'charge_mission',
     equipements, verifications, maintenances, evenements: [],
   })
 
