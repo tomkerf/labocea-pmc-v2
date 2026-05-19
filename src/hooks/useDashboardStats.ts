@@ -165,8 +165,9 @@ export function useDashboardStats({
     clients.forEach((client: Client) => {
       client.plans.forEach((plan: Plan) => {
         plan.samplings.forEach((s: Sampling) => {
-          // Même garde : rapportDate future = bug résiduel, ne pas inclure dans les envoyés
-          if (!s.rapportPrevu || !s.rapportDate || s.rapportDate > todayISO) return
+          // Seulement les rapports envoyés à partir du 2026-05-19 (démarrage du suivi)
+          const SUIVI_DEPUIS = '2026-05-19'
+          if (!s.rapportPrevu || !s.rapportDate || s.rapportDate > todayISO || s.rapportDate < SUIVI_DEPUIS) return
           if (!isGeneraliste) {
             const estMonRapport = s.doneBy ? s.doneBy === uid : client.preleveur === initiales
             if (!estMonRapport) return
