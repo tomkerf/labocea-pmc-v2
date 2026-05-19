@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Trash2, Camera, X, Loader2, HelpCircle } from 'lucide-react'
 import { uploadSamplingPhoto, deleteSamplingPhoto } from '@/lib/uploadPhoto'
 import { toast } from '@/stores/toastStore'
@@ -18,6 +18,14 @@ interface SamplingFormProps {
 }
 
 export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId }: SamplingFormProps) {
+  // Auto-remplir rapportDatePrevue = doneDate + 1 mois pour les prélèvements existants
+  useEffect(() => {
+    if (sampling.rapportPrevu && !sampling.rapportDatePrevue && sampling.doneDate) {
+      const d = new Date(sampling.doneDate)
+      d.setMonth(d.getMonth() + 1)
+      onUpdate('rapportDatePrevue', d.toISOString().slice(0, 10))
+    }
+  }, [sampling.rapportPrevu, sampling.rapportDatePrevue, sampling.doneDate])
   const [newTask, setNewTask]   = useState('')
   const [uploading, setUploading] = useState(false)
 
