@@ -159,6 +159,39 @@ export function useDashboardStats({
     return result.sort((a, b) => b.joursDepuis - a.joursDepuis)
   }, [clients, isGeneraliste, uid, initiales])
 
+  const rapportsAFaireMoi = useMemo((): RapportItem[] => {
+    const todayISO = new Date().toISOString().slice(0, 10)
+    const result: RapportItem[] = []
+    clients.forEach((client: Client) => {
+      client.plans.forEach((plan: Plan) => {
+        plan.samplings.forEach((s: Sampling) => {
+          const rapportEnvoye = s.rapportDate && s.rapportDate <= todayISO
+          if (!s.rapportPrevu || rapportEnvoye) return
+          if (s.status !== 'done' || !s.doneDate) return
+          const estMonRapport = s.doneBy ? s.doneBy === uid : client.preleveur === initiales
+          if (!estMonRapport) return
+          const msDay = 1000 * 60 * 60 * 24
+          const joursDepuis = Math.floor((new Date(todayISO).getTime() - new Date(s.doneDate).getTime()) / msDay)
+          const defaultDatePrevue = (() => {
+            if (s.rapportDatePrevue) return s.rapportDatePrevue
+            if (!s.doneDate) return ''
+            const d = new Date(s.doneDate)
+            d.setMonth(d.getMonth() + 1)
+            return d.toISOString().slice(0, 10)
+          })()
+          result.push({
+            clientId: client.id, planId: plan.id, samplingId: s.id,
+            clientNom: client.nom, siteNom: plan.siteNom || plan.nom || '—', planNom: plan.nom || '—',
+            doneDate: s.doneDate, joursDepuis, enRetard: joursDepuis > 30,
+            rapportDatePrevue: defaultDatePrevue,
+            doneBy: s.doneBy ?? '',
+          })
+        })
+      })
+    })
+    return result.sort((a, b) => b.joursDepuis - a.joursDepuis)
+  }, [clients, uid, initiales])
+
   const rapportsEnvoyes = useMemo((): RapportItem[] => {
     const todayISO = new Date().toISOString().slice(0, 10)
     const result: RapportItem[] = []
@@ -245,6 +278,63 @@ export function useDashboardStats({
     })
   }, [clients, evenements, initiales, isGeneraliste])
 
+  const lendemainItems = useMemo((): JourItem[] => {
+    const tomorrowISO = localISO(new Date(Date.now() + 86_400_000))
+    const items: JourItem[] = []
+
+    clients.forEach((client) => {
+      client.plans.forEach((plan) => {
+        const jMatch = `${plan.nom || ''} ${plan.siteNom || ''}`.match(/\bJ(\d+)\b/)
+        const dayOffset = jMatch ? parseInt(jMatch[1]) - 1 : 0
+        plan.samplings.forEach((s: Sampling) => {
+          if (!s.plannedDay && !s.doneDate) return
+          if (initiales) {
+            const techSampling = s.assignedTo || client.preleveur
+            if (techSampling && techSampling !== initiales) return
+          }
+          const baseDate = s.doneDate || localISO(new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay + dayOffset))
+          if (baseDate !== tomorrowISO) return
+          if (s.status === 'done') return
+          const badge = getSamplingBadge(s)
+          const dot = s.status === 'overdue' ? 'var(--color-danger)' : 'var(--color-accent)'
+          const sub = [plan.siteNom, plan.nom].filter(Boolean).join(' · ') || '—'
+          const modalEvent: ModalEventRef = {
+            id: s.id, type: 'prelevement', title: client.nom, subtitle: sub,
+            statusLabel: badge.label, statusBg: badge.bg, statusColor: dot,
+            link: `/missions/${client.id}/plan/${plan.id}`,
+            isDone: false, technicien: client.preleveur || '—',
+            clientId: client.id, planId: plan.id, samplingId: s.id, plannedTime: s.plannedTime,
+          }
+          items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub, badge, dot, meteo: plan.meteo || '', modalEvent })
+        })
+      })
+    })
+
+    evenements
+      .filter((ev: EvenementPersonnel) => {
+        if (!isGeneraliste && initiales && ev.createdByInitiales && ev.createdByInitiales !== initiales) return false
+        if (ev.dateFin && ev.dateFin > ev.date) return ev.date <= tomorrowISO && ev.dateFin >= tomorrowISO
+        return ev.date === tomorrowISO
+      })
+      .forEach((ev: EvenementPersonnel) => {
+        const cfg = EVENEMENT_CFG[ev.type] ?? EVENEMENT_CFG.autre
+        const evSub = [ev.createdByInitiales, ev.notes].filter(Boolean).join(' · ') || cfg.label
+        const evModalEvent: ModalEventRef = {
+          id: ev.id, type: 'evenement', title: ev.titre, subtitle: evSub,
+          statusLabel: cfg.label, statusBg: cfg.bg, statusColor: cfg.color,
+          link: '', isDone: false, technicien: ev.createdByInitiales || '—', evenementData: ev,
+        }
+        items.push({ kind: 'evenement', time: ev.heure ?? '', title: ev.titre, sub: evSub, badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, modalEvent: evModalEvent })
+      })
+
+    return items.sort((a, b) => {
+      if (!a.time && !b.time) return 0
+      if (!a.time) return -1
+      if (!b.time) return 1
+      return a.time.localeCompare(b.time)
+    })
+  }, [clients, evenements, initiales, isGeneraliste])
+
   // ── État du parc ──────────────────────────────────────────
 
   const parcEtat = useMemo(() => ({
@@ -308,8 +398,10 @@ export function useDashboardStats({
     verifiTotal, verifiConformes, conformitePct,
     aCalibrrer,
     rapportsAFaire,
+    rapportsAFaireMoi,
     rapportsEnvoyes,
     jourItems,
+    lendemainItems,
     parcEtat,
     prelevementsEnRetard,
     prelevementsPluie,

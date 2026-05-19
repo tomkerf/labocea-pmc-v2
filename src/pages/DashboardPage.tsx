@@ -51,7 +51,7 @@ export default function DashboardPage() {
 
   const {
     missionsCeMois, verifiTotal, verifiConformes, conformitePct,
-    aCalibrrer, rapportsAFaire, jourItems, parcEtat,
+    aCalibrrer, rapportsAFaire, rapportsAFaireMoi, jourItems, parcEtat,
     prelevementsEnRetard, prelevementsPluie, maintenancesActives,
     techOptions: rawTechOptions,
   } = useDashboardStats({ clients, verifications, equipements, evenements, maintenances, uid, initiales, isGeneraliste })
@@ -180,7 +180,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <RapportsWidget rapports={rapportsAFaire} onMarkEnvoye={markRapportEnvoye} />
+      <RapportsWidget rapports={rapportsAFaireMoi} onMarkEnvoye={markRapportEnvoye} />
       <RetardWidget items={prelevementsEnRetard} />
       <PluieWidget items={prelevementsPluie} />
       <MaintenancesWidget maintenances={maintenancesActives} />

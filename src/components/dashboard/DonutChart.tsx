@@ -69,7 +69,7 @@ export default function DonutChart({ segments, total, size = 120, strokeWidth = 
         {segments.map((s) => (
           <div key={s.label} className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: s.color }} />
-            <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{s.label}</span>
+            <span className="text-sm whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>{s.label}</span>
             <span className="text-sm font-semibold ml-auto pl-4" style={{ color: 'var(--color-text-primary)' }}>
               {s.value}
             </span>

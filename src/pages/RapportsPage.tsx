@@ -76,10 +76,10 @@ export default function RapportsPage() {
   }
 
   return (
-    <div className="p-6 pb-10 max-w-4xl">
+    <div className="px-4 py-6 pb-10 sm:px-6 max-w-4xl">
 
       {/* En-tête */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-3">
           <FileText size={22} strokeWidth={1.5} style={{ color: 'var(--color-accent)' }} />
           <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>Rapports</h1>
@@ -132,75 +132,107 @@ export default function RapportsPage() {
             ✓ Tous les rapports ont été envoyés.
           </div>
         ) : (
-          <div className="rounded-xl overflow-hidden"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-            {rapportsAFaire.map((r, i) => {
-              const fmtDone = r.doneDate
-                ? new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
-                : '—'
-              const today = new Date().toISOString().slice(0, 10)
-              const joursAvant = r.rapportDatePrevue
-                ? Math.floor((new Date(r.rapportDatePrevue).getTime() - new Date(today).getTime()) / 86400000)
-                : null
-              const delaiColor = joursAvant === null ? 'var(--color-text-tertiary)'
-                : joursAvant < 0 ? 'var(--color-danger)'
-                : joursAvant <= 7 ? 'var(--color-warning)'
-                : 'var(--color-success)'
-              const delaiBg = joursAvant === null ? 'var(--color-bg-tertiary)'
-                : joursAvant < 0 ? 'var(--color-danger-light)'
-                : joursAvant <= 7 ? 'var(--color-warning-light)'
-                : 'var(--color-success-light)'
-              const delaiLabel = joursAvant === null ? '—'
-                : joursAvant < 0 ? `${Math.abs(joursAvant)}j de retard`
-                : joursAvant === 0 ? 'Aujourd\'hui'
-                : `dans ${joursAvant}j`
-
+          <div className="flex flex-col gap-3">
+            {Object.entries(
+              rapportsAFaire.reduce<Record<string, typeof rapportsAFaire>>((acc, r) => {
+                ;(acc[r.clientId] ??= []).push(r)
+                return acc
+              }, {})
+            ).map(([clientId, clientRows]) => {
+              const bySite = clientRows.reduce<Record<string, typeof clientRows>>((acc, r) => {
+                ;(acc[r.siteNom] ??= []).push(r)
+                return acc
+              }, {})
+              const siteEntries = Object.entries(bySite)
               return (
-                <div key={r.samplingId}
-                  className="flex items-center gap-3 px-4 py-3 flex-wrap"
-                  style={{ borderBottom: i < rapportsAFaire.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                      {r.clientNom}
-                    </p>
-                    <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                      {r.planNom} · {r.siteNom} · intervention le {fmtDone}
-                    </p>
+                <div key={clientId} className="rounded-xl overflow-hidden"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                  <div className="px-4 py-2.5" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-tertiary)' }}>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{clientRows[0].clientNom}</p>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <input
-                      type="date"
-                      defaultValue={r.rapportDatePrevue}
-                      onBlur={(e) => { if (e.target.value !== r.rapportDatePrevue) updateDatePrevue(r.clientId, r.planId, r.samplingId, e.target.value) }}
-                      className="rounded-md px-2 py-1 text-xs"
-                      style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)' }}
-                    />
-                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0"
-                      style={{ background: delaiBg, color: delaiColor }}>
-                      {delaiLabel}
-                    </span>
-                    <button
-                      onClick={() => navigate(`/missions/${r.clientId}/plan/${r.planId}?sampling=${r.samplingId}`)}
-                      className="px-2 py-1.5 rounded-lg text-xs font-medium shrink-0"
-                      style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
-                    >
-                      Fiche
-                    </button>
-                    <button
-                      onClick={() => markEnvoye(r.clientId, r.planId, r.samplingId)}
-                      disabled={sending.has(r.samplingId)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium shrink-0"
-                      style={{
-                        background: sending.has(r.samplingId) ? 'var(--color-bg-tertiary)' : 'var(--color-accent-light)',
-                        color: sending.has(r.samplingId) ? 'var(--color-text-tertiary)' : 'var(--color-accent)',
-                        cursor: sending.has(r.samplingId) ? 'not-allowed' : 'pointer',
-                      }}
-                      onMouseEnter={e => { if (!sending.has(r.samplingId)) { e.currentTarget.style.background = 'var(--color-accent)'; e.currentTarget.style.color = 'white' } }}
-                      onMouseLeave={e => { if (!sending.has(r.samplingId)) { e.currentTarget.style.background = 'var(--color-accent-light)'; e.currentTarget.style.color = 'var(--color-accent)' } }}
-                    >
-                      {sending.has(r.samplingId) ? '…' : 'Envoyé ✓'}
-                    </button>
-                  </div>
+                  {siteEntries.map(([siteNom, rows], si) => (
+                    <div key={siteNom}>
+                      {siteEntries.length > 1 && (
+                        <div className="px-4 py-1.5" style={{
+                          borderBottom: '1px solid var(--color-border-subtle)',
+                          borderTop: si > 0 ? '1px solid var(--color-border-subtle)' : 'none',
+                          background: 'var(--color-bg-primary)',
+                        }}>
+                          <p className="text-[11px] font-medium uppercase" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>{siteNom}</p>
+                        </div>
+                      )}
+                      {rows.map((r, i) => {
+                        const fmtDone = r.doneDate
+                          ? new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+                          : '—'
+                        const today = new Date().toISOString().slice(0, 10)
+                        const joursAvant = r.rapportDatePrevue
+                          ? Math.floor((new Date(r.rapportDatePrevue).getTime() - new Date(today).getTime()) / 86400000)
+                          : null
+                        const delaiColor = joursAvant === null ? 'var(--color-text-tertiary)'
+                          : joursAvant < 0 ? 'var(--color-danger)'
+                          : joursAvant <= 7 ? 'var(--color-warning)'
+                          : 'var(--color-success)'
+                        const delaiBg = joursAvant === null ? 'var(--color-bg-tertiary)'
+                          : joursAvant < 0 ? 'var(--color-danger-light)'
+                          : joursAvant <= 7 ? 'var(--color-warning-light)'
+                          : 'var(--color-success-light)'
+                        const delaiLabel = joursAvant === null ? '—'
+                          : joursAvant < 0 ? `${Math.abs(joursAvant)}j de retard`
+                          : joursAvant === 0 ? 'Aujourd\'hui'
+                          : `dans ${joursAvant}j`
+                        const isLast = si === siteEntries.length - 1 && i === rows.length - 1
+                        return (
+                          <div key={r.samplingId}
+                            className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3"
+                            style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)' }}>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+                                {r.planNom}
+                              </p>
+                              <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                                intervention le {fmtDone}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap shrink-0">
+                              <input
+                                type="date"
+                                defaultValue={r.rapportDatePrevue}
+                                onBlur={(e) => { if (e.target.value !== r.rapportDatePrevue) updateDatePrevue(r.clientId, r.planId, r.samplingId, e.target.value) }}
+                                className="rounded-md px-2 py-1 text-xs"
+                                style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)' }}
+                              />
+                              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                                style={{ background: delaiBg, color: delaiColor }}>
+                                {delaiLabel}
+                              </span>
+                              <button
+                                onClick={() => navigate(`/missions/${r.clientId}/plan/${r.planId}?sampling=${r.samplingId}`)}
+                                className="px-2 py-1.5 rounded-lg text-xs font-medium"
+                                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
+                              >
+                                Fiche
+                              </button>
+                              <button
+                                onClick={() => markEnvoye(r.clientId, r.planId, r.samplingId)}
+                                disabled={sending.has(r.samplingId)}
+                                className="px-3 py-1.5 rounded-lg text-xs font-medium"
+                                style={{
+                                  background: sending.has(r.samplingId) ? 'var(--color-bg-tertiary)' : 'var(--color-accent-light)',
+                                  color: sending.has(r.samplingId) ? 'var(--color-text-tertiary)' : 'var(--color-accent)',
+                                  cursor: sending.has(r.samplingId) ? 'not-allowed' : 'pointer',
+                                }}
+                                onMouseEnter={e => { if (!sending.has(r.samplingId)) { e.currentTarget.style.background = 'var(--color-accent)'; e.currentTarget.style.color = 'white' } }}
+                                onMouseLeave={e => { if (!sending.has(r.samplingId)) { e.currentTarget.style.background = 'var(--color-accent-light)'; e.currentTarget.style.color = 'var(--color-accent)' } }}
+                              >
+                                {sending.has(r.samplingId) ? '…' : 'Envoyé ✓'}
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ))}
                 </div>
               )
             })}
@@ -227,36 +259,67 @@ export default function RapportsPage() {
             Aucun rapport envoyé pour le moment.
           </div>
         ) : (
-          <div className="rounded-xl overflow-hidden"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-            {rapportsEnvoyes.map((r, i) => {
-              const fmtDone = r.doneDate
-                ? new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
-                : '—'
-              const fmtEnvoye = r.rapportDatePrevue
-                ? new Date(r.rapportDatePrevue + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
-                : '—'
+          <div className="flex flex-col gap-3">
+            {Object.entries(
+              rapportsEnvoyes.reduce<Record<string, typeof rapportsEnvoyes>>((acc, r) => {
+                ;(acc[r.clientId] ??= []).push(r)
+                return acc
+              }, {})
+            ).map(([clientId, clientRows]) => {
+              const bySite = clientRows.reduce<Record<string, typeof clientRows>>((acc, r) => {
+                ;(acc[r.siteNom] ??= []).push(r)
+                return acc
+              }, {})
+              const siteEntries = Object.entries(bySite)
               return (
-                <div key={r.samplingId}
-                  className="flex items-center gap-3 px-4 py-3"
-                  style={{ borderBottom: i < rapportsEnvoyes.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                  <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: 'var(--color-success)' }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                      {r.clientNom}
-                    </p>
-                    <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                      {r.planNom} · {r.siteNom} · intervention le {fmtDone}
-                    </p>
+                <div key={clientId} className="rounded-xl overflow-hidden"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                  <div className="px-4 py-2.5" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-tertiary)' }}>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{clientRows[0].clientNom}</p>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                      Envoyé le {fmtEnvoye}
-                    </span>
-                    <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                      {resolveNom(r.doneBy)}
-                    </span>
-                  </div>
+                  {siteEntries.map(([siteNom, rows], si) => (
+                    <div key={siteNom}>
+                      {siteEntries.length > 1 && (
+                        <div className="px-4 py-1.5" style={{
+                          borderBottom: '1px solid var(--color-border-subtle)',
+                          borderTop: si > 0 ? '1px solid var(--color-border-subtle)' : 'none',
+                          background: 'var(--color-bg-primary)',
+                        }}>
+                          <p className="text-[11px] font-medium uppercase" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>{siteNom}</p>
+                        </div>
+                      )}
+                      {rows.map((r, i) => {
+                        const fmtDone = r.doneDate
+                          ? new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+                          : '—'
+                        const fmtEnvoye = r.rapportDatePrevue
+                          ? new Date(r.rapportDatePrevue + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+                          : '—'
+                        const isLast = si === siteEntries.length - 1 && i === rows.length - 1
+                        return (
+                          <div key={r.samplingId}
+                            className="flex items-center gap-3 px-4 py-3"
+                            style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)' }}>
+                            <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: 'var(--color-success)' }} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>{r.planNom}</p>
+                              <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                                intervention le {fmtDone}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-3 shrink-0">
+                              <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                                Envoyé le {fmtEnvoye}
+                              </span>
+                              <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                                {resolveNom(r.doneBy)}
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ))}
                 </div>
               )
             })}
