@@ -52,7 +52,7 @@ export default function DashboardPage() {
 
   const {
     missionsCeMois, verifiTotal, verifiConformes, conformitePct,
-    aCalibrrer, rapportsAFaire, rapportsAFaireMoi, jourItems, lendemainItems, parcEtat,
+    aCalibrrer, rapportsAFaireMoi, jourItems, lendemainItems, parcEtat,
     prelevementsEnRetard, prelevementsPluie, maintenancesActives,
     techOptions: rawTechOptions,
   } = useDashboardStats({ clients, verifications, equipements, evenements, maintenances, uid, initiales, isGeneraliste })
@@ -100,11 +100,11 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
         <StatCard value={missionsCeMois} label="Missions ce mois" sub="prélèvements réalisés" accent />
         <StatCard
-          value={rapportsAFaire.length}
+          value={rapportsAFaireMoi.length}
           label="Rapports à envoyer"
-          sub={rapportsAFaire.length > 0 ? `${rapportsAFaire.filter(r => r.enRetard).length} en retard` : 'Tout est à jour'}
-          danger={rapportsAFaire.some(r => r.enRetard)}
-          warning={rapportsAFaire.length > 0 && !rapportsAFaire.some(r => r.enRetard)}
+          sub={rapportsAFaireMoi.length > 0 ? `${rapportsAFaireMoi.filter(r => r.enRetard).length} en retard` : 'Tout est à jour'}
+          danger={rapportsAFaireMoi.some(r => r.enRetard)}
+          warning={rapportsAFaireMoi.length > 0 && !rapportsAFaireMoi.some(r => r.enRetard)}
         />
         <StatCard
           value={conformitePct !== null ? `${conformitePct}%` : '—'}
