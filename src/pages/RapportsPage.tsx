@@ -29,6 +29,7 @@ export default function RapportsPage() {
   const initiales = appUser?.initiales ?? ''
 
   const [touteEquipe, setTouteEquipe] = useState(isGeneraliste)
+  const [sending, setSending] = useState<Set<string>>(new Set())
 
   const { rapportsAFaire, rapportsEnvoyes } = useDashboardStats({
     clients, uid: uid ?? '', initiales, isGeneraliste: touteEquipe,
@@ -38,16 +39,21 @@ export default function RapportsPage() {
   async function markEnvoye(clientId: string, planId: string, samplingId: string) {
     const client = clients.find((c: Client) => c.id === clientId)
     if (!client || !uid) return
-    const today = new Date().toISOString().slice(0, 10)
-    await saveClient({
-      ...client,
-      plans: client.plans.map((plan: Plan) => plan.id !== planId ? plan : {
-        ...plan,
-        samplings: plan.samplings.map((s: Sampling) =>
-          s.id !== samplingId ? s : { ...s, rapportDate: today }
-        ),
-      }),
-    }, uid)
+    setSending(prev => new Set(prev).add(samplingId))
+    try {
+      const today = new Date().toISOString().slice(0, 10)
+      await saveClient({
+        ...client,
+        plans: client.plans.map((plan: Plan) => plan.id !== planId ? plan : {
+          ...plan,
+          samplings: plan.samplings.map((s: Sampling) =>
+            s.id !== samplingId ? s : { ...s, rapportDate: today, rapportPrevu: true }
+          ),
+        }),
+      }, uid)
+    } finally {
+      setSending(prev => { const next = new Set(prev); next.delete(samplingId); return next })
+    }
   }
 
   async function updateDatePrevue(clientId: string, planId: string, samplingId: string, date: string) {
@@ -164,8 +170,8 @@ export default function RapportsPage() {
                   <div className="flex items-center gap-2 shrink-0">
                     <input
                       type="date"
-                      value={r.rapportDatePrevue}
-                      onChange={(e) => updateDatePrevue(r.clientId, r.planId, r.samplingId, e.target.value)}
+                      defaultValue={r.rapportDatePrevue}
+                      onBlur={(e) => { if (e.target.value !== r.rapportDatePrevue) updateDatePrevue(r.clientId, r.planId, r.samplingId, e.target.value) }}
                       className="rounded-md px-2 py-1 text-xs"
                       style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)' }}
                     />
@@ -182,12 +188,17 @@ export default function RapportsPage() {
                     </button>
                     <button
                       onClick={() => markEnvoye(r.clientId, r.planId, r.samplingId)}
+                      disabled={sending.has(r.samplingId)}
                       className="px-3 py-1.5 rounded-lg text-xs font-medium shrink-0"
-                      style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-accent)', (e.currentTarget.style.color = 'white'))}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-accent-light)', (e.currentTarget.style.color = 'var(--color-accent)'))}
+                      style={{
+                        background: sending.has(r.samplingId) ? 'var(--color-bg-tertiary)' : 'var(--color-accent-light)',
+                        color: sending.has(r.samplingId) ? 'var(--color-text-tertiary)' : 'var(--color-accent)',
+                        cursor: sending.has(r.samplingId) ? 'not-allowed' : 'pointer',
+                      }}
+                      onMouseEnter={e => { if (!sending.has(r.samplingId)) { e.currentTarget.style.background = 'var(--color-accent)'; e.currentTarget.style.color = 'white' } }}
+                      onMouseLeave={e => { if (!sending.has(r.samplingId)) { e.currentTarget.style.background = 'var(--color-accent-light)'; e.currentTarget.style.color = 'var(--color-accent)' } }}
                     >
-                      Envoyé ✓
+                      {sending.has(r.samplingId) ? '…' : 'Envoyé ✓'}
                     </button>
                   </div>
                 </div>
