@@ -34,6 +34,7 @@ const AUDIT_FIELDS: Partial<Record<keyof Sampling, (v: unknown) => string>> = {
   plannedTime:  (v) => (v as string) || '—',
   rapportPrevu: (v) => v ? 'Oui' : 'Non',
   rapportDate:  (v) => v ? new Date(v as string).toLocaleDateString('fr-FR') : '—',
+  rapportDatePrevue: (v) => v ? new Date(v as string).toLocaleDateString('fr-FR') : '—',
   nappe:        (v) => ({ haute: 'Haute', basse: 'Basse', '': '—' }[v as string] ?? String(v)),
   doneBy:       () => '—',  // sera résolu depuis users lors du PDF
 }
@@ -93,6 +94,17 @@ export default function PlanPage() {
       if (field === 'status' && value === 'done' && !s.doneBy) patch.doneBy = uid_
       // Quand on quitte "Réalisé" → effacer doneBy
       if (field === 'status' && value !== 'done') patch.doneBy = ''
+
+      // Rapport : date prévue par défaut = doneDate + 1 mois
+      const effectiveDoneDate = field === 'doneDate' ? String(value) : s.doneDate
+      const effectiveRapportPrevu = field === 'rapportPrevu' ? Boolean(value) : s.rapportPrevu
+      if (effectiveRapportPrevu && !s.rapportDatePrevue) {
+        if (effectiveDoneDate) {
+          const d = new Date(effectiveDoneDate)
+          d.setMonth(d.getMonth() + 1)
+          patch.rapportDatePrevue = d.toISOString().slice(0, 10)
+        }
+      }
 
       // ── Journal d'audit ──────────────────────────────────────
       // Tracer uniquement les champs significatifs quand la valeur change vraiment
