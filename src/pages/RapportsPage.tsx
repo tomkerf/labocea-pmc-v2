@@ -28,7 +28,7 @@ export default function RapportsPage() {
   const isGeneraliste = role === 'admin' || role === 'charge_mission'
   const initiales = appUser?.initiales ?? ''
 
-  const [touteEquipe, setTouteEquipe] = useState(isGeneraliste)
+  const [touteEquipe, setTouteEquipe] = useState(false)
   const [sending, setSending] = useState<Set<string>>(new Set())
 
   const { rapportsAFaire, rapportsEnvoyes } = useDashboardStats({
