@@ -29,6 +29,8 @@ export interface RapportItem {
   clientId: string; planId: string; samplingId: string
   clientNom: string; siteNom: string; planNom: string
   doneDate: string; joursDepuis: number; enRetard: boolean
+  rapportDatePrevue: string   // peut être vide si non défini
+  doneBy: string              // uid du technicien
 }
 
 export interface PluieItem {
@@ -138,11 +140,36 @@ export function useDashboardStats({
             clientId: client.id, planId: plan.id, samplingId: s.id,
             clientNom: client.nom, siteNom: plan.siteNom || plan.nom || '—', planNom: plan.nom || '—',
             doneDate: s.doneDate, joursDepuis, enRetard: joursDepuis > 30,
+            rapportDatePrevue: s.rapportDatePrevue ?? '',
+            doneBy: s.doneBy ?? '',
           })
         })
       })
     })
     return result.sort((a, b) => b.joursDepuis - a.joursDepuis)
+  }, [clients, isGeneraliste, uid, initiales])
+
+  const rapportsEnvoyes = useMemo((): RapportItem[] => {
+    const result: RapportItem[] = []
+    clients.forEach((client: Client) => {
+      client.plans.forEach((plan: Plan) => {
+        plan.samplings.forEach((s: Sampling) => {
+          if (!s.rapportPrevu || !s.rapportDate) return
+          if (!isGeneraliste) {
+            const estMonRapport = s.doneBy ? s.doneBy === uid : client.preleveur === initiales
+            if (!estMonRapport) return
+          }
+          result.push({
+            clientId: client.id, planId: plan.id, samplingId: s.id,
+            clientNom: client.nom, siteNom: plan.siteNom || plan.nom || '—', planNom: plan.nom || '—',
+            doneDate: s.doneDate, joursDepuis: 0, enRetard: false,
+            rapportDatePrevue: s.rapportDate,
+            doneBy: s.doneBy ?? '',
+          })
+        })
+      })
+    })
+    return result.sort((a, b) => b.rapportDatePrevue.localeCompare(a.rapportDatePrevue))
   }, [clients, isGeneraliste, uid, initiales])
 
   // ── Planning du jour ──────────────────────────────────────
@@ -268,6 +295,7 @@ export function useDashboardStats({
     verifiTotal, verifiConformes, conformitePct,
     aCalibrrer,
     rapportsAFaire,
+    rapportsEnvoyes,
     jourItems,
     parcEtat,
     prelevementsEnRetard,
