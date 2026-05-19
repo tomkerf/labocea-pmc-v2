@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
@@ -16,6 +16,7 @@ const navItems: { to: string; icon?: React.ElementType; label: string; end?: boo
   { to: '/materiel',     icon: Wrench,          label: 'Matériel'               },
   { to: '/metrologie',   icon: Gauge,           label: 'Métrologie'             },
   { to: '/maintenances', icon: Hammer,          label: 'Maintenances'           },
+  { to: '/rapports',     icon: FileText,        label: 'Rapports'               },
   { to: '/outils/tuyaux',     icon: Pipette,      label: 'Tuyaux'                 },
   { to: '/aide',              icon: HelpCircle,  label: 'Mode d\'emploi'          },
   { to: '/compte',                               label: 'Mon compte', isAccount: true },

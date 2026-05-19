@@ -20,6 +20,7 @@ const MerologiePage     = lazy(() => import('@/pages/MerologiePage'))
 const VerificationPage  = lazy(() => import('@/pages/VerificationPage'))
 const MaintenancesPage  = lazy(() => import('@/pages/MaintenancesPage'))
 const MaintenancePage   = lazy(() => import('@/pages/MaintenancePage'))
+const RapportsPage      = lazy(() => import('@/pages/RapportsPage'))
 const PlanningPage       = lazy(() => import('@/pages/PlanningPage'))
 const DemandesPage      = lazy(() => import('@/pages/DemandesPage'))
 const ComptePage        = lazy(() => import('@/pages/ComptePage'))
@@ -81,6 +82,9 @@ function AppRoutes() {
         } />
         <Route path="/maintenances/:maintenanceId" element={
           <Suspense fallback={<PageSpinner />}><MaintenancePage /></Suspense>
+        } />
+        <Route path="/rapports" element={
+          <Suspense fallback={<PageSpinner />}><RapportsPage /></Suspense>
         } />
         <Route path="/planning" element={
           <Suspense fallback={<PageSpinner />}><PlanningPage /></Suspense>
