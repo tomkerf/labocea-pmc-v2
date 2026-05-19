@@ -139,11 +139,18 @@ export function useDashboardStats({
           }
           const msDay = 1000 * 60 * 60 * 24
           const joursDepuis = Math.floor((new Date(todayISO).getTime() - new Date(s.doneDate).getTime()) / msDay)
+          const defaultDatePrevue = (() => {
+            if (s.rapportDatePrevue) return s.rapportDatePrevue
+            if (!s.doneDate) return ''
+            const d = new Date(s.doneDate)
+            d.setMonth(d.getMonth() + 1)
+            return d.toISOString().slice(0, 10)
+          })()
           result.push({
             clientId: client.id, planId: plan.id, samplingId: s.id,
             clientNom: client.nom, siteNom: plan.siteNom || plan.nom || '—', planNom: plan.nom || '—',
             doneDate: s.doneDate, joursDepuis, enRetard: joursDepuis > 30,
-            rapportDatePrevue: s.rapportDatePrevue ?? '',
+            rapportDatePrevue: defaultDatePrevue,
             doneBy: s.doneBy ?? '',
           })
         })
