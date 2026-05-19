@@ -164,7 +164,7 @@ export default function RapportsPage() {
                       {r.clientNom}
                     </p>
                     <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                      {r.siteNom} · intervention le {fmtDone}
+                      {r.planNom} · {r.siteNom} · intervention le {fmtDone}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -246,7 +246,7 @@ export default function RapportsPage() {
                       {r.clientNom}
                     </p>
                     <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                      {r.siteNom} · intervention le {fmtDone}
+                      {r.planNom} · {r.siteNom} · intervention le {fmtDone}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
