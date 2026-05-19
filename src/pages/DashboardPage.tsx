@@ -48,10 +48,11 @@ export default function DashboardPage() {
   const { maintenances }  = useMaintenancesStore()
 
   const [eventDetail, setEventDetail] = useState<{ event: ModalEvent; dateStr: string } | null>(null)
+  const [planningMode, setPlanningMode] = useState<'today' | 'tomorrow'>('today')
 
   const {
     missionsCeMois, verifiTotal, verifiConformes, conformitePct,
-    aCalibrrer, rapportsAFaire, rapportsAFaireMoi, jourItems, parcEtat,
+    aCalibrrer, rapportsAFaire, rapportsAFaireMoi, jourItems, lendemainItems, parcEtat,
     prelevementsEnRetard, prelevementsPluie, maintenancesActives,
     techOptions: rawTechOptions,
   } = useDashboardStats({ clients, verifications, equipements, evenements, maintenances, uid, initiales, isGeneraliste })
@@ -60,7 +61,10 @@ export default function DashboardPage() {
     rawTechOptions.map(({ code, label }) => ({ code, label })),
     [rawTechOptions])
 
+  const activeItems = planningMode === 'today' ? jourItems : lendemainItems
   const todayISO = localISO(new Date())
+  const tomorrowISO = localISO(new Date(Date.now() + 86_400_000))
+  const activeDateISO = planningMode === 'today' ? todayISO : tomorrowISO
 
   // ── Actions ────────────────────────────────────────────────
 
@@ -119,19 +123,39 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 
-        {/* Planning du jour */}
+        {/* Planning */}
         <div>
-          <SectionTitle>Planning du jour</SectionTitle>
-          {jourItems.length === 0 ? (
-            <EmptyCard>Aucune intervention ni événement aujourd'hui.</EmptyCard>
+          <div className="flex items-center justify-between mb-3">
+            <SectionTitle>{planningMode === 'today' ? 'Planning du jour' : 'Planning de demain'}</SectionTitle>
+            <div className="flex gap-1 p-1 rounded-lg" style={{ background: 'var(--color-bg-tertiary)' }}>
+              <button
+                onClick={() => setPlanningMode('today')}
+                className="px-3 py-1.5 text-xs font-medium rounded-md transition-all"
+                style={{
+                  background: planningMode === 'today' ? 'var(--color-accent-light)' : 'transparent',
+                  color: planningMode === 'today' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                }}
+              >Aujourd'hui</button>
+              <button
+                onClick={() => setPlanningMode('tomorrow')}
+                className="px-3 py-1.5 text-xs font-medium rounded-md transition-all"
+                style={{
+                  background: planningMode === 'tomorrow' ? 'var(--color-accent-light)' : 'transparent',
+                  color: planningMode === 'tomorrow' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                }}
+              >Demain</button>
+            </div>
+          </div>
+          {activeItems.length === 0 ? (
+            <EmptyCard>Aucune intervention ni événement{planningMode === 'today' ? " aujourd'hui" : " demain"}.</EmptyCard>
           ) : (
             <div className="rounded-xl overflow-hidden"
               style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-              {jourItems.slice(0, 8).map((item, i) => (
+              {activeItems.slice(0, 8).map((item, i) => (
                 <div key={i}
-                  onClick={() => setEventDetail({ event: item.modalEvent as ModalEvent, dateStr: todayISO })}
+                  onClick={() => setEventDetail({ event: item.modalEvent as ModalEvent, dateStr: activeDateISO })}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer"
-                  style={{ borderBottom: i < jourItems.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                  style={{ borderBottom: i < activeItems.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
