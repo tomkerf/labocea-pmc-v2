@@ -169,10 +169,13 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
 
       {sampling.rapportPrevu && (
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date rapport</label>
-          <input type="date" value={sampling.rapportDate}
-            onChange={(e) => onUpdate('rapportDate', e.target.value)}
-            className="field-input w-full" />
+          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date envoi prévue</label>
+          <input
+            type="date"
+            value={sampling.rapportDatePrevue ?? ''}
+            onChange={(e) => onUpdate('rapportDatePrevue', e.target.value)}
+            className="field-input w-full"
+          />
         </div>
       )}
 
