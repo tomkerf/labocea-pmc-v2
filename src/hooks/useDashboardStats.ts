@@ -29,7 +29,8 @@ export interface RapportItem {
   clientId: string; planId: string; samplingId: string
   clientNom: string; siteNom: string; planNom: string
   doneDate: string; joursDepuis: number; enRetard: boolean
-  rapportDatePrevue: string   // peut être vide si non défini
+  /** rapportsAFaire: date d'envoi prévue (s.rapportDatePrevue) — rapportsEnvoyes: date d'envoi effectif (s.rapportDate) */
+  rapportDatePrevue: string
   doneBy: string              // uid du technicien
 }
 
@@ -163,7 +164,7 @@ export function useDashboardStats({
             clientId: client.id, planId: plan.id, samplingId: s.id,
             clientNom: client.nom, siteNom: plan.siteNom || plan.nom || '—', planNom: plan.nom || '—',
             doneDate: s.doneDate, joursDepuis: 0, enRetard: false,
-            rapportDatePrevue: s.rapportDate,
+            rapportDatePrevue: s.rapportDate,  // pour les envoyés : date effective (réutilise le champ "date à afficher")
             doneBy: s.doneBy ?? '',
           })
         })
