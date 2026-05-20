@@ -90,12 +90,8 @@ export function useDashboardStats({
       e.prochainEtalonnage && !verifEquipIds.has(e.id) && !verifEquipNoms.has(e.nom)
     )
 
-    const verifDates = verifications.map((v: Verification) => v.prochainControle)
-    const equipDates = equipsSansVerif.map((e: Equipement) => e.prochainEtalonnage)
-    const allDates = [...verifDates, ...equipDates]
-
-    const total = allDates.length
-    const conformes = allDates.filter(d => calcStatut(d).key === 'ok').length
+    const total = verifications.length
+    const conformes = verifications.filter((v: Verification) => v.resultat === 'conforme').length
     return {
       verifiTotal:     total,
       verifiConformes: conformes,
