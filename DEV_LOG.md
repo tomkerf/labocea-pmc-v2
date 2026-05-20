@@ -4,6 +4,31 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 41 — Refacto TuyauxPage + fix conformitePct + UX rapports
+**20 mai 2026**
+
+### Refactoring TuyauxPage
+- `TuyauxPage.tsx` 570L → 283L : extraction de `TuyauForm`, `Row`, `Tag` vers `src/components/tuyaux/TuyauForm.tsx` et utilitaires (`matColor`, `fmtDate`, `printLabel`, constantes) vers `src/lib/tuyauxUtils.ts`.
+- Même pattern que ClientPage/AdminPage — zéro régression TypeScript.
+
+### Fix bug conformitePct (dashboard)
+- **Cause racine** : après le fix précédent (session 40), l'import `calcStatut` et la variable `equipsSansVerif` sont devenus orphelins → erreurs TS silencieuses au build.
+- `conformitePct` retournait toujours `null` ("Aucun instrument suivi") car les anciennes vérifications Firestore n'ont pas de champ `resultat`.
+- **Fix** : logique hybride — utilise `resultat` si présent, sinon fallback sur `calcStatut(prochainControle).key === 'ok'`. Se mettra à jour automatiquement au fur et à mesure des nouvelles saisies métrologie.
+
+### UX rapports
+- Bouton `Envoyé ✓` renommé en `Marquer envoyé` — l'ancien libellé ressemblait à un badge d'état plutôt qu'une action.
+
+### Tests
+- Suite complète : 66/66 verts tout au long de la session.
+- Vérification que `metrologie.test.ts` et `dashboardStats.test.ts` couvrent déjà les hooks ciblés (pas de doublon à créer).
+
+### Prochaine étape
+- Valider la page Rapports en conditions réelles (clic "Marquer envoyé" → passage en section Envoyés).
+- Déploiement prod quand l'équipe a validé le staging.
+
+---
+
 ## Session 40 — Audit dette technique : refactoring, accessibilité, skeletons
 **19 mai 2026**
 
