@@ -5,6 +5,7 @@ import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectUid, selectAppUser, selectRole } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { useUsersListener } from '@/hooks/useUsers'
+import { useClientsListener } from '@/hooks/useClients'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useMetrologieStore } from '@/stores/metrologieStore'
@@ -20,6 +21,7 @@ export default function RapportsPage() {
   const role = useAuthStore(selectRole)
   const { users } = useUsersStore()
   useUsersListener()
+  useClientsListener()
 
   const equipements = useEquipementsStore((s) => s.equipements)
   const verifications = useMetrologieStore((s) => s.verifications)
