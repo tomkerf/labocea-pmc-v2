@@ -193,6 +193,7 @@ export default function RapportsPage() {
                               </p>
                               <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
                                 intervention le {fmtDone}
+                                {touteEquipe && <span style={{ color: 'var(--color-text-tertiary)' }}> · {resolveNom(r.doneBy)}</span>}
                               </p>
                             </div>
                             <div className="flex items-center gap-2 flex-wrap shrink-0">
