@@ -73,7 +73,7 @@ export default function RapportsPage() {
 
   function resolveNom(doneBy: string) {
     const u = users.find((u) => u.uid === doneBy)
-    return u ? `${u.prenom} ${u.nom}` : doneBy || '—'
+    return u ? `${u.prenom} ${u.nom}` : '—'
   }
 
   return (
