@@ -242,6 +242,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-19 | Audit dette ✅ | ClientPage 717→142L, AdminPage 706→49L (extraction composants). PlanningEquipePage supprimée. MerologiePage→MetrologiePage. Skeletons sur 3 listes. Focus visible clavier + aria-labels. |
 | 2026-05-20 | Refacto + bugfix | TuyauxPage 570→283L. Fix conformitePct dashboard (logique hybride resultat/date). UX rapports : bouton "Marquer envoyé". |
 | 2026-05-20 | Bugfix rapports ✅ | Fix temps réel bouton "Marquer rédigé" (useClientsListener manquant). Renommage "envoyé" → "rédigé". Technicien affiché en mode toute l'équipe. Fix UID brut affiché. Fix CI (variables inutilisées). |
+| 2026-05-20 | Planning UX ✅ | Groupement par client en vue jour/semaine (×N badge). Dépliage chevron avec sous-lignes individuelles. Fréquence affichée par sous-ligne. MonthView déjà groupée. |
 
 ---
 

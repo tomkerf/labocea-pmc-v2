@@ -4,6 +4,27 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 43 — Groupement planning par client + fréquence
+**20 mai 2026 (soirée)**
+
+### Groupement par client — vue jour, semaine, mois
+
+- **Problème** : un client avec beaucoup de plans (ex : ESID Lanveoc × 11) générait une ligne par plan, cassant la vue jour sur mobile.
+- **Fix vue jour** : application de `groupByClient` sur `allDayEvts` → une seule ligne "ESID Lanveoc · 11 prélèvements ×11".
+- **Fix vue semaine** : même chose via `groupByClient` sur `filteredForDayFlat`. La vue mois utilisait déjà `groupByClient`.
+- **Dépliage** : clic sur la ligne groupée en vue jour → chevron déplie les sous-lignes individuelles (nom du plan + statut). Clic sur une sous-ligne → modal de détail.
+
+### Affichage de la fréquence dans les sous-lignes
+
+- **Problème** : après dépliage, "Entrée STEP · Ecole navale" apparaissait plusieurs fois sans distinction.
+- **Fix** : ajout du champ `frequence?` dans `PlanningEvent`, alimenté depuis `plan.frequence` dans `usePlanningData`. Affiché à droite de chaque sous-ligne.
+- **Cause racine** du bug de build intermédiaire : `frequence` était dans `PoolItem` mais pas dans `PlanningEvent` — `tsc --noEmit` ne l'avait pas détecté (Vite est plus strict).
+
+### Prochaine étape impérative
+- **Refacto `PlanningPage.tsx`** (682L) — à attaquer en priorité en session 44.
+
+---
+
 ## Session 42 — Bugfix page Rapports + fix CI
 **20 mai 2026 (soir)**
 
