@@ -3,7 +3,7 @@ import {
   type PlanningEvent, type BilanGroup, type AllDayItem,
   JOURS_COURT,
   toISO, sameDay,
-  isMultiDay, sortEvts, filterEvents,
+  isMultiDay, sortEvts, filterEvents, groupByClient,
 } from '@/lib/planningUtils'
 import EventPill from '@/components/planning/EventPill'
 
@@ -165,7 +165,7 @@ export default function WeekView({
         onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
         {weekDays.map((day,i) => {
           const dateStr  = toISO(day)
-          const evts     = filteredForDayFlat(dateStr).filter(e => !isMultiDay(e))
+          const evts     = groupByClient(filteredForDayFlat(dateStr).filter(e => !isMultiDay(e)))
           const inDrag   = isInDrag(dateStr)
           const isHoliday = !!holidays[dateStr]
           const hasConge  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'conge') ?? false
