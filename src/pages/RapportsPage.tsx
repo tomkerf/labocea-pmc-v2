@@ -224,7 +224,7 @@ export default function RapportsPage() {
                                 onMouseEnter={e => { if (!sending.has(r.samplingId)) { e.currentTarget.style.background = 'var(--color-accent)'; e.currentTarget.style.color = 'white' } }}
                                 onMouseLeave={e => { if (!sending.has(r.samplingId)) { e.currentTarget.style.background = 'var(--color-accent-light)'; e.currentTarget.style.color = 'var(--color-accent)' } }}
                               >
-                                {sending.has(r.samplingId) ? '…' : 'Envoyé ✓'}
+                                {sending.has(r.samplingId) ? '…' : 'Marquer envoyé'}
                               </button>
                             </div>
                           </div>
