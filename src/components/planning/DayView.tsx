@@ -1,4 +1,5 @@
-import { Plus } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, ChevronDown, ChevronRight } from 'lucide-react'
 import {
   type PlanningEvent,
   toISO, sameDay,
@@ -24,10 +25,12 @@ export default function DayView({
   handleTouchStart, handleTouchEnd,
   handleSelectEvent, setSelectedDay,
 }: DayViewProps) {
+  const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set())
   const D_START = 7, D_END = 20, PX_H = 64, PX_M = PX_H / 60
   const dateStr = toISO(selectedDate)
   const allEvts = sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
-  const allDayEvts = groupByClient(allEvts.filter(e => !e.plannedTime))
+  const allDayEvtsFlat = allEvts.filter(e => !e.plannedTime)
+  const allDayEvts = groupByClient(allDayEvtsFlat)
   const timedEvts  = assignColumns(
     allEvts.filter(e => !!e.plannedTime)
       .map(e => ({ ...e, startMin: parseHHMM(e.plannedTime!), durationMin: 60 }))
@@ -72,36 +75,76 @@ export default function DayView({
           <div className="flex-1 py-1.5 pr-3 flex flex-col gap-1" style={{ minHeight: 36 }}>
             {allDayEvts.length === 0 ? (
               <span className="text-xs py-1" style={{ color: 'var(--color-text-tertiary)' }}>Aucune intervention planifiée</span>
-            ) : allDayEvts.map(evt => (
-              <button key={evt.id}
-                onClick={() => handleSelectEvent(evt, dateStr)}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-[5px] text-left"
-                style={{ background: evt.statusBg }}>
-                <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: evt.statusColor }} />
-                <span className="text-[11px] font-medium flex-1 truncate" style={{ color: 'var(--color-text-primary)' }}>
-                  {evt.title}
-                </span>
-                <span className="text-[10px] truncate max-w-[160px]" style={{ color: 'var(--color-text-secondary)' }}>
-                  {evt.subtitle}
-                </span>
-                {evt.count && evt.count > 1 && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold shrink-0"
-                    style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-                    ×{evt.count}
-                  </span>
-                )}
-                {evt.technicien && evt.technicien !== '—' && (
-                  <span className="text-[9px] px-1 rounded shrink-0"
-                    style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-                    {evt.technicien}
-                  </span>
-                )}
-                <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium shrink-0"
-                  style={{ background: evt.statusColor + '22', color: evt.statusColor }}>
-                  {evt.statusLabel}
-                </span>
-              </button>
-            ))}
+            ) : allDayEvts.map(evt => {
+              const isGrouped = (evt.count ?? 0) > 1
+              const isExpanded = isGrouped && expandedClients.has(evt.clientId ?? evt.id)
+              const subEvts = isExpanded
+                ? allDayEvtsFlat.filter(e => e.clientId === evt.clientId)
+                : []
+              return (
+                <div key={evt.id}>
+                  <button
+                    onClick={() => {
+                      if (isGrouped) {
+                        setExpandedClients(prev => {
+                          const next = new Set(prev)
+                          const key = evt.clientId ?? evt.id
+                          next.has(key) ? next.delete(key) : next.add(key)
+                          return next
+                        })
+                      } else {
+                        handleSelectEvent(evt, dateStr)
+                      }
+                    }}
+                    className="w-full flex items-center gap-1.5 px-2 py-1 rounded-[5px] text-left"
+                    style={{ background: evt.statusBg }}>
+                    {isGrouped
+                      ? (isExpanded
+                          ? <ChevronDown size={10} className="shrink-0" style={{ color: 'var(--color-text-secondary)' }} />
+                          : <ChevronRight size={10} className="shrink-0" style={{ color: 'var(--color-text-secondary)' }} />)
+                      : <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: evt.statusColor }} />
+                    }
+                    <span className="text-[11px] font-medium flex-1 truncate" style={{ color: 'var(--color-text-primary)' }}>
+                      {evt.title}
+                    </span>
+                    <span className="text-[10px] truncate max-w-[160px]" style={{ color: 'var(--color-text-secondary)' }}>
+                      {evt.subtitle}
+                    </span>
+                    {isGrouped && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold shrink-0"
+                        style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                        ×{evt.count}
+                      </span>
+                    )}
+                    {evt.technicien && evt.technicien !== '—' && (
+                      <span className="text-[9px] px-1 rounded shrink-0"
+                        style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                        {evt.technicien}
+                      </span>
+                    )}
+                    {!isGrouped && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium shrink-0"
+                        style={{ background: evt.statusColor + '22', color: evt.statusColor }}>
+                        {evt.statusLabel}
+                      </span>
+                    )}
+                  </button>
+                  {isExpanded && subEvts.map(sub => (
+                    <button key={sub.id}
+                      onClick={() => handleSelectEvent(sub, dateStr)}
+                      className="w-full flex items-center gap-1.5 pl-6 pr-2 py-0.5 text-left"
+                      style={{ background: 'transparent' }}>
+                      <span className="w-[4px] h-[4px] rounded-full shrink-0" style={{ background: sub.statusColor }} />
+                      <span className="text-[10px] flex-1 truncate" style={{ color: 'var(--color-text-primary)' }}>{sub.subtitle}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium shrink-0"
+                        style={{ background: sub.statusColor + '22', color: sub.statusColor }}>
+                        {sub.statusLabel}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )
+            })}
           </div>
         </div>
       </div>
