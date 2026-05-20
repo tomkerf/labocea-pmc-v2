@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react'
 import {
   type PlanningEvent,
   toISO, sameDay,
-  parseHHMM, assignColumns, sortEvts, filterEvents, getISOWeek,
+  parseHHMM, assignColumns, sortEvts, filterEvents, getISOWeek, groupByClient,
 } from '@/lib/planningUtils'
 
 interface DayViewProps {
@@ -27,7 +27,7 @@ export default function DayView({
   const D_START = 7, D_END = 20, PX_H = 64, PX_M = PX_H / 60
   const dateStr = toISO(selectedDate)
   const allEvts = sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
-  const allDayEvts = allEvts.filter(e => !e.plannedTime)
+  const allDayEvts = groupByClient(allEvts.filter(e => !e.plannedTime))
   const timedEvts  = assignColumns(
     allEvts.filter(e => !!e.plannedTime)
       .map(e => ({ ...e, startMin: parseHHMM(e.plannedTime!), durationMin: 60 }))
@@ -84,6 +84,12 @@ export default function DayView({
                 <span className="text-[10px] truncate max-w-[160px]" style={{ color: 'var(--color-text-secondary)' }}>
                   {evt.subtitle}
                 </span>
+                {evt.count && evt.count > 1 && (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold shrink-0"
+                    style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                    ×{evt.count}
+                  </span>
+                )}
                 {evt.technicien && evt.technicien !== '—' && (
                   <span className="text-[9px] px-1 rounded shrink-0"
                     style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
