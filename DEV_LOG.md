@@ -4,6 +4,33 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 42 — Bugfix page Rapports + fix CI
+**20 mai 2026 (soir)**
+
+### Fix temps réel "Marquer rédigé"
+- **Cause racine** : `RapportsPage` lisait le store Zustand mais n'avait pas de listener `onSnapshot` actif. Après le write Firestore, le store restait figé jusqu'au refresh.
+- **Fix** : ajout de `useClientsListener()` dans `RapportsPage` — le rapport bascule instantanément dans "Rédigés" après le clic.
+
+### Renommage terminologie
+- "envoyé / À envoyer / Envoyés" → "rédigé / À rédiger / Rédigés" dans tous les libellés UI (variables Firestore inchangées).
+
+### Affichage technicien en mode "Toute l'équipe"
+- En mode toute l'équipe, le nom du technicien s'affiche sous la date d'intervention dans la section "À rédiger".
+- Fix du fallback `resolveNom` : l'UID brut ne s'affiche plus quand le technicien n'est pas dans le store — affiche `—` à la place.
+
+### Fix CI (GitHub Actions)
+- **Cause** : variables inutilisées (`equipsSansVerif`, `calcStatut`, `matColor`) bloquaient le build Vite en CI mais pas en local (tsc --noEmit ne les signale pas).
+- **Fix** : suppression des imports/déclarations orphelins dans `useDashboardStats.ts` et `TuyauForm.tsx`.
+
+### Idée planifiée
+- Regroupement par client en vue jour du planning (quand un client a trop de plans le même jour). À implémenter après le refacto de `PlanningPage.tsx`.
+
+### Prochaine étape
+- Refacto `PlanningPage.tsx` (extraction DayView/WeekView/MonthView — tâche #34).
+- Valider staging avec l'équipe avant déploiement prod.
+
+---
+
 ## Session 41 — Refacto TuyauxPage + fix conformitePct + UX rapports
 **20 mai 2026**
 
