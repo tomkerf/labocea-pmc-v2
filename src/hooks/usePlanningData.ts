@@ -66,6 +66,7 @@ export function usePlanningData({
             link: `/missions/${client.id}/plan/${plan.id}/sampling/${s.id}`,
             isDone, technicien: technicien || '—',
             plannedTime: s.plannedTime, clientId: client.id, planId: plan.id, samplingId: s.id,
+            frequence: plan.frequence || '',
             meteo: plan.meteo || '',
             analysesSousTraitees: plan.analysesSousTraitees ?? false,
           }

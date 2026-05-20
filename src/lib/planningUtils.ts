@@ -26,6 +26,7 @@ export interface PlanningEvent {
   clientId?: string
   planId?: string
   samplingId?: string
+  frequence?: string
   meteo?: string
   analysesSousTraitees?: boolean
   maintenanceData?: Maintenance
