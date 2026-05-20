@@ -117,7 +117,7 @@ export default function RapportsPage() {
         <div className="flex items-center gap-2 mb-3">
           <h2 className="text-xs font-semibold uppercase"
             style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-            À envoyer
+            À rédiger
           </h2>
           {rapportsAFaire.length > 0 && (
             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
@@ -130,7 +130,7 @@ export default function RapportsPage() {
         {rapportsAFaire.length === 0 ? (
           <div className="rounded-xl px-5 py-4 text-sm"
             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)', color: 'var(--color-text-secondary)' }}>
-            ✓ Tous les rapports ont été envoyés.
+            ✓ Tous les rapports ont été rédigés.
           </div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -226,7 +226,7 @@ export default function RapportsPage() {
                                 onMouseEnter={e => { if (!sending.has(r.samplingId)) { e.currentTarget.style.background = 'var(--color-accent)'; e.currentTarget.style.color = 'white' } }}
                                 onMouseLeave={e => { if (!sending.has(r.samplingId)) { e.currentTarget.style.background = 'var(--color-accent-light)'; e.currentTarget.style.color = 'var(--color-accent)' } }}
                               >
-                                {sending.has(r.samplingId) ? '…' : 'Marquer envoyé'}
+                                {sending.has(r.samplingId) ? '…' : 'Marquer rédigé'}
                               </button>
                             </div>
                           </div>
@@ -246,7 +246,7 @@ export default function RapportsPage() {
         <div className="flex items-center gap-2 mb-3">
           <h2 className="text-xs font-semibold uppercase"
             style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-            Envoyés
+            Rédigés
           </h2>
           <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
             style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>
@@ -257,7 +257,7 @@ export default function RapportsPage() {
         {rapportsEnvoyes.length === 0 ? (
           <div className="rounded-xl px-5 py-4 text-sm"
             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)', color: 'var(--color-text-secondary)' }}>
-            Aucun rapport envoyé pour le moment.
+            Aucun rapport rédigé pour le moment.
           </div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -310,7 +310,7 @@ export default function RapportsPage() {
                             </div>
                             <div className="flex items-center gap-3 shrink-0">
                               <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                                Envoyé le {fmtEnvoye}
+                                Rédigé le {fmtEnvoye}
                               </span>
                               <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
                                 {resolveNom(r.doneBy)}
