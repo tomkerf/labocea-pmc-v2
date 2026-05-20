@@ -136,6 +136,9 @@ export default function DayView({
                       style={{ background: 'transparent' }}>
                       <span className="w-[4px] h-[4px] rounded-full shrink-0" style={{ background: sub.statusColor }} />
                       <span className="text-[10px] flex-1 truncate" style={{ color: 'var(--color-text-primary)' }}>{sub.subtitle}</span>
+                      {sub.frequence && (
+                        <span className="text-[9px] shrink-0" style={{ color: 'var(--color-text-tertiary)' }}>{sub.frequence}</span>
+                      )}
                       <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium shrink-0"
                         style={{ background: sub.statusColor + '22', color: sub.statusColor }}>
                         {sub.statusLabel}
