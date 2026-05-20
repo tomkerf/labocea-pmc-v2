@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MATERIAUX, matColor } from '@/lib/tuyauxUtils'
+import { MATERIAUX } from '@/lib/tuyauxUtils'
 import type { Tuyau, MateriauTuyau } from '@/types'
 
 interface TuyauFormProps {

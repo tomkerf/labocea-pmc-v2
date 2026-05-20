@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import { isSamplingOverdue } from '@/lib/overdue'
-import { isThisMonth, localISO, isToday, daysDiff } from '@/lib/dashboardUtils'
 import { calcStatut } from '@/hooks/useMetrologieRows'
+import { isThisMonth, localISO, isToday, daysDiff } from '@/lib/dashboardUtils'
+
 import type { Client, Sampling, Verification, Equipement, Plan, EvenementPersonnel, Maintenance } from '@/types'
 
 const EVENEMENT_CFG: Record<string, { label: string; bg: string; color: string; dot: string }> = {
@@ -83,15 +84,10 @@ export function useDashboardStats({
     [clients])
 
   const { verifiTotal, verifiConformes, conformitePct } = useMemo(() => {
-    // Même logique que MerologiePage : vérifications + équipements sans vérif ayant prochainEtalonnage
-    const verifEquipIds = new Set(verifications.map((v: Verification) => v.equipementId))
-    const verifEquipNoms = new Set(verifications.map((v: Verification) => v.equipementNom))
-    const equipsSansVerif = equipements.filter((e: Equipement) =>
-      e.prochainEtalonnage && !verifEquipIds.has(e.id) && !verifEquipNoms.has(e.nom)
-    )
-
     const total = verifications.length
-    const conformes = verifications.filter((v: Verification) => v.resultat === 'conforme').length
+    const conformes = verifications.filter((v: Verification) =>
+      v.resultat ? v.resultat === 'conforme' : calcStatut(v.prochainControle).key === 'ok'
+    ).length
     return {
       verifiTotal:     total,
       verifiConformes: conformes,
