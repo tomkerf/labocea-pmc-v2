@@ -4,6 +4,27 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 45 — Refacto PlanPage.tsx (partie 1)
+**21 mai 2026 (matin)**
+
+### Extraction usePlanActions (`src/hooks/usePlanActions.ts`)
+
+- `updatePlan`, `updateSampling` (avec journal d'audit), `generateSamplingsForPlan`, `addCustomSampling`, `deleteSampling`, `openPdfPreview` / `exportAnnualReport` (fusionnés en un seul appel `openPdfPreview(standalone: boolean)`)
+- `PlanPage.tsx` : 461L → 334L (-27%)
+- `AUDIT_FIELDS` et logique d'audit déplacés dans le hook
+
+### Bugs corrigés pendant le refacto
+- `clientId` oublié dans l'appel au hook (erreur TS2345 détectée par Vite build)
+- Types `Dispatch<SetStateAction<...>>` requis dans l'interface du hook (vs simples fonctions)
+- `Plan` inutilisé dans PlanPage après extraction
+
+### Prochaines étapes
+- `SamplingRow` composant : ligne prélèvement + bouton supprimer + formulaire inline (~75L)
+- `PdfPreviewModal` composant : modale iframe PDF (~45L)
+- Objectif : PlanPage < 200L
+
+---
+
 ## Session 44 — Refacto PlanningPage.tsx
 **21 mai 2026 (matin)**
 
