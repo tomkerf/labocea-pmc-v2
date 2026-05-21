@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Plus } from 'lucide-react'
 import {
   type PlanningEvent,
@@ -26,6 +27,8 @@ interface MonthViewProps {
   goToDay:              (dateStr: string) => void
   setCtxMenu:           (v: { dateStr: string; x: number; y: number } | null) => void
   isInDrag:             (dateStr: string) => boolean
+  prev:                 () => void
+  next:                 () => void
 }
 
 export default function MonthView({
@@ -33,15 +36,23 @@ export default function MonthView({
   filterTech, filterRetard, showRain,
   isDragging, handleDragMouseDown, handleDragMouseEnter, handleDragMouseUp,
   setIsDragging, setDragStart, setDragEnd,
-  handleSelectEvent, goToDay, setCtxMenu, isInDrag,
+  handleSelectEvent, goToDay, setCtxMenu, isInDrag, prev, next,
 }: MonthViewProps) {
+
+  const wheelCooldown = useRef(false)
+  function handleWheel(e: React.WheelEvent) {
+    if (wheelCooldown.current) return
+    wheelCooldown.current = true
+    setTimeout(() => { wheelCooldown.current = false }, 600)
+    if (e.deltaY > 0) next(); else prev()
+  }
 
   function filteredForDay(dateStr: string): PlanningEvent[] {
     return groupByClient(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
   }
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
+    <div className="flex flex-col flex-1 overflow-hidden" onWheel={handleWheel}>
       {/* En-têtes jours */}
       <div className="grid grid-cols-7 shrink-0"
         style={{ borderBottom:'1px solid var(--color-border-subtle)' }}>

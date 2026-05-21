@@ -271,6 +271,8 @@ const uid        = useAuthStore(selectUid)
             goToDay={goToDay}
             setCtxMenu={setCtxMenu}
             isInDrag={isInDrag}
+            prev={prev}
+            next={next}
           />
         )}
       </div>
