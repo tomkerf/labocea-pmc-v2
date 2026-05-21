@@ -15,16 +15,14 @@ import { useEvenementsStore } from '@/stores/evenementsStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { usePreleveursStore } from '@/stores/preleveursStore'
 import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
-import type { Client } from '@/types'
 import {
   // Types
-  type PlanningEvent, type PoolItem, type ViewMode,
+  type PlanningEvent, type ViewMode,
   // Constantes
   JOURS_LONG, MOIS_LONG,
   // Fonctions pure
-  getTechColor,
   getFrenchHolidays,
-  startOfWeek, startOfMonth, addDays, addMonths, toISO, sameDay,
+  startOfWeek, startOfMonth, addDays, addMonths, sameDay,
   buildMonthGrid,
   getPeriodLabel,
 } from '@/lib/planningUtils'
@@ -95,7 +93,7 @@ const uid        = useAuthStore(selectUid)
 
   const {
     handleTouchStart, handleTouchEnd,
-    isDragging, dragStart, dragEnd,
+    isDragging,
     setIsDragging, setDragStart, setDragEnd,
     isInDrag, handleDragMouseDown, handleDragMouseEnter, handleDragMouseUp,
   } = usePlanningDrag({ setSelectedDate, goToDay, setDragModal })

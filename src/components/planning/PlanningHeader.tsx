@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import { type ViewMode, getTechColor } from '@/lib/planningUtils'
-import type { Preleveur } from '@/types'
+type Preleveur = { code: string; nom?: string }
 
 interface PlanningHeaderProps {
   // Navigation
