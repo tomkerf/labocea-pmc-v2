@@ -4,6 +4,40 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 44 — Refacto PlanningPage.tsx
+**21 mai 2026 (matin)**
+
+### Extraction de 3 modules depuis PlanningPage.tsx (682L → 431L, -37%)
+
+**`usePlanningDrag`** (`src/hooks/usePlanningDrag.ts`)
+- Swipe mobile (touch start/end) avec functional update pattern (`d => addDays(d, ±1)`)
+- Drag-to-create (mouseDown/Enter/Up + état dragStart/dragEnd/isDragging)
+- Retourne aussi `isInDrag(dateStr)` utilisé par WeekView et MonthView
+
+**`usePlanningActions`** (`src/hooks/usePlanningActions.ts`)
+- 7 handlers Firestore : `handleCancelSampling`, `handleMoveEvent`, `handleDeleteEvent`, `toggleRainDay`, `handleChangeTechnicien`, `handleSaveEvenement`, `handleValidatePool`
+- Reçoit `{ uid, initiales, clients, evenements, holidays }` en props
+
+**`PlanningHeader`** (`src/components/planning/PlanningHeader.tsx`)
+- Navigation période (prev/next/today/mini-cal), toggle vue (jour/semaine/mois)
+- Filtres technicien (pills colorées), bouton retard, toggle pluie
+- Bandeau "à planifier ce mois" + hint drag (affiché une seule fois via localStorage)
+- MiniCalendarPanel **non inclus** (reste en overlay absolu dans PlanningPage)
+
+### Bugs corrigés
+- **Double bandeau** : les bandeaux "à planifier" et drag hint étaient restés dans PlanningPage après copie vers PlanningHeader. Supprimés.
+- **Import `Preleveur`** : type inexistant dans `@/types`, remplacé par type inline `{ code: string; nom?: string }`.
+- **Imports inutilisés** : `Client`, `PoolItem`, `getTechColor`, `toISO`, `dragStart`, `dragEnd` — détectés par Vite build (tsc --noEmit ne les avait pas catchés).
+
+### Cause racine du pattern d'erreurs imports
+`tsc --noEmit` ne détecte pas les `TS6133` (declared but never read) en mode strict sur toutes les configurations. Vite build est plus strict. Toujours valider avec `npm run build` avant commit.
+
+### Prochaines étapes
+- Tester staging : navigation planning, drag-to-create, swipe mobile, modals
+- Prochaine cible refacto : `ClientPage.tsx` ou `DashboardPage.tsx`
+
+---
+
 ## Session 43 — Groupement planning par client + fréquence
 **20 mai 2026 (soirée)**
 
