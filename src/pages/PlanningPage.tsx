@@ -206,40 +206,6 @@ const uid        = useAuthStore(selectUid)
           onClick={() => setShowMiniCal(false)} />
       )}
 
-      {/* ── Bandeau "à planifier" — visible en vue mois/semaine quand le pool n'est pas vide ── */}
-      {viewMode !== 'jour' && monthPoolCount > 0 && (
-        <div className="flex items-center gap-2 px-4 md:px-6 py-2 shrink-0"
-          style={{ background: 'var(--color-accent-light)', borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: 'var(--color-accent)' }} />
-          <p className="text-xs" style={{ color: 'var(--color-accent)' }}>
-            <span className="font-semibold">
-              {monthPoolCount} prélèvement{monthPoolCount > 1 ? 's' : ''} à planifier ce mois
-            </span>
-            <span className="font-normal" style={{ opacity: 0.75 }}>
-              {' '}— clic droit sur un jour pour les assigner
-            </span>
-          </p>
-        </div>
-      )}
-
-      {/* ── Hint premier drag (affiché une seule fois) ── */}
-      {showDragHint && viewMode !== 'jour' && (
-        <div className="flex items-center justify-between gap-3 px-4 md:px-6 py-2 shrink-0"
-          style={{ background: 'var(--color-success-light)', borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <p className="text-xs" style={{ color: 'var(--color-success)' }}>
-            <span className="font-semibold">Astuce —</span> glisse sur plusieurs jours pour créer rapidement un événement (congé, rappel, réunion…)
-          </p>
-          <button
-            onClick={() => { setShowDragHint(false); localStorage.setItem('planning_drag_hint_seen', '1') }}
-            className="text-xs font-medium shrink-0 px-2 py-0.5 rounded"
-            style={{ color: 'var(--color-success)', background: 'transparent' }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(52,199,89,0.15)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-          >
-            OK
-          </button>
-        </div>
-      )}
 
       {/* ── VUE JOUR (toutes tailles) ── */}
       {viewMode === 'jour' && (
