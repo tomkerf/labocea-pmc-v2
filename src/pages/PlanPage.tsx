@@ -5,13 +5,10 @@ import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { useClientData } from '@/hooks/useClientData'
-import { generateId } from '@/lib/ids'
-import { generateSamplings } from '@/lib/samplings'
 import { SamplingForm } from '@/components/plan/SamplingForm'
 import { PlanConfigSection } from '@/components/plan/PlanConfigSection'
-import { buildReportHtml } from '@/lib/reportHtml'
-import { toast } from '@/stores/toastStore'
-import type { Plan, Sampling, SamplingStatus, NappeType, SamplingHistoryEntry } from '@/types'
+import { usePlanActions } from '@/hooks/usePlanActions'
+import type { SamplingStatus } from '@/types'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
@@ -22,23 +19,6 @@ const STATUS_CONFIG: Record<SamplingStatus, { label: string; bg: string; color: 
   overdue:       { label: 'En retard',   bg: 'var(--color-danger-light)',   color: 'var(--color-danger)' },
   non_effectue:  { label: 'Non effectué',bg: 'var(--color-warning-light)',  color: 'var(--color-warning)' },
 }
-
-// ── Champs audités et leur formateur ──────────────────────────
-// Seuls les champs discrets/binaires sont audités — pas les textes libres (motif, comment)
-// qui génèreraient une entrée par frappe clavier
-const AUDIT_FIELDS: Partial<Record<keyof Sampling, (v: unknown) => string>> = {
-  status:       (v) => STATUS_CONFIG[v as SamplingStatus]?.label ?? String(v),
-  doneDate:     (v) => v ? new Date(v as string).toLocaleDateString('fr-FR') : '—',
-  plannedMonth: (v) => MOIS[v as number] ?? String(v),
-  plannedDay:   (v) => v ? `Jour ${v}` : '—',
-  plannedTime:  (v) => (v as string) || '—',
-  rapportPrevu: (v) => v ? 'Oui' : 'Non',
-  rapportDate:  (v) => v ? new Date(v as string).toLocaleDateString('fr-FR') : '—',
-  rapportDatePrevue: (v) => v ? new Date(v as string).toLocaleDateString('fr-FR') : '—',
-  nappe:        (v) => ({ haute: 'Haute', basse: 'Basse', '': '—' }[v as string] ?? String(v)),
-  doneBy:       () => '—',  // sera résolu depuis users lors du PDF
-}
-
 
 
 export default function PlanPage() {
@@ -76,123 +56,16 @@ export default function PlanPage() {
 
   const plan = client?.plans.find((p) => p.id === planId) ?? null
 
-  function updatePlan(field: keyof Plan, value: unknown) {
-    if (!client || !plan) return
-    const updatedPlan = { ...plan, [field]: value }
-    triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updatedPlan : p) })
-  }
-
-  function updateSampling(samplingId: string, field: keyof Sampling, value: unknown) {
-    if (!client || !plan) return
-    const uid_ = uid ?? ''
-    const updatedSamplings = plan.samplings.map((s) => {
-      if (s.id !== samplingId) return s
-
-      const patch: Partial<Sampling> = { [field]: value }
-
-      // Quand on passe en "Réalisé" et que doneBy n'est pas encore défini → technicien connecté par défaut
-      if (field === 'status' && value === 'done' && !s.doneBy) patch.doneBy = uid_
-      // Quand on quitte "Réalisé" → effacer doneBy
-      if (field === 'status' && value !== 'done') patch.doneBy = ''
-
-      // Rapport : date prévue par défaut = doneDate + 1 mois
-      const effectiveDoneDate = field === 'doneDate' ? String(value) : s.doneDate
-      const effectiveRapportPrevu = field === 'rapportPrevu' ? Boolean(value) : s.rapportPrevu
-      if (effectiveRapportPrevu && !s.rapportDatePrevue) {
-        if (effectiveDoneDate) {
-          const d = new Date(effectiveDoneDate)
-          d.setMonth(d.getMonth() + 1)
-          patch.rapportDatePrevue = d.toISOString().slice(0, 10)
-        }
-      }
-
-      // ── Journal d'audit ──────────────────────────────────────
-      // Tracer uniquement les champs significatifs quand la valeur change vraiment
-      const formatter = AUDIT_FIELDS[field]
-      if (formatter && String(s[field]) !== String(value)) {
-        const entry: SamplingHistoryEntry = {
-          at: new Date().toISOString(),
-          by: uid_,
-          byNom: currentUserNom,
-          field: String(field),
-          from: formatter(s[field]),
-          to: formatter(value),
-        }
-        // Cas spécial doneBy : résoudre le nom depuis users
-        if (field === 'doneBy') {
-          const fromUser = users.find((u) => u.uid === String(s[field]))
-          const toUser   = users.find((u) => u.uid === String(value))
-          entry.from = fromUser ? `${fromUser.prenom} ${fromUser.nom}` : (s[field] ? String(s[field]) : '—')
-          entry.to   = toUser   ? `${toUser.prenom} ${toUser.nom}`     : (value  ? String(value)   : '—')
-        }
-        patch.history = [...(s.history ?? []), entry]
-      }
-
-      return { ...s, ...patch }
-    })
-    triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? { ...p, samplings: updatedSamplings } : p) })
-  }
-
-  function generateSamplingsForPlan() {
-    if (!client || !plan) return
-    const newSamplings = generateSamplings(plan)
-    const updatedPlan = { ...plan, samplings: newSamplings }
-    triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updatedPlan : p) })
-  }
-
-  /** Ajoute un prélèvement à date libre (mode Personnalisé) */
-  function addCustomSampling(dateStr: string) {
-    if (!client || !plan || !dateStr) return
-    const d = new Date(dateStr + 'T12:00:00')
-    // Bloquer les doublons à la même date
-    const isDuplicate = plan.samplings.some(
-      (s) => s.plannedMonth === d.getMonth() && s.plannedDay === d.getDate()
-    )
-    if (isDuplicate) {
-      toast.error(`Un prélèvement est déjà prévu le ${d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}.`)
-      return
-    }
-    const newSampling: Sampling = {
-      id: generateId(),
-      num: plan.samplings.length + 1,
-      plannedMonth: d.getMonth(),
-      plannedDay: d.getDate(),
-      status: 'planned',
-      doneDate: '', comment: '',
-      nappe: '' as NappeType,
-      rapportPrevu: false, rapportDate: '',
-      tente: false, reportHistory: [], doneBy: '',
-    }
-    const updated = { ...plan, samplings: [...plan.samplings, newSampling].sort((a, b) => a.plannedMonth - b.plannedMonth || a.plannedDay - b.plannedDay) }
-    triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updated : p) })
-    setNewDate('')
-    setAddingDate(false)
-  }
-
-  /** Supprime un prélèvement (mode Personnalisé) */
-  function deleteSampling(samplingId: string) {
-    if (!client || !plan) return
-    const updated = { ...plan, samplings: plan.samplings.filter((s) => s.id !== samplingId).map((s, i) => ({ ...s, num: i + 1 })) }
-    triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updated : p) })
-    if (selectedSampling === samplingId) setSelectedSampling(null)
-  }
-
-  function openPdfPreview() {
-    if (!client || !plan) return
-    setPdfPreview(buildReportHtml(client, plan, users, false))
-  }
-
-  function exportAnnualReport() {
-    if (!client || !plan) return
-    const blob = new Blob([buildReportHtml(client, plan, users, true)], { type: 'text/html;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.target = '_blank'
-    a.rel = 'noopener'
-    a.click()
-    setTimeout(() => URL.revokeObjectURL(url), 10_000)
-  }
+  const {
+    updatePlan, updateSampling,
+    generateSamplingsForPlan, addCustomSampling, deleteSampling,
+    openPdfPreview,
+  } = usePlanActions({
+    uid, currentUserNom, users,
+    clientId, planId, plan, client,
+    triggerSave, setPdfPreview,
+    setSelectedSampling, setNewDate, setAddingDate,
+  })
 
   if (loading) return <div className="flex justify-center py-20"><div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} /></div>
   if (!client || !plan) return <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Point introuvable.</div>
@@ -248,7 +121,7 @@ export default function PlanPage() {
           <div className="flex items-center gap-2">
             {plan.samplings.length > 0 && (
               <button
-                onClick={openPdfPreview}
+                onClick={() => openPdfPreview(false)}
                 className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
                 style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
               >
@@ -363,7 +236,7 @@ export default function PlanPage() {
                       confirmDelSampling === s.id ? (
                         <div className="flex items-center gap-1 px-2">
                           <button
-                            onClick={() => { deleteSampling(s.id); setConfirmDelSampling(null) }}
+                            onClick={() => { deleteSampling(s.id, selectedSampling); setConfirmDelSampling(null) }}
                             className="text-xs px-2 py-1 rounded-md font-medium"
                             style={{ background: 'var(--color-danger)', color: 'white' }}
                           >
@@ -429,7 +302,7 @@ export default function PlanPage() {
               </p>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={exportAnnualReport}
+                  onClick={() => openPdfPreview(true)}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium"
                   style={{ background: 'var(--color-accent)', color: 'white' }}
                 >
