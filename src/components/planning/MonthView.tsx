@@ -55,7 +55,7 @@ export default function MonthView({
       </div>
       {/* Grille */}
       <div className="grid grid-cols-7 flex-1 overflow-y-auto select-none"
-        style={{ gridAutoRows:'1fr' }}
+        style={{ gridAutoRows:'minmax(90px, 1fr)' }}
         onMouseUp={handleDragMouseUp}
         onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
         {monthGrid.map((day,i) => {
