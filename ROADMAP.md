@@ -245,6 +245,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-20 | Planning UX ✅ | Groupement par client en vue jour/semaine (×N badge). Dépliage chevron avec sous-lignes individuelles. Fréquence affichée par sous-ligne. MonthView déjà groupée. |
 | 2026-05-21 | Refacto PlanningPage ✅ | PlanningPage.tsx 682L→431L (-37%). Extraction usePlanningDrag, usePlanningActions, PlanningHeader. Fix double bandeau après extraction. |
 | 2026-05-21 | Refacto PlanPage (1/2) | PlanPage.tsx 461L→334L (-27%). Extraction usePlanActions (audit trail, Firestore, PDF). Reste : SamplingRow + PdfPreviewModal. |
+| 2026-05-21 | UX discoverabilité | État vide riche + carte dashed en bas de liste + wording précis sur Matériel, Métrologie, Maintenances. |
 
 ---
 

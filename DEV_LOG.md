@@ -4,6 +4,34 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 46 — UX : discoverabilité bouton "Ajouter"
+**21 mai 2026 (soir)**
+
+### Problème
+Sur les pages Matériel, Métrologie et Maintenances, le bouton "+ Ajouter" (coin haut droit) n'attirait pas le regard : zone "chrome" éloignée du contenu, wording générique.
+
+### Ce qui a été fait
+
+**3 améliorations sur les 3 pages (MaterielPage, MetrologiePage, MaintenancesPage) :**
+
+1. **État vide enrichi** — remplace le simple texte gris par : icône dans carré coloré (accent) + titre + phrase d'invitation + bouton CTA centré bien visible.
+2. **Carte pointillée en bas de liste** — quand la liste a déjà des éléments, une ligne `+ Ajouter…` dashed apparaît après le dernier item. Au hover elle passe en bleu accent. Le regard qui descend après scroll la trouve naturellement.
+3. **Wording précis** :
+   - Matériel → "Ajouter un équipement"
+   - Métrologie → "Saisir une vérification"
+   - Maintenances → "Nouvelle intervention"
+
+### Décisions
+- Pas de FAB mobile pour l'instant (complexité layout, à évaluer si adoption insuffisante).
+- La carte dashed est en `transparent` par défaut pour ne pas alourdir la liste visuellement.
+
+### Prochaines étapes
+- Tester en conditions réelles (équipe terrain).
+- Appliquer le même pattern à `/missions` si besoin.
+- Reprendre le refacto PlanPage (extraction SamplingRow + PdfPreviewModal — session 45 interrompue).
+
+---
+
 ## Session 45 — Refacto PlanPage.tsx (partie 1)
 **21 mai 2026 (matin)**
 

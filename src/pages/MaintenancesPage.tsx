@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Plus, Wrench, Zap } from 'lucide-react'
+import { Plus, Wrench, Zap, Hammer } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { createMaintenance } from '@/services/maintenanceService'
@@ -103,7 +103,7 @@ export default function MaintenancesPage() {
           style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
         >
           <Plus size={16} />
-          Nouvelle
+          Nouvelle intervention
         </button>
       </div>
 
@@ -167,13 +167,31 @@ export default function MaintenancesPage() {
       {/* Liste */}
       {loading ? (
         <SkeletonList count={4} variant="card" />
+      ) : maintenances.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
+            style={{ background: 'var(--color-accent-light)' }}>
+            <Hammer size={28} strokeWidth={1.5} style={{ color: 'var(--color-accent)' }} />
+          </div>
+          <div className="text-center">
+            <p className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>Aucune intervention</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+              Planifiez votre première intervention de maintenance.
+            </p>
+          </div>
+          <button
+            onClick={handleCreate}
+            disabled={creating}
+            className="flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-lg transition-opacity"
+            style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
+          >
+            <Plus size={16} />
+            Nouvelle intervention
+          </button>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-            {maintenances.length === 0
-              ? 'Aucune intervention — cliquez sur "Nouvelle" pour commencer.'
-              : 'Aucune intervention pour ces filtres.'}
-          </p>
+          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Aucune intervention pour ces filtres.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
@@ -231,6 +249,27 @@ export default function MaintenancesPage() {
               </button>
             )
           })}
+          <button
+            onClick={handleCreate}
+            disabled={creating}
+            className="w-full flex items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-medium transition-colors"
+            style={{
+              border: '1.5px dashed var(--color-border)',
+              color: 'var(--color-text-tertiary)',
+              background: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-accent)'
+              e.currentTarget.style.color = 'var(--color-accent)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-border)'
+              e.currentTarget.style.color = 'var(--color-text-tertiary)'
+            }}
+          >
+            <Plus size={15} />
+            Nouvelle intervention
+          </button>
         </div>
       )}
     </div>

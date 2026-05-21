@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Gauge } from 'lucide-react'
+import { Plus, Gauge, Ruler } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useVerificationsListener } from '@/hooks/useVerifications'
 import { createVerification } from '@/services/verificationService'
@@ -96,7 +96,7 @@ export default function MerologiePage() {
           style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
         >
           <Plus size={16} />
-          Nouvelle
+          Saisir une vérification
         </button>
       </div>
 
@@ -123,13 +123,31 @@ export default function MerologiePage() {
           <div className="w-6 h-6 rounded-full border-2 animate-spin"
             style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
         </div>
+      ) : allRows.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
+            style={{ background: 'var(--color-accent-light)' }}>
+            <Ruler size={28} strokeWidth={1.5} style={{ color: 'var(--color-accent)' }} />
+          </div>
+          <div className="text-center">
+            <p className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>Aucune vérification</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+              Saisissez votre première vérification métrologique.
+            </p>
+          </div>
+          <button
+            onClick={handleCreate}
+            disabled={creating}
+            className="flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-lg transition-opacity"
+            style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
+          >
+            <Plus size={16} />
+            Saisir une vérification
+          </button>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-            {allRows.length === 0
-              ? 'Aucun instrument suivi — ajoutez un équipement ou une vérification.'
-              : 'Aucun résultat pour ce filtre.'}
-          </p>
+          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Aucun résultat pour ce filtre.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
@@ -240,6 +258,27 @@ export default function MerologiePage() {
               </button>
             )
           })}
+          <button
+            onClick={handleCreate}
+            disabled={creating}
+            className="w-full flex items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-medium transition-colors"
+            style={{
+              border: '1.5px dashed var(--color-border)',
+              color: 'var(--color-text-tertiary)',
+              background: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-accent)'
+              e.currentTarget.style.color = 'var(--color-accent)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-border)'
+              e.currentTarget.style.color = 'var(--color-text-tertiary)'
+            }}
+          >
+            <Plus size={15} />
+            Saisir une vérification
+          </button>
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Plus, Search, Package } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useUsersListener } from '@/hooks/useUsers'
@@ -119,7 +119,7 @@ export default function MaterielPage() {
           style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
         >
           <Plus size={16} />
-          Ajouter
+          Ajouter un équipement
         </button>
       </div>
 
@@ -225,19 +225,58 @@ export default function MaterielPage() {
       {/* Liste */}
       {loading ? (
         <SkeletonList count={4} variant="card" />
+      ) : equipements.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
+            style={{ background: 'var(--color-accent-light)' }}>
+            <Package size={28} strokeWidth={1.5} style={{ color: 'var(--color-accent)' }} />
+          </div>
+          <div className="text-center">
+            <p className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>Aucun équipement</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+              Commencez par ajouter votre premier équipement.
+            </p>
+          </div>
+          <button
+            onClick={handleCreate}
+            disabled={creating}
+            className="flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-lg transition-opacity"
+            style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
+          >
+            <Plus size={16} />
+            Ajouter un équipement
+          </button>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-            {equipements.length === 0
-              ? 'Aucun équipement — cliquez sur "Ajouter" pour commencer.'
-              : 'Aucun résultat pour ces filtres.'}
-          </p>
+          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Aucun résultat pour ces filtres.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
           {filtered.map((e: Equipement) => (
             <EquipementCard key={e.id} equipement={e} />
           ))}
+          <button
+            onClick={handleCreate}
+            disabled={creating}
+            className="w-full flex items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-medium transition-colors"
+            style={{
+              border: '1.5px dashed var(--color-border)',
+              color: 'var(--color-text-tertiary)',
+              background: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-accent)'
+              e.currentTarget.style.color = 'var(--color-accent)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-border)'
+              e.currentTarget.style.color = 'var(--color-text-tertiary)'
+            }}
+          >
+            <Plus size={15} />
+            Ajouter un équipement
+          </button>
         </div>
       )}
     </div>
