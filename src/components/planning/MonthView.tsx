@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { Plus } from 'lucide-react'
 import {
   type PlanningEvent,
@@ -39,20 +39,29 @@ export default function MonthView({
   handleSelectEvent, goToDay, setCtxMenu, isInDrag, prev, next,
 }: MonthViewProps) {
 
+  const containerRef = useRef<HTMLDivElement>(null)
   const wheelCooldown = useRef(false)
-  function handleWheel(e: React.WheelEvent) {
-    if (wheelCooldown.current) return
-    wheelCooldown.current = true
-    setTimeout(() => { wheelCooldown.current = false }, 600)
-    if (e.deltaY > 0) next(); else prev()
-  }
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    function onWheel(e: WheelEvent) {
+      e.preventDefault()
+      if (wheelCooldown.current) return
+      wheelCooldown.current = true
+      setTimeout(() => { wheelCooldown.current = false }, 600)
+      if (e.deltaY > 0) next(); else prev()
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [prev, next])
 
   function filteredForDay(dateStr: string): PlanningEvent[] {
     return groupByClient(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
   }
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden" onWheel={handleWheel}>
+    <div ref={containerRef} className="flex flex-col flex-1 overflow-hidden">
       {/* En-têtes jours */}
       <div className="grid grid-cols-7 shrink-0"
         style={{ borderBottom:'1px solid var(--color-border-subtle)' }}>
@@ -65,8 +74,8 @@ export default function MonthView({
         ))}
       </div>
       {/* Grille */}
-      <div className="grid grid-cols-7 flex-1 overflow-y-auto select-none"
-        style={{ gridAutoRows:'minmax(90px, 1fr)' }}
+      <div className="grid grid-cols-7 flex-1 overflow-hidden select-none"
+        style={{ gridAutoRows:'1fr' }}
         onMouseUp={handleDragMouseUp}
         onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
         {monthGrid.map((day,i) => {
