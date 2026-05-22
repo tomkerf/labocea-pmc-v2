@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useState } from 'react'
 import {
   User, Key, MapPin, FileText, Phone, Mail, Copy, Eye, EyeOff, Pencil, Trash2,

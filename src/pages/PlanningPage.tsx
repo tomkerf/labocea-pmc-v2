@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react'
-import { Plus } from 'lucide-react'
 import { useClientsListener } from '@/hooks/useClients'
 // saveClient, createEvenement, deleteEvenement → usePlanningActions
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -18,11 +17,9 @@ import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
 import {
   // Types
   type PlanningEvent, type ViewMode,
-  // Constantes
-  JOURS_LONG, MOIS_LONG,
   // Fonctions pure
   getFrenchHolidays,
-  startOfWeek, startOfMonth, addDays, addMonths, sameDay,
+  startOfWeek, startOfMonth, addDays,
   buildMonthGrid,
   getPeriodLabel,
 } from '@/lib/planningUtils'
@@ -30,6 +27,7 @@ import { usePlanningData } from '@/hooks/usePlanningData'
 import { usePlanningCalendar } from '@/hooks/usePlanningCalendar'
 import { usePlanningDrag } from '@/hooks/usePlanningDrag'
 import { usePlanningActions } from '@/hooks/usePlanningActions'
+import { usePlanningNavigation } from '@/hooks/usePlanningNavigation'
 import DayModal          from '@/components/planning/DayModal'
 import CellContextMenu   from '@/components/planning/CellContextMenu'
 import GhostDetailModal  from '@/components/planning/GhostDetailModal'
@@ -39,7 +37,7 @@ import PlanningHeader     from '@/components/planning/PlanningHeader'
 import DayView            from '@/components/planning/DayView'
 import WeekView           from '@/components/planning/WeekView'
 import MonthView          from '@/components/planning/MonthView'
-import EventRow           from '@/components/planning/EventRow'
+import PeriodListView     from '@/components/planning/PeriodListView'
 import MiniCalendarPanel  from '@/components/planning/MiniCalendarPanel'
 
 // ── Composant principal ─────────────────────────────────────
@@ -89,6 +87,15 @@ const uid        = useAuthStore(selectUid)
     else setEventDetail({ event, dateStr })
   }
 
+  // ── Navigation ──────────────────────────────────────────
+  const { prev, next, goToday, goToDay, switchView } = usePlanningNavigation({
+    viewMode, setViewMode, today,
+    selectedDate, setSelectedDate,
+    weekStart, setWeekStart,
+    monthStart, setMonthStart,
+    setSelectedDay,
+  })
+
   // ── Drag-to-create + swipe ──────────────────────────────
   const [dragModal, setDragModal] = useState<{ dateDebut: string; dateFin: string } | null>(null)
 
@@ -122,38 +129,6 @@ const uid        = useAuthStore(selectUid)
     handleCancelSampling, handleMoveEvent, handleDeleteEvent,
     toggleRainDay, handleChangeTechnicien, handleSaveEvenement, handleValidatePool,
   } = usePlanningActions({ uid, initiales, clients, evenements, holidays })
-
-  // ── Navigation ──────────────────────────────────────────
-
-  function prev() {
-    if (viewMode==='jour') setSelectedDate(addDays(selectedDate,-1))
-    else if (viewMode==='semaine') setWeekStart(addDays(weekStart,-7))
-    else setMonthStart(addMonths(monthStart,-1))
-    setSelectedDay(null)
-  }
-  function next() {
-    if (viewMode==='jour') setSelectedDate(addDays(selectedDate,1))
-    else if (viewMode==='semaine') setWeekStart(addDays(weekStart,7))
-    else setMonthStart(addMonths(monthStart,1))
-    setSelectedDay(null)
-  }
-  function goToday() {
-    setWeekStart(startOfWeek(today)); setMonthStart(startOfMonth(today))
-    setSelectedDate(today); setSelectedDay(null)
-  }
-  // Naviguer vers la vue Jour pour une date donnée
-  function goToDay(dateStr: string) {
-    const d = new Date(dateStr + 'T12:00:00')
-    setSelectedDate(d)
-    setViewMode('jour')
-    setSelectedDay(null)
-  }
-  function switchView(m:ViewMode) {
-    setViewMode(m)
-    if (m==='mois') setMonthStart(startOfMonth(selectedDate))
-    if (m==='semaine') setWeekStart(startOfWeek(selectedDate))
-    setSelectedDay(null)
-  }
 
   // ── Label période ───────────────────────────────────────
 
@@ -280,49 +255,14 @@ const uid        = useAuthStore(selectUid)
 
       {/* ── MOBILE : scroll vertical liste ── */}
       <div className={viewMode === 'jour' ? 'hidden' : 'md:hidden flex-1 overflow-y-auto'}>
-        <div className="px-4 py-4 space-y-4">
-          {periodList.length===0 ? (
-            <div className="rounded-xl px-5 py-12 text-center"
-              style={{ background:'var(--color-bg-secondary)', border:'1px solid var(--color-border-subtle)' }}>
-              <p className="text-sm" style={{ color:'var(--color-text-tertiary)' }}>
-                {filterRetard ? 'Aucun prélèvement en retard.' : 'Aucune intervention cette période.'}
-              </p>
-              <button onClick={goToday} className="mt-3 text-xs" style={{ color:'var(--color-accent)' }}>
-                Revenir à aujourd'hui
-              </button>
-            </div>
-          ) : (
-            periodList.map(({date, dateStr, events}) => {
-              const isToday = sameDay(date,today)
-              const dayIdx = (date.getDay()+6)%7
-              return (
-                <div key={dateStr}>
-                  <div className="flex items-center gap-2 mb-1.5 px-1">
-                    <span className="text-xs font-semibold capitalize"
-                      style={{ color:isToday?'#FF3B30':'var(--color-text-secondary)' }}>
-                      {JOURS_LONG[dayIdx]} {date.getDate()} {MOIS_LONG[date.getMonth()]}
-                    </span>
-                    {isToday && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                        style={{ background:'rgba(255,59,48,0.1)', color:'#FF3B30' }}>
-                        Aujourd'hui
-                      </span>
-                    )}
-                    <button onClick={() => goToDay(dateStr)}
-                      className="ml-auto flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-medium"
-                      style={{ color:'var(--color-text-tertiary)', border:'1px solid var(--color-border-subtle)' }}>
-                      <Plus size={9} /> Ajouter
-                    </button>
-                  </div>
-                  <div className="rounded-xl overflow-hidden"
-                    style={{ background:'var(--color-bg-secondary)', border:'1px solid var(--color-border-subtle)', boxShadow:'var(--shadow-card)' }}>
-                    {events.map((evt,i) => <EventRow key={evt.id} event={evt} isLast={i===events.length-1} onSelect={e => handleSelectEvent(e, dateStr)} />)}
-                  </div>
-                </div>
-              )
-            })
-          )}
-        </div>
+        <PeriodListView
+          periodList={periodList}
+          today={today}
+          filterRetard={filterRetard}
+          goToday={goToday}
+          goToDay={goToDay}
+          handleSelectEvent={handleSelectEvent}
+        />
       </div>
 
       {/* ── DayModal ── */}

@@ -1,0 +1,66 @@
+import { Plus } from 'lucide-react'
+import {
+  type PlanningEvent,
+  JOURS_LONG, MOIS_LONG, sameDay,
+} from '@/lib/planningUtils'
+import EventRow from '@/components/planning/EventRow'
+
+interface PeriodListViewProps {
+  periodList:        { date: Date; dateStr: string; events: PlanningEvent[] }[]
+  today:             Date
+  filterRetard:      boolean
+  goToday:           () => void
+  goToDay:           (dateStr: string) => void
+  handleSelectEvent: (event: PlanningEvent, dateStr: string) => void
+}
+
+export default function PeriodListView({
+  periodList, today, filterRetard,
+  goToday, goToDay, handleSelectEvent,
+}: PeriodListViewProps) {
+  return (
+    <div className="px-4 py-4 space-y-4">
+      {periodList.length===0 ? (
+        <div className="rounded-xl px-5 py-12 text-center"
+          style={{ background:'var(--color-bg-secondary)', border:'1px solid var(--color-border-subtle)' }}>
+          <p className="text-sm" style={{ color:'var(--color-text-tertiary)' }}>
+            {filterRetard ? 'Aucun prélèvement en retard.' : 'Aucune intervention cette période.'}
+          </p>
+          <button onClick={goToday} className="mt-3 text-xs" style={{ color:'var(--color-accent)' }}>
+            Revenir à aujourd'hui
+          </button>
+        </div>
+      ) : (
+        periodList.map(({date, dateStr, events}) => {
+          const isToday = sameDay(date,today)
+          const dayIdx = (date.getDay()+6)%7
+          return (
+            <div key={dateStr}>
+              <div className="flex items-center gap-2 mb-1.5 px-1">
+                <span className="text-xs font-semibold capitalize"
+                  style={{ color:isToday?'#FF3B30':'var(--color-text-secondary)' }}>
+                  {JOURS_LONG[dayIdx]} {date.getDate()} {MOIS_LONG[date.getMonth()]}
+                </span>
+                {isToday && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                    style={{ background:'rgba(255,59,48,0.1)', color:'#FF3B30' }}>
+                    Aujourd'hui
+                  </span>
+                )}
+                <button onClick={() => goToDay(dateStr)}
+                  className="ml-auto flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-medium"
+                  style={{ color:'var(--color-text-tertiary)', border:'1px solid var(--color-border-subtle)' }}>
+                  <Plus size={9} /> Ajouter
+                </button>
+              </div>
+              <div className="rounded-xl overflow-hidden"
+                style={{ background:'var(--color-bg-secondary)', border:'1px solid var(--color-border-subtle)', boxShadow:'var(--shadow-card)' }}>
+                {events.map((evt,i) => <EventRow key={evt.id} event={evt} isLast={i===events.length-1} onSelect={e => handleSelectEvent(e, dateStr)} />)}
+              </div>
+            </div>
+          )
+        })
+      )}
+    </div>
+  )
+}
