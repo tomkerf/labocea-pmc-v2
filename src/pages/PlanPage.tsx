@@ -1,25 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, Trash2, FileText, X, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, Plus, FileText, AlertTriangle } from 'lucide-react'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { useClientData } from '@/hooks/useClientData'
-import { SamplingForm } from '@/components/plan/SamplingForm'
 import { PlanConfigSection } from '@/components/plan/PlanConfigSection'
+import { SamplingRow } from '@/components/plan/SamplingRow'
+import { PdfPreviewModal } from '@/components/plan/PdfPreviewModal'
 import { usePlanActions } from '@/hooks/usePlanActions'
-import type { SamplingStatus } from '@/types'
-
-const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-              'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
-
-const STATUS_CONFIG: Record<SamplingStatus, { label: string; bg: string; color: string }> = {
-  planned:       { label: 'Planifié',    bg: 'var(--color-bg-tertiary)',    color: 'var(--color-text-secondary)' },
-  done:          { label: 'Réalisé',     bg: 'var(--color-success-light)',  color: 'var(--color-success)' },
-  overdue:       { label: 'En retard',   bg: 'var(--color-danger-light)',   color: 'var(--color-danger)' },
-  non_effectue:  { label: 'Non effectué',bg: 'var(--color-warning-light)',  color: 'var(--color-warning)' },
-}
-
 
 export default function PlanPage() {
   const { clientId, planId } = useParams<{ clientId: string; planId: string }>()
@@ -42,7 +31,6 @@ export default function PlanPage() {
     dismissRemoteChanged,
   } = useClientData(clientId)
 
-  // Client supprimé depuis un autre onglet/appareil → rediriger
   useEffect(() => {
     if (!loading && !client) navigate('/missions', { replace: true })
   }, [loading, client, navigate])
@@ -67,18 +55,25 @@ export default function PlanPage() {
     setSelectedSampling, setNewDate, setAddingDate,
   })
 
-  if (loading) return <div className="flex justify-center py-20"><div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} /></div>
-  if (!client || !plan) return <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Point introuvable.</div>
+  if (loading) return (
+    <div className="flex justify-center py-20">
+      <div className="w-6 h-6 rounded-full border-2 animate-spin"
+        style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+    </div>
+  )
+  if (!client || !plan) return (
+    <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Point introuvable.</div>
+  )
+
+  const isCustom = plan.frequence === 'Personnalisé'
 
   return (
     <div className="p-4 sm:p-6 max-w-2xl pb-10">
-      {/* Retour */}
       <button onClick={() => navigate(`/missions/${clientId}`)}
         className="flex items-center gap-1 text-sm mb-6" style={{ color: 'var(--color-accent)' }}>
         <ChevronLeft size={16} /> {client.nom}
       </button>
 
-      {/* Bandeau écriture concurrente */}
       {remoteChanged && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg px-4 py-3 text-sm"
           style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
@@ -112,7 +107,6 @@ export default function PlanPage() {
 
       <PlanConfigSection plan={plan} onUpdate={updatePlan} />
 
-      {/* Calendrier des prélèvements */}
       <div className="mt-8">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
@@ -129,7 +123,7 @@ export default function PlanPage() {
                 <span className="hidden sm:inline">Aperçu PDF</span>
               </button>
             )}
-            {plan.frequence === 'Personnalisé' ? (
+            {isCustom ? (
               <button
                 onClick={() => setAddingDate(v => !v)}
                 className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
@@ -160,8 +154,7 @@ export default function PlanPage() {
           </div>
         </div>
 
-        {/* Sélecteur de date pour mode Personnalisé */}
-        {plan.frequence === 'Personnalisé' && addingDate && (
+        {isCustom && addingDate && (
           <div className="flex items-center gap-2 mb-4 p-3 rounded-xl"
             style={{ background: 'var(--color-accent-light)', border: '1px solid var(--color-accent)20' }}>
             <input
@@ -192,143 +185,43 @@ export default function PlanPage() {
 
         {plan.samplings.length === 0 ? (
           <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-            {plan.frequence === 'Personnalisé'
+            {isCustom
               ? 'Aucun prélèvement — clique sur "Ajouter une date" pour créer les interventions une par une.'
               : 'Aucun prélèvement — clique sur "Générer" pour créer le calendrier automatiquement.'}
           </p>
         ) : (
-          <div className="rounded-xl overflow-hidden" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-            {(plan.samplings ?? []).map((s, i) => {
-              const cfg = STATUS_CONFIG[s.status] ?? STATUS_CONFIG['planned']
-              const isSelected = selectedSampling === s.id
-              const isCustom = plan.frequence === 'Personnalisé'
-              // Libellé de la date : pour Personnalisé, affiche "15 Mars" au lieu de "Mars — j15"
-              const dateLabel = isCustom && s.plannedDay
-                ? `${s.plannedDay} ${MOIS[s.plannedMonth]}`
-                : `${MOIS[s.plannedMonth]}${s.plannedDay ? ` — j${s.plannedDay}` : ''}`
-              return (
-                <div key={s.id}>
-                  <div className="flex items-center"
-                    style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                    <button
-                      onClick={() => setSelectedSampling(isSelected ? null : s.id)}
-                      className="flex-1 flex items-center gap-4 px-5 py-3 text-left transition-colors"
-                      style={{ background: isSelected ? 'var(--color-accent-light)' : 'transparent' }}
-                    >
-                      <span className="text-sm font-medium w-6 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
-                        {s.num}
-                      </span>
-                      <span className="text-sm font-medium flex-1" style={{ color: 'var(--color-text-primary)' }}>
-                        {dateLabel}
-                      </span>
-                      {s.doneDate && (
-                        <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-                          {new Date(s.doneDate).toLocaleDateString('fr-FR')}
-                        </span>
-                      )}
-                      <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-                        style={{ background: cfg.bg, color: cfg.color }}>
-                        {cfg.label}
-                      </span>
-                    </button>
-                    {/* Bouton supprimer — visible uniquement en mode Personnalisé */}
-                    {isCustom && (
-                      confirmDelSampling === s.id ? (
-                        <div className="flex items-center gap-1 px-2">
-                          <button
-                            onClick={() => { deleteSampling(s.id, selectedSampling); setConfirmDelSampling(null) }}
-                            className="text-xs px-2 py-1 rounded-md font-medium"
-                            style={{ background: 'var(--color-danger)', color: 'white' }}
-                          >
-                            Supprimer
-                          </button>
-                          <button
-                            onClick={() => setConfirmDelSampling(null)}
-                            className="text-xs px-1.5 py-1 rounded-md"
-                            style={{ color: 'var(--color-text-secondary)' }}
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setConfirmDelSampling(s.id)}
-                          className="px-3 py-3 shrink-0"
-                          style={{ color: 'var(--color-text-tertiary)' }}
-                          title="Supprimer ce prélèvement"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      )
-                    )}
-                  </div>
-
-                  {/* Formulaire inline du prélèvement */}
-                  {isSelected && (
-                    <div className="px-5 py-4" style={{ background: 'var(--color-bg-tertiary)', borderBottom: i < plan.samplings.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                      <SamplingForm
-                        sampling={s}
-                        onUpdate={(field, val) => updateSampling(s.id, field, val)}
-                        users={users}
-                        clientId={clientId!}
-                        planId={planId!}
-                      />
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+          <div className="rounded-xl overflow-hidden"
+            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            {plan.samplings.map((s, i) => (
+              <SamplingRow
+                key={s.id}
+                sampling={s}
+                index={i}
+                total={plan.samplings.length}
+                isCustom={isCustom}
+                isSelected={selectedSampling === s.id}
+                confirmDel={confirmDelSampling === s.id}
+                clientId={clientId!}
+                planId={planId!}
+                users={users}
+                onSelect={() => setSelectedSampling(selectedSampling === s.id ? null : s.id)}
+                onUpdate={(field, val) => updateSampling(s.id, field, val)}
+                onDeleteRequest={() => setConfirmDelSampling(s.id)}
+                onDeleteCancel={() => setConfirmDelSampling(null)}
+                onDeleteConfirm={() => { deleteSampling(s.id, selectedSampling); setConfirmDelSampling(null) }}
+              />
+            ))}
           </div>
         )}
       </div>
 
-      {/* ── Modale de prévisualisation PDF ───────────────────── */}
       {pdfPreview && (
-        <div
-          className="fixed inset-0 z-[80] flex flex-col"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
-          onClick={() => setPdfPreview(null)}
-        >
-          <div
-            className="flex flex-col m-4 md:m-8 rounded-2xl overflow-hidden flex-1"
-            style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)', maxHeight: 'calc(100dvh - 32px)' }}
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-3 shrink-0"
-              style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-              <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                Aperçu du rapport PDF
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => openPdfPreview(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium"
-                  style={{ background: 'var(--color-accent)', color: 'white' }}
-                >
-                  <FileText size={14} />
-                  Imprimer / Télécharger
-                </button>
-                <button
-                  onClick={() => setPdfPreview(null)}
-                  className="p-1.5 rounded-lg"
-                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' }}
-                >
-                  <X size={15} />
-                </button>
-              </div>
-            </div>
-            {/* Iframe preview */}
-            <iframe
-              srcDoc={pdfPreview}
-              className="flex-1 w-full"
-              style={{ border: 'none', background: 'white' }}
-              title="Aperçu PDF"
-            />
-          </div>
-        </div>
+        <PdfPreviewModal
+          srcDoc={pdfPreview}
+          onClose={() => setPdfPreview(null)}
+          onPrint={() => openPdfPreview(true)}
+        />
       )}
     </div>
   )
 }
-
