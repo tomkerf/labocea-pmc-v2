@@ -254,6 +254,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-22 | Qualité ESLint ✅ | Correction des 32 erreurs ESLint (pureté React 19) : Date.now() stabilisés, DonutChart pur, composants extraits. 0 erreur lint. |
 | 2026-05-22 | Refacto PlanningPage (fin) ✅ | Extraction usePlanningNavigation + PeriodListView. PlanningPage 399→339L. Découpage architectural complet, §4 TODO soldé. |
 | 2026-05-22 | Refacto PlanningPage (MiniCal) ✅ | Extraction du Mini-Calendrier et du backdrop overlay dans PlanningMiniCalendar. PlanningPage réduit à 322L. Tests (74) verts. |
+| 2026-05-22 | Tests intégration ✅ | Création de tests d'intégration Firestore pour useClients, useEquipements, useVerifications (80/80 tests verts). |
 
 ---
 

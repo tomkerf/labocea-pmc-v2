@@ -4,6 +4,26 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 55 — Tests d'intégration Firestore sur les hooks
+**22 mai 2026 (début de soirée)**
+
+### Ce qui a été fait
+- **Création de tests d'intégration pour les listeners de hooks** :
+  - `src/hooks/__tests__/useClients.test.ts` pour `useClientsListener` (tri par nom, mise à jour Zustand `useMissionsStore`, gestion d'erreur avec toast d'alerte, désabonnement).
+  - `src/hooks/__tests__/useEquipements.test.ts` pour `useEquipementsListener` (tri par nom, mise à jour Zustand `useEquipementsStore`, gestion d'erreur, désabonnement).
+  - `src/hooks/__tests__/useVerifications.test.ts` pour `useVerificationsListener` (tri par date desc, mise à jour Zustand `useMetrologieStore`, gestion d'erreur, désabonnement).
+- **Résolution des alertes act() dans les tests** : Intégration systématique de la méthode `act()` de `@testing-library/react` autour des invocations de callbacks Firestore pour éviter les avertissements et correspondre aux standards React 19.
+
+### Validation & Qualité
+- **Tests unitaires et d'intégration** : Lancement complet conclu avec **80/80 tests passés au vert (100% vert)**.
+- **Compilation & ESLint** : 0 erreur, build de production stable.
+
+### Prochaines étapes
+- **Déploiement production (Phase 6)** : tests finaux avec l'équipe mesures et transition définitive V1 -> V2.
+- **Migration en sous-collection Firestore** : surveiller et migrer les plans/échantillonnages si nécessaire.
+
+---
+
 ## Session 54 — Découpage final PlanningPage : PlanningMiniCalendar
 **22 mai 2026 (fin d'après-midi)**
 
