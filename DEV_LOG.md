@@ -4,6 +4,32 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 50 — Correction du filtrage de responsabilité des rapports
+**22 mai 2026 (après-midi)**
+
+### Problème résolu
+- **Correction de la responsabilité des rapports** : Thomas Kerfendal (`THK`) ne doit pas voir apparaître les rapports de clients dont il n'est pas responsable (par exemple, "QBO - Kerjequel" géré par un autre technicien).
+
+### Ce qui a été fait
+- **Modification de la logique d'attribution** dans `src/hooks/useDashboardStats.ts` :
+  - *Ancienne logique* : `const estMonRapport = s.doneBy ? s.doneBy === uid : client.preleveur === initiales` — Si un technicien réalisait un prélèvement sur le terrain (remplissant `s.doneBy` avec son UID), le rapport lui était faussement attribué pour la rédaction même si un autre technicien était assigné à ce client/prélèvement. De plus, si un prélèvement était explicitement attribué à un autre technicien via `s.assignedTo` mais que `s.doneBy` était vide, le système retombait sur le preleveur du client, ignorant `s.assignedTo`.
+  - *Nouvelle logique* : `const estMonRapport = (s.assignedTo || client.preleveur) === initiales` — La responsabilité de la rédaction des rapports est maintenant strictement alignée sur l'attribution planifiée (par ordre de priorité : technicien assigné au prélèvement `s.assignedTo` s'il est spécifié, sinon le préleveur du client `client.preleveur`), identique aux règles du planning.
+  - Cette correction a été appliquée de manière uniforme pour les trois calculs : `rapportsAFaire`, `rapportsAFaireMoi` et `rapportsEnvoyes`.
+- **Ajout de tests unitaires** dans `src/lib/__tests__/dashboardStats.test.ts` :
+  - Écriture de 5 cas de test robustes couvrant :
+    1. L'inclusion standard par `client.preleveur`.
+    2. La priorité de l'attribution spécifique du prélèvement (`s.assignedTo`) sur celle du client.
+    3. Le maintien de la responsabilité de rédaction pour le technicien assigné même si le prélèvement a été réalisé physiquement sur le terrain par un autre technicien (`s.doneBy`).
+    4. L'accès total aux rapports pour les profils administrateurs ou chargés de mission (qui doivent tout voir sans restriction d'attribution).
+  - Validation complète des tests : 72 tests réussis avec succès (**100 % vert**).
+
+### Validation & Qualité
+- **Compilation de production** : Build réussi avec succès via `npm run build` en 328ms avec 0 erreur.
+- **Déploiement staging** : Changements déployés sur staging via `bash deploy-dev.sh`.
+
+---
+
+
 ## Session 49 — Découpage AidePage.tsx & InfosPage.tsx
 **22 mai 2026 (après-midi)**
 

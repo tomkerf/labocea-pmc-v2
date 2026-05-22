@@ -231,3 +231,85 @@ describe('useDashboardStats — prelevementsEnRetard', () => {
     expect(result.current.prelevementsEnRetard).toHaveLength(0)
   })
 })
+
+// ─── rapportsAFaire & rapportsAFaireMoi ───────────────────────────────────────
+
+describe('useDashboardStats — rapportsAFaire et rapportsAFaireMoi', () => {
+  it('inclut les rapports à envoyer', () => {
+    const client = makeClient({
+      preleveur: 'THK',
+      plans: [makePlan({ samplings: [
+        makeSampling({ status: 'done', doneDate: THIS_MONTH_DATE, rapportPrevu: true }),
+      ]})],
+    })
+    const { result } = renderHook(() =>
+      useDashboardStats({ ...BASE_PARAMS, isGeneraliste: false, clients: [client] })
+    )
+    expect(result.current.rapportsAFaire).toHaveLength(1)
+    expect(result.current.rapportsAFaireMoi).toHaveLength(1)
+  })
+
+  it('priorise s.assignedTo sur client.preleveur pour le filtrage', () => {
+    // Cas A : Client préleveur = THK, mais prélèvement assigné à LMT
+    // Pour THK (non généraliste), il ne doit pas voir ce rapport
+    const client = makeClient({
+      preleveur: 'THK',
+      plans: [makePlan({ samplings: [
+        makeSampling({ status: 'done', doneDate: THIS_MONTH_DATE, rapportPrevu: true, assignedTo: 'LMT' }),
+      ]})],
+    })
+    const { result } = renderHook(() =>
+      useDashboardStats({ ...BASE_PARAMS, isGeneraliste: false, initiales: 'THK', clients: [client] })
+    )
+    expect(result.current.rapportsAFaire).toHaveLength(0)
+    expect(result.current.rapportsAFaireMoi).toHaveLength(0)
+  })
+
+  it('associe le rapport à initiales si s.assignedTo correspond, même si client.preleveur est différent', () => {
+    // Cas B : Client préleveur = LMT, mais prélèvement assigné à THK
+    // Pour THK, il doit voir le rapport
+    const client = makeClient({
+      preleveur: 'LMT',
+      plans: [makePlan({ samplings: [
+        makeSampling({ status: 'done', doneDate: THIS_MONTH_DATE, rapportPrevu: true, assignedTo: 'THK' }),
+      ]})],
+    })
+    const { result } = renderHook(() =>
+      useDashboardStats({ ...BASE_PARAMS, isGeneraliste: false, initiales: 'THK', clients: [client] })
+    )
+    expect(result.current.rapportsAFaire).toHaveLength(1)
+    expect(result.current.rapportsAFaireMoi).toHaveLength(1)
+  })
+
+  it('ignore s.doneBy pour la responsabilité du rapport', () => {
+    // Cas C : Le prélèvement est assigné à LMT (et client preleveur = LMT)
+    // Mais s.doneBy est l'uid de THK (par exemple parce que THK a validé pour aider).
+    // THK (initiales='THK', uid='uid1') ne doit pas voir le rapport sous son filtre personnel
+    const client = makeClient({
+      preleveur: 'LMT',
+      plans: [makePlan({ samplings: [
+        makeSampling({ status: 'done', doneDate: THIS_MONTH_DATE, rapportPrevu: true, doneBy: 'uid1' }),
+      ]})],
+    })
+    const { result } = renderHook(() =>
+      useDashboardStats({ ...BASE_PARAMS, isGeneraliste: false, uid: 'uid1', initiales: 'THK', clients: [client] })
+    )
+    expect(result.current.rapportsAFaire).toHaveLength(0)
+    expect(result.current.rapportsAFaireMoi).toHaveLength(0)
+  })
+
+  it('affiche tout en mode généraliste', () => {
+    const client = makeClient({
+      preleveur: 'LMT',
+      plans: [makePlan({ samplings: [
+        makeSampling({ status: 'done', doneDate: THIS_MONTH_DATE, rapportPrevu: true, assignedTo: 'LMT' }),
+      ]})],
+    })
+    const { result } = renderHook(() =>
+      useDashboardStats({ ...BASE_PARAMS, isGeneraliste: true, initiales: 'THK', clients: [client] })
+    )
+    expect(result.current.rapportsAFaire).toHaveLength(1)
+    expect(result.current.rapportsAFaireMoi).toHaveLength(0) // rapportsAFaireMoi filtre toujours par initiales !
+  })
+})
+

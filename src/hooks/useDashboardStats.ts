@@ -127,7 +127,7 @@ export function useDashboardStats({
           if (!s.rapportPrevu || rapportEnvoye) return
           if (s.status !== 'done' || !s.doneDate) return
           if (!isGeneraliste) {
-            const estMonRapport = s.doneBy ? s.doneBy === uid : client.preleveur === initiales
+            const estMonRapport = (s.assignedTo || client.preleveur) === initiales
             if (!estMonRapport) return
           }
           const msDay = 1000 * 60 * 60 * 24
@@ -161,7 +161,7 @@ export function useDashboardStats({
           const rapportEnvoye = s.rapportDate && s.rapportDate <= todayISO
           if (!s.rapportPrevu || rapportEnvoye) return
           if (s.status !== 'done' || !s.doneDate) return
-          const estMonRapport = s.doneBy ? s.doneBy === uid : client.preleveur === initiales
+          const estMonRapport = (s.assignedTo || client.preleveur) === initiales
           if (!estMonRapport) return
           const msDay = 1000 * 60 * 60 * 24
           const joursDepuis = Math.floor((new Date(todayISO).getTime() - new Date(s.doneDate).getTime()) / msDay)
@@ -195,7 +195,7 @@ export function useDashboardStats({
           const SUIVI_DEPUIS = '2026-05-19'
           if (!s.rapportPrevu || !s.rapportDate || s.rapportDate > todayISO || s.rapportDate < SUIVI_DEPUIS) return
           if (!isGeneraliste) {
-            const estMonRapport = s.doneBy ? s.doneBy === uid : client.preleveur === initiales
+            const estMonRapport = (s.assignedTo || client.preleveur) === initiales
             if (!estMonRapport) return
           }
           result.push({
