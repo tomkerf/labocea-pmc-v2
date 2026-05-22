@@ -38,7 +38,7 @@ import DayView            from '@/components/planning/DayView'
 import WeekView           from '@/components/planning/WeekView'
 import MonthView          from '@/components/planning/MonthView'
 import PeriodListView     from '@/components/planning/PeriodListView'
-import MiniCalendarPanel  from '@/components/planning/MiniCalendarPanel'
+import PlanningMiniCalendar from '@/components/planning/PlanningMiniCalendar'
 
 // ── Composant principal ─────────────────────────────────────
 
@@ -151,36 +151,20 @@ const uid        = useAuthStore(selectUid)
       />
 
       {/* ── Panneau mini-calendrier overlay (desktop) ── */}
-      <div
-        className="hidden md:flex flex-col absolute z-30 top-0 left-0 bottom-0 w-[220px]"
-        style={{
-          background: 'var(--color-bg-secondary)',
-          boxShadow: showMiniCal ? 'var(--shadow-modal)' : 'none',
-          borderRight: '1px solid var(--color-border-subtle)',
-          transform: showMiniCal ? 'translateX(0)' : 'translateX(-100%)',
-          transition: 'transform 200ms ease',
-          pointerEvents: showMiniCal ? 'auto' : 'none',
-        }}>
-        <MiniCalendarPanel
-          viewMode={viewMode}
-          monthStart={monthStart}
-          weekStart={weekStart}
-          selectedDate={selectedDate}
-          today={today}
-          setWeekStart={setWeekStart}
-          setMonthStart={setMonthStart}
-          setSelectedDate={setSelectedDate}
-          setViewMode={setViewMode}
-          setSelectedDay={setSelectedDay}
-          setShowMiniCal={setShowMiniCal}
-        />
-      </div>
-
-      {/* Backdrop overlay (ferme au clic extérieur) */}
-      {showMiniCal && (
-        <div className="hidden md:block absolute inset-0 z-20"
-          onClick={() => setShowMiniCal(false)} />
-      )}
+      <PlanningMiniCalendar
+        showMiniCal={showMiniCal}
+        setShowMiniCal={setShowMiniCal}
+        viewMode={viewMode}
+        monthStart={monthStart}
+        weekStart={weekStart}
+        selectedDate={selectedDate}
+        today={today}
+        setWeekStart={setWeekStart}
+        setMonthStart={setMonthStart}
+        setSelectedDate={setSelectedDate}
+        setViewMode={setViewMode}
+        setSelectedDay={setSelectedDay}
+      />
 
 
       {/* ── VUE JOUR (toutes tailles) ── */}

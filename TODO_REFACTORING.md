@@ -31,7 +31,7 @@ Ce document liste les dettes techniques identifiées lors des audits successifs.
 
 - [x] **`AidePage.tsx` (724L → 38L)** — Découpé en composants modulaires dédiés. ✅ 2026-05-22
 - [x] **`InfosPage.tsx` (688L → 273L)** — Découpé en composants modulaires dédiés. ✅ 2026-05-22
-- [x] **`PlanningPage.tsx` (682L → 339L)** — Vues, header, modales et hooks extraits. ✅ 2026-05-22
+- [x] **`PlanningPage.tsx` (682L → 322L)** — Vues, header, modales, hooks et mini-calendrier extraits. ✅ 2026-05-22
 - [x] **`components/missions/` → `components/client/`** — Renommage convention auditeur. ✅ 2026-05-22
 
 ## 5. Évolutivité des données — Surveiller

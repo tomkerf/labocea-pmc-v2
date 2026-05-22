@@ -4,6 +4,22 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 54 — Découpage final PlanningPage : PlanningMiniCalendar
+**22 mai 2026 (fin d'après-midi)**
+
+### Ce qui a été fait
+- **Extraction du Mini-Calendrier** : Création de `src/components/planning/PlanningMiniCalendar.tsx` regroupant l'overlay absolu du mini-calendrier de bureau (drawer) ainsi que le composant de backdrop réactif servant à fermer le calendrier lors d'un clic extérieur.
+- **Simplification de PlanningPage** :
+  - Remplacement de 35 lignes de JSX inline et imports complexes dans `src/pages/PlanningPage.tsx` par l'appel propre de `<PlanningMiniCalendar />`.
+  - Réduction de la taille de `PlanningPage.tsx` de **339 lignes à 322 lignes**, consolidant son rôle de simple chef d'orchestre de la vue planning.
+- **Backlog de Refactoring** : Mise à jour du fichier `TODO_REFACTORING.md` pour refléter la nouvelle taille et l'extraction complète du mini-calendrier.
+
+### Validation & Qualité
+- **Tests unitaires** : Exécution de `npm test` concluante, **74/74 tests réussis (100% vert)**.
+- **Compilation de production** : Build de production Vite réussi avec 0 erreur TypeScript ou d'importation.
+
+---
+
 ## Session 53 — Qualité ESLint (React 19) + découpage final PlanningPage
 **22 mai 2026 (après-midi)**
 
