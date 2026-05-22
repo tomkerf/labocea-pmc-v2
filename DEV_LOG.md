@@ -4,6 +4,34 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 47 — Refacto PlanPage (2/2) + UX mode Personnalisé
+**22 mai 2026 (matin)**
+
+### Ce qui a été fait
+
+**Refacto PlanPage.tsx — suite et fin**
+- Extraction de `SamplingRow` (`src/components/plan/SamplingRow.tsx`, 129L) : ligne prélèvement + confirm suppression inline + formulaire SamplingForm
+- Extraction de `PdfPreviewModal` (`src/components/plan/PdfPreviewModal.tsx`, 53L) : modale iframe PDF avec bouton impression
+- `PlanPage.tsx` : 334L → 227L (-32%)
+
+**UX mode Personnalisé — création d'intervention sans date**
+- Bouton "Ajouter une intervention" crée immédiatement un prélèvement avec `dateUndefined: true`
+- Suppression du sélecteur de date intermédiaire (la date se saisit dans le formulaire inline)
+- Affichage "Date à définir" dans la liste, le rapport HTML et MissionDetailPage
+- `dateUndefined: true` → pas en retard (garde overdue.ts cohérent)
+- Propagation null-safe sur tout le codebase (exportPdf, exportExcel, exportClientHtml, useDashboardStats, usePlanningData, DayModal, AdminChargeEquipe, ClientCard, SamplingForm)
+
+**Petits fixes UX**
+- Nature de l'eau par défaut → "Eau usée" à la création d'un point (au lieu de "Souterraine")
+- Carte dashed "+ Ajouter un point" toujours visible dans la liste des points (ClientPlans.tsx), même sans déverrouiller
+- État vide enrichi avec icône + CTA centré
+
+### Prochaines étapes
+- Regroupement par client en vue jour planning (noté en roadmap depuis session 43)
+- Tests terrain avec l'équipe sur staging
+
+---
+
 ## Session 46 — UX : discoverabilité bouton "Ajouter"
 **21 mai 2026 (soir)**
 
