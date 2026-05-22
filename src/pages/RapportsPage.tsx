@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
-import { useAuthStore, selectUid, selectAppUser, selectRole } from '@/stores/authStore'
+import { useAuthStore, selectUid, selectAppUser } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useClientsListener } from '@/hooks/useClients'
@@ -18,7 +18,6 @@ export default function RapportsPage() {
   const { clients } = useMissionsStore()
   const uid = useAuthStore(selectUid)
   const appUser = useAuthStore(selectAppUser)
-  const role = useAuthStore(selectRole)
   const { users } = useUsersStore()
   useUsersListener()
   useClientsListener()
@@ -33,7 +32,7 @@ export default function RapportsPage() {
   const [sending, setSending] = useState<Set<string>>(new Set())
 
   const { rapportsAFaire, rapportsEnvoyes } = useDashboardStats({
-    clients, uid: uid ?? '', initiales, isGeneraliste: touteEquipe || role === 'admin' || role === 'charge_mission',
+    clients, uid: uid ?? '', initiales, isGeneraliste: touteEquipe,
     equipements, verifications, maintenances, evenements: [],
   })
 
