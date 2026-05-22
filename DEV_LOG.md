@@ -4,6 +4,35 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 49 — Découpage AidePage.tsx & InfosPage.tsx
+**22 mai 2026 (après-midi)**
+
+### Ce qui a été fait
+
+**Refactoring AidePage.tsx & InfosPage.tsx**
+- **Découpage de la page Aide (724 L) :**
+  - Création de `src/components/aide/AideComponents.tsx` regroupant les composants typographiques et de structure de base (`Section`, `Step`, `StatusBadge`, `Note`, `Tip`, `Divider`).
+  - Création de `src/components/aide/IntroSections.tsx` pour les sections d'introduction ("Par où commencer" et "Statuts").
+  - Création de `src/components/aide/PlanningSections.tsx` pour les sections "Planning" et "Bilans 24h".
+  - Création de `src/components/aide/MissionsSections.tsx` pour la section "Missions".
+  - Création de `src/components/aide/MaterielSections.tsx` pour les sections "Matériel" et "Métrologie & Maintenances".
+  - Création de `src/components/aide/DashboardSections.tsx` pour les sections "Dashboard" et "Problème".
+  - Refactoring de `src/pages/AidePage.tsx` : réduction massive de **724 L → 38 L** en intégrant proprement les sous-sections.
+- **Découpage de la page Infos terrain (688 L) :**
+  - Création de `src/components/infos/EntryCard.tsx` regroupant la structure d'affichage `EntryCard`, le composant `Badge` et le dictionnaire central de configuration `TYPE_CONFIG` partagé entre les fichiers.
+  - Création de `src/components/infos/EntryForm.tsx` pour le formulaire d'ajout et édition d'une entrée terrain (`EntryForm`) ainsi que la fonction de nettoyage Firestore `stripUndef`.
+  - Refactoring de `src/pages/InfosPage.tsx` : réduction de **688 L → 273 L** en extrayant l'affichage des cartes et les formulaires interactifs tout en préservant le chargement temps réel, le filtrage et la logique de regroupement.
+
+### Validation & Qualité
+- **Tests unitaires :** Exécution réussie de `npm run test` (67/67 tests verts, **100 % passés**).
+- **Compilation de production :** Build de production complet et réussi avec `npm run build` (0 erreur TypeScript / Vite).
+
+### Prochaines étapes
+- Envoyer le lien de staging mis à jour à l'équipe mesures pour tests terrain de pré-production.
+
+---
+
+
 ## Session 48 — Regroupement par Client & Accordéon Mobile
 **22 mai 2026 (après-midi)**
 
