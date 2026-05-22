@@ -247,6 +247,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-21 | Refacto PlanPage (1/2) | PlanPage.tsx 461L→334L (-27%). Extraction usePlanActions (audit trail, Firestore, PDF). Reste : SamplingRow + PdfPreviewModal. |
 | 2026-05-21 | UX discoverabilité | État vide riche + carte dashed en bas de liste + wording précis sur Matériel, Métrologie, Maintenances. |
 | 2026-05-22 | Refacto PlanPage (2/2) + UX Personnalisé ✅ | PlanPage 334L→227L. Extraction SamplingRow + PdfPreviewModal. Création intervention sans date (dateUndefined). Nature eau usée par défaut. Carte dashed "Ajouter un point" toujours visible. |
+| 2026-05-22 | Planning mobile ✅ | Regroupement par client et accordéons interactifs pour la vue planning mobile (EventRow, usePlanningCalendar, planningUtils). Tests et builds 100% OK. |
 
 ---
 

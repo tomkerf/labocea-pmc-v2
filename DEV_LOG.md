@@ -4,6 +4,22 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 48 — Regroupement par Client & Accordéon Mobile
+**22 mai 2026 (après-midi)**
+
+### Ce qui a été fait
+
+**Regroupement par client & Accordéons sur Mobile**
+- **Interface & Types** (`src/lib/planningUtils.ts`) : Ajout de la propriété optionnelle `subEvents?: PlanningEvent[]` sur `PlanningEvent` et modification de la fonction pure `groupByClient` pour y injecter le tableau complet d'origine `group` dans `subEvents` lors de la fusion d'un événement groupé.
+- **Hook Calendrier** (`src/hooks/usePlanningCalendar.ts`) : Mise à jour de la propriété `periodList` pour utiliser systématiquement `filteredForDay` (la version groupée par client) au lieu de `filteredForDayFlat` en mode semaine et mois, unifiant l'affichage mobile.
+- **Composant UI EventRow** (`src/components/planning/EventRow.tsx`) : Refonte complète du composant pour ajouter un accordéon interactif en cas d'événement groupé. Affiche un chevron dynamique (`ChevronDown`/`ChevronRight`), un badge de compte `×N` d'accent Apple, et déploie une sous-liste aérée et contrastée (fond `--color-bg-primary`) contenant chaque prélèvement individuel cliquable.
+
+### Validation & Qualité
+- **Tests unitaires** : 67 tests passés avec succès (**100 % vert**).
+- **Linter & Build** : 0 erreur de linter (les 4 warnings stables ciblés sont préservés) et build de production compilé et bundlé avec succès via `npm run build`.
+
+---
+
 ## Session 47 — Refacto PlanPage (2/2) + UX mode Personnalisé
 **22 mai 2026 (matin)**
 
