@@ -1020,7 +1020,7 @@ export const useMissionsStore = create<MissionsState>((set) => ({
 // src/pages/MissionsPage.tsx
 import { useClientsListener } from '@/hooks/useClients'
 import { useMissionsStore } from '@/stores/missionsStore'
-import { ClientCard } from '@/components/materiel/ClientCard'
+import ClientCard from '@/components/client/ClientCard'
 
 export default function MissionsPage() {
   // Active l'écoute Firestore (une seule fois au montage)
