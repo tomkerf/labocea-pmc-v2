@@ -1755,7 +1755,98 @@ Chaque couche a une responsabilité unique :
 - `pages/` → orchestration et filtres
 - `components/` → affichage
 
-## 14.3 Comment modifier un comportement existant — exemple pratique
+## 14.3 Walkthrough : `src/components/planning/PlanningMiniCalendar.tsx` (Composant d'affichage animé)
+
+Voici comment fonctionne le mini-calendrier latéral de la page Planning, que nous avons isolé pour simplifier l'orchestration globale :
+
+```tsx
+import MiniCalendarPanel from './MiniCalendarPanel'
+import { type ViewMode } from '@/lib/planningUtils'
+
+interface PlanningMiniCalendarProps {
+  showMiniCal: boolean
+  setShowMiniCal: (show: boolean) => void
+  viewMode: ViewMode
+  monthStart: Date
+  weekStart: Date
+  selectedDate: Date
+  today: Date
+  setWeekStart: (d: Date) => void
+  setMonthStart: (d: Date) => void
+  setSelectedDate: (d: Date) => void
+  setViewMode: (v: ViewMode) => void
+  setSelectedDay: (d: string | null) => void
+}
+
+export default function PlanningMiniCalendar({
+  showMiniCal,
+  setShowMiniCal,
+  viewMode,
+  monthStart,
+  weekStart,
+  selectedDate,
+  today,
+  setWeekStart,
+  setMonthStart,
+  setSelectedDate,
+  setViewMode,
+  setSelectedDay,
+}: PlanningMiniCalendarProps) {
+  return (
+    <>
+      {/* ── Panneau mini-calendrier overlay (desktop) ── */}
+      <div
+        className="hidden md:flex flex-col absolute z-30 top-0 left-0 bottom-0 w-[220px]"
+        style={{
+          background: 'var(--color-bg-secondary)',
+          boxShadow: showMiniCal ? 'var(--shadow-modal)' : 'none',
+          borderRight: '1px solid var(--color-border-subtle)',
+          transform: showMiniCal ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 200ms ease',
+          pointerEvents: showMiniCal ? 'auto' : 'none',
+        }}
+      >
+        <MiniCalendarPanel
+          viewMode={viewMode}
+          monthStart={monthStart}
+          weekStart={weekStart}
+          selectedDate={selectedDate}
+          today={today}
+          setWeekStart={setWeekStart}
+          setMonthStart={setMonthStart}
+          setSelectedDate={setSelectedDate}
+          setViewMode={setViewMode}
+          setSelectedDay={setSelectedDay}
+          setShowMiniCal={setShowMiniCal}
+        />
+      </div>
+
+      {/* Backdrop overlay (ferme au clic extérieur) */}
+      {showMiniCal && (
+        <div
+          className="hidden md:block absolute inset-0 z-20"
+          onClick={() => setShowMiniCal(false)}
+        />
+      )}
+    </>
+  )
+}
+```
+
+**Comprendre la logique d'intégration :**
+
+| Concept | Explication |
+|---------|-------------|
+| `interface PlanningMiniCalendarProps` | Liste les états et fonctions de navigation partagés avec le parent `PlanningPage.tsx`. |
+| `hidden md:flex` | Masque le composant sur mobile et l'affiche uniquement sur écran moyen (`md`) et large. |
+| `absolute z-30` | Place le calendrier au-dessus du contenu de la page planning (`z-30`) pour qu'il agisse comme un panneau tiroir. |
+| `transform` & `transition` | Utilise les styles CSS inline dynamiques pour animer l'ouverture avec une transition fluide de 200ms (`translateX(-100%)` vers `translateX(0)`). |
+| `pointerEvents` | Très important ! Si `showMiniCal` est faux, le panneau est masqué hors-écran mais est toujours présent dans le DOM. `pointerEvents: 'none'` l'empêche de capturer les clics de l'utilisateur à cet endroit. |
+| **Le Backdrop (`z-20`)** | Une zone transparente invisible qui remplit tout l'écran (`absolute inset-0`) uniquement quand le calendrier est ouvert. Cliquer dessus appelle `setShowMiniCal(false)` pour fermer automatiquement le tiroir. Son `z-20` le place sous le calendrier (`z-30`) mais au-dessus de la page (`z-10`). |
+
+---
+
+## 14.4 Comment modifier un comportement existant — exemple pratique
 
 **Scénario :** tu veux ajouter le numéro de série sous le nom dans `EquipementCard`.
 
