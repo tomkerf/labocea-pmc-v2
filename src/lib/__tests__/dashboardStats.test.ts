@@ -281,10 +281,10 @@ describe('useDashboardStats — rapportsAFaire et rapportsAFaireMoi', () => {
     expect(result.current.rapportsAFaireMoi).toHaveLength(1)
   })
 
-  it('ignore s.doneBy pour la responsabilité du rapport', () => {
-    // Cas C : Le prélèvement est assigné à LMT (et client preleveur = LMT)
-    // Mais s.doneBy est l'uid de THK (par exemple parce que THK a validé pour aider).
-    // THK (initiales='THK', uid='uid1') ne doit pas voir le rapport sous son filtre personnel
+  it('utilise s.doneBy pour attribuer le rapport si s.assignedTo n\'est pas renseigné', () => {
+    // Cas C : Le prélèvement n'est pas assigné explicitement (s.assignedTo est absent)
+    // Mais s.doneBy est l'uid de THK ('uid1').
+    // THK doit donc rédiger le rapport, même si le preleveur par défaut du client est LMT.
     const client = makeClient({
       preleveur: 'LMT',
       plans: [makePlan({ samplings: [
@@ -293,6 +293,40 @@ describe('useDashboardStats — rapportsAFaire et rapportsAFaireMoi', () => {
     })
     const { result } = renderHook(() =>
       useDashboardStats({ ...BASE_PARAMS, isGeneraliste: false, uid: 'uid1', initiales: 'THK', clients: [client] })
+    )
+    expect(result.current.rapportsAFaire).toHaveLength(1)
+    expect(result.current.rapportsAFaireMoi).toHaveLength(1)
+  })
+
+  it('priorise s.assignedTo sur s.doneBy pour la responsabilité du rapport', () => {
+    // Cas D : Le prélèvement est explicitement assigné à LMT (s.assignedTo = 'LMT')
+    // Mais s.doneBy est l'uid de THK ('uid1').
+    // LMT (s.assignedTo) doit rédiger le rapport, pas THK.
+    const client = makeClient({
+      preleveur: 'LMT',
+      plans: [makePlan({ samplings: [
+        makeSampling({ status: 'done', doneDate: THIS_MONTH_DATE, rapportPrevu: true, assignedTo: 'LMT', doneBy: 'uid1' }),
+      ]})],
+    })
+    const { result } = renderHook(() =>
+      useDashboardStats({ ...BASE_PARAMS, isGeneraliste: false, uid: 'uid1', initiales: 'THK', clients: [client] })
+    )
+    expect(result.current.rapportsAFaire).toHaveLength(0)
+    expect(result.current.rapportsAFaireMoi).toHaveLength(0)
+  })
+
+  it('attribue le rapport au technicien ayant fait le prélèvement (s.doneBy) plutôt qu\'au préleveur par défaut du client (client.preleveur) si s.assignedTo est absent', () => {
+    // Cas E : Client préleveur par défaut = THK.
+    // Prélèvement fait par Romain (uid_romain).
+    // Thomas (THK, uid_thomas) ne doit pas voir le rapport Kerjequel, car c'est Romain qui l'a fait.
+    const client = makeClient({
+      preleveur: 'THK',
+      plans: [makePlan({ samplings: [
+        makeSampling({ status: 'done', doneDate: THIS_MONTH_DATE, rapportPrevu: true, doneBy: 'uid_romain' }),
+      ]})],
+    })
+    const { result } = renderHook(() =>
+      useDashboardStats({ ...BASE_PARAMS, isGeneraliste: false, uid: 'uid_thomas', initiales: 'THK', clients: [client] })
     )
     expect(result.current.rapportsAFaire).toHaveLength(0)
     expect(result.current.rapportsAFaireMoi).toHaveLength(0)

@@ -249,7 +249,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-22 | Refacto PlanPage (2/2) + UX Personnalisé ✅ | PlanPage 334L→227L. Extraction SamplingRow + PdfPreviewModal. Création intervention sans date (dateUndefined). Nature eau usée par défaut. Carte dashed "Ajouter un point" toujours visible. |
 | 2026-05-22 | Planning mobile ✅ | Regroupement par client et accordéons interactifs pour la vue planning mobile (EventRow, usePlanningCalendar, planningUtils). Tests et builds 100% OK. |
 | 2026-05-22 | Refacto Aide + Infos ✅ | AidePage 724L→38L et InfosPage 688L→273L. Extraction en composants modulaires dédiés. Tests (67/67) et builds 100% OK. |
-| 2026-05-22 | Rapports ✅ | Correction du filtrage de responsabilité des rapports (assignedTo || client.preleveur) dans useDashboardStats et ajouts de tests. |
+| 2026-05-22 | Rapports ✅ | Correction définitive de l'attribution des rapports (priorité 3 niveaux : assignedTo > doneBy > client.preleveur) pour résoudre le bug Kerjequel de Thomas. Tests (74) et staging OK. |
 
 ---
 

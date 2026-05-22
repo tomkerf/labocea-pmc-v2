@@ -4,6 +4,28 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 51 — Correction de l'attribution des rapports par priorité à 3 niveaux
+**22 mai 2026 (fin d'après-midi)**
+
+### Problème résolu
+- **Attribution des rapports complétés** : Résolution du bug où Thomas (`THK`) voyait des rapports complétés pour "QBO - Kerjequel" alors qu'ils avaient été physiquement réalisés par Romain Duvail (`doneBy`). La logique de Session 50 forçait le retour à `client.preleveur` (`THK`) car aucun technicien n'était spécifiquement assigné via `s.assignedTo` sur les samplings historiques.
+
+### Ce qui a été fait
+- **Mise en place de la priorité à 3 niveaux** dans `src/hooks/useDashboardStats.ts` pour l'attribution `estMonRapport` :
+  1. **Priorité 1** : Si un technicien est explicitement planifié sur le prélèvement (`s.assignedTo`), c'est lui qui rédige : `s.assignedTo === initiales`.
+  2. **Priorité 2** : Si le prélèvement a été réalisé sans assignation explicite préalable (`s.doneBy` présent), le technicien qui a fait le prélèvement rédige : `s.doneBy === uid`.
+  3. **Priorité 3 (Fallback)** : Sinon, on utilise le préleveur par défaut du client : `client.preleveur === initiales`.
+  - Cette logique a été intégrée de façon uniforme dans `rapportsAFaire`, `rapportsAFaireMoi` et `rapportsEnvoyes`.
+- **Mise à jour des tests unitaires** dans `src/lib/__tests__/dashboardStats.test.ts` :
+  - Remplacement de l'ancien test qui ignorait `s.doneBy`.
+  - Ajout de 3 nouveaux scénarios de test couvrant la priorité 3 niveaux et le cas de non-attribution de Kerjequel pour Thomas.
+  - Exécution de la suite complète : **74 tests réussis (100% vert)**.
+- **Vérification et Compilation** : Build de production Vite 100% OK.
+- **Déploiement** : Staging mis à jour et déployé avec succès sur `https://labocea-pmc-v2-dev.tomkerf.workers.dev`.
+
+### Prochaines étapes
+- Attendre le retour de l'équipe terrain sur la conformité de l'attribution sur la page "Mes rapports".
+
 ## Session 50 — Correction du filtrage de responsabilité des rapports
 **22 mai 2026 (après-midi)**
 
