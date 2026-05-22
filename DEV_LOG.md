@@ -18,6 +18,11 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 - **Tests unitaires** : Exécution de `npm test` concluante, **74/74 tests réussis (100% vert)**.
 - **Compilation de production** : Build de production Vite réussi avec 0 erreur TypeScript ou d'importation.
 
+### Prochaines étapes (Junior onboarding)
+- **Validation terrain (Staging)** : Faire tester la version déployée par l'équipe pour collecter des retours UX/terrain et s'assurer de l'absence de bugs avant la prod.
+- **Tests unitaires des hooks** : Écrire des tests unitaires (`renderHook`) avec des mocks Firestore pour les hooks personnalisés `useClients`, `useEquipements`, `useVerifications` pour s'entraîner au TDD.
+- **Scalabilité de Firestore** : Surveiller la taille des documents clients. Prévoir à terme la migration des plans et échantillonnages vers une sous-collection pour éviter la limite de 1 Mo.
+
 ---
 
 ## Session 53 — Qualité ESLint (React 19) + découpage final PlanningPage
