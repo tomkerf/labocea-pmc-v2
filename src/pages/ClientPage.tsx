@@ -49,7 +49,7 @@ export default function ClientPage() {
     if (!client) return
     const newPlan: Plan = {
       id: generateId(), nom: 'Nouveau point', siteNom: '',
-      frequence: 'Mensuel', meteo: '', nature: 'Souterraine', methode: 'Ponctuel',
+      frequence: 'Mensuel', meteo: '', nature: 'Eau usée', methode: 'Ponctuel',
       lat: '', lng: '', gpsApprox: false,
       customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
       samplings: [],
