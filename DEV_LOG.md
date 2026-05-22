@@ -4,6 +4,23 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 52 — Refactoring & Alignement : missions ➔ client
+**22 mai 2026 (fin d'après-midi)**
+
+### Ce qui a été fait
+- **Alignement structurel des répertoires** : Renommage du dossier `src/components/missions/` en `src/components/client/` pour correspondre à la collection Firestore `clients-v2` et au hook `useClientData` (conventions de l'auditeur technique senior).
+- **Mise à jour des imports** dans les fichiers :
+  - `src/pages/ClientPage.tsx`
+  - `src/pages/MissionsPage.tsx`
+- **Backlog de Refactoring** : Mise à jour de `TODO_REFACTORING.md` pour cocher définitivement le renommage du répertoire ainsi que les découpages d'AidePage et d'InfosPage achevés lors de la Session 49.
+
+### Validation & Qualité
+- **Tests unitaires** : Exécution de `npm test` concluante, **74/74 tests réussis (100% vert)**.
+- **Compilation de production** : Build de production réussi sans aucune erreur TypeScript ou Vite.
+- **Déploiement staging** : Synchronisé avec succès sur staging `https://labocea-pmc-v2-dev.tomkerf.workers.dev`.
+
+---
+
 ## Session 51 — Correction de l'attribution des rapports par priorité à 3 niveaux
 **22 mai 2026 (fin d'après-midi)**
 

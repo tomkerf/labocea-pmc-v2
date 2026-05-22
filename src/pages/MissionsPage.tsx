@@ -6,7 +6,7 @@ import { createClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
-import ClientCard from '@/components/missions/ClientCard'
+import ClientCard from '@/components/client/ClientCard'
 import { SkeletonList } from '@/components/ui/Skeleton'
 import type { Client } from '@/types'
 

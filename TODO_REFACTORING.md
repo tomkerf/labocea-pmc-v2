@@ -29,10 +29,10 @@ Ce document liste les dettes techniques identifiées lors des audits successifs.
 
 ## 4. Dette faible — À traiter si on touche ces fichiers
 
-- [ ] **`AidePage.tsx` (724L)** — contenu statique, pas critique. Découper seulement si on ajoute des sections. Gravité : faible.
-- [ ] **`InfosPage.tsx` (688L)** — page terrain documentaire, peut rester monolithique. Gravité : faible.
-- [ ] **`PlanningPage.tsx` (682L)** — complexe, déjà partiellement refactorisée. Découper si on doit y ajouter une feature. Gravité : moyenne.
-- [ ] **`components/missions/` → `components/client/`** — alignement convention auditeur. Purement cosmétique, 30 min. Gravité : faible.
+- [x] **`AidePage.tsx` (724L → 38L)** — Découpé en composants modulaires dédiés. ✅ 2026-05-22
+- [x] **`InfosPage.tsx` (688L → 273L)** — Découpé en composants modulaires dédiés. ✅ 2026-05-22
+- [x] **`PlanningPage.tsx` (682L → 339L)** — Vues, header, modales et hooks extraits. ✅ 2026-05-22
+- [x] **`components/missions/` → `components/client/`** — Renommage convention auditeur. ✅ 2026-05-22
 
 ## 5. Évolutivité des données — Surveiller
 
@@ -50,4 +50,4 @@ Ce document liste les dettes techniques identifiées lors des audits successifs.
 - Store filtres global — chaque page gère ses filtres localement, pas de partage
 
 ---
-*Mis à jour le 2026-05-19 — §1, §2, §3 soldés. Score audit : 7.5/10. Prochaine étape recommandée : déploiement prod + feedback équipe.*
+*Mis à jour le 2026-05-22 — §1, §2, §3, §4 soldés. Lint ESLint : 0 erreur. Prochaine étape recommandée : déploiement prod + feedback équipe.*

@@ -250,6 +250,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-22 | Planning mobile ✅ | Regroupement par client et accordéons interactifs pour la vue planning mobile (EventRow, usePlanningCalendar, planningUtils). Tests et builds 100% OK. |
 | 2026-05-22 | Refacto Aide + Infos ✅ | AidePage 724L→38L et InfosPage 688L→273L. Extraction en composants modulaires dédiés. Tests (67/67) et builds 100% OK. |
 | 2026-05-22 | Rapports ✅ | Correction définitive de l'attribution des rapports (priorité 3 niveaux : assignedTo > doneBy > client.preleveur) pour résoudre le bug Kerjequel de Thomas. Tests (74) et staging OK. |
+| 2026-05-22 | Dette technique ✅ | Alignement structurel des répertoires : renommage de components/missions en components/client. Cohérence imports et tests (74) verts. Déploiement staging OK. |
 
 ---
 
