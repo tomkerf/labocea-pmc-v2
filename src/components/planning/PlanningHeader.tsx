@@ -106,7 +106,7 @@ export default function PlanningHeader({
                   const label = prel?.nom ? prel.nom.split(' ')[0] + ' · ' + t : t
                   const tc = getTechColor(t)
                   return (
-                    <button key={t} onClick={() => { const v=t===filterTech?'':t; setFilterTech(v); v ? localStorage.setItem('planning_filter_tech',v) : localStorage.removeItem('planning_filter_tech') }}
+                    <button key={t} onClick={() => { const v=t===filterTech?'':t; setFilterTech(v); if (v) localStorage.setItem('planning_filter_tech',v); else localStorage.removeItem('planning_filter_tech') }}
                       className="px-3 py-1.5 rounded-full text-xs font-medium"
                       style={{
                         background: isActive ? tc.color : tc.bg,

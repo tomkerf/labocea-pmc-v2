@@ -17,6 +17,7 @@ export default function AppLayout() {
   const avatarColor = appUser?.avatarColor
 
   // Fermer le drawer à chaque changement de route
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setDrawerOpen(false) }, [location.pathname])
 
   // Synchronise la couleur d'accentuation avec la couleur d'avatar

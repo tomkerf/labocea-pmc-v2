@@ -89,7 +89,7 @@ export default function DayView({
                         setExpandedClients(prev => {
                           const next = new Set(prev)
                           const key = evt.clientId ?? evt.id
-                          next.has(key) ? next.delete(key) : next.add(key)
+                          if (next.has(key)) next.delete(key); else next.add(key)
                           return next
                         })
                       } else {

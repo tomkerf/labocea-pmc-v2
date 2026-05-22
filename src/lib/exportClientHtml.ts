@@ -267,7 +267,7 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
     ${noPlans}
 
     <p class="footer">Document généré automatiquement par Labocea PMC V2</p>
-    ${withPrintScript ? '<script>window.onload = () => { window.print() }<\/script>' : ''}
+    ${withPrintScript ? '<script>window.onload = () => { window.print() }</script>' : ''}
   </body></html>`
 
   return html

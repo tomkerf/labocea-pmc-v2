@@ -57,7 +57,7 @@ td{font-size:8.5px;padding:1.5px 0;vertical-align:top;line-height:1.3}
 <div class="top"><span class="ref">${tuyau.refLabo}</span><span class="badge">${tuyau.annee || ''}</span></div>
 <div class="body"><table>${rowsHtml}</table></div>
 <div class="footer">Labocea · Tuyaux de prélèvement</div>
-<script>window.onload=()=>{window.focus();window.print()}<\/script>
+<script>window.onload=()=>{window.focus();window.print()}</script>
 </body></html>`
 
   const w = window.open('', '_blank', 'width=340,height=240')

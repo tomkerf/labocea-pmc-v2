@@ -16,18 +16,16 @@ export default function DonutChart({ segments, total, size = 120, strokeWidth = 
   const circumference = 2 * Math.PI * radius
   const center = size / 2
 
-  // Calcule les arcs
-  let offset = 0
   const arcs = segments
     .filter((s) => s.value > 0)
-    .map((s) => {
+    .reduce<Array<Segment & { dash: number; gap: number; offset: number }>>((acc, s) => {
       const pct = total > 0 ? s.value / total : 0
       const dash = pct * circumference
       const gap = circumference - dash
-      const arc = { ...s, dash, gap, offset }
-      offset += dash
-      return arc
-    })
+      const offset = acc.length > 0 ? acc[acc.length - 1].offset + acc[acc.length - 1].dash : 0
+      acc.push({ ...s, dash, gap, offset })
+      return acc
+    }, [])
 
   return (
     <div className="flex items-center gap-6">

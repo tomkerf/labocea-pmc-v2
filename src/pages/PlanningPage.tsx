@@ -62,10 +62,11 @@ const uid        = useAuthStore(selectUid)
   const today = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d }, [])
 
   // Jours fériés — recalculés chaque année (couvre l'année courante + suivante)
+  const todayYear = today.getFullYear()
   const holidays = useMemo(() => ({
-    ...getFrenchHolidays(today.getFullYear()),
-    ...getFrenchHolidays(today.getFullYear() + 1),
-  }), [today.getFullYear()])
+    ...getFrenchHolidays(todayYear),
+    ...getFrenchHolidays(todayYear + 1),
+  }), [todayYear])
 
   const [showDragHint, setShowDragHint] = useState(() => !localStorage.getItem('planning_drag_hint_seen'))
 

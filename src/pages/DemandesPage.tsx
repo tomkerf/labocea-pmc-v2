@@ -290,6 +290,7 @@ export default function DemandesPage() {
     if (d.id) {
       await saveDemande(d, uid)
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id: _id, createdBy: _cb, createdAt: _ca, updatedAt: _ua, ...partial } = d as Demande & { id: string }
       await createDemande(partial, uid)
     }

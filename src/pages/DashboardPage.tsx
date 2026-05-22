@@ -63,7 +63,8 @@ export default function DashboardPage() {
 
   const activeItems = planningMode === 'today' ? jourItems : lendemainItems
   const todayISO = localISO(new Date())
-  const tomorrowISO = localISO(new Date(Date.now() + 86_400_000))
+  const [nowMs] = useState(() => Date.now())
+  const tomorrowISO = localISO(new Date(nowMs + 86_400_000))
   const activeDateISO = planningMode === 'today' ? todayISO : tomorrowISO
 
   // ── Actions ────────────────────────────────────────────────

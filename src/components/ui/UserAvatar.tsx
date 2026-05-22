@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 // Palette des couleurs d'avatar disponibles.
 // Orange (#FF9F0A), rouge (#FF3B30) et vert (#34C759) sont exclus intentionnellement :
 // ils entrent en conflit avec les tokens de statut --color-warning, --color-danger, --color-success.

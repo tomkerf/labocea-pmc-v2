@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { calcStatut } from '@/hooks/useMetrologieRows'
 import { isThisMonth, localISO, isToday, daysDiff } from '@/lib/dashboardUtils'
@@ -74,6 +74,7 @@ export function useDashboardStats({
   clients, verifications, equipements, evenements, maintenances,
   uid, initiales, isGeneraliste,
 }: Params) {
+  const [nowMs] = useState(() => Date.now())
 
   // ── KPIs ──────────────────────────────────────────────────
 
@@ -214,7 +215,7 @@ export function useDashboardStats({
 
   const jourItems = useMemo((): JourItem[] => {
     const todayISO     = localISO(new Date())
-    const yesterdayISO = localISO(new Date(Date.now() - 86_400_000))
+    const yesterdayISO = localISO(new Date(nowMs - 86_400_000))
     const items: JourItem[] = []
 
     clients.forEach((client) => {
@@ -268,10 +269,10 @@ export function useDashboardStats({
       if (!b.time) return 1
       return a.time.localeCompare(b.time)
     })
-  }, [clients, evenements, initiales, isGeneraliste])
+  }, [clients, evenements, initiales, isGeneraliste, nowMs])
 
   const lendemainItems = useMemo((): JourItem[] => {
-    const tomorrowISO = localISO(new Date(Date.now() + 86_400_000))
+    const tomorrowISO = localISO(new Date(nowMs + 86_400_000))
     const items: JourItem[] = []
 
     clients.forEach((client) => {
@@ -325,7 +326,7 @@ export function useDashboardStats({
       if (!b.time) return 1
       return a.time.localeCompare(b.time)
     })
-  }, [clients, evenements, initiales, isGeneraliste])
+  }, [clients, evenements, initiales, isGeneraliste, nowMs])
 
   // ── État du parc ──────────────────────────────────────────
 

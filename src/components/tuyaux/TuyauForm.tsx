@@ -30,6 +30,19 @@ export function Tag({ children }: { children: React.ReactNode }) {
   )
 }
 
+const lbl = { color: 'var(--color-text-secondary)' } as const
+
+function F({ label, req, children }: { label: string; req?: boolean; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-xs font-medium" style={lbl}>
+        {label}{req && <span className="ml-0.5" style={{ color: 'var(--color-danger)' }}>*</span>}
+      </label>
+      {children}
+    </div>
+  )
+}
+
 export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProps) {
   const [refLabo,      setRefLabo]      = useState(tuyau.refLabo      ?? '')
   const [materiau,     setMateriau]     = useState<MateriauTuyau>(tuyau.materiau ?? 'TEFLON')
@@ -65,17 +78,6 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
     borderRadius: 'var(--radius-sm)',
     padding: '8px 11px',
   } as const
-
-  const lbl = { color: 'var(--color-text-secondary)' } as const
-
-  const F = ({ label, req, children }: { label: string; req?: boolean; children: React.ReactNode }) => (
-    <div className="flex flex-col gap-1">
-      <label className="text-xs font-medium" style={lbl}>
-        {label}{req && <span className="ml-0.5" style={{ color: 'var(--color-danger)' }}>*</span>}
-      </label>
-      {children}
-    </div>
-  )
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"

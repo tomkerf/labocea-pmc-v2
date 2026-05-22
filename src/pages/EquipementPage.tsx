@@ -78,6 +78,8 @@ export default function EquipementPage() {
     navigate('/materiel')
   }
 
+  const [nowMs] = useState(() => Date.now())
+
   if (loading) return (
     <div className="flex justify-center py-20">
       <div className="w-6 h-6 rounded-full border-2 animate-spin"
@@ -90,10 +92,10 @@ export default function EquipementPage() {
 
   const metroPercent = calcMetroPercent(equipement.prochainEtalonnage)
   const isMetroOverdue = equipement.prochainEtalonnage
-    ? new Date(equipement.prochainEtalonnage).getTime() < Date.now()
+    ? new Date(equipement.prochainEtalonnage).getTime() < nowMs
     : false
   const metroOverdueDays = isMetroOverdue
-    ? Math.floor((Date.now() - new Date(equipement.prochainEtalonnage).getTime()) / (1000 * 60 * 60 * 24))
+    ? Math.floor((nowMs - new Date(equipement.prochainEtalonnage).getTime()) / (1000 * 60 * 60 * 24))
     : 0
 
   return (
