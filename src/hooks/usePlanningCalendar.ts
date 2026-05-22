@@ -185,12 +185,10 @@ export function usePlanningCalendar({
       .map(date => ({
         date,
         dateStr: toISO(date),
-        events: viewMode === 'semaine'
-          ? filteredForDayFlat(toISO(date))
-          : filteredForDay(toISO(date)),
+        events: filteredForDay(toISO(date)),
       }))
       .filter(g => g.events.length > 0)
-  }, [viewMode, weekDays, monthStart, filteredForDay, filteredForDayFlat])
+  }, [viewMode, weekDays, monthStart, filteredForDay])
 
   return {
     filteredForDay,

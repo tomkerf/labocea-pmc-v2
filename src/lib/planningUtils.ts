@@ -41,6 +41,7 @@ export interface PlanningEvent {
   // Bilan 24h spanning J1→J2
   dateFin?: string          // présent sur J1 uniquement — date du J2
   isJ2Continuation?: boolean // vrai sur J2 — masqué des colonnes semaine/mois
+  subEvents?: PlanningEvent[]
 }
 
 export interface PoolItem {
@@ -286,7 +287,7 @@ export function groupByClient(evts: PlanningEvent[]): PlanningEvent[] {
     const subtitle = pointNames.length <= 2
       ? pointNames.join(' · ')
       : `${group.length} prélèvements`
-    merged.push({ ...worst, subtitle, count: group.length, link: `/missions/${worst.clientId}` })
+    merged.push({ ...worst, subtitle, count: group.length, link: `/missions/${worst.clientId}`, subEvents: group })
   })
 
   // Fantômes toujours en fin de liste (sortEvts les pousse en bas aussi)
