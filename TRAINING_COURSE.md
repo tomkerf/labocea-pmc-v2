@@ -1846,7 +1846,82 @@ export default function PlanningMiniCalendar({
 
 ---
 
-## 14.4 Comment modifier un comportement existant — exemple pratique
+## 14.4 Architecture & Découpage : La Révolution de `PlanningPage.tsx`
+
+La page Planning est le cœur opérationnel de l'application Labocea. Dans la V1 et au début de la V2, c'était un **"God Component"** de près de 700 lignes, extrêmement complexe et difficile à maintenir. Nous l'avons entièrement réarchitecturée selon le **Pattern Orchestrateur**.
+
+### 14.4.1 L'arbre de composants (Component Tree)
+
+Voici comment la page est découpée structurellement aujourd'hui. C'est l'illustration parfaite du principe de **composants isolés à responsabilité unique** :
+
+```mermaid
+graph TD
+    A[PlanningPage.tsx <br><i>Orchestrateur principal</i>] --> B[PlanningHeader.tsx <br><i>Barre d'outils, filtres & KPIs</i>]
+    A --> C[PlanningMiniCalendar.tsx <br><i>Drawer latéral animé</i>]
+    C --> C1[MiniCalendarPanel.tsx <br><i>Grille de sélection rapide</i>]
+    
+    A --> D{Filtre de Vue <br><i>viewMode</i>}
+    D -->|jour| E[DayView.tsx <br><i>Timeline horaire du jour</i>]
+    D -->|semaine| F[WeekView.tsx <br><i>Vue 7 jours groupée par clients</i>]
+    D -->|mois| G[MonthView.tsx <br><i>Grille mensuelle classique</i>]
+    D -->|liste| H[PeriodListView.tsx <br><i>Timeline chronologique des interventions</i>]
+```
+
+---
+
+### 14.4.2 La séparation de la logique métier (Les 4 Hooks Personnalisés)
+
+Au lieu d'avoir des centaines de lignes de fonctions de calculs de dates et de requêtes Firestore dans le composant d'affichage, nous avons extrait la logique dans 4 hooks spécialisés :
+
+1. **`usePlanningCalendar`** :
+   * **Rôle** : Calculs purs de dates.
+   * **Responsabilité** : Détermine le début de la semaine ou du mois, calcule les numéros de semaines au format ISO (indépendant de la timezone du client), et génère les étiquettes dynamiques de périodes (ex: *"Mai 2026"* ou *"Semaine 21 — 2026"*).
+2. **`usePlanningNavigation`** :
+   * **Rôle** : État de la navigation temporelle.
+   * **Responsabilité** : Gère les boutons "Précédent", "Suivant", "Aujourd'hui" et le passage d'une vue à l'autre (Jour, Semaine, Mois, Liste).
+3. **`usePlanningActions`** :
+   * **Rôle** : Événements d'écriture et de persistance.
+   * **Responsabilité** : Modifie la date d'un prélèvement, valide les droits d'édition de l'utilisateur connecté (seuls les techniciens assignés ou les admins peuvent déplacer un prélèvement) et déclenche les notifications de succès/erreur (`toast.success`).
+4. **`usePlanningDrag`** :
+   * **Rôle** : Gestion du glisser-déposer (Drag & Drop).
+   * **Responsabilité** : Stocke et met en cache l'ID de l'élément en cours de déplacement et applique un retour visuel (opacité de la carte déplacée) durant l'interaction.
+
+---
+
+### 14.4.3 Focus React 19 : La Règle d'or de la Pureté des Rendus
+
+Pendant le refactoring, nous avons nettoyé 32 erreurs critiques d'ESLint liées à la pureté des fonctions de rendu sous **React 19** et son nouveau **React Compiler**.
+
+#### La Règle : Un rendu doit être 100% pur et prévisible.
+Si tu passes les mêmes props à un composant, il doit retourner **exactement le même JSX**, sans aucun effet de bord pendant le calcul du rendu.
+
+#### ❌ Ce qui est interdit (Anti-pattern d'impureté) :
+```tsx
+export default function DashboardCard() {
+  // ❌ IMPUR : Date.now() ou new Date() renvoie une valeur différente à CHAQUE milliseconde.
+  // Lors d'un re-rendu, la valeur change, ce qui casse l'optimisation du React Compiler.
+  const currentTimestamp = Date.now() 
+  
+  return <div>Généré à {currentTimestamp}</div>
+}
+```
+
+#### ✅ La solution pure :
+```tsx
+export default function DashboardCard() {
+  // ✅ PURE : La fonction d'initialisation passée à useState ne s'exécute qu'UNE seule fois au montage.
+  // La valeur reste parfaitement stable pendant toute la durée de vie du composant.
+  const [currentTimestamp] = useState(() => Date.now())
+
+  return <div>Généré au montage : {currentTimestamp}</div>
+}
+```
+
+Pour les calculs de dates dynamiques qui dépendent d'une variable (comme le jour sélectionné), on utilise le hook **`useMemo`** pour recalculer la valeur *uniquement* lorsque cette variable change, garantissant un rendu optimal.
+
+---
+
+## 14.5 Comment modifier un comportement existant — exemple pratique
 
 **Scénario :** tu veux ajouter le numéro de série sous le nom dans `EquipementCard`.
 
