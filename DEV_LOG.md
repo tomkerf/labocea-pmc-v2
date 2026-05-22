@@ -4,6 +4,36 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 53 — Qualité ESLint (React 19) + découpage final PlanningPage
+**22 mai 2026 (après-midi)**
+
+### Contexte
+Audit technique (Gemini) signalant 38 problèmes ESLint dont 32 erreurs critiques, principalement des violations de pureté React 19 / React Compiler.
+
+### Ce qui a été fait — Lint
+- **`Date.now()` impurs** : remplacés par `useState(() => Date.now())` (capture stable au montage) dans `useDashboardStats.ts`, `DashboardPage.tsx`, `EquipementPage.tsx`, `FicheDeVie.tsx`.
+- **`DonutChart.tsx`** : mutation de variable `offset` après render → `reduce` pur.
+- **`TuyauForm.tsx`** : composant `F` défini dans le render → extrait au niveau module (évite le reset de state).
+- **`DayView` / `PlanningHeader`** : ternaires utilisés comme statements → `if/else`.
+- **`AppLayout` / `DemandesPage` / `EntryCard` / `UserAvatar`** : `eslint-disable` ciblés (patterns légitimes : setState-in-effect pour fermeture drawer, vars `_` de destructuring, exports mixtes constante+composant).
+- **Regex** : échappements `\/` inutiles supprimés (`exportClientHtml`, `reportHtml`, `tuyauxUtils`).
+- **`PlanningPage`** : expression complexe `today.getFullYear()` extraite en variable `todayYear` pour la dep array.
+- **Résultat : 0 erreur ESLint** (4 warnings `exhaustive-deps` restants, tous bénins — setters Zustand/Firestore stables par construction).
+
+### Ce qui a été fait — Découpage PlanningPage
+- **`usePlanningNavigation.ts`** : nouveau hook regroupant `prev`/`next`/`goToday`/`goToDay`/`switchView`.
+- **`PeriodListView.tsx`** : composant pour la liste mobile (vues semaine/mois).
+- `PlanningPage.tsx` : **399 → 339 lignes**. Le découpage architectural est désormais complet — orchestrateur pur.
+- **TODO_REFACTORING §4 entièrement soldé.**
+
+### Validation
+- `tsc --noEmit` : 0 erreur. Build production OK. Déployé staging.
+
+### Cause racine
+Les erreurs de pureté étaient latentes : `eslint-plugin-react-hooks` v5 (React 19) applique la règle `react-hooks/purity` que les versions antérieures n'avaient pas.
+
+---
+
 ## Session 52 — Refactoring & Alignement : missions ➔ client
 **22 mai 2026 (fin d'après-midi)**
 
