@@ -1,7 +1,6 @@
 import { generateId } from '@/lib/ids'
 import { generateSamplings } from '@/lib/samplings'
 import { buildReportHtml } from '@/lib/reportHtml'
-import { toast } from '@/stores/toastStore'
 import React from 'react'
 import type { Client, Plan, Sampling, SamplingStatus, NappeType, SamplingHistoryEntry, AppUser } from '@/types'
 
@@ -39,15 +38,13 @@ interface UsePlanActionsProps {
   triggerSave: (client: Client) => void
   setPdfPreview: React.Dispatch<React.SetStateAction<string | null>>
   setSelectedSampling: React.Dispatch<React.SetStateAction<string | null>>
-  setNewDate: React.Dispatch<React.SetStateAction<string>>
-  setAddingDate: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 export function usePlanActions({
   uid, currentUserNom, users,
   planId, plan, client,
   triggerSave, setPdfPreview,
-  setSelectedSampling, setNewDate, setAddingDate,
+  setSelectedSampling,
 }: UsePlanActionsProps) {
 
   function updatePlan(field: keyof Plan, value: unknown) {
@@ -104,21 +101,14 @@ export function usePlanActions({
     triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updated : p) })
   }
 
-  function addCustomSampling(dateStr: string) {
-    if (!client || !plan || !dateStr) return
-    const d = new Date(dateStr + 'T12:00:00')
-    const isDuplicate = plan.samplings.some(
-      (s) => s.plannedMonth === d.getMonth() && s.plannedDay === d.getDate()
-    )
-    if (isDuplicate) {
-      toast.error(`Un prélèvement est déjà prévu le ${d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}.`)
-      return
-    }
+  function addCustomSampling() {
+    if (!client || !plan) return
     const newSampling: Sampling = {
       id: generateId(),
       num: plan.samplings.length + 1,
-      plannedMonth: d.getMonth(),
-      plannedDay: d.getDate(),
+      plannedMonth: 0,
+      plannedDay: 0,
+      dateUndefined: true,
       status: 'planned',
       doneDate: '', comment: '',
       nappe: '' as NappeType,
@@ -127,11 +117,9 @@ export function usePlanActions({
     }
     const updated = {
       ...plan,
-      samplings: [...plan.samplings, newSampling].sort((a, b) => a.plannedMonth - b.plannedMonth || a.plannedDay - b.plannedDay),
+      samplings: [...plan.samplings, newSampling],
     }
     triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updated : p) })
-    setNewDate('')
-    setAddingDate(false)
   }
 
   function deleteSampling(samplingId: string, selectedSampling: string | null) {

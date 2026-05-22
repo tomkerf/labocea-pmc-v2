@@ -43,7 +43,7 @@ export function buildReportHtml(
 
     return `<tr>
       <td style="color:#6e6e73;text-align:center">${s.num}</td>
-      <td>${MOIS[s.plannedMonth]}${s.plannedDay ? ` (j.${s.plannedDay})` : ''}</td>
+      <td>${s.dateUndefined ? 'Date à définir' : MOIS[s.plannedMonth] + (s.plannedDay ? ` (j.${s.plannedDay})` : '')}</td>
       <td>${dateLabel}</td>
       <td><span style="color:${color};font-weight:500">${statusLabel}</span></td>
       <td>${techLabel}</td>

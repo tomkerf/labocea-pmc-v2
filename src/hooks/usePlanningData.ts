@@ -50,9 +50,11 @@ export function usePlanningData({
         plan.samplings.forEach((s: Sampling) => {
           if (!s.plannedDay && !s.doneDate) return
           const overdue = isSamplingOverdue(s)
-          const dateStr = s.plannedDay
-            ? toISO(new Date(year, s.plannedMonth, s.plannedDay))
-            : s.doneDate
+          const dateStr = s.status === 'done' && s.doneDate
+            ? s.doneDate
+            : s.plannedDay
+              ? toISO(new Date(year, s.plannedMonth, s.plannedDay))
+              : s.doneDate
           const statusLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[s.status] ?? SAMPLING_LABEL.planned
           const priority    = overdue ? 0 : s.status === 'non_effectue' ? 1 : s.status === 'planned' ? 2 : 3
           const technicien  = s.assignedTo || client.preleveur || ''

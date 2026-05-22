@@ -17,12 +17,11 @@ export function isSamplingOverdue(s: Sampling, year?: number): boolean {
   const planYear = year ?? new Date().getFullYear()
   let deadline: Date
 
+  if (s.dateUndefined) return false  // date non définie → pas en retard
+
   if (s.plannedDay && s.plannedDay > 0) {
-    // Jour précis fixé → retard dès le lendemain
     deadline = new Date(planYear, s.plannedMonth, s.plannedDay, 23, 59, 59, 999)
   } else {
-    // Pas de jour fixé → retard seulement après la fin du mois
-    // new Date(year, month+1, 0) = dernier jour du mois
     deadline = new Date(planYear, s.plannedMonth + 1, 0, 23, 59, 59, 999)
   }
 

@@ -37,8 +37,6 @@ export default function PlanPage() {
 
   const [selectedSampling, setSelectedSampling] = useState<string | null>(null)
   const [pdfPreview, setPdfPreview] = useState<string | null>(null)
-  const [addingDate, setAddingDate] = useState(false)
-  const [newDate, setNewDate] = useState('')
   const [confirmGen, setConfirmGen] = useState(false)
   const [confirmDelSampling, setConfirmDelSampling] = useState<string | null>(null)
 
@@ -52,7 +50,7 @@ export default function PlanPage() {
     uid, currentUserNom, users,
     clientId, planId, plan, client,
     triggerSave, setPdfPreview,
-    setSelectedSampling, setNewDate, setAddingDate,
+    setSelectedSampling,
   })
 
   if (loading) return (
@@ -125,11 +123,11 @@ export default function PlanPage() {
             )}
             {isCustom ? (
               <button
-                onClick={() => setAddingDate(v => !v)}
+                onClick={() => addCustomSampling()}
                 className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
                 style={{ background: 'var(--color-accent)', color: 'white' }}
               >
-                <Plus size={14} /> Ajouter une date
+                <Plus size={14} /> Ajouter une intervention
               </button>
             ) : confirmGen ? (
               <div className="flex items-center gap-1.5">
@@ -154,39 +152,10 @@ export default function PlanPage() {
           </div>
         </div>
 
-        {isCustom && addingDate && (
-          <div className="flex items-center gap-2 mb-4 p-3 rounded-xl"
-            style={{ background: 'var(--color-accent-light)', border: '1px solid var(--color-accent)20' }}>
-            <input
-              type="date"
-              value={newDate}
-              onChange={e => setNewDate(e.target.value)}
-              autoFocus
-              className="flex-1 px-3 py-1.5 rounded-lg text-sm"
-              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
-            />
-            <button
-              onClick={() => addCustomSampling(newDate)}
-              disabled={!newDate}
-              className="px-3 py-1.5 rounded-lg text-sm font-medium"
-              style={{ background: newDate ? 'var(--color-accent)' : 'var(--color-bg-tertiary)', color: newDate ? 'white' : 'var(--color-text-tertiary)' }}
-            >
-              Confirmer
-            </button>
-            <button
-              onClick={() => { setAddingDate(false); setNewDate('') }}
-              className="px-2 py-1.5 rounded-lg text-sm"
-              style={{ color: 'var(--color-text-secondary)' }}
-            >
-              Annuler
-            </button>
-          </div>
-        )}
-
         {plan.samplings.length === 0 ? (
           <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
             {isCustom
-              ? 'Aucun prélèvement — clique sur "Ajouter une date" pour créer les interventions une par une.'
+              ? 'Aucun prélèvement — clique sur "Ajouter une intervention" pour créer les interventions une par une.'
               : 'Aucun prélèvement — clique sur "Générer" pour créer le calendrier automatiquement.'}
           </p>
         ) : (

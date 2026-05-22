@@ -65,6 +65,7 @@ export interface Sampling {
   num: number
   plannedMonth: number    // 0-11
   plannedDay: number
+  dateUndefined?: boolean  // true si date non encore définie (mode Personnalisé)
   plannedTime?: string    // "HH:MM"
   status: SamplingStatus
   doneDate: string        // "2026-03-25" | ""

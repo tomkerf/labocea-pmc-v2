@@ -46,9 +46,11 @@ export function SamplingRow({
   onDeleteConfirm,
 }: SamplingRowProps) {
   const cfg = STATUS_CONFIG[s.status] ?? STATUS_CONFIG['planned']
-  const dateLabel = isCustom && s.plannedDay
-    ? `${s.plannedDay} ${MOIS[s.plannedMonth]}`
-    : `${MOIS[s.plannedMonth]}${s.plannedDay ? ` — j${s.plannedDay}` : ''}`
+  const dateLabel = s.dateUndefined
+    ? 'Date à définir'
+    : isCustom
+      ? `${s.plannedDay} ${MOIS[s.plannedMonth]}`
+      : `${MOIS[s.plannedMonth]}${s.plannedDay ? ` — j${s.plannedDay}` : ''}`
 
   return (
     <div>

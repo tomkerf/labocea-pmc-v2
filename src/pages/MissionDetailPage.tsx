@@ -187,7 +187,7 @@ export default function MissionDetailPage() {
           {plan.siteNom}{plan.nom ? ` · ${plan.nom}` : ''}
         </p>
         <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-          <span>{MOIS[sampling.plannedMonth]}{sampling.plannedDay ? ` — j${sampling.plannedDay}` : ''}</span>
+          <span>{sampling.dateUndefined ? 'Date à définir' : `${MOIS[sampling.plannedMonth]}${sampling.plannedDay ? ` — j${sampling.plannedDay}` : ''}`}</span>
           <span>·</span>
           <span>{plan.frequence}</span>
           <span>·</span>
