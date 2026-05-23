@@ -42,6 +42,8 @@ export interface PlanningEvent {
   dateFin?: string          // présent sur J1 uniquement — date du J2
   isJ2Continuation?: boolean // vrai sur J2 — masqué des colonnes semaine/mois
   subEvents?: PlanningEvent[]
+  lat?: string
+  lng?: string
 }
 
 export interface PoolItem {
@@ -57,7 +59,7 @@ export interface PoolItem {
   analysesSousTraitees: boolean
 }
 
-export type ViewMode = 'jour' | 'semaine' | 'mois'
+export type ViewMode = 'jour' | 'semaine' | 'mois' | 'carte'
 
 export type TimedEvent = PlanningEvent & {
   startMin: number

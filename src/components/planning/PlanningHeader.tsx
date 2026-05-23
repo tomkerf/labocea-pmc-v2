@@ -79,7 +79,7 @@ export default function PlanningHeader({
           <div className="flex items-center gap-2">
             <div className="flex rounded-lg overflow-hidden"
               style={{ border:'1px solid var(--color-border-subtle)', background:'var(--color-bg-tertiary)' }}>
-              {(['jour','semaine','mois'] as ViewMode[]).map(m => (
+              {(['jour','semaine','mois','carte'] as ViewMode[]).map(m => (
                 <button key={m} onClick={() => switchView(m)}
                   className="px-3 py-1.5 text-xs font-medium capitalize"
                   style={{ background:viewMode===m?'var(--color-accent)':'transparent', color:viewMode===m?'white':'var(--color-text-secondary)' }}>

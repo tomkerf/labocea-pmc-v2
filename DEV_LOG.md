@@ -4,6 +4,25 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 57 — Carte Interactive des Tournées (Feature 1)
+**23 mai 2026 (matin)**
+
+### Ce qui a été fait
+- **Implémentation de la Carte des Tournées** : Conception et intégration de la vue cartographique interactive dans le module Planning pour visualiser géographiquement les interventions planifiées.
+- **Résolution des bugs d'icône Leaflet** : Remplacement des icônes SVG complexes sujettes à des soucis de cache/moteur par un macaron circulaire CSS standard (`border-radius: 50%`) ultra-fluide et robuste aux couleurs du technicien.
+- **Modèle de données** : Liaison des coordonnées `lat`/`lng` configurées sur les points de prélèvement vers les événements du planning.
+- **Panneau de Tournée responsive** : Liste verticale interactive à gauche sur desktop (avec centrage et ouverture automatique de popup au clic) et carrousel horizontal tactile en overlay bas de carte sur mobile.
+- **Legend & Fallbacks** : Affichage d'une légende dynamique et détection des points planifiés sans coordonnées GPS valides (avec lien d'édition directe).
+
+### Validation & Qualité
+- **Rendu visuel local** : Validé avec succès par l'utilisateur sur son serveur local (l'épingle numérotée `1` apparaît exactement au bon endroit sur la presqu'île de Crozon).
+- **Propreté** : Retrait complet de tous les logs de débogage et des fonctions d'inspection DOM temporaires avant validation.
+
+### Prochaines étapes
+- **Déploiement Staging** : Pousser les modifications pour test par l'équipe measures (`bash deploy-dev.sh`).
+
+---
+
 ## Session 56 — Résolution de l'erreur Wrangler de Staging (Assets)
 **23 mai 2026 (matin)**
 

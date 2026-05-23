@@ -39,6 +39,7 @@ import WeekView           from '@/components/planning/WeekView'
 import MonthView          from '@/components/planning/MonthView'
 import PeriodListView     from '@/components/planning/PeriodListView'
 import PlanningMiniCalendar from '@/components/planning/PlanningMiniCalendar'
+import MapView            from '@/components/planning/MapView'
 
 // ── Composant principal ─────────────────────────────────────
 
@@ -183,8 +184,21 @@ const uid        = useAuthStore(selectUid)
         />
       )}
 
+      {/* ── VUE CARTE (toutes tailles) ── */}
+      {viewMode === 'carte' && (
+        <MapView
+          selectedDate={selectedDate}
+          today={today}
+          eventsByDate={eventsByDate}
+          filterTech={filterTech}
+          filterRetard={filterRetard}
+          preleveurs={preleveurs}
+          handleSelectEvent={handleSelectEvent}
+        />
+      )}
+
       {/* ── DESKTOP : vue calendrier grille ── */}
-      <div className={viewMode === 'jour' ? 'hidden' : 'hidden md:flex flex-col flex-1 overflow-hidden'}>
+      <div className={(viewMode === 'semaine' || viewMode === 'mois') ? 'hidden md:flex flex-col flex-1 overflow-hidden' : 'hidden'}>
 
         {viewMode==='semaine' && (
           <WeekView
@@ -238,7 +252,7 @@ const uid        = useAuthStore(selectUid)
       </div>
 
       {/* ── MOBILE : scroll vertical liste ── */}
-      <div className={viewMode === 'jour' ? 'hidden' : 'md:hidden flex-1 overflow-y-auto'}>
+      <div className={(viewMode === 'semaine' || viewMode === 'mois') ? 'md:hidden flex-1 overflow-y-auto' : 'hidden'}>
         <PeriodListView
           periodList={periodList}
           today={today}

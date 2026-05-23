@@ -71,6 +71,8 @@ export function usePlanningData({
             frequence: plan.frequence || '',
             meteo: plan.meteo || '',
             analysesSousTraitees: plan.analysesSousTraitees ?? false,
+            lat: plan.lat || '',
+            lng: plan.lng || '',
           }
           if (isAuto) {
             const dateStr2 = toISO(addDays(new Date(dateStr + 'T12:00:00'), 1))
