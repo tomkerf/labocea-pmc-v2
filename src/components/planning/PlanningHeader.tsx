@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Map } from 'lucide-react'
 import { type ViewMode, getTechColor } from '@/lib/planningUtils'
 type Preleveur = { code: string; nom?: string }
 
@@ -77,16 +77,32 @@ export default function PlanningHeader({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Sélecteur de période de calendrier */}
             <div className="flex rounded-lg overflow-hidden"
               style={{ border:'1px solid var(--color-border-subtle)', background:'var(--color-bg-tertiary)' }}>
-              {(['jour','semaine','mois','carte'] as ViewMode[]).map(m => (
+              {(['jour','semaine','mois'] as ViewMode[]).map(m => (
                 <button key={m} onClick={() => switchView(m)}
-                  className="px-3 py-1.5 text-xs font-medium capitalize"
+                  className="px-3 py-1.5 text-xs font-medium capitalize transition-all"
                   style={{ background:viewMode===m?'var(--color-accent)':'transparent', color:viewMode===m?'white':'var(--color-text-secondary)' }}>
                   {m}
                 </button>
               ))}
             </div>
+
+            {/* Bouton Carte mis en valeur séparément avec un icône Map premium */}
+            <button onClick={() => switchView('carte')}
+              className="px-3 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                background: viewMode === 'carte' ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                color: viewMode === 'carte' ? 'white' : 'var(--color-text-primary)',
+                border: viewMode === 'carte' ? '1px solid transparent' : '1px solid var(--color-border-subtle)',
+                boxShadow: viewMode === 'carte' ? 'none' : 'var(--shadow-card)',
+                cursor: 'pointer'
+              }}
+            >
+              <Map size={13} style={{ color: viewMode === 'carte' ? 'white' : 'var(--color-accent)' }} />
+              <span>Carte</span>
+            </button>
           </div>
         </div>
 
