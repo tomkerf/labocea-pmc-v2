@@ -4,6 +4,23 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 58 — Vérification et corrections post-carte
+**23 mai 2026 (fin de matinée)**
+
+### Ce qui a été fait
+- **Audit de la feature Carte** : Vérification post-implémentation de la vue carte (build, analyse statique du diff, 6 commits, 719 lignes).
+- **Fix label de période en mode carte** : `getPeriodLabel` ne gérait pas `viewMode === 'carte'` et retombait sur l'affichage mois ("mai 2026"). Corrigé pour afficher la date complète du jour sélectionné (ex. "vendredi 23 mai 2026"), cohérent avec le fait que la carte est une vue jour.
+- **Fix navigation prev/next en mode carte** : Les flèches `<` `>` exécutaient `setMonthStart` par défaut (branche `else`) au lieu d'incrémenter `selectedDate`. Corrigé dans `usePlanningNavigation` pour traiter `'carte'` comme `'jour'`.
+
+### Cause racine
+Les deux bugs venaient du même pattern : `viewMode === 'carte'` n'avait pas été ajouté dans les branches `if/else` existantes de `getPeriodLabel` et `usePlanningNavigation` lors de l'implémentation de la feature.
+
+### Validation
+- Build de production propre (425ms, 0 erreur)
+- Déployé sur staging : https://labocea-pmc-v2-dev.tomkerf.workers.dev
+
+---
+
 ## Session 57 — Carte Interactive des Tournées (Feature 1)
 **23 mai 2026 (matin)**
 
