@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { ChevronLeft, ChevronRight, Calendar, Map as MapIcon } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Map as MapIcon, X } from 'lucide-react'
 import { type ViewMode, getTechColor } from '@/lib/planningUtils'
 type Preleveur = { code: string; nom?: string }
 
@@ -76,7 +76,7 @@ export default function PlanningHeader({
             </button>
 
             {/* Bouton Carte mis en valeur séparément avec un icône Map premium (à droite du Mini-calendrier) */}
-            <button onClick={() => switchView('carte')}
+            <button onClick={() => switchView(viewMode === 'carte' ? 'semaine' : 'carte')}
               className="px-3 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] ml-1 shrink-0"
               style={{
                 background: viewMode === 'carte' ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
@@ -85,9 +85,14 @@ export default function PlanningHeader({
                 boxShadow: viewMode === 'carte' ? 'none' : 'var(--shadow-card)',
                 cursor: 'pointer'
               }}
+              title={viewMode === 'carte' ? 'Quitter la carte' : 'Afficher la carte'}
             >
-              <MapIcon size={13} style={{ color: viewMode === 'carte' ? 'white' : 'var(--color-accent)' }} />
-              <span>Carte</span>
+              {viewMode === 'carte' ? (
+                <X size={13} style={{ color: 'white' }} />
+              ) : (
+                <MapIcon size={13} style={{ color: 'var(--color-accent)' }} />
+              )}
+              <span>{viewMode === 'carte' ? 'Fermer' : 'Carte'}</span>
             </button>
           </div>
 
