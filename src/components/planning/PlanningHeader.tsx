@@ -51,7 +51,7 @@ export default function PlanningHeader({
               onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
               <ChevronLeft size={18} />
             </button>
-            <span className="text-sm font-semibold min-w-[180px] text-center" style={{ color:'var(--color-text-primary)' }}>
+            <span className="text-sm font-semibold min-w-[120px] md:min-w-[180px] text-center" style={{ color:'var(--color-text-primary)' }}>
               {periodLabel}
             </span>
             <button onClick={next} className="p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
@@ -74,6 +74,21 @@ export default function PlanningHeader({
               title="Mini-calendrier">
               <Calendar size={13} />
             </button>
+
+            {/* Bouton Carte mis en valeur séparément avec un icône Map premium (à droite du Mini-calendrier) */}
+            <button onClick={() => switchView('carte')}
+              className="px-3 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] ml-1 shrink-0"
+              style={{
+                background: viewMode === 'carte' ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                color: viewMode === 'carte' ? 'white' : 'var(--color-text-primary)',
+                border: viewMode === 'carte' ? '1px solid transparent' : '1px solid var(--color-border-subtle)',
+                boxShadow: viewMode === 'carte' ? 'none' : 'var(--shadow-card)',
+                cursor: 'pointer'
+              }}
+            >
+              <MapIcon size={13} style={{ color: viewMode === 'carte' ? 'white' : 'var(--color-accent)' }} />
+              <span>Carte</span>
+            </button>
           </div>
 
           <div className="flex items-center gap-2">
@@ -88,21 +103,6 @@ export default function PlanningHeader({
                 </button>
               ))}
             </div>
-
-            {/* Bouton Carte mis en valeur séparément avec un icône Map premium */}
-            <button onClick={() => switchView('carte')}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98]"
-              style={{
-                background: viewMode === 'carte' ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
-                color: viewMode === 'carte' ? 'white' : 'var(--color-text-primary)',
-                border: viewMode === 'carte' ? '1px solid transparent' : '1px solid var(--color-border-subtle)',
-                boxShadow: viewMode === 'carte' ? 'none' : 'var(--shadow-card)',
-                cursor: 'pointer'
-              }}
-            >
-              <MapIcon size={13} style={{ color: viewMode === 'carte' ? 'white' : 'var(--color-accent)' }} />
-              <span>Carte</span>
-            </button>
           </div>
         </div>
 
