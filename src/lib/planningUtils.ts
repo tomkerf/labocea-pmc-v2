@@ -328,7 +328,7 @@ export function getISOWeek(d: Date): number {
 }
 
 export function getPeriodLabel(viewMode: ViewMode, selectedDate: Date, weekStart: Date, monthStart: Date): string {
-  if (viewMode === 'jour') {
+  if (viewMode === 'jour' || viewMode === 'carte') {
     return `${JOURS_LONG[(selectedDate.getDay()+6)%7]} ${selectedDate.getDate()} ${MOIS_LONG[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`
   }
   if (viewMode === 'semaine') {

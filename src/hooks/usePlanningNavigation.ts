@@ -26,14 +26,14 @@ export function usePlanningNavigation({
 }: UsePlanningNavigationProps) {
 
   function prev() {
-    if (viewMode === 'jour') setSelectedDate(addDays(selectedDate, -1))
+    if (viewMode === 'jour' || viewMode === 'carte') setSelectedDate(addDays(selectedDate, -1))
     else if (viewMode === 'semaine') setWeekStart(addDays(weekStart, -7))
     else setMonthStart(addMonths(monthStart, -1))
     setSelectedDay(null)
   }
 
   function next() {
-    if (viewMode === 'jour') setSelectedDate(addDays(selectedDate, 1))
+    if (viewMode === 'jour' || viewMode === 'carte') setSelectedDate(addDays(selectedDate, 1))
     else if (viewMode === 'semaine') setWeekStart(addDays(weekStart, 7))
     else setMonthStart(addMonths(monthStart, 1))
     setSelectedDay(null)
