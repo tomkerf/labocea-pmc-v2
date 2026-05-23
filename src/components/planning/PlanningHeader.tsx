@@ -162,7 +162,7 @@ export default function PlanningHeader({
       </div>
 
       {/* Bandeau "à planifier" */}
-      {viewMode !== 'jour' && monthPoolCount > 0 && (
+      {viewMode !== 'jour' && viewMode !== 'carte' && monthPoolCount > 0 && (
         <div className="flex items-center gap-2 px-4 md:px-6 py-2 shrink-0"
           style={{ background: 'var(--color-accent-light)', borderBottom: '1px solid var(--color-border-subtle)' }}>
           <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: 'var(--color-accent)' }} />
@@ -178,7 +178,7 @@ export default function PlanningHeader({
       )}
 
       {/* Hint premier drag */}
-      {showDragHint && viewMode !== 'jour' && (
+      {showDragHint && viewMode !== 'jour' && viewMode !== 'carte' && (
         <div className="flex items-center justify-between gap-3 px-4 md:px-6 py-2 shrink-0"
           style={{ background: 'var(--color-success-light)', borderBottom: '1px solid var(--color-border-subtle)' }}>
           <p className="text-xs" style={{ color: 'var(--color-success)' }}>

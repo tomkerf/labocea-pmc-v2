@@ -266,10 +266,12 @@ export default function MapView({
     <div className="flex-1 min-h-0 flex flex-col md:flex-row relative overflow-hidden bg-gray-100">
       
       {/* ── BARRE LATÉRALE (Desktop uniquement) ── */}
-      <div 
+      <div
         className={`hidden md:flex flex-col shrink-0 transition-all duration-300 relative z-10`}
         style={{
           width: sidebarOpen ? '320px' : '0px',
+          minWidth: sidebarOpen ? '320px' : '0px',
+          overflow: 'hidden',
           background: 'var(--color-bg-secondary)',
           borderRight: sidebarOpen ? '1px solid var(--color-border-subtle)' : 'none',
           boxShadow: sidebarOpen ? 'var(--shadow-card)' : 'none'
