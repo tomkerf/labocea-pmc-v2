@@ -13,13 +13,16 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 - **Modèle de données** : Liaison des coordonnées `lat`/`lng` configurées sur les points de prélèvement vers les événements du planning.
 - **Panneau de Tournée responsive** : Liste verticale interactive à gauche sur desktop (avec centrage et ouverture automatique de popup au clic) et carrousel horizontal tactile en overlay bas de carte sur mobile.
 - **Legend & Fallbacks** : Affichage d'une légende dynamique et détection des points planifiés sans coordonnées GPS valides (avec lien d'édition directe).
+- **Sécurité Firestore** : Identification d'un avertissement `permission-denied` sur le listener `preleveurs`. Résolu en ajoutant la règle de sécurité correspondante dans `firestore.rules` et en la déployant à 100% sur la base Firestore.
+- **Compilation Strict TypeScript** : Nettoyage des imports et variables inutilisées dans `MapView.tsx`, et renforcement des assertions sur `markerGroupRef` pour permettre un build de production impeccable (`tsc -b && vite build` 100% au vert).
 
 ### Validation & Qualité
 - **Rendu visuel local** : Validé avec succès par l'utilisateur sur son serveur local (l'épingle numérotée `1` apparaît exactement au bon endroit sur la presqu'île de Crozon).
+- **Sécurité** : Règles Firestore déployées et validées sans erreur de syntaxe.
 - **Propreté** : Retrait complet de tous les logs de débogage et des fonctions d'inspection DOM temporaires avant validation.
 
 ### Prochaines étapes
-- **Déploiement Staging** : Pousser les modifications pour test par l'équipe measures (`bash deploy-dev.sh`).
+- **Authentification Wrangler** : Exécuter `npx wrangler login` pour obtenir les nouveaux scopes OAuth requis (comme `artifacts:write` et `flagship:write` requis pour Workers Assets) et relancer `bash deploy-dev.sh`.
 
 ---
 
