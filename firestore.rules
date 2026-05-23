@@ -90,5 +90,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ── preleveurs (V1 — archive, lecture seule) ──────────────
+    match /preleveurs/{preleveurId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
   }
 }

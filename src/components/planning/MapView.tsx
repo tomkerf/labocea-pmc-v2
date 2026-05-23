@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import {
-  MapPin, ChevronRight, ChevronLeft, Navigation,
-  CheckCircle2, AlertTriangle, ExternalLink, RefreshCw
+  MapPin, ChevronRight, ChevronLeft,
+  AlertTriangle, ExternalLink
 } from 'lucide-react'
 import {
   type PlanningEvent,
@@ -22,8 +22,8 @@ interface MapViewProps {
 }
 
 export default function MapView({
-  selectedDate, today, eventsByDate,
-  filterTech, filterRetard, preleveurs,
+  selectedDate, eventsByDate,
+  filterTech, filterRetard,
   handleSelectEvent
 }: MapViewProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -65,7 +65,6 @@ export default function MapView({
   // Création personnalisée de l'icône SVG pour chaque marqueur
   const createCustomMarker = (event: PlanningEvent, index: number) => {
     const tc = getTechColor(event.technicien)
-    const color = event.isDone ? 'var(--color-success)' : tc.color
     const num = index + 1
 
     const colorHex = event.isDone ? '#34C759' : (tc.color.startsWith('var') ? '#0071E3' : tc.color)
@@ -134,11 +133,14 @@ export default function MapView({
     if (!mapRef.current) return
 
     // S'assurer de la présence du groupe de marqueurs
-    if (markerGroupRef.current) {
-      markerGroupRef.current.clearLayers()
-    } else {
+    if (!markerGroupRef.current) {
       markerGroupRef.current = L.featureGroup().addTo(mapRef.current)
     }
+
+    const markerGroup = markerGroupRef.current
+    if (!markerGroup) return
+
+    markerGroup.clearLayers()
 
     const markers: L.Marker[] = []
 
@@ -207,13 +209,13 @@ export default function MapView({
         setSelectedEventId(null)
       })
 
-      markerGroupRef.current.addLayer(marker)
+      markerGroup.addLayer(marker)
       markers.push(marker)
     })
 
     // Zoomer/Ajuster la carte pour afficher tous les marqueurs du jour
     if (markers.length > 0) {
-      mapRef.current.fitBounds(markerGroupRef.current.getBounds(), {
+      mapRef.current.fitBounds(markerGroup.getBounds(), {
         padding: [50, 50],
         maxZoom: 15
       })
