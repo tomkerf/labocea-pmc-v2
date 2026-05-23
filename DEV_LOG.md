@@ -9,6 +9,7 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ### Ce qui a été fait
 - **Implémentation de la Carte des Tournées** : Conception et intégration de la vue cartographique interactive dans le module Planning pour visualiser géographiquement les interventions planifiées.
+- **UX & Discoverability (Bouton Carte/Fermer)** : Le bouton de carte a été séparé du sélecteur classique (`Jour`, `Semaine`, `Mois`), enrichi d'une icône `Map` et positionné à droite du mini-calendrier. Pour faciliter le retour au calendrier (qui était confus pour l'utilisateur), le bouton se transforme dynamiquement en bouton de fermeture bleu `✕ Fermer` lorsque la carte est active, permettant de quitter intuitivement la carte en un seul clic (basculement en vue Semaine).
 - **Résolution des bugs d'icône Leaflet** : Remplacement des icônes SVG complexes sujettes à des soucis de cache/moteur par un macaron circulaire CSS standard (`border-radius: 50%`) ultra-fluide et robuste aux couleurs du technicien.
 - **Modèle de données** : Liaison des coordonnées `lat`/`lng` configurées sur les points de prélèvement vers les événements du planning.
 - **Panneau de Tournée responsive** : Liste verticale interactive à gauche sur desktop (avec centrage et ouverture automatique de popup au clic) et carrousel horizontal tactile en overlay bas de carte sur mobile.
