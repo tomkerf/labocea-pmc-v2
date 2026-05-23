@@ -4,6 +4,15 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 59 — Bugs d'affichage carte
+**23 mai 2026 (fin de matinée)**
+
+### Ce qui a été fait
+- **Sidebar tronquée** : Le div sidebar de `MapView` n'avait pas `overflow: hidden` ni `minWidth`, ce qui permettait au flex de l'écraser à ~35px. Ajout de `overflow: hidden` et `minWidth` synchronisé avec `width`.
+- **Bandeaux hors-contexte** : Les bandeaux "à planifier ce mois" et "Astuce drag" s'affichaient en mode carte car leurs conditions `viewMode !== 'jour'` incluaient `'carte'`. Ajout de `viewMode !== 'carte'` sur les deux conditions dans `PlanningHeader`.
+
+---
+
 ## Session 58 — Vérification et corrections post-carte
 **23 mai 2026 (fin de matinée)**
 
@@ -40,7 +49,7 @@ Les deux bugs venaient du même pattern : `viewMode === 'carte'` n'avait pas ét
 - **Propreté** : Retrait complet de tous les logs de débogage et des fonctions d'inspection DOM temporaires avant validation.
 
 ### Prochaines étapes
-- **Authentification Wrangler** : Exécuter `npx wrangler login` pour obtenir les nouveaux scopes OAuth requis (comme `artifacts:write` et `flagship:write` requis pour Workers Assets) et relancer `bash deploy-dev.sh`.
+- Tester la carte sur des jours avec des prélèvements GPS pour valider les marqueurs et popups.
 
 ---
 

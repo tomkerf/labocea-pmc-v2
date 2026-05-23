@@ -258,6 +258,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-23 | Build / Staging ✅ | Fix de l'erreur d'upload d'assets Wrangler (accumulation de 4282 fichiers obsolètes) en activant emptyOutDir sur Vite. Déploiement staging 100% OK. |
 | 2026-05-23 | Planning Carte ✅ | Carte interactive des tournées (Leaflet, pins colorés par technicien, sidebar, mobile carousel). Résolution définitive du bug de visibilité des épingles (découplage DOM + mapReady) et des règles Firestore preleveurs. Build & local 100% OK. |
 | 2026-05-23 | Fix post-carte ✅ | Correction du label de période (carte = vue jour, pas mois) et de la navigation prev/next (incrémente selectedDate au lieu de monthStart). |
+| 2026-05-23 | Bugs affichage carte ✅ | Sidebar tronquée corrigée (overflow:hidden + minWidth). Bandeaux "à planifier" et "Astuce drag" masqués en mode carte. |
 
 ---
 
