@@ -17,7 +17,7 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 - **Compilation Strict TypeScript** : Nettoyage des imports et variables inutilisées dans `MapView.tsx`, et renforcement des assertions sur `markerGroupRef` pour permettre un build de production impeccable (`tsc -b && vite build` 100% au vert).
 
 ### Validation & Qualité
-- **Rendu visuel local** : Validé avec succès par l'utilisateur sur son serveur local (l'épingle numérotée `1` apparaît exactement au bon endroit sur la presqu'île de Crozon).
+- **Rendu visuel local** : Résolution définitive du problème de visibilité des épingles. En découplant le container Leaflet de la réconciliation React et en synchronisant le chargement des marqueurs avec la taille de la carte validée (`mapReady` state), l'épingle numérotée `1` apparaît instantanément et parfaitement visible sur la presqu'île de Crozon.
 - **Sécurité** : Règles Firestore déployées et validées sans erreur de syntaxe.
 - **Propreté** : Retrait complet de tous les logs de débogage et des fonctions d'inspection DOM temporaires avant validation.
 

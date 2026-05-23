@@ -173,5 +173,8 @@ textarea:focus-visible {
 .custom-leaflet-marker {
   background: transparent !important;
   border: none !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: block !important;
   overflow: visible !important;
 }

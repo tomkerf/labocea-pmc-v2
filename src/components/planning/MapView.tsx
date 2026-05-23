@@ -28,6 +28,7 @@ export default function MapView({
 }: MapViewProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+  const [mapReady, setMapReady] = useState(false)
 
   const dateStr = toISO(selectedDate)
 
@@ -117,6 +118,14 @@ export default function MapView({
       L.control.zoom({
         position: 'bottomright'
       }).addTo(mapRef.current)
+
+      // Ajuster la taille après affichage initial dans le DOM (compense flex/reflow)
+      setTimeout(() => {
+        if (mapRef.current) {
+          mapRef.current.invalidateSize()
+          setMapReady(true)
+        }
+      }, 200)
     }
 
     return () => {
@@ -125,12 +134,13 @@ export default function MapView({
         mapRef.current.remove()
         mapRef.current = null
       }
+      setMapReady(false)
     }
   }, [])
 
   // Mise à jour des marqueurs quand la liste change
   useEffect(() => {
-    if (!mapRef.current) return
+    if (!mapRef.current || !mapReady) return
 
     // S'assurer de la présence du groupe de marqueurs
     if (!markerGroupRef.current) {
@@ -213,6 +223,9 @@ export default function MapView({
       markers.push(marker)
     })
 
+    // Réajuster la taille de la carte pour parer aux soucis de montage flexbox
+    mapRef.current.invalidateSize()
+
     // Zoomer/Ajuster la carte pour afficher tous les marqueurs du jour
     if (markers.length > 0) {
       mapRef.current.fitBounds(markerGroup.getBounds(), {
@@ -223,7 +236,7 @@ export default function MapView({
       // Centrer sur la Bretagne si aucun marqueur
       mapRef.current.setView([48.20, -2.90], 8)
     }
-  }, [mappedEvts])
+  }, [mappedEvts, mapReady])
 
 
   // Centrer et ouvrir le popup d'un prélèvement lors d'un clic sur la liste
@@ -389,7 +402,8 @@ export default function MapView({
       )}
 
       {/* ── LA CARTE (Leaflet) ── */}
-      <div className="flex-1 h-full w-full relative z-0" ref={containerRef}>
+      <div className="flex-1 h-full w-full relative z-0">
+        <div ref={containerRef} className="w-full h-full" />
         
         {/* Mobile Horizontal Overlay (Bottom) */}
         {mappedEvts.length > 0 && (
