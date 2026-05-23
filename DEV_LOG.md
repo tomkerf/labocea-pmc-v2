@@ -4,6 +4,27 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 56 — Résolution de l'erreur Wrangler de Staging (Assets)
+**23 mai 2026 (matin)**
+
+### Ce qui a été fait
+- **Identification et résolution de l'erreur Wrangler** : L'erreur `entitlements.not_available [code: 10007]` survenant lors de l'upload des assets (`assets-upload-session`) était causée par le volume démesuré de fichiers (4282 fichiers) accumulés dans `dist/assets/`.
+- **Cause racine** : L'option `emptyOutDir: false` dans `vite.config.ts` empêchait Vite de vider le répertoire `dist/` entre les builds, ce qui accumulait tous les anciens chunks et assets générés au fil des sessions.
+- **Correction** : 
+  - Modification de `vite.config.ts` pour passer `emptyOutDir: true`.
+  - Suppression manuelle de `dist/` et reconstruction complète (`rm -rf dist && npm run build`), réduisant le nombre de fichiers de 4282 à 69.
+  - Déploiement réussi sur l'environnement de staging : `https://labocea-pmc-v2-dev.tomkerf.workers.dev`.
+
+### Validation & Qualité
+- **Déploiement Staging** : Terminé avec succès (28 nouveaux/modifiés et 50 existants).
+- **Propreté du build** : Le répertoire `dist/` se nettoie désormais automatiquement à chaque build.
+
+### Prochaines étapes
+- **Validation terrain (Staging)** : Tests par l'équipe mesures.
+- **Déploiement production** : Étape finale de transition.
+
+---
+
 ## Session 55 — Tests d'intégration Firestore sur les hooks
 **22 mai 2026 (début de soirée)**
 
