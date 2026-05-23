@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { ChevronLeft, ChevronRight, Calendar, Map } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Map as MapIcon } from 'lucide-react'
 import { type ViewMode, getTechColor } from '@/lib/planningUtils'
 type Preleveur = { code: string; nom?: string }
 
@@ -100,7 +100,7 @@ export default function PlanningHeader({
                 cursor: 'pointer'
               }}
             >
-              <Map size={13} style={{ color: viewMode === 'carte' ? 'white' : 'var(--color-accent)' }} />
+              <MapIcon size={13} style={{ color: viewMode === 'carte' ? 'white' : 'var(--color-accent)' }} />
               <span>Carte</span>
             </button>
           </div>
