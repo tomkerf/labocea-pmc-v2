@@ -6,6 +6,7 @@ import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import UserAvatar from '@/components/ui/UserAvatar'
 import BugReportModal from '@/components/ui/BugReportModal'
+import SyncBadge from '@/components/ui/SyncBadge'
 
 const navItems: { to: string; icon?: React.ElementType; label: string; end?: boolean; badge?: boolean; isAccount?: boolean }[] = [
   { to: '/',             icon: LayoutDashboard, label: 'Tableau de bord', end: true },
@@ -96,8 +97,11 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Bouton signalement bug */}
-      <div className="px-3 pb-4">
+      {/* Sync badge + Bouton signalement bug */}
+      <div className="px-3 pb-4 flex flex-col gap-1">
+        <div className="flex items-center gap-2 px-3 py-1.5">
+          <SyncBadge />
+        </div>
         <button
           onClick={() => setBugOpen(true)}
           className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs transition-colors"

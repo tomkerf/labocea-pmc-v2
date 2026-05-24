@@ -8,11 +8,14 @@ import ErrorBoundary from './ErrorBoundary'
 import ToastContainer from '@/components/ui/ToastContainer'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { getAvatarColor, AVATAR_COLORS } from '@/components/ui/UserAvatar'
+import { useNetworkStatus } from '@/hooks/useNetworkStatus'
+import SyncBadge from '@/components/ui/SyncBadge'
 
 export default function AppLayout() {
   const location  = useLocation()
   const appUser   = useAuthStore(selectAppUser)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  useNetworkStatus()
 
   const avatarColor = appUser?.avatarColor
 
@@ -58,15 +61,18 @@ export default function AppLayout() {
             </span>
           </div>
 
-          {/* Burger — mobile, à droite */}
-          <button
-            className="md:hidden p-2 rounded-xl"
-            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}
-            onClick={() => setDrawerOpen(true)}
-            aria-label="Menu"
-          >
-            <Menu size={18} strokeWidth={2} />
-          </button>
+          {/* Sync badge + Burger — mobile */}
+          <div className="md:hidden flex items-center gap-2">
+            <SyncBadge />
+            <button
+              className="p-2 rounded-xl"
+              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Menu"
+            >
+              <Menu size={18} strokeWidth={2} />
+            </button>
+          </div>
         </header>
 
         {/* Pages avec transition — plus de padding-bottom pour tab bar */}
