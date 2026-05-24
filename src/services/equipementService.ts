@@ -1,15 +1,16 @@
 import { collection, doc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import { trackWrite } from '@/lib/trackWrite'
 import type { Equipement } from '@/types'
 
 export async function saveEquipement(equipement: Equipement, uid: string): Promise<void> {
   const ref = doc(db, 'equipements', equipement.id)
-  await setDoc(ref, { ...equipement, updatedAt: serverTimestamp(), updatedBy: uid }, { merge: true })
+  await trackWrite(setDoc(ref, { ...equipement, updatedAt: serverTimestamp(), updatedBy: uid }, { merge: true }))
 }
 
 export async function createEquipement(uid: string): Promise<string> {
   const now = new Date().toISOString().split('T')[0]
-  const ref = await addDoc(collection(db, 'equipements'), {
+  const ref = await trackWrite(addDoc(collection(db, 'equipements'), {
     nom: '',
     marque: '',
     modele: '',
@@ -23,6 +24,6 @@ export async function createEquipement(uid: string): Promise<string> {
     createdBy: uid,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
-  })
+  }))
   return ref.id
 }

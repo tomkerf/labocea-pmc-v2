@@ -1,5 +1,6 @@
 import { collection, doc, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import { trackWrite } from '@/lib/trackWrite'
 import type { TypeEvenement } from '@/types'
 
 export async function createEvenement(
@@ -12,7 +13,7 @@ export async function createEvenement(
   initiales?: string,
   dateFin?: string,
 ): Promise<string> {
-  const ref = await addDoc(collection(db, 'evenements'), {
+  const ref = await trackWrite(addDoc(collection(db, 'evenements'), {
     titre,
     date,
     type,
@@ -22,10 +23,10 @@ export async function createEvenement(
     createdBy: uid,
     createdByInitiales: initiales || null,
     createdAt: serverTimestamp(),
-  })
+  }))
   return ref.id
 }
 
 export async function deleteEvenement(id: string): Promise<void> {
-  await deleteDoc(doc(db, 'evenements', id))
+  await trackWrite(deleteDoc(doc(db, 'evenements', id)))
 }
