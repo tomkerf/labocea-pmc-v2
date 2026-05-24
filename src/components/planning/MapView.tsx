@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { useWeather } from '@/hooks/useWeather'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import {
@@ -57,6 +58,16 @@ export default function MapView({
 
     return { mappedEvts: mapped, noGpsEvts: unmapped }
   }, [allEvents])
+
+  // Barycentre des points GPS pour la requête météo
+  const centroid = useMemo(() => {
+    if (mappedEvts.length === 0) return null
+    const sumLat = mappedEvts.reduce((acc, e) => acc + parseFloat(e.lat || '0'), 0)
+    const sumLng = mappedEvts.reduce((acc, e) => acc + parseFloat(e.lng || '0'), 0)
+    return { lat: sumLat / mappedEvts.length, lng: sumLng / mappedEvts.length }
+  }, [mappedEvts])
+
+  const weather = useWeather(centroid?.lat ?? null, centroid?.lng ?? null, selectedDate)
 
   // Refs pour l'instance Leaflet
   const mapRef = useRef<L.Map | null>(null)
@@ -262,6 +273,23 @@ export default function MapView({
     }
   }
 
+  function formatRainLabel(w: typeof weather): string {
+    if (w.rainWindows.length === 0) return '☀️ Pas de précipitations prévues'
+    const groups: string[] = []
+    let i = 0
+    while (i < w.rainWindows.length) {
+      const start = w.rainWindows[i].hour
+      let end = start
+      while (i + 1 < w.rainWindows.length && w.rainWindows[i + 1].hour === end + 1) {
+        i++
+        end = w.rainWindows[i].hour
+      }
+      groups.push(start === end ? `${start}h` : `${start}h–${end + 1}h`)
+      i++
+    }
+    return `🌧️ Pluie probable ${groups.join(', ')} (${w.maxProba}%) · max ${w.maxMm.toFixed(1)} mm`
+  }
+
   return (
     <div className="flex-1 min-h-0 flex flex-col md:flex-row relative overflow-hidden bg-gray-100">
       
@@ -278,6 +306,23 @@ export default function MapView({
         }}
       >
         <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 scrollbar-none">
+          {/* Bandeau météo */}
+          {centroid && (
+            <div className="mb-3 rounded-lg px-3 py-2" style={{ background: 'var(--color-bg-tertiary)' }}>
+              {weather.loading ? (
+                <div className="h-4 rounded animate-pulse" style={{ background: 'var(--color-border)', width: '75%' }} />
+              ) : weather.error ? null : (
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-[11px] leading-snug" style={{ color: 'var(--color-text-secondary)' }}>
+                    {formatRainLabel(weather)}
+                  </p>
+                  <p className="text-[9px]" style={{ color: 'var(--color-text-tertiary)' }}>
+                    Météo : Open-Meteo.com
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
           <div className="mb-4">
             <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--color-text-secondary)' }}>
               Tournée du jour ({mappedEvts.length})
