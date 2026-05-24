@@ -259,6 +259,8 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-23 | Planning Carte ✅ | Carte interactive des tournées (Leaflet, pins colorés par technicien, sidebar, mobile carousel). Résolution définitive du bug de visibilité des épingles (découplage DOM + mapReady) et des règles Firestore preleveurs. Build & local 100% OK. |
 | 2026-05-23 | Fix post-carte ✅ | Correction du label de période (carte = vue jour, pas mois) et de la navigation prev/next (incrémente selectedDate au lieu de monthStart). |
 | 2026-05-23 | Bugs affichage carte ✅ | Sidebar tronquée corrigée (overflow:hidden + minWidth). Bandeaux "à planifier" et "Astuce drag" masqués en mode carte. |
+| 2026-05-24 | Météo carte ✅ | Bandeau précipitations Open-Meteo en haut de la sidebar Carte (barycentre GPS, créneaux > 30%, fail silencieux). useWeather hook + 6 tests. |
+| 2026-05-24 | Sync cloud ✅ | Badge nuage synced/syncing/offline dans TopBar mobile et Sidebar desktop. syncStore + trackWrite (6 services wrappés) + useNetworkStatus + SyncBadge. 98 tests. |
 
 ---
 

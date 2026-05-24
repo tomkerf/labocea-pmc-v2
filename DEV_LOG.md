@@ -4,6 +4,33 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 60 — Météo carte + Indicateur sync cloud
+**24 mai 2026 (soirée)**
+
+### Ce qui a été fait
+
+#### Feature 1 — Météo précipitations sur la Carte des Tournées
+- **`src/hooks/useWeather.ts`** : hook isolé qui fetch l'API Open-Meteo (gratuite, sans clé). Calcule `rainWindows` (créneaux > 30% de proba), `maxProba` et `maxMm` pour la journée. Cleanup `cancelled` anti-memory-leak. 6 tests Vitest.
+- **`src/components/planning/MapView.tsx`** : calcul du barycentre GPS des points de la journée (`useMemo`), appel `useWeather`, bandeau affiché en haut de la sidebar — squelette loading, fail silencieux sur erreur réseau, texte formaté (ex : `🌧️ Pluie probable 14h–16h (70%) · max 3.0 mm` ou `☀️ Pas de précipitations prévues`). Attribution Open-Meteo requise et présente.
+
+#### Feature 2 — Indicateur de synchronisation cloud
+- **`src/stores/syncStore.ts`** : store Zustand avec `pendingWrites` (compteur) + `isOnline` + `getSyncStatus` → `'synced' | 'syncing' | 'offline'`. 8 tests.
+- **`src/lib/trackWrite.ts`** : helper générique `trackWrite<T>(promise)` — incrémente avant, décrémente dans `.finally()`. 4 tests.
+- **`src/hooks/useNetworkStatus.ts`** : écoute `window` 'online'/'offline', initialise `isOnline` au montage, cleanup propre.
+- **`src/components/ui/SyncBadge.tsx`** : Cloud vert ✓ (synced) / CloudUpload pulsant gris (syncing) / CloudOff gris (offline). Tooltip natif. Intégré en sidebar desktop (au-dessus du bouton bug) et TopBar mobile (à gauche du burger).
+- **6 services Firestore wrappés** : `clientService`, `equipementService`, `verificationService`, `maintenanceService`, `evenementService`, `userService` — tous les `setDoc`/`addDoc`/`deleteDoc`/`runTransaction` passent désormais par `trackWrite`.
+
+### Validation
+- Build propre (417ms, 0 erreur TypeScript)
+- 98 tests verts
+- Déployé sur staging (Cloudflare Workers, version ae55d38f)
+
+### Prochaines étapes
+- Valider météo + badge sync sur staging avec une vraie journée de prélèvements GPS
+- Feature 5 — Widget "Planning du lendemain" sur le dashboard
+
+---
+
 ## Session 59 — Bugs d'affichage carte
 **23 mai 2026 (fin de matinée)**
 
