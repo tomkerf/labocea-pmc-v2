@@ -119,16 +119,17 @@
 <div class="footer" id="footer"></div>
 
 <script>
-const RAW_URL = 'https://raw.githubusercontent.com/tomkerf/labocea-pmc-v2/main/ROADMAP.md'
+const LOCAL_URL = './ROADMAP.md'
+const GITHUB_URL = 'https://raw.githubusercontent.com/tomkerf/labocea-pmc-v2/main/ROADMAP.md'
 
 // ── Helpers ──────────────────────────────────────────────────────
 function themeClass(theme) {
   const t = theme.toLowerCase()
-  if (t.includes('phase') || t.includes('fond') || t.includes('mission') || t.includes('matéri') || t.includes('métrolog') || t.includes('dashboard') || t.includes('terminé') || t.includes('deploy')) return 'phase'
-  if (t.includes('refactor') || t.includes('archi') || t.includes('abstrac')) return 'refactor'
-  if (t.includes('qualit') || t.includes('sécu') || t.includes('solid') || t.includes('test')) return 'qualite'
-  if (t.includes('feature') || t.includes('planning') || t.includes('mobile') || t.includes('finit') || t.includes('ux') || t.includes('style') || t.includes('repo')) return 'feature'
-  if (t.includes('infra') || t.includes('ci') || t.includes('deploy') || t.includes('règles')) return 'infra'
+  if (t.includes('phase') || t.includes('fond') || t.includes('mission') || t.includes('matéri') || t.includes('métrolog') || t.includes('dashboard') || t.includes('terminé')) return 'phase'
+  if (t.includes('refactor') || t.includes('archi') || t.includes('abstrac') || t.includes('dette') || t.includes('audit')) return 'refactor'
+  if (t.includes('qualit') || t.includes('sécu') || t.includes('solid') || t.includes('test') || t.includes('lint')) return 'qualite'
+  if (t.includes('feature') || t.includes('planning') || t.includes('mobile') || t.includes('finit') || t.includes('ux') || t.includes('style') || t.includes('repo') || t.includes('tournée') || t.includes('rapport') || t.includes('carte') || t.includes('météo') || t.includes('sync') || t.includes('cloud') || t.includes('weather')) return 'feature'
+  if (t.includes('infra') || t.includes('ci') || t.includes('deploy') || t.includes('règles') || t.includes('build') || t.includes('staging')) return 'infra'
   return 'other'
 }
 
@@ -189,7 +190,16 @@ function parse(md) {
 
 // ── Render ───────────────────────────────────────────────────────
 function statusOf(phase, journal) {
-  // Priorité 1 : journal — cherche "Phase N ✅" ou "Phase N ⏳"
+  // Priorité 1 : checkboxes réelles (plus à jour et précises pour l'état des tâches)
+  const total = phase.tasks.length
+  if (total > 0) {
+    const done  = phase.tasks.filter(t => t.done).length
+    if (done === total) return 'done'
+    if (done > 0) return 'partial'
+    return 'todo'
+  }
+
+  // Priorité 2 : journal de progression (si pas de checkboxes)
   const n = phase.num.replace('Phase ', '').trim()
   for (const e of journal) {
     const raw = e.rawTheme || ''
@@ -198,12 +208,6 @@ function statusOf(phase, journal) {
       if (raw.includes('⏳')) return 'partial'
     }
   }
-  // Priorité 2 : checkboxes dans le texte de la phase
-  const total = phase.tasks.length
-  const done  = phase.tasks.filter(t => t.done).length
-  if (total === 0) return 'todo'
-  if (done === total) return 'done'
-  if (done > 0) return 'partial'
   return 'todo'
 }
 
@@ -272,13 +276,20 @@ function render(md) {
   const phasesHTML   = phases.map(p => renderPhaseCard(p, journal)).join('')
   const journalHTML  = [...journal].reverse().map(renderJournalEntryHTML).join('')
 
-  const nextItems = [
-    'Session de test équipe sur staging — recueillir les retours terrain',
-    '§3 Évolutivité données — sous-collection <code>samplings</code> (risque 1 Mo/document)',
-    '§4 Tests unitaires — couverture des hooks de données',
-    'Déploiement production quand équipe valide',
-  ]
-  const nextHTML = nextItems.map((t, i) => `<li><span class="next-num">${i+1}</span>${t}</li>`).join('')
+  // ── Prochaines étapes dynamiques ──
+  // On récupère la première phase non encore "done"
+  const activePhase = phases.find(p => statusOf(p, journal) !== 'done')
+  let nextHTML = ''
+  if (activePhase) {
+    const todoTasks = activePhase.tasks.filter(t => !t.done)
+    if (todoTasks.length > 0) {
+      nextHTML = todoTasks.map((t, i) => `<li><span class="next-num">${i+1}</span>${escape(t.text)}</li>`).join('')
+    } else {
+      nextHTML = `<li><span class="next-num">✓</span>Toutes les tâches de la phase active (${escape(activePhase.num)}) sont cochées !</li>`
+    }
+  } else {
+    nextHTML = `<li><span class="next-num">✓</span>Félicitations, toutes les phases de la roadmap sont terminées ! 🎉</li>`
+  }
 
   document.getElementById('content').innerHTML = `
     <p class="section-title">Avancement global</p>
@@ -334,12 +345,23 @@ function render(md) {
 }
 
 // ── Fetch ─────────────────────────────────────────────────────────
-fetch(RAW_URL + '?_=' + Date.now())
-  .then(r => { if (!r.ok) throw new Error(r.status); return r.text() })
+fetch(LOCAL_URL + '?_=' + Date.now())
+  .then(r => {
+    if (!r.ok) throw new Error(`Status ${r.status}`);
+    return r.text();
+  })
+  .catch(err => {
+    console.warn("Fetch local ROADMAP.md impossible, tentative depuis GitHub...", err);
+    return fetch(GITHUB_URL + '?_=' + Date.now())
+      .then(r => {
+        if (!r.ok) throw new Error(`Status ${r.status}`);
+        return r.text();
+      });
+  })
   .then(render)
   .catch(err => {
     document.getElementById('content').innerHTML =
-      `<div class="error-msg">Impossible de charger la roadmap (${err.message}).<br>Vérifie ta connexion ou que le repo est public.</div>`
+      `<div class="error-msg">Impossible de charger la roadmap (${err.message}).<br>Vérifie que le fichier ROADMAP.md est accessible localement ou sur GitHub.</div>`
   })
 </script>
 </body>

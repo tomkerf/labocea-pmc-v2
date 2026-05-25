@@ -91,7 +91,8 @@
   </div>
 
   <script>
-    const RAW_URL = 'https://raw.githubusercontent.com/tomkerf/labocea-pmc-v2/main/ROADMAP.md'
+    const LOCAL_URL = './ROADMAP.md'
+    const GITHUB_URL = 'https://raw.githubusercontent.com/tomkerf/labocea-pmc-v2/main/ROADMAP.md'
 
     marked.setOptions({ gfm: true, breaks: false })
 
@@ -103,10 +104,18 @@
         .replace(/(- ✅ ~~.+)$/gim, '$1~~')
     }
 
-    fetch(RAW_URL + '?t=' + Date.now())
+    fetch(LOCAL_URL + '?t=' + Date.now())
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`)
         return r.text()
+      })
+      .catch(err => {
+        console.warn("Fetch local ROADMAP.md impossible, tentative depuis GitHub...", err)
+        return fetch(GITHUB_URL + '?t=' + Date.now())
+          .then(r => {
+            if (!r.ok) throw new Error(`HTTP ${r.status}`)
+            return r.text()
+          })
       })
       .then(md => {
         md = preprocessMd(md)

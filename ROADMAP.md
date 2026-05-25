@@ -262,6 +262,8 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-24 | Météo carte ✅ | Bandeau précipitations Open-Meteo en haut de la sidebar Carte (barycentre GPS, créneaux > 30%, fail silencieux). useWeather hook + 6 tests. |
 | 2026-05-24 | Sync cloud ✅ | Badge nuage synced/syncing/offline dans TopBar mobile et Sidebar desktop. syncStore + trackWrite (6 services wrappés) + useNetworkStatus + SyncBadge. 98 tests. |
 | 2026-05-25 | Tournée du jour ✅ | Mode Tournée du Jour : page /tournee accessible depuis Dashboard. TourneeItem (heure, GPS, météo), SaisieRapideModal (date/nappe/motif, Framer Motion), TourneeFinEcran (récap). Bouton conditionnel Dashboard. 115 tests, build 559ms. |
+| 2026-05-25 | Qualité roadmap ✅ | Dynamisation complète de roadmap-visual.html et roadmap.html (chargement local/fallback, prochaines étapes dynamiques par phase, statut synchronisé par checkboxes). |
+
 
 ---
 

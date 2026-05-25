@@ -4,6 +4,25 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 62 — Automatisation de la Roadmap Visuelle
+**25 mai 2026 (après-midi)**
+
+### Ce qui a été fait
+
+#### Qualité & Outils — Dynamisation de roadmap-visual.html
+- **Chargement local adaptatif** : Les fichiers `roadmap-visual.html` et `roadmap.html` tentent désormais de fetch le fichier `ROADMAP.md` en local (relatif `./ROADMAP.md`) en premier lieu.
+- **Plan de secours (Fallback)** : En cas d'erreur de chargement relative (ex. blocage CORS dû à l'utilisation du protocole `file://` en local sans serveur web), le système retombe élégamment sur le fetch depuis les dépôts distants de GitHub raw.
+- **Prochaines étapes 100% dynamiques** : Suppression de la liste codée en dur de `nextItems`. Le visualiseur extrait dorénavant de manière dynamique les tâches non terminées de la première phase active de `ROADMAP.md`.
+- **Indicateur de statut fiable** : Modification de la fonction `statusOf()` pour privilégier l'état des cases à cocher `[x]` / `[ ]` réelles par rapport aux mentions textuelles dans le journal, ce qui assure une synchronisation parfaite avec l'avancement technique réel.
+- **Thèmes étendus** : Enrichissement de `themeClass` pour catégoriser esthétiquement les dernières fonctionnalités (Tournée du jour, Météo carte, Sync cloud, Dette technique, etc.).
+- **Déploiements robustes** : Mise à jour de `deploy-dev.sh` et `deploy-prod.sh` pour intégrer et copier automatiquement `roadmap.html`, `roadmap-visual.html` et `ROADMAP.md` dans le répertoire de production `dist/`.
+
+### Prochaines étapes
+- Valider le Mode Tournée sur staging avec une vraie journée de prélèvements.
+- Commencer les tests de validation de l'équipe terrain sur la version staging.
+
+---
+
 ## Session 61 — Mode Tournée du Jour
 **25 mai 2026 (matin)**
 

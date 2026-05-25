@@ -15,6 +15,10 @@ fi
 echo "🔨 Build..."
 npm run build
 
+cp roadmap-visual.html dist/roadmap-visual.html
+cp roadmap.html dist/roadmap.html
+cp ROADMAP.md dist/ROADMAP.md
+
 echo "🚀 Déploiement production..."
 npx wrangler deploy --name labocea-pmc-v2
 

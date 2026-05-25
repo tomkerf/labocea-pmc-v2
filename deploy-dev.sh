@@ -7,6 +7,9 @@ set -e
 echo "🔨 Build..."
 npm run build
 cp roadmap-visual.html dist/roadmap-visual.html
+cp roadmap.html dist/roadmap.html
+cp ROADMAP.md dist/ROADMAP.md
+
 
 echo "🚀 Déploiement staging..."
 npx wrangler deploy --name labocea-pmc-v2-dev
