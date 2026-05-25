@@ -99,8 +99,15 @@ export const EVENEMENT_LABEL: Record<TypeEvenement, string> = {
 // Règle : ne pas utiliser les couleurs de statut du planning
 //   danger #FF3B30, success #34C759, warning #FF9F0A, accent #0071E3, neutral #8E8E93
 const TECH_COLORS: Record<string, { color: string; bg: string }> = {
-  'THK': { color: '#0071E3', bg: '#E8F1FB' },  // bleu accent (ok, distinct des statuts)
-  'ROD': { color: '#00C7BE', bg: '#E0F7F6' },  // teal (distinct du vert success)
+  'THK': { color: '#0071E3', bg: '#E8F1FB' },  // Thomas Kerfendal - bleu accent
+  'ROD': { color: '#00C7BE', bg: '#E0F7F6' },  // Romain Duvail - teal
+  'FBA': { color: '#AF52DE', bg: '#F5EEFF' },  // Fabien Barloy - violet
+  'DBE': { color: '#FF2D55', bg: '#FFEEF2' },  // Delphine Benard - rose
+  'LDU': { color: '#5856D6', bg: '#EEEEFF' },  // Ludovic Dugue - indigo
+  'POGR': { color: '#FF6B6B', bg: '#FFF0F0' }, // Pierre Olivier Groulard - saumon
+  'HJE': { color: '#32ADE6', bg: '#E5F5FD' },  // Hubert Jehl - bleu ciel
+  'EMO': { color: '#F3526E', bg: '#FDF0F3' },  // Emmanuelle Moreau Haug - magenta
+  'CTA': { color: '#5A738E', bg: '#EFF3F6' },  // Cindy Tabard - bleu ardoise
 }
 const TECH_PALETTE = [
   { color: '#AF52DE', bg: '#F5EEFF' },  // violet

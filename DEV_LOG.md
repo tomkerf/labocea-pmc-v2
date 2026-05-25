@@ -16,6 +16,7 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 - **Indicateur de statut fiable** : Modification de la fonction `statusOf()` pour privilégier l'état des cases à cocher `[x]` / `[ ]` réelles par rapport aux mentions textuelles dans le journal, ce qui assure une synchronisation parfaite avec l'avancement technique réel.
 - **Thèmes étendus** : Enrichissement de `themeClass` pour catégoriser esthétiquement les dernières fonctionnalités (Tournée du jour, Météo carte, Sync cloud, Dette technique, etc.).
 - **Déploiements robustes** : Mise à jour de `deploy-dev.sh` et `deploy-prod.sh` pour intégrer et copier automatiquement `roadmap.html`, `roadmap-visual.html` et `ROADMAP.md` dans le répertoire de production `dist/`.
+- **Couleurs uniques des techniciens** : Configuration de couleurs Apple-style à haut contraste dans `planningUtils.ts` pour les 9 comptes utilisateurs identifiés dans l'administration (Fabien, Delphine, Ludovic, Romain, Pierre Olivier, Hubert, Thomas, Emmanuelle, Cindy) afin de prévenir les collisions visuelles sur le planning et sur la carte interactive.
 
 ### Prochaines étapes
 - Valider le Mode Tournée sur staging avec une vraie journée de prélèvements.
