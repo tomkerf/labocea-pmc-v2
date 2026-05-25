@@ -20,8 +20,15 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
   - Modification de `src/hooks/usePlanningActions.ts` (drag-and-drop sur planning modifiant le technicien)
   - Modification de `src/components/ui/BugReportModal.tsx` (envoi automatique d'une alerte à l'admin `THK` sur signalement de bug)
 
+#### Configuration & Déploiement (session suivante)
+- **`.env` créé** : variables Firebase injectées (`VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, etc.) + clé VAPID publique (`VITE_FIREBASE_VAPID_KEY`).
+- **`.gitignore` mis à jour** : `.env` exclu du versioning (commit `89db4fc`).
+- **Secret Wrangler injecté** : `FIREBASE_SERVICE_ACCOUNT` poussé dans le Worker staging via `wrangler secret put`.
+- **Staging déployé** : build propre + deploy → `labocea-pmc-v2-dev.tomkerf.workers.dev` (version `19a42643`).
+- **Endpoint validé** : `/api/send-notification` répond 401 sans token — comportement attendu.
+
 ### Prochaines étapes
-- Valider le flux de notification de bout en bout sur l'environnement staging après liaison des secrets Wrangler.
+- Valider le flux de notification de bout en bout sur staging : activer les push dans Mon compte, déclencher une assignation ou un bug report, vérifier la réception.
 
 ---
 
