@@ -98,7 +98,6 @@ export default function MobileDrawer({ open, onClose }: Props) {
               </div>
             </div>
 
-            {/* Navigation */}
             <nav className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5">
               {allItems.map(({ to, icon: Icon, label, end, isAccount }: { to: string; icon: LucideIcon | null; label: string; end?: boolean; isAccount?: boolean }) => (
                 <NavLink
@@ -106,25 +105,36 @@ export default function MobileDrawer({ open, onClose }: Props) {
                   to={to}
                   end={end}
                   onClick={onClose}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
+                  className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
                   style={({ isActive }) => ({
-                    background: isActive ? 'var(--color-accent-light)' : 'transparent',
                     color: isActive ? 'var(--color-accent)' : 'var(--color-text-secondary)',
                     fontWeight: isActive ? 500 : 400,
                   })}
                 >
-                  {isAccount ? (
-                    <UserAvatar
-                      initiales={appUser?.initiales}
-                      color={appUser?.avatarColor}
-                      avatarSeed={appUser?.avatarSeed}
-                      size={20}
-                      fontSize={8}
-                    />
-                  ) : Icon ? (
-                    <Icon size={18} strokeWidth={1.8} />
-                  ) : null}
-                  <span className="flex-1">{label}</span>
+                  {({ isActive }) => (
+                    <>
+                      {isActive && (
+                        <motion.div
+                          layoutId="active-mobile-drawer-bg"
+                          className="absolute inset-0 rounded-xl -z-10"
+                          style={{ background: 'var(--color-accent-light)' }}
+                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                      {isAccount ? (
+                        <UserAvatar
+                          initiales={appUser?.initiales}
+                          color={appUser?.avatarColor}
+                          avatarSeed={appUser?.avatarSeed}
+                          size={20}
+                          fontSize={8}
+                        />
+                      ) : Icon ? (
+                        <Icon size={18} strokeWidth={1.8} />
+                      ) : null}
+                      <span className="flex-1 z-10">{label}</span>
+                    </>
+                  )}
                 </NavLink>
               ))}
             </nav>

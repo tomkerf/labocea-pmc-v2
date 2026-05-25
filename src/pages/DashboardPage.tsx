@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Route } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import DonutChart from '@/components/dashboard/DonutChart'
 import { StatCard, SectionTitle, EmptyCard } from '@/components/dashboard/StatCard'
@@ -84,29 +85,64 @@ export default function DashboardPage() {
   }
 
   // ── Render ────────────────────────────────────────────────
+  
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05
+      }
+    }
+  } as const
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 12 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: 'spring',
+        stiffness: 300,
+        damping: 30
+      }
+    }
+  } as const
 
   return (
-    <div className="p-6 pb-10 max-w-4xl">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="p-6 pb-10 max-w-4xl"
+    >
 
       {/* Salutation */}
-      <div className="mb-8">
+      <motion.div variants={itemVariants} className="mb-8">
         <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--color-text-primary)', letterSpacing: '-0.5px' }}>
           {getGreeting()} {prenom || 'Thomas'} 👋
         </h1>
         <p className="text-sm capitalize" style={{ color: 'var(--color-text-secondary)' }}>
           {formatDate()}
         </p>
-      </div>
+      </motion.div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <StatCard value={missionsCeMois} label="Missions ce mois" sub="prélèvements réalisés" accent />
+      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        <StatCard
+          value={missionsCeMois}
+          label="Missions ce mois"
+          sub="prélèvements réalisés"
+          accent
+          onClick={() => navigate('/missions')}
+        />
         <StatCard
           value={rapportsAFaireMoi.length}
           label="Rapports à envoyer"
           sub={rapportsAFaireMoi.length > 0 ? `${rapportsAFaireMoi.filter(r => r.enRetard).length} en retard` : 'Tout est à jour'}
           danger={rapportsAFaireMoi.some(r => r.enRetard)}
           warning={rapportsAFaireMoi.length > 0 && !rapportsAFaireMoi.some(r => r.enRetard)}
+          onClick={() => navigate('/rapports')}
         />
         <StatCard
           value={conformitePct !== null ? `${conformitePct}%` : '—'}
@@ -114,16 +150,18 @@ export default function DashboardPage() {
           sub={verifiTotal > 0 ? `${verifiConformes}/${verifiTotal} à jour` : 'Aucun instrument suivi'}
           warning={conformitePct !== null && conformitePct < 80}
           accent={conformitePct !== null && conformitePct >= 80}
+          onClick={() => navigate('/metrologie')}
         />
         <StatCard
           value={aCalibrrer}
           label="À calibrer (30j)"
           sub={aCalibrrer > 0 ? 'Étalonnages à prévoir' : 'Aucune échéance proche'}
           warning={aCalibrrer > 0}
+          onClick={() => navigate('/metrologie')}
         />
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 
         {/* Planning */}
         <div>
@@ -139,23 +177,41 @@ export default function DashboardPage() {
                 Démarrer la tournée
               </button>
             )}
-            <div className="flex gap-1 p-1 rounded-lg shrink-0" style={{ background: 'var(--color-bg-tertiary)' }}>
+            <div className="relative flex gap-1 p-1 rounded-lg shrink-0" style={{ background: 'var(--color-bg-tertiary)' }}>
               <button
                 onClick={() => setPlanningMode('today')}
-                className="px-3 py-1.5 text-xs font-medium rounded-md transition-all"
+                className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200"
                 style={{
-                  background: planningMode === 'today' ? 'var(--color-accent-light)' : 'transparent',
                   color: planningMode === 'today' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
                 }}
-              >Aujourd'hui</button>
+              >
+                {planningMode === 'today' && (
+                  <motion.div
+                    layoutId="active-dashboard-pill"
+                    className="absolute inset-0 rounded-md -z-10"
+                    style={{ background: 'var(--color-accent-light)' }}
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+                Aujourd'hui
+              </button>
               <button
                 onClick={() => setPlanningMode('tomorrow')}
-                className="px-3 py-1.5 text-xs font-medium rounded-md transition-all"
+                className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200"
                 style={{
-                  background: planningMode === 'tomorrow' ? 'var(--color-accent-light)' : 'transparent',
                   color: planningMode === 'tomorrow' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
                 }}
-              >Demain</button>
+              >
+                {planningMode === 'tomorrow' && (
+                  <motion.div
+                    layoutId="active-dashboard-pill"
+                    className="absolute inset-0 rounded-md -z-10"
+                    style={{ background: 'var(--color-accent-light)' }}
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+                Demain
+              </button>
             </div>
           </div>
           {activeItems.length === 0 ? (
@@ -214,12 +270,14 @@ export default function DashboardPage() {
             Voir tout le matériel →
           </button>
         </div>
-      </div>
+      </motion.div>
 
-      <RapportsWidget rapports={rapportsAFaireMoi} onMarkEnvoye={markRapportEnvoye} />
-      <RetardWidget items={prelevementsEnRetard} />
-      <PluieWidget items={prelevementsPluie} />
-      <MaintenancesWidget maintenances={maintenancesActives} />
+      <motion.div variants={itemVariants} className="space-y-6">
+        <RapportsWidget rapports={rapportsAFaireMoi} onMarkEnvoye={markRapportEnvoye} />
+        <RetardWidget items={prelevementsEnRetard} />
+        <PluieWidget items={prelevementsPluie} />
+        <MaintenancesWidget maintenances={maintenancesActives} />
+      </motion.div>
 
       {eventDetail && (
         <EventDetailModal
@@ -270,6 +328,6 @@ export default function DashboardPage() {
           techOptions={techOptions}
         />
       )}
-    </div>
+    </motion.div>
   )
 }

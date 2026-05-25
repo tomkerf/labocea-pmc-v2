@@ -4,6 +4,28 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 64 — Raffinement UI/UX & Micro-animations (Apple-style)
+**25 mai 2026 (fin d'après-midi)**
+
+### Ce qui a été fait
+
+#### UI/UX — Premium Fluid Transitions (Framer Motion)
+- **Cartes KPI tactiles & cliquables** :
+  - Modification de `src/components/dashboard/StatCard.tsx` pour envelopper les cartes dans des `motion.div` tactiles de style physique ("spring-loaded" survol `scale: 1.01`, clic `scale: 0.98`).
+  - Raccordement des clics sur les 4 cartes KPI du Dashboard vers leurs modules respectifs pour une navigation intuitive ("Missions ce mois" → `/missions`, "Rapports" → `/rapports`, "Métrologie" → `/metrologie`, "À calibrer" → `/metrologie`).
+- **Entrance Staggered (Dashboard)** :
+  - Enveloppement des éléments majeurs de `src/pages/DashboardPage.tsx` (salutation, cartes KPI, planning, Donut Chart, widgets) dans des animations de slide-up progressif de style iOS (fondu-glissé vertical avec léger décalage).
+- **Segment Controls Apple-style** :
+  - Conversion du bouton de période du Dashboard ("Aujourd'hui / Demain") et du sélecteur de planning ("Jour / Semaine / Mois" dans `PlanningHeader.tsx`) pour y injecter une pilule blanche glissante continue et fluide grâce au `layoutId` de Framer Motion.
+  - Ajout d'animations tactiles fluides sur les filtres techniciens de la vue Planning.
+- **Navigation latérale fluide (macOS style)** :
+  - Intégration de transitions glissantes en continu (`layoutId="active-sidebar-bg"` sur Sidebar desktop et `layoutId="active-mobile-drawer-bg"` sur Mobile Drawer) sur les sélections d'onglets pour un feeling premium macOS.
+
+### Prochaines étapes
+- Déployer sur staging et valider avec l'équipe les nouvelles micro-interactions et le fluid design.
+
+---
+
 ## Session 63 — Implémentation des Notifications Push (FCM)
 **25 mai 2026 (après-midi)**
 

@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import { ChevronLeft, ChevronRight, Calendar, Map as MapIcon, X } from 'lucide-react'
 import { type ViewMode, getTechColor } from '@/lib/planningUtils'
+import { motion } from 'framer-motion'
 type Preleveur = { code: string; nom?: string }
 
 interface PlanningHeaderProps {
@@ -98,12 +99,25 @@ export default function PlanningHeader({
 
           <div className="flex items-center gap-2">
             {/* Sélecteur de période de calendrier */}
-            <div className="flex rounded-lg overflow-hidden"
+            <div className="relative flex p-0.5 rounded-lg shrink-0"
               style={{ border:'1px solid var(--color-border-subtle)', background:'var(--color-bg-tertiary)' }}>
               {(['jour','semaine','mois'] as ViewMode[]).map(m => (
-                <button key={m} onClick={() => switchView(m)}
-                  className="px-3 py-1.5 text-xs font-medium capitalize transition-all"
-                  style={{ background:viewMode===m?'var(--color-accent)':'transparent', color:viewMode===m?'white':'var(--color-text-secondary)' }}>
+                <button
+                  key={m}
+                  onClick={() => switchView(m)}
+                  className="relative px-3 py-1.5 text-xs font-medium capitalize z-10 transition-colors duration-200"
+                  style={{
+                    color: viewMode === m ? 'white' : 'var(--color-text-secondary)'
+                  }}
+                >
+                  {viewMode === m && (
+                    <motion.div
+                      layoutId="active-planning-view"
+                      className="absolute inset-0 rounded-md -z-10"
+                      style={{ background: 'var(--color-accent)' }}
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
                   {m}
                 </button>
               ))}
@@ -116,26 +130,39 @@ export default function PlanningHeader({
           <div className="flex items-center gap-2 px-4 md:px-6 pb-3 flex-wrap">
             {allTechs.length > 1 && (
               <div className="flex items-center gap-1.5 flex-wrap">
-                <button onClick={() => { setFilterTech(''); localStorage.removeItem('planning_filter_tech') }}
-                  className="px-3 py-1.5 rounded-full text-xs font-medium"
-                  style={{ background:!filterTech?'var(--color-accent)':'var(--color-bg-secondary)', color:!filterTech?'white':'var(--color-text-secondary)', border:`1px solid ${!filterTech?'transparent':'var(--color-border-subtle)'}` }}>
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => { setFilterTech(''); localStorage.removeItem('planning_filter_tech') }}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer"
+                  style={{
+                    background: !filterTech ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                    color: !filterTech ? 'white' : 'var(--color-text-secondary)',
+                    border: `1px solid ${!filterTech ? 'transparent' : 'var(--color-border-subtle)'}`
+                  }}
+                >
                   Tous
-                </button>
+                </motion.button>
                 {allTechs.map(t => {
                   const isActive = filterTech === t
                   const prel = preleveurs.find(p => p.code === t)
                   const label = prel?.nom ? prel.nom.split(' ')[0] + ' · ' + t : t
                   const tc = getTechColor(t)
                   return (
-                    <button key={t} onClick={() => { const v=t===filterTech?'':t; setFilterTech(v); if (v) localStorage.setItem('planning_filter_tech',v); else localStorage.removeItem('planning_filter_tech') }}
-                      className="px-3 py-1.5 rounded-full text-xs font-medium"
+                    <motion.button
+                      key={t}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => { const v=t===filterTech?'':t; setFilterTech(v); if (v) localStorage.setItem('planning_filter_tech',v); else localStorage.removeItem('planning_filter_tech') }}
+                      className="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer"
                       style={{
                         background: isActive ? tc.color : tc.bg,
                         color: isActive ? 'white' : tc.color,
                         border: `1px solid ${isActive ? 'transparent' : tc.color + '55'}`,
-                      }}>
+                      }}
+                    >
                       {label}
-                    </button>
+                    </motion.button>
                   )
                 })}
               </div>

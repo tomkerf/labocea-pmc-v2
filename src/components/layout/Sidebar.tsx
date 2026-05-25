@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
@@ -68,30 +69,41 @@ export default function Sidebar() {
             key={to}
             to={to}
             end={end}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
+            className="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
             style={({ isActive }) => ({
-              background: isActive ? 'var(--color-accent-light)' : 'transparent',
               color: isActive ? 'var(--color-accent)' : 'var(--color-text-secondary)',
               fontWeight: isActive ? 500 : 400,
             })}
           >
-            {isAccount ? (
-              <UserAvatar
-                initiales={appUser?.initiales}
-                color={appUser?.avatarColor}
-                avatarSeed={appUser?.avatarSeed}
-                size={20}
-                fontSize={8}
-              />
-            ) : Icon ? (
-              <Icon size={17} strokeWidth={1.8} />
-            ) : null}
-            <span className="flex-1">{label}</span>
-            {badge && overdueCount > 0 && (
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                style={{ background: 'var(--color-danger)', color: 'white', minWidth: 18, textAlign: 'center' }}>
-                {overdueCount}
-              </span>
+            {({ isActive }) => (
+              <>
+                {isActive && (
+                  <motion.div
+                    layoutId="active-sidebar-bg"
+                    className="absolute inset-0 rounded-lg -z-10"
+                    style={{ background: 'var(--color-accent-light)' }}
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+                {isAccount ? (
+                  <UserAvatar
+                    initiales={appUser?.initiales}
+                    color={appUser?.avatarColor}
+                    avatarSeed={appUser?.avatarSeed}
+                    size={20}
+                    fontSize={8}
+                  />
+                ) : Icon ? (
+                  <Icon size={17} strokeWidth={1.8} />
+                ) : null}
+                <span className="flex-1 z-10">{label}</span>
+                {badge && overdueCount > 0 && (
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full z-10"
+                    style={{ background: 'var(--color-danger)', color: 'white', minWidth: 18, textAlign: 'center' }}>
+                    {overdueCount}
+                  </span>
+                )}
+              </>
             )}
           </NavLink>
         ))}
