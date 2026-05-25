@@ -71,17 +71,20 @@ service cloud.firestore {
 
     // ── evenements ────────────────────────────────────────────
     match /evenements/{evenementId} {
-      allow read, write: if isAuthenticated();
+      allow read, create, update: if isAuthenticated();
+      allow delete: if isAdmin();
     }
 
     // ── demandes ──────────────────────────────────────────────
     match /demandes/{demandeId} {
-      allow read, write: if isAuthenticated();
+      allow read, create, update: if isAuthenticated();
+      allow delete: if isAdmin();
     }
 
     // ── tuyaux ────────────────────────────────────────────────
     match /tuyaux/{tuyauId} {
-      allow read, write: if isAuthenticated();
+      allow read, create, update: if isAuthenticated();
+      allow delete: if isAdmin();
     }
 
     // ── bugs ──────────────────────────────────────────────────
