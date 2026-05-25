@@ -71,7 +71,7 @@ export default function TourneePage() {
           nature:     plan?.nature  ?? '',
           lat:        plan?.lat     ?? '',
           lng:        plan?.lng     ?? '',
-          status:     (s?.status === 'done' ? 'done' : s?.status === 'non_effectue' ? 'non_effectue' : 'todo') as LocalStatus,
+          status:     s?.status === 'done' ? 'done' : s?.status === 'non_effectue' ? 'non_effectue' : 'todo',
           motif:      s?.motif ?? '',
         }
       })
@@ -138,9 +138,14 @@ export default function TourneePage() {
         }),
       }),
     }
-    await saveClient(updatedClient, uid)
-    setLocalStatuses(prev => new Map(prev).set(modal.samplingId, data.status))
-    setModal(null)
+    try {
+      await saveClient(updatedClient, uid)
+      setLocalStatuses(prev => new Map(prev).set(modal.samplingId, data.status))
+      setModal(null)
+    } catch {
+      // Fail silencieux — Firestore a son propre retry, l'utilisateur peut réessayer
+      setModal(null)
+    }
   }, [modal, uid, clients])
 
   // Construire les items pour l'écran de fin
