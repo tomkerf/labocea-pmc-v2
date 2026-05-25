@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Route } from 'lucide-react'
 
 import DonutChart from '@/components/dashboard/DonutChart'
 import { StatCard, SectionTitle, EmptyCard } from '@/components/dashboard/StatCard'
@@ -126,9 +127,19 @@ export default function DashboardPage() {
 
         {/* Planning */}
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 gap-2">
             <SectionTitle>{planningMode === 'today' ? 'Planning du jour' : 'Planning de demain'}</SectionTitle>
-            <div className="flex gap-1 p-1 rounded-lg" style={{ background: 'var(--color-bg-tertiary)' }}>
+            {planningMode === 'today' && jourItems.filter(i => i.kind === 'sampling' && !i.modalEvent.isDone).length > 0 && (
+              <button
+                onClick={() => navigate('/tournee')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0"
+                style={{ background: 'var(--color-accent)', color: 'white' }}
+              >
+                <Route size={13} />
+                Démarrer la tournée
+              </button>
+            )}
+            <div className="flex gap-1 p-1 rounded-lg shrink-0" style={{ background: 'var(--color-bg-tertiary)' }}>
               <button
                 onClick={() => setPlanningMode('today')}
                 className="px-3 py-1.5 text-xs font-medium rounded-md transition-all"
