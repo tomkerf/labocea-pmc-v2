@@ -4,6 +4,36 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 61 — Mode Tournée du Jour
+**25 mai 2026 (matin)**
+
+### Ce qui a été fait
+
+#### Feature — Mode Tournée du Jour (`/tournee`)
+
+Nouvelle page dédiée accessible depuis le Dashboard, conçue pour les techniciens sur le terrain. Remplace la navigation en 4 niveaux (Missions → Client → Plan → Prélèvement) par un écran unique opérable en une main.
+
+**Composants créés :**
+- **`src/components/tournee/TourneeFinEcran.tsx`** : écran de fin automatique quand tous les sites sont traités. Résumé visuel (✓ réalisé / ✗ non effectué) + bouton retour dashboard.
+- **`src/components/tournee/TourneeItem.tsx`** : ligne de site avec heure prévue, badge statut coloré, icône météo 🌧, boutons "Réalisé" / "Non effectué", lien GPS Apple Maps conditionnel.
+- **`src/components/tournee/SaisieRapideModal.tsx`** : modale bottom-sheet (Framer Motion slide-up). Champs : date (pré-remplie), nappe haute/basse (si eau souterraine uniquement), commentaire optionnel, statut + motif obligatoire si non effectué.
+- **`src/pages/TourneePage.tsx`** : page principale. Consomme les stores Zustand déjà hydratés (pas de nouveau listener). État local `Map<samplingId, status>` pour éviter les flickers. Barre de progression linéaire. try/catch sur `saveClient` (état local mis à jour seulement après succès Firestore).
+
+**Intégration :**
+- Route `/tournee` ajoutée dans `App.tsx` (lazy + Suspense)
+- Bouton "▶ Démarrer la tournée" dans Dashboard → visible uniquement si `planningMode === 'today'` ET au moins un sampling non terminé
+
+### Validation
+- Build propre (559ms, 0 erreur TypeScript)
+- 115 tests verts (17 nouveaux)
+- Déployé staging (version `4ecc6d40`)
+
+### Prochaines étapes
+- Valider le Mode Tournée sur staging avec une vraie journée de prélèvements (à faire hors jour férié)
+- Explorer les autres features terrain identifiées : Scanner QR Code (Matériel), Notifications Push
+
+---
+
 ## Session 60 — Météo carte + Indicateur sync cloud
 **24 mai 2026 (soirée)**
 
