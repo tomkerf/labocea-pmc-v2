@@ -4,6 +4,28 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 65 — Raffinements Visuels Ultra-Premium (Apple-style)
+**25 mai 2026 (soirée)**
+
+### Ce qui a été fait
+
+#### UI/UX — Finitions Haute Couture
+- **Scrollbars macOS minimalistes** : Intégration de barres de défilement discrètes et arrondies dans `src/index.css` s'estompant au repos et s'ajustant élégamment au survol, fonctionnelles y compris en mode sombre.
+- **En-tête mobile à profondeur 3D (Sticky scroll shadow)** :
+  - Modification de `src/components/layout/AppLayout.tsx` pour écouter dynamiquement le défilement de la page principale.
+  - Ajout d'effets visuels Apple-style sur la TopBar mobile (translucidité accrue `rgba(255,255,255,0.7)` + flou `backdrop-filter: blur(20px)` + apparition progressive d'une ombre et d'une bordure basse marquée dès que l'utilisateur scrolle).
+- **Modale de bug de luxe (Zoom élastique & Verre dépoli)** :
+  - Modification de `src/components/ui/BugReportModal.tsx` pour doter la fenêtre d'un pop-in à zoom élastique et d'un arrière-plan en verre dépoli translucide flouté (`backdrop-filter: blur(5px)`).
+  - Intégration d'un wrapper `AnimatePresence` dans `src/components/layout/Sidebar.tsx` pour assurer une fermeture fluide en fondu.
+- **Bouton haptique & Transitions de timelines** :
+  - Intégration de spring-scaling sur le bouton "Démarrer la tournée" du Dashboard.
+  - Ajout d'animations fluides de crossfade-slide (`AnimatePresence` et layout) sur les items de la timeline de planning lors du switch "Aujourd'hui / Demain" sur le Dashboard.
+
+### Prochaines étapes
+- Lancer le déploiement sur staging pour apprécier ces finitions graphiques poussées au pixel près.
+
+---
+
 ## Session 64 — Raffinement UI/UX & Micro-animations (Apple-style)
 **25 mai 2026 (fin d'après-midi)**
 

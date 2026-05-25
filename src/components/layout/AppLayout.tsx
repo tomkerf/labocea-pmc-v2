@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Menu } from 'lucide-react'
@@ -15,6 +15,8 @@ export default function AppLayout() {
   const location  = useLocation()
   const appUser   = useAuthStore(selectAppUser)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
   useNetworkStatus()
 
   const avatarColor = appUser?.avatarColor
@@ -34,6 +36,19 @@ export default function AppLayout() {
     root.style.setProperty('--color-accent-light',  accentLight)
   }, [avatarColor])
 
+  // Écouteur de scroll dynamique pour la barre supérieure mobile
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+    const handleScroll = () => {
+      setScrolled(container.scrollTop > 5)
+    }
+    container.addEventListener('scroll', handleScroll)
+    // Réinitialiser au changement de route
+    setScrolled(false)
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [location.pathname])
+
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--color-bg-primary)' }}>
       {/* Sidebar desktop */}
@@ -46,11 +61,12 @@ export default function AppLayout() {
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* TopBar */}
         <header
-          className="flex items-center px-4 h-14 shrink-0"
+          className="flex items-center px-4 h-14 shrink-0 transition-all duration-300 z-30"
           style={{
-            background: 'rgba(255,255,255,0.85)',
-            backdropFilter: 'blur(12px)',
-            borderBottom: '1px solid var(--color-border-subtle)',
+            background: scrolled ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.85)',
+            backdropFilter: scrolled ? 'blur(20px)' : 'blur(12px)',
+            borderBottom: scrolled ? '1px solid var(--color-border)' : '1px solid var(--color-border-subtle)',
+            boxShadow: scrolled ? '0 4px 16px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' : 'none',
           }}
         >
           {/* Titre app — mobile */}
@@ -76,7 +92,7 @@ export default function AppLayout() {
         </header>
 
         {/* Pages avec transition — plus de padding-bottom pour tab bar */}
-        <div className="flex-1 overflow-y-auto">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

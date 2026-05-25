@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Route } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 import DonutChart from '@/components/dashboard/DonutChart'
 import { StatCard, SectionTitle, EmptyCard } from '@/components/dashboard/StatCard'
@@ -168,14 +168,17 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-3 gap-2">
             <SectionTitle>{planningMode === 'today' ? 'Planning du jour' : 'Planning de demain'}</SectionTitle>
             {planningMode === 'today' && jourItems.filter(i => i.kind === 'sampling' && !i.modalEvent.isDone).length > 0 && (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02, y: -0.5 }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: 'spring', stiffness: 450, damping: 25 }}
                 onClick={() => navigate('/tournee')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 cursor-pointer shadow-sm"
                 style={{ background: 'var(--color-accent)', color: 'white' }}
               >
                 <Route size={13} />
                 Démarrer la tournée
-              </button>
+              </motion.button>
             )}
             <div className="relative flex gap-1 p-1 rounded-lg shrink-0" style={{ background: 'var(--color-bg-tertiary)' }}>
               <button
@@ -217,36 +220,46 @@ export default function DashboardPage() {
           {activeItems.length === 0 ? (
             <EmptyCard>Aucune intervention ni événement{planningMode === 'today' ? " aujourd'hui" : " demain"}.</EmptyCard>
           ) : (
-            <div className="rounded-xl overflow-hidden"
-              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-              {activeItems.slice(0, 8).map((item, i) => (
-                <div key={i}
-                  onClick={() => setEventDetail({ event: item.modalEvent as ModalEvent, dateStr: activeDateISO })}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer"
-                  style={{ borderBottom: i < activeItems.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                >
-                  {item.time ? (
-                    <span className="text-xs font-semibold shrink-0 w-10 text-center px-1.5 py-1 rounded-lg"
-                      style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-                      {item.time}
-                    </span>
-                  ) : (
-                    <span className="shrink-0 w-2 h-2 rounded-full mt-0.5" style={{ background: item.dot }} />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium leading-snug" style={{ color: 'var(--color-text-primary)' }}>{item.title}</p>
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{item.sub}</p>
-                  </div>
-                  {'meteo' in item && item.meteo === 'pluie' && (
-                    <span title="Prélèvement temps de pluie" className="shrink-0 text-base leading-none">🌧</span>
-                  )}
-                  <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
-                    style={{ background: item.badge.bg, color: item.badge.color }}>{item.badge.label}</span>
-                </div>
-              ))}
-            </div>
+            <motion.div
+              layout
+              className="rounded-xl overflow-hidden"
+              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}
+            >
+              <AnimatePresence mode="popLayout">
+                {activeItems.slice(0, 8).map((item, idx) => (
+                  <motion.div
+                    key={item.modalEvent?.id || `${planningMode}-${idx}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.18, ease: 'easeOut' }}
+                    onClick={() => setEventDetail({ event: item.modalEvent as ModalEvent, dateStr: activeDateISO })}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer"
+                    style={{ borderBottom: idx < activeItems.slice(0, 8).length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    {item.time ? (
+                      <span className="text-xs font-semibold shrink-0 w-10 text-center px-1.5 py-1 rounded-lg"
+                        style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                        {item.time}
+                      </span>
+                    ) : (
+                      <span className="shrink-0 w-2 h-2 rounded-full mt-0.5" style={{ background: item.dot }} />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium leading-snug" style={{ color: 'var(--color-text-primary)' }}>{item.title}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{item.sub}</p>
+                    </div>
+                    {'meteo' in item && item.meteo === 'pluie' && (
+                      <span title="Prélèvement temps de pluie" className="shrink-0 text-base leading-none">🌧</span>
+                    )}
+                    <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
+                      style={{ background: item.badge.bg, color: item.badge.color }}>{item.badge.label}</span>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
           )}
         </div>
 

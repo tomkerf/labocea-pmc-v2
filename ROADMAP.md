@@ -266,6 +266,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-25 | Notifications Push ✅ | Implémentation des notifications push (FCM) via un proxy sécurisé dans le Cloudflare Worker, service worker d'arrière-plan, hook React, switch de profil de style Apple et déclenchements automatiques (planning, bug). |
 | 2026-05-25 | Config & Deploy Push ✅ | Configuration des variables d'environnement Firebase (.env), clé VAPID, secret FIREBASE_SERVICE_ACCOUNT injecté dans Wrangler. Staging déployé avec push activé. |
 | 2026-05-25 | Raffinement UI/UX ✅ | Intégration de micro-animations premium Apple-style (Framer Motion spring, sélecteurs et navigation par pilule glissante layoutId, KPIs tactiles et cliquables pour la navigation). |
+| 2026-05-25 | Raffinements Ultra-Premium ✅ | Scrollbars fines macOS, TopBar mobile flottante avec ombre 3D dynamique, modales à zoom élastique et verre dépoli, boutons haptiques et transitions de timelines en fondu. |
 
 ---
 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { X, Bug } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useAuthStore, selectUid, selectAppUser } from '@/stores/authStore'
@@ -47,11 +48,26 @@ export default function BugReportModal({ onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.3)' }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
-      <div className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 flex flex-col gap-4"
-        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)' }}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-0"
+      style={{
+        background: 'rgba(0, 0, 0, 0.25)',
+        backdropFilter: 'blur(5px)',
+        WebkitBackdropFilter: 'blur(5px)',
+      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0, y: 15 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 15 }}
+        transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+        className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 flex flex-col gap-4"
+        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)' }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bug size={17} strokeWidth={1.8} style={{ color: 'var(--color-accent)' }} />
@@ -103,7 +119,7 @@ export default function BugReportModal({ onClose }: Props) {
             {submitting ? 'Envoi…' : 'Envoyer'}
           </button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

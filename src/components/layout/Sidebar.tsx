@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, ClipboardList, CalendarDays, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
@@ -125,7 +125,9 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {bugOpen && <BugReportModal onClose={() => setBugOpen(false)} />}
+      <AnimatePresence>
+        {bugOpen && <BugReportModal onClose={() => setBugOpen(false)} />}
+      </AnimatePresence>
     </aside>
   )
 }
