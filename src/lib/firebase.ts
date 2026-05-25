@@ -53,3 +53,17 @@ export const storage = getStorage(app)
 const secondaryApp = initializeApp(firebaseConfig, 'secondary')
 export const authSecondary = getAuth(secondaryApp)
 export const dbSecondary   = getFirestore(secondaryApp)
+
+// Initialisation asynchrone sécurisée de Firebase Messaging (évite de planter sous Vitest ou PWA offline)
+export async function getMessagingInstance() {
+  try {
+    const { isSupported, getMessaging } = await import('firebase/messaging')
+    const supported = await isSupported()
+    if (supported) {
+      return getMessaging(app)
+    }
+  } catch (err) {
+    console.warn('[Firebase Messaging] Non supporté ou erreur de chargement :', err)
+  }
+  return null
+}

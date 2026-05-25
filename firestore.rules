@@ -37,7 +37,15 @@ service cloud.firestore {
     // Écriture profil tiers (création/suppression comptes) : admin uniquement.
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuthenticated() && (
+        isAdmin() || 
+        (request.auth.uid == userId && request.resource.data.role == 'technicien')
+      );
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        (request.auth.uid == userId && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'email'])))
+      );
+      allow delete: if isAdmin();
     }
 
     // ── equipements ───────────────────────────────────────────

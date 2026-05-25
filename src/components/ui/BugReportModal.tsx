@@ -27,6 +27,16 @@ export default function BugReportModal({ onClose }: Props) {
         userInitiales: appUser?.initiales ?? '',
         createdAt: serverTimestamp(),
       })
+
+      // Déclencher une notification push pour l'administrateur
+      import('@/services/notificationService').then(({ sendPushToTechnician }) => {
+        sendPushToTechnician(
+          'THK',
+          '🐞 Nouveau bug signalé',
+          `${appUser ? `${appUser.prenom} ${appUser.nom}` : 'Un utilisateur'} a signalé un problème sur ${window.location.pathname}`
+        )
+      }).catch(err => console.error('[Notification] Failed to load notificationService:', err))
+
       toast.success('Signalement envoyé, merci !')
       onClose()
     } catch {

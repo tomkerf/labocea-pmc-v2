@@ -263,7 +263,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-24 | Sync cloud ✅ | Badge nuage synced/syncing/offline dans TopBar mobile et Sidebar desktop. syncStore + trackWrite (6 services wrappés) + useNetworkStatus + SyncBadge. 98 tests. |
 | 2026-05-25 | Tournée du jour ✅ | Mode Tournée du Jour : page /tournee accessible depuis Dashboard. TourneeItem (heure, GPS, météo), SaisieRapideModal (date/nappe/motif, Framer Motion), TourneeFinEcran (récap). Bouton conditionnel Dashboard. 115 tests, build 559ms. |
 | 2026-05-25 | Qualité roadmap ✅ | Dynamisation complète de roadmap-visual.html et roadmap.html (chargement local/fallback, prochaines étapes dynamiques par phase, statut synchronisé par checkboxes). |
-
+| 2026-05-25 | Notifications Push ✅ | Implémentation des notifications push (FCM) via un proxy sécurisé dans le Cloudflare Worker, service worker d'arrière-plan, hook React, switch de profil de style Apple et déclenchements automatiques (planning, bug). |
 
 ---
 

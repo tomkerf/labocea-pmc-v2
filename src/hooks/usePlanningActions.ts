@@ -71,6 +71,10 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
     if (!uid || !event.clientId || !event.planId || !event.samplingId) return
     const client = clients.find((c: Client) => c.id === event.clientId)
     if (!client) return
+
+    const plan = client.plans.find(p => p.id === event.planId)
+    const planNom = plan ? plan.nom : 'Plan'
+
     await saveClient({
       ...client,
       plans: client.plans.map(plan => plan.id !== event.planId ? plan : {
@@ -80,6 +84,17 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
         ),
       }),
     }, uid)
+
+    if (initiales_ && initiales_ !== '—' && initiales_ !== event.technicien) {
+      import('@/services/notificationService').then(({ sendPushToTechnician }) => {
+        sendPushToTechnician(
+          initiales_,
+          'Changement d\'assignation 📋',
+          `Tu as été assigné à un prélèvement pour ${client.nom} (Plan : ${planNom})`,
+          `/missions/${client.id}/plan/${event.planId}`
+        )
+      }).catch(err => console.error('[Notification] Failed to load notificationService:', err))
+    }
   }
 
   async function handleSaveEvenement(

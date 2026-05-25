@@ -92,6 +92,22 @@ export function usePlanActions({
 
       return { ...s, ...patch }
     })
+
+    // Déclencher une notification push si le technicien assigné change
+    if (field === 'assignedTo' && value && String(value) !== '—') {
+      const originalSampling = plan.samplings.find((s) => s.id === samplingId)
+      if (originalSampling && originalSampling.assignedTo !== value) {
+        import('@/services/notificationService').then(({ sendPushToTechnician }) => {
+          sendPushToTechnician(
+            String(value),
+            'Nouveau prélèvement planifié 📋',
+            `Tu as été assigné à un prélèvement pour le client ${client.nom} (Plan : ${plan.nom})`,
+            `/missions/${client.id}/plan/${plan.id}`
+          )
+        }).catch(err => console.error('[Notification] Failed to load notificationService:', err))
+      }
+    }
+
     triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? { ...p, samplings: updatedSamplings } : p) })
   }
 

@@ -4,6 +4,27 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 63 — Implémentation des Notifications Push (FCM)
+**25 mai 2026 (après-midi)**
+
+### Ce qui a été fait
+
+#### Feature — Notifications Push FCM & Proxy Sécurisé
+- **Service Worker** : Création de `public/firebase-messaging-sw.js` pour écouter l'événement `push` et `notificationclick` en arrière-plan avec réorientation intelligente (focus/navigate sur onglet existant ou ouverture).
+- **Hook d'intégration** : Écriture de `src/hooks/usePushNotifications.ts` gérant la détection du support navigateur, le consentement utilisateur, la récupération asynchrone du token FCM de l'appareil et sa synchronisation dans Firestore (`pushTokens`).
+- **Interface utilisateur** : Ajout d'une section "Notifications Push" moderne de style Apple dans `src/pages/ComptePage.tsx` avec indicateurs de statut, micro-loaders et gestion des permissions bloquées.
+- **Règles Firestore durcies** : Ajustement de `firestore.rules` pour autoriser la mise à jour des `pushTokens` tout en verrouillant l'altération frauduleuse des champs `role` et `email` par un utilisateur non-admin.
+- **Proxy Serverless Worker** : Ajout de l'endpoint `/api/send-notification` dans `worker/index.js` validant de manière cryptographique (RS256) le Firebase ID Token des requêtes entrantes via les clés Google JWK, puis construisant et signant un jeton JWT d'assertion pour négocier un token OAuth2 et envoyer les messages via l'API HTTP v1 de Google FCM.
+- **Déclenchements contextuels** :
+  - Modification de `src/hooks/usePlanActions.ts` (assignation d'un prélèvement à un technicien)
+  - Modification de `src/hooks/usePlanningActions.ts` (drag-and-drop sur planning modifiant le technicien)
+  - Modification de `src/components/ui/BugReportModal.tsx` (envoi automatique d'une alerte à l'admin `THK` sur signalement de bug)
+
+### Prochaines étapes
+- Valider le flux de notification de bout en bout sur l'environnement staging après liaison des secrets Wrangler.
+
+---
+
 ## Session 62 — Automatisation de la Roadmap Visuelle
 **25 mai 2026 (après-midi)**
 
