@@ -267,6 +267,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-25 | Config & Deploy Push ✅ | Configuration des variables d'environnement Firebase (.env), clé VAPID, secret FIREBASE_SERVICE_ACCOUNT injecté dans Wrangler. Staging déployé avec push activé. |
 | 2026-05-25 | Raffinement UI/UX ✅ | Intégration de micro-animations premium Apple-style (Framer Motion spring, sélecteurs et navigation par pilule glissante layoutId, KPIs tactiles et cliquables pour la navigation). |
 | 2026-05-25 | Raffinements Ultra-Premium ✅ | Scrollbars fines macOS, TopBar mobile flottante avec ombre 3D dynamique, modales à zoom élastique et verre dépoli, boutons haptiques et transitions de timelines en fondu. |
+| 2026-05-25 | Phase 6 (Déploiement) ✅ | Validation via tests (115/115), build de production (0 erreur), et déploiement sur staging. Guide de test remplacé par le mode d'emploi interne. |
 
 ---
 

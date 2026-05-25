@@ -5,6 +5,19 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 ---
 
 ## Session 65 — Raffinements Visuels Ultra-Premium (Apple-style)
+## Session 66 — Préparation des tests équipe & Déploiement Staging
+**25 mai 2026**
+
+### Ce qui a été fait
+- Lancement complet des tests unitaires (115/115 succès) et vérification du build TypeScript/Vite (0 erreur).
+- Déploiement de la dernière version (incluant toutes les finitions UI premium et le mode Tournée) sur l'environnement de Staging.
+- Lancement de la Phase 6 (Déploiement et validation) avec l'équipe métier. L'aide intégrée à l'application servira de guide de test.
+
+### Prochaines étapes
+- Phase de test équipe (1-2 semaines)
+- Corrections issues de la phase de test
+---
+
 **25 mai 2026 (soirée)**
 
 ### Ce qui a été fait
