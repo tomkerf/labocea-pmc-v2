@@ -30,6 +30,9 @@ import { useDashboardStats } from '@/hooks/useDashboardStats'
 import type { ModalEventRef } from '@/hooks/useDashboardStats'
 import { getGreeting, formatDate, localISO } from '@/lib/dashboardUtils'
 import type { Sampling, Client, Plan } from '@/types'
+import { TodosWidget } from '@/components/dashboard/TodosWidget'
+import { useTodosListener } from '@/hooks/useTodos'
+import { useTodosStore } from '@/stores/todosStore'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
@@ -65,12 +68,14 @@ export default function DashboardPage() {
   useVerificationsListener()
   useEvenementsListener()
   useMaintenancesListener()
+  useTodosListener()
 
   const { clients }       = useMissionsStore()
   const { equipements }   = useEquipementsStore()
   const { verifications } = useMetrologieStore()
   const { evenements }    = useEvenementsStore()
   const { maintenances }  = useMaintenancesStore()
+  const todos             = useTodosStore(s => s.todos)
 
   const [eventDetail, setEventDetail] = useState<{ event: ModalEvent; dateStr: string } | null>(null)
   const [planningMode, setPlanningMode] = useState<'today' | 'tomorrow'>('today')
@@ -309,6 +314,7 @@ export default function DashboardPage() {
       </motion.div>
 
       <motion.div variants={itemVariants} className="space-y-6">
+        <TodosWidget todos={todos} uid={uid || ''} />
         <RapportsWidget rapports={rapportsAFaireMoi} onMarkEnvoye={markRapportEnvoye} />
         <RetardWidget items={prelevementsEnRetard} />
         <PluieWidget items={prelevementsPluie} />

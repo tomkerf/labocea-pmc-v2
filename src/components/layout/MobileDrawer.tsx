@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 import {
-  LayoutDashboard, ClipboardList, CalendarDays, Wrench, BookOpen, ShieldAlert, X, FlaskConical, Pipette, HelpCircle, Gauge, Hammer, FileText,
+  LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, BookOpen, ShieldAlert, X, FlaskConical, Pipette, HelpCircle, Gauge, Hammer, FileText,
 } from 'lucide-react'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import UserAvatar from '@/components/ui/UserAvatar'
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { to: '/',           icon: LayoutDashboard, label: 'Tableau de bord', end: true },
   { to: '/missions',   icon: ClipboardList,   label: 'Missions'                   },
   { to: '/planning',   icon: CalendarDays,    label: 'Planning'                   },
+  { to: '/todos',      icon: ListTodo,        label: 'Tâches'                     },
   { to: '/infos',      icon: BookOpen,        label: 'Infos terrain'              },
   { to: '/rapports',              icon: FileText,     label: 'Rapports'           },
   { to: '/materiel',   icon: Wrench,          label: 'Matériel'                   },

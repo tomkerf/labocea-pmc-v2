@@ -104,6 +104,12 @@ service cloud.firestore {
         (request.auth.uid == resource.data.technicienUid || isAdmin());
     }
 
+    // ── todos ─────────────────────────────────────────────────
+    match /todos/{todoId} {
+      allow read, create, update: if isAuthenticated();
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.createdBy || isAdmin());
+    }
+
     // ── clients (V1 — archive, lecture seule) ─────────────────
     match /clients/{clientId} {
       allow read: if isAuthenticated();

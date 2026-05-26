@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { ChevronLeft, ChevronRight, Calendar, Map as MapIcon, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Map as MapIcon, X, Printer, FileSpreadsheet } from 'lucide-react'
 import { type ViewMode, getTechColor } from '@/lib/planningUtils'
 import { motion } from 'framer-motion'
 type Preleveur = { code: string; nom?: string }
@@ -28,6 +28,9 @@ interface PlanningHeaderProps {
   monthPoolCount: number
   showDragHint:   boolean
   setShowDragHint: Dispatch<SetStateAction<boolean>>
+  // Exports
+  onExportPdf:    () => void
+  onExportExcel:  () => void
 }
 
 export default function PlanningHeader({
@@ -37,6 +40,7 @@ export default function PlanningHeader({
   totalOverdue, filterRetard, setFilterRetard,
   showRain, setShowRain, preleveurs,
   monthPoolCount, showDragHint, setShowDragHint,
+  onExportPdf, onExportExcel,
 }: PlanningHeaderProps) {
   return (
     <>
@@ -98,6 +102,24 @@ export default function PlanningHeader({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Boutons d'export */}
+            <button
+              onClick={onExportPdf}
+              className="px-2.5 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] cursor-pointer"
+              title="Exporter la feuille de route PDF"
+            >
+              <Printer size={13} style={{ color: 'var(--color-text-secondary)' }} />
+              <span className="hidden md:inline">Feuille de route</span>
+            </button>
+            <button
+              onClick={onExportExcel}
+              className="px-2.5 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] cursor-pointer mr-1"
+              title="Exporter au format Excel"
+            >
+              <FileSpreadsheet size={13} style={{ color: 'var(--color-success)' }} />
+              <span className="hidden md:inline">Excel</span>
+            </button>
+
             {/* Sélecteur de période de calendrier */}
             <div className="relative flex p-0.5 rounded-lg shrink-0"
               style={{ border:'1px solid var(--color-border-subtle)', background:'var(--color-bg-tertiary)' }}>

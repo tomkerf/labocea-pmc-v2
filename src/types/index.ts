@@ -375,3 +375,28 @@ export interface VisitePreliminaire {
   createdAt: Timestamp
   updatedAt: Timestamp
 }
+
+// --- Tâches (Todo List) ---
+
+export type TodoPriority = 'basse' | 'moyenne' | 'haute'
+export type TodoStatus = 'a_faire' | 'en_cours' | 'termine'
+
+export interface Todo {
+  id: string
+  titre: string
+  description?: string
+  statut: TodoStatus
+  priorite: TodoPriority
+  assignedTo?: string              // uid of user, or 'equipe'
+  assignedToNom?: string           // Nom complet dénormalisé
+  assignedToInitiales?: string     // Initiales dénormalisées
+  dueDate?: string                 // ISO Date "YYYY-MM-DD"
+  clientId?: string                // Client lié (optionnel)
+  clientNom?: string               // Nom client dénormalisé
+  equipementId?: string            // Équipement lié (optionnel)
+  equipementNom?: string           // Nom équipement dénormalisé
+  createdBy: string                // uid du créateur
+  createdByNom?: string            // Nom du créateur
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}

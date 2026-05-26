@@ -1654,3 +1654,24 @@ Review complète de la codebase. 8 issues corrigées :
 - **Icône pluie** : supprimée des en-têtes de dates (`.rain-overlay.opacity-30`), conservée uniquement dans les cellules de contenu (`.rain-overlay:not(.opacity-30)::after`).
 - **Icône jours fériés** : opacité ajustée de `0.25` → `0.55` (meilleure lisibilité sans être trop envahissante).
 - Analyser `EquipementPage.tsx` (782L) pour un futur refactoring.
+
+---
+
+## Session 38 — Gestion des Tâches (Todo List)
+**26 mai 2026**
+
+### Features & Architecture
+- **Types TypeScript** : définitions de `Todo`, `TodoStatus`, `TodoPriority` dans `types/index.ts`.
+- **Règles de sécurité Firestore** : mise à jour de `firestore.rules` pour la collection `/todos/{todoId}`, restreignant la suppression aux créateurs ou admins.
+- **Gestion d'état (Zustand)** : création de `todosStore.ts` pour la synchronisation réactive de l'interface.
+- **Service & Hook Firestore** : création de `todoService.ts` (méthodes `saveTodo`, `createTodo`, `deleteTodo` enveloppées dans `trackWrite`) et `useTodos.ts` (`useTodosListener` via `onSnapshot` temps réel).
+- **Navigation** : intégration dans `Sidebar.tsx` et `MobileDrawer.tsx` avec l'icône `ListTodo`.
+- **Tableau de Bord** : intégration d'un widget premium réactif `TodosWidget.tsx` au-dessus de `RapportsWidget` affichant les 5 tâches prioritaires non terminées, avec case à cocher interactive instantanée.
+- **Page Principale Tâches** : page `TodosPage.tsx` inspirée de l'application *Rappels (Reminders)* d'Apple.
+  - Filtre par attribution ("Toutes", "Miennes", "Équipe") via des boutons pilules avec transition spring coulissante.
+  - Recherche textuelle et filtre par priorité.
+  - Organisation en trois sections pliables : *À faire*, *En cours* et *Terminées* (fermée par défaut).
+  - Checkbox ronde animée pour clore les tâches réactivement.
+  - Double confirmation de suppression.
+  - Liaison bidirectionnelle avec les fiches Clients/Missions et Équipements.
+- **Qualité & Tests** : création de `useTodos.test.ts` (2 tests pour le hook de synchronisation). Lancement de la suite de tests (128/128 tests au vert).

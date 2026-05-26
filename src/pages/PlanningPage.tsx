@@ -22,6 +22,7 @@ import {
   startOfWeek, startOfMonth, addDays,
   buildMonthGrid,
   getPeriodLabel,
+  toISO,
 } from '@/lib/planningUtils'
 import { usePlanningData } from '@/hooks/usePlanningData'
 import { usePlanningCalendar } from '@/hooks/usePlanningCalendar'
@@ -117,13 +118,54 @@ const uid        = useAuthStore(selectUid)
 
   // ── Calculs calendrier (filtrage, bilanBand, allDayItems, periodList) ──
   const {
-    monthPoolCount, bilanBand, allDayItems, periodList,
+    monthPoolCount, bilanBand, allDayItems, periodList, filteredForDayFlat,
   } = usePlanningCalendar({
     eventsByDate, evenements, clients,
     viewMode, weekDays, monthStart, weekStart, selectedDate,
     filterTech, filterRetard,
     handleSelectEvent,
   })
+
+  // ── Événements de la période active (pour exports) ──────────
+  const activePeriodEvents = useMemo(() => {
+    const dates: string[] = []
+    if (viewMode === 'jour' || viewMode === 'carte') {
+      dates.push(toISO(selectedDate))
+    } else if (viewMode === 'semaine') {
+      weekDays.forEach(d => dates.push(toISO(d)))
+    } else if (viewMode === 'mois') {
+      monthGrid.forEach(d => {
+        if (d) {
+          dates.push(toISO(d))
+        }
+      })
+    }
+
+    const list: PlanningEvent[] = []
+    const seen = new Set<string>()
+    dates.forEach(dateStr => {
+      const dayEvts = filteredForDayFlat(dateStr)
+      dayEvts.forEach(e => {
+        if (!seen.has(e.id)) {
+          seen.add(e.id)
+          list.push(e)
+        }
+      })
+    })
+    return list
+  }, [viewMode, selectedDate, weekDays, monthGrid, filteredForDayFlat])
+
+  const handleExportPdf = () => {
+    import('@/lib/exportPlanningPdf').then(({ exportPlanningPdf }) => {
+      exportPlanningPdf(activePeriodEvents, periodLabel, filterTech, users)
+    })
+  }
+
+  const handleExportExcel = () => {
+    import('@/lib/exportPlanningExcel').then(({ exportPlanningExcel }) => {
+      exportPlanningExcel(activePeriodEvents, periodLabel, filterTech)
+    })
+  }
 
   // ── Actions Firestore ──────────────────────────────────
   const {
@@ -149,6 +191,7 @@ const uid        = useAuthStore(selectUid)
         totalOverdue={totalOverdue} filterRetard={filterRetard} setFilterRetard={setFilterRetard}
         showRain={showRain} setShowRain={setShowRain} preleveurs={preleveurs}
         monthPoolCount={monthPoolCount} showDragHint={showDragHint} setShowDragHint={setShowDragHint}
+        onExportPdf={handleExportPdf} onExportExcel={handleExportExcel}
       />
 
       {/* ── Panneau mini-calendrier overlay (desktop) ── */}
