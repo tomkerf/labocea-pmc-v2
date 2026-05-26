@@ -13,5 +13,14 @@ service firebase.storage {
         && request.resource.contentType.matches('image/.*');
     }
 
+    // Photos de visites préliminaires
+    // Chemin : visites/{visiteId}/{pointId}/{filename}
+    match /visites/{visiteId}/{pointId}/{filename} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
   }
 }

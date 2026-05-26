@@ -95,6 +95,15 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // ── visites préliminaires ──────────────────────────────────
+    // Création/lecture : tout utilisateur authentifié.
+    // Modification/suppression : technicien créateur ou admin.
+    match /visites/{visiteId} {
+      allow read, create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() &&
+        (request.auth.uid == resource.data.technicienUid || isAdmin());
+    }
+
     // ── clients (V1 — archive, lecture seule) ─────────────────
     match /clients/{clientId} {
       allow read: if isAuthenticated();
