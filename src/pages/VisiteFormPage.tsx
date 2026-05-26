@@ -30,7 +30,7 @@ export default function VisiteFormPage() {
   const { visiteId } = useParams<{ visiteId?: string }>()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { user } = useAuthStore()
+  const user = useAuthStore(s => s.appUser)
 
   const isNew = !visiteId
   const linkedType = searchParams.get('type') as 'client' | 'demande' | null
