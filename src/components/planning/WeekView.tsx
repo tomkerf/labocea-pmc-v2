@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react'
+import { Plus, Clock } from 'lucide-react'
 import {
   type PlanningEvent, type BilanGroup, type AllDayItem,
   JOURS_COURT,
@@ -90,22 +90,45 @@ export default function WeekView({
 
       {/* ── Bande bilan 24h — groupe J1+J2 avec bordure commune (colspan) ── */}
       {bilanBand.length > 0 && (
-        <div className="shrink-0" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 0' }}>
+        <div className="shrink-0 animate-fade-in" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-primary)', padding: '4px 0 6px 0' }}>
+          <div className="flex items-center justify-between px-4 py-1.5 select-none">
+            <div className="flex items-center gap-2">
+              <Clock size={12} className="text-blue-500" strokeWidth={2.5} />
+              <span className="text-[10px] font-semibold tracking-wider uppercase text-[var(--color-text-primary)]">
+                Cycles Bilan 24h
+              </span>
+              <span className="text-[9px] px-2 py-0.5 rounded-full font-medium"
+                style={{
+                  color: '#0071E3',
+                  background: 'rgba(0,113,227,0.08)',
+                  border: '1px solid rgba(0,113,227,0.15)',
+                }}>
+                Pose J1 → Dépose J2
+              </span>
+            </div>
+            {filterTech && (
+              <span className="text-[9px] text-[var(--color-text-secondary)] font-medium">
+                Filtré par technicien
+              </span>
+            )}
+          </div>
           {bilanBand.map((row, rowIdx) => {
             const wISOs = weekDays.map(toISO)
             return (
               <div key={rowIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', padding: '0 2px' }}>
                 {row.map((group, gIdx) => (
                   <div key={gIdx}
+                    className="transition-all duration-200 hover:brightness-95"
                     style={{
                       gridColumn: `${group.colStart + 1} / ${group.colEnd + 2}`,
                       display: 'flex',
                       gap: 2,
-                      border: `1px solid ${group.techColor}45`,
-                      borderRadius: 7,
-                      padding: '1px 2px',
-                      margin: '0 3px',
-                      background: group.techColor + '08',
+                      border: `1px solid ${group.techColor}25`,
+                      borderLeft: `3px solid ${group.techColor}`,
+                      borderRadius: '5px',
+                      padding: '2px 4px 2px 2px',
+                      margin: '2px 4px',
+                      background: `linear-gradient(90deg, ${group.techColor}12 0%, ${group.techColor}03 100%)`,
                     }}>
                     {group.items.map(item => (
                       <div key={item.event.id} style={{ flex: 1, minWidth: 0 }}>
