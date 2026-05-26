@@ -122,7 +122,7 @@ export default function DashboardPage() {
         <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--color-text-primary)', letterSpacing: '-0.5px' }}>
           {getGreeting()} {prenom || 'Thomas'} 👋
         </h1>
-        <p className="text-sm capitalize" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-base capitalize" style={{ color: 'var(--color-text-secondary)' }}>
           {formatDate()}
         </p>
       </motion.div>

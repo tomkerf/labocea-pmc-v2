@@ -125,7 +125,6 @@ export default function MobileDrawer({ open, onClose }: Props) {
                         <UserAvatar
                           initiales={appUser?.initiales}
                           color={appUser?.avatarColor}
-                          avatarSeed={appUser?.avatarSeed}
                           size={20}
                           fontSize={8}
                         />
@@ -146,7 +145,6 @@ export default function MobileDrawer({ open, onClose }: Props) {
                 <UserAvatar
                   initiales={appUser?.initiales}
                   color={appUser?.avatarColor}
-                  avatarSeed={appUser?.avatarSeed}
                   size={36}
                 />
                 <div className="flex-1 min-w-0">

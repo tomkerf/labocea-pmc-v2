@@ -20,40 +20,17 @@ export function getAvatarColor(color?: string): string {
   return color ?? DEFAULT_AVATAR_COLOR
 }
 
-const DICEBEAR_BASE = 'https://api.dicebear.com/9.x/notionists/svg'
-
-export function dicebearUrl(seed: string): string {
-  return `${DICEBEAR_BASE}?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf,f4d9bb`
-}
 
 interface UserAvatarProps {
   initiales?: string
   color?: string
-  avatarSeed?: string
   size?: number   // px
   fontSize?: number
 }
 
-export default function UserAvatar({ initiales, color, avatarSeed, size = 40, fontSize }: UserAvatarProps) {
+export default function UserAvatar({ initiales, color, size = 40, fontSize }: UserAvatarProps) {
   const bg = getAvatarColor(color)
   const fs = fontSize ?? Math.round(size * 0.38)
-
-  if (avatarSeed) {
-    return (
-      <img
-        src={dicebearUrl(avatarSeed)}
-        alt="avatar"
-        width={size}
-        height={size}
-        style={{
-          borderRadius: '50%',
-          flexShrink: 0,
-          userSelect: 'none',
-          display: 'block',
-        }}
-      />
-    )
-  }
 
   return (
     <div

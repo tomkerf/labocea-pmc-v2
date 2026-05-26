@@ -2,9 +2,9 @@ import { useState, useRef } from 'react'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { logout } from '@/hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, Check, X, RefreshCw, KeyRound, ChevronDown, Bell, BellOff, LoaderCircle } from 'lucide-react'
+import { LogOut, Check, KeyRound, ChevronDown, Bell, BellOff, LoaderCircle } from 'lucide-react'
 import { updateUserProfile } from '@/services/userService'
-import UserAvatar, { AVATAR_COLORS, getAvatarColor, dicebearUrl } from '@/components/ui/UserAvatar'
+import UserAvatar, { AVATAR_COLORS, getAvatarColor } from '@/components/ui/UserAvatar'
 import type { AppUser } from '@/types'
 import {
   getAuth,
@@ -14,21 +14,6 @@ import {
 } from 'firebase/auth'
 import usePushNotifications from '@/hooks/usePushNotifications'
 
-// Pool de seeds — mots nature/eau/terrain pour des avatars variés
-const SEED_POOL = [
-  'rivière','océan','cascade','source','marée','torrent','delta','estuaire',
-  'falaise','montagne','forêt','prairie','bruyère','tourbière','marais','lande',
-  'algue','corail','baleine','dauphin','loutre','héron','cygne','truite',
-  'granite','basalte','limon','argile','calcaire','schiste','quartzite','silex',
-  'brume','aurore','solstice','équinoxe','zénith','vortex','prisma','nebula',
-  'atlas','boussole','sextant','niveau','balance','jauge','sonde','capteur',
-]
-
-function pickSeeds(n = 16, exclude?: string): string[] {
-  const pool = exclude ? SEED_POOL.filter(s => s !== exclude) : [...SEED_POOL]
-  const shuffled = pool.sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, n)
-}
 
 const DEBOUNCE = 600
 
@@ -37,11 +22,7 @@ export default function ComptePage() {
   const setAppUser = useAuthStore(s => s.setAppUser)
   const navigate = useNavigate()
   const [saving, setSaving] = useState(false)
-  const [seeds, setSeeds] = useState<string[]>(() => {
-    const initial = pickSeeds(16, appUser?.avatarSeed)
-    // Si l'user a déjà un seed, le mettre en premier
-    return appUser?.avatarSeed ? [appUser.avatarSeed, ...initial.slice(0, 15)] : initial
-  })
+
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   async function handleLogout() {
@@ -61,7 +42,7 @@ export default function ComptePage() {
           nom:         updated.nom,
           initiales:   updated.initiales,
           avatarColor: updated.avatarColor ?? null,
-          avatarSeed:  updated.avatarSeed  ?? null,
+
         })
       } finally {
         setSaving(false)
@@ -69,22 +50,6 @@ export default function ComptePage() {
     }, DEBOUNCE)
   }
 
-  async function handleSeedSelect(seed: string) {
-    if (!appUser) return
-    const next = seed === appUser.avatarSeed ? undefined : seed  // reclic = retirer
-    const updated = { ...appUser, avatarSeed: next }
-    setSaving(true)
-    try {
-      await updateUserProfile(appUser.uid, { avatarSeed: next ?? null })
-      setAppUser(updated)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  function refreshSeeds() {
-    setSeeds(pickSeeds(16, appUser?.avatarSeed))
-  }
 
   function update(field: keyof AppUser, value: string) {
     if (!appUser) return
@@ -129,7 +94,7 @@ export default function ComptePage() {
           <UserAvatar
             initiales={appUser?.initiales}
             color={appUser?.avatarColor}
-            avatarSeed={appUser?.avatarSeed}
+
             size={48}
           />
           <div>
@@ -181,22 +146,13 @@ export default function ComptePage() {
 
         {/* Aperçu */}
         <div className="flex items-center gap-3 mb-4 pb-4" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <UserAvatar initiales={appUser?.initiales} color={appUser?.avatarColor} avatarSeed={appUser?.avatarSeed} size={48} />
+          <UserAvatar initiales={appUser?.initiales} color={appUser?.avatarColor} size={48} />
           <div>
             <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
               {appUser?.prenom || appUser?.nom ? `${appUser?.prenom} ${appUser?.nom}`.trim() : 'Nom non renseigné'}
             </p>
             <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Aperçu</p>
           </div>
-          {appUser?.avatarSeed && (
-            <button
-              onClick={() => handleSeedSelect(appUser.avatarSeed!)}
-              className="ml-auto flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-              <X size={11} strokeWidth={2} />
-              Retirer
-            </button>
-          )}
         </div>
 
         {/* Couleur */}
@@ -225,44 +181,7 @@ export default function ComptePage() {
           })}
         </div>
 
-        {/* Avatars illustrés */}
-        <div className="flex items-center justify-between mb-2.5">
-          <p className="text-xs font-semibold uppercase"
-            style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>
-            Avatar illustré (optionnel)
-          </p>
-          <button onClick={refreshSeeds}
-            className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg"
-            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-            <RefreshCw size={11} strokeWidth={2} />
-            Autres
-          </button>
-        </div>
-        <div className="grid grid-cols-8 gap-1.5">
-          {seeds.map((seed) => {
-            const isSelected = appUser?.avatarSeed === seed
-            return (
-              <button key={seed} onClick={() => handleSeedSelect(seed)}
-                title={seed}
-                style={{
-                  borderRadius: '50%',
-                  outline: isSelected ? '2px solid var(--color-accent)' : '2px solid transparent',
-                  outlineOffset: 2,
-                  padding: 0,
-                  cursor: 'pointer',
-                  transform: isSelected ? 'scale(1.12)' : 'scale(1)',
-                  transition: 'transform 0.1s, outline 0.1s',
-                  background: 'transparent',
-                }}>
-                <img src={dicebearUrl(seed)} alt={seed} width={36} height={36}
-                  style={{ borderRadius: '50%', display: 'block' }} />
-              </button>
-            )
-          })}
-        </div>
-        <p className="text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
-          Cliquer sur le même avatar pour le retirer.
-        </p>
+
       </div>
 
       {/* Notifications Push */}
