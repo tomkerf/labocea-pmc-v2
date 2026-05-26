@@ -9,6 +9,7 @@ import { useClientData } from '@/hooks/useClientData'
 import { ClientHeader } from '@/components/client/ClientHeader'
 import { ClientInfoForm } from '@/components/client/ClientInfoForm'
 import { ClientPlans } from '@/components/client/ClientPlans'
+import ClientVisites from '@/components/client/ClientVisites'
 import { PdfPreviewModal } from '@/components/client/PdfPreviewModal'
 import type { Plan } from '@/types'
 
@@ -128,6 +129,11 @@ export default function ClientPage() {
         onConfirmDelete={confirmDeletePlan}
         onCancelDelete={() => setConfirmDeletePlanId(null)}
         onSeparatorLabel={handleSeparatorLabel}
+      />
+
+      <ClientVisites
+        clientId={client.id}
+        clientNom={client.nom}
       />
 
       {pdfPreview && (
