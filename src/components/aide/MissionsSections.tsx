@@ -134,3 +134,35 @@ export function MissionClientSection() {
     </Section>
   )
 }
+
+export function VisitePreliminaireSection() {
+  return (
+    <Section icon={Camera} title="Visites préliminaires">
+      <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+        Consigne tes repérages sur le terrain avant de définir un plan de prélèvement.
+      </p>
+
+      <div className="flex flex-col gap-4">
+        <div>
+          <div className="flex flex-col gap-3">
+            <Step num={1}>
+              Rends-toi sur la fiche d'un <strong>Client</strong> (Missions) ou d'une <strong>Demande</strong> (Demandes).
+            </Step>
+            <Step num={2}>
+              Descends jusqu'à la section <strong>Visites préliminaires</strong> et clique sur <strong>Nouvelle</strong>.
+            </Step>
+            <Step num={3}>
+              Renseigne tes notes générales et ajoute autant de <strong>points de prélèvement</strong> que nécessaire.
+            </Step>
+            <Step num={4}>
+              Pour chaque point, tu peux définir le type d'eau, la méthode, la faisabilité, les consignes de sécurité, et <strong>ajouter des photos</strong>.
+            </Step>
+            <Step num={5}>
+              Une fois la visite enregistrée, tu peux l'ouvrir pour la modifier ou l'<strong>exporter en PDF</strong> via le bouton Exporter.
+            </Step>
+          </div>
+        </div>
+      </div>
+    </Section>
+  )
+}

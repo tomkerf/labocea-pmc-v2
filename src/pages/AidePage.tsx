@@ -1,6 +1,6 @@
 import { ParOuCommencerSection, StatutsSection } from '@/components/aide/IntroSections'
 import { PlanningSection, Bilan24hSection } from '@/components/aide/PlanningSections'
-import { MissionClientSection } from '@/components/aide/MissionsSections'
+import { MissionClientSection, VisitePreliminaireSection } from '@/components/aide/MissionsSections'
 import { MaterielSection, MetrologieSection } from '@/components/aide/MaterielSections'
 import { DashboardSection, SignalerProblemeSection } from '@/components/aide/DashboardSections'
 
@@ -26,6 +26,7 @@ export default function AidePage() {
       <StatutsSection />
       <PlanningSection />
       <MissionClientSection />
+      <VisitePreliminaireSection />
       <Bilan24hSection />
       <MaterielSection />
       <MetrologieSection />
