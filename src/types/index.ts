@@ -343,3 +343,34 @@ export interface BugReport {
   userInitiales: string
   createdAt: Timestamp
 }
+
+// --- Visites préliminaires ---
+
+export type FaisabiliteVisite = 'ok' | 'difficile' | 'impossible'
+
+export interface PointVisite {
+  id: string
+  nom: string
+  typeEau: NatureEauType
+  methode: MethodeType
+  faisabilite: FaisabiliteVisite
+  securite: string
+  notes: string
+  photos: string[]
+}
+
+export interface VisitePreliminaire {
+  id: string
+  linkedTo: {
+    type: 'client' | 'demande'
+    id: string
+    nom: string
+  }
+  date: string           // ISO "YYYY-MM-DD"
+  technicienUid: string
+  technicienNom: string
+  notes: string
+  points: PointVisite[]
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
