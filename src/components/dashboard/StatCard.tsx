@@ -19,13 +19,7 @@ export function StatCard({ value, label, sub, accent, warning, danger, onClick }
     ? 'var(--color-accent)'
     : 'var(--color-text-primary)'
 
-  const gradient = danger
-    ? 'linear-gradient(135deg, #ffffff 60%, #fff5f5 100%)'
-    : warning
-    ? 'linear-gradient(135deg, #ffffff 60%, #fffbf0 100%)'
-    : accent
-    ? 'linear-gradient(135deg, #ffffff 60%, #f0f6ff 100%)'
-    : 'var(--color-bg-secondary)'
+  const gradient = 'var(--color-bg-secondary)'
 
   return (
     <motion.div
