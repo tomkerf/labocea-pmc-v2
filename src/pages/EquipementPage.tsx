@@ -167,7 +167,14 @@ export default function EquipementPage() {
         maintenances={maintenances.filter((m) => m.equipementId === equipementId)}
         onAddNote={(note) => update('ficheDeVieNotes', [...(equipement.ficheDeVieNotes ?? []), note])}
         onDeleteNote={(id) => update('ficheDeVieNotes', (equipement.ficheDeVieNotes ?? []).filter((n) => n.id !== id))}
-        onAddVerification={async (verif) => { if (uid) await saveVerification(verif, uid) }}
+        onAddVerification={async (verif) => { 
+          if (uid) {
+            await saveVerification(verif, uid)
+            if (verif.prochainControle) {
+              update('prochainEtalonnage', verif.prochainControle)
+            }
+          }
+        }}
         initiales={initiales}
         uid={uid ?? ''}
         equipementId={equipementId!}

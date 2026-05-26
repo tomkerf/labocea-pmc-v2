@@ -34,7 +34,9 @@ export default function BugReportModal({ onClose }: Props) {
         sendPushToTechnician(
           'THK',
           '🐞 Nouveau bug signalé',
-          `${appUser ? `${appUser.prenom} ${appUser.nom}` : 'Un utilisateur'} a signalé un problème sur ${window.location.pathname}`
+          `${appUser ? `${appUser.prenom} ${appUser.nom}` : 'Un utilisateur'} a signalé un problème sur ${window.location.pathname}`,
+          undefined,
+          true // allowSelfNotification
         )
       }).catch(err => console.error('[Notification] Failed to load notificationService:', err))
 

@@ -9,7 +9,7 @@ import type {
   Maintenance,
   Plan,
   Sampling,
-  Verification,
+  Equipement,
 } from '@/types'
 import type { Preleveur } from '@/stores/preleveursStore'
 
@@ -85,7 +85,7 @@ function makeClient(overrides: Partial<Client> = {}): Client {
 }
 
 const EMPTY_MAINTENANCES: Maintenance[] = []
-const EMPTY_VERIFICATIONS: Verification[] = []
+const EMPTY_EQUIPEMENTS: Equipement[] = []
 const EMPTY_EVENEMENTS: EvenementPersonnel[] = []
 const EMPTY_USERS: AppUser[] = []
 const EMPTY_PRELEVEURS: Preleveur[] = []
@@ -109,7 +109,7 @@ describe('usePlanningData', () => {
     const { result } = renderHook(() => usePlanningData({
       clients: [client],
       maintenances: EMPTY_MAINTENANCES,
-      verifications: EMPTY_VERIFICATIONS,
+      equipements: EMPTY_EQUIPEMENTS,
       evenements: EMPTY_EVENEMENTS,
       users: EMPTY_USERS,
       preleveurs: EMPTY_PRELEVEURS,

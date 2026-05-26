@@ -9,6 +9,7 @@ import { RapportsWidget } from '@/components/dashboard/RapportsWidget'
 import { RetardWidget } from '@/components/dashboard/RetardWidget'
 import { PluieWidget } from '@/components/dashboard/PluieWidget'
 import { MaintenancesWidget } from '@/components/dashboard/MaintenancesWidget'
+import { MetrologieWidget } from '@/components/dashboard/MetrologieWidget'
 import { EventDetailModal } from '@/components/EventDetailModal'
 import type { ModalEvent, TechOption } from '@/components/EventDetailModal'
 import { useAuthStore, selectPrenom, selectInitiales, selectUid, selectRole } from '@/stores/authStore'
@@ -77,7 +78,7 @@ export default function DashboardPage() {
   const {
     missionsCeMois, verifiTotal, verifiConformes, conformitePct,
     aCalibrrer, rapportsAFaireMoi, jourItems, lendemainItems, parcEtat,
-    prelevementsEnRetard, prelevementsPluie, maintenancesActives,
+    prelevementsEnRetard, prelevementsPluie, maintenancesActives, metrologieAlertes,
     techOptions: rawTechOptions,
   } = useDashboardStats({ clients, verifications, equipements, evenements, maintenances, uid, initiales, isGeneraliste })
 
@@ -312,6 +313,7 @@ export default function DashboardPage() {
         <RetardWidget items={prelevementsEnRetard} />
         <PluieWidget items={prelevementsPluie} />
         <MaintenancesWidget maintenances={maintenancesActives} />
+        <MetrologieWidget equipements={metrologieAlertes} />
       </motion.div>
 
       {eventDetail && (

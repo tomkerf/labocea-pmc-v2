@@ -77,7 +77,8 @@ export async function sendPushToTechnician(
   initials: string,
   title:    string,
   body:     string,
-  path?:    string
+  path?:    string,
+  allowSelfNotification?: boolean
 ): Promise<boolean> {
   try {
     if (!initials || initials === '—') return false
@@ -95,8 +96,8 @@ export async function sendPushToTechnician(
     const targetUserDoc = querySnap.docs[0]
     const recipientUid = targetUserDoc.id
 
-    // Ne pas envoyer si le destinataire est l'expéditeur lui-même
-    if (auth.currentUser && recipientUid === auth.currentUser.uid) {
+    // Ne pas envoyer si le destinataire est l'expéditeur lui-même, SAUF si allowSelfNotification est true
+    if (!allowSelfNotification && auth.currentUser && recipientUid === auth.currentUser.uid) {
       return false
     }
 

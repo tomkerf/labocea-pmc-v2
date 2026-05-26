@@ -14,13 +14,13 @@ import {
   SAMPLING_LABEL, MAINTENANCE_LABEL, EVENEMENT_LABEL,
   type PlanningEvent, type PoolItem, type TechOption,
 } from '@/lib/planningUtils'
-import type { Client, Sampling, Maintenance, Verification, EvenementPersonnel, AppUser } from '@/types'
+import type { Client, Sampling, Maintenance, Equipement, EvenementPersonnel, AppUser } from '@/types'
 import type { Preleveur } from '@/stores/preleveursStore'
 
 interface UsePlanningDataParams {
   clients:       Client[]
   maintenances:  Maintenance[]
-  verifications: Verification[]
+  equipements:   Equipement[]
   evenements:    EvenementPersonnel[]
   users:         AppUser[]
   preleveurs:    Preleveur[]
@@ -28,7 +28,7 @@ interface UsePlanningDataParams {
 }
 
 export function usePlanningData({
-  clients, maintenances, verifications, evenements,
+  clients, maintenances, equipements, evenements,
   users, preleveurs, selectedDay,
 }: UsePlanningDataParams) {
 
@@ -114,7 +114,9 @@ export function usePlanningData({
     })
 
     maintenances.forEach((m: Maintenance) => {
-      const dateStr = m.dateRealisee || m.datePrevue
+      const rawDate = m.dateRealisee || m.datePrevue
+      if (!rawDate) return
+      const dateStr = rawDate.split('T')[0]
       const tc = getTechColor('')
       add(dateStr, {
         id: m.id, type: 'maintenance', priority: m.statut === 'realisee' ? 3 : 2,
@@ -126,15 +128,27 @@ export function usePlanningData({
       })
     })
 
-    verifications.forEach((v: Verification) => {
-      if (!v.prochainControle) return
-      const tc = getTechColor('')
-      add(v.prochainControle, {
-        id: v.id, type: 'verification', priority: 2,
-        title: v.equipementNom || 'Équipement',
-        subtitle: v.type === 'etalonnage_interne' ? 'Étalonnage interne' : v.type === 'verification_externe' ? 'Vérification externe' : 'Contrôle terrain',
-        statusLabel: 'Métrologie', statusBg: tc.bg, statusColor: tc.color,
-        link: `/metrologie/${v.id}`, isDone: false, technicien: v.technicienNom || '—',
+    equipements.forEach((eq: Equipement) => {
+      if (!eq.prochainEtalonnage) return
+      const dateStr = eq.prochainEtalonnage.split('T')[0]
+      add(dateStr, {
+        id: `cal_${eq.id}`, type: 'verification', priority: 2,
+        title: eq.nom,
+        subtitle: `À calibrer (${eq.numSerie || eq.marque})`,
+        statusLabel: 'Métrologie', statusBg: 'var(--color-warning-light)', statusColor: 'var(--color-warning)',
+        link: `/materiel/${eq.id}`, isDone: false, technicien: eq.technicien || '—',
+      })
+      
+      const target = new Date(dateStr)
+      target.setDate(target.getDate() - 14)
+      const warningDateStr = target.toISOString().split('T')[0]
+      
+      add(warningDateStr, {
+        id: `cal_warn_${eq.id}`, type: 'verification', priority: 3,
+        title: eq.nom,
+        subtitle: `Rappel : calibration prévue le ${dateStr.split('-').reverse().join('/')}`,
+        statusLabel: 'J-14 Métro', statusBg: 'var(--color-bg-tertiary)', statusColor: 'var(--color-text-secondary)',
+        link: `/materiel/${eq.id}`, isDone: false, technicien: eq.technicien || '—',
       })
     })
 
@@ -161,7 +175,7 @@ export function usePlanningData({
     })
 
     return map
-  }, [clients, maintenances, verifications, evenements])
+  }, [clients, maintenances, equipements, evenements])
 
   // ── Techniciens disponibles ─────────────────────────────────
 

@@ -387,6 +387,14 @@ export function useDashboardStats({
     }).slice(0, 8),
     [maintenances])
 
+  const metrologieAlertes = useMemo(() =>
+    equipements.filter((e: Equipement) => {
+      if (!e.prochainEtalonnage) return false
+      const diff = daysDiff(e.prochainEtalonnage.split('T')[0])
+      return diff <= 14 && e.etat !== 'hors_service'
+    }).slice(0, 8),
+    [equipements])
+
   const techOptions = useMemo(() => {
     const codes = new Set(clients.map((c: Client) => c.preleveur).filter(Boolean) as string[])
     return Array.from(codes).sort().map(code => ({ code, label: code }))
@@ -405,6 +413,7 @@ export function useDashboardStats({
     prelevementsEnRetard,
     prelevementsPluie,
     maintenancesActives,
+    metrologieAlertes,
     techOptions,
   }
 }

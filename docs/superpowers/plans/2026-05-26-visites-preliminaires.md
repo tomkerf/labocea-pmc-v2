@@ -1096,7 +1096,7 @@ git commit -m "feat: ClientVisites — section visites dans la fiche client"
 
 La section visites s'affiche dans `DemandeModal` uniquement pour les demandes existantes (`!isNew`), entre les notes et les actions.
 
-- [ ] **Step 1 : Ajouter les imports dans `src/pages/DemandesPage.tsx`**
+- [x] **Step 1 : Ajouter les imports dans `src/pages/DemandesPage.tsx`**
 
 En haut du fichier, ajouter :
 
@@ -1105,7 +1105,7 @@ import { useVisites } from '@/hooks/useVisites'
 import { useNavigate } from 'react-router-dom'
 ```
 
-- [ ] **Step 2 : Ajouter le composant inline `DemandeVisites` juste avant `function DemandeModal`**
+- [x] **Step 2 : Ajouter le composant inline `DemandeVisites` juste avant `function DemandeModal`**
 
 ```typescript
 function DemandeVisites({ demandeId, demandeNom, onNavigate }: { demandeId: string; demandeNom: string; onNavigate: () => void }) {
@@ -1156,7 +1156,7 @@ function DemandeVisites({ demandeId, demandeNom, onNavigate }: { demandeId: stri
 
 Ajouter `ChevronRight` aux imports Lucide existants.
 
-- [ ] **Step 3 : Utiliser `DemandeVisites` dans `DemandeModal`**
+- [x] **Step 3 : Utiliser `DemandeVisites` dans `DemandeModal`**
 
 Dans `DemandeModal`, après le bloc `<Field label="Notes internes">...</Field>` (ligne ~155) et avant `{/* Actions */}`, ajouter :
 
@@ -1173,7 +1173,7 @@ Dans `DemandeModal`, après le bloc `<Field label="Notes internes">...</Field>` 
           )}
 ```
 
-- [ ] **Step 4 : Vérifier la compilation**
+- [x] **Step 4 : Vérifier la compilation**
 
 ```bash
 npx tsc --noEmit 2>&1 | head -20
@@ -1181,7 +1181,7 @@ npx tsc --noEmit 2>&1 | head -20
 
 Expected : aucune erreur.
 
-- [ ] **Step 5 : Commit**
+- [x] **Step 5 : Commit**
 
 ```bash
 git add src/pages/DemandesPage.tsx
@@ -1195,7 +1195,7 @@ git commit -m "feat: section visites dans DemandeModal"
 **Files:**
 - Modify: `src/App.tsx`
 
-- [ ] **Step 1 : Ajouter les imports lazy**
+- [x] **Step 1 : Ajouter les imports lazy**
 
 Après la ligne `const AidePage = lazy(...)`, ajouter :
 
@@ -1203,7 +1203,7 @@ Après la ligne `const AidePage = lazy(...)`, ajouter :
 const VisiteFormPage    = lazy(() => import('@/pages/VisiteFormPage'))
 ```
 
-- [ ] **Step 2 : Ajouter les routes**
+- [x] **Step 2 : Ajouter les routes**
 
 Dans la section `<Route element={<RequireAuth>...}>`, après la route `/demandes`, ajouter :
 
@@ -1216,7 +1216,7 @@ Dans la section `<Route element={<RequireAuth>...}>`, après la route `/demandes
         } />
 ```
 
-- [ ] **Step 3 : Vérifier la compilation complète**
+- [x] **Step 3 : Vérifier la compilation complète**
 
 ```bash
 npx tsc --noEmit 2>&1 | head -30
@@ -1224,7 +1224,7 @@ npx tsc --noEmit 2>&1 | head -30
 
 Expected : aucune erreur.
 
-- [ ] **Step 4 : Lancer tous les tests**
+- [x] **Step 4 : Lancer tous les tests**
 
 ```bash
 npx vitest run
@@ -1232,7 +1232,7 @@ npx vitest run
 
 Expected : tous les tests passent.
 
-- [ ] **Step 5 : Commit**
+- [x] **Step 5 : Commit**
 
 ```bash
 git add src/App.tsx
@@ -1243,7 +1243,7 @@ git commit -m "feat: routes /visites — navigation vers VisiteFormPage"
 
 ## Task 11 — Build et déploiement staging
 
-- [ ] **Step 1 : Build de production**
+- [x] **Step 1 : Build de production**
 
 ```bash
 npm run build 2>&1 | tail -20
@@ -1251,7 +1251,7 @@ npm run build 2>&1 | tail -20
 
 Expected : `built in Xs` sans erreur.
 
-- [ ] **Step 2 : Déployer sur staging**
+- [x] **Step 2 : Déployer sur staging**
 
 ```bash
 bash deploy-dev.sh
@@ -1259,7 +1259,7 @@ bash deploy-dev.sh
 
 Expected : `Deployed to labocea-pmc-dev.tomkerf.workers.dev`
 
-- [ ] **Step 3 : Vérifier sur staging**
+- [x] **Step 3 : Vérifier sur staging**
 
 Ouvrir `labocea-pmc-dev.tomkerf.workers.dev` :
 1. Aller sur une fiche client → vérifier que la section "Visites préliminaires" apparaît
@@ -1268,7 +1268,7 @@ Ouvrir `labocea-pmc-dev.tomkerf.workers.dev` :
 4. Aller sur une demande existante → vérifier la section visites dans la modal
 5. Tester sur mobile : bouton caméra sur les photos de points
 
-- [ ] **Step 4 : Commit final**
+- [x] **Step 4 : Commit final**
 
 ```bash
 git add -A
