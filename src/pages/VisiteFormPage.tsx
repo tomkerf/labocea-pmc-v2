@@ -45,6 +45,7 @@ export default function VisiteFormPage() {
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(!isNew)
   const [uploadingPointId, setUploadingPointId] = useState<string | null>(null)
+  const [createdAt, setCreatedAt] = useState<Timestamp>(Timestamp.now())
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [linkedNomState, setLinkedNomState] = useState(linkedNom)
   const [linkedTypeState, setLinkedTypeState] = useState<'client' | 'demande'>(linkedType ?? 'client')
@@ -70,6 +71,7 @@ export default function VisiteFormPage() {
       setLinkedNomState(v.linkedTo.nom)
       setLinkedTypeState(v.linkedTo.type)
       setLinkedIdState(v.linkedTo.id)
+      setCreatedAt(v.createdAt)
       setLoading(false)
     })
   }, [visiteId, navigate])
@@ -94,24 +96,22 @@ export default function VisiteFormPage() {
 
   async function handlePhotoAdd(pointId: string, file: File) {
     if (isNew) {
-      const tempId = await handleSave(true)
-      if (!tempId) return
-      setUploadingPointId(pointId)
-      const url = await uploadVisitePhoto(file, tempId, pointId)
-      setPoints(ps => ps.map(p => p.id === pointId ? { ...p, photos: [...p.photos, url] } : p))
-      setUploadingPointId(null)
+      await handleSave(false)
       return
     }
     const id = visiteId!
     setUploadingPointId(pointId)
-    const url = await uploadVisitePhoto(file, id, pointId)
-    setPoints(ps => ps.map(p => p.id === pointId ? { ...p, photos: [...p.photos, url] } : p))
-    setUploadingPointId(null)
+    try {
+      const url = await uploadVisitePhoto(file, id, pointId)
+      setPoints(ps => ps.map(p => p.id === pointId ? { ...p, photos: [...p.photos, url] } : p))
+    } finally {
+      setUploadingPointId(null)
+    }
   }
 
   async function handlePhotoDelete(pointId: string, url: string) {
-    setPoints(ps => ps.map(p => p.id === pointId ? { ...p, photos: p.photos.filter(u => u !== url) } : p))
     await deleteVisitePhoto(url)
+    setPoints(ps => ps.map(p => p.id === pointId ? { ...p, photos: p.photos.filter(u => u !== url) } : p))
   }
 
   async function handleSave(silent = false): Promise<string | null> {
@@ -131,7 +131,7 @@ export default function VisiteFormPage() {
         if (!silent) navigate(`/visites/${newId}`, { replace: true })
         return newId
       } else {
-        await saveVisite({ id: visiteId!, ...payload, createdAt: Timestamp.now(), updatedAt: Timestamp.now() })
+        await saveVisite({ id: visiteId!, ...payload, createdAt, updatedAt: Timestamp.now() })
         if (!silent) navigate(-1)
         return visiteId!
       }
@@ -272,7 +272,7 @@ export default function VisiteFormPage() {
         {isNew && <div />}
         <button
           onClick={() => handleSave()}
-          disabled={saving || !date || points.some(p => !p.nom.trim())}
+          disabled={saving || !date || !technicienNom.trim() || points.some(p => !p.nom.trim())}
           className="px-5 py-2 rounded-lg text-sm font-medium"
           style={{ background: 'var(--color-accent)', color: 'white', opacity: saving ? 0.6 : 1 }}
         >
