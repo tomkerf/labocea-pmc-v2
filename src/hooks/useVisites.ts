@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore'
+import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { VisitePreliminaire } from '@/types'
 
@@ -15,10 +15,14 @@ export function useVisites(linkedId: string) {
     const q = query(
       collection(db, 'visites'),
       where('linkedTo.id', '==', linkedId),
-      orderBy('date', 'desc'),
     )
     const unsub = onSnapshot(q, (snap) => {
-      setVisites(snap.docs.map((d) => ({ id: d.id, ...d.data() } as VisitePreliminaire)))
+      const data = snap.docs.map((d) => ({ id: d.id, ...d.data() } as VisitePreliminaire))
+      data.sort((a, b) => b.date.localeCompare(a.date))
+      setVisites(data)
+      setLoading(false)
+    }, () => {
+      setVisites([])
       setLoading(false)
     })
     return () => unsub()

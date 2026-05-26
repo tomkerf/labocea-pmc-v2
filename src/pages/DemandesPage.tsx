@@ -56,13 +56,14 @@ interface ModalProps {
 }
 
 function DemandeVisites({ demandeId, demandeNom, onNavigate }: { demandeId: string; demandeNom: string; onNavigate: () => void }) {
+  const navigate = useNavigate()
   const { visites, loading } = useVisites(demandeId)
 
   function handleNew() {
     onNavigate()
     setTimeout(() => {
-      window.location.href = `/visites/nouveau?type=demande&id=${demandeId}&nom=${encodeURIComponent(demandeNom)}`
-    }, 50)
+      navigate(`/visites/nouveau?type=demande&id=${demandeId}&nom=${encodeURIComponent(demandeNom)}`)
+    }, 10)
   }
 
   return (
@@ -83,7 +84,10 @@ function DemandeVisites({ demandeId, demandeNom, onNavigate }: { demandeId: stri
         <div className="flex flex-col gap-1">
           {visites.map(v => (
             <button key={v.id}
-              onClick={() => { onNavigate(); setTimeout(() => { window.location.href = `/visites/${v.id}` }, 50) }}
+              onClick={() => {
+                onNavigate()
+                setTimeout(() => navigate(`/visites/${v.id}`), 10)
+              }}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-left w-full"
               style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border-subtle)' }}>
               <span className="flex-1 text-xs font-medium" style={{ color: 'var(--color-text-primary)' }}>
