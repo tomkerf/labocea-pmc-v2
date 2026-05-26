@@ -33,3 +33,33 @@ export async function deleteSamplingPhoto(url: string): Promise<void> {
     // Si le fichier n'existe plus (déjà supprimé), on ignore silencieusement
   }
 }
+
+/**
+ * Upload une photo de visite préliminaire dans Firebase Storage.
+ * Chemin : visites/{visiteId}/{pointId}/{timestamp}.{ext}
+ */
+export async function uploadVisitePhoto(
+  file: File,
+  visiteId: string,
+  pointId: string,
+): Promise<string> {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+  const path = `visites/${visiteId}/${pointId}/${Date.now()}.${ext}`
+  const storageRef = ref(storage, path)
+  await uploadBytes(storageRef, file, { contentType: file.type })
+  return getDownloadURL(storageRef)
+}
+
+/**
+ * Supprime une photo de visite depuis son URL.
+ */
+export async function deleteVisitePhoto(url: string): Promise<void> {
+  try {
+    const match = url.match(/\/o\/(.+?)(\?|$)/)
+    if (!match) return
+    const path = decodeURIComponent(match[1])
+    await deleteObject(ref(storage, path))
+  } catch {
+    // Fichier déjà supprimé — ignorer silencieusement
+  }
+}
