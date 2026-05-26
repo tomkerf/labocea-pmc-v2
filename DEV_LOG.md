@@ -5,6 +5,22 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 ---
 
 ## Session 65 — Raffinements Visuels Ultra-Premium (Apple-style)
+## Session 67 — Visites préliminaires et Modale de Bienvenue
+**26 mai 2026**
+
+### Ce qui a été fait
+- **Module Visites Préliminaires** : Implémentation d'une nouvelle collection `visites/{id}` gérant des visites avant démarrage des missions (lieu, date, interlocuteur, points de prélèvement à créer). Intégration sur `ClientPage` (onglet spécifique ou liste) et dans `DemandeModal`.
+- **Correction UX de navigation** : Ajout d'un timeout lors de la redirection depuis la modale "Nouvelle demande" vers le profil client pour éviter les blocages liés au démontage des composants.
+- **Optimisation des performances** : Suppression d'un index composite forcé sur Firestore pour `useVisites.ts` en remplaçant par un tri côté client, réglant ainsi un problème de chargement infini (moulinette) sans avoir à gérer des index complexes pour des petites collections.
+- **Documentation et Onboarding** :
+  - Mise à jour de la page d'aide avec un nouveau `VisitePreliminaireSection` expliquant la marche à suivre.
+  - Mise en place d'une **Modale de bienvenue** ("Welcome Modal") pour les utilisateurs se connectant pour la première fois à la V2. Elle les invite à lire le mode d'emploi, avec mémorisation de l'action (`hasSeenAide`) dans leur profil `users/{uid}`.
+  
+### Prochaines étapes
+- Continuer le suivi des retours de l'équipe terrain sur l'application staging.
+
+---
+
 ## Session 66 — Préparation des tests équipe & Déploiement Staging
 **25 mai 2026**
 
