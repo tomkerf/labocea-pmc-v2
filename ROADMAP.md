@@ -270,6 +270,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-25 | Phase 6 (Déploiement) ✅ | Validation via tests (115/115), build de production (0 erreur), et déploiement sur staging. Guide de test remplacé par le mode d'emploi interne. |
 | 2026-05-26 | Visites Préliminaires ✅ | Implémentation du module de visites préliminaires (ClientPage, DemandeModal, hooks) + Modale de bienvenue incitant à lire le mode d'emploi. |
 | 2026-05-26 | Dashboard / Push ✅ | Repliement par défaut du widget Métrologie à prévoir. Bypass auto-notification (allowSelfNotification) pour l'admin THK sur signalement de bug. |
+| 2026-05-26 | Exports + Bilan UI ✅ | Implémentation des exports Planning PDF (liste de route A4) et Excel (tableur auto-ajusté) + refonte esthétique de la bande Bilan 24h avec en-tête asymétrique, icône Clock, badge Pose/Dépose et capsules dégradées avec ligne d'accentuation style Apple Calendar |
 
 ---
 

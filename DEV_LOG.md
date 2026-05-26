@@ -4,6 +4,26 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 69 — Exports Planning et Refonte Visuelle Bilan 24h
+**26 mai 2026 (soirée)**
+
+### Ce qui a été fait
+- **Exports du Planning (PDF & Excel)** : Implémentation de deux nouveaux boutons de style Apple dans `PlanningHeader.tsx` (avec icônes Lucide `Printer` et `FileSpreadsheet`) permettant de télécharger le planning sous deux formats :
+  - **PDF (Feuille de route)** : Format A4 paysage très soigné sous forme de checklist (cases à cocher `[ ]`), avec métadonnées complètes (météo, coordonnées GPS, consignes) et une large zone lignée pour la prise de notes manuscrite sur le terrain. Les prénoms et noms complets des techniciens sont résolus à partir de leur profil pour remplacer les simples initiales.
+  - **Excel (Tableur)** : Export tabulaire propre et épuré avec ajustement automatique de la largeur de chaque colonne pour éviter les coupures de texte.
+  - **Respect du filtrage (WYSIWYG)** : L'export est dynamique et s'adapte en temps réel aux filtres appliqués à l'écran (technicien et période active).
+  - **Optimisation des performances** : Import dynamique (lazy loading) de `jspdf` et `xlsx` uniquement au moment du clic pour ne pas alourdir le bundle de démarrage.
+- **Refonte Visuelle Bilan 24h (Apple-style)** : Réponse immédiate au retour de l'utilisateur pour rendre la section "Bilan 24h" visuellement époustouflante :
+  - Remplacement du séparateur central coupant par un en-tête asymétrique ultra-minimaliste intégrant une icône `Clock` discrète en bleu Apple, le titre "Cycles Bilan 24h" et un magnifique badge de légende `"Pose J1 → Dépose J2"` très soigné.
+  - Attribution d'un arrière-plan contrasté gris clair Apple (`var(--color-bg-primary)`) à toute la bande pour structurer la page de manière calme et naturelle.
+  - Métamorphose des boîtes englobant les interventions J1/J2 en véritables capsules d'agenda Apple : ligne verticale d'accentuation solide à gauche de la couleur du technicien, fond en dégradé linéaire subtil (7% à 1% d'opacité), bords fins arrondis et micro-animations de survol (`hover:brightness-95`).
+- **Validation** : Passage réussi du typecheck strict (`tsc --noEmit`), exécution globale verte des 126 tests unitaires (dont les tests d'exports) et compilation de production.
+
+### Prochaines étapes
+- Recueillir les impressions de Tom sur le nouveau rendu visuel des Bilans 24h et les feuilles de route PDF générées.
+
+---
+
 ## Session 68 — Ergonomie du Dashboard & Auto-notifications Push
 **26 mai 2026 (fin de journée)**
 
