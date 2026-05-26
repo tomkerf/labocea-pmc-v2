@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Route } from 'lucide-react'
+import { Route, BookOpen, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 import DonutChart from '@/components/dashboard/DonutChart'
@@ -12,6 +12,7 @@ import { MaintenancesWidget } from '@/components/dashboard/MaintenancesWidget'
 import { EventDetailModal } from '@/components/EventDetailModal'
 import type { ModalEvent, TechOption } from '@/components/EventDetailModal'
 import { useAuthStore, selectPrenom, selectInitiales, selectUid, selectRole } from '@/stores/authStore'
+import { updateUserProfile } from '@/services/userService'
 import { useClientsListener } from '@/hooks/useClients'
 import { saveClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -31,11 +32,32 @@ import type { Sampling, Client, Plan } from '@/types'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
+  const appUser   = useAuthStore(s => s.appUser)
   const prenom    = useAuthStore(selectPrenom)
   const initiales = useAuthStore(selectInitiales)
   const uid       = useAuthStore(selectUid)
   const role      = useAuthStore(selectRole)
   const isGeneraliste = role === 'charge_mission' || role === 'admin'
+
+  const [showWelcome, setShowWelcome] = useState(false)
+
+  useEffect(() => {
+    if (appUser && appUser.hasSeenAide !== true) {
+      setShowWelcome(true)
+    }
+  }, [appUser])
+
+  async function dismissWelcome(navigateAide: boolean) {
+    setShowWelcome(false)
+    if (uid) {
+      await updateUserProfile(uid, { hasSeenAide: true })
+      // Update local state optimisticly so it doesn't blink
+      useAuthStore.setState(s => s.appUser ? { appUser: { ...s.appUser, hasSeenAide: true } } : s)
+    }
+    if (navigateAide) {
+      navigate('/aide')
+    }
+  }
 
   useClientsListener()
   useEquipementsListener()
@@ -294,10 +316,10 @@ export default function DashboardPage() {
 
       {eventDetail && (
         <EventDetailModal
-          key={eventDetail.event.id}
-          event={eventDetail.event}
-          dateStr={eventDetail.dateStr}
+          event={eventDetail?.event || null}
+          dateStr={eventDetail?.dateStr || ''}
           onClose={() => setEventDetail(null)}
+          techOptions={techOptions}
           onCancel={async (ev, reason) => {
             if (!uid || !ev.clientId || !ev.planId || !ev.samplingId) return
             const client = clients.find((c: Client) => c.id === ev.clientId)
@@ -338,9 +360,62 @@ export default function DashboardPage() {
             if (!client) return
             await saveClient({ ...client, preleveur: initiales_ }, uid)
           }}
-          techOptions={techOptions}
         />
       )}
+
+      <AnimatePresence>
+        {showWelcome && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl relative"
+              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}
+            >
+              <button
+                onClick={() => dismissWelcome(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 transition-colors"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                <X size={18} />
+              </button>
+
+              <div className="p-6 text-center flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+                  style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                  <BookOpen size={24} />
+                </div>
+                
+                <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                  Bienvenue sur PMC V2 ! 👋
+                </h3>
+                
+                <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                  L'application a fait peau neuve. Pour découvrir les nouveautés et le fonctionnement général, n'hésite pas à consulter le mode d'emploi.
+                </p>
+
+                <div className="flex flex-col gap-2 w-full">
+                  <button
+                    onClick={() => dismissWelcome(true)}
+                    className="w-full py-2.5 rounded-xl text-sm font-medium transition-transform active:scale-95"
+                    style={{ background: 'var(--color-accent)', color: 'white' }}
+                  >
+                    Lire le mode d'emploi
+                  </button>
+                  <button
+                    onClick={() => dismissWelcome(false)}
+                    className="w-full py-2 text-sm font-medium transition-colors"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    Plus tard
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }

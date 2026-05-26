@@ -16,6 +16,7 @@ export interface AppUser {
   initiales: string
   email: string
   role: UserRole
+  hasSeenAide?: boolean
   avatarColor?: string
   avatarSeed?: string    // seed DiceBear — si défini, affiche un avatar illustré
   createdAt: Timestamp
