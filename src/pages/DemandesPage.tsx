@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, X, Trash2 } from 'lucide-react'
+import { Plus, X, Trash2, ChevronRight } from 'lucide-react'
 import { useDemandesListener, saveDemande, createDemande, deleteDemande } from '@/hooks/useDemandes'
 import { useDemandesStore } from '@/stores/demandesStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { createClient } from '@/services/clientService'
+import { useVisites } from '@/hooks/useVisites'
 import type { AppUser, Demande, DemandeStatut } from '@/types'
 
 // ── Config statuts ────────────────────────────────────────────
@@ -52,6 +53,50 @@ interface ModalProps {
   onDelete?: () => void
   onConvertir?: (d: Demande) => void
   users: AppUser[]
+}
+
+function DemandeVisites({ demandeId, demandeNom, onNavigate }: { demandeId: string; demandeNom: string; onNavigate: () => void }) {
+  const { visites, loading } = useVisites(demandeId)
+
+  function handleNew() {
+    onNavigate()
+    setTimeout(() => {
+      window.location.href = `/visites/nouveau?type=demande&id=${demandeId}&nom=${encodeURIComponent(demandeNom)}`
+    }, 50)
+  }
+
+  return (
+    <div className="mt-2">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.05em' }}>
+          Visites préliminaires
+        </span>
+        <button onClick={handleNew} className="text-xs px-2.5 py-1 rounded-lg font-medium flex items-center gap-1"
+          style={{ background: 'var(--color-accent)', color: 'white' }}>
+          <Plus size={12} />
+          Nouvelle
+        </button>
+      </div>
+      {loading ? null : visites.length === 0 ? (
+        <p className="text-xs py-2" style={{ color: 'var(--color-text-tertiary)' }}>Aucune visite enregistrée</p>
+      ) : (
+        <div className="flex flex-col gap-1">
+          {visites.map(v => (
+            <button key={v.id}
+              onClick={() => { onNavigate(); setTimeout(() => { window.location.href = `/visites/${v.id}` }, 50) }}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-left w-full"
+              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border-subtle)' }}>
+              <span className="flex-1 text-xs font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                {new Date(v.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                {' — '}{v.points.length} pt{v.points.length > 1 ? 's' : ''}
+              </span>
+              <ChevronRight size={12} style={{ color: 'var(--color-text-tertiary)' }} />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }: ModalProps) {
@@ -153,6 +198,16 @@ function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }
           <Field label="Notes internes">
             <textarea value={form.notes} onChange={e => set('notes', e.target.value)} rows={2} placeholder="Remarques, points d'attention…" className="field-input w-full resize-none" />
           </Field>
+          {!isNew && demande.id && (
+            <>
+              <Sec label="Visites préliminaires" />
+              <DemandeVisites
+                demandeId={demande.id}
+                demandeNom={form.contactSociete || form.contactNom || 'Demande'}
+                onNavigate={onClose}
+              />
+            </>
+          )}
         </div>
 
         {/* Actions */}
