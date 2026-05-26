@@ -4,6 +4,19 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 68 — Ergonomie du Dashboard & Auto-notifications Push
+**26 mai 2026 (fin de journée)**
+
+### Ce qui a été fait
+- **Ergonomie du Dashboard** : Le widget "Métrologie à prévoir (J-14)" est désormais replié par défaut (`const [open, setOpen] = useState(false)` dans `MetrologieWidget.tsx`), allégeant considérablement l'interface d'accueil.
+- **Auto-notifications de bugs (Admin)** : Ajout d'une option `allowSelfNotification` dans `sendPushToTechnician` (`notificationService.ts`) pour permettre aux administrateurs de recevoir les pushs de leurs propres signalements de bugs à des fins de test.
+- **Validation & Déploiement** : Lancement complet des tests (124/124 succès), validation du build TypeScript, et déploiement de la version finale sur l'environnement de Staging.
+
+### Prochaines étapes
+- Poursuivre le débogage de la réception des notifications push en local avec Tom (permissions de notification Chrome/macOS).
+
+---
+
 ## Session 65 — Raffinements Visuels Ultra-Premium (Apple-style)
 ## Session 67 — Visites préliminaires et Modale de Bienvenue
 **26 mai 2026**
