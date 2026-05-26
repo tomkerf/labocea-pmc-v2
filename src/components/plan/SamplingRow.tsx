@@ -49,7 +49,7 @@ export function SamplingRow({
   const dateLabel = s.dateUndefined
     ? 'Date à définir'
     : isCustom
-      ? `${s.plannedDay} ${MOIS[s.plannedMonth]}`
+      ? s.plannedDay > 0 ? `${s.plannedDay} ${MOIS[s.plannedMonth]}` : MOIS[s.plannedMonth]
       : `${MOIS[s.plannedMonth]}${s.plannedDay ? ` — j${s.plannedDay}` : ''}`
 
   return (
