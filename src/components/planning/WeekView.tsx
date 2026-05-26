@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import {
   type PlanningEvent, type BilanGroup, type AllDayItem,
@@ -38,6 +39,22 @@ export default function WeekView({
   setIsDragging, setDragStart, setDragEnd,
   handleSelectEvent, goToDay, setCtxMenu, isInDrag,
 }: WeekViewProps) {
+
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
+
+  function toggleGroup(dateStr: string, clientId: string) {
+    const key = `${dateStr}—${clientId}`
+    setExpandedGroups(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
+  function isGroupExpanded(dateStr: string, clientId: string) {
+    return expandedGroups.has(`${dateStr}—${clientId}`)
+  }
 
   function filteredForDayFlat(dateStr: string): PlanningEvent[] {
     return sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
@@ -194,7 +211,36 @@ export default function WeekView({
               {!isHoliday && hasConge && !inDrag && <div className="conge-overlay" />}
               {/* Overlay pluie */}
               {showRain && isRainyDay && !inDrag && <div className="rain-overlay" />}
-              {evts.map(evt => <EventPill key={evt.id} event={evt} dateStr={dateStr} onExpand={() => goToDay(dateStr)} onSelect={e => handleSelectEvent(e, dateStr)} />)}
+              {evts.flatMap(evt => {
+                const isGrouped = (evt.count ?? 0) > 1
+                if (isGrouped && isGroupExpanded(dateStr, evt.clientId ?? evt.id)) {
+                  const groupKey = evt.clientId ?? evt.id
+                  return [
+                    ...(evt.subEvents ?? []).map(sub => (
+                      <EventPill key={sub.id} event={sub} dateStr={dateStr} onSelect={e => handleSelectEvent(e, dateStr)} />
+                    )),
+                    <button
+                      key={`collapse-${groupKey}`}
+                      onMouseDown={e => e.stopPropagation()}
+                      onClick={e => { e.stopPropagation(); toggleGroup(dateStr, groupKey) }}
+                      className="w-full text-center text-[9px] font-medium rounded py-[2px]"
+                      style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border-subtle)' }}
+                    >
+                      ▲ replier
+                    </button>
+                  ]
+                }
+                return [
+                  <EventPill
+                    key={evt.id}
+                    event={evt}
+                    dateStr={dateStr}
+                    expanded={false}
+                    onExpand={isGrouped ? () => toggleGroup(dateStr, evt.clientId ?? evt.id) : () => goToDay(dateStr)}
+                    onSelect={e => handleSelectEvent(e, dateStr)}
+                  />
+                ]
+              })}
               <div className="mt-auto pt-1 flex justify-end pr-0.5">
                 <Plus size={10} className="opacity-20 group-hover:opacity-60 transition-opacity"
                   style={{ color: 'var(--color-text-tertiary)' }} />

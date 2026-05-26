@@ -13,11 +13,12 @@ interface EventPillProps {
   event:     PlanningEvent
   compact?:  boolean
   dateStr?:  string
+  expanded?: boolean
   onExpand?: () => void
   onSelect?: (event: PlanningEvent) => void
 }
 
-export default function EventPill({ event, compact, dateStr, onExpand, onSelect }: EventPillProps) {
+export default function EventPill({ event, compact, dateStr, expanded, onExpand, onSelect }: EventPillProps) {
   const navigate = useNavigate()
 
   // compact = true en vue mois : une seule ligne, pas de sous-titre
@@ -151,8 +152,8 @@ export default function EventPill({ event, compact, dateStr, onExpand, onSelect 
         )}
         {isGrouped && (
           <span className="shrink-0 text-[9px] font-bold px-1 rounded"
-            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-            ×{event.count}
+            style={{ background: expanded ? dotColor + '22' : 'var(--color-bg-tertiary)', color: expanded ? dotColor : 'var(--color-text-secondary)' }}>
+            {expanded ? '▲' : `×${event.count}`}
           </span>
         )}
         {event.plannedTime && (
