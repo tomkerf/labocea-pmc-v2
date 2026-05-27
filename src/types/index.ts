@@ -343,6 +343,7 @@ export interface BugReport {
   userNom: string
   userInitiales: string
   createdAt: Timestamp
+  status?: 'ouvert' | 'traite'
 }
 
 // --- Visites préliminaires ---

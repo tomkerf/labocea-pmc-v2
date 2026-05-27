@@ -54,10 +54,14 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
                 const fmtPrevue = r.rapportDatePrevue
                   ? new Date(r.rapportDatePrevue + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
                   : '—'
-                const dotColor = r.enRetard ? 'var(--color-danger)' : r.joursDepuis > 15 ? 'var(--color-warning)' : 'var(--color-success)'
-                const tagBg    = r.enRetard ? 'var(--color-danger-light)' : r.joursDepuis > 15 ? 'var(--color-warning-light)' : 'var(--color-success-light)'
-                const tagColor = r.enRetard ? 'var(--color-danger)' : r.joursDepuis > 15 ? 'var(--color-warning)' : 'var(--color-success)'
-                const tagLabel = r.enRetard ? `+${r.joursDepuis}j` : `${r.joursDepuis}j`
+                const today = new Date(); today.setHours(0,0,0,0)
+                const joursAvant = r.rapportDatePrevue
+                  ? Math.floor((new Date(r.rapportDatePrevue).getTime() - today.getTime()) / 86400000)
+                  : null
+                const dotColor = joursAvant === null ? 'var(--color-neutral)' : joursAvant < 0 ? 'var(--color-danger)' : joursAvant <= 7 ? 'var(--color-warning)' : 'var(--color-success)'
+                const tagBg    = joursAvant === null ? 'var(--color-bg-tertiary)' : joursAvant < 0 ? 'var(--color-danger-light)' : joursAvant <= 7 ? 'var(--color-warning-light)' : 'var(--color-success-light)'
+                const tagColor = joursAvant === null ? 'var(--color-text-secondary)' : joursAvant < 0 ? 'var(--color-danger)' : joursAvant <= 7 ? 'var(--color-warning)' : 'var(--color-success)'
+                const tagLabel = joursAvant === null ? '—' : joursAvant < 0 ? `${Math.abs(joursAvant)}j de retard` : joursAvant === 0 ? "aujourd'hui" : `dans ${joursAvant}j`
                 return (
                   <div key={r.samplingId}
                     className="flex items-center gap-3 px-4 py-3"

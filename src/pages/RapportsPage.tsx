@@ -188,7 +188,7 @@ export default function RapportsPage() {
                             style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)' }}>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
-                                {r.planNom}
+                                {r.planNom} · <span style={{ color: 'var(--color-text-secondary)' }}>{r.siteNom}</span>
                               </p>
                               <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
                                 intervention le {fmtDone}
@@ -303,7 +303,9 @@ export default function RapportsPage() {
                             style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)' }}>
                             <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: 'var(--color-success)' }} />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>{r.planNom}</p>
+                              <p className="text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+                                {r.planNom} · <span style={{ color: 'var(--color-text-secondary)' }}>{r.siteNom}</span>
+                              </p>
                               <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
                                 intervention le {fmtDone}
                               </p>
