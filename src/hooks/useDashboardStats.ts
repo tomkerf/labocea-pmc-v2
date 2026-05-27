@@ -285,6 +285,7 @@ export function useDashboardStats({
       client.plans.forEach((plan) => {
         const jMatch = `${plan.nom || ''} ${plan.siteNom || ''}`.match(/\bJ(\d+)\b/)
         const dayOffset = jMatch ? parseInt(jMatch[1]) - 1 : 0
+        const isAuto = plan.methode === 'Automatique'
         plan.samplings.forEach((s: Sampling) => {
           if (!s.plannedDay && !s.doneDate) return
           if (initiales) {
@@ -292,19 +293,37 @@ export function useDashboardStats({
             if (techSampling && techSampling !== initiales) return
           }
           const baseDate = s.doneDate || localISO(new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay + dayOffset))
+          const todayISO = localISO(new Date(nowMs))
+          // Bilan 24h : J1 aujourd'hui → ajouter J2 (récupération) demain
+          if (isAuto && baseDate === todayISO && s.status !== 'done') {
+            const badge = getSamplingBadge(s)
+            const dot = 'var(--color-accent)'
+            const sub = [plan.siteNom, plan.nom].filter(Boolean).join(' · ') || '—'
+            const subJ2 = `${sub} · Bilan 24h J2`
+            const modalEvent: ModalEventRef = {
+              id: `${s.id}_j2`, type: 'prelevement', title: client.nom, subtitle: subJ2,
+              statusLabel: badge.label, statusBg: badge.bg, statusColor: dot,
+              link: `/missions/${client.id}/plan/${plan.id}`,
+              isDone: false, technicien: client.preleveur || '—',
+              clientId: client.id, planId: plan.id, samplingId: s.id, plannedTime: s.plannedTime,
+            }
+            items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub: subJ2, badge, dot, meteo: plan.meteo || '', modalEvent })
+            return
+          }
           if (baseDate !== tomorrowISO) return
           if (s.status === 'done') return
           const badge = getSamplingBadge(s)
           const dot = s.status === 'overdue' ? 'var(--color-danger)' : 'var(--color-accent)'
           const sub = [plan.siteNom, plan.nom].filter(Boolean).join(' · ') || '—'
+          const subtitle = isAuto ? `${sub} · Bilan 24h J1` : sub
           const modalEvent: ModalEventRef = {
-            id: s.id, type: 'prelevement', title: client.nom, subtitle: sub,
+            id: s.id, type: 'prelevement', title: client.nom, subtitle,
             statusLabel: badge.label, statusBg: badge.bg, statusColor: dot,
             link: `/missions/${client.id}/plan/${plan.id}`,
             isDone: false, technicien: client.preleveur || '—',
             clientId: client.id, planId: plan.id, samplingId: s.id, plannedTime: s.plannedTime,
           }
-          items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub, badge, dot, meteo: plan.meteo || '', modalEvent })
+          items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub: subtitle, badge, dot, meteo: plan.meteo || '', modalEvent })
         })
       })
     })

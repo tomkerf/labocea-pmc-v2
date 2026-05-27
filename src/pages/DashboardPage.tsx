@@ -193,21 +193,9 @@ export default function DashboardPage() {
 
         {/* Planning */}
         <div>
-          <div className="flex items-center justify-between mb-3 gap-2">
+          <div className="flex flex-col gap-2 mb-3">
+            <div className="flex items-center justify-between gap-2">
             <SectionTitle>{planningMode === 'today' ? 'Planning du jour' : 'Planning de demain'}</SectionTitle>
-            {planningMode === 'today' && jourItems.filter(i => i.kind === 'sampling' && !i.modalEvent.isDone).length > 0 && (
-              <motion.button
-                whileHover={{ scale: 1.02, y: -0.5 }}
-                whileTap={{ scale: 0.96 }}
-                transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                onClick={() => navigate('/tournee')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 cursor-pointer shadow-sm"
-                style={{ background: 'var(--color-accent)', color: 'white' }}
-              >
-                <Route size={13} />
-                Démarrer la tournée
-              </motion.button>
-            )}
             <div className="relative flex gap-1 p-1 rounded-lg shrink-0" style={{ background: 'var(--color-bg-tertiary)' }}>
               <button
                 onClick={() => setPlanningMode('today')}
@@ -244,6 +232,20 @@ export default function DashboardPage() {
                 Demain
               </button>
             </div>
+            </div>
+            {planningMode === 'today' && jourItems.filter(i => i.kind === 'sampling' && !i.modalEvent.isDone).length > 0 && (
+              <motion.button
+                whileHover={{ scale: 1.02, y: -0.5 }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+                onClick={() => navigate('/tournee')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 cursor-pointer shadow-sm self-start"
+                style={{ background: 'var(--color-accent)', color: 'white' }}
+              >
+                <Route size={13} />
+                Démarrer la tournée
+              </motion.button>
+            )}
           </div>
           {activeItems.length === 0 ? (
             <EmptyCard>Aucune intervention ni événement{planningMode === 'today' ? " aujourd'hui" : " demain"}.</EmptyCard>
