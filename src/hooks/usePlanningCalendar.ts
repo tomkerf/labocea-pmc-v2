@@ -101,7 +101,7 @@ export function usePlanningCalendar({
       if (j2Col !== -1) rowIdx = Math.max(rowIdx, colRowNext[j2Col])
       if (!rows[rowIdx]) rows[rowIdx] = []
 
-      const tc = getTechColor(j1.technicien).color
+      const tc = j1.technicien && j1.technicien !== '—' ? getTechColor(j1.technicien).color : 'var(--color-accent)'
       const hasPair = j2Col !== -1 && j2 !== null
 
       rows[rowIdx].push({

@@ -107,7 +107,8 @@ export default function WeekView({
 
       {/* ── Bande bilan 24h — groupe J1+J2 avec bordure commune (colspan) ── */}
       {bilanBand.length > 0 && (
-        <div className="shrink-0 animate-fade-in" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-primary)', padding: '3px 0' }}>
+        <div className="shrink-0 animate-fade-in" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 0', position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '50%', left: 6, transform: 'translateY(-50%)', fontSize: 8, fontWeight: 600, letterSpacing: '0.07em', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', pointerEvents: 'none', userSelect: 'none' }}>Bilans 24h</span>
           {bilanBand.map((row, rowIdx) => {
             const wISOs = weekDays.map(toISO)
             return (
