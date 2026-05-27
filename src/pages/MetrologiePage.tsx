@@ -92,11 +92,12 @@ export default function MerologiePage() {
         <button
           onClick={handleCreate}
           disabled={creating}
-          className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg"
+          className="shrink-0 flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg"
           style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
         >
           <Plus size={16} />
-          Saisir une vérification
+          <span className="hidden sm:inline">Saisir une vérification</span>
+          <span className="sm:hidden">Saisir</span>
         </button>
       </div>
 

@@ -43,13 +43,13 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, o
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose}>
+      <div className="fixed inset-0 z-50 flex items-end md:items-center md:justify-center" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose}>
         <motion.div
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
-          className="w-full rounded-t-2xl px-6 pt-5 pb-10"
+          className="w-full rounded-t-2xl px-6 pt-5 pb-10 md:rounded-2xl md:max-w-lg md:pb-6"
           style={{ background: 'var(--color-bg-secondary)' }}
           onClick={e => e.stopPropagation()}>
 
