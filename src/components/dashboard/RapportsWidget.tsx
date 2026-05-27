@@ -26,7 +26,7 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
       >
         <span className="text-xs font-semibold uppercase"
           style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-          Rapports à envoyer
+          Rapports à rédiger
         </span>
         {rapports.length > 0 && (
           <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
@@ -80,7 +80,7 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
                       onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-accent)', (e.currentTarget.style.color = 'white'))}
                       onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-accent-light)', (e.currentTarget.style.color = 'var(--color-accent)'))}
                     >
-                      Envoyé ✓
+                      Rédigé ✓
                     </button>
                   </div>
                 )
