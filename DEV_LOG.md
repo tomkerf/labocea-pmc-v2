@@ -4,6 +4,25 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 75 — Planning : temps de pluie activé par défaut
+**27 mai 2026 (soirée)**
+
+### Ce qui a été fait
+- **Temps de pluie activé par défaut** : le filtre "Temps de pluie" sur le planning était désactivé par défaut (`=== 'true'`). Logique inversée en `!== 'false'` — actif à la première ouverture, désactivé seulement si l'utilisateur l'a explicitement coupé (localStorage = `'false'`).
+- **Tentative animation gouttes** : essai d'animation CSS (repeating-linear-gradient diagonal animé) sur le `rain-overlay`. Rejeté visuellement — revenu à l'original.
+
+### Fichiers modifiés
+- `src/pages/PlanningPage.tsx` — condition `showRain` par défaut
+
+### Cause racine
+Le `useState` initialisé avec `localStorage.getItem(...) === 'true'` retourne `false` quand la clé est absente (premier chargement), ce qui masquait le filtre alors qu'il devrait être visible par défaut.
+
+### Prochaines étapes
+- Continuer le triage react-doctor (767 warnings accessibilité/design tokens).
+- Tournée : drag & drop ou horaire planifié (déféré en roadmap).
+
+---
+
 ## Session 73 — React Doctor : qualité code + outils de sécurité
 **27 mai 2026 (après-midi/soirée)**
 
