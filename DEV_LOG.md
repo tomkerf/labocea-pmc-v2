@@ -1675,3 +1675,21 @@ Review complète de la codebase. 8 issues corrigées :
   - Double confirmation de suppression.
   - Liaison bidirectionnelle avec les fiches Clients/Missions et Équipements.
 - **Qualité & Tests** : création de `useTodos.test.ts` (2 tests pour le hook de synchronisation). Lancement de la suite de tests (128/128 tests au vert).
+
+---
+
+## Session 71 — Bugfixes dashboard
+**27 mai 2026**
+
+### Bugs corrigés
+
+**J2 bilan 24h manquant dans "Planning de demain"**
+- Cause racine : `lendemainItems` dans `useDashboardStats.ts` n'itère que les vrais samplings Firestore. Les événements J2 sont synthétiques dans `usePlanningData` (générés à J1+1 jour) et n'existent pas en base — ils n'apparaissaient donc jamais dans le widget dashboard.
+- Fix : pour les plans `methode === 'Automatique'`, si le J1 tombe aujourd'hui, on injecte un item J2 ("Bilan 24h J2") dans `lendemainItems` pour demain.
+
+**Layout mobile cassé sur le header planning**
+- Cause racine : titre + bouton "Démarrer la tournée" + toggle Aujourd'hui/Demain dans un seul `flex justify-between` → débordement horizontal sur mobile.
+- Fix : restructuration en deux lignes — ligne 1 : titre + toggle, ligne 2 : bouton tournée (conditionnel).
+
+### Prochaines étapes
+- Ordre de passage dans la tournée (drag & drop ou heure planifiée) — reporté
