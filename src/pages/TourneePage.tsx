@@ -20,7 +20,7 @@ import type { SaisieRapideData } from '@/components/tournee/SaisieRapideModal'
 import { TourneeFinEcran } from '@/components/tournee/TourneeFinEcran'
 import type { TourneeFinItem } from '@/components/tournee/TourneeFinEcran'
 
-type LocalStatus = 'todo' | 'done' | 'non_effectue'
+type LocalStatus = 'todo' | 'done' | 'non_effectue' | 'reporte'
 
 interface ModalState {
   samplingId: string
@@ -87,12 +87,12 @@ export default function TourneePage() {
 
   const allDone = tourneeItems.length > 0 && tourneeItems.every(i => {
     const s = localStatuses.get(i.samplingId) ?? i.status
-    return s === 'done' || s === 'non_effectue'
+    return s === 'done' || s === 'non_effectue' || s === 'reporte'
   })
 
   const doneCount = tourneeItems.filter(i => {
     const s = localStatuses.get(i.samplingId) ?? i.status
-    return s === 'done' || s === 'non_effectue'
+    return s === 'done' || s === 'non_effectue' || s === 'reporte'
   }).length
 
   function handleAction(samplingId: string, action: 'done' | 'non_effectue') {
@@ -128,6 +128,15 @@ export default function TourneePage() {
               doneDate: localISO(d),
               nappe:    data.nappe as NappeType,
               comment:  data.commentaire,
+            }
+          }
+          if (data.status === 'reporte') {
+            const nd = new Date(data.newPlannedDate + 'T12:00:00')
+            return {
+              ...s,
+              status:       'planned',
+              plannedMonth: nd.getMonth(),
+              plannedDay:   nd.getDate(),
             }
           }
           return {

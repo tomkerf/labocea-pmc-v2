@@ -4,11 +4,12 @@ import { AnimatePresence, motion } from 'framer-motion'
 import type { NappeType } from '@/types'
 
 export interface SaisieRapideData {
-  status: 'done' | 'non_effectue'
+  status: 'done' | 'non_effectue' | 'reporte'
   doneDate: string
   nappe: NappeType
   commentaire: string
   motif: string
+  newPlannedDate: string
 }
 
 interface Props {
@@ -23,8 +24,9 @@ interface Props {
 const todayISO = () => new Date().toISOString().slice(0, 10)
 
 export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, onConfirm, onClose }: Props) {
-  const [status, setStatus]           = useState<'done' | 'non_effectue'>(initialStatus)
+  const [status, setStatus]           = useState<'done' | 'non_effectue' | 'reporte'>(initialStatus)
   const [doneDate, setDoneDate]       = useState(todayISO())
+  const [newPlannedDate, setNewPlannedDate] = useState(todayISO())
   const [nappe, setNappe]             = useState<NappeType>('')
   const [commentaire, setCommentaire] = useState('')
   const [motif, setMotif]             = useState('')
@@ -37,8 +39,12 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, o
       setError('Motif obligatoire pour un prélèvement non effectué.')
       return
     }
+    if (status === 'reporte' && !newPlannedDate) {
+      setError('Nouvelle date obligatoire pour reporter.')
+      return
+    }
     setError('')
-    onConfirm({ status, doneDate, nappe, commentaire, motif: motif.trim() })
+    onConfirm({ status, doneDate, nappe, commentaire, motif: motif.trim(), newPlannedDate })
   }
 
   return (
@@ -60,26 +66,47 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, o
 
           {/* Statut */}
           <div className="flex gap-2 mb-4">
-            {(['done', 'non_effectue'] as const).map(s => (
-              <button key={s}
-                onClick={() => setStatus(s)}
-                className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
-                style={{
-                  background: status === s ? (s === 'done' ? 'var(--color-success-light)' : 'var(--color-warning-light)') : 'var(--color-bg-tertiary)',
-                  color: status === s ? (s === 'done' ? 'var(--color-success)' : 'var(--color-warning)') : 'var(--color-text-secondary)',
-                }}>
-                {s === 'done' ? 'Réalisé' : 'Non effectué'}
-              </button>
-            ))}
+            {(['done', 'non_effectue', 'reporte'] as const).map(s => {
+              const labels = { done: 'Réalisé', non_effectue: 'Non effectué', reporte: 'Reporter' }
+              const activeColors = {
+                done:         { bg: 'var(--color-success-light)',  text: 'var(--color-success)' },
+                non_effectue: { bg: 'var(--color-warning-light)',  text: 'var(--color-warning)' },
+                reporte:      { bg: 'var(--color-accent-light)',   text: 'var(--color-accent)'  },
+              }
+              const isActive = status === s
+              return (
+                <button key={s}
+                  onClick={() => setStatus(s)}
+                  className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
+                  style={{
+                    background: isActive ? activeColors[s].bg : 'var(--color-bg-tertiary)',
+                    color:      isActive ? activeColors[s].text : 'var(--color-text-secondary)',
+                  }}>
+                  {labels[s]}
+                </button>
+              )
+            })}
           </div>
 
-          {/* Date */}
-          <label className="block mb-3">
-            <span className="text-xs font-medium mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Date réalisée</span>
-            <input type="date" value={doneDate} onChange={e => setDoneDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm"
-              style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)' }} />
-          </label>
+          {/* Date réalisée — uniquement si done */}
+          {status === 'done' && (
+            <label className="block mb-3">
+              <span className="text-xs font-medium mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Date réalisée</span>
+              <input type="date" value={doneDate} onChange={e => setDoneDate(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-sm"
+                style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)' }} />
+            </label>
+          )}
+
+          {/* Nouvelle date planifiée — uniquement si reporté */}
+          {status === 'reporte' && (
+            <label className="block mb-3">
+              <span className="text-xs font-medium mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Nouvelle date prévue *</span>
+              <input type="date" value={newPlannedDate} onChange={e => setNewPlannedDate(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-sm"
+                style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)' }} />
+            </label>
+          )}
 
           {/* Nappe — uniquement eau souterraine */}
           {isSouterraine && (

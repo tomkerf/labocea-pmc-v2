@@ -12,7 +12,7 @@ export interface TourneeItemData {
   nature: string
   lat: string
   lng: string
-  status: 'todo' | 'done' | 'non_effectue'
+  status: 'todo' | 'done' | 'non_effectue' | 'reporte'
   motif: string
 }
 
@@ -22,19 +22,22 @@ interface Props {
 }
 
 export function TourneeItem({ item, onAction }: Props) {
-  const isDone = item.status === 'done'
-  const isNonFait = item.status === 'non_effectue'
-  const isTerminal = isDone || isNonFait
+  const isDone     = item.status === 'done'
+  const isNonFait  = item.status === 'non_effectue'
+  const isReporte  = item.status === 'reporte'
+  const isTerminal = isDone || isNonFait || isReporte
 
   const bg = isDone
     ? 'var(--color-success-light)'
     : isNonFait
     ? 'var(--color-warning-light)'
+    : isReporte
+    ? 'var(--color-accent-light)'
     : 'var(--color-bg-secondary)'
 
-  const badgeLabel = isDone ? 'Réalisé' : isNonFait ? 'Non effectué' : 'À faire'
-  const badgeBg    = isDone ? 'var(--color-success-light)' : isNonFait ? 'var(--color-warning-light)' : 'var(--color-bg-tertiary)'
-  const badgeColor = isDone ? 'var(--color-success)' : isNonFait ? 'var(--color-warning)' : 'var(--color-text-secondary)'
+  const badgeLabel = isDone ? 'Réalisé' : isNonFait ? 'Non effectué' : isReporte ? 'Reporté' : 'À faire'
+  const badgeBg    = isDone ? 'var(--color-success-light)' : isNonFait ? 'var(--color-warning-light)' : isReporte ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)'
+  const badgeColor = isDone ? 'var(--color-success)' : isNonFait ? 'var(--color-warning)' : isReporte ? 'var(--color-accent)' : 'var(--color-text-secondary)'
 
   const hasGps = item.lat !== '' && item.lng !== ''
   const mapsUrl = `https://maps.apple.com/?q=${item.lat},${item.lng}`
