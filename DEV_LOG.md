@@ -4,6 +4,29 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 73 — React Doctor : qualité code + outils de sécurité
+**27 mai 2026 (après-midi/soirée)**
+
+### Ce qui a été fait
+- **Installation react-doctor** : linter spécialisé React (score 0–100), pre-commit hook actif, workflow GitHub Actions retiré (permission `workflow` manquante sur le token).
+- **Triage des 23 erreurs react-doctor** :
+  - Vrai positif corrigé : `effect-needs-cleanup` dans `MapView.tsx` — `setTimeout` sans capture d'id, `clearTimeout` ajouté dans le cleanup pour éviter `setMapReady(true)` sur composant démonté.
+  - Faux positifs documentés dans `.react-doctor/false-positives.md` : `only-export-components` (EntryCard, UserAvatar — exports utilitaires co-localisés intentionnels), `no-mutable-in-deps` (AppLayout — `location` vient de `useLocation()` pas de `window.location`), `effect-needs-cleanup` MapView:153 (listeners Leaflet détruits par `map.remove()`), tout `dist_old/`.
+- **Fix global `button-has-type`** : ~160 `<button>` sans `type="button"` corrigés dans tous les fichiers `src/` via regex perl.
+- **Installation security-guidance plugin** (Anthropic officiel) : revue de sécurité automatique à chaque edit/fin de tour/commit. 20 hooks enregistrés, actif en arrière-plan.
+
+### Fichiers modifiés
+- `src/components/planning/MapView.tsx` — clearTimeout ajouté
+- ~65 fichiers `src/` — `type="button"` ajouté
+- `.react-doctor/false-positives.md` — créé
+- `package.json` / `package-lock.json` — react-doctor installé
+
+### Prochaines étapes
+- Surveiller les remontées du plugin security-guidance sur les prochains commits.
+- Continuer le triage react-doctor : 767 warnings restants (accessibilité, design tokens, `prefer-useReducer`).
+
+---
+
 ## Session 72 — Reporter une intervention depuis la tournée
 **27 mai 2026 (après-midi)**
 
@@ -1694,6 +1717,32 @@ Review complète de la codebase. 8 issues corrigées :
   - Double confirmation de suppression.
   - Liaison bidirectionnelle avec les fiches Clients/Missions et Équipements.
 - **Qualité & Tests** : création de `useTodos.test.ts` (2 tests pour le hook de synchronisation). Lancement de la suite de tests (128/128 tests au vert).
+
+---
+
+## Session 74 — Cohérence UI rapports + gestion bugs admin
+**27 mai 2026**
+
+### Améliorations
+
+**Widget Rapports (dashboard)**
+- Titre renommé "Rapports à rédiger" (cohérent avec l'onglet Rapports)
+- Bouton renommé "Rédigé ✓" → "Rédigé ✓"
+- Couleurs du délai alignées sur RapportsPage : jours avant deadline (seuils <0 danger, ≤7 warning, >7 success)
+- Correction du calcul : comparaison depuis minuit (comme la page) pour éviter un décalage de 1 jour dû à l'heure courante
+
+**RapportsPage**
+- Site géographique affiché inline sous le nom du plan — format "Rejet EP · Quimper"
+- Appliqué sur les deux sections (À rédiger et Rédigés)
+
+**AdminBugsSection**
+- Bouton "Marquer traité" par ligne → écrit `status: 'traite'` dans Firestore
+- Badge vert "Traité" remplace le bouton une fois traité
+- Bugs traités masqués par défaut — lien "Voir les X traités" / "Masquer les traités"
+- Type `BugReport` enrichi avec le champ `status?: 'ouvert' | 'traite'`
+
+### Prochaines étapes
+- Ordre de passage dans la tournée (drag & drop ou heure planifiée)
 
 ---
 

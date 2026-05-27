@@ -274,6 +274,8 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-26 | Gestion des Tâches ✅ | Implémentation complète du module de Gestion des Tâches (Todo List) : collection Firestore, règles de sécurité, store Zustand, hook temps réel onSnapshot, widget interactif sur le Tableau de bord et page principale Reminders-style Apple. |
 | 2026-05-27 | Bugfixes dashboard | J2 bilan 24h manquant dans "Planning de demain" (item synthétique non généré) + layout mobile cassé sur le toggle Aujourd'hui/Demain. |
 | 2026-05-27 | Reporter une intervention | Ajout du statut "Reporter" dans SaisieRapideModal (tournée) avec sélection de nouvelle date planifiée — met à jour plannedMonth/plannedDay en Firestore. |
+| 2026-05-27 | Qualité code & sécurité | Installation react-doctor (score 57/100, fix button-has-type global + effect cleanup MapView) + security-guidance plugin Anthropic (revue sécurité automatique). |
+| 2026-05-27 | Cohérence UI rapports + admin bugs | Widget rapports : titre/bouton/couleurs/calcul jours alignés sur RapportsPage. Site géographique affiché inline. AdminBugsSection : marquage traité + masquage par défaut. |
 
 ---
 
