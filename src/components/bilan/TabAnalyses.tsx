@@ -75,7 +75,7 @@ export function TabAnalyses({ rows, setRows }: {
                   <option value="max">≤ seuil</option>
                   <option value="min">≥ seuil</option>
                 </select>
-                <button onClick={() => removeRow(row.id)}
+                <button type="button" onClick={() => removeRow(row.id)}
                   className="flex items-center justify-center rounded p-1"
                   style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
                   <Trash2 size={14} strokeWidth={1.8} />
@@ -85,7 +85,7 @@ export function TabAnalyses({ rows, setRows }: {
           })}
         </div>
 
-        <button onClick={addRow}
+        <button type="button" onClick={addRow}
           className="mt-4 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium w-full justify-center"
           style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)', border: '1px dashed var(--color-accent)' }}>
           <Plus size={15} strokeWidth={2} />

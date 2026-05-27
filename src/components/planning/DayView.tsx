@@ -83,7 +83,7 @@ export default function DayView({
                 : []
               return (
                 <div key={evt.id}>
-                  <button
+                  <button type="button"
                     onClick={() => {
                       if (isGrouped) {
                         setExpandedClients(prev => {
@@ -225,7 +225,7 @@ export default function DayView({
       </div>
 
       {/* FAB Planifier — flottant bas droite */}
-      <button
+      <button type="button"
         onClick={() => setSelectedDay(dateStr)}
         className="absolute bottom-6 right-6 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-lg"
         style={{

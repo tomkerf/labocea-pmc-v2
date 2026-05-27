@@ -25,7 +25,7 @@ export default function AdminPage() {
     <div className="min-h-screen" style={{ background: 'var(--color-bg-primary)' }}>
       <div className="px-6 py-5 flex items-center gap-4"
         style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
-        <button onClick={() => navigate(-1)}
+        <button type="button" onClick={() => navigate(-1)}
           className="p-1.5 rounded-lg"
           style={{ color: 'var(--color-text-secondary)', background: 'var(--color-bg-tertiary)' }}>
           <ChevronLeft size={18} strokeWidth={1.8} />

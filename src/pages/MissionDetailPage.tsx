@@ -113,7 +113,7 @@ export default function MissionDetailPage() {
 
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-3">
-        <button
+        <button type="button"
           onClick={() => navigate(-1)}
           className="flex items-center gap-1 text-sm font-medium"
           style={{ color: 'var(--color-accent)' }}>
@@ -122,7 +122,7 @@ export default function MissionDetailPage() {
         <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
           Détail mission
         </span>
-        <button
+        <button type="button"
           onClick={() => navigate(`/missions/${clientId}/plan/${planId}`)}
           className="p-1.5 rounded-lg"
           style={{ color: 'var(--color-text-tertiary)' }}
@@ -226,7 +226,7 @@ export default function MissionDetailPage() {
           )}
 
           {checklist.map((item) => (
-            <button
+            <button type="button"
               key={item.id}
               onClick={() => toggleChecklist(item.id)}
               className="w-full flex items-center gap-3 px-5 py-4 text-left transition-colors"
@@ -262,7 +262,7 @@ export default function MissionDetailPage() {
               className="flex-1 text-sm outline-none bg-transparent"
               style={{ color: 'var(--color-text-primary)' }}
             />
-            <button
+            <button type="button"
               onClick={addTask}
               disabled={!newTask.trim()}
               className="p-1.5 rounded-lg transition-colors"
@@ -299,7 +299,7 @@ export default function MissionDetailPage() {
             borderTop: '1px solid var(--color-border-subtle)',
             paddingBottom: '12px',
           }}>
-          <button
+          <button type="button"
             onClick={handleTerminer}
             disabled={saving}
             className="w-full py-4 rounded-2xl text-base font-semibold flex items-center justify-center gap-2"

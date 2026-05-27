@@ -114,7 +114,7 @@ export default function Sidebar() {
         <div className="flex items-center gap-2 px-3 py-1.5">
           <SyncBadge />
         </div>
-        <button
+        <button type="button"
           onClick={() => setBugOpen(true)}
           className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs transition-colors"
           style={{ color: 'var(--color-text-tertiary)' }}

@@ -100,7 +100,7 @@ export default function EquipementPage() {
 
   return (
     <div className="p-6 max-w-2xl">
-      <button onClick={() => navigate('/materiel')}
+      <button type="button" onClick={() => navigate('/materiel')}
         className="flex items-center gap-1 text-sm mb-6" style={{ color: 'var(--color-accent)' }}>
         <ChevronLeft size={16} /> Matériel
       </button>
@@ -128,19 +128,19 @@ export default function EquipementPage() {
           {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
           {confirmDelete ? (
             <div className="flex items-center gap-1.5">
-              <button onClick={() => { setConfirmDelete(false); handleDelete() }}
+              <button type="button" onClick={() => { setConfirmDelete(false); handleDelete() }}
                 className="text-sm px-3 py-1.5 rounded-lg font-medium"
                 style={{ background: 'var(--color-danger)', color: 'white' }}>
                 Supprimer
               </button>
-              <button onClick={() => setConfirmDelete(false)}
+              <button type="button" onClick={() => setConfirmDelete(false)}
                 className="text-sm px-2 py-1.5 rounded-lg"
                 style={{ color: 'var(--color-text-secondary)' }}>
                 Annuler
               </button>
             </div>
           ) : (
-            <button onClick={() => setConfirmDelete(true)} className="p-2 rounded-lg transition-colors"
+            <button type="button" onClick={() => setConfirmDelete(true)} className="p-2 rounded-lg transition-colors"
               style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }} title="Supprimer">
               <Trash2 size={16} />
             </button>

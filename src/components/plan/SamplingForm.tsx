@@ -217,7 +217,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
                   }}>
                   {item.label}
                 </span>
-                <button onClick={() => deleteTask(item.id)}
+                <button type="button" onClick={() => deleteTask(item.id)}
                   className="shrink-0 flex items-center justify-center rounded"
                   style={{ color: 'var(--color-text-tertiary)', minWidth: 44, minHeight: 44 }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
@@ -236,7 +236,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
             placeholder="Ajouter une tâche…"
             className="field-input flex-1 text-sm"
           />
-          <button onClick={addTask}
+          <button type="button" onClick={addTask}
             className="px-3 py-1.5 rounded-lg text-sm font-medium"
             style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
             <Plus size={15} />
@@ -277,7 +277,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
-                <button
+                <button type="button"
                   onClick={() => handlePhotoDelete(url)}
                   className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
                   style={{ background: 'rgba(0,0,0,0.55)', color: 'white' }}

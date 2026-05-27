@@ -79,7 +79,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             {isEdit ? 'Modifier' : 'Nouvelle entrée'}
           </h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg"
+          <button type="button" onClick={onClose} className="p-1.5 rounded-lg"
             style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
             <X size={15} />
           </button>
@@ -96,7 +96,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
                 const cfg = TYPE_CONFIG[t]
                 const active = type === t
                 return (
-                  <button key={t} onClick={() => setType(t)}
+                  <button type="button" key={t} onClick={() => setType(t)}
                     className="flex flex-col items-center gap-1 py-2.5 px-1 rounded-lg text-[10px] font-semibold transition-all"
                     style={{
                       background: active ? cfg.bg : 'var(--color-bg-tertiary)',
@@ -212,7 +212,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           )}
 
           {/* Bouton */}
-          <button onClick={handleSave} disabled={!canSave}
+          <button type="button" onClick={handleSave} disabled={!canSave}
             className="w-full py-2.5 rounded-lg text-sm font-medium"
             style={{
               background: canSave ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',

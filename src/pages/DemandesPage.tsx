@@ -72,7 +72,7 @@ function DemandeVisites({ demandeId, demandeNom, onNavigate }: { demandeId: stri
         <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.05em' }}>
           Visites préliminaires
         </span>
-        <button onClick={handleNew} className="text-xs px-2.5 py-1 rounded-lg font-medium flex items-center gap-1"
+        <button type="button" onClick={handleNew} className="text-xs px-2.5 py-1 rounded-lg font-medium flex items-center gap-1"
           style={{ background: 'var(--color-accent)', color: 'white' }}>
           <Plus size={12} />
           Nouvelle
@@ -83,7 +83,7 @@ function DemandeVisites({ demandeId, demandeNom, onNavigate }: { demandeId: stri
       ) : (
         <div className="flex flex-col gap-1">
           {visites.map(v => (
-            <button key={v.id}
+            <button type="button" key={v.id}
               onClick={() => {
                 onNavigate()
                 setTimeout(() => navigate(`/visites/${v.id}`), 10)
@@ -146,7 +146,7 @@ function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }
               </p>
             )}
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg" style={{ color: 'var(--color-text-tertiary)' }}>
+          <button type="button" onClick={onClose} className="p-1 rounded-lg" style={{ color: 'var(--color-text-tertiary)' }}>
             <X size={18} />
           </button>
         </div>
@@ -219,14 +219,14 @@ function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }
           {onDelete && !isNew ? (
             confirmDelete ? (
               <div className="flex items-center gap-1.5">
-                <button
+                <button type="button"
                   onClick={onDelete}
                   className="text-sm px-3 py-1.5 rounded-lg font-medium"
                   style={{ background: 'var(--color-danger)', color: 'white' }}
                 >
                   Confirmer la suppression
                 </button>
-                <button
+                <button type="button"
                   onClick={() => setConfirmDelete(false)}
                   className="text-sm px-2 py-1.5 rounded-lg"
                   style={{ color: 'var(--color-text-secondary)' }}
@@ -235,7 +235,7 @@ function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }
                 </button>
               </div>
             ) : (
-              <button
+              <button type="button"
                 onClick={() => setConfirmDelete(true)}
                 className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg font-medium"
                 style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}
@@ -246,11 +246,11 @@ function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }
           ) : <div />}
 
           <div className="flex items-center gap-2">
-            <button onClick={onClose} className="text-sm px-4 py-2 rounded-lg font-medium" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+            <button type="button" onClick={onClose} className="text-sm px-4 py-2 rounded-lg font-medium" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
               Annuler
             </button>
             {form.statut === 'devis_signe' && !isNew && onConvertir && (
-              <button
+              <button type="button"
                 onClick={() => { handleSave(); onConvertir({ ...demande, ...form } as Demande) }}
                 className="text-sm px-4 py-2 rounded-lg font-semibold"
                 style={{ background: 'var(--color-success)', color: 'white' }}
@@ -258,7 +258,7 @@ function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }
                 → Créer la mission
               </button>
             )}
-            <button onClick={handleSave} className="text-sm px-4 py-2 rounded-lg font-medium" style={{ background: 'var(--color-accent)', color: 'white' }}>
+            <button type="button" onClick={handleSave} className="text-sm px-4 py-2 rounded-lg font-medium" style={{ background: 'var(--color-accent)', color: 'white' }}>
               {isNew ? 'Créer' : 'Enregistrer'}
             </button>
           </div>
@@ -294,7 +294,7 @@ function DemandeCard({ dem, onClick }: { dem: Demande; onClick: () => void }) {
   const jColor = j === null ? 'var(--color-text-tertiary)' : j > 30 ? 'var(--color-danger)' : j > 14 ? 'var(--color-warning)' : 'var(--color-text-tertiary)'
 
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       className="w-full text-left rounded-xl p-3 transition-shadow"
       style={{
@@ -406,7 +406,7 @@ export default function DemandesPage() {
             {activeCount} demande{activeCount !== 1 ? 's' : ''} en cours
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={() => setModal({})}
           className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg"
           style={{ background: 'var(--color-accent)', color: 'white' }}

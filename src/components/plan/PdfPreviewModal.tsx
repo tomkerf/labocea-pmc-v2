@@ -24,7 +24,7 @@ export function PdfPreviewModal({ srcDoc, onClose, onPrint }: PdfPreviewModalPro
             Aperçu du rapport PDF
           </p>
           <div className="flex items-center gap-2">
-            <button
+            <button type="button"
               onClick={onPrint}
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium"
               style={{ background: 'var(--color-accent)', color: 'white' }}
@@ -32,7 +32,7 @@ export function PdfPreviewModal({ srcDoc, onClose, onPrint }: PdfPreviewModalPro
               <FileText size={14} />
               Imprimer / Télécharger
             </button>
-            <button
+            <button type="button"
               onClick={onClose}
               className="p-1.5 rounded-lg"
               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' }}

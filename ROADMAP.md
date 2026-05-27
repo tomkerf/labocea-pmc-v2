@@ -273,6 +273,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-26 | Exports + Bilan UI ✅ | Implémentation des exports Planning PDF (liste de route A4) et Excel (tableur auto-ajusté) + refonte esthétique de la bande Bilan 24h avec en-tête asymétrique, icône Clock, badge Pose/Dépose et capsules dégradées avec ligne d'accentuation style Apple Calendar |
 | 2026-05-26 | Gestion des Tâches ✅ | Implémentation complète du module de Gestion des Tâches (Todo List) : collection Firestore, règles de sécurité, store Zustand, hook temps réel onSnapshot, widget interactif sur le Tableau de bord et page principale Reminders-style Apple. |
 | 2026-05-27 | Bugfixes dashboard | J2 bilan 24h manquant dans "Planning de demain" (item synthétique non généré) + layout mobile cassé sur le toggle Aujourd'hui/Demain. |
+| 2026-05-27 | Reporter une intervention | Ajout du statut "Reporter" dans SaisieRapideModal (tournée) avec sélection de nouvelle date planifiée — met à jour plannedMonth/plannedDay en Firestore. |
 
 ---
 

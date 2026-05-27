@@ -222,7 +222,7 @@ export default function TodosPage() {
             {todos.filter((t) => t.statut !== 'termine').length} tâches actives · {listCompleted.length} terminées
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={openAddModal}
           className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-transform active:scale-95 cursor-pointer"
           style={{ background: 'var(--color-accent)', color: 'white' }}
@@ -262,7 +262,7 @@ export default function TodosPage() {
             ] as const).map((tab) => {
               const isActive = filterTab === tab.id
               return (
-                <button
+                <button type="button"
                   key={tab.id}
                   onClick={() => setFilterTab(tab.id)}
                   className="relative z-10 px-3.5 py-1.5 rounded-md transition-colors cursor-pointer focus:outline-none"
@@ -317,7 +317,7 @@ export default function TodosPage() {
           <p className="text-xs mt-1 max-w-[280px]" style={{ color: 'var(--color-text-secondary)' }}>
             Créez une nouvelle tâche pour planifier vos interventions, calibrations ou autres devoirs.
           </p>
-          <button
+          <button type="button"
             onClick={openAddModal}
             className="mt-4 text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer"
             style={{ background: 'var(--color-accent)', color: 'white' }}
@@ -329,7 +329,7 @@ export default function TodosPage() {
         <div className="flex flex-col gap-6">
           {/* SECTION : À FAIRE */}
           <div>
-            <button
+            <button type="button"
               onClick={() => setShowTodo((s) => !s)}
               className="flex items-center gap-2 w-full text-left font-semibold text-xs uppercase mb-3 focus:outline-none"
               style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.04em' }}
@@ -369,7 +369,7 @@ export default function TodosPage() {
 
           {/* SECTION : EN COURS */}
           <div>
-            <button
+            <button type="button"
               onClick={() => setShowInProgress((s) => !s)}
               className="flex items-center gap-2 w-full text-left font-semibold text-xs uppercase mb-3 focus:outline-none"
               style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.04em' }}
@@ -409,7 +409,7 @@ export default function TodosPage() {
 
           {/* SECTION : TERMINÉES */}
           <div>
-            <button
+            <button type="button"
               onClick={() => setShowCompleted((s) => !s)}
               className="flex items-center gap-2 w-full text-left font-semibold text-xs uppercase mb-3 focus:outline-none"
               style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.04em' }}
@@ -480,7 +480,7 @@ export default function TodosPage() {
                 <h3 className="text-md font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                   {editingTodo ? 'Modifier la tâche' : 'Nouvelle tâche'}
                 </h3>
-                <button
+                <button type="button"
                   onClick={() => setShowModal(false)}
                   className="text-gray-400 hover:text-gray-600 font-bold focus:outline-none cursor-pointer"
                 >
@@ -538,9 +538,8 @@ export default function TodosPage() {
                     ] as const).map((p) => {
                       const isSel = formPriority === p.value
                       return (
-                        <button
+                        <button type="button"
                           key={p.value}
-                          type="button"
                           onClick={() => setFormPriority(p.value)}
                           className="flex-1 py-2 text-center rounded-md cursor-pointer transition-colors focus:outline-none"
                           style={{
@@ -643,14 +642,14 @@ export default function TodosPage() {
 
               {/* Footer */}
               <div className="px-6 py-4 flex items-center justify-end gap-3 shrink-0" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
-                <button
+                <button type="button"
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 text-xs font-semibold rounded-lg hover:bg-neutral-100 transition-colors focus:outline-none cursor-pointer"
                   style={{ color: 'var(--color-text-secondary)' }}
                 >
                   Annuler
                 </button>
-                <button
+                <button type="button"
                   onClick={handleSave}
                   disabled={!formTitre.trim() || saving}
                   className="px-5 py-2 text-xs font-semibold rounded-lg cursor-pointer focus:outline-none transition-opacity"
@@ -716,7 +715,7 @@ function TodoRow({
       }`}
     >
       {/* Checkbox ronde Apple-style */}
-      <button
+      <button type="button"
         onClick={onToggle}
         className="mt-0.5 shrink-0 flex items-center justify-center w-5.5 h-5.5 rounded-full border transition-all cursor-pointer focus:outline-none"
         style={{
@@ -821,7 +820,7 @@ function TodoRow({
 
         {/* Boutons d'actions */}
         {!isCompleted && (
-          <button
+          <button type="button"
             onClick={onCycle}
             title={todo.statut === 'a_faire' ? 'Commencer la tâche' : 'Remettre à faire'}
             className="p-1 rounded hover:bg-neutral-100 text-gray-400 hover:text-gray-700 cursor-pointer focus:outline-none transition-colors"
@@ -834,7 +833,7 @@ function TodoRow({
           </button>
         )}
 
-        <button
+        <button type="button"
           onClick={onEdit}
           title="Modifier"
           className="p-1.5 rounded hover:bg-neutral-100 text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none transition-colors"
@@ -845,7 +844,7 @@ function TodoRow({
         {/* Bouton de suppression double confirmation */}
         <div className="relative">
           {isCnfDelete ? (
-            <button
+            <button type="button"
               onClick={onDelete}
               onMouseLeave={() => setDeletingId(null)}
               className="px-2.5 py-1 text-[10px] font-bold text-white rounded bg-red-500 hover:bg-red-600 focus:outline-none cursor-pointer transition-colors shadow-sm"
@@ -853,7 +852,7 @@ function TodoRow({
               Supprimer ?
             </button>
           ) : (
-            <button
+            <button type="button"
               onClick={() => setDeletingId(todo.id)}
               title="Supprimer"
               className="p-1.5 rounded hover:bg-neutral-100 text-gray-400 hover:text-red-500 cursor-pointer focus:outline-none transition-colors"

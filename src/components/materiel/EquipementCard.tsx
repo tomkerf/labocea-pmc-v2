@@ -101,7 +101,7 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
   const categoryIcon = <Icon size={iconSize} strokeWidth={1.8} color={iconColor} />
 
   return (
-    <button
+    <button type="button"
       onClick={() => navigate(`/materiel/${equipement.id}`)}
       className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
       style={{

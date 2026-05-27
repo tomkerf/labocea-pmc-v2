@@ -45,7 +45,7 @@ export function ClientPlans({
           Points de prélèvement
         </h2>
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={onToggleLock}
             className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
             style={{
@@ -142,7 +142,7 @@ export function ClientPlans({
                     />
               })}
               {/* Carte dashed — toujours visible pour ajouter un point */}
-              <button
+              <button type="button"
                 onClick={onAddPlan}
                 className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors"
                 style={{
@@ -215,7 +215,7 @@ function SortableSeparatorRow({
       }}
     >
       <div className="flex items-center gap-2 px-3 py-2">
-        <button
+        <button type="button"
           {...(!locked ? { ...attributes, ...listeners } : {})}
           className="shrink-0 p-1 rounded touch-none"
           style={{ color: 'var(--color-text-tertiary)', cursor: locked ? 'default' : isDragging ? 'grabbing' : 'grab', opacity: locked ? 0.3 : 1 }}
@@ -310,7 +310,7 @@ function SortablePlanRow({
       className="flex flex-col px-3 py-3 gap-2"
     >
       <div className="flex items-center gap-2">
-        <button
+        <button type="button"
           {...(!locked ? { ...attributes, ...listeners } : {})}
           className="shrink-0 p-1 rounded touch-none"
           style={{ color: 'var(--color-text-tertiary)', cursor: locked ? 'default' : isDragging ? 'grabbing' : 'grab', opacity: locked ? 0.3 : 1 }}

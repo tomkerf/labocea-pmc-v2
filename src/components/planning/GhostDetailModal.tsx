@@ -106,7 +106,7 @@ export default function GhostDetailModal({ event, onClose }: { event: PlanningEv
           )}
 
           {event.clientId && event.planId && event.samplingId && (
-            <button
+            <button type="button"
               onClick={() => {
                 onClose()
                 setTimeout(() => navigate(`/missions/${event.clientId}/plan/${event.planId}/sampling/${event.samplingId}`), 50)

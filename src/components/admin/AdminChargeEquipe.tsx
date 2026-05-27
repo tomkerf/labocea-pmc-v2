@@ -132,7 +132,7 @@ export function AdminChargeEquipe() {
           style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
           <div className="flex gap-1 p-1 rounded-lg" style={{ background: 'var(--color-bg-tertiary)' }}>
             {(['semaine', 'mois'] as const).map(v => (
-              <button key={v}
+              <button type="button" key={v}
                 onClick={() => { setViewMode(v); setRefDate(new Date()) }}
                 className="px-3 py-1 rounded-md text-xs font-medium transition-colors"
                 style={{
@@ -146,7 +146,7 @@ export function AdminChargeEquipe() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button onClick={() => navigate_(-1)}
+            <button type="button" onClick={() => navigate_(-1)}
               className="p-1 rounded-md"
               style={{ color: 'var(--color-text-secondary)', background: 'var(--color-bg-tertiary)' }}>
               <ChevronLeft size={15} />
@@ -155,7 +155,7 @@ export function AdminChargeEquipe() {
               style={{ color: 'var(--color-text-primary)' }}>
               {label}
             </span>
-            <button onClick={() => navigate_(1)}
+            <button type="button" onClick={() => navigate_(1)}
               className="p-1 rounded-md"
               style={{ color: 'var(--color-text-secondary)', background: 'var(--color-bg-tertiary)' }}>
               <ChevronRight size={15} />

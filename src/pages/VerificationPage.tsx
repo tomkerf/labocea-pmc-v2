@@ -64,7 +64,7 @@ export default function VerificationPage() {
   return (
     <div className="p-6 max-w-2xl">
       {/* Retour */}
-      <button onClick={() => navigate('/metrologie')}
+      <button type="button" onClick={() => navigate('/metrologie')}
         className="flex items-center gap-1 text-sm mb-6" style={{ color: 'var(--color-accent)' }}>
         <ChevronLeft size={16} /> Métrologie
       </button>
@@ -83,13 +83,13 @@ export default function VerificationPage() {
           {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
           {confirmDelete ? (
             <div className="flex items-center gap-1.5">
-              <button onClick={handleDelete} className="text-sm px-3 py-1.5 rounded-lg font-medium"
+              <button type="button" onClick={handleDelete} className="text-sm px-3 py-1.5 rounded-lg font-medium"
                 style={{ background: 'var(--color-danger)', color: 'white' }}>Supprimer</button>
-              <button onClick={cancelDelete} className="text-sm px-2 py-1.5 rounded-lg"
+              <button type="button" onClick={cancelDelete} className="text-sm px-2 py-1.5 rounded-lg"
                 style={{ color: 'var(--color-text-secondary)' }}>Annuler</button>
             </div>
           ) : (
-            <button onClick={requestDelete} className="p-2 rounded-lg"
+            <button type="button" onClick={requestDelete} className="p-2 rounded-lg"
               style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}>
               <Trash2 size={16} />
             </button>

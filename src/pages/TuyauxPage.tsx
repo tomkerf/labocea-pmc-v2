@@ -100,7 +100,7 @@ export default function TuyauxPage() {
             {tuyaux.length} lot{tuyaux.length !== 1 ? 's' : ''} · {allMats.length} matériau{allMats.length !== 1 ? 'x' : ''} · {allYears.length} campagne{allYears.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <button onClick={() => setEditing({})}
+        <button type="button" onClick={() => setEditing({})}
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium"
           style={{ background: 'var(--color-accent)', color: 'white', borderRadius: 'var(--radius-sm)' }}>
           <Plus size={15} /> Nouveau tuyau
@@ -114,9 +114,9 @@ export default function TuyauxPage() {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-semibold uppercase tracking-wider shrink-0 w-16"
                 style={{ color: 'var(--color-text-tertiary)' }}>Année</span>
-              <button style={chipStyle(filterYear === 'all')} onClick={() => setFilterYear('all')}>Toutes</button>
+              <button type="button" style={chipStyle(filterYear === 'all')} onClick={() => setFilterYear('all')}>Toutes</button>
               {allYears.map(y => (
-                <button key={y} style={chipStyle(filterYear === String(y))} onClick={() => setFilterYear(String(y))}>
+                <button type="button" key={y} style={chipStyle(filterYear === String(y))} onClick={() => setFilterYear(String(y))}>
                   {y}
                 </button>
               ))}
@@ -126,11 +126,11 @@ export default function TuyauxPage() {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-semibold uppercase tracking-wider shrink-0 w-16"
                 style={{ color: 'var(--color-text-tertiary)' }}>Matériau</span>
-              <button style={chipStyle(filterMat === 'all')} onClick={() => setFilterMat('all')}>Tous</button>
+              <button type="button" style={chipStyle(filterMat === 'all')} onClick={() => setFilterMat('all')}>Tous</button>
               {allMats.map(m => {
                 const mc = matColor(m)
                 return (
-                  <button key={m}
+                  <button type="button" key={m}
                     style={filterMat === m ? chipStyle(true, mc.text) : { ...chipStyle(false), borderColor: mc.border, color: mc.text }}
                     onClick={() => setFilterMat(filterMat === m ? 'all' : m)}>
                     {m}
@@ -151,7 +151,7 @@ export default function TuyauxPage() {
           <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
             Ajoutez un lot de tubes pour gérer vos tuyaux de prélèvement.
           </p>
-          <button onClick={() => setEditing({})}
+          <button type="button" onClick={() => setEditing({})}
             className="px-5 py-2 text-sm font-medium"
             style={{ background: 'var(--color-accent)', color: 'white', borderRadius: 'var(--radius-sm)' }}>
             + Ajouter un premier tuyau
@@ -232,17 +232,17 @@ export default function TuyauxPage() {
 
                     <div className="flex gap-2 px-4 py-2.5"
                       style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
-                      <button onClick={() => setEditing(t)}
+                      <button type="button" onClick={() => setEditing(t)}
                         className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium"
                         style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', borderRadius: 'var(--radius-sm)' }}>
                         <Pencil size={12} /> Modifier
                       </button>
-                      <button onClick={() => printLabel(t)} title="Imprimer étiquette"
+                      <button type="button" onClick={() => printLabel(t)} title="Imprimer étiquette"
                         className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium"
                         style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', borderRadius: 'var(--radius-sm)' }}>
                         <Printer size={12} /> Étiquette
                       </button>
-                      <button onClick={() => setConfirmDel(t.id)}
+                      <button type="button" onClick={() => setConfirmDel(t.id)}
                         className="flex items-center justify-center px-2.5 py-1.5"
                         style={{ background: 'none', border: '1px solid var(--color-border)', color: 'var(--color-text-tertiary)', borderRadius: 'var(--radius-sm)' }}>
                         <Trash2 size={12} />
@@ -255,12 +255,12 @@ export default function TuyauxPage() {
                         <p className="text-xs flex-1 font-medium" style={{ color: 'var(--color-danger)' }}>
                           Supprimer {t.refLabo} ?
                         </p>
-                        <button onClick={() => handleDelete(t.id)}
+                        <button type="button" onClick={() => handleDelete(t.id)}
                           className="px-3 py-1 rounded-lg text-xs font-semibold"
                           style={{ background: 'var(--color-danger)', color: 'white' }}>
                           Supprimer
                         </button>
-                        <button onClick={() => setConfirmDel(null)}
+                        <button type="button" onClick={() => setConfirmDel(null)}
                           className="px-3 py-1 rounded-lg text-xs"
                           style={{ background: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
                           Annuler

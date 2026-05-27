@@ -41,7 +41,7 @@ export default function ToastContainer() {
             <p className="text-sm flex-1 leading-snug" style={{ color: c.color }}>
               {t.message}
             </p>
-            <button
+            <button type="button"
               onClick={() => remove(t.id)}
               className="shrink-0 text-xs font-medium opacity-60 hover:opacity-100"
               style={{ color: c.color }}>

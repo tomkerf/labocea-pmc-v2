@@ -181,7 +181,7 @@ export default function TourneePage() {
     <div className="p-6 pb-10 max-w-xl mx-auto">
       {/* En-tête */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate(-1)} className="p-1 -ml-1" aria-label="Retour">
+        <button type="button" onClick={() => navigate(-1)} className="p-1 -ml-1" aria-label="Retour">
           <ArrowLeft size={20} style={{ color: 'var(--color-text-secondary)' }} />
         </button>
         <div className="flex-1">

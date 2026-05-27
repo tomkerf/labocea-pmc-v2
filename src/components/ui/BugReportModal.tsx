@@ -110,7 +110,7 @@ export default function BugReportModal({ onClose }: Props) {
             style={{ color: 'var(--color-text-secondary)', background: 'var(--color-bg-tertiary)' }}>
             Annuler
           </button>
-          <button
+          <button type="button"
             onClick={handleSubmit}
             disabled={!description.trim() || submitting}
             className="px-4 py-2 rounded-lg text-sm font-medium text-white"

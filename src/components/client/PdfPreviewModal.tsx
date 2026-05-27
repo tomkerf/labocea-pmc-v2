@@ -27,7 +27,7 @@ export function PdfPreviewModal({ html, client, users, onClose }: Props) {
             Aperçu du rapport
           </p>
           <div className="flex items-center gap-2">
-            <button
+            <button type="button"
               onClick={() => {
                 const printHtml = buildClientReportHtml(client, users, true)
                 const w = window.open('', '_blank')
@@ -39,7 +39,7 @@ export function PdfPreviewModal({ html, client, users, onClose }: Props) {
               <FileDown size={14} />
               Imprimer / Télécharger
             </button>
-            <button
+            <button type="button"
               onClick={onClose}
               aria-label="Fermer l'aperçu"
               className="p-1.5 rounded-lg"

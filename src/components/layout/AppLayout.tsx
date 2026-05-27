@@ -80,7 +80,7 @@ export default function AppLayout() {
           {/* Sync badge + Burger — mobile */}
           <div className="md:hidden flex items-center gap-2">
             <SyncBadge />
-            <button
+            <button type="button"
               className="p-2 rounded-xl"
               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}
               onClick={() => setDrawerOpen(true)}

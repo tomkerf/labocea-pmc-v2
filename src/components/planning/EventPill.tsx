@@ -44,7 +44,7 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
           return `→ ${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}`
         })()
     return (
-      <button
+      <button type="button"
         onClick={handleClick}
         onMouseDown={e => e.stopPropagation()}
         className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
@@ -108,7 +108,7 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
 
   // ── Pill standard ──────────────────────────────────────────────
   return (
-    <button
+    <button type="button"
       onClick={handleClick}
       onMouseDown={e => e.stopPropagation()}
       className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"

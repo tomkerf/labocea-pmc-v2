@@ -30,7 +30,7 @@ export default function CellContextMenu({ x, y, onClose, onPlanifier, onEvenemen
             ⛔ {holidayName}
           </div>
         )}
-        <button
+        <button type="button"
           onClick={() => { if (!holidayName) { onPlanifier(); onClose() } }}
           disabled={!!holidayName}
           className="flex items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium"
@@ -41,7 +41,7 @@ export default function CellContextMenu({ x, y, onClose, onPlanifier, onEvenemen
           Planifier un prélèvement
         </button>
         <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
-        <button
+        <button type="button"
           onClick={() => { onEvenement(); onClose() }}
           className="flex items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium"
           style={{ color: 'var(--color-text-primary)' }}
@@ -51,7 +51,7 @@ export default function CellContextMenu({ x, y, onClose, onPlanifier, onEvenemen
           Nouvel événement
         </button>
         <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
-        <button
+        <button type="button"
           onClick={() => { onToggleRain(); onClose() }}
           className="flex items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium"
           style={{ color: hasRain ? 'var(--color-danger)' : 'var(--color-text-primary)' }}

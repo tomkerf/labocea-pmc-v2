@@ -112,7 +112,7 @@ export default function MaterielPage() {
             {equipements.length} équipement{equipements.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={handleCreate}
           disabled={creating}
           className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-opacity"
@@ -237,7 +237,7 @@ export default function MaterielPage() {
               Commencez par ajouter votre premier équipement.
             </p>
           </div>
-          <button
+          <button type="button"
             onClick={handleCreate}
             disabled={creating}
             className="flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-lg transition-opacity"
@@ -256,7 +256,7 @@ export default function MaterielPage() {
           {filtered.map((e: Equipement) => (
             <EquipementCard key={e.id} equipement={e} />
           ))}
-          <button
+          <button type="button"
             onClick={handleCreate}
             disabled={creating}
             className="w-full flex items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-medium transition-colors"

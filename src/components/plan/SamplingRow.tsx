@@ -55,7 +55,7 @@ export function SamplingRow({
   return (
     <div>
       <div className="flex items-center" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-        <button
+        <button type="button"
           onClick={onSelect}
           className="flex-1 flex items-center gap-4 px-5 py-3 text-left transition-colors"
           style={{ background: isSelected ? 'var(--color-accent-light)' : 'transparent' }}
@@ -80,14 +80,14 @@ export function SamplingRow({
         {isCustom && (
           confirmDel ? (
             <div className="flex items-center gap-1 px-2">
-              <button
+              <button type="button"
                 onClick={onDeleteConfirm}
                 className="text-xs px-2 py-1 rounded-md font-medium"
                 style={{ background: 'var(--color-danger)', color: 'white' }}
               >
                 Supprimer
               </button>
-              <button
+              <button type="button"
                 onClick={onDeleteCancel}
                 className="text-xs px-1.5 py-1 rounded-md"
                 style={{ color: 'var(--color-text-secondary)' }}
@@ -96,7 +96,7 @@ export function SamplingRow({
               </button>
             </div>
           ) : (
-            <button
+            <button type="button"
               onClick={onDeleteRequest}
               className="px-3 py-3 shrink-0"
               style={{ color: 'var(--color-text-tertiary)' }}

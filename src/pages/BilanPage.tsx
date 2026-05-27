@@ -73,7 +73,7 @@ export default function BilanPage() {
 
       <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3"
         style={{ background: 'var(--color-bg-primary)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--color-border-subtle)' }}>
-        <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg"
+        <button type="button" onClick={() => navigate(-1)} className="p-1.5 rounded-lg"
           style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
           <ChevronLeft size={18} strokeWidth={1.8} />
         </button>
@@ -93,7 +93,7 @@ export default function BilanPage() {
           const dot = conf === true ? ' ✓' : conf === false ? ' ✗' : ''
           const active = tab === t.id
           return (
-            <button key={t.id} onClick={() => setTab(t.id)}
+            <button type="button" key={t.id} onClick={() => setTab(t.id)}
               className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{
                 background: active ? 'var(--color-accent)' : 'var(--color-bg-secondary)',

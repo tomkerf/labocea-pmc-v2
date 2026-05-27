@@ -26,7 +26,7 @@ export default function PeriodListView({
           <p className="text-sm" style={{ color:'var(--color-text-tertiary)' }}>
             {filterRetard ? 'Aucun prélèvement en retard.' : 'Aucune intervention cette période.'}
           </p>
-          <button onClick={goToday} className="mt-3 text-xs" style={{ color:'var(--color-accent)' }}>
+          <button type="button" onClick={goToday} className="mt-3 text-xs" style={{ color:'var(--color-accent)' }}>
             Revenir à aujourd'hui
           </button>
         </div>
@@ -47,7 +47,7 @@ export default function PeriodListView({
                     Aujourd'hui
                   </span>
                 )}
-                <button onClick={() => goToDay(dateStr)}
+                <button type="button" onClick={() => goToDay(dateStr)}
                   className="ml-auto flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-medium"
                   style={{ color:'var(--color-text-tertiary)', border:'1px solid var(--color-border-subtle)' }}>
                   <Plus size={9} /> Ajouter

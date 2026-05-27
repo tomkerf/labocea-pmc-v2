@@ -96,7 +96,7 @@ export default function MaintenancesPage() {
             {maintenances.length} intervention{maintenances.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={handleCreate}
           disabled={creating}
           className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg"
@@ -179,7 +179,7 @@ export default function MaintenancesPage() {
               Planifiez votre première intervention de maintenance.
             </p>
           </div>
-          <button
+          <button type="button"
             onClick={handleCreate}
             disabled={creating}
             className="flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-lg transition-opacity"
@@ -206,7 +206,7 @@ export default function MaintenancesPage() {
               : null
 
             return (
-              <button
+              <button type="button"
                 key={m.id}
                 onClick={() => navigate(`/maintenances/${m.id}`)}
                 className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
@@ -249,7 +249,7 @@ export default function MaintenancesPage() {
               </button>
             )
           })}
-          <button
+          <button type="button"
             onClick={handleCreate}
             disabled={creating}
             className="w-full flex items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-medium transition-colors"

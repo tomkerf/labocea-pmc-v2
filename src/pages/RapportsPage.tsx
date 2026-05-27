@@ -86,7 +86,7 @@ export default function RapportsPage() {
         </div>
         <div className="flex items-center gap-1 rounded-lg p-1"
           style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border-subtle)' }}>
-          <button
+          <button type="button"
             onClick={() => setTouteEquipe(false)}
             className="px-3 py-1 rounded-md text-sm font-medium transition-colors"
             style={{
@@ -97,7 +97,7 @@ export default function RapportsPage() {
           >
             Mes rapports
           </button>
-          <button
+          <button type="button"
             onClick={() => setTouteEquipe(true)}
             className="px-3 py-1 rounded-md text-sm font-medium transition-colors"
             style={{
@@ -207,14 +207,14 @@ export default function RapportsPage() {
                                 style={{ background: delaiBg, color: delaiColor }}>
                                 {delaiLabel}
                               </span>
-                              <button
+                              <button type="button"
                                 onClick={() => navigate(`/missions/${r.clientId}/plan/${r.planId}?sampling=${r.samplingId}`)}
                                 className="px-2 py-1.5 rounded-lg text-xs font-medium"
                                 style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
                               >
                                 Fiche
                               </button>
-                              <button
+                              <button type="button"
                                 onClick={() => markEnvoye(r.clientId, r.planId, r.samplingId)}
                                 disabled={sending.has(r.samplingId)}
                                 className="px-3 py-1.5 rounded-lg text-xs font-medium"

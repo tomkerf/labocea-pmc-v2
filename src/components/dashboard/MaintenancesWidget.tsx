@@ -12,7 +12,7 @@ export function MaintenancesWidget({ maintenances }: { maintenances: Maintenance
 
   return (
     <div className="mb-6">
-      <button
+      <button type="button"
         onClick={() => setOpen(o => !o)}
         className="flex items-center gap-2 mb-3 w-full text-left"
       >

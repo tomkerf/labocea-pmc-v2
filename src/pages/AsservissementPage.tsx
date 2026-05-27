@@ -110,7 +110,7 @@ function Stepper({ label, hint, value, onChange, unit, step, min, max }: {
       <div className="flex items-center rounded-xl overflow-hidden"
         style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-secondary)' }}>
         {/* Bouton − */}
-        <button
+        <button type="button"
           onPointerDown={() => startPress(-1)} onPointerUp={stopPress}
           onPointerLeave={stopPress} onContextMenu={e => e.preventDefault()}
           className="flex items-center justify-center shrink-0 select-none"
@@ -139,7 +139,7 @@ function Stepper({ label, hint, value, onChange, unit, step, min, max }: {
         </div>
 
         {/* Bouton + */}
-        <button
+        <button type="button"
           onPointerDown={() => startPress(1)} onPointerUp={stopPress}
           onPointerLeave={stopPress} onContextMenu={e => e.preventDefault()}
           className="flex items-center justify-center shrink-0 select-none"
@@ -162,7 +162,7 @@ function Chips({ values, current, unit, onSelect }: {
   return (
     <div className="flex gap-2 mt-2 flex-wrap">
       {values.map(v => (
-        <button key={v}
+        <button type="button" key={v}
           onClick={() => onSelect(String(v))}
           className="px-3 py-1.5 rounded-full text-xs font-semibold"
           style={{
@@ -235,7 +235,7 @@ export default function AsservissementPage() {
           backdropFilter: 'blur(12px)',
           borderBottom: '1px solid var(--color-border-subtle)',
         }}>
-        <button onClick={() => navigate(-1)}
+        <button type="button" onClick={() => navigate(-1)}
           className="p-1.5 rounded-lg shrink-0"
           style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
           <ChevronLeft size={18} strokeWidth={1.8} />
@@ -265,7 +265,7 @@ export default function AsservissementPage() {
         <div className="flex gap-1.5 p-1.5 rounded-xl"
           style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
           {(['auto', 'manuel'] as const).map(m => (
-            <button key={m} onClick={() => setMode(m)}
+            <button type="button" key={m} onClick={() => setMode(m)}
               className="flex-1 py-3 rounded-lg text-sm font-semibold transition-all"
               style={{
                 background: mode === m ? 'var(--color-accent)' : 'transparent',
@@ -364,7 +364,7 @@ export default function AsservissementPage() {
         {/* Réglementation — accordéon */}
         <div className="rounded-xl overflow-hidden mb-2"
           style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
-          <button
+          <button type="button"
             onClick={() => setRegleOpen(v => !v)}
             className="w-full flex items-center gap-3 px-4 py-3.5 text-left">
             <ClipboardList size={15} strokeWidth={1.8} className="shrink-0"
@@ -426,7 +426,7 @@ export default function AsservissementPage() {
                 </span>
               </div>
             </div>
-            <button
+            <button type="button"
               onClick={handleCopy}
               className="flex items-center gap-1.5 px-4 py-3 rounded-xl font-semibold text-sm shrink-0"
               style={{

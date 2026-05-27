@@ -27,7 +27,7 @@ export default function ClientVisites({ clientId, clientNom }: Props) {
         <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
           Visites préliminaires
         </h2>
-        <button
+        <button type="button"
           onClick={handleNew}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium"
           style={{ background: 'var(--color-accent)', color: 'white' }}
@@ -50,7 +50,7 @@ export default function ClientVisites({ clientId, clientNom }: Props) {
         <div className="rounded-xl overflow-hidden"
           style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
           {visites.map((v, idx) => (
-            <button
+            <button type="button"
               key={v.id}
               onClick={() => navigate(`/visites/${v.id}`)}
               className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"

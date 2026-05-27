@@ -119,7 +119,7 @@ function TimelineRow({ icon, iconBg, iconColor, date, title, subtitle, badge, is
           </span>
         )}
         {onDelete && (
-          <button
+          <button type="button"
             onClick={onDelete}
             className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded"
             style={{ color: 'var(--color-danger)' }}
@@ -232,21 +232,21 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
           )}
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={() => exportFicheDeViePDF(equipement, entries)}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
             style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border-subtle)' }}
           >
             <FileText size={12} /> Exporter PDF
           </button>
-          <button
+          <button type="button"
             onClick={() => { setShowVerif(v => !v); setShowForm(false) }}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
             style={{ background: showVerif ? 'var(--color-success-light)' : 'var(--color-bg-tertiary)', color: showVerif ? 'var(--color-success)' : 'var(--color-text-secondary)', border: '1px solid var(--color-border-subtle)' }}
           >
             <Gauge size={12} /> Vérification
           </button>
-          <button
+          <button type="button"
             onClick={() => { setShowForm(v => !v); setShowVerif(false) }}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
             style={{ background: showForm ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)', color: showForm ? 'var(--color-accent)' : 'var(--color-text-secondary)', border: '1px solid var(--color-border-subtle)' }}
@@ -277,11 +277,11 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
               placeholder="Observations, actions effectuées…" className="field-input w-full resize-none" />
           </div>
           <div className="flex justify-end gap-2">
-            <button onClick={() => setShowForm(false)} className="px-3 py-1.5 rounded-lg text-xs font-medium"
+            <button type="button" onClick={() => setShowForm(false)} className="px-3 py-1.5 rounded-lg text-xs font-medium"
               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
               Annuler
             </button>
-            <button onClick={handleAddNote} disabled={!formTitre.trim()} className="px-3 py-1.5 rounded-lg text-xs font-medium"
+            <button type="button" onClick={handleAddNote} disabled={!formTitre.trim()} className="px-3 py-1.5 rounded-lg text-xs font-medium"
               style={{ background: 'var(--color-accent)', color: 'white', opacity: formTitre.trim() ? 1 : 0.5 }}>
               Enregistrer
             </button>
@@ -325,11 +325,11 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
               placeholder="Observations, dérives constatées…" className="field-input w-full resize-none" />
           </div>
           <div className="flex justify-end gap-2">
-            <button onClick={() => setShowVerif(false)} className="px-3 py-1.5 rounded-lg text-xs font-medium"
+            <button type="button" onClick={() => setShowVerif(false)} className="px-3 py-1.5 rounded-lg text-xs font-medium"
               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
               Annuler
             </button>
-            <button onClick={handleAddVerification} disabled={!verifDate || verifSaving} className="px-3 py-1.5 rounded-lg text-xs font-medium"
+            <button type="button" onClick={handleAddVerification} disabled={!verifDate || verifSaving} className="px-3 py-1.5 rounded-lg text-xs font-medium"
               style={{ background: 'var(--color-success)', color: 'white', opacity: !verifDate || verifSaving ? 0.5 : 1 }}>
               {verifSaving ? '…' : 'Enregistrer'}
             </button>

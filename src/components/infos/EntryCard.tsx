@@ -72,7 +72,7 @@ export function EntryCard({
                     style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
                     <Phone size={11} strokeWidth={2} />
                     {entry.tel}
-                    <button onClick={e => { e.preventDefault(); copy(entry.tel!) }}
+                    <button type="button" onClick={e => { e.preventDefault(); copy(entry.tel!) }}
                       className="ml-1 opacity-60 hover:opacity-100">
                       <Copy size={10} strokeWidth={2} />
                     </button>
@@ -84,7 +84,7 @@ export function EntryCard({
                     style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
                     <Phone size={11} strokeWidth={2} />
                     {entry.tel2}
-                    <button onClick={e => { e.preventDefault(); copy(entry.tel2!) }}
+                    <button type="button" onClick={e => { e.preventDefault(); copy(entry.tel2!) }}
                       className="ml-1 opacity-60 hover:opacity-100">
                       <Copy size={10} strokeWidth={2} />
                     </button>
@@ -121,14 +121,14 @@ export function EntryCard({
                   }}>
                   {entry.code || '—'}
                 </div>
-                <button
+                <button type="button"
                   onClick={() => setRevealed(v => !v)}
                   className="p-2 rounded-lg shrink-0"
                   style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
                   {revealed ? <EyeOff size={15} strokeWidth={1.8} /> : <Eye size={15} strokeWidth={1.8} />}
                 </button>
                 {revealed && entry.code && (
-                  <button
+                  <button type="button"
                     onClick={() => copy(entry.code!)}
                     className="p-2 rounded-lg shrink-0"
                     style={{
@@ -169,12 +169,12 @@ export function EntryCard({
 
         {/* Actions */}
         <div className="flex flex-col gap-1 p-2 shrink-0 justify-start">
-          <button onClick={onEdit}
+          <button type="button" onClick={onEdit}
             className="p-2 rounded-lg"
             style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
             <Pencil size={13} strokeWidth={1.8} />
           </button>
-          <button onClick={onDelete}
+          <button type="button" onClick={onDelete}
             className="p-2 rounded-lg"
             style={{ color: 'var(--color-text-tertiary)' }}>
             <Trash2 size={13} strokeWidth={1.8} />

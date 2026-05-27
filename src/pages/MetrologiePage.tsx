@@ -89,7 +89,7 @@ export default function MerologiePage() {
             )}
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={handleCreate}
           disabled={creating}
           className="shrink-0 flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg"
@@ -136,7 +136,7 @@ export default function MerologiePage() {
               Saisissez votre première vérification métrologique.
             </p>
           </div>
-          <button
+          <button type="button"
             onClick={handleCreate}
             disabled={creating}
             className="flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-lg transition-opacity"
@@ -259,7 +259,7 @@ export default function MerologiePage() {
               </button>
             )
           })}
-          <button
+          <button type="button"
             onClick={handleCreate}
             disabled={creating}
             className="w-full flex items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-medium transition-colors"

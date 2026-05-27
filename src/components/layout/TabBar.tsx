@@ -56,7 +56,7 @@ export default function TabBar() {
               Créer
             </p>
             {actions.map(({ label, icon: Icon, path, color }, i) => (
-              <button
+              <button type="button"
                 key={path}
                 onClick={() => handleAction(path)}
                 className="w-full flex items-center gap-4 px-5 py-3.5 text-left"
@@ -110,7 +110,7 @@ export default function TabBar() {
 
         {/* FAB centré */}
         <div className="flex-1 flex flex-col items-center justify-end pb-2">
-          <button
+          <button type="button"
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
             className="w-12 h-12 rounded-full flex items-center justify-center -mt-6 transition-transform"

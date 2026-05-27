@@ -55,7 +55,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
 
   return (
     <div className="mb-6">
-      <button
+      <button type="button"
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-2 mb-3 w-full text-left focus:outline-none"
       >
@@ -109,7 +109,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                     }}
                   >
                     {/* Checkbox animée */}
-                    <button
+                    <button type="button"
                       onClick={() => handleToggleComplete(todo)}
                       className="mt-0.5 shrink-0 flex items-center justify-center w-5 h-5 rounded-md border transition-all cursor-pointer focus:outline-none"
                       style={{

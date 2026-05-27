@@ -113,7 +113,7 @@ export function TabSynthese({
       </table>` : ''}
       ${analysesSection}
       <p style="margin-top:32px"><strong>Signature opérateur :</strong> ___________________________</p>
-      <button onclick="window.print()" style="margin-top:20px;padding:10px 20px;background:#0c6b6b;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px">🖨️ Imprimer / Sauvegarder PDF</button>
+      <button type="button" onclick="window.print()" style="margin-top:20px;padding:10px 20px;background:#0c6b6b;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px">🖨️ Imprimer / Sauvegarder PDF</button>
       </body></html>`
 
     const blob = new Blob([html], { type: 'text/html' })
@@ -176,7 +176,7 @@ export function TabSynthese({
         </Card>
       )}
 
-      <button onClick={generatePDF}
+      <button type="button" onClick={generatePDF}
         className="flex items-center justify-center gap-2 w-full py-3 rounded-[var(--radius-md)] font-semibold text-sm"
         style={{ background: 'var(--color-accent)', color: '#fff' }}>
         <FileText size={16} strokeWidth={1.8} />

@@ -75,7 +75,7 @@ export function TourneeItem({ item, onAction }: Props) {
       {/* Actions */}
       {!isTerminal && (
         <div className="flex gap-2 px-4 pb-4 pt-1">
-          <button
+          <button type="button"
             aria-label="Réalisé"
             onClick={() => onAction(item.samplingId, 'done')}
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all"
@@ -83,7 +83,7 @@ export function TourneeItem({ item, onAction }: Props) {
             <CheckCircle2 size={15} />
             Réalisé
           </button>
-          <button
+          <button type="button"
             aria-label="Non effectué"
             onClick={() => onAction(item.samplingId, 'non_effectue')}
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all"

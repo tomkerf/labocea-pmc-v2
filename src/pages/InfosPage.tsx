@@ -105,7 +105,7 @@ export default function InfosPage() {
           <h1 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             Infos terrain
           </h1>
-          <button onClick={() => setModal('new')}
+          <button type="button" onClick={() => setModal('new')}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium"
             style={{ background: 'var(--color-accent)', color: 'white' }}>
             <Plus size={15} strokeWidth={2} />
@@ -130,7 +130,7 @@ export default function InfosPage() {
             }}
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2"
+            <button type="button" onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2"
               style={{ color: 'var(--color-text-tertiary)' }}>
               <X size={14} />
             </button>
@@ -144,7 +144,7 @@ export default function InfosPage() {
             const cfg    = tab.key !== 'all' ? TYPE_CONFIG[tab.key] : null
             const n      = counts[tab.key] ?? 0
             return (
-              <button key={tab.key} onClick={() => setFilter(tab.key)}
+              <button type="button" key={tab.key} onClick={() => setFilter(tab.key)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium shrink-0 transition-all"
                 style={{
                   background: active ? (cfg?.bg ?? 'var(--color-accent-light)') : 'var(--color-bg-secondary)',
@@ -192,7 +192,7 @@ export default function InfosPage() {
               }}>
 
               {/* En-tête groupe */}
-              <button
+              <button type="button"
                 onClick={() => toggleGroup(g.clientId)}
                 className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
                 style={{ borderBottom: isOpen ? '1px solid var(--color-border-subtle)' : 'none' }}>
@@ -238,7 +238,7 @@ export default function InfosPage() {
                       />
                     </div>
                   ))}
-                  <button
+                  <button type="button"
                     onClick={() => setModal('new')}
                     className="flex items-center justify-center gap-1.5 w-full py-2 rounded-lg text-xs font-medium mt-1"
                     style={{

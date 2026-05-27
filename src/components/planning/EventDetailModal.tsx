@@ -112,7 +112,7 @@ export default function EventDetailModal({
               {dateLabel}
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg shrink-0 mt-0.5"
+          <button type="button" onClick={onClose} className="p-1.5 rounded-lg shrink-0 mt-0.5"
             style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
             <X size={15} />
           </button>
@@ -143,7 +143,7 @@ export default function EventDetailModal({
                 className="w-full px-3 py-2 rounded-lg text-sm resize-none"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
             </div>
-            <button onClick={handleMove} disabled={!moveDate || saving}
+            <button type="button" onClick={handleMove} disabled={!moveDate || saving}
               className="px-4 py-2 rounded-lg text-sm font-medium self-end"
               style={{ background: 'var(--color-accent)', color: 'white', opacity: (!moveDate || saving) ? 0.5 : 1 }}>
               {saving ? '…' : 'Déplacer'}
@@ -170,7 +170,7 @@ export default function EventDetailModal({
                 ))}
               </select>
             </div>
-            <button onClick={handleChangeTech} disabled={saving || !techInitiales.trim()}
+            <button type="button" onClick={handleChangeTech} disabled={saving || !techInitiales.trim()}
               className="px-4 py-2 rounded-lg text-sm font-medium"
               style={{ background: 'var(--color-accent)', color: 'white', opacity: (saving || !techInitiales.trim()) ? 0.5 : 1 }}>
               {saving ? '…' : 'Confirmer'}
@@ -183,7 +183,7 @@ export default function EventDetailModal({
           style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}>
 
           {event.link && (
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
@@ -203,7 +203,7 @@ export default function EventDetailModal({
           )}
 
           {isPrelev && !event.isDone && (
-            <button onClick={() => { setIsMoving(v => !v); setIsChangingTech(false) }}
+            <button type="button" onClick={() => { setIsMoving(v => !v); setIsChangingTech(false) }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border-subtle)' }}>
               <ChevronRight size={15} style={{ transform: isMoving ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
@@ -212,7 +212,7 @@ export default function EventDetailModal({
           )}
 
           {isPrelev && (
-            <button onClick={() => { setIsChangingTech(v => !v); setIsMoving(false) }}
+            <button type="button" onClick={() => { setIsChangingTech(v => !v); setIsMoving(false) }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border-subtle)' }}>
               <ChevronRight size={15} style={{ transform: isChangingTech ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
@@ -233,7 +233,7 @@ export default function EventDetailModal({
                   className="w-full px-3 py-2 rounded-lg text-sm resize-none"
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
               </div>
-              <button onClick={handleCancel} disabled={saving}
+              <button type="button" onClick={handleCancel} disabled={saving}
                 className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
                 style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)', opacity: saving ? 0.5 : 1 }}>
                 ↩ Retirer du calendrier
@@ -252,12 +252,12 @@ export default function EventDetailModal({
                 </p>
               </div>
               <div className="flex gap-2">
-                <button onClick={handleCancel} disabled={saving}
+                <button type="button" onClick={handleCancel} disabled={saving}
                   className="flex-1 py-2 rounded-lg text-sm font-semibold"
                   style={{ background: 'var(--color-danger)', color: 'white' }}>
                   {saving ? 'Retrait…' : 'Oui, retirer'}
                 </button>
-                <button onClick={() => setConfirmCancel(false)} disabled={saving}
+                <button type="button" onClick={() => setConfirmCancel(false)} disabled={saving}
                   className="flex-1 py-2 rounded-lg text-sm font-medium"
                   style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
                   Annuler
@@ -267,7 +267,7 @@ export default function EventDetailModal({
           )}
 
           {isEvt && (
-            <button onClick={() => { onDelete(event); onClose() }}
+            <button type="button" onClick={() => { onDelete(event); onClose() }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
               style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
               <Trash2 size={15} /> Supprimer

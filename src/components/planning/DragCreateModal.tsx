@@ -68,7 +68,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
               {isMultiDay ? `${fmtDate(debut)} → ${fmtDate(fin)}` : fmtDate(debut)}
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg"
+          <button type="button" onClick={onClose} className="p-1.5 rounded-lg"
             style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
             <X size={15} />
           </button>
@@ -93,7 +93,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
 
           <div className="grid grid-cols-5 gap-1.5">
             {TYPES.map(t => (
-              <button key={t.value} onClick={() => setType(t.value)}
+              <button type="button" key={t.value} onClick={() => setType(t.value)}
                 className="flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl text-[11px] font-medium"
                 style={{
                   background: type === t.value ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)',
@@ -148,7 +148,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
           {(() => {
             const canSave = type === 'conge' ? true : !!titre.trim()
             return (
-              <button onClick={handleSave} disabled={!canSave || saving}
+              <button type="button" onClick={handleSave} disabled={!canSave || saving}
                 className="w-full py-3 rounded-xl text-sm font-semibold"
                 style={{
                   background: canSave ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',

@@ -131,21 +131,21 @@ export default function MapView({
       }).addTo(mapRef.current)
 
       // Ajuster la taille après affichage initial dans le DOM (compense flex/reflow)
-      setTimeout(() => {
+      const initTimer = setTimeout(() => {
         if (mapRef.current) {
           mapRef.current.invalidateSize()
           setMapReady(true)
         }
       }, 200)
-    }
 
-    return () => {
-      // Nettoyage lors de la destruction du composant
-      if (mapRef.current) {
-        mapRef.current.remove()
-        mapRef.current = null
+      return () => {
+        clearTimeout(initTimer)
+        if (mapRef.current) {
+          mapRef.current.remove()
+          mapRef.current = null
+        }
+        setMapReady(false)
       }
-      setMapReady(false)
     }
   }, [])
 

@@ -197,7 +197,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between gap-2">
             <SectionTitle>{planningMode === 'today' ? 'Planning du jour' : 'Planning de demain'}</SectionTitle>
             <div className="relative flex gap-1 p-1 rounded-lg shrink-0" style={{ background: 'var(--color-bg-tertiary)' }}>
-              <button
+              <button type="button"
                 onClick={() => setPlanningMode('today')}
                 className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200"
                 style={{
@@ -214,7 +214,7 @@ export default function DashboardPage() {
                 )}
                 Aujourd'hui
               </button>
-              <button
+              <button type="button"
                 onClick={() => setPlanningMode('tomorrow')}
                 className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200"
                 style={{
@@ -309,7 +309,7 @@ export default function DashboardPage() {
               ]}
             />
           </div>
-          <button onClick={() => navigate('/materiel')} className="mt-2 text-xs" style={{ color: 'var(--color-accent)' }}>
+          <button type="button" onClick={() => navigate('/materiel')} className="mt-2 text-xs" style={{ color: 'var(--color-accent)' }}>
             Voir tout le matériel →
           </button>
         </div>
@@ -383,7 +383,7 @@ export default function DashboardPage() {
               className="w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl relative"
               style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}
             >
-              <button
+              <button type="button"
                 onClick={() => dismissWelcome(false)}
                 className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 transition-colors"
                 style={{ color: 'var(--color-text-secondary)' }}
@@ -406,14 +406,14 @@ export default function DashboardPage() {
                 </p>
 
                 <div className="flex flex-col gap-2 w-full">
-                  <button
+                  <button type="button"
                     onClick={() => dismissWelcome(true)}
                     className="w-full py-2.5 rounded-xl text-sm font-medium transition-transform active:scale-95"
                     style={{ background: 'var(--color-accent)', color: 'white' }}
                   >
                     Lire le mode d'emploi
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => dismissWelcome(false)}
                     className="w-full py-2 text-sm font-medium transition-colors"
                     style={{ color: 'var(--color-text-secondary)' }}

@@ -85,7 +85,7 @@ export default function MissionsPage() {
             {loading ? '…' : `${clients.length} client${clients.length > 1 ? 's' : ''}`}
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={handleNewClient}
           disabled={creating}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
@@ -116,7 +116,7 @@ export default function MissionsPage() {
         </div>
 
         {overdueCount > 0 && (
-          <button
+          <button type="button"
             onClick={() => setOnlyRetard((v) => !v)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium shrink-0 transition-colors"
             style={{

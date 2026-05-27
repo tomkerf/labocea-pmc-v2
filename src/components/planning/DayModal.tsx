@@ -88,7 +88,7 @@ export default function DayModal({
           <p className="flex-1 text-base font-semibold capitalize" style={{ color: 'var(--color-text-primary)' }}>
             {dayLabel}
           </p>
-          <button onClick={onClose} className="p-1.5 rounded-lg"
+          <button type="button" onClick={onClose} className="p-1.5 rounded-lg"
             style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
             <X size={16} />
           </button>
@@ -98,7 +98,7 @@ export default function DayModal({
         <div className="flex px-4 pt-3 pb-2.5 gap-1.5 shrink-0"
           style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
           {TABS.map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+            <button type="button" key={tab.id} onClick={() => setActiveTab(tab.id)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
               style={{
                 background: activeTab === tab.id ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
@@ -133,7 +133,7 @@ export default function DayModal({
               }} />
             <div className="grid grid-cols-5 gap-1.5">
               {EVENEMENT_TYPES.map(t => (
-                <button key={t.value} onClick={() => setEvtType(t.value)}
+                <button type="button" key={t.value} onClick={() => setEvtType(t.value)}
                   className="flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl text-[11px] font-medium"
                   style={{
                     background: evtType === t.value ? 'var(--color-accent-light)' : 'var(--color-bg-secondary)',
@@ -154,7 +154,7 @@ export default function DayModal({
             {(() => {
               const canCreate = evtType === 'conge' ? true : !!evtTitre.trim()
               return (
-                <button onClick={handleCreateEvt} disabled={!canCreate || evtSaving}
+                <button type="button" onClick={handleCreateEvt} disabled={!canCreate || evtSaving}
                   className="w-full py-3 rounded-xl text-sm font-semibold"
                   style={{
                     background: canCreate ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
@@ -203,7 +203,7 @@ export default function DayModal({
                   return (
                     <div key={item.sampling.id}
                       style={{ borderBottom: i < groupItems.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                      <button className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
+                      <button type="button" className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
                         onClick={() => isValidating
                           ? setPoolValidId(null)
                           : (setPoolValidId(item.sampling.id), setPoolDate(dateStr))
@@ -283,7 +283,7 @@ export default function DayModal({
                                     color: 'var(--color-text-primary)',
                                   }} />
                               </div>
-                              <button onClick={() => handleValidatePool(item)} disabled={poolSaving || !poolDate || !!poolHoliday}
+                              <button type="button" onClick={() => handleValidatePool(item)} disabled={poolSaving || !poolDate || !!poolHoliday}
                                 className="px-4 py-2 rounded-lg text-sm font-medium"
                                 style={{
                                   background: poolHoliday ? 'var(--color-bg-tertiary)' : 'var(--color-success)',
@@ -313,7 +313,7 @@ export default function DayModal({
                       const isOpen = openGroups[group.label] !== false
                       return (
                         <div key={group.label}>
-                          <button
+                          <button type="button"
                             className="w-full flex items-center justify-between px-1 py-1 mb-1.5"
                             onClick={() => setOpenGroups(prev => ({ ...prev, [group.label]: !isOpen }))}>
                             <p className="text-[11px] font-semibold uppercase tracking-wider"

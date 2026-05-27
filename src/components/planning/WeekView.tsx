@@ -155,7 +155,7 @@ export default function WeekView({
             gap: '2px 0',
           }}>
               {allDayItems.map(({ key, colStart, colEnd, row, bg, label, badge, onClick, tooltip }) => (
-                <button
+                <button type="button"
                   key={key}
                   onMouseDown={e => e.stopPropagation()}
                   onClick={onClick}
@@ -220,7 +220,7 @@ export default function WeekView({
                     ...(evt.subEvents ?? []).map(sub => (
                       <EventPill key={sub.id} event={sub} dateStr={dateStr} onSelect={e => handleSelectEvent(e, dateStr)} />
                     )),
-                    <button
+                    <button type="button"
                       key={`collapse-${groupKey}`}
                       onMouseDown={e => e.stopPropagation()}
                       onClick={e => { e.stopPropagation(); toggleGroup(dateStr, groupKey) }}

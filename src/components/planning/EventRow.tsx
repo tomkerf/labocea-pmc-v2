@@ -94,7 +94,7 @@ export default function EventRow({ event, isLast, onSelect }: EventRowProps) {
           {event.subEvents.map((sub, idx) => {
             const subTechColor = getTechColor(sub.technicien).color
             return (
-              <button
+              <button type="button"
                 key={sub.id}
                 onClick={() => onSelect && onSelect(sub)}
                 className="w-full flex items-center justify-between gap-3 py-2.5 text-left cursor-pointer transition-colors hover:bg-[rgba(0,0,0,0.03)]"

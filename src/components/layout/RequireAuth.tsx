@@ -97,7 +97,7 @@ function CompleteProfileModal() {
             <p className="text-xs" style={{ color: 'var(--color-danger)' }}>{error}</p>
           )}
 
-          <button
+          <button type="button"
             onClick={handleSave}
             disabled={saving}
             className="mt-2 py-2.5 rounded-xl text-sm font-semibold"

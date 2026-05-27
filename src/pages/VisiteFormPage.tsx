@@ -178,7 +178,7 @@ export default function VisiteFormPage() {
     <div className="p-4 sm:p-6 max-w-2xl pb-20">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate(backPath)} className="p-1.5 rounded-lg"
+        <button type="button" onClick={() => navigate(backPath)} className="p-1.5 rounded-lg"
           style={{ color: 'var(--color-text-secondary)' }}>
           <ArrowLeft size={18} />
         </button>
@@ -189,7 +189,7 @@ export default function VisiteFormPage() {
           <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{linkedNomState}</p>
         </div>
         {!isNew && (
-          <button onClick={handleExport} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium"
+          <button type="button" onClick={handleExport} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium"
             style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>
             <FileText size={14} />
             Exporter
@@ -238,7 +238,7 @@ export default function VisiteFormPage() {
         ))}
       </div>
 
-      <button
+      <button type="button"
         onClick={() => setPoints(ps => [...ps, newPoint()])}
         className="flex items-center gap-2 w-full py-3 rounded-xl text-sm font-medium mb-6"
         style={{ border: '1.5px dashed var(--color-border)', color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}
@@ -252,17 +252,17 @@ export default function VisiteFormPage() {
         {!isNew && (
           confirmDelete ? (
             <div className="flex items-center gap-2">
-              <button onClick={handleDelete} className="text-sm px-3 py-1.5 rounded-lg font-medium"
+              <button type="button" onClick={handleDelete} className="text-sm px-3 py-1.5 rounded-lg font-medium"
                 style={{ background: 'var(--color-danger)', color: 'white' }}>
                 Confirmer la suppression
               </button>
-              <button onClick={() => setConfirmDelete(false)} className="text-sm px-2 py-1.5 rounded-lg"
+              <button type="button" onClick={() => setConfirmDelete(false)} className="text-sm px-2 py-1.5 rounded-lg"
                 style={{ color: 'var(--color-text-secondary)' }}>
                 Annuler
               </button>
             </div>
           ) : (
-            <button onClick={() => setConfirmDelete(true)} className="text-sm px-3 py-1.5 rounded-lg"
+            <button type="button" onClick={() => setConfirmDelete(true)} className="text-sm px-3 py-1.5 rounded-lg"
               style={{ color: 'var(--color-danger)' }}>
               <Trash2 size={14} className="inline mr-1" />
               Supprimer
@@ -270,7 +270,7 @@ export default function VisiteFormPage() {
           )
         )}
         {isNew && <div />}
-        <button
+        <button type="button"
           onClick={() => handleSave()}
           disabled={saving || !date || !technicienNom.trim() || points.some(p => !p.nom.trim())}
           className="px-5 py-2 rounded-lg text-sm font-medium"
@@ -323,15 +323,15 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
         />
         <div className="flex items-center gap-1 shrink-0">
           {idx > 0 && (
-            <button onClick={() => onMove(-1)} className="p-1 rounded"
+            <button type="button" onClick={() => onMove(-1)} className="p-1 rounded"
               style={{ color: 'var(--color-text-tertiary)' }} title="Monter">↑</button>
           )}
           {idx < total - 1 && (
-            <button onClick={() => onMove(1)} className="p-1 rounded"
+            <button type="button" onClick={() => onMove(1)} className="p-1 rounded"
               style={{ color: 'var(--color-text-tertiary)' }} title="Descendre">↓</button>
           )}
           {total > 1 && (
-            <button onClick={onRemove} className="p-1 rounded"
+            <button type="button" onClick={onRemove} className="p-1 rounded"
               style={{ color: 'var(--color-danger)' }} title="Supprimer">
               <X size={14} />
             </button>
@@ -361,7 +361,7 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
         <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Faisabilité</label>
         <div className="flex gap-2">
           {FAISABILITE.map(f => (
-            <button
+            <button type="button"
               key={f.key}
               onClick={() => onChange('faisabilite', f.key)}
               className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
@@ -398,7 +398,7 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
               <div key={url} className="relative rounded-lg overflow-hidden shrink-0"
                 style={{ width: 80, height: 80, border: '1px solid var(--color-border)' }}>
                 <img src={url} alt="photo" className="w-full h-full object-cover" loading="lazy" />
-                <button onClick={() => onPhotoDelete(url)}
+                <button type="button" onClick={() => onPhotoDelete(url)}
                   className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
                   style={{ background: 'rgba(0,0,0,0.55)', color: 'white' }}>
                   <X size={10} strokeWidth={3} />

@@ -51,7 +51,7 @@ export default function PlanningHeader({
         {/* Ligne 1 : navigation période + toggle vue */}
         <div className="flex items-center justify-between px-4 md:px-6 pt-4 pb-3">
           <div className="flex items-center gap-2">
-            <button onClick={prev} className="p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
+            <button type="button" onClick={prev} className="p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
               onMouseEnter={e=>(e.currentTarget.style.background='var(--color-bg-tertiary)')}
               onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
               <ChevronLeft size={18} />
@@ -59,17 +59,17 @@ export default function PlanningHeader({
             <span className="text-sm font-semibold min-w-[120px] md:min-w-[180px] text-center" style={{ color:'var(--color-text-primary)' }}>
               {periodLabel}
             </span>
-            <button onClick={next} className="p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
+            <button type="button" onClick={next} className="p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
               onMouseEnter={e=>(e.currentTarget.style.background='var(--color-bg-tertiary)')}
               onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
               <ChevronRight size={18} />
             </button>
-            <button onClick={goToday}
+            <button type="button" onClick={goToday}
               className="hidden md:block px-2.5 py-1 rounded-lg text-xs font-medium ml-1"
               style={{ background:'var(--color-bg-tertiary)', color:'var(--color-text-secondary)', border:'1px solid var(--color-border-subtle)' }}>
               Aujourd'hui
             </button>
-            <button onClick={() => setShowMiniCal(v => !v)}
+            <button type="button" onClick={() => setShowMiniCal(v => !v)}
               className="hidden md:flex items-center justify-center w-7 h-7 rounded-lg ml-1"
               style={{
                 background: showMiniCal ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)',
@@ -81,7 +81,7 @@ export default function PlanningHeader({
             </button>
 
             {/* Bouton Carte mis en valeur séparément avec un icône Map premium (à droite du Mini-calendrier) */}
-            <button onClick={() => switchView(viewMode === 'carte' ? 'semaine' : 'carte')}
+            <button type="button" onClick={() => switchView(viewMode === 'carte' ? 'semaine' : 'carte')}
               className="px-3 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] ml-1 shrink-0"
               style={{
                 background: viewMode === 'carte' ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
@@ -103,7 +103,7 @@ export default function PlanningHeader({
 
           <div className="flex items-center gap-2">
             {/* Boutons d'export */}
-            <button
+            <button type="button"
               onClick={onExportPdf}
               className="px-2.5 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] cursor-pointer"
               title="Exporter la feuille de route PDF"
@@ -111,7 +111,7 @@ export default function PlanningHeader({
               <Printer size={13} style={{ color: 'var(--color-text-secondary)' }} />
               <span className="hidden md:inline">Feuille de route</span>
             </button>
-            <button
+            <button type="button"
               onClick={onExportExcel}
               className="px-2.5 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] cursor-pointer mr-1"
               title="Exporter au format Excel"
@@ -124,7 +124,7 @@ export default function PlanningHeader({
             <div className="relative flex p-0.5 rounded-lg shrink-0"
               style={{ border:'1px solid var(--color-border-subtle)', background:'var(--color-bg-tertiary)' }}>
               {(['jour','semaine','mois'] as ViewMode[]).map(m => (
-                <button
+                <button type="button"
                   key={m}
                   onClick={() => switchView(m)}
                   className="relative px-3 py-1.5 text-xs font-medium capitalize z-10 transition-colors duration-200"
@@ -190,13 +190,13 @@ export default function PlanningHeader({
               </div>
             )}
             {totalOverdue > 0 && (
-              <button onClick={() => setFilterRetard(v=>!v)}
+              <button type="button" onClick={() => setFilterRetard(v=>!v)}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
                 style={{ background:filterRetard?'var(--color-danger)':'var(--color-danger-light)', color:filterRetard?'white':'var(--color-danger)' }}>
                 ⚠ {totalOverdue} en retard
               </button>
             )}
-            <button onClick={() => { const v = !showRain; setShowRain(v); localStorage.setItem('planning_show_rain', String(v)) }}
+            <button type="button" onClick={() => { const v = !showRain; setShowRain(v); localStorage.setItem('planning_show_rain', String(v)) }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
               style={{
                 background: showRain ? '#0071E3' : 'rgba(0,113,227,0.1)',
@@ -233,7 +233,7 @@ export default function PlanningHeader({
           <p className="text-xs" style={{ color: 'var(--color-success)' }}>
             <span className="font-semibold">Astuce —</span> glisse sur plusieurs jours pour créer rapidement un événement (congé, rappel, réunion…)
           </p>
-          <button
+          <button type="button"
             onClick={() => { setShowDragHint(false); localStorage.setItem('planning_drag_hint_seen', '1') }}
             className="text-xs font-medium shrink-0 px-2 py-0.5 rounded"
             style={{ color: 'var(--color-success)', background: 'transparent' }}

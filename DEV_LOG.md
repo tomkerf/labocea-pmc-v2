@@ -4,6 +4,25 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 72 — Reporter une intervention depuis la tournée
+**27 mai 2026 (après-midi)**
+
+### Ce qui a été fait
+- **Nouvelle option "Reporter" dans SaisieRapideModal** : ajout d'un 3e statut `reporte` aux côtés de "Réalisé" et "Non effectué". Quand sélectionné, le champ "Date réalisée" est remplacé par "Nouvelle date prévue".
+- **Mise à jour Firestore** : un intervention reportée repart en `status: 'planned'` avec `plannedMonth` et `plannedDay` mis à jour selon la nouvelle date choisie.
+- **TourneeItem** : le badge "Reporté" (bleu accent) s'affiche et l'item est considéré comme traité (ne bloque pas la fin de tournée).
+- **Types** : `LocalStatus`, `TourneeItemData.status` et `SaisieRapideData.status` étendus avec `'reporte'`.
+
+### Fichiers modifiés
+- `src/components/tournee/SaisieRapideModal.tsx`
+- `src/components/tournee/TourneeItem.tsx`
+- `src/pages/TourneePage.tsx`
+
+### Prochaines étapes
+- Tester le reporter sur staging : vérifier que la nouvelle date apparaît bien dans le planning WeekView/DayView.
+
+---
+
 ## Session 69 — Exports Planning et Refonte Visuelle Bilan 24h
 **26 mai 2026 (soirée)**
 

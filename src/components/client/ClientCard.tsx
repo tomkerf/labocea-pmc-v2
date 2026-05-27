@@ -46,7 +46,7 @@ export default function ClientCard({ client }: Props) {
   const counts = countByStatus(client)
 
   return (
-    <button
+    <button type="button"
       onClick={() => navigate(`/missions/${client.id}`)}
       className="w-full text-left flex items-center gap-4 px-5 py-4 rounded-xl transition-colors"
       style={{

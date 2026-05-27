@@ -164,7 +164,7 @@ export default function ComptePage() {
           {AVATAR_COLORS.map(({ id, value, label }) => {
             const isSelected = value === currentColor
             return (
-              <button key={id} title={label} onClick={() => handleColorSelect(value)}
+              <button type="button" key={id} title={label} onClick={() => handleColorSelect(value)}
                 style={{
                   width: 30, height: 30, borderRadius: '50%',
                   background: value,
@@ -191,7 +191,7 @@ export default function ComptePage() {
       <ChangePasswordSection email={appUser?.email ?? ''} />
 
       {/* Déconnexion */}
-      <button
+      <button type="button"
         onClick={handleLogout}
         className="flex items-center gap-2 w-full px-5 py-4 rounded-xl text-sm font-medium"
         style={{
@@ -251,7 +251,7 @@ function ChangePasswordSection({ email }: { email: string }) {
   return (
     <div className="rounded-xl mb-4 overflow-hidden"
       style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-      <button
+      <button type="button"
         onClick={() => setOpen(o => !o)}
         className="w-full px-5 py-4 flex items-center justify-between"
       >
@@ -401,7 +401,7 @@ function PushNotificationsSection() {
           </div>
         </div>
 
-        <button
+        <button type="button"
           onClick={isPushEnabled ? disableNotifications : enableNotifications}
           disabled={loading}
           className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"

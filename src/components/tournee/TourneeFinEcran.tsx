@@ -53,7 +53,7 @@ export function TourneeFinEcran({ items, onRetour }: Props) {
         ))}
       </div>
 
-      <button
+      <button type="button"
         onClick={onRetour}
         className="px-6 py-3 rounded-lg text-sm font-medium"
         style={{ background: 'var(--color-accent)', color: 'white' }}>

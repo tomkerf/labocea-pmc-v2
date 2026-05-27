@@ -20,7 +20,7 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
 
   return (
     <div className="mb-6">
-      <button
+      <button type="button"
         onClick={() => setOpen(o => !o)}
         className="flex items-center gap-2 mb-3 w-full text-left"
       >
@@ -73,7 +73,7 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
                       style={{ background: tagBg, color: tagColor }}>
                       {tagLabel}
                     </span>
-                    <button
+                    <button type="button"
                       onClick={() => onMarkEnvoye(r.clientId, r.planId, r.samplingId)}
                       className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium"
                       style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}
@@ -87,7 +87,7 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
               })}
             </div>
             <div className="px-4 py-2.5" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
-              <button
+              <button type="button"
                 onClick={() => navigate('/rapports')}
                 className="text-xs font-medium"
                 style={{ color: 'var(--color-accent)' }}

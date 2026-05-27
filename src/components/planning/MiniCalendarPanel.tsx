@@ -62,7 +62,7 @@ function MonthGrid({ offset, baseMonth, viewMode, monthStart, weekStart, selecte
           const isSelected  = viewMode === 'jour' && iso === toISO(selectedDate)
           const highlighted = inWeek || inMonth || isSelected
           return (
-            <button key={iso} onClick={() => jumpToDate(d)}
+            <button type="button" key={iso} onClick={() => jumpToDate(d)}
               className="flex items-center justify-center rounded-full mx-auto"
               style={{
                 width: 22, height: 22,
@@ -103,21 +103,21 @@ export default function MiniCalendarPanel({
     <div className="flex flex-col h-full overflow-y-auto">
       <div className="flex items-center justify-between px-3 pt-3 pb-1 shrink-0"
         style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-        <button onClick={() => setBaseMonth(m => addMonths(m, -1))}
+        <button type="button" onClick={() => setBaseMonth(m => addMonths(m, -1))}
           className="p-1.5 rounded-md"
           onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           style={{ color: 'var(--color-text-secondary)' }}>
           <ChevronLeft size={13} />
         </button>
-        <button onClick={() => setBaseMonth(startOfMonth(today))}
+        <button type="button" onClick={() => setBaseMonth(startOfMonth(today))}
           className="text-[10px] font-medium px-2 py-0.5 rounded"
           onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           style={{ color: 'var(--color-text-secondary)' }}>
           Aujourd'hui
         </button>
-        <button onClick={() => setBaseMonth(m => addMonths(m, 1))}
+        <button type="button" onClick={() => setBaseMonth(m => addMonths(m, 1))}
           className="p-1.5 rounded-md"
           onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
