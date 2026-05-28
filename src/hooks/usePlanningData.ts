@@ -71,6 +71,7 @@ export function usePlanningData({
             frequence: plan.frequence || '',
             meteo: plan.meteo || '',
             analysesSousTraitees: plan.analysesSousTraitees ?? false,
+            cofrac: plan.cofrac ?? false,
             lat: plan.lat || '',
             lng: plan.lng || '',
           }
@@ -236,6 +237,7 @@ export function usePlanningData({
               techInitiales: client.preleveur || '—',
               meteo: plan.meteo || '',
               analysesSousTraitees: plan.analysesSousTraitees ?? false,
+              cofrac: plan.cofrac ?? false,
             })
           }
         })
@@ -266,6 +268,7 @@ export function usePlanningData({
               techInitiales: s.assignedTo || client.preleveur || '—',
               meteo: plan.meteo || '',
               analysesSousTraitees: plan.analysesSousTraitees ?? false,
+              cofrac: plan.cofrac ?? false,
             })
           }
         })

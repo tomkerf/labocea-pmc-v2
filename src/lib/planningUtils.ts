@@ -29,6 +29,7 @@ export interface PlanningEvent {
   frequence?: string
   meteo?: string
   analysesSousTraitees?: boolean
+  cofrac?: boolean
   maintenanceData?: Maintenance
   evenementData?: EvenementPersonnel
   // Fantôme (historique report / retrait)
@@ -57,6 +58,7 @@ export interface PoolItem {
   techInitiales: string
   meteo: string
   analysesSousTraitees: boolean
+  cofrac: boolean
 }
 
 export type ViewMode = 'jour' | 'semaine' | 'mois' | 'carte'

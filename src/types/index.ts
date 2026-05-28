@@ -108,6 +108,8 @@ export interface Plan {
   notes?: string               // commentaire libre sur le point de prélèvement
   analysesSousTraitees?: boolean // si true, analyses confiées à un sous-traitant (ex : RSDE, CORPEP)
   separator?: boolean          // si true, cet élément est un séparateur visuel (pas un vrai plan)
+  cofrac?: boolean
+  contraintesParticulieres?: string
   samplings: Sampling[]
 }
 
@@ -158,6 +160,10 @@ export interface Client {
   partSousTraitance: number
   plans: Plan[]
   terrain?: TerrainEntry[]
+  numBC?: string
+  modeFacturation?: string
+  situationActuelle?: string
+  contactPrevenance?: string
   _v2ts?: Timestamp
   createdBy: string
   updatedBy: string

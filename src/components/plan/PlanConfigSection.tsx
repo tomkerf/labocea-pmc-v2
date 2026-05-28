@@ -93,7 +93,7 @@ export function PlanConfigSection({ plan, onUpdate }: PlanConfigSectionProps) {
             </span>
           </label>
         </PlanField>
-        <PlanField label="Analyses" last>
+        <PlanField label="Analyses">
           <label className="flex items-center gap-2 mt-1 cursor-pointer">
             <input
               type="checkbox"
@@ -106,6 +106,29 @@ export function PlanConfigSection({ plan, onUpdate }: PlanConfigSectionProps) {
                 : 'Analyses en interne (labo Labocea)'}
             </span>
           </label>
+        </PlanField>
+        <PlanField label="Accréditation COFRAC">
+          <label className="relative inline-flex items-center cursor-pointer mt-1">
+            <input
+              type="checkbox"
+              checked={!!plan.cofrac}
+              onChange={(e) => onUpdate('cofrac', e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600" />
+            <span className="ml-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              {plan.cofrac ? 'Point accrédité COFRAC' : 'Non accrédité'}
+            </span>
+          </label>
+        </PlanField>
+        <PlanField label="Contraintes terrain" last>
+          <textarea
+            value={plan.contraintesParticulieres ?? ''}
+            onChange={(e) => onUpdate('contraintesParticulieres', e.target.value)}
+            rows={2}
+            className="field-input resize-none w-full"
+            placeholder="Codes barrières, équipements spécifiques…"
+          />
         </PlanField>
       </div>
     </div>

@@ -213,11 +213,17 @@ export default function DayModal({
                           <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
                             {item.clientNom}
                           </p>
-                          <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                            {item.planNom}{item.siteNom ? ` · ${item.siteNom}` : ''}
+                          <p className="text-xs mt-0.5 truncate flex items-center gap-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                            <span className="truncate">{item.planNom}{item.siteNom ? ` · ${item.siteNom}` : ''}
                             {item.frequence && (
                               <span className="ml-1" style={{ color: 'var(--color-text-tertiary)' }}>
                                 — {item.frequence}
+                              </span>
+                            )}</span>
+                            {item.cofrac && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0"
+                                style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                                COFRAC
                               </span>
                             )}
                           </p>

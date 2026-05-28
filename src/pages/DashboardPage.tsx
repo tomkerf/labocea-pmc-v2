@@ -325,6 +325,12 @@ export default function DashboardPage() {
                             <p className="text-sm font-medium leading-snug" style={{ color: 'var(--color-text-primary)' }}>{item.title}</p>
                             <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{item.sub}</p>
                           </div>
+                          {'cofrac' in item && item.cofrac && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0"
+                              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                              COFRAC
+                            </span>
+                          )}
                           {'meteo' in item && item.meteo === 'pluie' && (
                             <span title="Prélèvement temps de pluie" className="shrink-0 text-base leading-none">🌧</span>
                           )}

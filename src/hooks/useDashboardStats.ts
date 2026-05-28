@@ -15,7 +15,7 @@ const EVENEMENT_CFG: Record<string, { label: string; bg: string; color: string; 
 export type SamplingBadge = { label: string; bg: string; color: string }
 
 export type JourItem =
-  | { kind: 'sampling';  time: string; title: string; sub: string; badge: SamplingBadge; dot: string; meteo: string; modalEvent: ModalEventRef }
+  | { kind: 'sampling';  time: string; title: string; sub: string; badge: SamplingBadge; dot: string; meteo: string; cofrac: boolean; modalEvent: ModalEventRef }
   | { kind: 'evenement'; time: string; title: string; sub: string; badge: SamplingBadge; dot: string; modalEvent: ModalEventRef }
 
 export interface ModalEventRef {
@@ -247,7 +247,7 @@ export function useDashboardStats({
             isDone: s.status === 'done', technicien: client.preleveur || '—',
             clientId: client.id, planId: plan.id, samplingId: s.id, plannedTime: s.plannedTime,
           }
-          items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub, badge, dot, meteo: plan.meteo || '', modalEvent })
+          items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub, badge, dot, meteo: plan.meteo || '', cofrac: plan.cofrac ?? false, modalEvent })
         })
       })
     })
@@ -307,7 +307,7 @@ export function useDashboardStats({
               isDone: false, technicien: client.preleveur || '—',
               clientId: client.id, planId: plan.id, samplingId: s.id, plannedTime: s.plannedTime,
             }
-            items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub: subJ2, badge, dot, meteo: plan.meteo || '', modalEvent })
+            items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub: subJ2, badge, dot, meteo: plan.meteo || '', cofrac: plan.cofrac ?? false, modalEvent })
             return
           }
           if (baseDate !== tomorrowISO) return
@@ -323,7 +323,7 @@ export function useDashboardStats({
             isDone: false, technicien: client.preleveur || '—',
             clientId: client.id, planId: plan.id, samplingId: s.id, plannedTime: s.plannedTime,
           }
-          items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub: subtitle, badge, dot, meteo: plan.meteo || '', modalEvent })
+          items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub: subtitle, badge, dot, meteo: plan.meteo || '', cofrac: plan.cofrac ?? false, modalEvent })
         })
       })
     })

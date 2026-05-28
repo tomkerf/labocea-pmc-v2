@@ -65,9 +65,28 @@ export function ClientInfoForm({ client, sitesInput, update, onSitesChange }: Pr
           <input value={client.mobile} onChange={(e) => update('mobile', e.target.value)}
             className="field-input" placeholder="06 …" />
         </Field>
-        <Field label="Email" last>
+        <Field label="Email">
           <input type="email" value={client.email} onChange={(e) => update('email', e.target.value)}
             className="field-input" placeholder="contact@…" />
+        </Field>
+        <Field label="Contact prévenance" last>
+          <input value={client.contactPrevenance || ''} onChange={(e) => update('contactPrevenance', e.target.value)}
+            className="field-input" placeholder="Nom, téléphone…" />
+        </Field>
+      </Section>
+
+      <Section title="Facturation & Situation">
+        <Field label="N° Bon de commande (BC)">
+          <input value={client.numBC || ''} onChange={(e) => update('numBC', e.target.value)}
+            className="field-input" placeholder="ex: BC-12345" />
+        </Field>
+        <Field label="Mode de facturation">
+          <input value={client.modeFacturation || ''} onChange={(e) => update('modeFacturation', e.target.value)}
+            className="field-input" placeholder="ex: Facturation mensuelle" />
+        </Field>
+        <Field label="Situation administrative" last>
+          <input value={client.situationActuelle || ''} onChange={(e) => update('situationActuelle', e.target.value)}
+            className="field-input" placeholder="ex: Convention signée" />
         </Field>
       </Section>
 
