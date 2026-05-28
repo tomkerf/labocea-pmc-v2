@@ -44,6 +44,7 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
   - Une galerie photo unifiée combinant les photos de repérage du plan, les photos des prélèvements terrain, et les inspections de visites.
   - La liste des comptes-rendus de visites préliminaires spécifiques à ce point (filtrés dynamiquement par nom exact de point).
   - L'historique chronologique complet des prélèvements passés de ce plan.
+- **Ajout d'uploads photos dans la Configuration du Plan (`PlanConfigSection.tsx`)** : Ajout d'une ligne dédiée "Photos du point" sous le champ "Contraintes terrain" dans le tableau de configuration de la page du plan, permettant de charger directement des photos de repérage (miniatures `64x64`, bouton d'appareil photo tactile, suppression, auto-save).
 - **Raccordement de la fiche** :
   - Ajout d'un bouton d'action *"Fiche du point"* dans l'en-tête de la page de configuration de plan (`PlanPage.tsx`).
   - Ajout d'une icône raccourcie `BookOpen` dans la liste des plans de la fiche client (`ClientPlans.tsx`) pour un accès direct.
@@ -56,7 +57,8 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 - `src/pages/PlanPage.tsx`
 - `src/components/client/ClientPlans.tsx`
 - `src/components/plan/SamplingRow.tsx`
-- `src/pages/PointMesureFichePage.tsx` (créé et enrichi d'uploads)
+- `src/components/plan/PlanConfigSection.tsx`
+- `src/pages/PointMesureFichePage.tsx`
 - `src/types/index.ts`
 - `src/lib/uploadPhoto.ts`
 

@@ -1,5 +1,8 @@
+import { useState } from 'react'
+import { X, Camera, Loader2 } from 'lucide-react'
 import { PlanField } from '@/components/plan/SamplingForm'
 import type { Plan, FrequenceType, NatureEauType, MethodeType } from '@/types'
+import { uploadPlanPhoto, deletePlanPhoto } from '@/lib/uploadPhoto'
 
 const FREQUENCES: FrequenceType[] = ['Mensuel', 'Bimensuel', 'Trimestriel', 'Semestriel', 'Annuel', 'Personnalisé']
 const NATURES: NatureEauType[] = ['Eau usée', 'Rivière', 'Souterraine', 'Eau pluviale', 'Eau saline', 'Boues', 'Autre']
@@ -8,9 +11,36 @@ const METHODES: MethodeType[] = ['Ponctuel', 'Composite', 'Automatique']
 interface PlanConfigSectionProps {
   plan: Plan
   onUpdate: (field: keyof Plan, value: unknown) => void
+  clientId: string
+  planId: string
 }
 
-export function PlanConfigSection({ plan, onUpdate }: PlanConfigSectionProps) {
+export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConfigSectionProps) {
+  const [uploading, setUploading] = useState(false)
+
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || uploading) return
+    setUploading(true)
+    try {
+      const url = await uploadPlanPhoto(file, clientId, planId)
+      onUpdate('photos', [...(plan.photos || []), url])
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  async function handlePhotoDelete(url: string) {
+    try {
+      await deletePlanPhoto(url)
+      onUpdate('photos', (plan.photos || []).filter((u) => u !== url))
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   return (
     <div className="mb-5">
       <h2 className="text-xs font-semibold uppercase mb-2" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
@@ -112,7 +142,7 @@ export function PlanConfigSection({ plan, onUpdate }: PlanConfigSectionProps) {
             </span>
           </label>
         </PlanField>
-        <PlanField label="Contraintes terrain" last>
+        <PlanField label="Contraintes terrain">
           <textarea
             aria-label="Contraintes terrain"
             value={plan.contraintesParticulieres ?? ''}
@@ -121,6 +151,55 @@ export function PlanConfigSection({ plan, onUpdate }: PlanConfigSectionProps) {
             className="field-input resize-none w-full"
             placeholder="Codes barrières, équipements spécifiques…"
           />
+        </PlanField>
+        <PlanField label="Photos du point" last>
+          <div className="flex flex-col gap-3">
+            {/* Photos grid */}
+            {(plan.photos ?? []).length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {(plan.photos ?? []).map((url, i) => (
+                  <div key={url} className="relative rounded-lg overflow-hidden shrink-0"
+                    style={{ width: 64, height: 64, border: '1px solid var(--color-border)' }}>
+                    <img src={url} alt={`Repérage ${i + 1}`} className="w-full h-full object-cover" />
+                    <button type="button"
+                      onClick={() => handlePhotoDelete(url)}
+                      className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center bg-black/60 text-white hover:bg-black/80 transition-colors"
+                      title="Supprimer cette photo"
+                    >
+                      <X size={8} strokeWidth={3} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Upload Button */}
+            <label className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all active:scale-95"
+              style={{
+                background: 'var(--color-bg-tertiary)',
+                border: '1px solid var(--color-border)',
+                color: uploading ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+                opacity: uploading ? 0.6 : 1,
+                pointerEvents: uploading ? 'none' : 'auto',
+                maxWidth: 'fit-content'
+              }}
+            >
+              {uploading ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : (
+                <Camera size={12} />
+              )}
+              {uploading ? 'Envoi…' : 'Ajouter une photo'}
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handlePhotoChange}
+                disabled={uploading}
+              />
+            </label>
+          </div>
         </PlanField>
       </div>
     </div>

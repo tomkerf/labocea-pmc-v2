@@ -103,7 +103,7 @@ export default function PlanPage() {
         {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
       </div>
 
-      <PlanConfigSection plan={plan} onUpdate={updatePlan} />
+      <PlanConfigSection plan={plan} onUpdate={updatePlan} clientId={clientId!} planId={planId!} />
 
       <div className="mt-8">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
