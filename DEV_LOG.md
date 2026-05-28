@@ -9,9 +9,10 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ### Ce qui a été fait
 - **isSamplingIncomplet dans overdue.ts** : Fonction utilitaire détectant les prélèvements marqués comme terminés (`status: 'done'`) mais ayant des informations manquantes (date de réalisation, technicien). Suite aux retours d'ergonomie, la contrainte de **nappe** est restreinte **uniquement à la nature d'eau `Souterraine`** et seulement en période de nappe haute (janvier-mars, plannedMonth 0-2) ou nappe basse (septembre-novembre, plannedMonth 8-10). Tests unitaires exhaustifs écrits et validés (26/26 PASS).
-- **Composant EquipeSuiviWidget** : Nouveau composant autonome de style Apple affichant 4 KPIs clés (Réalisés, Incomplets, En retard, Rapports dus). La liste détaillée des prélèvements incomplets est **collapsée par défaut** pour ne pas charger le Dashboard, avec un bouton d'en-tête interactif, un chevron rotatif et un badge rappelant le nombre total de manques. Un clic sur un élément redirige vers le plan de prélèvement. Tests unitaires créés et validés.
+- **Composant EquipeSuiviWidget** : Nouveau composant autonome de style Apple affichant 4 KPIs clés (Réalisés, Incomplets, En retard, Rapports dus) dotés de descriptions et sous-labels explicatifs précis.
+- **Listes Collapsées** : Intégration de trois listes distinctes, **collapsées par défaut**, pour afficher les détails nominatifs de l'ensemble de l'équipe : *Prélèvements incomplets*, *Prélèvements en retard (équipe)*, et *Rapports dus (équipe)*. Chacune dispose de son propre en-tête cliquable interactif, de son chevron rotatif et de son badge coloré dynamique. Tests unitaires étendus à ces nouvelles listes.
 - **Intégration DashboardPage** : Intégration conditionnelle du widget dans le tableau de bord (visible uniquement pour les rôles `charge_mission` et `admin` via la variable `isGeneraliste` existante).
-- **Typecheck & Tests unitaires** : Correction des types TypeScript strict dans les mocks des tests (`makeClient` nécessitait `segment: 'Réseau de mesure'`, `createdBy`, `updatedBy` et `updatedAt`). Passage au vert de l'intégralité du banc de tests (143/143 tests PASS).
+- **Typecheck & Tests unitaires** : Correction des types TypeScript strict dans les mocks des tests (`makeClient` nécessitait `segment: 'Réseau de mesure'`, `createdBy`, `updatedBy` et `updatedAt`). Passage au vert de l'intégralité du banc de tests (145/145 tests PASS).
 - **Déploiement Staging** : Déploiement et build de production réussis sur Cloudflare Workers (staging).
 
 ### Fichiers modifiés
