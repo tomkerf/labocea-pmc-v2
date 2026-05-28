@@ -306,7 +306,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
           {uploading ? 'Envoi en cours…' : 'Ajouter une photo'}
           <input
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
             capture="environment"
             className="hidden"
             onChange={handlePhotoChange}

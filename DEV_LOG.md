@@ -3,6 +3,26 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 82 — Débridage du sélecteur de fichiers pour le format HEIC/HEIF (Mac et PC)
+**28 mai 2026 (soirée - suite)**
+
+### Ce qui a été fait
+- **Prise en charge de la sélection HEIC/HEIF sur macOS et PC** :
+  - **Problème** : L'attribut `accept` trop restrictif (`image/jpeg,image/png,image/webp,image/gif`) grisonnait et empêchait de sélectionner les fichiers `.HEIC` et `.HEIF` dans le sélecteur de fichiers système sur macOS/Finder et Windows Explorer.
+  - **Correction** : Mise à jour de l'attribut `accept` pour autoriser explicitement les types MIME et extensions de fichiers HEIC/HEIF : `accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"`.
+  - **Application** : Modifié sur l'ensemble des points d'entrée de photos de l'application : `PlanConfigSection.tsx`, `SamplingForm.tsx`, `VisiteFormPage.tsx`.
+  - Les utilisateurs de Mac/PC peuvent désormais sélectionner et télécharger directement des images `.HEIC`/`.HEIF` depuis leur dossier Téléchargements, et le système client-side `heic2any` effectue automatiquement la conversion en JPEG avant l'upload Firebase Storage.
+- **Validation** :
+  - Build complet en production réussi (0 erreur).
+  - Validation réussie de l'intégralité des tests unitaires et d'intégration (145/145 tests PASS).
+
+### Fichiers modifiés
+- `src/components/plan/PlanConfigSection.tsx`
+- `src/components/plan/SamplingForm.tsx`
+- `src/pages/VisiteFormPage.tsx`
+
+---
+
 ## Session 81 — Fix de la suppression de photo (Erreur 403 Forbidden sur Firebase Storage)
 **28 mai 2026 (soirée)**
 
