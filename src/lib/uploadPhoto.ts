@@ -3,7 +3,7 @@ import { storage } from '@/lib/firebase'
 
 /**
  * Assure que le fichier est bien au format standard (convertit le HEIC/HEIF en JPEG
- * à la volée via un import dynamique de heic2any pour ne pas alourdir le bundle initial).
+ * à la volée via un import dynamique de heic-to pour ne pas alourdir le bundle initial).
  */
 async function processImageFile(file: File): Promise<{ data: File | Blob; ext: string; contentType: string }> {
   const nameLower = file.name.toLowerCase()
@@ -11,13 +11,13 @@ async function processImageFile(file: File): Promise<{ data: File | Blob; ext: s
 
   if (isHeic) {
     try {
-      const heic2any = (await import('heic2any')).default
-      const conversionResult = await heic2any({
+      const { heicTo } = await import('heic-to')
+      const conversionResult = await heicTo({
         blob: file,
-        toType: 'image/jpeg',
+        type: 'image/jpeg',
         quality: 0.85
       })
-      const blob = Array.isArray(conversionResult) ? conversionResult[0] : conversionResult
+      const blob = Array.isArray(conversionResult) ? conversionResult[0] : (conversionResult as any)
       return {
         data: blob,
         ext: 'jpg',

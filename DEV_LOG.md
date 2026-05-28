@@ -3,6 +3,25 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 83 — Remplacement de heic2any par heic-to (Support des HEIC iPhone récents)
+**28 mai 2026 (soirée - suite)**
+
+### Ce qui a été fait
+- **Migration vers la bibliothèque modernisée `heic-to`** :
+  - **Problème** : L'ancienne bibliothèque `heic2any` renvoyait une erreur `ERR_LIBHEIF format not supported` sur le décodage de certains fichiers `.HEIC` provenant d'iPhones récents (avec des encodages HEIF/HEIC d'iOS plus récents).
+  - **Correction** : Remplacement de `heic2any` par la bibliothèque activement maintenue `heic-to` qui intègre la dernière mouture de `libheif-web` et prend en charge l'intégralité des formats HEIC récents.
+  - **Optimisation** : Importation dynamique préservée (`await import('heic-to')`) pour isoler le décodage WebAssembly de ~3Mo dans un chunk asynchrone (`heic-to-*.js`), garantissant le chargement instantané de l'application (zéro impact sur le chargement initial).
+- **Validation** :
+  - Build complet en production réussi (0 erreur).
+  - Validation réussie de l'intégralité des 145 tests unitaires et d'intégration (145/145 PASS).
+
+### Fichiers modifiés
+- `package.json`
+- `package-lock.json`
+- `src/lib/uploadPhoto.ts`
+
+---
+
 ## Session 82 — Débridage du sélecteur de fichiers pour le format HEIC/HEIF (Mac et PC)
 **28 mai 2026 (soirée - suite)**
 
