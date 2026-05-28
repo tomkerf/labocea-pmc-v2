@@ -3,6 +3,25 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 80 — Résolution du bug de l'upload de photo & règles Storage
+**28 mai 2026 (fin d'après-midi)**
+
+### Ce qui a été fait
+- **Règles de sécurité Firebase Storage** : Déploiement des nouvelles règles de stockage Firebase (`storage.rules`) autorisant les prélèvements et repérages de points dans le chemin `plans/{clientId}/{planId}/{filename}` pour les utilisateurs authentifiés.
+- **Confirmation & Rétroaction visuelle (Toasts)** :
+  - Ajout d'alertes `toast.success` et `toast.error` (via `useToastStore`) lors du chargement de photos de repérage dans `PlanConfigSection.tsx`.
+  - Ajout de toasts d'information/erreur lors de la suppression de photos de repérage.
+- **Déploiement & Validation** :
+  - Déploiement des règles Storage sur le projet Firebase de production/staging `labocea-pmc` via les API Firebase CLI.
+  - Déploiement de la version corrigée de l'application sur le serveur de staging Cloudflare Workers (`labocea-pmc-v2-dev.tomkerf.workers.dev`).
+  - Validation du build de production (0 erreur) et réussite de l'intégralité des tests unitaires et d'intégration (145/145 PASS).
+
+### Fichiers modifiés
+- `storage.rules`
+- `src/components/plan/PlanConfigSection.tsx`
+
+---
+
 ## Session 79 — Alignement fichier Excel Cindy & Fiche point de mesure
 **28 mai 2026 (après-midi)**
 
