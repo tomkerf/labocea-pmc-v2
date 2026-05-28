@@ -197,7 +197,7 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
               {uploading ? 'Envoi…' : 'Ajouter une photo'}
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/gif"
                 capture="environment"
                 className="hidden"
                 onChange={handlePhotoChange}
