@@ -1,4 +1,6 @@
-import type { Sampling } from '@/types'
+import type { Sampling, NatureEauType } from '@/types'
+
+const NATURES_NAPPE: NatureEauType[] = ['Rivière', 'Souterraine', 'AEP']
 
 /** Retourne true si le prélèvement est en retard :
  *  - statut 'overdue' (marqué manuellement), OU
@@ -37,7 +39,7 @@ export function isSamplingOverdue(s: Sampling, year?: number): boolean {
  *  @param nature - la nature d'eau du plan (ex: 'Rivière', 'Eau usée', etc.)
  *  @returns true si le prélèvement est incomplètement renseigné, false sinon
  */
-export function isSamplingIncomplet(s: Sampling, nature: string): boolean {
+export function isSamplingIncomplet(s: Sampling, nature: NatureEauType): boolean {
   // Si le statut n'est pas 'done', le prélèvement n'est pas considéré comme incomplet
   if (s.status !== 'done') return false
 
@@ -46,7 +48,6 @@ export function isSamplingIncomplet(s: Sampling, nature: string): boolean {
   if (!s.doneBy) return true
 
   // Vérifier la nappe seulement si la nature est Rivière, Souterraine ou AEP
-  const NATURES_NAPPE: string[] = ['Rivière', 'Souterraine', 'AEP']
   if (NATURES_NAPPE.includes(nature) && !s.nappe) return true
 
   return false
