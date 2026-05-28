@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { Timestamp } from 'firebase/firestore'
 import { EquipeSuiviWidget } from '../EquipeSuiviWidget'
 import type { Client } from '@/types'
 
@@ -8,9 +9,10 @@ vi.mock('react-router-dom', () => ({ useNavigate: () => vi.fn() }))
 const makeClient = (overrides: Partial<Client> = {}): Client => ({
   id: 'c1', nom: 'Kerjequel', annee: '2026', numClient: '', nouvelleDemande: 'Annuelle',
   interlocuteur: '', telephone: '', mobile: '', email: '', fonction: '', mission: '',
-  segment: 'Réseaux de mesure', numDevis: '', numConvention: '', preleveur: 'THK',
+  segment: 'Réseau de mesure', numDevis: '', numConvention: '', preleveur: 'THK',
   dureeContrat: '', periodeIntervention: '', sites: [], montantTotal: 0,
-  partPMC: 0, partSousTraitance: 0, plans: [], ...overrides,
+  partPMC: 0, partSousTraitance: 0, plans: [], createdBy: 'uid1', updatedBy: 'uid1',
+  updatedAt: Timestamp.now(), ...overrides,
 })
 
 const doneSampling = {

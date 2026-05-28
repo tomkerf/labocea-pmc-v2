@@ -10,6 +10,7 @@ import { RetardWidget } from '@/components/dashboard/RetardWidget'
 import { PluieWidget } from '@/components/dashboard/PluieWidget'
 import { MaintenancesWidget } from '@/components/dashboard/MaintenancesWidget'
 import { MetrologieWidget } from '@/components/dashboard/MetrologieWidget'
+import { EquipeSuiviWidget } from '@/components/dashboard/EquipeSuiviWidget'
 import { EventDetailModal } from '@/components/EventDetailModal'
 import type { ModalEvent, TechOption } from '@/components/EventDetailModal'
 import { useAuthStore, selectPrenom, selectInitiales, selectUid, selectRole } from '@/stores/authStore'
@@ -166,7 +167,7 @@ export default function DashboardPage() {
         />
         <StatCard
           value={rapportsAFaireMoi.length}
-          label="Rapports à envoyer"
+          label="Rapports à rédiger"
           sub={rapportsAFaireMoi.length > 0 ? `${rapportsAFaireMoi.filter(r => r.enRetard).length} en retard` : 'Tout est à jour'}
           danger={rapportsAFaireMoi.some(r => r.enRetard)}
           warning={rapportsAFaireMoi.length > 0 && !rapportsAFaireMoi.some(r => r.enRetard)}
@@ -322,6 +323,7 @@ export default function DashboardPage() {
         <PluieWidget items={prelevementsPluie} />
         <MaintenancesWidget maintenances={maintenancesActives} />
         <MetrologieWidget equipements={metrologieAlertes} />
+        {isGeneraliste && <EquipeSuiviWidget clients={clients} />}
       </motion.div>
 
       {eventDetail && (
