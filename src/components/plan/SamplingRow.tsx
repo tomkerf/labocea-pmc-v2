@@ -1,4 +1,4 @@
-import { X, Trash2, Clock } from 'lucide-react'
+import { X, Trash2, Clock, ChevronRight } from 'lucide-react'
 import { SamplingForm } from './SamplingForm'
 import type { Sampling, SamplingStatus, AppUser } from '@/types'
 
@@ -82,6 +82,7 @@ export function SamplingRow({
             style={{ background: cfg.bg, color: cfg.color }}>
             {cfg.label}
           </span>
+          <ChevronRight size={14} className="shrink-0 transition-transform" style={{ color: 'var(--color-text-tertiary)', transform: isSelected ? 'rotate(90deg)' : 'none' }} />
         </button>
 
         {isCustom && (
