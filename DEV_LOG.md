@@ -13,6 +13,7 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
   - Implémentation d'un convertisseur automatique d'images côté client (`processImageFile`) : si l'image sélectionnée est au format HEIC/HEIF ou possède une extension `.heic`/`.heif`, elle est automatiquement décodée et convertie en JPEG (qualité 85%) avant l'upload.
   - La conversion se fait via un **import dynamique** (`await import('heic2any')`), ce qui permet de charger la bibliothèque lourde uniquement à la volée lorsque nécessaire (zéro impact sur la taille du bundle initial et le temps de chargement de la page).
   - Ce support est universel : il résout le problème de l'HEIC pour tous les modules d'upload de l'application (photos de prélèvements terrain, visites préliminaires et photos de repérage des plans).
+  - **Correction pour iOS (Médiathèque iPhone)** : Modification de l'attribut `accept` de tous les `<input type="file">` de l'application (`PlanConfigSection.tsx`, `SamplingForm.tsx`, `VisiteFormPage.tsx`) de `accept="image/*"` à `accept="image/jpeg,image/png,image/webp,image/gif"`. Cette restriction force le système d'exploitation iOS (Safari et Chrome) à effectuer une **conversion native et instantanée** de l'image HEIC sélectionnée en JPEG haute qualité lors de la sélection, supprimant ainsi tout risque de crash mémoire sur l'appareil mobile lors du décodage Javascript/WASM tout en assurant une compatibilité absolue.
 - **Confirmation & Rétroaction visuelle (Toasts)** :
   - Ajout d'alertes `toast.success` et `toast.error` (via `useToastStore`) lors du chargement de photos de repérage dans `PlanConfigSection.tsx`.
   - Ajout de toasts d'information/erreur lors de la suppression de photos de repérage.
@@ -26,6 +27,8 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 - `package.json`
 - `package-lock.json`
 - `src/components/plan/PlanConfigSection.tsx`
+- `src/components/plan/SamplingForm.tsx`
+- `src/pages/VisiteFormPage.tsx`
 - `src/lib/uploadPhoto.ts`
 
 ---
