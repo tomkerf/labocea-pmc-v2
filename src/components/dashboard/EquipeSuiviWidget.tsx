@@ -1,5 +1,6 @@
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ChevronDown } from 'lucide-react'
 import { isSamplingIncomplet, isSamplingOverdue } from '@/lib/overdue'
 import type { Client, Sampling, NatureEauType } from '@/types'
 
@@ -29,6 +30,7 @@ interface Props {
 
 export function EquipeSuiviWidget({ clients }: Props) {
   const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
 
   const { kpis, incomplets } = useMemo(() => {
     let realises = 0
@@ -96,16 +98,28 @@ export function EquipeSuiviWidget({ clients }: Props) {
       {/* Liste incomplets */}
       <div className="rounded-xl overflow-hidden"
         style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-        <div className="flex items-center justify-between px-4 py-3"
-          style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            Prélèvements incomplets
-          </span>
-          <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-            {incomplets.length} à compléter
-          </span>
-        </div>
-        {incomplets.map((item, i) => (
+        <button
+          type="button"
+          onClick={() => setOpen(o => !o)}
+          className="flex items-center justify-between px-4 py-3 w-full text-left cursor-pointer hover:bg-[var(--color-bg-tertiary)] transition-colors"
+          style={{ borderBottom: open ? '1px solid var(--color-border-subtle)' : 'none' }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              Prélèvements incomplets
+            </span>
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+              style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+              {incomplets.length}
+            </span>
+          </div>
+          <ChevronDown size={14} strokeWidth={2.5} style={{
+            color: 'var(--color-text-secondary)',
+            transform: open ? 'rotate(0deg)' : 'rotate(-90deg)',
+            transition: 'transform 0.2s ease',
+          }} />
+        </button>
+        {open && incomplets.map((item, i) => (
           <div key={item.samplingId}
             className="flex items-center gap-3 px-4 py-3 cursor-pointer"
             style={{ borderBottom: i < incomplets.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}

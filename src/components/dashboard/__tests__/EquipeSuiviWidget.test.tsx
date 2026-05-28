@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { Timestamp } from 'firebase/firestore'
 import { EquipeSuiviWidget } from '../EquipeSuiviWidget'
 import type { Client } from '@/types'
@@ -41,21 +41,25 @@ describe('EquipeSuiviWidget', () => {
     expect(screen.getByText(/suivi équipe/i)).toBeTruthy()
   })
 
-  it('affiche le nom du client dans la liste des incomplets', () => {
+  it('affiche le nom du client dans la liste des incomplets après ouverture', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Jaudy', frequence: 'Mensuel',
       meteo: '', nature: 'Souterraine', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
       customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
       samplings: [{ ...doneSampling, nappe: '' }] }] })
     render(<EquipeSuiviWidget clients={[client]} />)
+    const toggle = screen.getByRole('button', { name: /prélèvements incomplets/i })
+    fireEvent.click(toggle)
     expect(screen.getByText('Kerjequel')).toBeTruthy()
   })
 
-  it('affiche le bon champ manquant', () => {
+  it('affiche le bon champ manquant après ouverture', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Site', frequence: 'Mensuel',
       meteo: '', nature: 'Souterraine', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
       customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
       samplings: [{ ...doneSampling, nappe: '' }] }] })
     render(<EquipeSuiviWidget clients={[client]} />)
+    const toggle = screen.getByRole('button', { name: /prélèvements incomplets/i })
+    fireEvent.click(toggle)
     expect(screen.getByText(/nappe/i)).toBeTruthy()
   })
 })
