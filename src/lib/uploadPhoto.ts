@@ -63,3 +63,34 @@ export async function deleteVisitePhoto(url: string): Promise<void> {
     // Fichier déjà supprimé — ignorer silencieusement
   }
 }
+
+/**
+ * Upload une photo de plan dans Firebase Storage.
+ * Chemin : plans/{clientId}/{planId}/{timestamp}.{ext}
+ */
+export async function uploadPlanPhoto(
+  file: File,
+  clientId: string,
+  planId: string,
+): Promise<string> {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+  const path = `plans/${clientId}/${planId}/${Date.now()}.${ext}`
+  const storageRef = ref(storage, path)
+  await uploadBytes(storageRef, file, { contentType: file.type })
+  return getDownloadURL(storageRef)
+}
+
+/**
+ * Supprime une photo de plan depuis son URL.
+ */
+export async function deletePlanPhoto(url: string): Promise<void> {
+  try {
+    const match = url.match(/\/o\/(.+?)(\?|$)/)
+    if (!match) return
+    const path = decodeURIComponent(match[1])
+    await deleteObject(ref(storage, path))
+  } catch {
+    // Ignorer silencieusement
+  }
+}
+

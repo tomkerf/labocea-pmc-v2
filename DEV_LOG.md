@@ -37,23 +37,28 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ### Ce qui a été fait
 - **Création de la Fiche Point de Mesure dédiée (`/missions/:clientId/plan/:planId/fiche`)** : Nouveau composant autonome `PointMesureFichePage.tsx` de style Apple affichant :
-  - La carte GPS via iframe interactive Google Maps.
+  - La carte GPS via iframe interactive Google Maps (sécurisée avec l'attribut `sandbox`).
   - Les métadonnées complètes du point de prélèvement (nature, méthode, fréquence, COFRAC).
   - Un champ de contraintes d'accès terrain (`contraintesParticulieres`) éditable directement avec auto-save sur blur.
-  - Une galerie photo unifiée combinant les photos prises lors des prélèvements et des inspections de visites.
+  - **Ajout de photos de repérage** : Bouton d'appareil photo / upload direct sur la fiche (sous les contraintes terrain) pour stocker les photos de repérage du plan (`Plan.photos`), avec gestion de la suppression.
+  - Une galerie photo unifiée combinant les photos de repérage du plan, les photos des prélèvements terrain, et les inspections de visites.
   - La liste des comptes-rendus de visites préliminaires spécifiques à ce point (filtrés dynamiquement par nom exact de point).
   - L'historique chronologique complet des prélèvements passés de ce plan.
 - **Raccordement de la fiche** :
   - Ajout d'un bouton d'action *"Fiche du point"* dans l'en-tête de la page de configuration de plan (`PlanPage.tsx`).
   - Ajout d'une icône raccourcie `BookOpen` dans la liste des plans de la fiche client (`ClientPlans.tsx`) pour un accès direct.
   - Déclaration de la route différée (code-splitting) dans `App.tsx`.
+- **UX & Chevron interactif** : Import de `ChevronRight` et ajout de l'indicateur interactif rotatif sur les lignes de prélèvement (`SamplingRow.tsx`) pour guider visuellement l'utilisateur.
 - **Validation** : Build de production 100% OK et tests Vitest tous au vert (145/145 PASS).
 
 ### Fichiers modifiés
 - `src/App.tsx`
 - `src/pages/PlanPage.tsx`
 - `src/components/client/ClientPlans.tsx`
-- `src/pages/PointMesureFichePage.tsx` (créé)
+- `src/components/plan/SamplingRow.tsx`
+- `src/pages/PointMesureFichePage.tsx` (créé et enrichi d'uploads)
+- `src/types/index.ts`
+- `src/lib/uploadPhoto.ts`
 
 ---
 

@@ -111,6 +111,7 @@ export interface Plan {
   cofrac?: boolean
   contraintesParticulieres?: string
   samplings: Sampling[]
+  photos?: string[]
 }
 
 // --- Infos terrain ---
