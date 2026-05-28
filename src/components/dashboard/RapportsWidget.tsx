@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 interface RapportItem {
   clientId: string; planId: string; samplingId: string
-  clientNom: string; siteNom: string
+  clientNom: string; siteNom: string; planNom: string
   doneDate: string; joursDepuis: number; enRetard: boolean
   rapportDatePrevue: string
 }
@@ -70,7 +70,7 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{r.clientNom}</p>
                       <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                        {r.siteNom} · intervention {fmtDone} · envoi prévu {fmtPrevue}
+                        {r.siteNom === r.planNom ? r.siteNom : [r.siteNom, r.planNom].filter(Boolean).join(' · ')} · intervention {fmtDone} · envoi prévu {fmtPrevue}
                       </p>
                     </div>
                     <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"

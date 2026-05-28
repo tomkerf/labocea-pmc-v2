@@ -3,16 +3,18 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
-## Session 78 — Retrait temporaire du bouton Démarrer la tournée
+## Session 78 — Retrait temporaire du bouton Démarrer la tournée & Affichage des points de prélèvement
 **28 mai 2026 (après-midi)**
 
 ### Ce qui a été fait
 - **Retrait temporaire du bouton "Démarrer la tournée"** : Suppression du bouton conditionnel d'ouverture de la tournée dans `DashboardPage.tsx` pour l'instant.
 - **Nettoyage des imports** : Retrait de l'icône `Route` devenue inutile de l'import `lucide-react` dans `DashboardPage.tsx`.
+- **Affichage du nom des points de prélèvement dans Rapports à rédiger** : Ajout du nom du point (`planNom`) dans le widget `RapportsWidget.tsx` sur le Dashboard afin de différencier les rapports de prélèvement provenant du même site.
 - **Validation** : Build de production 100% OK et tests Vitest tous au vert (145/145 PASS).
 
 ### Fichiers modifiés
 - `src/pages/DashboardPage.tsx`
+- `src/components/dashboard/RapportsWidget.tsx`
 
 ---
 
