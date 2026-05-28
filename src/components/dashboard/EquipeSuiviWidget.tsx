@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import { isSamplingIncomplet, isSamplingOverdue } from '@/lib/overdue'
+import { useUsersStore } from '@/stores/usersStore'
 import type { Client, Sampling, NatureEauType } from '@/types'
 
 interface IncompletItem {
@@ -12,6 +13,8 @@ interface IncompletItem {
   siteNom: string
   doneDate: string
   champManquant: string
+  doneBy: string
+  preleveur: string
 }
 
 interface EnRetardItem {
@@ -22,6 +25,7 @@ interface EnRetardItem {
   siteNom: string
   plannedMonth: number
   plannedDay: number
+  preleveur: string
 }
 
 interface RapportDuItem {
@@ -31,6 +35,8 @@ interface RapportDuItem {
   clientNom: string
   siteNom: string
   doneDate: string
+  doneBy: string
+  preleveur: string
 }
 
 function getChampManquant(s: Sampling, nature: NatureEauType): string {
@@ -52,6 +58,13 @@ export function EquipeSuiviWidget({ clients }: Props) {
   const [openIncomplets, setOpenIncomplets] = useState(false)
   const [openRetard, setOpenRetard] = useState(false)
   const [openRapports, setOpenRapports] = useState(false)
+  const users = useUsersStore(state => state.users)
+
+  const resolveInitials = (uid: string, fallbackInitials?: string) => {
+    if (!uid) return fallbackInitials || '—'
+    const u = users.find(user => user.uid === uid)
+    return u ? u.initiales : (fallbackInitials || '—')
+  }
 
   const { kpis, incomplets, enRetardList, rapportsDusList } = useMemo(() => {
     let realises = 0
@@ -76,6 +89,8 @@ export function EquipeSuiviWidget({ clients }: Props) {
                 siteNom: plan.siteNom,
                 doneDate: s.doneDate,
                 champManquant: getChampManquant(s, plan.nature),
+                doneBy: s.doneBy || '',
+                preleveur: s.assignedTo || client.preleveur || '—',
               })
             }
           }
@@ -89,6 +104,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
               siteNom: plan.siteNom,
               plannedMonth: s.plannedMonth,
               plannedDay: s.plannedDay,
+              preleveur: s.assignedTo || client.preleveur || '—',
             })
           }
           if (s.rapportPrevu && !s.rapportDate) {
@@ -100,6 +116,8 @@ export function EquipeSuiviWidget({ clients }: Props) {
               clientNom: client.nom,
               siteNom: plan.siteNom,
               doneDate: s.doneDate || '',
+              doneBy: s.doneBy || '',
+              preleveur: s.assignedTo || client.preleveur || '—',
             })
           }
         }
@@ -185,7 +203,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
                     {item.clientNom}
                   </p>
                   <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                    {item.siteNom}{item.doneDate ? ` · réalisé le ${new Date(item.doneDate + 'T12:00:00').toLocaleDateString('fr-FR')}` : ''}
+                    {item.siteNom} · tech: {resolveInitials(item.doneBy, item.preleveur)}{item.doneDate ? ` · fait le ${new Date(item.doneDate + 'T12:00:00').toLocaleDateString('fr-FR')}` : ''}
                   </p>
                 </div>
                 <span className="shrink-0 text-xs font-medium px-2.5 py-1 rounded-full"
@@ -239,7 +257,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
                       {item.clientNom}
                     </p>
                     <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                      {item.siteNom} · {dateStr}
+                      {item.siteNom} · tech: {item.preleveur} · {dateStr}
                     </p>
                   </div>
                   <span className="shrink-0 text-xs font-medium px-2.5 py-1 rounded-full"
@@ -291,7 +309,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
                     {item.clientNom}
                   </p>
                   <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                    {item.siteNom}{item.doneDate ? ` · réalisé le ${new Date(item.doneDate + 'T12:00:00').toLocaleDateString('fr-FR')}` : ''}
+                    {item.siteNom} · tech: {resolveInitials(item.doneBy, item.preleveur)}{item.doneDate ? ` · fait le ${new Date(item.doneDate + 'T12:00:00').toLocaleDateString('fr-FR')}` : ''}
                   </p>
                 </div>
                 <span className="shrink-0 text-xs font-medium px-2.5 py-1 rounded-full"
