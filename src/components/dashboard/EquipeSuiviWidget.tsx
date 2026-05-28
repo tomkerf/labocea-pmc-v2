@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { isSamplingIncomplet, isSamplingOverdue } from '@/lib/overdue'
+import { isSamplingIncomplet, isSamplingOverdue, NATURES_NAPPE } from '@/lib/overdue'
 import type { Client, Sampling, NatureEauType } from '@/types'
 
 interface IncompletItem {
+  samplingId: string
   clientId: string
   planId: string
   clientNom: string
@@ -15,7 +16,7 @@ interface IncompletItem {
 function getChampManquant(s: Sampling, nature: NatureEauType): string {
   if (!s.doneDate) return 'Date manquante'
   if (!s.doneBy) return 'Technicien manquant'
-  if (['Rivière', 'Souterraine', 'AEP'].includes(nature) && !s.nappe) return 'Nappe manquante'
+  if (NATURES_NAPPE.includes(nature) && !s.nappe) return 'Nappe manquante'
   return ''
 }
 
@@ -40,6 +41,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
             realises++
             if (isSamplingIncomplet(s, plan.nature)) {
               incompletsList.push({
+                samplingId: s.id,
                 clientId: client.id,
                 planId: plan.id,
                 clientNom: client.nom,
@@ -101,7 +103,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
           </span>
         </div>
         {incomplets.map((item, i) => (
-          <div key={`${item.clientId}-${item.planId}-${item.doneDate}`}
+          <div key={item.samplingId}
             className="flex items-center gap-3 px-4 py-3 cursor-pointer"
             style={{ borderBottom: i < incomplets.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
             onClick={() => navigate(`/missions/${item.clientId}/plan/${item.planId}`)}
