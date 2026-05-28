@@ -3,8 +3,25 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 81 — Fix de la suppression de photo (Erreur 403 Forbidden sur Firebase Storage)
+**28 mai 2026 (soirée)**
+
+### Ce qui a été fait
+- **Correction de la règle Firebase Storage (Erreur 403 Forbidden sur suppression)** :
+  - **Cause racine** : La règle `allow write` unifiée dans `storage.rules` validait les requêtes via `request.resource.size` et `request.resource.contentType`. Lors d'une requête de suppression (`DELETE`), la ressource envoyée (`request.resource`) est `null`, provoquant un échec systématique de l'évaluation de la règle par le moteur Firebase Storage et renvoyant une erreur HTTP 403 (Forbidden).
+  - **Résolution** : Séparation de la règle `write` en deux blocs distincts et précis : `allow create, update` (avec la vérification de la taille < 10Mo et du type mime `image/*`) et `allow delete` (nécessitant uniquement l'authentification de l'utilisateur). Cette modification a été appliquée à l'ensemble des dossiers de stockage (`samplings`, `visites`, `plans`).
+- **Déploiement & Validation** :
+  - Déploiement instantané des nouvelles règles via la commande `npx firebase deploy --only storage` sur le projet Firebase `labocea-pmc`.
+  - Intégration complète des modifications dans le dépôt Git (branche `main`).
+
+### Fichiers modifiés
+- `storage.rules`
+
+---
+
 ## Session 80 — Résolution du bug de l'upload de photo & règles Storage & Support HEIC (iPhone)
 **28 mai 2026 (fin d'après-midi)**
+
 
 ### Ce qui a été fait
 - **Règles de sécurité Firebase Storage** : Déploiement des nouvelles règles de stockage Firebase (`storage.rules`) autorisant les prélèvements et repérages de points dans le chemin `plans/{clientId}/{planId}/{filename}` pour les utilisateurs authentifiés.
