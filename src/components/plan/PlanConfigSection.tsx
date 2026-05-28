@@ -123,6 +123,7 @@ export function PlanConfigSection({ plan, onUpdate }: PlanConfigSectionProps) {
         </PlanField>
         <PlanField label="Contraintes terrain" last>
           <textarea
+            aria-label="Contraintes terrain"
             value={plan.contraintesParticulieres ?? ''}
             onChange={(e) => onUpdate('contraintesParticulieres', e.target.value)}
             rows={2}
