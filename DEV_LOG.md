@@ -4,6 +4,29 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 76 — Suivi équipe chargé de mission (Dashboard)
+**28 mai 2026 (après-midi)**
+
+### Ce qui a été fait
+- **isSamplingIncomplet dans overdue.ts** : Fonction utilitaire détectant les prélèvements marqués comme terminés (`status: 'done'`) mais ayant des informations manquantes (date de réalisation, technicien ou nappe pour les plans de nature Rivière, Souterraine ou AEP). Tests unitaires exhaustifs écrits et validés (24/24 PASS).
+- **Composant EquipeSuiviWidget** : Nouveau composant autonome de style Apple affichant 4 KPIs clés (Réalisés, Incomplets, En retard, Rapports dus) et la liste détaillée des prélèvements incomplets avec un badge identifiant le champ manquant (Date, Technicien ou Nappe). Un clic sur un élément redirige directement vers le plan de prélèvement. Tests unitaires créés et validés.
+- **Intégration DashboardPage** : Intégration conditionnelle du widget dans le tableau de bord (visible uniquement pour les rôles `charge_mission` et `admin` via la variable `isGeneraliste` existante).
+- **Typecheck & Tests unitaires** : Correction des types TypeScript strict dans les mocks des tests (`makeClient` nécessitait `segment: 'Réseau de mesure'`, `createdBy`, `updatedBy` et `updatedAt`). Passage au vert de l'intégralité du banc de tests (141/141 tests PASS).
+- **Déploiement Staging** : Déploiement et build de production réussis sur Cloudflare Workers (staging).
+
+### Fichiers modifiés
+- `src/lib/overdue.ts` — Ajout de `isSamplingIncomplet`
+- `src/lib/__tests__/overdue.test.ts` — Tests unitaires de `isSamplingIncomplet`
+- `src/components/dashboard/EquipeSuiviWidget.tsx` — Création du composant
+- `src/components/dashboard/__tests__/EquipeSuiviWidget.test.tsx` — Tests unitaires du widget et correctifs de mocks
+- `src/pages/DashboardPage.tsx` — Intégration conditionnelle du widget dans le layout
+
+### Prochaines étapes
+- Vérifier manuellement le widget de suivi équipe sur staging (rôles `charge_mission`/`admin` vs `technicien`).
+- Continuer avec la validation par l'équipe terrain.
+
+---
+
 ## Session 75 — Planning : temps de pluie activé par défaut
 **27 mai 2026 (soirée)**
 
