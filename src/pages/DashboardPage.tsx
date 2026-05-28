@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Route, BookOpen, X } from 'lucide-react'
+import { BookOpen, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 import DonutChart from '@/components/dashboard/DonutChart'
@@ -289,19 +289,7 @@ export default function DashboardPage() {
                       </button>
                     </div>
                   </div>
-                  {planningMode === 'today' && jourItems.filter(i => i.kind === 'sampling' && !i.modalEvent.isDone).length > 0 && (
-                    <motion.button
-                      whileHover={{ scale: 1.02, y: -0.5 }}
-                      whileTap={{ scale: 0.96 }}
-                      transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                      onClick={() => navigate('/tournee')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 cursor-pointer shadow-sm self-start"
-                      style={{ background: 'var(--color-accent)', color: 'white' }}
-                    >
-                      <Route size={13} />
-                      Démarrer la tournée
-                    </motion.button>
-                  )}
+
                 </div>
                 {activeItems.length === 0 ? (
                   <EmptyCard>Aucune intervention ni événement{planningMode === 'today' ? " aujourd'hui" : " demain"}.</EmptyCard>

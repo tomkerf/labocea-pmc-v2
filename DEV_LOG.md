@@ -2,7 +2,20 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+
+## Session 78 — Retrait temporaire du bouton Démarrer la tournée
+**28 mai 2026 (après-midi)**
+
+### Ce qui a été fait
+- **Retrait temporaire du bouton "Démarrer la tournée"** : Suppression du bouton conditionnel d'ouverture de la tournée dans `DashboardPage.tsx` pour l'instant.
+- **Nettoyage des imports** : Retrait de l'icône `Route` devenue inutile de l'import `lucide-react` dans `DashboardPage.tsx`.
+- **Validation** : Build de production 100% OK et tests Vitest tous au vert (145/145 PASS).
+
+### Fichiers modifiés
+- `src/pages/DashboardPage.tsx`
+
 ---
+
 
 ## Session 77 — Séparation des dashboards & Ajustements ergonomiques
 **28 mai 2026 (après-midi)**
