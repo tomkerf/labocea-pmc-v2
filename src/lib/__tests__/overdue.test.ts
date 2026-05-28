@@ -172,16 +172,24 @@ describe('isSamplingIncomplet', () => {
     expect(isSamplingIncomplet({ ...base, doneBy: '' }, 'Eau usée')).toBe(true)
   })
 
-  it('retourne true si nappe manquante sur plan Rivière', () => {
-    expect(isSamplingIncomplet({ ...base, nappe: '' }, 'Rivière')).toBe(true)
+  it('retourne false si nappe manquante sur plan Rivière', () => {
+    expect(isSamplingIncomplet({ ...base, nappe: '' }, 'Rivière')).toBe(false)
   })
 
-  it('retourne true si nappe manquante sur plan Souterraine', () => {
-    expect(isSamplingIncomplet({ ...base, nappe: '' }, 'Souterraine')).toBe(true)
+  it('retourne true si nappe manquante sur plan Souterraine prélevé en janvier (nappe haute)', () => {
+    expect(isSamplingIncomplet({ ...base, plannedMonth: 0, nappe: '' }, 'Souterraine')).toBe(true)
   })
 
-  it('retourne true si nappe manquante sur plan AEP', () => {
-    expect(isSamplingIncomplet({ ...base, nappe: '' }, 'AEP')).toBe(true)
+  it('retourne true si nappe manquante sur plan Souterraine prélevé en octobre (nappe basse)', () => {
+    expect(isSamplingIncomplet({ ...base, plannedMonth: 9, nappe: '' }, 'Souterraine')).toBe(true)
+  })
+
+  it('retourne false si nappe manquante sur plan Souterraine prélevé en mai (hors période)', () => {
+    expect(isSamplingIncomplet({ ...base, plannedMonth: 4, nappe: '' }, 'Souterraine')).toBe(false)
+  })
+
+  it('retourne false si nappe manquante sur plan AEP', () => {
+    expect(isSamplingIncomplet({ ...base, nappe: '' }, 'AEP')).toBe(false)
   })
 
   it('retourne false si nappe manquante sur plan Eau usée', () => {

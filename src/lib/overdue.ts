@@ -1,6 +1,6 @@
 import type { Sampling, NatureEauType } from '@/types'
 
-export const NATURES_NAPPE: NatureEauType[] = ['Rivière', 'Souterraine', 'AEP']
+export const NATURES_NAPPE: NatureEauType[] = ['Souterraine']
 
 /** Retourne true si le prélèvement est en retard :
  *  - statut 'overdue' (marqué manuellement), OU
@@ -33,10 +33,10 @@ export function isSamplingOverdue(s: Sampling, year?: number): boolean {
 /** Retourne true si un prélèvement "done" manque des informations obligatoires :
  *  - doneDate (date de réalisation)
  *  - doneBy (uid du technicien)
- *  - nappe (seulement si la nature est Rivière, Souterraine ou AEP)
+ *  - nappe (uniquement pour la nature Souterraine lors des périodes de nappe haute/basse)
  *
  *  @param s - le prélèvement à évaluer
- *  @param nature - la nature d'eau du plan (ex: 'Rivière', 'Eau usée', etc.)
+ *  @param nature - la nature d'eau du plan (ex: 'Souterraine', 'Eau usée', etc.)
  *  @returns true si le prélèvement est incomplètement renseigné, false sinon
  */
 export function isSamplingIncomplet(s: Sampling, nature: NatureEauType): boolean {
@@ -47,8 +47,11 @@ export function isSamplingIncomplet(s: Sampling, nature: NatureEauType): boolean
   if (!s.doneDate) return true
   if (!s.doneBy) return true
 
-  // Vérifier la nappe seulement si la nature est Rivière, Souterraine ou AEP
-  if (NATURES_NAPPE.includes(nature) && !s.nappe) return true
+  // L'info nappe n'est obligatoire que pour les eaux souterraines prélevées en période de nappe haute/basse
+  if (nature === 'Souterraine') {
+    const isPeriodeNappe = [0, 1, 2, 8, 9, 10].includes(s.plannedMonth)
+    if (isPeriodeNappe && !s.nappe) return true
+  }
 
   return false
 }

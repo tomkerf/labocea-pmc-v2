@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { isSamplingIncomplet, isSamplingOverdue, NATURES_NAPPE } from '@/lib/overdue'
+import { isSamplingIncomplet, isSamplingOverdue } from '@/lib/overdue'
 import type { Client, Sampling, NatureEauType } from '@/types'
 
 interface IncompletItem {
@@ -16,7 +16,10 @@ interface IncompletItem {
 function getChampManquant(s: Sampling, nature: NatureEauType): string {
   if (!s.doneDate) return 'Date manquante'
   if (!s.doneBy) return 'Technicien manquant'
-  if (NATURES_NAPPE.includes(nature) && !s.nappe) return 'Nappe manquante'
+  if (nature === 'Souterraine') {
+    const isPeriodeNappe = [0, 1, 2, 8, 9, 10].includes(s.plannedMonth)
+    if (isPeriodeNappe && !s.nappe) return 'Nappe manquante'
+  }
   return ''
 }
 

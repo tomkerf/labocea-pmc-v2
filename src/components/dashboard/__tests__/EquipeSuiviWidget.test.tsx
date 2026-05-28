@@ -16,8 +16,8 @@ const makeClient = (overrides: Partial<Client> = {}): Client => ({
 })
 
 const doneSampling = {
-  id: 's1', num: 1, plannedMonth: 4, plannedDay: 10,
-  status: 'done' as const, doneDate: '2026-05-10', doneBy: 'uid1',
+  id: 's1', num: 1, plannedMonth: 0, plannedDay: 10,
+  status: 'done' as const, doneDate: '2026-01-10', doneBy: 'uid1',
   nappe: '' as const, comment: '', rapportPrevu: false, rapportDate: '',
   tente: false, reportHistory: [],
 }
@@ -34,7 +34,7 @@ describe('EquipeSuiviWidget', () => {
 
   it('affiche le titre "Suivi équipe"', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Site', frequence: 'Mensuel',
-      meteo: '', nature: 'Rivière', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
+      meteo: '', nature: 'Souterraine', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
       customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
       samplings: [{ ...doneSampling, nappe: '' }] }] })
     render(<EquipeSuiviWidget clients={[client]} />)
@@ -43,7 +43,7 @@ describe('EquipeSuiviWidget', () => {
 
   it('affiche le nom du client dans la liste des incomplets', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Jaudy', frequence: 'Mensuel',
-      meteo: '', nature: 'Rivière', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
+      meteo: '', nature: 'Souterraine', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
       customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
       samplings: [{ ...doneSampling, nappe: '' }] }] })
     render(<EquipeSuiviWidget clients={[client]} />)
@@ -52,7 +52,7 @@ describe('EquipeSuiviWidget', () => {
 
   it('affiche le bon champ manquant', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Site', frequence: 'Mensuel',
-      meteo: '', nature: 'Rivière', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
+      meteo: '', nature: 'Souterraine', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
       customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
       samplings: [{ ...doneSampling, nappe: '' }] }] })
     render(<EquipeSuiviWidget clients={[client]} />)
