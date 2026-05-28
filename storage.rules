@@ -22,5 +22,14 @@ service firebase.storage {
         && request.resource.contentType.matches('image/.*');
     }
 
+    // Photos de plans de prélèvement (Mémoire du point / Fiche)
+    // Chemin : plans/{clientId}/{planId}/{filename}
+    match /plans/{clientId}/{planId}/{filename} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
   }
 }

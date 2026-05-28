@@ -3,6 +3,7 @@ import { X, Camera, Loader2 } from 'lucide-react'
 import { PlanField } from '@/components/plan/SamplingForm'
 import type { Plan, FrequenceType, NatureEauType, MethodeType } from '@/types'
 import { uploadPlanPhoto, deletePlanPhoto } from '@/lib/uploadPhoto'
+import { toast } from '@/stores/toastStore'
 
 const FREQUENCES: FrequenceType[] = ['Mensuel', 'Bimensuel', 'Trimestriel', 'Semestriel', 'Annuel', 'Personnalisé']
 const NATURES: NatureEauType[] = ['Eau usée', 'Rivière', 'Souterraine', 'Eau pluviale', 'Eau saline', 'Boues', 'Autre']
@@ -25,8 +26,10 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
     try {
       const url = await uploadPlanPhoto(file, clientId, planId)
       onUpdate('photos', [...(plan.photos || []), url])
+      toast.success('Photo ajoutée avec succès !')
     } catch (err) {
       console.error(err)
+      toast.error('Erreur lors de l\'ajout de la photo. Vérifie les permissions ou ta connexion.')
     } finally {
       setUploading(false)
     }
@@ -36,8 +39,10 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
     try {
       await deletePlanPhoto(url)
       onUpdate('photos', (plan.photos || []).filter((u) => u !== url))
+      toast.success('Photo supprimée avec succès !')
     } catch (err) {
       console.error(err)
+      toast.error('Erreur lors de la suppression de la photo.')
     }
   }
 
