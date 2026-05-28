@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { isSamplingOverdue } from '../overdue'
+import { isSamplingOverdue, isSamplingIncomplet } from '../overdue'
 import type { Sampling } from '@/types'
 
 // Prélèvement minimal
@@ -130,5 +130,61 @@ describe('isSamplingOverdue', () => {
       // Plan de l'année courante 2026, juillet 2026 → pas encore dépassé en janvier
       expect(isSamplingOverdue(s, 2026)).toBe(false)
     })
+  })
+})
+
+// ─── isSamplingIncomplet ────────────────────────────────────────
+
+describe('isSamplingIncomplet', () => {
+  const base: Sampling = {
+    id: 's1',
+    num: 1,
+    plannedMonth: 4,
+    plannedDay: 15,
+    status: 'done',
+    doneDate: '2026-05-14',
+    doneBy: 'uid1',
+    nappe: 'haute',
+    comment: '',
+    rapportPrevu: false,
+    rapportDate: '',
+    tente: false,
+    reportHistory: [],
+  }
+
+  it('retourne false si tout est renseigné (plan non-nappe)', () => {
+    expect(isSamplingIncomplet({ ...base, nappe: '' }, 'Eau usée')).toBe(false)
+  })
+
+  it('retourne false si tout est renseigné (plan nappe)', () => {
+    expect(isSamplingIncomplet({ ...base, nappe: 'haute' }, 'Rivière')).toBe(false)
+  })
+
+  it('retourne false si status !== done', () => {
+    expect(isSamplingIncomplet({ ...base, status: 'planned' }, 'Rivière')).toBe(false)
+  })
+
+  it('retourne true si doneDate manquante', () => {
+    expect(isSamplingIncomplet({ ...base, doneDate: '' }, 'Eau usée')).toBe(true)
+  })
+
+  it('retourne true si doneBy manquant', () => {
+    expect(isSamplingIncomplet({ ...base, doneBy: '' }, 'Eau usée')).toBe(true)
+  })
+
+  it('retourne true si nappe manquante sur plan Rivière', () => {
+    expect(isSamplingIncomplet({ ...base, nappe: '' }, 'Rivière')).toBe(true)
+  })
+
+  it('retourne true si nappe manquante sur plan Souterraine', () => {
+    expect(isSamplingIncomplet({ ...base, nappe: '' }, 'Souterraine')).toBe(true)
+  })
+
+  it('retourne true si nappe manquante sur plan AEP', () => {
+    expect(isSamplingIncomplet({ ...base, nappe: '' }, 'AEP')).toBe(true)
+  })
+
+  it('retourne false si nappe manquante sur plan Eau usée', () => {
+    expect(isSamplingIncomplet({ ...base, nappe: '' }, 'Eau usée')).toBe(false)
   })
 })

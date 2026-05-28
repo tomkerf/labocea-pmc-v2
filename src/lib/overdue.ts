@@ -27,3 +27,27 @@ export function isSamplingOverdue(s: Sampling, year?: number): boolean {
 
   return deadline < new Date()
 }
+
+/** Retourne true si un prélèvement "done" manque des informations obligatoires :
+ *  - doneDate (date de réalisation)
+ *  - doneBy (uid du technicien)
+ *  - nappe (seulement si la nature est Rivière, Souterraine ou AEP)
+ *
+ *  @param s - le prélèvement à évaluer
+ *  @param nature - la nature d'eau du plan (ex: 'Rivière', 'Eau usée', etc.)
+ *  @returns true si le prélèvement est incomplètement renseigné, false sinon
+ */
+export function isSamplingIncomplet(s: Sampling, nature: string): boolean {
+  // Si le statut n'est pas 'done', le prélèvement n'est pas considéré comme incomplet
+  if (s.status !== 'done') return false
+
+  // Vérifier les champs obligatoires pour tous les prélèvements done
+  if (!s.doneDate) return true
+  if (!s.doneBy) return true
+
+  // Vérifier la nappe seulement si la nature est Rivière, Souterraine ou AEP
+  const NATURES_NAPPE: string[] = ['Rivière', 'Souterraine', 'AEP']
+  if (NATURES_NAPPE.includes(nature) && !s.nappe) return true
+
+  return false
+}
