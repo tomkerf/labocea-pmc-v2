@@ -82,15 +82,18 @@ export function EquipeSuiviWidget({ clients }: Props) {
       {/* KPIs */}
       <div className="grid grid-cols-4 gap-2 mb-4">
         {[
-          { label: 'Réalisés',    value: kpis.realises,   color: 'var(--color-success)' },
-          { label: 'Incomplets',  value: kpis.incomplets, color: 'var(--color-warning)' },
-          { label: 'En retard',   value: kpis.enRetard,   color: 'var(--color-danger)'  },
-          { label: 'Rapports dus',value: kpis.rapportsDus,color: 'var(--color-accent)'  },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="rounded-xl p-3"
+          { label: 'Réalisés',    sub: "Faits sur l'année",          value: kpis.realises,   color: 'var(--color-success)' },
+          { label: 'Incomplets',  sub: 'Date, tech ou nappe requis', value: kpis.incomplets, color: 'var(--color-warning)' },
+          { label: 'En retard',   sub: 'Échéances dépassées',        value: kpis.enRetard,   color: 'var(--color-danger)'  },
+          { label: 'Rapports dus',sub: 'Prévus non rédigés',        value: kpis.rapportsDus,color: 'var(--color-accent)'  },
+        ].map(({ label, sub, value, color }) => (
+          <div key={label} className="rounded-xl p-3 flex flex-col justify-between"
             style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-            <div className="text-xl font-bold" style={{ color }}>{value}</div>
-            <div className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{label}</div>
+            <div>
+              <div className="text-xl font-bold" style={{ color }}>{value}</div>
+              <div className="text-xs font-semibold mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{label}</div>
+            </div>
+            <div className="text-[10px] mt-1.5 leading-tight" style={{ color: 'var(--color-text-secondary)' }}>{sub}</div>
           </div>
         ))}
       </div>

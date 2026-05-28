@@ -60,6 +60,6 @@ describe('EquipeSuiviWidget', () => {
     render(<EquipeSuiviWidget clients={[client]} />)
     const toggle = screen.getByRole('button', { name: /prélèvements incomplets/i })
     fireEvent.click(toggle)
-    expect(screen.getByText(/nappe/i)).toBeTruthy()
+    expect(screen.getByText('Nappe manquante')).toBeTruthy()
   })
 })
