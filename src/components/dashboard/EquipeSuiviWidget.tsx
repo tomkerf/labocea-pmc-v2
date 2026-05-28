@@ -71,6 +71,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
   }
 
   const { kpis, incomplets, enRetardList, rapportsDusList } = useMemo(() => {
+    const todayISO = new Date().toISOString().slice(0, 10)
     let realises = 0
     let enRetard = 0
     let rapportsDus = 0
@@ -114,7 +115,8 @@ export function EquipeSuiviWidget({ clients }: Props) {
               meteo: plan.meteo || '',
             })
           }
-          if (s.status === 'done' && s.rapportPrevu && !s.rapportDate) {
+          const rapportEnvoye = s.rapportDate && s.rapportDate <= todayISO
+          if (s.status === 'done' && s.rapportPrevu && !rapportEnvoye) {
             rapportsDus++
             rapportsDusListItems.push({
               samplingId: s.id,

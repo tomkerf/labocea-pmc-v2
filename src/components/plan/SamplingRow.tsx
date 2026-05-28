@@ -1,4 +1,4 @@
-import { X, Trash2 } from 'lucide-react'
+import { X, Trash2, Clock } from 'lucide-react'
 import { SamplingForm } from './SamplingForm'
 import type { Sampling, SamplingStatus, AppUser } from '@/types'
 
@@ -66,6 +66,13 @@ export function SamplingRow({
           <span className="text-sm font-medium flex-1" style={{ color: 'var(--color-text-primary)' }}>
             {dateLabel}
           </span>
+          {s.plannedTime && (
+            <span className="flex items-center gap-1 text-xs"
+              style={{ color: 'var(--color-accent)' }}>
+              <Clock size={11} />
+              {s.plannedTime}
+            </span>
+          )}
           {s.doneDate && (
             <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
               {new Date(s.doneDate).toLocaleDateString('fr-FR')}

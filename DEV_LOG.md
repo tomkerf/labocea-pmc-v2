@@ -10,11 +10,13 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 - **Retrait temporaire du bouton "Démarrer la tournée"** : Suppression du bouton conditionnel d'ouverture de la tournée dans `DashboardPage.tsx` pour l'instant.
 - **Nettoyage des imports** : Retrait de l'icône `Route` devenue inutile de l'import `lucide-react` dans `DashboardPage.tsx`.
 - **Affichage du nom des points de prélèvement dans Rapports à rédiger** : Ajout du nom du point (`planNom`) dans le widget `RapportsWidget.tsx` sur le Dashboard afin de différencier les rapports de prélèvement provenant du même site.
+- **Alignement des rapports dus (équipe vs individuel)** : Correction de la condition de filtrage des rapports rédigés dans `EquipeSuiviWidget.tsx` pour utiliser la même logique de détection des dates futures corrompues (`!rapportEnvoye` au lieu de `!s.rapportDate`) que `useDashboardStats.ts`, résolvant ainsi l'absence de certains rapports dus d'équipe dans l'onglet CM.
 - **Validation** : Build de production 100% OK et tests Vitest tous au vert (145/145 PASS).
 
 ### Fichiers modifiés
 - `src/pages/DashboardPage.tsx`
 - `src/components/dashboard/RapportsWidget.tsx`
+- `src/components/dashboard/EquipeSuiviWidget.tsx`
 
 ---
 

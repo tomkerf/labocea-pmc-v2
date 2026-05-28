@@ -71,9 +71,15 @@ export default function TourneePage() {
           nature:     plan?.nature  ?? '',
           lat:        plan?.lat     ?? '',
           lng:        plan?.lng     ?? '',
-          status:     s?.status === 'done' ? 'done' : s?.status === 'non_effectue' ? 'non_effectue' : 'todo',
+          status:     (s?.status === 'done' ? 'done' : s?.status === 'non_effectue' ? 'non_effectue' : 'todo') as TourneeItemData['status'],
           motif:      s?.motif ?? '',
         }
+      })
+      .sort((a, b) => {
+        if (a.time && b.time) return a.time.localeCompare(b.time)
+        if (a.time) return -1
+        if (b.time) return 1
+        return 0
       })
   }, [jourItems, clients])
 
