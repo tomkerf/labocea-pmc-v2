@@ -3,7 +3,60 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
-## Session 78 — Retrait temporaire du bouton Démarrer la tournée & Affichage des points de prélèvement
+## Session 79 — Alignement fichier Excel Cindy & Fiche point de mesure
+**28 mai 2026 (après-midi)**
+
+### Ce qui a été fait
+- **Alignement fichier Excel Cindy** : Ajout des champs manquants dans les types `Client` et `Plan` pour correspondre aux colonnes du fichier de suivi de Cindy :
+  - `Client` : `numBC`, `modeFacturation`, `situationActuelle`, `contactPrevenance`
+  - `Plan` : `cofrac`, `contraintesParticulieres`
+- **ClientInfoForm** : Ajout du champ "Contact prévenance" en fin de section Contact + nouvelle section "Facturation & Situation" (N° BC, mode de facturation, situation administrative).
+- **PlanConfigSection** : Remplacement du champ "Commentaire" par deux nouveaux champs : toggle "Accréditation COFRAC" (style Apple switch) + textarea "Contraintes terrain". Suppression du champ Commentaire devenu redondant.
+- **Badge COFRAC** : Propagé dans tout le stack planning (`PlanningEvent`, `PoolItem`, `JourItem`) et affiché dans le Dashboard (planning du jour) et le modal planning (`DayModal`).
+- **MissionDetailPage** : Remplacement de la checklist terrain (dynamique, peu utilisée) par l'affichage statique du champ `contraintesParticulieres` du plan. Suppression de ~100 lignes de code mort (fonctions checklist, imports, state).
+- **Correction react-doctor** : Ajout des `aria-label` manquants sur les 5 nouveaux contrôles.
+
+### Décisions prises
+- La "Fiche point de mesure" dédiée (Option B) est approuvée pour une prochaine session. Question en attente : visites prelim liées au plan (A/B/C) avant de démarrer l'implémentation.
+
+### Fichiers modifiés
+- `src/types/index.ts`
+- `src/components/client/ClientInfoForm.tsx`
+- `src/components/plan/PlanConfigSection.tsx`
+- `src/lib/planningUtils.ts`
+- `src/hooks/usePlanningData.ts`
+- `src/hooks/useDashboardStats.ts`
+- `src/pages/DashboardPage.tsx`
+- `src/components/planning/DayModal.tsx`
+- `src/pages/MissionDetailPage.tsx`
+
+---
+
+## Session 79 — Implémentation de la Fiche Point de Mesure dédiée
+**28 mai 2026 (fin d'après-midi)**
+
+### Ce qui a été fait
+- **Création de la Fiche Point de Mesure dédiée (`/missions/:clientId/plan/:planId/fiche`)** : Nouveau composant autonome `PointMesureFichePage.tsx` de style Apple affichant :
+  - La carte GPS via iframe interactive Google Maps.
+  - Les métadonnées complètes du point de prélèvement (nature, méthode, fréquence, COFRAC).
+  - Un champ de contraintes d'accès terrain (`contraintesParticulieres`) éditable directement avec auto-save sur blur.
+  - Une galerie photo unifiée combinant les photos prises lors des prélèvements et des inspections de visites.
+  - La liste des comptes-rendus de visites préliminaires spécifiques à ce point (filtrés dynamiquement par nom exact de point).
+  - L'historique chronologique complet des prélèvements passés de ce plan.
+- **Raccordement de la fiche** :
+  - Ajout d'un bouton d'action *"Fiche du point"* dans l'en-tête de la page de configuration de plan (`PlanPage.tsx`).
+  - Ajout d'une icône raccourcie `BookOpen` dans la liste des plans de la fiche client (`ClientPlans.tsx`) pour un accès direct.
+  - Déclaration de la route différée (code-splitting) dans `App.tsx`.
+- **Validation** : Build de production 100% OK et tests Vitest tous au vert (145/145 PASS).
+
+### Fichiers modifiés
+- `src/App.tsx`
+- `src/pages/PlanPage.tsx`
+- `src/components/client/ClientPlans.tsx`
+- `src/pages/PointMesureFichePage.tsx` (créé)
+
+---
+
 **28 mai 2026 (après-midi)**
 
 ### Ce qui a été fait

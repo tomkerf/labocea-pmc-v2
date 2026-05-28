@@ -13,6 +13,7 @@ const DashboardPage     = lazy(() => import('@/pages/DashboardPage'))
 const MissionsPage      = lazy(() => import('@/pages/MissionsPage'))
 const ClientPage        = lazy(() => import('@/pages/ClientPage'))
 const PlanPage          = lazy(() => import('@/pages/PlanPage'))
+const PointMesureFichePage = lazy(() => import('@/pages/PointMesureFichePage'))
 const MissionDetailPage = lazy(() => import('@/pages/MissionDetailPage'))
 const MaterielPage      = lazy(() => import('@/pages/MaterielPage'))
 const EquipementPage    = lazy(() => import('@/pages/EquipementPage'))
@@ -64,6 +65,9 @@ function AppRoutes() {
         } />
         <Route path="/missions/:clientId/plan/:planId" element={
           <Suspense fallback={<PageSpinner />}><PlanPage /></Suspense>
+        } />
+        <Route path="/missions/:clientId/plan/:planId/fiche" element={
+          <Suspense fallback={<PageSpinner />}><PointMesureFichePage /></Suspense>
         } />
         <Route path="/missions/:clientId/plan/:planId/sampling/:samplingId" element={
           <Suspense fallback={<PageSpinner />}><MissionDetailPage /></Suspense>

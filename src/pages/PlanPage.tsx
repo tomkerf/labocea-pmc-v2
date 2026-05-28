@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Plus, FileText, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, Plus, FileText, AlertTriangle, BookOpen } from 'lucide-react'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
@@ -111,6 +111,14 @@ export default function PlanPage() {
             Prélèvements {new Date().getFullYear()}
           </h2>
           <div className="flex items-center gap-2">
+            <button type="button"
+              onClick={() => navigate(`/missions/${clientId}/plan/${planId}/fiche`)}
+              className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium cursor-pointer"
+              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
+            >
+              <BookOpen size={14} />
+              <span>Fiche du point</span>
+            </button>
             {plan.samplings.length > 0 && (
               <button type="button"
                 onClick={() => openPdfPreview(false)}

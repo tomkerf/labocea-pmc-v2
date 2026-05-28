@@ -1,4 +1,5 @@
-import { Plus, ChevronRight, Trash2, AlertTriangle, GripVertical, Minus, Lock, Unlock } from 'lucide-react'
+import { Plus, ChevronRight, Trash2, AlertTriangle, GripVertical, Minus, Lock, Unlock, BookOpen } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import {
   DndContext, closestCenter, PointerSensor, TouchSensor,
   useSensor, useSensors, type DragEndEvent,
@@ -289,9 +290,10 @@ interface SortablePlanRowProps {
 }
 
 function SortablePlanRow({
-  plan, clientYear, isLast, isConfirmingDelete, locked,
+  plan, clientYear, clientId, isLast, isConfirmingDelete, locked,
   onOpen, onDelete, onConfirmDelete, onCancelDelete,
 }: SortablePlanRowProps) {
+  const navigate = useNavigate()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: plan.id })
 
@@ -342,6 +344,16 @@ function SortablePlanRow({
           style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
           {(plan.samplings ?? []).length} prélèv.
         </span>
+        <button type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            navigate(`/missions/${clientId}/plan/${plan.id}/fiche`)
+          }}
+          className="shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-gray-100 transition-colors cursor-pointer"
+          title="Consulter la fiche du point"
+        >
+          <BookOpen size={14} />
+        </button>
         <button onClick={onOpen}
           className="shrink-0 flex items-center gap-1 text-sm font-medium"
           style={{ color: 'var(--color-accent)' }}>
