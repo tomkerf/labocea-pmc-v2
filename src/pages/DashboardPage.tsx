@@ -45,6 +45,7 @@ export default function DashboardPage() {
   const isGeneraliste = role === 'charge_mission' || role === 'admin'
 
   const [showWelcome, setShowWelcome] = useState(false)
+  const [activeTab, setActiveTab] = useState<'technicien' | 'manager'>(isGeneraliste ? 'manager' : 'technicien')
 
   useEffect(() => {
     if (appUser && appUser.hasSeenAide !== true) {
@@ -156,175 +157,240 @@ export default function DashboardPage() {
         </p>
       </motion.div>
 
-      {/* KPIs */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <StatCard
-          value={missionsCeMois}
-          label="Missions ce mois"
-          sub="prélèvements réalisés"
-          accent
-          onClick={() => navigate('/missions')}
-        />
-        <StatCard
-          value={rapportsAFaireMoi.length}
-          label="Rapports à rédiger"
-          sub={rapportsAFaireMoi.length > 0 ? `${rapportsAFaireMoi.filter(r => r.enRetard).length} en retard` : 'Tout est à jour'}
-          danger={rapportsAFaireMoi.some(r => r.enRetard)}
-          warning={rapportsAFaireMoi.length > 0 && !rapportsAFaireMoi.some(r => r.enRetard)}
-          onClick={() => navigate('/rapports')}
-        />
-        <StatCard
-          value={conformitePct !== null ? `${conformitePct}%` : '—'}
-          label="Conformité métrologie"
-          sub={verifiTotal > 0 ? `${verifiConformes}/${verifiTotal} à jour` : 'Aucun instrument suivi'}
-          warning={conformitePct !== null && conformitePct < 80}
-          accent={conformitePct !== null && conformitePct >= 80}
-          onClick={() => navigate('/metrologie')}
-        />
-        <StatCard
-          value={aCalibrrer}
-          label="À calibrer (30j)"
-          sub={aCalibrrer > 0 ? 'Étalonnages à prévoir' : 'Aucune échéance proche'}
-          warning={aCalibrrer > 0}
-          onClick={() => navigate('/metrologie')}
-        />
-      </motion.div>
-
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-
-        {/* Planning */}
-        <div>
-          <div className="flex flex-col gap-2 mb-3">
-            <div className="flex items-center justify-between gap-2">
-            <SectionTitle>{planningMode === 'today' ? 'Planning du jour' : 'Planning de demain'}</SectionTitle>
-            <div className="relative flex gap-1 p-1 rounded-lg shrink-0" style={{ background: 'var(--color-bg-tertiary)' }}>
-              <button type="button"
-                onClick={() => setPlanningMode('today')}
-                className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200"
-                style={{
-                  color: planningMode === 'today' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                }}
-              >
-                {planningMode === 'today' && (
-                  <motion.div
-                    layoutId="active-dashboard-pill"
-                    className="absolute inset-0 rounded-md -z-10"
-                    style={{ background: 'var(--color-accent-light)' }}
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-                Aujourd'hui
-              </button>
-              <button type="button"
-                onClick={() => setPlanningMode('tomorrow')}
-                className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200"
-                style={{
-                  color: planningMode === 'tomorrow' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                }}
-              >
-                {planningMode === 'tomorrow' && (
-                  <motion.div
-                    layoutId="active-dashboard-pill"
-                    className="absolute inset-0 rounded-md -z-10"
-                    style={{ background: 'var(--color-accent-light)' }}
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-                Demain
-              </button>
-            </div>
-            </div>
-            {planningMode === 'today' && jourItems.filter(i => i.kind === 'sampling' && !i.modalEvent.isDone).length > 0 && (
-              <motion.button
-                whileHover={{ scale: 1.02, y: -0.5 }}
-                whileTap={{ scale: 0.96 }}
-                transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                onClick={() => navigate('/tournee')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 cursor-pointer shadow-sm self-start"
-                style={{ background: 'var(--color-accent)', color: 'white' }}
-              >
-                <Route size={13} />
-                Démarrer la tournée
-              </motion.button>
-            )}
-          </div>
-          {activeItems.length === 0 ? (
-            <EmptyCard>Aucune intervention ni événement{planningMode === 'today' ? " aujourd'hui" : " demain"}.</EmptyCard>
-          ) : (
-            <motion.div
-              layout
-              className="rounded-xl overflow-hidden"
-              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}
+      {/* Switcher de rôle (uniquement pour les chargés de mission / admins) */}
+      {isGeneraliste && (
+        <motion.div variants={itemVariants} className="mb-6 flex">
+          <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--color-bg-tertiary)' }}>
+            <button
+              type="button"
+              onClick={() => setActiveTab('technicien')}
+              className="relative px-4 py-2 text-sm font-semibold rounded-lg z-10 transition-colors duration-200 cursor-pointer"
+              style={{
+                color: activeTab === 'technicien' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+              }}
             >
-              <AnimatePresence mode="popLayout">
-                {activeItems.slice(0, 8).map((item, idx) => (
-                  <motion.div
-                    key={item.modalEvent?.id || `${planningMode}-${idx}`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.18, ease: 'easeOut' }}
-                    onClick={() => setEventDetail({ event: item.modalEvent as ModalEvent, dateStr: activeDateISO })}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer"
-                    style={{ borderBottom: idx < activeItems.slice(0, 8).length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    {item.time ? (
-                      <span className="text-xs font-semibold shrink-0 w-10 text-center px-1.5 py-1 rounded-lg"
-                        style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-                        {item.time}
-                      </span>
-                    ) : (
-                      <span className="shrink-0 w-2 h-2 rounded-full mt-0.5" style={{ background: item.dot }} />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium leading-snug" style={{ color: 'var(--color-text-primary)' }}>{item.title}</p>
-                      <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{item.sub}</p>
-                    </div>
-                    {'meteo' in item && item.meteo === 'pluie' && (
-                      <span title="Prélèvement temps de pluie" className="shrink-0 text-base leading-none">🌧</span>
-                    )}
-                    <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
-                      style={{ background: item.badge.bg, color: item.badge.color }}>{item.badge.label}</span>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
-          )}
-        </div>
-
-        {/* État du parc */}
-        <div>
-          <SectionTitle>État du parc matériel</SectionTitle>
-          <div className="rounded-xl px-6 py-5"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-            <DonutChart
-              total={equipements.length}
-              segments={[
-                { value: parcEtat.operationnel,   color: 'var(--color-success)', label: 'En service'     },
-                { value: aCalibrrer,              color: 'var(--color-warning)', label: 'À calibrer'     },
-                { value: parcEtat.en_maintenance, color: 'var(--color-accent)',  label: 'En maintenance' },
-                { value: parcEtat.hors_service,   color: 'var(--color-danger)',  label: 'Hors service'   },
-                { value: parcEtat.prete,          color: 'var(--color-neutral)', label: 'Prêté'          },
-              ]}
-            />
+              {activeTab === 'technicien' && (
+                <motion.div
+                  layoutId="active-role-tab"
+                  className="absolute inset-0 rounded-lg -z-10"
+                  style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-card)' }}
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
+              Mon activité terrain
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('manager')}
+              className="relative px-4 py-2 text-sm font-semibold rounded-lg z-10 transition-colors duration-200 cursor-pointer"
+              style={{
+                color: activeTab === 'manager' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+              }}
+            >
+              {activeTab === 'manager' && (
+                <motion.div
+                  layoutId="active-role-tab"
+                  className="absolute inset-0 rounded-lg -z-10"
+                  style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-card)' }}
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
+              Suivi équipe (CM)
+            </button>
           </div>
-          <button type="button" onClick={() => navigate('/materiel')} className="mt-2 text-xs" style={{ color: 'var(--color-accent)' }}>
-            Voir tout le matériel →
-          </button>
-        </div>
-      </motion.div>
+        </motion.div>
+      )}
 
-      <motion.div variants={itemVariants} className="space-y-6">
-        <TodosWidget todos={todos} uid={uid || ''} />
-        <RapportsWidget rapports={rapportsAFaireMoi} onMarkEnvoye={markRapportEnvoye} />
-        <RetardWidget items={prelevementsEnRetard} />
-        <PluieWidget items={prelevementsPluie} />
-        <MaintenancesWidget maintenances={maintenancesActives} />
-        <MetrologieWidget equipements={metrologieAlertes} />
-        {isGeneraliste && <EquipeSuiviWidget clients={clients} />}
-      </motion.div>
+      <AnimatePresence mode="wait">
+        {(!isGeneraliste || activeTab === 'technicien') ? (
+          <motion.div
+            key="technicien"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
+            className="space-y-6"
+          >
+            {/* KPIs */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <StatCard
+                value={missionsCeMois}
+                label="Missions ce mois"
+                sub="prélèvements réalisés"
+                accent
+                onClick={() => navigate('/missions')}
+              />
+              <StatCard
+                value={rapportsAFaireMoi.length}
+                label="Rapports à rédiger"
+                sub={rapportsAFaireMoi.length > 0 ? `${rapportsAFaireMoi.filter(r => r.enRetard).length} en retard` : 'Tout est à jour'}
+                danger={rapportsAFaireMoi.some(r => r.enRetard)}
+                warning={rapportsAFaireMoi.length > 0 && !rapportsAFaireMoi.some(r => r.enRetard)}
+                onClick={() => navigate('/rapports')}
+              />
+              <StatCard
+                value={conformitePct !== null ? `${conformitePct}%` : '—'}
+                label="Conformité métrologie"
+                sub={verifiTotal > 0 ? `${verifiConformes}/${verifiTotal} à jour` : 'Aucun instrument suivi'}
+                warning={conformitePct !== null && conformitePct < 80}
+                accent={conformitePct !== null && conformitePct >= 80}
+                onClick={() => navigate('/metrologie')}
+              />
+              <StatCard
+                value={aCalibrrer}
+                label="À calibrer (30j)"
+                sub={aCalibrrer > 0 ? 'Étalonnages à prévoir' : 'Aucune échéance proche'}
+                warning={aCalibrrer > 0}
+                onClick={() => navigate('/metrologie')}
+              />
+            </div>
+
+            {/* Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Planning */}
+              <div>
+                <div className="flex flex-col gap-2 mb-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <SectionTitle>{planningMode === 'today' ? 'Planning du jour' : 'Planning de demain'}</SectionTitle>
+                    <div className="relative flex gap-1 p-1 rounded-lg shrink-0" style={{ background: 'var(--color-bg-tertiary)' }}>
+                      <button type="button"
+                        onClick={() => setPlanningMode('today')}
+                        className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200 cursor-pointer"
+                        style={{
+                          color: planningMode === 'today' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                        }}
+                      >
+                        {planningMode === 'today' && (
+                          <motion.div
+                            layoutId="active-dashboard-pill"
+                            className="absolute inset-0 rounded-md -z-10"
+                            style={{ background: 'var(--color-accent-light)' }}
+                            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                          />
+                        )}
+                        Aujourd'hui
+                      </button>
+                      <button type="button"
+                        onClick={() => setPlanningMode('tomorrow')}
+                        className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200 cursor-pointer"
+                        style={{
+                          color: planningMode === 'tomorrow' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                        }}
+                      >
+                        {planningMode === 'tomorrow' && (
+                          <motion.div
+                            layoutId="active-dashboard-pill"
+                            className="absolute inset-0 rounded-md -z-10"
+                            style={{ background: 'var(--color-accent-light)' }}
+                            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                          />
+                        )}
+                        Demain
+                      </button>
+                    </div>
+                  </div>
+                  {planningMode === 'today' && jourItems.filter(i => i.kind === 'sampling' && !i.modalEvent.isDone).length > 0 && (
+                    <motion.button
+                      whileHover={{ scale: 1.02, y: -0.5 }}
+                      whileTap={{ scale: 0.96 }}
+                      transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+                      onClick={() => navigate('/tournee')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 cursor-pointer shadow-sm self-start"
+                      style={{ background: 'var(--color-accent)', color: 'white' }}
+                    >
+                      <Route size={13} />
+                      Démarrer la tournée
+                    </motion.button>
+                  )}
+                </div>
+                {activeItems.length === 0 ? (
+                  <EmptyCard>Aucune intervention ni événement{planningMode === 'today' ? " aujourd'hui" : " demain"}.</EmptyCard>
+                ) : (
+                  <motion.div
+                    layout
+                    className="rounded-xl overflow-hidden"
+                    style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}
+                  >
+                    <AnimatePresence mode="popLayout">
+                      {activeItems.slice(0, 8).map((item, idx) => (
+                        <motion.div
+                          key={item.modalEvent?.id || `${planningMode}-${idx}`}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.18, ease: 'easeOut' }}
+                          onClick={() => setEventDetail({ event: item.modalEvent as ModalEvent, dateStr: activeDateISO })}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer"
+                          style={{ borderBottom: idx < activeItems.slice(0, 8).length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                        >
+                          {item.time ? (
+                            <span className="text-xs font-semibold shrink-0 w-10 text-center px-1.5 py-1 rounded-lg"
+                              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                              {item.time}
+                            </span>
+                          ) : (
+                            <span className="shrink-0 w-2 h-2 rounded-full mt-0.5" style={{ background: item.dot }} />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium leading-snug" style={{ color: 'var(--color-text-primary)' }}>{item.title}</p>
+                            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{item.sub}</p>
+                          </div>
+                          {'meteo' in item && item.meteo === 'pluie' && (
+                            <span title="Prélèvement temps de pluie" className="shrink-0 text-base leading-none">🌧</span>
+                          )}
+                          <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
+                            style={{ background: item.badge.bg, color: item.badge.color }}>{item.badge.label}</span>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </motion.div>
+                )}
+              </div>
+
+              {/* État du parc */}
+              <div>
+                <SectionTitle>État du parc matériel</SectionTitle>
+                <div className="rounded-xl px-6 py-5"
+                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                  <DonutChart
+                    total={equipements.length}
+                    segments={[
+                      { value: parcEtat.operationnel,   color: 'var(--color-success)', label: 'En service'     },
+                      { value: aCalibrrer,              color: 'var(--color-warning)', label: 'À calibrer'     },
+                      { value: parcEtat.en_maintenance, color: 'var(--color-accent)',  label: 'En maintenance' },
+                      { value: parcEtat.hors_service,   color: 'var(--color-danger)',  label: 'Hors service'   },
+                      { value: parcEtat.prete,          color: 'var(--color-neutral)', label: 'Prêté'          },
+                    ]}
+                  />
+                </div>
+                <button type="button" onClick={() => navigate('/materiel')} className="mt-2 text-xs cursor-pointer" style={{ color: 'var(--color-accent)' }}>
+                  Voir tout le matériel →
+                </button>
+              </div>
+            </div>
+
+            {/* Bottom Widgets */}
+            <TodosWidget todos={todos} uid={uid || ''} />
+            <RapportsWidget rapports={rapportsAFaireMoi} onMarkEnvoye={markRapportEnvoye} />
+            <RetardWidget items={prelevementsEnRetard} />
+            <PluieWidget items={prelevementsPluie} />
+            <MaintenancesWidget maintenances={maintenancesActives} />
+            <MetrologieWidget equipements={metrologieAlertes} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="manager"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
+          >
+            <EquipeSuiviWidget clients={clients} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {eventDetail && (
         <EventDetailModal

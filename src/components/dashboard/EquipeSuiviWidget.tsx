@@ -11,6 +11,7 @@ interface IncompletItem {
   planId: string
   clientNom: string
   siteNom: string
+  planNom: string
   doneDate: string
   champManquant: string
   doneBy: string
@@ -23,9 +24,11 @@ interface EnRetardItem {
   planId: string
   clientNom: string
   siteNom: string
+  planNom: string
   plannedMonth: number
   plannedDay: number
   preleveur: string
+  meteo: string
 }
 
 interface RapportDuItem {
@@ -34,6 +37,7 @@ interface RapportDuItem {
   planId: string
   clientNom: string
   siteNom: string
+  planNom: string
   doneDate: string
   doneBy: string
   preleveur: string
@@ -87,6 +91,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
                 planId: plan.id,
                 clientNom: client.nom,
                 siteNom: plan.siteNom,
+                planNom: plan.nom,
                 doneDate: s.doneDate,
                 champManquant: getChampManquant(s, plan.nature),
                 doneBy: s.doneBy || '',
@@ -102,12 +107,14 @@ export function EquipeSuiviWidget({ clients }: Props) {
               planId: plan.id,
               clientNom: client.nom,
               siteNom: plan.siteNom,
+              planNom: plan.nom,
               plannedMonth: s.plannedMonth,
               plannedDay: s.plannedDay,
               preleveur: s.assignedTo || client.preleveur || '—',
+              meteo: plan.meteo || '',
             })
           }
-          if (s.rapportPrevu && !s.rapportDate) {
+          if (s.status === 'done' && s.rapportPrevu && !s.rapportDate) {
             rapportsDus++
             rapportsDusListItems.push({
               samplingId: s.id,
@@ -115,6 +122,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
               planId: plan.id,
               clientNom: client.nom,
               siteNom: plan.siteNom,
+              planNom: plan.nom,
               doneDate: s.doneDate || '',
               doneBy: s.doneBy || '',
               preleveur: s.assignedTo || client.preleveur || '—',
@@ -203,7 +211,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
                     {item.clientNom}
                   </p>
                   <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                    {item.siteNom} · tech: {resolveInitials(item.doneBy, item.preleveur)}{item.doneDate ? ` · fait le ${new Date(item.doneDate + 'T12:00:00').toLocaleDateString('fr-FR')}` : ''}
+                    {[item.siteNom, item.planNom].filter(Boolean).join(' · ')} · tech: {resolveInitials(item.doneBy, item.preleveur)}{item.doneDate ? ` · fait le ${new Date(item.doneDate + 'T12:00:00').toLocaleDateString('fr-FR')}` : ''}
                   </p>
                 </div>
                 <span className="shrink-0 text-xs font-medium px-2.5 py-1 rounded-full"
@@ -257,9 +265,12 @@ export function EquipeSuiviWidget({ clients }: Props) {
                       {item.clientNom}
                     </p>
                     <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                      {item.siteNom} · tech: {item.preleveur} · {dateStr}
+                      {[item.siteNom, item.planNom].filter(Boolean).join(' · ')} · tech: {item.preleveur} · {dateStr}
                     </p>
                   </div>
+                  {item.meteo === 'pluie' && (
+                    <span title="Prélèvement temps de pluie" className="shrink-0 text-base leading-none">🌧</span>
+                  )}
                   <span className="shrink-0 text-xs font-medium px-2.5 py-1 rounded-full"
                     style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
                     En retard
@@ -309,7 +320,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
                     {item.clientNom}
                   </p>
                   <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                    {item.siteNom} · tech: {resolveInitials(item.doneBy, item.preleveur)}{item.doneDate ? ` · fait le ${new Date(item.doneDate + 'T12:00:00').toLocaleDateString('fr-FR')}` : ''}
+                    {[item.siteNom, item.planNom].filter(Boolean).join(' · ')} · tech: {resolveInitials(item.doneBy, item.preleveur)}{item.doneDate ? ` · fait le ${new Date(item.doneDate + 'T12:00:00').toLocaleDateString('fr-FR')}` : ''}
                   </p>
                 </div>
                 <span className="shrink-0 text-xs font-medium px-2.5 py-1 rounded-full"

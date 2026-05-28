@@ -4,6 +4,24 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ---
 
+## Session 77 — Séparation des dashboards & Ajustements ergonomiques
+**28 mai 2026 (après-midi)**
+
+### Ce qui a été fait
+- **Séparation des Dashboards (Technicien vs CM)** : Restructuration complète de `DashboardPage.tsx` pour isoler les fonctionnalités personnelles terrain des outils de coordination d'équipe.
+- **Onglet Switcher Apple-Style** : Intégration d'un sélecteur à pilule glissante (Segmented Control) animé avec Framer Motion (`layoutId` + `AnimatePresence`) permettant aux chargés de mission et administrateurs de basculer de manière fluide entre *Mon activité terrain* et *Suivi équipe (CM)*.
+- **Default Tab Intelligent** : Les coordinateurs s'ouvrent désormais directement sur l'onglet **Suivi équipe (CM)** par défaut, tandis que les techniciens continuent d'accéder directement à leur vue d'activité terrain sans surcharge.
+- **Affichage des points de prélèvement (planNom)** : Intégration systématique du nom des points de prélèvement (`plan.nom`) dans toutes les lignes des trois listes détaillées de `EquipeSuiviWidget` (incomplets, retards, rapports), sous la forme cohérente `Nom du site · Nom du point · tech: initiales`.
+- **Indicateur Temps de Pluie (Retards équipe)** : Ajout de l'icône temps de pluie `🌧` à côté du nom de l'intervention dans la liste des retards de l'équipe de `EquipeSuiviWidget` si `plan.meteo === 'pluie'`.
+- **Correction des rapports dus prématurés** : Résolution du bug où des prélèvements futurs planifiés apparaissaient comme des rapports dus dans le suivi d'équipe. Désormais, seuls les prélèvements réellement finalisés (`s.status === 'done'`) y figurent.
+- **Validation** : Build de production validé (0 erreur) et banc de tests vitest 100% au vert (145/145 tests PASS). Déploiement staging réussi.
+
+### Fichiers modifiés
+- `src/pages/DashboardPage.tsx` — Sélecteur d'onglets de rôle, default activeTab intelligent par rôle et structure AnimatePresence
+- `src/components/dashboard/EquipeSuiviWidget.tsx` — Intégration du nom du point (planNom), de l'icône pluie (🌧) dans les retards, et condition de statut réalisé sur rapports dus
+
+---
+
 ## Session 76 — Suivi équipe chargé de mission (Dashboard)
 **28 mai 2026 (après-midi)**
 

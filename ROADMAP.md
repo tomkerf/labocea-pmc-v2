@@ -278,6 +278,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-27 | Temps de pluie par défaut | Filtre "Temps de pluie" du planning activé par défaut (correction logique localStorage). |
 | 2026-05-27 | Cohérence UI rapports + admin bugs | Widget rapports : titre/bouton/couleurs/calcul jours alignés sur RapportsPage. Site géographique affiché inline. AdminBugsSection : marquage traité + masquage par défaut. |
 | 2026-05-28 | Suivi équipe CM ✅ | Implémentation du widget de suivi équipe pour les chargés de mission et admins : détection des prélèvements incomplets (isSamplingIncomplet), widget de style Apple (EquipeSuiviWidget) avec 4 KPIs, liste des manques (Date, Tech ou Nappe), intégration conditionnelle sur DashboardPage. Tests 100% PASS. |
+| 2026-05-28 | Dashboard CM / Ajustements ✅ | Séparation du dashboard (Mon activité terrain / Suivi équipe CM) par onglets Apple-style, default tab intelligente par rôle, affichage du nom de point (planNom) dans les listes, icône pluie 🌧 dans les retards équipe, correction rapports dus (uniquement samplings done). |
 
 ---
 
