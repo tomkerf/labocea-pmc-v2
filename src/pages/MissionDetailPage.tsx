@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, MapPin, Clock, CheckCircle2, Circle, Navigation, ExternalLink, Plus } from 'lucide-react'
+import { ChevronLeft, MapPin, Clock, CheckCircle2, Navigation, ExternalLink } from 'lucide-react'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useClientData } from '@/hooks/useClientData'
-import type { Sampling, SamplingStatus, ChecklistItem } from '@/types'
+import type { Sampling, SamplingStatus } from '@/types'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
@@ -40,37 +40,8 @@ export default function MissionDetailPage() {
     if (!loading && !client) navigate('/missions', { replace: true })
   }, [loading, client, navigate])
 
-  const [newTask, setNewTask] = useState('')
-
   const plan = client?.plans.find((p) => p.id === planId) ?? null
   const sampling = plan?.samplings.find((s) => s.id === samplingId) ?? null
-
-  function updateSampling(field: keyof Sampling, value: unknown) {
-    if (!client || !plan || !sampling) return
-    const updatedSamplings = plan.samplings.map((s) =>
-      s.id === samplingId ? { ...s, [field]: value } : s
-    )
-    triggerSave({
-      ...client,
-      plans: client.plans.map((p) => p.id === planId ? { ...p, samplings: updatedSamplings } : p),
-    })
-  }
-
-  function toggleChecklist(itemId: string) {
-    if (!sampling) return
-    const updated = (sampling.checklist ?? []).map((item) =>
-      item.id === itemId ? { ...item, done: !item.done } : item
-    )
-    updateSampling('checklist', updated)
-  }
-
-  function addTask() {
-    const label = newTask.trim()
-    if (!label || !sampling) return
-    const item: ChecklistItem = { id: crypto.randomUUID(), label, done: false }
-    updateSampling('checklist', [...(sampling.checklist ?? []), item])
-    setNewTask('')
-  }
 
   function handleTerminer() {
     if (!client || !plan || !sampling || saving) return
@@ -101,8 +72,6 @@ export default function MissionDetailPage() {
   }
 
   const cfg = getEnCoursStatus(sampling) ?? STATUS_CONFIG[sampling.status]
-  const checklist: ChecklistItem[] = sampling.checklist ?? []
-  const checklistDone = checklist.filter((i) => i.done).length
   const hasGps = plan.lat && plan.lng && plan.lat !== '' && plan.lng !== ''
   const mapsUrl = hasGps
     ? `https://maps.google.com/?q=${plan.lat},${plan.lng}`
@@ -202,79 +171,21 @@ export default function MissionDetailPage() {
         )}
       </div>
 
-      {/* Checklist */}
-      <div className="mx-4 mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-xs font-semibold uppercase"
+      {/* Contraintes terrain */}
+      {plan.contraintesParticulieres && (
+        <div className="mx-4 mb-4">
+          <h2 className="text-xs font-semibold uppercase mb-2"
             style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-            Checklist terrain
+            Contraintes terrain
           </h2>
-          {checklist.length > 0 && (
-            <span className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
-              {checklistDone}/{checklist.length}
-            </span>
-          )}
-        </div>
-
-        <div className="rounded-2xl overflow-hidden"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-
-          {checklist.length === 0 && (
-            <div className="px-5 py-4 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-              Aucune tâche — ajoute-en une ci-dessous.
-            </div>
-          )}
-
-          {checklist.map((item) => (
-            <button type="button"
-              key={item.id}
-              onClick={() => toggleChecklist(item.id)}
-              className="w-full flex items-center gap-3 px-5 py-4 text-left transition-colors"
-              style={{
-                borderBottom: '1px solid var(--color-border-subtle)',
-                background: 'transparent',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-            >
-              {item.done
-                ? <CheckCircle2 size={22} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
-                : <Circle size={22} style={{ color: 'var(--color-border)', flexShrink: 0 }} />
-              }
-              <span className="flex-1 text-sm font-medium"
-                style={{
-                  color: item.done ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
-                  textDecoration: item.done ? 'line-through' : 'none',
-                }}>
-                {item.label}
-              </span>
-            </button>
-          ))}
-
-          {/* Ajout tâche */}
-          <div className="flex items-center gap-2 px-4 py-3"
-            style={{ borderTop: checklist.length > 0 ? 'none' : undefined }}>
-            <input
-              value={newTask}
-              onChange={(e) => setNewTask(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addTask()}
-              placeholder="Ajouter une tâche…"
-              className="flex-1 text-sm outline-none bg-transparent"
-              style={{ color: 'var(--color-text-primary)' }}
-            />
-            <button type="button"
-              onClick={addTask}
-              disabled={!newTask.trim()}
-              className="p-1.5 rounded-lg transition-colors"
-              style={{
-                background: newTask.trim() ? 'var(--color-accent-light)' : 'transparent',
-                color: newTask.trim() ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
-              }}>
-              <Plus size={16} />
-            </button>
+          <div className="rounded-2xl px-5 py-4"
+            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--color-text-primary)' }}>
+              {plan.contraintesParticulieres}
+            </p>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Commentaire */}
       {sampling.comment && (
