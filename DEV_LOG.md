@@ -3,6 +3,25 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 84 — Agrandissement des vignettes photo et Zoom au clic
+**28 mai 2026 (soirée - suite)**
+
+### Ce qui a été fait
+- **Agrandissement des miniatures d'images** :
+  - **Amélioration** : Augmentation de la taille des vignettes d'images (thumbnails) à `96px` de large et de haut (au lieu de `64px` ou `80px`) pour offrir une bien meilleure visibilité immédiate sur tous les écrans.
+  - **Support du Zoom Natif au clic** : Enveloppement des images de miniatures dans des liens standard (`a target="_blank" rel="noreferrer"`) avec un curseur de zoom (`cursor-zoom-in`). L'utilisateur peut ainsi cliquer ou tapoter sur n'importe quelle miniature pour ouvrir l'image en pleine résolution dans un nouvel onglet, fournissant un zoom fluide et robuste.
+  - **Application globale** : Appliqué à l'ensemble des modules d'upload photo (`PlanConfigSection.tsx`, `SamplingForm.tsx`, `VisiteFormPage.tsx`).
+- **Validation** :
+  - Build complet en production réussi (0 erreur).
+  - Validation de l'intégralité des 145 tests unitaires et d'intégration (145/145 PASS).
+
+### Fichiers modifiés
+- `src/components/plan/PlanConfigSection.tsx`
+- `src/components/plan/SamplingForm.tsx`
+- `src/pages/VisiteFormPage.tsx`
+
+---
+
 ## Session 83 — Remplacement de heic2any par heic-to (Support des HEIC iPhone récents)
 **28 mai 2026 (soirée - suite)**
 

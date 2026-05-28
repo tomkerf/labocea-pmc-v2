@@ -286,6 +286,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-28 | Fix suppression photo ✅ | Séparation des règles Storage en create/update et delete pour résoudre l'erreur 403 Forbidden lors de la suppression de photo. |
 | 2026-05-28 | Sélection HEIC Mac/PC ✅ | Mise à jour de l'attribut accept pour autoriser la sélection des fichiers .HEIC et .HEIF sous macOS et Windows. |
 | 2026-05-28 | Migration heic-to ✅ | Migration de heic2any vers heic-to pour assurer le décodage et support des formats HEIC récents issus d'iOS 17+/iPhone 15+. |
+| 2026-05-28 | Vignettes photo 96px + Zoom ✅ | Agrandissement des miniatures d'images à 96px et intégration du zoom natif au clic dans un nouvel onglet. |
 
 ---
 

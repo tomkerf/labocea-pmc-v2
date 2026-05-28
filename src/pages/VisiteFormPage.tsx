@@ -396,11 +396,12 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
           <div className="flex flex-wrap gap-2 mb-2">
             {point.photos.map(url => (
               <div key={url} className="relative rounded-lg overflow-hidden shrink-0"
-                style={{ width: 80, height: 80, border: '1px solid var(--color-border)' }}>
-                <img src={url} alt="photo" className="w-full h-full object-cover" loading="lazy" />
+                style={{ width: 96, height: 96, border: '1px solid var(--color-border)' }}>
+                <a href={url} target="_blank" rel="noreferrer" className="block w-full h-full">
+                  <img src={url} alt="photo" className="w-full h-full object-cover cursor-zoom-in" loading="lazy" />
+                </a>
                 <button type="button" onClick={() => onPhotoDelete(url)}
-                  className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(0,0,0,0.55)', color: 'white' }}>
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center bg-black/60 text-white hover:bg-black/80 transition-colors">
                   <X size={10} strokeWidth={3} />
                 </button>
               </div>
