@@ -282,7 +282,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-28 | Dashboard UX ✅ | Suppression temporaire du bouton "Démarrer la tournée", ajout du nom des points dans le widget des rapports à rédiger, et résolution du désalignement de calcul des rapports dus de l'équipe (dates futures corrompues). |
 | 2026-05-28 | Alignement Excel Cindy ✅ | Ajout champs BC, COFRAC, contact prévenance, contraintes terrain dans types + formulaires. Badge COFRAC propagé dans tout le stack planning. Checklist terrain remplacée par contraintes particulières du plan dans MissionDetailPage. |
 | 2026-05-28 | Fiche Point de Mesure ✅ | Création de la Fiche Point de Mesure dédiée (carte GPS, contraintes terrain éditables, uploads directs sur la fiche, galerie photo unifiée, listes des inspections de visites préliminaires et historique des prélèvements) + raccordement sur PlanPage et ClientPlans. |
-| 2026-05-28 | Correction Upload Photo ✅ | Déploiement des règles de sécurité Firebase Storage permettant l'upload au chemin plans/... + ajout de toasts success/error sur ajout/suppression de photo. |
+| 2026-05-28 | Correction Upload Photo & HEIC ✅ | Déploiement des règles Firebase Storage pour plans/... + support automatique de la conversion HEIC (iPhone) vers JPEG côté client à l'upload + toasts de succès/erreur. |
 
 ---
 

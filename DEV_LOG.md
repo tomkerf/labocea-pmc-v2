@@ -3,11 +3,16 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
-## Session 80 — Résolution du bug de l'upload de photo & règles Storage
+## Session 80 — Résolution du bug de l'upload de photo & règles Storage & Support HEIC (iPhone)
 **28 mai 2026 (fin d'après-midi)**
 
 ### Ce qui a été fait
 - **Règles de sécurité Firebase Storage** : Déploiement des nouvelles règles de stockage Firebase (`storage.rules`) autorisant les prélèvements et repérages de points dans le chemin `plans/{clientId}/{planId}/{filename}` pour les utilisateurs authentifiés.
+- **Support des photos iPhone (format HEIC/HEIF)** :
+  - Intégration de la bibliothèque `heic2any` dans `src/lib/uploadPhoto.ts`.
+  - Implémentation d'un convertisseur automatique d'images côté client (`processImageFile`) : si l'image sélectionnée est au format HEIC/HEIF ou possède une extension `.heic`/`.heif`, elle est automatiquement décodée et convertie en JPEG (qualité 85%) avant l'upload.
+  - La conversion se fait via un **import dynamique** (`await import('heic2any')`), ce qui permet de charger la bibliothèque lourde uniquement à la volée lorsque nécessaire (zéro impact sur la taille du bundle initial et le temps de chargement de la page).
+  - Ce support est universel : il résout le problème de l'HEIC pour tous les modules d'upload de l'application (photos de prélèvements terrain, visites préliminaires et photos de repérage des plans).
 - **Confirmation & Rétroaction visuelle (Toasts)** :
   - Ajout d'alertes `toast.success` et `toast.error` (via `useToastStore`) lors du chargement de photos de repérage dans `PlanConfigSection.tsx`.
   - Ajout de toasts d'information/erreur lors de la suppression de photos de repérage.
@@ -18,7 +23,10 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 ### Fichiers modifiés
 - `storage.rules`
+- `package.json`
+- `package-lock.json`
 - `src/components/plan/PlanConfigSection.tsx`
+- `src/lib/uploadPhoto.ts`
 
 ---
 
