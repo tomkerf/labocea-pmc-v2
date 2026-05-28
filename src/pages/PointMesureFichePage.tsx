@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, MapPin, Camera, Navigation, AlertTriangle, X } from 'lucide-react'
+import { ChevronLeft, MapPin, Camera, Navigation, AlertTriangle } from 'lucide-react'
 import { useClientData } from '@/hooks/useClientData'
 import { useVisites } from '@/hooks/useVisites'
-import { uploadPlanPhoto, deletePlanPhoto } from '@/lib/uploadPhoto'
 
 const FAISABILITE_CONFIG = {
   ok:         { label: 'Faisable (OK)',   bg: 'var(--color-success-light)', color: 'var(--color-success)' },
@@ -22,7 +21,6 @@ export default function PointMesureFichePage() {
 
   const [contraintes, setContraintes] = useState('')
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
-  const [uploading, setUploading] = useState(false)
 
   // Synchroniser les contraintes locales lorsque le plan est chargé
   useEffect(() => {
@@ -89,42 +87,7 @@ export default function PointMesureFichePage() {
     setTimeout(() => setSaveStatus('idle'), 2000)
   }
 
-  // 5. Gestion des photos associées à la fiche du point
-  async function handlePlanPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file || !client || !plan || uploading) return
-    setUploading(true)
-    try {
-      const url = await uploadPlanPhoto(file, clientId!, planId!)
-      const updatedPlans = client.plans.map(p =>
-        p.id === planId ? { ...p, photos: [...(p.photos || []), url] } : p
-      )
-      await triggerSave({
-        ...client,
-        plans: updatedPlans
-      })
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setUploading(false)
-    }
-  }
 
-  async function handlePlanPhotoDelete(url: string) {
-    if (!client || !plan) return
-    try {
-      await deletePlanPhoto(url)
-      const updatedPlans = client.plans.map(p =>
-        p.id === planId ? { ...p, photos: (p.photos || []).filter(u => u !== url) } : p
-      )
-      await triggerSave({
-        ...client,
-        plans: updatedPlans
-      })
-    } catch (err) {
-      console.error(err)
-    }
-  }
 
   const hasGps = plan.lat && plan.lng && plan.lat !== '' && plan.lng !== ''
   const mapsUrl = hasGps
@@ -248,66 +211,31 @@ export default function PointMesureFichePage() {
       </div>
 
       {/* Photos de repérage (Fiche) */}
-      <div className="mx-4 mb-6">
-        <div className="flex items-center justify-between mb-2 px-1">
-          <h2 className="text-xs font-semibold uppercase"
+      {(plan.photos ?? []).length > 0 && (
+        <div className="mx-4 mb-6">
+          <h2 className="text-xs font-semibold uppercase mb-2 px-1"
             style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-            Photos de repérage (Fiche)
+            Photos de repérage
           </h2>
-          {uploading && (
-            <span className="text-[11px]" style={{ color: 'var(--color-accent)' }}>Envoi…</span>
-          )}
-        </div>
-        <div className="rounded-2xl p-4 flex flex-col gap-3"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-          
-          {/* Plan photos grid */}
-          {(plan.photos ?? []).length > 0 && (
+          <div className="rounded-2xl p-4 flex flex-col gap-3"
+            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             <div className="flex flex-wrap gap-2">
               {(plan.photos ?? []).map((url, i) => (
-                <div key={url} className="relative rounded-lg overflow-hidden shrink-0"
+                <div key={url} className="relative rounded-lg overflow-hidden shrink-0 bg-gray-50"
                   style={{ width: 80, height: 80, border: '1px solid var(--color-border)' }}>
                   <img src={url} alt={`Repérage ${i + 1}`} className="w-full h-full object-cover" />
-                  <button type="button"
-                    onClick={() => handlePlanPhotoDelete(url)}
-                    className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center bg-black/60 text-white"
-                    title="Supprimer cette photo"
+                  <a href={url} target="_blank" rel="noreferrer" 
+                    className="absolute bottom-1 right-1 p-1 bg-white/80 backdrop-blur rounded-full text-gray-700 hover:text-blue-600"
+                    title="Ouvrir la photo dans un nouvel onglet"
                   >
-                    <X size={10} strokeWidth={3} />
-                  </button>
+                    <Camera size={12} />
+                  </a>
                 </div>
               ))}
             </div>
-          )}
-
-          {/* Upload Button */}
-          <label className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-all active:scale-98"
-            style={{
-              background: 'var(--color-bg-tertiary)',
-              border: '1px solid var(--color-border)',
-              color: uploading ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
-              opacity: uploading ? 0.6 : 1,
-              pointerEvents: uploading ? 'none' : 'auto',
-            }}
-          >
-            {uploading ? (
-              <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
-                style={{ borderColor: 'var(--color-text-tertiary)', borderTopColor: 'var(--color-accent)' }} />
-            ) : (
-              <Camera size={16} />
-            )}
-            {uploading ? 'Envoi en cours…' : 'Ajouter une photo de repérage'}
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={handlePlanPhotoChange}
-              disabled={uploading}
-            />
-          </label>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Galerie Photos */}
       {allPhotos.length > 0 && (
