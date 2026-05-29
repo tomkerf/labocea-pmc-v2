@@ -4,7 +4,8 @@ import { logout } from '@/hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 import { LogOut, Check, KeyRound, ChevronDown, Bell, BellOff, LoaderCircle } from 'lucide-react'
 import { updateUserProfile } from '@/services/userService'
-import UserAvatar, { AVATAR_COLORS, getAvatarColor } from '@/components/ui/UserAvatar'
+import UserAvatar from '@/components/ui/UserAvatar'
+import { AVATAR_COLORS, getAvatarColor } from '@/components/ui/avatarColors'
 import type { AppUser } from '@/types'
 import {
   getAuth,

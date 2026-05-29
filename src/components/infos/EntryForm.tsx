@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import type { Client, TerrainEntry, TerrainType } from '@/types'
-import { TYPE_CONFIG } from './EntryCard'
+import { TYPE_CONFIG } from './entryConfig'
 
 /** Supprime les champs undefined d'un objet — Firestore les rejette */
 function stripUndef<T extends object>(obj: T): T {

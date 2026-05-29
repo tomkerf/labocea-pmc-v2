@@ -247,6 +247,11 @@ export default function MapView({
       // Centrer sur la Bretagne si aucun marqueur
       mapRef.current.setView([48.20, -2.90], 8)
     }
+
+    return () => {
+      markers.forEach(m => m.off())
+      markerGroup.clearLayers()
+    }
   }, [mappedEvts, mapReady])
 
 

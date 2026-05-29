@@ -7,12 +7,12 @@ import MobileDrawer from './MobileDrawer'
 import ErrorBoundary from './ErrorBoundary'
 import ToastContainer from '@/components/ui/ToastContainer'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
-import { getAvatarColor, AVATAR_COLORS } from '@/components/ui/UserAvatar'
+import { getAvatarColor, AVATAR_COLORS } from '@/components/ui/avatarColors'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import SyncBadge from '@/components/ui/SyncBadge'
 
 export default function AppLayout() {
-  const location  = useLocation()
+  const { pathname } = useLocation()
   const appUser   = useAuthStore(selectAppUser)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -23,7 +23,7 @@ export default function AppLayout() {
 
   // Fermer le drawer à chaque changement de route
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setDrawerOpen(false) }, [location.pathname])
+  useEffect(() => { setDrawerOpen(false) }, [pathname])
 
   // Synchronise la couleur d'accentuation avec la couleur d'avatar
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function AppLayout() {
     // Réinitialiser au changement de route
     setScrolled(false)
     return () => container.removeEventListener('scroll', handleScroll)
-  }, [location.pathname])
+  }, [pathname])
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--color-bg-primary)' }}>

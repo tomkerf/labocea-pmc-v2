@@ -5,7 +5,8 @@ import { saveClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import type { Client, TerrainEntry, TerrainType } from '@/types'
-import { TYPE_CONFIG, Badge, EntryCard } from '@/components/infos/EntryCard'
+import { Badge, EntryCard } from '@/components/infos/EntryCard'
+import { TYPE_CONFIG } from '@/components/infos/entryConfig'
 import { EntryForm } from '@/components/infos/EntryForm'
 
 export default function InfosPage() {
