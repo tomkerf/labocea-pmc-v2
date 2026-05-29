@@ -41,7 +41,9 @@ async function verifyAuthToken(idToken, projectId) {
   const now = Math.floor(Date.now() / 1000)
   if (payload.aud !== projectId) throw new Error('Audience invalide')
   if (payload.iss !== `https://securetoken.google.com/${projectId}`) throw new Error('Émetteur invalide')
+  if (!payload.sub) throw new Error('Subject manquant')
   if (payload.exp < now) throw new Error('Token expiré')
+  if (payload.iat > now + 60) throw new Error('Token iat invalide')
 
   // 2. Récupération de la clé JWK de signature
   const jwks = await getGoogleJwks()
@@ -72,15 +74,15 @@ async function verifyAuthToken(idToken, projectId) {
   return payload
 }
 
-// Obtention d'un jeton d'accès Google OAuth2 pour FCM via Service Account
-async function getFcmAccessToken(serviceAccount) {
+// Obtention d'un jeton d'accès Google OAuth2 (scopes multiples) via Service Account
+async function getGoogleAccessToken(serviceAccount, scope) {
   const sa = typeof serviceAccount === 'string' ? JSON.parse(serviceAccount) : serviceAccount
   const now = Math.floor(Date.now() / 1000)
 
   const header = { alg: 'RS256', typ: 'JWT' }
   const claims = {
     iss: sa.client_email,
-    scope: 'https://www.googleapis.com/auth/firebase.messaging',
+    scope,
     aud: 'https://oauth2.googleapis.com/token',
     iat: now,
     exp: now + 3600
@@ -158,18 +160,54 @@ export default {
         await verifyAuthToken(idToken, projectId)
 
         // 2. Lecture du payload
-        const { tokens, title, body, path } = await request.json()
-        if (!tokens || !Array.isArray(tokens) || tokens.length === 0 || !title || !body) {
-          return new Response(JSON.stringify({ error: 'Arguments tokens/title/body requis' }), {
+        const { recipientUid, title, body, path } = await request.json()
+        if (!recipientUid || typeof recipientUid !== 'string' || !title || !body) {
+          return new Response(JSON.stringify({ error: 'Arguments recipientUid/title/body requis' }), {
             status: 400,
             headers: { 'Content-Type': 'application/json' }
           })
         }
 
-        // 3. Récupération du jeton d'accès Google FCM
-        const accessToken = await getFcmAccessToken(env.FIREBASE_SERVICE_ACCOUNT)
+        // 3. Récupérer les tokens FCM depuis Firestore (source de vérité — le client ne les fournit pas)
+        if (!/^[A-Za-z0-9]{1,128}$/.test(recipientUid)) {
+          return new Response(JSON.stringify({ error: 'recipientUid invalide' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          })
+        }
 
-        // 4. Envoi de la notification push à tous les jetons du destinataire
+        const firestoreToken = await getGoogleAccessToken(
+          env.FIREBASE_SERVICE_ACCOUNT,
+          'https://www.googleapis.com/auth/datastore'
+        )
+        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${encodeURIComponent(recipientUid)}`
+        const userRes = await fetch(firestoreUrl, {
+          headers: { 'Authorization': `Bearer ${firestoreToken}` }
+        })
+        if (!userRes.ok) {
+          return new Response(JSON.stringify({ error: 'Destinataire introuvable' }), {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' }
+          })
+        }
+        const userDoc = await userRes.json()
+        const pushTokensField = userDoc.fields?.pushTokens?.arrayValue?.values ?? []
+        const tokens = pushTokensField.map(v => v.stringValue).filter(Boolean)
+
+        if (tokens.length === 0) {
+          return new Response(JSON.stringify({ success: true, sent: 0, reason: 'no_tokens' }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          })
+        }
+
+        // 4. Récupération du jeton d'accès Google FCM
+        const accessToken = await getGoogleAccessToken(
+          env.FIREBASE_SERVICE_ACCOUNT,
+          'https://www.googleapis.com/auth/firebase.messaging'
+        )
+
+        // 5. Envoi de la notification push à tous les jetons du destinataire
         const sendPromises = tokens.map(async (token) => {
           const fcmPayload = {
             message: {
@@ -192,13 +230,13 @@ export default {
         const results = await Promise.all(sendPromises)
         const statuses = await Promise.all(results.map(r => r.status))
 
-        return new Response(JSON.stringify({ success: true, statuses }), {
+        return new Response(JSON.stringify({ success: true, sent: tokens.length, statuses }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
         })
       } catch (err) {
         console.error('[API Send Notification] Erreur :', err)
-        return new Response(JSON.stringify({ error: err.message }), {
+        return new Response(JSON.stringify({ error: 'Erreur interne' }), {
           status: 500,
           headers: { 'Content-Type': 'application/json' }
         })
