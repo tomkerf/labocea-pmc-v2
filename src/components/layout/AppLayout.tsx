@@ -6,14 +6,12 @@ import Sidebar from './Sidebar'
 import MobileDrawer from './MobileDrawer'
 import ErrorBoundary from './ErrorBoundary'
 import ToastContainer from '@/components/ui/ToastContainer'
-import { useAuthStore, selectAppUser } from '@/stores/authStore'
 
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import SyncBadge from '@/components/ui/SyncBadge'
 
 export default function AppLayout() {
   const { pathname } = useLocation()
-  const appUser   = useAuthStore(selectAppUser)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
