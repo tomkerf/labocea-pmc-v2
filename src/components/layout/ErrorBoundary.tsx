@@ -11,7 +11,7 @@ export default class ErrorBoundary extends Component<Props, State> {
   state: State = { error: null }
 
   static getDerivedStateFromError(error: Error): State {
-    // Chunk JS introuvable après un nouveau déploiement → rechargement silencieux
+    console.error('[ErrorBoundary]', error.message, error)
     if (
       error.message.includes('Failed to fetch dynamically imported module') ||
       error.message.includes('Importing a module script failed')
