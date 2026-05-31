@@ -195,7 +195,7 @@ export function usePlanningData({
           add(dateStr, {
             id: `rapport_${s.id}`, type: 'rapport', priority: 1,
             title: client.nom,
-            subtitle: 'Rapport',
+            subtitle: plan.nom ? `${plan.nom} · Rapport` : 'Rapport',
             statusLabel: 'Rapport dû', statusBg: 'var(--color-accent-light)', statusColor: 'var(--color-accent)',
             link: `/missions/${client.id}/plan/${plan.id}`,
             isDone: false, technicien: s.assignedTo || client.preleveur || '—',

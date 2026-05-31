@@ -273,15 +273,15 @@ export function sortEvts(evts: PlanningEvent[]): PlanningEvent[] {
   })
 }
 
-/** Regroupe les prélèvements du même client sur un même jour en une seule pill */
+/** Regroupe les prélèvements et rapports du même client sur un même jour en une seule pill */
 export function groupByClient(evts: PlanningEvent[]): PlanningEvent[] {
   const ghosts = evts.filter(e => e.isGhost)
-  const prelev  = evts.filter(e => e.type === 'prelevement' && !e.isGhost)
-  const others  = evts.filter(e => e.type !== 'prelevement')
+  const groupable = evts.filter(e => !e.isGhost && (e.type === 'prelevement' || e.type === 'rapport'))
+  const others = evts.filter(e => !e.isGhost && e.type !== 'prelevement' && e.type !== 'rapport')
 
   const groups = new Map<string, PlanningEvent[]>()
-  prelev.forEach(e => {
-    const key = e.clientId ?? e.id
+  groupable.forEach(e => {
+    const key = e.clientId ? `${e.clientId}_${e.type}` : e.id
     if (!groups.has(key)) groups.set(key, [])
     groups.get(key)!.push(e)
   })
@@ -294,11 +294,20 @@ export function groupByClient(evts: PlanningEvent[]): PlanningEvent[] {
     const worst = group.reduce((best, e) => statusPri(e) < statusPri(best) ? e : best, group[0])
     // Noms de points uniques (retire "· Bilan 24h J1/J2" pour dédupliquer)
     const pointNames = [...new Set(
-      group.map(e => e.subtitle.replace(/ · Bilan 24h J[12]$/, '')).filter(s => s && s !== '—')
+      group.map(e => e.subtitle
+        .replace(/ · Bilan 24h J[12]$/, '')
+        .replace(/ · Rapport$/, '')
+      ).filter(s => s && s !== '—' && s !== 'Rapport')
     )]
-    const subtitle = pointNames.length <= 2
-      ? pointNames.join(' · ')
-      : `${group.length} prélèvements`
+    
+    let subtitle = ''
+    if (pointNames.length > 0 && pointNames.length <= 2) {
+      subtitle = pointNames.join(' · ')
+    } else {
+      const defaultLabel = worst.type === 'rapport' ? 'rapports' : 'prélèvements'
+      subtitle = `${group.length} ${defaultLabel}`
+    }
+    
     merged.push({ ...worst, subtitle, count: group.length, link: `/missions/${worst.clientId}`, subEvents: group })
   })
 
