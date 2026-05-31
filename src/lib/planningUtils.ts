@@ -98,6 +98,9 @@ export const EVENEMENT_LABEL: Record<TypeEvenement, string> = {
   rappel: 'Rappel', reunion: 'Réunion', rapport: 'Rapport', autre: 'Autre', conge: 'Congé/RTT', meteo: 'Météo',
 }
 
+import { AVATAR_COLORS } from '@/components/ui/avatarColors'
+import { useUsersStore } from '@/stores/usersStore'
+
 // ── Couleurs par technicien ──────────────────────────────────────
 // Règle : ne pas utiliser les couleurs de statut du planning
 //   danger #FF3B30, success #34C759, warning #FF9F0A, accent #0071E3, neutral #8E8E93
@@ -121,6 +124,16 @@ const TECH_PALETTE = [
 ]
 
 export function getTechColor(initiales: string): { color: string; bg: string } {
+  // 1. Chercher dans les utilisateurs de la base
+  const user = useUsersStore.getState().users.find(u => u.initiales === initiales)
+  if (user?.avatarColor) {
+    const match = AVATAR_COLORS.find(c => c.value === user.avatarColor)
+    if (match) {
+      return { color: match.value, bg: match.accentLight }
+    }
+  }
+
+  // 2. Fallbacks codés en dur ou générés
   if (TECH_COLORS[initiales]) return TECH_COLORS[initiales]
   if (!initiales || initiales === '—') return { color: 'var(--color-neutral)', bg: 'var(--color-bg-tertiary)' }
   const idx = [...initiales].reduce((a, c) => a + c.charCodeAt(0), 0) % TECH_PALETTE.length
