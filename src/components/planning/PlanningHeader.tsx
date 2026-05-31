@@ -18,9 +18,6 @@ interface PlanningHeaderProps {
   allTechs:       string[]
   filterTech:     string
   setFilterTech:  Dispatch<SetStateAction<string>>
-  totalOverdue:   number
-  filterRetard:   boolean
-  setFilterRetard: Dispatch<SetStateAction<boolean>>
   showRain:       boolean
   setShowRain:    Dispatch<SetStateAction<boolean>>
   preleveurs:     Preleveur[]
@@ -37,7 +34,6 @@ export default function PlanningHeader({
   periodLabel, viewMode, prev, next, goToday, switchView,
   showMiniCal, setShowMiniCal,
   allTechs, filterTech, setFilterTech,
-  totalOverdue, filterRetard, setFilterRetard,
   showRain, setShowRain, preleveurs,
   monthPoolCount, showDragHint, setShowDragHint,
   onExportPdf, onExportExcel,
@@ -99,6 +95,18 @@ export default function PlanningHeader({
               )}
               <span>{viewMode === 'carte' ? 'Fermer' : 'Carte'}</span>
             </button>
+            <button type="button" onClick={() => { const v = !showRain; setShowRain(v); localStorage.setItem('planning_show_rain', String(v)) }}
+              className="flex items-center justify-center rounded-lg text-xs font-medium transition-all hover:scale-[1.02] active:scale-[0.98] ml-1 shrink-0"
+              title={showRain ? 'Temps de pluie activé' : 'Temps de pluie désactivé'}
+              style={{
+                width: 56, height: 30,
+                background: showRain ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                color: showRain ? 'white' : 'var(--color-text-primary)',
+                border: `1px solid ${showRain ? 'transparent' : 'var(--color-border-subtle)'}`,
+                boxShadow: showRain ? 'none' : 'var(--shadow-card)',
+              }}>
+              <span className="text-sm">🌧</span>
+            </button>
           </div>
 
           <div className="flex items-center gap-2">
@@ -147,9 +155,8 @@ export default function PlanningHeader({
           </div>
         </div>
 
-        {/* Ligne 2 : filtres technicien + retard + pluie */}
-        {(allTechs.length > 1 || totalOverdue > 0) && (
-          <div className="flex items-center gap-2 px-4 md:px-6 pb-3 flex-wrap">
+        {/* Ligne 2 : filtres technicien + pluie */}
+        <div className="flex items-center gap-2 px-4 md:px-6 pb-3 flex-wrap">
             {allTechs.length > 1 && (
               <div className="flex items-center gap-1.5 flex-wrap">
                 <motion.button
@@ -189,25 +196,7 @@ export default function PlanningHeader({
                 })}
               </div>
             )}
-            {totalOverdue > 0 && (
-              <button type="button" onClick={() => setFilterRetard(v=>!v)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
-                style={{ background:filterRetard?'var(--color-danger)':'var(--color-danger-light)', color:filterRetard?'white':'var(--color-danger)' }}>
-                ⚠ {totalOverdue} en retard
-              </button>
-            )}
-            <button type="button" onClick={() => { const v = !showRain; setShowRain(v); localStorage.setItem('planning_show_rain', String(v)) }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-              style={{
-                background: showRain ? '#0071E3' : 'rgba(0,113,227,0.1)',
-                color: showRain ? 'white' : '#0071E3',
-                border: `1px solid ${showRain ? 'transparent' : 'rgba(0,113,227,0.2)'}`
-              }}>
-              <span className="text-sm">🌧</span>
-              Temps de pluie {showRain ? 'activé' : 'off'}
-            </button>
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Bandeau "à planifier" */}

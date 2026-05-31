@@ -78,7 +78,7 @@ const uid        = useAuthStore(selectUid)
   const [monthStart,  setMonthStart]  = useState(() => startOfMonth(today))
   const [selectedDate,setSelectedDate]= useState(today)
   const [filterTech,  setFilterTech]  = useState(() => localStorage.getItem('planning_filter_tech') ?? '')
-  const [filterRetard,setFilterRetard]= useState(false)
+  const [filterRetard] = useState(false)
   const [selectedDay,         setSelectedDay]         = useState<string|null>(null)
   const [dayModalInitialTab,  setDayModalInitialTab]  = useState<'pool'|'evt'>('pool')
   const [showRain,            setShowRain]            = useState(() => localStorage.getItem('planning_show_rain') !== 'false')
@@ -115,7 +115,7 @@ const uid        = useAuthStore(selectUid)
   const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])
 
   // ── Calculs dérivés des données Firestore ───────────────
-  const { eventsByDate, allTechs, totalOverdue, techOptions, poolSamplings, overduePool } = usePlanningData({
+  const { eventsByDate, allTechs, techOptions, poolSamplings, overduePool } = usePlanningData({
     clients, maintenances, equipements, evenements, todos, users, preleveurs, selectedDay,
   })
 
@@ -191,7 +191,6 @@ const uid        = useAuthStore(selectUid)
         prev={prev} next={next} goToday={goToday} switchView={switchView}
         showMiniCal={showMiniCal} setShowMiniCal={setShowMiniCal}
         allTechs={allTechs} filterTech={filterTech} setFilterTech={setFilterTech}
-        totalOverdue={totalOverdue} filterRetard={filterRetard} setFilterRetard={setFilterRetard}
         showRain={showRain} setShowRain={setShowRain} preleveurs={preleveurs}
         monthPoolCount={monthPoolCount} showDragHint={showDragHint} setShowDragHint={setShowDragHint}
         onExportPdf={handleExportPdf} onExportExcel={handleExportExcel}
