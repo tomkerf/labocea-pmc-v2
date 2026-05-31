@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { logout } from '@/hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, Check, KeyRound, ChevronDown, Bell, BellOff, LoaderCircle } from 'lucide-react'
+import { LogOut, KeyRound, ChevronDown, Bell, BellOff, LoaderCircle } from 'lucide-react'
 import { updateUserProfile } from '@/services/userService'
 import UserAvatar from '@/components/ui/UserAvatar'
 
