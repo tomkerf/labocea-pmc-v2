@@ -14,6 +14,7 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 - **Rapports dus dans le Planning** :
   - Intégration des alertes "Rapport dû" dans la chronologie de la vue Planning.
   - S'affiche pour les prélèvements dont le rapport est prévu, non encore rédigé, à la date de rendu (calculée automatiquement).
+  - Regroupement des rapports (accordion) pour un même client un même jour de la même manière que les interventions, avec le nom du plan pour chaque sous-ligne.
 - **Ajustements divers** :
   - Ajustement de l'opacité (0.55) des icônes jours fériés.
   - Mise à jour des appels de hooks et tests associés.
