@@ -5,13 +5,19 @@ import type { VisitePreliminaire } from '@/types'
 
 export function useVisites(linkedId: string) {
   const [visites, setVisites] = useState<VisitePreliminaire[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!!linkedId)
+  const [prevLinkedId, setPrevLinkedId] = useState(linkedId)
+
+  if (linkedId !== prevLinkedId) {
+    setPrevLinkedId(linkedId)
+    if (!linkedId) {
+      setVisites([])
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    if (!linkedId) {
-      setLoading(false)
-      return
-    }
+    if (!linkedId) return
     const q = query(
       collection(db, 'visites'),
       where('linkedTo.id', '==', linkedId),

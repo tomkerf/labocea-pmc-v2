@@ -21,17 +21,19 @@ export function useWeather(
   lng: number | null,
   date: Date
 ): WeatherResult {
+  const dateStr = date.toISOString().slice(0, 10)
+  const fetchKey = lat !== null && lng !== null ? `${lat}_${lng}_${dateStr}` : ''
+
   const [result, setResult] = useState<WeatherResult>(EMPTY)
+  const [prevKey, setPrevKey] = useState(fetchKey)
+
+  if (fetchKey !== prevKey) {
+    setPrevKey(fetchKey)
+    setResult(fetchKey ? { ...EMPTY, loading: true } : EMPTY)
+  }
 
   useEffect(() => {
-    if (lat === null || lng === null) {
-      setResult(EMPTY)
-      return
-    }
-
-    const dateStr = date.toISOString().slice(0, 10) // "YYYY-MM-DD"
-
-    setResult(prev => ({ ...prev, loading: true, error: false }))
+    if (!fetchKey || lat === null || lng === null) return
 
     const url =
       `https://api.open-meteo.com/v1/forecast` +
@@ -80,7 +82,7 @@ export function useWeather(
       })
 
     return () => { cancelled = true }
-  }, [lat, lng, date.toISOString().slice(0, 10)])
+  }, [fetchKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return result
 }
