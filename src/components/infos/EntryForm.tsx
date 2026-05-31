@@ -79,7 +79,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             {isEdit ? 'Modifier' : 'Nouvelle entrée'}
           </h2>
-          <button type="button" onClick={onClose} className="p-1.5 rounded-lg"
+          <button type="button" onClick={onClose} aria-label="Fermer" className="p-1.5 rounded-lg"
             style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
             <X size={15} />
           </button>

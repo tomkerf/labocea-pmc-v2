@@ -522,8 +522,9 @@ export default function MapView({
         {/* Mobile floating pill if there are unmapped events */}
         {noGpsEvts.length > 0 && (
           <div className="absolute top-4 left-4 z-[1000] md:hidden">
-            <button 
+            <button
               onClick={() => alert(`Il y a ${noGpsEvts.length} prélèvement(s) aujourd'hui sans coordonnées GPS. Modifie-les dans l'onglet Missions pour les faire apparaître.`)}
+              aria-label={`${noGpsEvts.length} prélèvement(s) sans coordonnées GPS`}
               className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 text-white rounded-full shadow-lg text-[10px] font-bold uppercase tracking-wider"
             >
               <AlertTriangle size={12} />

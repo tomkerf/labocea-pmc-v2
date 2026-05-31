@@ -181,6 +181,7 @@ export default function WeekView({
                     marginRight: 1,
                   }}
                   title={tooltip}
+                  aria-label={tooltip ?? label}
                 >
                   <span className="text-[11px] font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
                   {badge && (

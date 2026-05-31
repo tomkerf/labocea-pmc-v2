@@ -146,7 +146,7 @@ function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }
               </p>
             )}
           </div>
-          <button type="button" onClick={onClose} className="p-1 rounded-lg" style={{ color: 'var(--color-text-tertiary)' }}>
+          <button type="button" onClick={onClose} aria-label="Fermer" className="p-1 rounded-lg" style={{ color: 'var(--color-text-tertiary)' }}>
             <X size={18} />
           </button>
         </div>
@@ -155,52 +155,52 @@ function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }
           {/* Contact */}
           <Sec label="Contact" />
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Nom"><input value={form.contactNom} onChange={e => set('contactNom', e.target.value)} placeholder="Prénom Nom" className="field-input w-full" /></Field>
-            <Field label="Société"><input value={form.contactSociete} onChange={e => set('contactSociete', e.target.value)} placeholder="Organisme" className="field-input w-full" /></Field>
-            <Field label="Email"><input type="email" value={form.contactEmail} onChange={e => set('contactEmail', e.target.value)} placeholder="email@…" className="field-input w-full" /></Field>
-            <Field label="Téléphone"><input value={form.contactTel} onChange={e => set('contactTel', e.target.value)} placeholder="06 XX…" className="field-input w-full" /></Field>
+            <Field label="Nom"><input aria-label="Nom" value={form.contactNom} onChange={e => set('contactNom', e.target.value)} placeholder="Prénom Nom" className="field-input w-full" /></Field>
+            <Field label="Société"><input aria-label="Société" value={form.contactSociete} onChange={e => set('contactSociete', e.target.value)} placeholder="Organisme" className="field-input w-full" /></Field>
+            <Field label="Email"><input aria-label="Email" type="email" value={form.contactEmail} onChange={e => set('contactEmail', e.target.value)} placeholder="email@…" className="field-input w-full" /></Field>
+            <Field label="Téléphone"><input aria-label="Téléphone" value={form.contactTel} onChange={e => set('contactTel', e.target.value)} placeholder="06 XX…" className="field-input w-full" /></Field>
           </div>
 
           {/* Prestation */}
           <Sec label="Prestation" />
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Lieu"><input value={form.lieu} onChange={e => set('lieu', e.target.value)} placeholder="Commune (29)" className="field-input w-full" /></Field>
+            <Field label="Lieu"><input aria-label="Lieu" value={form.lieu} onChange={e => set('lieu', e.target.value)} placeholder="Commune (29)" className="field-input w-full" /></Field>
             <Field label="Segment">
-              <select value={form.segment} onChange={e => set('segment', e.target.value)} className="field-input w-full">
+              <select aria-label="Segment" value={form.segment} onChange={e => set('segment', e.target.value)} className="field-input w-full">
                 {SEGMENTS.map(s => <option key={s}>{s}</option>)}
               </select>
             </Field>
             <Field label="Fréquence">
-              <select value={form.frequence} onChange={e => set('frequence', e.target.value)} className="field-input w-full">
+              <select aria-label="Fréquence" value={form.frequence} onChange={e => set('frequence', e.target.value)} className="field-input w-full">
                 {FREQUENCES.map(f => <option key={f} value={f}>{f || '— Non précisée —'}</option>)}
               </select>
             </Field>
-            <Field label="Nb points / sites"><input value={form.nbPoints} onChange={e => set('nbPoints', e.target.value)} placeholder="ex: 3 piézomètres" className="field-input w-full" /></Field>
+            <Field label="Nb points / sites"><input aria-label="Nb points / sites" value={form.nbPoints} onChange={e => set('nbPoints', e.target.value)} placeholder="ex: 3 piézomètres" className="field-input w-full" /></Field>
           </div>
           <Field label="Description technique">
-            <textarea value={form.description} onChange={e => set('description', e.target.value)} rows={2} placeholder="Nature, conditions, contraintes terrain…" className="field-input w-full resize-none" />
+            <textarea aria-label="Description technique" value={form.description} onChange={e => set('description', e.target.value)} rows={2} placeholder="Nature, conditions, contraintes terrain…" className="field-input w-full resize-none" />
           </Field>
 
           {/* Suivi */}
           <Sec label="Suivi commercial" />
           <div className="grid grid-cols-2 gap-3">
             <Field label="Statut">
-              <select value={form.statut} onChange={e => set('statut', e.target.value as DemandeStatut)} className="field-input w-full" style={{ color: cfg.color, fontWeight: 600 }}>
+              <select aria-label="Statut" value={form.statut} onChange={e => set('statut', e.target.value as DemandeStatut)} className="field-input w-full" style={{ color: cfg.color, fontWeight: 600 }}>
                 {[...STATUTS, ...STATUTS_ARCHIVES].map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
               </select>
             </Field>
             <Field label="Technicien assigné">
-              <select value={form.preleveurUid} onChange={e => set('preleveurUid', e.target.value)} className="field-input w-full">
+              <select aria-label="Technicien assigné" value={form.preleveurUid} onChange={e => set('preleveurUid', e.target.value)} className="field-input w-full">
                 <option value="">— Non assigné —</option>
                 {users.map(u => <option key={u.uid} value={u.uid}>{u.prenom} {u.nom} ({u.initiales})</option>)}
               </select>
             </Field>
-            <Field label="Date de réception"><input type="date" value={form.dateReception} onChange={e => set('dateReception', e.target.value)} className="field-input w-full" /></Field>
-            <Field label="Date envoi devis"><input type="date" value={form.dateDevis} onChange={e => set('dateDevis', e.target.value)} className="field-input w-full" /></Field>
-            <Field label="Montant devis (€ HT)"><input value={form.montantDevis} onChange={e => set('montantDevis', e.target.value)} placeholder="ex: 2 400" className="field-input w-full" /></Field>
+            <Field label="Date de réception"><input aria-label="Date de réception" type="date" value={form.dateReception} onChange={e => set('dateReception', e.target.value)} className="field-input w-full" /></Field>
+            <Field label="Date envoi devis"><input aria-label="Date envoi devis" type="date" value={form.dateDevis} onChange={e => set('dateDevis', e.target.value)} className="field-input w-full" /></Field>
+            <Field label="Montant devis (€ HT)"><input aria-label="Montant devis (€ HT)" value={form.montantDevis} onChange={e => set('montantDevis', e.target.value)} placeholder="ex: 2 400" className="field-input w-full" /></Field>
           </div>
           <Field label="Notes internes">
-            <textarea value={form.notes} onChange={e => set('notes', e.target.value)} rows={2} placeholder="Remarques, points d'attention…" className="field-input w-full resize-none" />
+            <textarea aria-label="Notes internes" value={form.notes} onChange={e => set('notes', e.target.value)} rows={2} placeholder="Remarques, points d'attention…" className="field-input w-full resize-none" />
           </Field>
           {!isNew && demande.id && (
             <>

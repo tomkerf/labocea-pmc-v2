@@ -112,7 +112,7 @@ export default function EventDetailModal({
               {dateLabel}
             </p>
           </div>
-          <button type="button" onClick={onClose} className="p-1.5 rounded-lg shrink-0 mt-0.5"
+          <button type="button" onClick={onClose} aria-label="Fermer" className="p-1.5 rounded-lg shrink-0 mt-0.5"
             style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
             <X size={15} />
           </button>
@@ -129,6 +129,7 @@ export default function EventDetailModal({
                 Nouvelle date
               </label>
               <input type="date" value={moveDate} onChange={e => setMoveDate(e.target.value)} autoFocus
+                aria-label="Nouvelle date"
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
             </div>
@@ -138,6 +139,7 @@ export default function EventDetailModal({
               </label>
               <textarea
                 value={moveReason} onChange={e => setMoveReason(e.target.value)}
+                aria-label="Motif du report"
                 placeholder="Ex : météo défavorable, client indisponible…"
                 rows={2}
                 className="w-full px-3 py-2 rounded-lg text-sm resize-none"
@@ -163,6 +165,7 @@ export default function EventDetailModal({
                 value={techInitiales}
                 onChange={e => setTechInitiales(e.target.value)}
                 autoFocus
+                aria-label="Technicien assigné"
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
                 {techOptions.map(o => (
@@ -230,6 +233,7 @@ export default function EventDetailModal({
                 </label>
                 <textarea
                   value={cancelReason} onChange={e => setCancelReason(e.target.value)}
+                  aria-label="Motif du retrait"
                   placeholder="Ex : reporté à une date ultérieure, annulé par le client…"
                   rows={2}
                   className="w-full px-3 py-2 rounded-lg text-sm resize-none"

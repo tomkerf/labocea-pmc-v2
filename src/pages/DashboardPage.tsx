@@ -447,6 +447,7 @@ export default function DashboardPage() {
             >
               <button type="button"
                 onClick={() => dismissWelcome(false)}
+                aria-label="Fermer"
                 className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 transition-colors"
                 style={{ color: 'var(--color-text-secondary)' }}
               >

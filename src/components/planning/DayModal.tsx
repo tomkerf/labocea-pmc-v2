@@ -88,7 +88,7 @@ export default function DayModal({
           <p className="flex-1 text-base font-semibold capitalize" style={{ color: 'var(--color-text-primary)' }}>
             {dayLabel}
           </p>
-          <button type="button" onClick={onClose} className="p-1.5 rounded-lg"
+          <button type="button" onClick={onClose} aria-label="Fermer" className="p-1.5 rounded-lg"
             style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
             <X size={16} />
           </button>
@@ -120,6 +120,7 @@ export default function DayModal({
           <div className="px-4 py-4 space-y-3 flex-1 overflow-y-auto">
             <input
               autoFocus
+              aria-label="Titre de l'événement"
               placeholder={evtType === 'conge' ? 'Titre (optionnel)' : 'Titre de l\'événement'}
               value={evtTitre}
               onChange={e => setEvtTitre(e.target.value)}
@@ -146,9 +147,10 @@ export default function DayModal({
               ))}
             </div>
             <input type="time" value={evtHeure} onChange={e => setEvtHeure(e.target.value)}
+              aria-label="Heure de l'événement"
               className="w-full px-3 py-2 rounded-lg text-sm"
               style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
-            <textarea rows={2} placeholder="Notes (optionnel)" value={evtNotes} onChange={e => setEvtNotes(e.target.value)}
+            <textarea rows={2} aria-label="Notes de l'événement" placeholder="Notes (optionnel)" value={evtNotes} onChange={e => setEvtNotes(e.target.value)}
               className="w-full px-3 py-2 rounded-lg text-sm resize-none"
               style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
             {(() => {
@@ -203,7 +205,9 @@ export default function DayModal({
                   return (
                     <div key={item.sampling.id}
                       style={{ borderBottom: i < groupItems.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                      <button type="button" className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
+                      <button type="button"
+                        aria-label={isValidating ? 'Annuler la planification' : `Planifier : ${item.clientNom}`}
+                        className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
                         onClick={() => isValidating
                           ? setPoolValidId(null)
                           : (setPoolValidId(item.sampling.id), setPoolDate(dateStr))
@@ -282,6 +286,7 @@ export default function DayModal({
                                   Planifier le
                                 </label>
                                 <input type="date" value={poolDate} onChange={e => setPoolDate(e.target.value)}
+                                  aria-label="Date de planification"
                                   className="w-full px-3 py-2 rounded-lg text-sm"
                                   style={{
                                     background: 'var(--color-bg-secondary)',

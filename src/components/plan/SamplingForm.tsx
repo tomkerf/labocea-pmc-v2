@@ -81,7 +81,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
             </div>
           </span>
         </label>
-        <select value={sampling.status}
+        <select aria-label="Statut du prélèvement" value={sampling.status}
           onChange={(e) => onUpdate('status', e.target.value as SamplingStatus)}
           className="field-input w-full">
           <option value="planned">Planifié</option>
@@ -95,6 +95,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
         <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Heure prévue</label>
         <input
           type="time"
+          aria-label="Heure prévue"
           value={sampling.plannedTime ?? ''}
           onChange={(e) => onUpdate('plannedTime', e.target.value)}
           className="field-input w-full"
@@ -104,6 +105,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       <div>
         <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Mois prévu</label>
         <select
+          aria-label="Mois prévu"
           value={sampling.plannedMonth}
           onChange={(e) => onUpdate('plannedMonth', parseInt(e.target.value))}
           className="field-input w-full">
@@ -118,6 +120,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
         </label>
         <input
           type="number" min={1} max={31}
+          aria-label="Jour prévu"
           value={sampling.plannedDay || ''}
           onChange={(e) => {
             const v = parseInt(e.target.value)
@@ -131,7 +134,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
 
       <div>
         <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date réalisée</label>
-        <input type="date" value={sampling.doneDate}
+        <input type="date" aria-label="Date réalisée" value={sampling.doneDate}
           onChange={(e) => onUpdate('doneDate', e.target.value)}
           className="field-input w-full" />
       </div>
@@ -140,6 +143,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
         <div>
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Effectué par</label>
           <select
+            aria-label="Effectué par"
             value={sampling.doneBy ?? ''}
             onChange={(e) => onUpdate('doneBy', e.target.value)}
             className="field-input w-full">
@@ -155,7 +159,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
 
       <div>
         <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Nappe</label>
-        <select value={sampling.nappe}
+        <select aria-label="Nappe" value={sampling.nappe}
           onChange={(e) => onUpdate('nappe', e.target.value as NappeType)}
           className="field-input w-full">
           <option value="">—</option>
@@ -167,7 +171,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       <div>
         <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Rapport prévu</label>
         <label className="flex items-center gap-2 mt-2 cursor-pointer">
-          <input type="checkbox" checked={sampling.rapportPrevu}
+          <input type="checkbox" aria-label="Rapport prévu" checked={sampling.rapportPrevu}
             onChange={(e) => onUpdate('rapportPrevu', e.target.checked)} />
           <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
             {sampling.rapportPrevu ? 'Oui' : 'Non'}
@@ -180,6 +184,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
           <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date envoi prévue</label>
           <input
             type="date"
+            aria-label="Date d'envoi prévue du rapport"
             value={sampling.rapportDatePrevue ?? ''}
             onChange={(e) => onUpdate('rapportDatePrevue', e.target.value)}
             className="field-input w-full"
@@ -189,7 +194,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
 
       <div className="sm:col-span-2">
         <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Commentaire</label>
-        <input value={sampling.comment}
+        <input aria-label="Commentaire" value={sampling.comment}
           onChange={(e) => onUpdate('comment', e.target.value)}
           placeholder="Remarques…"
           className="field-input w-full" />
@@ -207,7 +212,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
               <div key={item.id}
                 className="flex items-center gap-3 px-3 py-2"
                 style={{ borderBottom: i < checklist.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                <input type="checkbox" checked={item.done}
+                <input type="checkbox" aria-label={`Tâche : ${item.label}`} checked={item.done}
                   onChange={() => toggleTask(item.id)}
                   className="cursor-pointer" />
                 <span className="flex-1 text-sm"
@@ -218,6 +223,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
                   {item.label}
                 </span>
                 <button type="button" onClick={() => deleteTask(item.id)}
+                  aria-label="Supprimer la tâche"
                   className="shrink-0 flex items-center justify-center rounded"
                   style={{ color: 'var(--color-text-tertiary)', minWidth: 44, minHeight: 44 }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
@@ -230,6 +236,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
         )}
         <div className="flex gap-2">
           <input
+            aria-label="Nouvelle tâche"
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addTask()}
@@ -237,6 +244,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
             className="field-input flex-1 text-sm"
           />
           <button type="button" onClick={addTask}
+            aria-label="Ajouter la tâche"
             className="px-3 py-1.5 rounded-lg text-sm font-medium"
             style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
             <Plus size={15} />
@@ -251,6 +259,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
             Motif de non-réalisation
           </label>
           <input
+            aria-label="Motif de non-réalisation"
             value={sampling.motif ?? ''}
             onChange={(e) => onUpdate('motif', e.target.value)}
             placeholder="Ex : Pas d'eau sur site / Annulation client / Accès impossible…"
@@ -281,6 +290,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
                 </a>
                 <button type="button"
                   onClick={() => handlePhotoDelete(url)}
+                  aria-label="Supprimer cette photo"
                   className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center bg-black/60 text-white hover:bg-black/80 transition-colors"
                   title="Supprimer cette photo"
                 >

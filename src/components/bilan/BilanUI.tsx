@@ -25,10 +25,11 @@ export function FieldLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function TextInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+export function TextInput({ value, onChange, placeholder, 'aria-label': ariaLabel }: { value: string; onChange: (v: string) => void; placeholder?: string; 'aria-label'?: string }) {
   return (
     <input
       type="text" value={value} placeholder={placeholder}
+      aria-label={ariaLabel ?? placeholder ?? 'Champ texte'}
       onChange={e => onChange(e.target.value)}
       className="w-full px-3 py-2 rounded-lg text-sm"
       style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', outline: 'none' }}
@@ -36,11 +37,12 @@ export function TextInput({ value, onChange, placeholder }: { value: string; onC
   )
 }
 
-export function NumInput({ value, onChange, unit, placeholder }: { value: string; onChange: (v: string) => void; unit?: string; placeholder?: string }) {
+export function NumInput({ value, onChange, unit, placeholder, 'aria-label': ariaLabel }: { value: string; onChange: (v: string) => void; unit?: string; placeholder?: string; 'aria-label'?: string }) {
   return (
     <div className="flex items-center gap-2">
       <input
         type="number" inputMode="decimal" value={value} placeholder={placeholder}
+        aria-label={ariaLabel ?? placeholder ?? 'Valeur numérique'}
         onChange={e => onChange(e.target.value)}
         className="flex-1 px-3 py-2.5 rounded-lg text-right text-base font-semibold"
         style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', outline: 'none' }}

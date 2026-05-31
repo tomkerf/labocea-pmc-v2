@@ -147,18 +147,21 @@ export default function MaintenancePage() {
           <p className="text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Problème / motif</p>
           <textarea value={maintenance.description} onChange={(e) => update('description', e.target.value)}
             rows={2} placeholder="Description du problème ou motif de l'intervention…"
+            aria-label="Problème ou motif de l'intervention"
             className="w-full text-sm resize-none bg-transparent outline-none" style={{ color: 'var(--color-text-primary)' }} />
         </div>
         <div className="px-5 py-3" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
           <p className="text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Travaux réalisés</p>
           <textarea value={maintenance.travauxRealises} onChange={(e) => update('travauxRealises', e.target.value)}
             rows={2} placeholder="Détail des travaux effectués…"
+            aria-label="Travaux réalisés"
             className="w-full text-sm resize-none bg-transparent outline-none" style={{ color: 'var(--color-text-primary)' }} />
         </div>
         <div className="px-5 py-3">
           <p className="text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Pièces remplacées</p>
           <textarea value={maintenance.piecesRemplacees} onChange={(e) => update('piecesRemplacees', e.target.value)}
             rows={2} placeholder="Liste des pièces remplacées…"
+            aria-label="Pièces remplacées"
             className="w-full text-sm resize-none bg-transparent outline-none" style={{ color: 'var(--color-text-primary)' }} />
         </div>
       </Section>

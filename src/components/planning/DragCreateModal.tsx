@@ -68,7 +68,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
               {isMultiDay ? `${fmtDate(debut)} → ${fmtDate(fin)}` : fmtDate(debut)}
             </p>
           </div>
-          <button type="button" onClick={onClose} className="p-1.5 rounded-lg"
+          <button type="button" onClick={onClose} aria-label="Fermer" className="p-1.5 rounded-lg"
             style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
             <X size={15} />
           </button>
@@ -79,6 +79,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
         <div className="px-5 py-4 space-y-3">
           <input
             autoFocus
+            aria-label="Titre de l'événement"
             placeholder={type === 'conge' ? 'Titre (optionnel)' : 'Titre de l\'événement'}
             value={titre}
             onChange={e => setTitre(e.target.value)}
@@ -111,7 +112,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
               <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                 Début
               </label>
-              <input type="date" value={debut} onChange={e => setDebut(e.target.value)}
+              <input type="date" value={debut} onChange={e => setDebut(e.target.value)} aria-label="Date de début"
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
             </div>
@@ -119,7 +120,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
               <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                 Fin
               </label>
-              <input type="date" value={fin} min={debut} onChange={e => setFin(e.target.value)}
+              <input type="date" value={fin} min={debut} onChange={e => setFin(e.target.value)} aria-label="Date de fin"
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
             </div>
@@ -130,7 +131,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
               <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                 Heure (optionnel)
               </label>
-              <input type="time" value={heure} onChange={e => setHeure(e.target.value)}
+              <input type="time" value={heure} onChange={e => setHeure(e.target.value)} aria-label="Heure"
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
             </div>
@@ -140,7 +141,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
             <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
               Notes (optionnel)
             </label>
-            <textarea rows={2} placeholder="Remarques…" value={notes} onChange={e => setNotes(e.target.value)}
+            <textarea rows={2} placeholder="Remarques…" value={notes} onChange={e => setNotes(e.target.value)} aria-label="Notes"
               className="w-full px-3 py-2 rounded-lg text-sm resize-none"
               style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
           </div>

@@ -203,6 +203,7 @@ export default function PointMesureFichePage() {
             onChange={(e) => setContraintes(e.target.value)}
             onBlur={handleSaveContraintes}
             rows={4}
+            aria-label="Contraintes terrain et mémoire du point"
             className="w-full p-4 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
             style={{ background: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)' }}
             placeholder="Saisissez ici les contraintes d'accès, codes barrières, équipements spécifiques requis..."

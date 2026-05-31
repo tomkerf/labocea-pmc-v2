@@ -111,6 +111,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                     {/* Checkbox animée */}
                     <button type="button"
                       onClick={() => handleToggleComplete(todo)}
+                      aria-label="Marquer comme terminé"
                       className="mt-0.5 shrink-0 flex items-center justify-center w-5 h-5 rounded-md border transition-all cursor-pointer focus:outline-none"
                       style={{
                         borderColor: 'var(--color-border)',

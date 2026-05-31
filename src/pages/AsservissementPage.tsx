@@ -126,6 +126,7 @@ function Stepper({ label, hint, value, onChange, unit, step, min, max }: {
             type="number" inputMode="decimal"
             value={value}
             onChange={e => onChange(e.target.value)}
+            aria-label={label}
             className="asserv-inp text-center font-bold"
             style={{
               width: '100%', height: 52, border: 'none', background: 'transparent',

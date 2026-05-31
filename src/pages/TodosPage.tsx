@@ -239,6 +239,7 @@ export default function TodosPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            aria-label="Rechercher une tâche"
             placeholder="Rechercher une tâche par titre, client, matériel..."
             className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm"
             style={{
@@ -286,6 +287,7 @@ export default function TodosPage() {
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value)}
+            aria-label="Filtrer par priorité"
             className="px-3 py-1.5 rounded-lg text-xs border"
             style={{
               background: 'var(--color-bg-secondary)',
@@ -482,6 +484,7 @@ export default function TodosPage() {
                 </h3>
                 <button type="button"
                   onClick={() => setShowModal(false)}
+                  aria-label="Fermer"
                   className="text-gray-400 hover:text-gray-600 font-bold focus:outline-none cursor-pointer"
                 >
                   ✕
@@ -494,6 +497,7 @@ export default function TodosPage() {
                 <div>
                   <label className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Titre de la tâche</label>
                   <input
+                    aria-label="Titre de la tâche"
                     value={formTitre}
                     onChange={(e) => setFormTitre(e.target.value)}
                     placeholder="Ex: Préparer flaconnage rivière"
@@ -511,6 +515,7 @@ export default function TodosPage() {
                 <div>
                   <label className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Description / Notes</label>
                   <textarea
+                    aria-label="Description / Notes"
                     value={formDesc}
                     onChange={(e) => setFormDesc(e.target.value)}
                     placeholder="Détails supplémentaires, consignes..."
@@ -559,6 +564,7 @@ export default function TodosPage() {
                 <div>
                   <label className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Assignée à</label>
                   <select
+                    aria-label="Assignée à"
                     value={formAssignedTo}
                     onChange={(e) => setFormAssignedTo(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none"
@@ -582,6 +588,7 @@ export default function TodosPage() {
                   <label className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Date d'échéance</label>
                   <input
                     type="date"
+                    aria-label="Date d'échéance"
                     value={formDueDate}
                     onChange={(e) => setFormDueDate(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none"
@@ -598,6 +605,7 @@ export default function TodosPage() {
                   <div>
                     <label className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Client / Mission</label>
                     <select
+                      aria-label="Client / Mission"
                       value={formClientId}
                       onChange={(e) => setFormClientId(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border text-xs focus:outline-none"
@@ -620,6 +628,7 @@ export default function TodosPage() {
                   <div>
                     <label className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Matériel / Instrument</label>
                     <select
+                      aria-label="Matériel / Instrument"
                       value={formEquipementId}
                       onChange={(e) => setFormEquipementId(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border text-xs focus:outline-none"
@@ -717,6 +726,7 @@ function TodoRow({
       {/* Checkbox ronde Apple-style */}
       <button type="button"
         onClick={onToggle}
+        aria-label={isCompleted ? 'Marquer comme non terminé' : 'Marquer comme terminé'}
         className="mt-0.5 shrink-0 flex items-center justify-center w-5.5 h-5.5 rounded-full border transition-all cursor-pointer focus:outline-none"
         style={{
           borderColor: isCompleted ? 'var(--color-success)' : 'var(--color-border)',
@@ -823,6 +833,7 @@ function TodoRow({
         {!isCompleted && (
           <button type="button"
             onClick={onCycle}
+            aria-label={todo.statut === 'a_faire' ? 'Commencer la tâche' : 'Remettre à faire'}
             title={todo.statut === 'a_faire' ? 'Commencer la tâche' : 'Remettre à faire'}
             className="p-1 rounded hover:bg-neutral-100 text-gray-400 hover:text-gray-700 cursor-pointer focus:outline-none transition-colors"
           >
@@ -836,6 +847,7 @@ function TodoRow({
 
         <button type="button"
           onClick={onEdit}
+          aria-label="Modifier la tâche"
           title="Modifier"
           className="p-1.5 rounded hover:bg-neutral-100 text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none transition-colors"
         >
@@ -855,6 +867,7 @@ function TodoRow({
           ) : (
             <button type="button"
               onClick={() => setDeletingId(todo.id)}
+              aria-label="Supprimer la tâche"
               title="Supprimer"
               className="p-1.5 rounded hover:bg-neutral-100 text-gray-400 hover:text-red-500 cursor-pointer focus:outline-none transition-colors"
             >

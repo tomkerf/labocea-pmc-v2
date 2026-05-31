@@ -15,7 +15,7 @@ export function ClientInfoForm({ client, sitesInput, update, onSitesChange }: Pr
     <>
       <Section title="Informations générales">
         <Field label="Nom du client">
-          <input value={client.nom} onChange={(e) => update('nom', e.target.value)}
+          <input aria-label="Nom du client" value={client.nom} onChange={(e) => update('nom', e.target.value)}
             className="field-input" placeholder="Nom du client"
             style={!client.nom.trim() ? { borderColor: 'var(--color-danger)' } : undefined} />
           {!client.nom.trim() && (
@@ -23,50 +23,50 @@ export function ClientInfoForm({ client, sitesInput, update, onSitesChange }: Pr
           )}
         </Field>
         <Field label="Segment">
-          <select value={client.segment} onChange={(e) => update('segment', e.target.value as SegmentType)}
+          <select aria-label="Segment" value={client.segment} onChange={(e) => update('segment', e.target.value as SegmentType)}
             className="field-input">
             {SEGMENTS.map((s) => <option key={s}>{s}</option>)}
           </select>
         </Field>
         <Field label="Type de demande">
-          <select value={client.nouvelleDemande} onChange={(e) => update('nouvelleDemande', e.target.value as NouvelleDemandeType)}
+          <select aria-label="Type de demande" value={client.nouvelleDemande} onChange={(e) => update('nouvelleDemande', e.target.value as NouvelleDemandeType)}
             className="field-input">
             {NOUVELLES_DEMANDES.map((s) => <option key={s}>{s}</option>)}
           </select>
         </Field>
         <Field label="Préleveur (initiales)">
-          <input value={client.preleveur} onChange={(e) => update('preleveur', e.target.value)}
+          <input aria-label="Préleveur (initiales)" value={client.preleveur} onChange={(e) => update('preleveur', e.target.value)}
             className="field-input" placeholder="ex: THK" />
         </Field>
         <Field label="Année">
-          <input value={client.annee} onChange={(e) => update('annee', e.target.value)}
+          <input aria-label="Année" value={client.annee} onChange={(e) => update('annee', e.target.value)}
             className="field-input" placeholder="2026" />
         </Field>
         <Field label="Sites (séparés par virgule)" last>
-          <input value={sitesInput} onChange={(e) => onSitesChange(e.target.value)}
+          <input aria-label="Sites (séparés par virgule)" value={sitesInput} onChange={(e) => onSitesChange(e.target.value)}
             className="field-input" placeholder="Quimper, Kerambris, Aven" />
         </Field>
       </Section>
 
       <Section title="Contact">
         <Field label="Interlocuteur">
-          <input value={client.interlocuteur} onChange={(e) => update('interlocuteur', e.target.value)}
+          <input aria-label="Interlocuteur" value={client.interlocuteur} onChange={(e) => update('interlocuteur', e.target.value)}
             className="field-input" placeholder="Prénom Nom" />
         </Field>
         <Field label="Fonction">
-          <input value={client.fonction} onChange={(e) => update('fonction', e.target.value)}
+          <input aria-label="Fonction" value={client.fonction} onChange={(e) => update('fonction', e.target.value)}
             className="field-input" placeholder="Directeur technique" />
         </Field>
         <Field label="Téléphone">
-          <input value={client.telephone} onChange={(e) => update('telephone', e.target.value)}
+          <input aria-label="Téléphone" value={client.telephone} onChange={(e) => update('telephone', e.target.value)}
             className="field-input" placeholder="02 98 …" />
         </Field>
         <Field label="Mobile">
-          <input value={client.mobile} onChange={(e) => update('mobile', e.target.value)}
+          <input aria-label="Mobile" value={client.mobile} onChange={(e) => update('mobile', e.target.value)}
             className="field-input" placeholder="06 …" />
         </Field>
         <Field label="Email">
-          <input type="email" value={client.email} onChange={(e) => update('email', e.target.value)}
+          <input aria-label="Email" type="email" value={client.email} onChange={(e) => update('email', e.target.value)}
             className="field-input" placeholder="contact@…" />
         </Field>
         <Field label="Contact prévenance" last>
@@ -92,34 +92,34 @@ export function ClientInfoForm({ client, sitesInput, update, onSitesChange }: Pr
 
       <Section title="Contrat">
         <Field label="N° Devis">
-          <input value={client.numDevis} onChange={(e) => update('numDevis', e.target.value)}
+          <input aria-label="N° Devis" value={client.numDevis} onChange={(e) => update('numDevis', e.target.value)}
             className="field-input" />
         </Field>
         <Field label="N° Convention">
-          <input value={client.numConvention} onChange={(e) => update('numConvention', e.target.value)}
+          <input aria-label="N° Convention" value={client.numConvention} onChange={(e) => update('numConvention', e.target.value)}
             className="field-input" />
         </Field>
         <Field label="Durée contrat">
-          <input value={client.dureeContrat} onChange={(e) => update('dureeContrat', e.target.value)}
+          <input aria-label="Durée contrat" value={client.dureeContrat} onChange={(e) => update('dureeContrat', e.target.value)}
             className="field-input" placeholder="12 mois" />
         </Field>
         <Field label="Montant total (€)">
-          <input type="number" value={client.montantTotal || ''} onChange={(e) => update('montantTotal', Number(e.target.value))}
+          <input aria-label="Montant total (€)" type="number" value={client.montantTotal || ''} onChange={(e) => update('montantTotal', Number(e.target.value))}
             className="field-input" />
         </Field>
         <Field label="Part PMC (€)">
-          <input type="number" value={client.partPMC || ''} onChange={(e) => update('partPMC', Number(e.target.value))}
+          <input aria-label="Part PMC (€)" type="number" value={client.partPMC || ''} onChange={(e) => update('partPMC', Number(e.target.value))}
             className="field-input" />
         </Field>
         <Field label="Part sous-traitance (€)" last>
-          <input type="number" value={client.partSousTraitance || ''} onChange={(e) => update('partSousTraitance', Number(e.target.value))}
+          <input aria-label="Part sous-traitance (€)" type="number" value={client.partSousTraitance || ''} onChange={(e) => update('partSousTraitance', Number(e.target.value))}
             className="field-input" />
         </Field>
       </Section>
 
       <Section title="Description de la mission">
         <Field label="Mission" last>
-          <textarea value={client.mission} onChange={(e) => update('mission', e.target.value)}
+          <textarea aria-label="Description de la mission" value={client.mission} onChange={(e) => update('mission', e.target.value)}
             rows={3} className="field-input resize-none" placeholder="Description libre de la mission…" />
         </Field>
       </Section>

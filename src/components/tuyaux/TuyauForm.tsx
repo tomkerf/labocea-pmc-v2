@@ -92,7 +92,7 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
           <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             {tuyau.id ? 'Modifier le tuyau' : 'Nouveau tuyau'}
           </h2>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full text-sm"
+          <button onClick={onClose} aria-label="Fermer" className="w-7 h-7 flex items-center justify-center rounded-full text-sm"
             style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
             ✕
           </button>
@@ -104,6 +104,7 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
               <div style={{ ...wrap, borderColor: refLabo ? 'var(--color-border)' : undefined }}>
                 <input value={refLabo} onChange={e => setRefLabo(e.target.value.toUpperCase())}
                   placeholder="Q25TFE1"
+                  aria-label="Référence labo"
                   className="field-input text-sm font-bold tracking-widest"
                   autoFocus />
               </div>
@@ -111,6 +112,7 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
             <F label="Matériau">
               <div style={wrap}>
                 <select value={materiau} onChange={e => setMateriau(e.target.value as MateriauTuyau)}
+                  aria-label="Matériau"
                   className="field-input text-sm">
                   {MATERIAUX.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
@@ -119,7 +121,7 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
             <F label="Objet">
               <div style={wrap}>
                 <input value={objet} onChange={e => setObjet(e.target.value)}
-                  placeholder="RSDE DZ, SRA…" className="field-input text-sm" />
+                  placeholder="RSDE DZ, SRA…" aria-label="Objet" className="field-input text-sm" />
               </div>
             </F>
           </div>
@@ -128,13 +130,13 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
             <F label="Code matériel">
               <div style={wrap}>
                 <input value={materiel} onChange={e => setMateriel(e.target.value)}
-                  placeholder="PLV07 / FLC22" className="field-input text-sm" />
+                  placeholder="PLV07 / FLC22" aria-label="Code matériel" className="field-input text-sm" />
               </div>
             </F>
             <F label="Date création">
               <div style={wrap}>
                 <input type="date" value={dateCreation} onChange={e => setDateCreation(e.target.value)}
-                  className="field-input text-sm" />
+                  aria-label="Date de création" className="field-input text-sm" />
               </div>
             </F>
           </div>
@@ -143,19 +145,19 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
             <F label="Marque">
               <div style={wrap}>
                 <input value={marque} onChange={e => setMarque(e.target.value)}
-                  className="field-input text-sm" />
+                  aria-label="Marque" className="field-input text-sm" />
               </div>
             </F>
             <F label="N° de série">
               <div style={wrap}>
                 <input value={numSerie} onChange={e => setNumSerie(e.target.value)}
-                  className="field-input text-sm" />
+                  aria-label="Numéro de série" className="field-input text-sm" />
               </div>
             </F>
             <F label="Type">
               <div style={wrap}>
                 <input value={type} onChange={e => setType(e.target.value)}
-                  className="field-input text-sm" />
+                  aria-label="Type de tuyau" className="field-input text-sm" />
               </div>
             </F>
           </div>
@@ -163,7 +165,7 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
           <F label="Fournisseur">
             <div style={wrap}>
               <input value={fournisseur} onChange={e => setFournisseur(e.target.value)}
-                placeholder="SEFI Quimper" className="field-input text-sm" />
+                placeholder="SEFI Quimper" aria-label="Fournisseur" className="field-input text-sm" />
             </div>
           </F>
 
@@ -171,6 +173,7 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
             <div style={{ ...wrap, padding: '8px 11px' }}>
               <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
                 placeholder="Observations, lot de campagne…"
+                aria-label="Notes"
                 className="field-input text-sm resize-none" />
             </div>
           </F>

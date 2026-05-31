@@ -44,30 +44,31 @@ export function TabAnalyses({ rows, setRows }: {
                   border: `1px solid ${conf === true ? 'var(--color-success)' : conf === false ? 'var(--color-danger)' : 'var(--color-border)'}`,
                 }}>
                 <input
-                  type="text" value={row.parametre} placeholder="Ex: DCO"
+                  type="text" value={row.parametre} placeholder="Ex: DCO" aria-label="Paramètre"
                   onChange={e => updateRow(row.id, 'parametre', e.target.value)}
                   className="px-2 py-1.5 rounded text-sm w-full"
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', outline: 'none' }}
                 />
                 <input
-                  type="text" value={row.unite} placeholder="mg/L"
+                  type="text" value={row.unite} placeholder="mg/L" aria-label="Unité"
                   onChange={e => updateRow(row.id, 'unite', e.target.value)}
                   className="px-2 py-1.5 rounded text-sm w-full text-center"
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', outline: 'none' }}
                 />
                 <input
-                  type="number" inputMode="decimal" value={row.resultat} placeholder="0"
+                  type="number" inputMode="decimal" value={row.resultat} placeholder="0" aria-label="Résultat"
                   onChange={e => updateRow(row.id, 'resultat', e.target.value)}
                   className="px-2 py-1.5 rounded text-sm w-full text-right font-semibold"
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', outline: 'none' }}
                 />
                 <input
-                  type="number" inputMode="decimal" value={row.seuil} placeholder="0"
+                  type="number" inputMode="decimal" value={row.seuil} placeholder="0" aria-label="Seuil"
                   onChange={e => updateRow(row.id, 'seuil', e.target.value)}
                   className="px-2 py-1.5 rounded text-sm w-full text-right"
                   style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-tertiary)', outline: 'none' }}
                 />
                 <select
+                  aria-label="Type de comparaison"
                   value={row.typeComp}
                   onChange={e => updateRow(row.id, 'typeComp', e.target.value as 'max' | 'min')}
                   className="px-1 py-1.5 rounded text-xs w-full"

@@ -54,6 +54,7 @@ export function ClientPlans({
               color: plansLocked ? 'var(--color-text-tertiary)' : 'var(--color-accent)',
               border: `1px solid ${plansLocked ? 'var(--color-border)' : 'var(--color-accent)'}`,
             }}
+            aria-label={plansLocked ? 'Déverrouiller pour réorganiser' : 'Verrouiller la réorganisation'}
             title={plansLocked ? 'Déverrouiller pour réorganiser' : 'Verrouiller la réorganisation'}>
             {plansLocked ? <Lock size={14} /> : <Unlock size={14} />}
           </button>
@@ -231,6 +232,7 @@ function SortableSeparatorRow({
             value={plan.nom}
             onChange={(e) => onLabelChange(e.target.value)}
             placeholder="Section…"
+            aria-label="Nom du séparateur"
             className="bg-transparent border-none outline-none text-center"
             style={{
               color: 'var(--color-text-tertiary)',
@@ -244,7 +246,7 @@ function SortableSeparatorRow({
           <div className="flex-1 h-px" style={{ background: 'var(--color-border)' }} />
         </div>
 
-        <button onClick={onDelete} className="shrink-0 p-1 rounded"
+        <button onClick={onDelete} aria-label="Supprimer le séparateur" className="shrink-0 p-1 rounded"
           style={{ color: isConfirmingDelete ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
           onMouseLeave={(e) => { if (!isConfirmingDelete) e.currentTarget.style.color = 'var(--color-text-tertiary)' }}>
@@ -349,6 +351,7 @@ function SortablePlanRow({
             e.stopPropagation()
             navigate(`/missions/${clientId}/plan/${plan.id}/fiche`)
           }}
+          aria-label="Consulter la fiche du point"
           className="shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-gray-100 transition-colors cursor-pointer"
           title="Consulter la fiche du point"
         >
@@ -359,7 +362,7 @@ function SortablePlanRow({
           style={{ color: 'var(--color-accent)' }}>
           Ouvrir <ChevronRight size={14} />
         </button>
-        <button onClick={onDelete} className="shrink-0 p-1 rounded"
+        <button onClick={onDelete} aria-label="Supprimer ce point" className="shrink-0 p-1 rounded"
           style={{ color: isConfirmingDelete ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
           onMouseLeave={(e) => { if (!isConfirmingDelete) e.currentTarget.style.color = 'var(--color-text-tertiary)' }}>

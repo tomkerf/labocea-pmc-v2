@@ -102,7 +102,7 @@ export function AdminCreateUserForm() {
             <label className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Prénom</label>
             <div className="relative">
               <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
-              <input type="text" value={prenom}
+              <input type="text" value={prenom} aria-label="Prénom"
                 onChange={e => { setPrenom(e.target.value); handleNameChange(e.target.value, nom) }}
                 placeholder="Thomas"
                 className="w-full pl-8 pr-3 py-2 text-sm rounded-lg"
@@ -114,7 +114,7 @@ export function AdminCreateUserForm() {
             <label className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Nom</label>
             <div className="relative">
               <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
-              <input type="text" value={nom}
+              <input type="text" value={nom} aria-label="Nom"
                 onChange={e => { setNom(e.target.value); handleNameChange(prenom, e.target.value) }}
                 placeholder="Kerfendal"
                 className="w-full pl-8 pr-3 py-2 text-sm rounded-lg"
@@ -129,7 +129,7 @@ export function AdminCreateUserForm() {
             <label className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Initiales</label>
             <div className="relative">
               <Hash size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
-              <input type="text" value={initiales}
+              <input type="text" value={initiales} aria-label="Initiales"
                 onChange={e => setInitiales(e.target.value.toUpperCase().slice(0, 4))}
                 placeholder="THK" maxLength={4}
                 className="w-full pl-8 pr-3 py-2 text-sm rounded-lg font-mono"
@@ -140,6 +140,7 @@ export function AdminCreateUserForm() {
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Rôle</label>
             <select value={role} onChange={e => setRole(e.target.value as UserRole)}
+              aria-label="Rôle"
               className="w-full px-3 py-2 text-sm rounded-lg"
               style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
               <option value="technicien">Technicien</option>
@@ -153,7 +154,7 @@ export function AdminCreateUserForm() {
           <label className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Email</label>
           <div className="relative">
             <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
-            <input type="email" value={email}
+            <input type="email" value={email} aria-label="Email"
               onChange={e => setEmail(e.target.value)}
               placeholder="prenom.nom@labocea.fr"
               className="w-full pl-8 pr-3 py-2 text-sm rounded-lg"
@@ -168,7 +169,7 @@ export function AdminCreateUserForm() {
           </label>
           <div className="relative">
             <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
-            <input type="password" value={password}
+            <input type="password" value={password} aria-label="Mot de passe provisoire"
               onChange={e => setPassword(e.target.value)}
               placeholder="6 caractères minimum"
               className="w-full pl-8 pr-3 py-2 text-sm rounded-lg"

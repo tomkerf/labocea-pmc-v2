@@ -74,40 +74,40 @@ export function EquipementForm({ equipement, update }: {
     <>
       <Section title="Identification">
         <Field label="Nom de l'équipement">
-          <input value={equipement.nom} onChange={(e) => update('nom', e.target.value)} className="field-input" placeholder="Ex : YSI Pro30" />
+          <input aria-label="Nom de l'équipement" value={equipement.nom} onChange={(e) => update('nom', e.target.value)} className="field-input" placeholder="Ex : YSI Pro30" />
         </Field>
         <Field label="Marque">
-          <input value={equipement.marque} onChange={(e) => update('marque', e.target.value)} className="field-input" placeholder="Ex : YSI" />
+          <input aria-label="Marque" value={equipement.marque} onChange={(e) => update('marque', e.target.value)} className="field-input" placeholder="Ex : YSI" />
         </Field>
         <Field label="Modèle">
-          <input value={equipement.modele} onChange={(e) => update('modele', e.target.value)} className="field-input" placeholder="Ex : Pro30" />
+          <input aria-label="Modèle" value={equipement.modele} onChange={(e) => update('modele', e.target.value)} className="field-input" placeholder="Ex : Pro30" />
         </Field>
         <Field label="Numéro de série">
-          <input value={equipement.numSerie} onChange={(e) => update('numSerie', e.target.value)} className="field-input" placeholder="Ex : A123456" />
+          <input aria-label="Numéro de série" value={equipement.numSerie} onChange={(e) => update('numSerie', e.target.value)} className="field-input" placeholder="Ex : A123456" />
         </Field>
         <Field label="Catégorie">
-          <select value={equipement.categorie} onChange={(e) => update('categorie', e.target.value as CategorieType)} className="field-input">
+          <select aria-label="Catégorie" value={equipement.categorie} onChange={(e) => update('categorie', e.target.value as CategorieType)} className="field-input">
             {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
         </Field>
         <Field label="Date d'acquisition" last>
-          <input type="date" value={equipement.dateAcquisition} onChange={(e) => update('dateAcquisition', e.target.value)} className="field-input" />
+          <input aria-label="Date d'acquisition" type="date" value={equipement.dateAcquisition} onChange={(e) => update('dateAcquisition', e.target.value)} className="field-input" />
         </Field>
       </Section>
 
       <Section title="État et localisation">
         <Field label="État">
-          <select value={equipement.etat} onChange={(e) => update('etat', e.target.value as EtatType)} className="field-input">
+          <select aria-label="État" value={equipement.etat} onChange={(e) => update('etat', e.target.value as EtatType)} className="field-input">
             {ETATS.map((et) => <option key={et.value} value={et.value}>{et.label}</option>)}
           </select>
         </Field>
         <Field label="Localisation">
-          <select value={equipement.localisation} onChange={(e) => update('localisation', e.target.value as LocalisationType)} className="field-input">
+          <select aria-label="Localisation" value={equipement.localisation} onChange={(e) => update('localisation', e.target.value as LocalisationType)} className="field-input">
             {LOCALISATIONS.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
           </select>
         </Field>
         <Field label="Site" last={!showTechnicien}>
-          <select value={equipement.site ?? ''} onChange={(e) => update('site', e.target.value as SiteEquipement)} className="field-input">
+          <select aria-label="Site" value={equipement.site ?? ''} onChange={(e) => update('site', e.target.value as SiteEquipement)} className="field-input">
             <option value="">— Non renseigné</option>
             <option value="quimper">Quimper</option>
             <option value="brest">Brest</option>
@@ -115,7 +115,7 @@ export function EquipementForm({ equipement, update }: {
         </Field>
         {showTechnicien && (
           <Field label="Technicien assigné" last>
-            <select value={equipement.technicien ?? ''} onChange={(e) => update('technicien', e.target.value)} className="field-input">
+            <select aria-label="Technicien assigné" value={equipement.technicien ?? ''} onChange={(e) => update('technicien', e.target.value)} className="field-input">
               <option value="">— Non assigné</option>
               {techniciens.map(t => (
                 <option key={t.uid} value={t.initiales}>{t.prenom} {t.nom} ({t.initiales})</option>
@@ -127,24 +127,24 @@ export function EquipementForm({ equipement, update }: {
 
       <Section title="Métrologie">
         <Field label="Prochain étalonnage" last>
-          <input type="date" value={equipement.prochainEtalonnage} onChange={(e) => update('prochainEtalonnage', e.target.value)} className="field-input" />
+          <input aria-label="Prochain étalonnage" type="date" value={equipement.prochainEtalonnage} onChange={(e) => update('prochainEtalonnage', e.target.value)} className="field-input" />
         </Field>
       </Section>
 
       {equipement.categorie === 'flacon' && (
         <Section title="Caractéristiques flacon">
           <Field label="Volume">
-            <input value={equipement.volume ?? ''} onChange={(e) => update('volume', e.target.value)} className="field-input" placeholder="Ex : 20L, 1L, 500 mL" />
+            <input aria-label="Volume" value={equipement.volume ?? ''} onChange={(e) => update('volume', e.target.value)} className="field-input" placeholder="Ex : 20L, 1L, 500 mL" />
           </Field>
           <Field label="Matériau">
-            <select value={equipement.materiau ?? ''} onChange={(e) => update('materiau', e.target.value as MateriauFlacon)} className="field-input">
+            <select aria-label="Matériau" value={equipement.materiau ?? ''} onChange={(e) => update('materiau', e.target.value as MateriauFlacon)} className="field-input">
               <option value="">— Non renseigné</option>
               <option value="plastique">Plastique</option>
               <option value="verre">Verre</option>
             </select>
           </Field>
           <Field label="Poids" last>
-            <input value={equipement.poids ?? ''} onChange={(e) => update('poids', e.target.value)} className="field-input" placeholder="Ex : 0.570 kg" />
+            <input aria-label="Poids" value={equipement.poids ?? ''} onChange={(e) => update('poids', e.target.value)} className="field-input" placeholder="Ex : 0.570 kg" />
           </Field>
         </Section>
       )}
@@ -152,7 +152,7 @@ export function EquipementForm({ equipement, update }: {
       {equipement.categorie === 'manchon_deversoir' && (
         <Section title="Caractéristiques manchon">
           <Field label="Diamètre (mm)" last>
-            <select value={equipement.diametre ?? ''} onChange={(e) => update('diametre', e.target.value)} className="field-input">
+            <select aria-label="Diamètre (mm)" value={equipement.diametre ?? ''} onChange={(e) => update('diametre', e.target.value)} className="field-input">
               <option value="">— Non renseigné</option>
               <option value="150">150</option>
               <option value="200">200</option>
@@ -170,6 +170,7 @@ export function EquipementForm({ equipement, update }: {
             onChange={(e) => update('notes', e.target.value)}
             rows={3}
             placeholder="Remarques, historique, informations complémentaires…"
+            aria-label="Notes sur l'équipement"
             className="w-full text-sm resize-none bg-transparent outline-none"
             style={{ color: 'var(--color-text-primary)' }}
           />

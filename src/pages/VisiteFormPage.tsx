@@ -178,7 +178,7 @@ export default function VisiteFormPage() {
     <div className="p-4 sm:p-6 max-w-2xl pb-20">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button type="button" onClick={() => navigate(backPath)} className="p-1.5 rounded-lg"
+        <button type="button" onClick={() => navigate(backPath)} aria-label="Retour" className="p-1.5 rounded-lg"
           style={{ color: 'var(--color-text-secondary)' }}>
           <ArrowLeft size={18} />
         </button>
@@ -203,17 +203,17 @@ export default function VisiteFormPage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date de visite</label>
-            <input type="date" value={date} onChange={e => setDate(e.target.value)}
+            <input type="date" aria-label="Date de visite" value={date} onChange={e => setDate(e.target.value)}
               className="field-input w-full" />
           </div>
           <div>
             <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Technicien</label>
-            <input value={technicienNom} onChange={e => setTechnicienNom(e.target.value)}
+            <input aria-label="Technicien" value={technicienNom} onChange={e => setTechnicienNom(e.target.value)}
               className="field-input w-full" placeholder="Prénom Nom" />
           </div>
           <div className="col-span-2">
             <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Notes générales</label>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)}
+            <textarea aria-label="Notes générales" value={notes} onChange={e => setNotes(e.target.value)}
               rows={2} className="field-input w-full resize-none"
               placeholder="Remarques générales sur le site…" />
           </div>
@@ -319,19 +319,20 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
           value={point.nom}
           onChange={e => onChange('nom', e.target.value)}
           placeholder="Nom du point (ex: Regard aval station)"
+          aria-label="Nom du point de visite"
           className="field-input flex-1"
         />
         <div className="flex items-center gap-1 shrink-0">
           {idx > 0 && (
-            <button type="button" onClick={() => onMove(-1)} className="p-1 rounded"
+            <button type="button" onClick={() => onMove(-1)} aria-label="Monter ce point" className="p-1 rounded"
               style={{ color: 'var(--color-text-tertiary)' }} title="Monter">↑</button>
           )}
           {idx < total - 1 && (
-            <button type="button" onClick={() => onMove(1)} className="p-1 rounded"
+            <button type="button" onClick={() => onMove(1)} aria-label="Descendre ce point" className="p-1 rounded"
               style={{ color: 'var(--color-text-tertiary)' }} title="Descendre">↓</button>
           )}
           {total > 1 && (
-            <button type="button" onClick={onRemove} className="p-1 rounded"
+            <button type="button" onClick={onRemove} aria-label="Supprimer ce point" className="p-1 rounded"
               style={{ color: 'var(--color-danger)' }} title="Supprimer">
               <X size={14} />
             </button>
@@ -379,13 +380,13 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
 
       <div className="mb-3">
         <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Sécurité</label>
-        <input value={point.securite} onChange={e => onChange('securite', e.target.value)}
+        <input aria-label="Sécurité" value={point.securite} onChange={e => onChange('securite', e.target.value)}
           className="field-input w-full" placeholder="EPI requis, risques, accès…" />
       </div>
 
       <div className="mb-3">
         <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Notes</label>
-        <input value={point.notes} onChange={e => onChange('notes', e.target.value)}
+        <input aria-label="Notes du point" value={point.notes} onChange={e => onChange('notes', e.target.value)}
           className="field-input w-full" placeholder="Remarques spécifiques…" />
       </div>
 
@@ -401,6 +402,7 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
                   <img src={url} alt="photo" className="w-full h-full object-cover cursor-zoom-in" loading="lazy" />
                 </a>
                 <button type="button" onClick={() => onPhotoDelete(url)}
+                  aria-label="Supprimer cette photo"
                   className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center bg-black/60 text-white hover:bg-black/80 transition-colors">
                   <X size={10} strokeWidth={3} />
                 </button>
