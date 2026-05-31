@@ -156,7 +156,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
       </span>
 
       {/* KPIs */}
-      <div className="grid grid-cols-4 gap-2 mb-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         {[
           { label: 'Réalisés',    sub: "Faits sur l'année",          value: kpis.realises,   color: 'var(--color-success)' },
           { label: 'Incomplets',  sub: 'Date, tech ou nappe requis', value: kpis.incomplets, color: 'var(--color-warning)' },
@@ -169,7 +169,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
               <div className="text-xl font-bold" style={{ color }}>{value}</div>
               <div className="text-xs font-semibold mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{label}</div>
             </div>
-            <div className="text-[10px] mt-1.5 leading-tight" style={{ color: 'var(--color-text-secondary)' }}>{sub}</div>
+            <div className="text-xs mt-1.5 leading-tight" style={{ color: 'var(--color-text-secondary)' }}>{sub}</div>
           </div>
         ))}
       </div>
