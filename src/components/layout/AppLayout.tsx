@@ -71,7 +71,7 @@ export default function AppLayout() {
         >
           {/* Titre app — mobile */}
           <div className="md:hidden flex items-center gap-2 flex-1">
-            <img src="/logo.png" alt="Labocea" className="w-6 h-6 object-contain" />
+            <img src="/logo.png" alt="Labocea" className="w-8 h-8 object-contain" />
             <span className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
               Labocea PMC
             </span>

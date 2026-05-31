@@ -3,6 +3,37 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 85 — Intégration des Tâches et Rapports au Planning
+**31 mai 2026**
+
+### Ce qui a été fait
+- **Tâches (Todos) dans le Dashboard** :
+  - Intégration des tâches (`todos`) prévues aujourd'hui ou demain directement dans la timeline de la page d'accueil (Dashboard).
+  - Couleurs conditionnelles basées sur la priorité (rouge = haute, orange = moyenne, gris = basse).
+  - Navigation directe vers la page des tâches (`/todos`) au clic sur une tâche dans la chronologie.
+- **Rapports dus dans le Planning** :
+  - Intégration des alertes "Rapport dû" dans la chronologie de la vue Planning.
+  - S'affiche pour les prélèvements dont le rapport est prévu, non encore rédigé, à la date de rendu (calculée automatiquement).
+- **Ajustements divers** :
+  - Ajustement de l'opacité (0.55) des icônes jours fériés.
+  - Mise à jour des appels de hooks et tests associés.
+
+### Fichiers modifiés
+- `src/components/layout/AppLayout.tsx`
+- `src/components/layout/Sidebar.tsx`
+- `src/components/planning/EventDetailModal.tsx`
+- `src/components/planning/WeekView.tsx`
+- `src/hooks/useDashboardStats.ts`
+- `src/hooks/usePlanningData.ts`
+- `src/index.css`
+- `src/lib/__tests__/dashboardStats.test.ts`
+- `src/lib/planningUtils.ts`
+- `src/pages/DashboardPage.tsx`
+- `src/pages/RapportsPage.tsx`
+- `src/pages/TourneePage.tsx`
+
+---
+
 ## Session 84 — Agrandissement des vignettes photo et Zoom au clic
 **28 mai 2026 (soirée - suite)**
 

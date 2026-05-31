@@ -3,7 +3,7 @@ import { isSamplingOverdue } from '@/lib/overdue'
 import { calcStatut } from '@/hooks/useMetrologieRows'
 import { isThisMonth, localISO, isToday, daysDiff } from '@/lib/dashboardUtils'
 
-import type { Client, Sampling, Verification, Equipement, Plan, EvenementPersonnel, Maintenance } from '@/types'
+import type { Client, Sampling, Verification, Equipement, Plan, EvenementPersonnel, Maintenance, Todo } from '@/types'
 
 const EVENEMENT_CFG: Record<string, { label: string; bg: string; color: string; dot: string }> = {
   rappel:  { label: 'Rappel',  bg: 'var(--color-bg-tertiary)',  color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' },
@@ -17,6 +17,7 @@ export type SamplingBadge = { label: string; bg: string; color: string }
 export type JourItem =
   | { kind: 'sampling';  time: string; title: string; sub: string; badge: SamplingBadge; dot: string; meteo: string; cofrac: boolean; modalEvent: ModalEventRef }
   | { kind: 'evenement'; time: string; title: string; sub: string; badge: SamplingBadge; dot: string; modalEvent: ModalEventRef }
+  | { kind: 'todo';      time: string; title: string; sub: string; badge: SamplingBadge; dot: string; link: string }
 
 export interface ModalEventRef {
   id: string; type: string; title: string; subtitle: string
@@ -52,6 +53,7 @@ interface Params {
   equipements:   Equipement[]
   evenements:    EvenementPersonnel[]
   maintenances:  Maintenance[]
+  todos:         Todo[]
   uid:           string | null
   initiales:     string | null
   isGeneraliste: boolean
@@ -71,7 +73,7 @@ function getSamplingBadge(s: Sampling): SamplingBadge {
 }
 
 export function useDashboardStats({
-  clients, verifications, equipements, evenements, maintenances,
+  clients, verifications, equipements, evenements, maintenances, todos,
   uid, initiales, isGeneraliste,
 }: Params) {
   const [nowMs] = useState(() => Date.now())
@@ -269,13 +271,20 @@ export function useDashboardStats({
         items.push({ kind: 'evenement', time: ev.heure ?? '', title: ev.titre, sub: evSub, badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, modalEvent: evModalEvent })
       })
 
+    const TODO_COLORS = { haute: { bg: 'var(--color-danger-light)', color: 'var(--color-danger)', dot: 'var(--color-danger)' }, moyenne: { bg: 'var(--color-warning-light)', color: 'var(--color-warning)', dot: 'var(--color-warning)' }, basse: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' } }
+    todos.forEach((t: Todo) => {
+      if (!t.dueDate || t.statut === 'termine' || t.dueDate !== todayISO) return
+      const cfg = TODO_COLORS[t.priorite] ?? TODO_COLORS.basse
+      items.push({ kind: 'todo', time: '', title: t.titre, sub: 'Tâche', badge: { label: 'Tâche', bg: cfg.bg, color: cfg.color }, dot: cfg.dot, link: '/todos' })
+    })
+
     return items.sort((a, b) => {
       if (!a.time && !b.time) return 0
       if (!a.time) return -1
       if (!b.time) return 1
       return a.time.localeCompare(b.time)
     })
-  }, [clients, evenements, initiales, isGeneraliste, nowMs])
+  }, [clients, evenements, todos, initiales, isGeneraliste, nowMs])
 
   const lendemainItems = useMemo((): JourItem[] => {
     const tomorrowISO = localISO(new Date(nowMs + 86_400_000))
@@ -345,13 +354,20 @@ export function useDashboardStats({
         items.push({ kind: 'evenement', time: ev.heure ?? '', title: ev.titre, sub: evSub, badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, modalEvent: evModalEvent })
       })
 
+    const TODO_COLORS = { haute: { bg: 'var(--color-danger-light)', color: 'var(--color-danger)', dot: 'var(--color-danger)' }, moyenne: { bg: 'var(--color-warning-light)', color: 'var(--color-warning)', dot: 'var(--color-warning)' }, basse: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' } }
+    todos.forEach((t: Todo) => {
+      if (!t.dueDate || t.statut === 'termine' || t.dueDate !== tomorrowISO) return
+      const cfg = TODO_COLORS[t.priorite] ?? TODO_COLORS.basse
+      items.push({ kind: 'todo', time: '', title: t.titre, sub: 'Tâche', badge: { label: 'Tâche', bg: cfg.bg, color: cfg.color }, dot: cfg.dot, link: '/todos' })
+    })
+
     return items.sort((a, b) => {
       if (!a.time && !b.time) return 0
       if (!a.time) return -1
       if (!b.time) return 1
       return a.time.localeCompare(b.time)
     })
-  }, [clients, evenements, initiales, isGeneraliste, nowMs])
+  }, [clients, evenements, todos, initiales, isGeneraliste, nowMs])
 
   // ── État du parc ──────────────────────────────────────────
 

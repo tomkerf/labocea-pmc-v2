@@ -47,7 +47,7 @@ export default function TourneePage() {
 
   const { jourItems } = useDashboardStats({
     clients, verifications, equipements, evenements, maintenances,
-    uid, initiales, isGeneraliste,
+    todos: [], uid, initiales, isGeneraliste,
   })
 
   // Construire TourneeItemData depuis jourItems (sampling uniquement)

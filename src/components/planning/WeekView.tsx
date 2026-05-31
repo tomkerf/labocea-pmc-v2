@@ -108,11 +108,24 @@ export default function WeekView({
       {/* ── Bande bilan 24h — groupe J1+J2 avec bordure commune (colspan) ── */}
       {bilanBand.length > 0 && (
         <div className="shrink-0 animate-fade-in" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 0', position: 'relative' }}>
-          <span style={{ position: 'absolute', top: '50%', left: 6, transform: 'translateY(-50%)', fontSize: 8, fontWeight: 600, letterSpacing: '0.07em', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', pointerEvents: 'none', userSelect: 'none' }}>Bilans 24h</span>
+          {/* Overlay weekend gris par colonne */}
+          <div style={{ position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', pointerEvents: 'none' }}>
+            {weekDays.map((day, i) => {
+              const isWeekend = day.getDay() === 0 || day.getDay() === 6
+              return (
+                <div key={i} style={{
+                  height: '100%',
+                  borderRight: i < 6 ? '1px solid var(--color-border-subtle)' : 'none',
+                  background: isWeekend ? 'rgba(0,0,0,0.028)' : 'transparent',
+                }} />
+              )
+            })}
+          </div>
+          <span style={{ position: 'absolute', top: '50%', left: 6, transform: 'translateY(-50%)', fontSize: 8, fontWeight: 600, letterSpacing: '0.07em', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', pointerEvents: 'none', userSelect: 'none', zIndex: 2 }}>Bilans 24h</span>
           {bilanBand.map((row, rowIdx) => {
             const wISOs = weekDays.map(toISO)
             return (
-              <div key={rowIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', padding: '0 2px' }}>
+              <div key={rowIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', padding: '0 2px', position: 'relative', zIndex: 1 }}>
                 {row.map((group, gIdx) => (
                   <div key={gIdx}
                     className="transition-all duration-200 hover:brightness-95"

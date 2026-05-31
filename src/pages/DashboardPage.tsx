@@ -87,7 +87,7 @@ export default function DashboardPage() {
     aCalibrrer, rapportsAFaireMoi, jourItems, lendemainItems, parcEtat,
     prelevementsEnRetard, prelevementsPluie, maintenancesActives, metrologieAlertes,
     techOptions: rawTechOptions,
-  } = useDashboardStats({ clients, verifications, equipements, evenements, maintenances, uid, initiales, isGeneraliste })
+  } = useDashboardStats({ clients, verifications, equipements, evenements, maintenances, todos, uid, initiales, isGeneraliste })
 
   const techOptions = useMemo((): TechOption[] =>
     rawTechOptions.map(({ code, label }) => ({ code, label })),
@@ -302,12 +302,12 @@ export default function DashboardPage() {
                     <AnimatePresence mode="popLayout">
                       {activeItems.slice(0, 8).map((item, idx) => (
                         <motion.div
-                          key={item.modalEvent?.id || `${planningMode}-${idx}`}
+                          key={'modalEvent' in item ? item.modalEvent?.id : `todo-${idx}` || `${planningMode}-${idx}`}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
                           transition={{ duration: 0.18, ease: 'easeOut' }}
-                          onClick={() => setEventDetail({ event: item.modalEvent as ModalEvent, dateStr: activeDateISO })}
+                          onClick={() => item.kind === 'todo' ? navigate(item.link) : setEventDetail({ event: item.modalEvent as ModalEvent, dateStr: activeDateISO })}
                           className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer"
                           style={{ borderBottom: idx < activeItems.slice(0, 8).length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
                           onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}

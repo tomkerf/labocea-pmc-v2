@@ -33,7 +33,7 @@ export default function RapportsPage() {
 
   const { rapportsAFaire, rapportsEnvoyes } = useDashboardStats({
     clients, uid: uid ?? '', initiales, isGeneraliste: touteEquipe,
-    equipements, verifications, maintenances, evenements: [],
+    equipements, verifications, maintenances, evenements: [], todos: [],
   })
 
   async function markEnvoye(clientId: string, planId: string, samplingId: string) {

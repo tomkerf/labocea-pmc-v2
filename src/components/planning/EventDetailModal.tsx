@@ -198,6 +198,8 @@ export default function EventDetailModal({
               <ExternalLink size={15} />
               {event.type === 'prelevement' ? 'Voir la mission' :
                event.type === 'maintenance' ? 'Voir la maintenance' :
+               event.type === 'todo' ? 'Voir les tâches' :
+               event.type === 'rapport' ? 'Voir le plan' :
                'Voir la métrologie'}
             </button>
           )}

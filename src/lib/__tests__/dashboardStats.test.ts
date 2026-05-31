@@ -74,7 +74,7 @@ const NO_MAINTENANCES: Maintenance[] = []
 const BASE_PARAMS = {
   uid: 'uid1', initiales: 'THK', isGeneraliste: false,
   evenements: NO_EVENEMENTS, maintenances: NO_MAINTENANCES,
-  verifications: [], equipements: [], clients: [],
+  verifications: [], equipements: [], clients: [], todos: [],
 }
 
 // ─── missionsCeMois ───────────────────────────────────────────────────────────

@@ -1,0 +1,26 @@
+<h2>Ordre de passage dans la tournée</h2>
+<p class="subtitle">Comment veux-tu définir l'ordre des missions ?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Drag & drop dans la tournée</h3>
+      <p>Tu réordonnes les cartes directement dans la page Tournée en les glissant. L'ordre est mémorisé localement (pas de sauvegarde Firestore). Simple et rapide à faire depuis le terrain.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Champ "heure prévue" sur chaque prélèvement</h3>
+      <p>Tu renseignes une heure planifiée (ex. 08h00, 10h30) sur chaque sampling dans la fiche plan. La tournée et le dashboard trient automatiquement par heure. L'ordre est persisté en base.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Les deux : heure planifiée + ajustement drag & drop</h3>
+      <p>L'ordre de base vient des heures planifiées. Sur le terrain, tu peux réarranger à la main si le planning change. Meilleure UX, un peu plus de travail à implémenter.</p>
+    </div>
+  </div>
+</div>

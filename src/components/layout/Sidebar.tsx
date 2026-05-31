@@ -51,7 +51,7 @@ export default function Sidebar() {
     >
       {/* Logo + titre app */}
       <div className="px-4 py-4 flex items-center gap-3" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-        <img src="/logo.png" alt="Labocea" className="w-8 h-8 object-contain shrink-0" />
+        <img src="/logo.png" alt="Labocea" className="w-10 h-10 object-contain shrink-0" />
         <div className="flex items-baseline gap-1.5">
           <span className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             Labocea PMC

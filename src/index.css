@@ -114,7 +114,6 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 1;
-  background: rgba(0, 113, 227, 0.06);
   animation: holidayFadeIn 0.5s ease-out forwards;
 }
 
@@ -125,7 +124,7 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 48px;
-  opacity: 0.45;
+  opacity: 0.55;
   line-height: 1;
 }
 

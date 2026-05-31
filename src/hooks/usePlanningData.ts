@@ -181,6 +181,30 @@ export function usePlanningData({
       moyenne: { bg: 'var(--color-warning-light)', color: 'var(--color-warning)' },
       basse:   { bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)' },
     }
+    clients.forEach((client: Client) => {
+      client.plans.forEach(plan => {
+        plan.samplings.forEach((s: Sampling) => {
+          if (!s.rapportPrevu || s.rapportDate) return
+          const rawDate = s.rapportDatePrevue || ''
+          if (!rawDate) return
+          const d = new Date(rawDate + 'T12:00:00')
+          const dow = d.getDay()
+          if (dow === 6) d.setDate(d.getDate() - 1)
+          else if (dow === 0) d.setDate(d.getDate() - 2)
+          const dateStr = toISO(d)
+          add(dateStr, {
+            id: `rapport_${s.id}`, type: 'rapport', priority: 1,
+            title: client.nom,
+            subtitle: 'Rapport',
+            statusLabel: 'Rapport dû', statusBg: 'var(--color-accent-light)', statusColor: 'var(--color-accent)',
+            link: `/missions/${client.id}/plan/${plan.id}`,
+            isDone: false, technicien: s.assignedTo || client.preleveur || '—',
+            clientId: client.id, planId: plan.id, samplingId: s.id,
+          })
+        })
+      })
+    })
+
     todos.forEach((t: Todo) => {
       if (!t.dueDate || t.statut === 'termine') return
       const colors = PRIORITY_COLORS[t.priorite] ?? PRIORITY_COLORS.basse

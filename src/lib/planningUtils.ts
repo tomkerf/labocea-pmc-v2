@@ -11,7 +11,7 @@ import type { Maintenance, EvenementPersonnel, TypeEvenement } from '@/types'
 
 export interface PlanningEvent {
   id: string
-  type: 'prelevement' | 'maintenance' | 'verification' | 'evenement' | 'todo'
+  type: 'prelevement' | 'maintenance' | 'verification' | 'evenement' | 'todo' | 'rapport'
   title: string
   subtitle: string
   statusLabel: string
