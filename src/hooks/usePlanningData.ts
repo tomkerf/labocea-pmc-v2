@@ -14,7 +14,7 @@ import {
   SAMPLING_LABEL, MAINTENANCE_LABEL, EVENEMENT_LABEL,
   type PlanningEvent, type PoolItem, type TechOption,
 } from '@/lib/planningUtils'
-import type { Client, Sampling, Maintenance, Equipement, EvenementPersonnel, AppUser } from '@/types'
+import type { Client, Sampling, Maintenance, Equipement, EvenementPersonnel, AppUser, Todo } from '@/types'
 import type { Preleveur } from '@/stores/preleveursStore'
 
 interface UsePlanningDataParams {
@@ -22,13 +22,14 @@ interface UsePlanningDataParams {
   maintenances:  Maintenance[]
   equipements:   Equipement[]
   evenements:    EvenementPersonnel[]
+  todos:         Todo[]
   users:         AppUser[]
   preleveurs:    Preleveur[]
   selectedDay:   string | null
 }
 
 export function usePlanningData({
-  clients, maintenances, equipements, evenements,
+  clients, maintenances, equipements, evenements, todos,
   users, preleveurs, selectedDay,
 }: UsePlanningDataParams) {
 
@@ -175,8 +176,27 @@ export function usePlanningData({
       }
     })
 
+    const PRIORITY_COLORS: Record<string, { bg: string; color: string }> = {
+      haute:   { bg: 'var(--color-danger-light)',  color: 'var(--color-danger)'  },
+      moyenne: { bg: 'var(--color-warning-light)', color: 'var(--color-warning)' },
+      basse:   { bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)' },
+    }
+    todos.forEach((t: Todo) => {
+      if (!t.dueDate || t.statut === 'termine') return
+      const colors = PRIORITY_COLORS[t.priorite] ?? PRIORITY_COLORS.basse
+      add(t.dueDate, {
+        id: `todo_${t.id}`, type: 'todo', priority: t.priorite === 'haute' ? 0 : t.priorite === 'moyenne' ? 1 : 2,
+        title: t.titre,
+        subtitle: 'Tâche',
+        statusLabel: 'Tâche', statusBg: colors.bg, statusColor: colors.color,
+        link: '/todos', isDone: false,
+        technicien: users.find(u => u.uid === t.assignedTo)?.initiales || t.assignedTo || '—',
+        todoData: t,
+      })
+    })
+
     return map
-  }, [clients, maintenances, equipements, evenements])
+  }, [clients, maintenances, equipements, evenements, todos, users])
 
   // ── Techniciens disponibles ─────────────────────────────────
 

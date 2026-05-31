@@ -111,6 +111,7 @@ describe('usePlanningData', () => {
       maintenances: EMPTY_MAINTENANCES,
       equipements: EMPTY_EQUIPEMENTS,
       evenements: EMPTY_EVENEMENTS,
+      todos: [],
       users: EMPTY_USERS,
       preleveurs: EMPTY_PRELEVEURS,
       selectedDay: null,

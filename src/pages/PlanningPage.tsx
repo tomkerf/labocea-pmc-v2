@@ -13,6 +13,8 @@ import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useEvenementsStore } from '@/stores/evenementsStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { usePreleveursStore } from '@/stores/preleveursStore'
+import { useTodosStore } from '@/stores/todosStore'
+import { useTodosListener } from '@/hooks/useTodos'
 import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
 import {
   // Types
@@ -48,7 +50,7 @@ export default function PlanningPage() {
   useClientsListener(); useEquipementsListener()
   useVerificationsListener(); useMaintenancesListener()
   useEvenementsListener(); useUsersListener()
-  usePreleveursListener()
+  usePreleveursListener(); useTodosListener()
 
 const uid        = useAuthStore(selectUid)
   const initiales  = useAuthStore(selectInitiales)
@@ -58,6 +60,7 @@ const uid        = useAuthStore(selectUid)
   const { evenements }    = useEvenementsStore()
   const users             = useUsersStore(s => s.users)
   const preleveurs        = usePreleveursStore(s => s.preleveurs)
+  const { todos }         = useTodosStore()
 
   const today = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d }, [])
 
@@ -113,7 +116,7 @@ const uid        = useAuthStore(selectUid)
 
   // ── Calculs dérivés des données Firestore ───────────────
   const { eventsByDate, allTechs, totalOverdue, techOptions, poolSamplings, overduePool } = usePlanningData({
-    clients, maintenances, equipements, evenements, users, preleveurs, selectedDay,
+    clients, maintenances, equipements, evenements, todos, users, preleveurs, selectedDay,
   })
 
   // ── Calculs calendrier (filtrage, bilanBand, allDayItems, periodList) ──

@@ -11,7 +11,7 @@ import type { Maintenance, EvenementPersonnel, TypeEvenement } from '@/types'
 
 export interface PlanningEvent {
   id: string
-  type: 'prelevement' | 'maintenance' | 'verification' | 'evenement'
+  type: 'prelevement' | 'maintenance' | 'verification' | 'evenement' | 'todo'
   title: string
   subtitle: string
   statusLabel: string
@@ -32,6 +32,7 @@ export interface PlanningEvent {
   cofrac?: boolean
   maintenanceData?: Maintenance
   evenementData?: EvenementPersonnel
+  todoData?: import('@/types').Todo
   // Fantôme (historique report / retrait)
   isGhost?: boolean
   ghostAction?: 'retiré' | 'reporté'
