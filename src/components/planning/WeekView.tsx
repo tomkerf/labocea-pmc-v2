@@ -219,8 +219,8 @@ export default function WeekView({
                 minHeight: 120,
                 userSelect: 'none',
               }}>
-              {/* Overlay jour férié */}
-              {isHoliday && !inDrag && <div className="holiday-overlay" />}
+              {/* Overlay jour férié ou week-end */}
+              {(isHoliday || isWeekend) && !inDrag && <div className="holiday-overlay" />}
               {/* Overlay congé/RTT */}
               {!isHoliday && hasConge && !inDrag && <div className="conge-overlay" />}
               {/* Overlay pluie */}

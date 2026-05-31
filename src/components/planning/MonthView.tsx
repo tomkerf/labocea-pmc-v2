@@ -111,8 +111,8 @@ export default function MonthView({
                 minHeight: 90,
                 userSelect: 'none',
               }}>
-              {/* Overlay jour férié */}
-              {holidayName && !inDrag && <div className="holiday-overlay" />}
+              {/* Overlay jour férié ou week-end */}
+              {(holidayName || isWeekend) && !inDrag && <div className="holiday-overlay" />}
               {/* Overlay congé/RTT */}
               {!holidayName && hasCongeM && !inDrag && <div className="conge-overlay" />}
               {/* Overlay pluie */}
