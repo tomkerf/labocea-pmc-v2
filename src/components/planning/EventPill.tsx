@@ -6,7 +6,7 @@
  */
 
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, FileText, Bell, Wrench, CheckSquare, CalendarDays } from 'lucide-react'
 import { getTechColor, isVeilleJourFerie, type PlanningEvent } from '@/lib/planningUtils'
 
 interface EventPillProps {
@@ -127,6 +127,11 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
       <div className="flex items-center gap-1">
         {event.isDone
           ? <CheckCircle2 size={11} className="shrink-0" style={{ color: dotColor }} />
+          : event.type === 'rapport' ? <FileText size={11} className="shrink-0" style={{ color: dotColor }} />
+          : event.type === 'verification' ? <Bell size={11} className="shrink-0" style={{ color: dotColor }} />
+          : event.type === 'maintenance' ? <Wrench size={11} className="shrink-0" style={{ color: dotColor }} />
+          : event.type === 'todo' ? <CheckSquare size={11} className="shrink-0" style={{ color: dotColor }} />
+          : event.type === 'evenement' ? <CalendarDays size={11} className="shrink-0" style={{ color: dotColor }} />
           : <span className="shrink-0 w-[6px] h-[6px] rounded-full" style={{ background: dotColor }} />
         }
         {event.meteo === 'pluie' && (
