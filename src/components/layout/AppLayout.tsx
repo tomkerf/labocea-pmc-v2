@@ -61,7 +61,7 @@ export default function AppLayout() {
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* TopBar */}
         <header
-          className="flex items-center px-4 h-14 shrink-0 transition-all duration-300 z-30"
+          className="flex items-center px-4 h-14 md:h-[72px] shrink-0 transition-all duration-300 z-30"
           style={{
             background: scrolled ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.85)',
             backdropFilter: scrolled ? 'blur(20px)' : 'blur(12px)',
