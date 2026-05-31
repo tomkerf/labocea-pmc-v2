@@ -632,7 +632,7 @@ export default function TodosPage() {
                       <option value="">(Aucun)</option>
                       {equipements.map((e) => (
                         <option key={e.id} value={e.id}>
-                          {e.nom} ({e.numSerie})
+                          {e.nom}{e.diametre ? ` Ø${e.diametre}` : ''}{e.numSerie ? ` (${e.numSerie})` : ''}
                         </option>
                       ))}
                     </select>

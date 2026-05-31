@@ -19,6 +19,7 @@ const CATEGORIES: { value: CategorieType; label: string }[] = [
   { value: 'pompe_pz',      label: 'Pompe PZ'       },
   { value: 'sonde_niveau',  label: 'Sonde niveau'   },
   { value: 'chronometre',   label: 'Chronomètre'    },
+  { value: 'manchon_deversoir', label: 'Manchon déversoir' },
 ]
 
 const ETATS: { value: EtatType; label: string }[] = [
@@ -144,6 +145,20 @@ export function EquipementForm({ equipement, update }: {
           </Field>
           <Field label="Poids" last>
             <input value={equipement.poids ?? ''} onChange={(e) => update('poids', e.target.value)} className="field-input" placeholder="Ex : 0.570 kg" />
+          </Field>
+        </Section>
+      )}
+
+      {equipement.categorie === 'manchon_deversoir' && (
+        <Section title="Caractéristiques manchon">
+          <Field label="Diamètre (mm)" last>
+            <select value={equipement.diametre ?? ''} onChange={(e) => update('diametre', e.target.value)} className="field-input">
+              <option value="">— Non renseigné</option>
+              <option value="150">150</option>
+              <option value="200">200</option>
+              <option value="250">250</option>
+              <option value="300">300</option>
+            </select>
           </Field>
         </Section>
       )}

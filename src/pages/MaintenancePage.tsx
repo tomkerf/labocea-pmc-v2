@@ -107,7 +107,9 @@ export default function MaintenancePage() {
           <select value={maintenance.equipementId} onChange={(e) => update('equipementId', e.target.value)} className="field-input">
             <option value="">— Sélectionner —</option>
             {equipements.map((e) => (
-              <option key={e.id} value={e.id}>{e.nom} {e.numSerie ? `(${e.numSerie})` : ''}</option>
+              <option key={e.id} value={e.id}>
+                {e.nom}{e.modele && e.modele !== e.nom ? ` ${e.modele}` : ''}{e.diametre ? ` Ø${e.diametre}` : ''}{e.volume ? ` ${e.volume}` : ''}{e.numSerie ? ` (${e.numSerie})` : ''}
+              </option>
             ))}
           </select>
         </Field>

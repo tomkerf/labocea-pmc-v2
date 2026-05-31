@@ -107,7 +107,9 @@ export default function VerificationPage() {
           >
             <option value="">— Sélectionner —</option>
             {equipements.map((e) => (
-              <option key={e.id} value={e.id}>{e.nom} {e.numSerie ? `(${e.numSerie})` : ''}</option>
+              <option key={e.id} value={e.id}>
+                {e.nom}{e.modele && e.modele !== e.nom ? ` ${e.modele}` : ''}{e.diametre ? ` Ø${e.diametre}` : ''}{e.volume ? ` ${e.volume}` : ''}{e.numSerie ? ` (${e.numSerie})` : ''}
+              </option>
             ))}
           </select>
         </Field>

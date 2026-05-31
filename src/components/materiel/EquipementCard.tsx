@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import {
-  Pipette, Activity, SlidersHorizontal, Snowflake, HardDrive,
+  Container, Activity, SlidersHorizontal, Snowflake, HardDrive,
   Thermometer, Ruler, FlaskConical, Droplets, ArrowDownToLine,
-  Gauge, Timer, Package,
+  Gauge, Timer, Package, Cylinder,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import CircleProgress from './CircleProgress'
@@ -22,6 +22,7 @@ const CATEGORIE_LABELS: Record<string, string> = {
   pompe_pz:       'Pompe PZ',
   sonde_niveau:   'Sonde niveau',
   chronometre:    'Chronomètre',
+  manchon_deversoir: 'Manchon déversoir',
   // Anciens noms V1 (rétrocompatibilité)
   preleveur_auto: 'Préleveur',
   turbidimetre:   'Turbidimètre',
@@ -31,8 +32,8 @@ const CATEGORIE_LABELS: Record<string, string> = {
 }
 
 const CATEGORIE_ICONS: Record<string, LucideIcon> = {
-  preleveur:      Pipette,
-  preleveur_auto: Pipette,
+  preleveur:      Container,
+  preleveur_auto: Container,
   debitmetre:     Activity,
   multiparametre: SlidersHorizontal,
   turbidimetre:   SlidersHorizontal,
@@ -47,6 +48,7 @@ const CATEGORIE_ICONS: Record<string, LucideIcon> = {
   pompe_pz:       ArrowDownToLine,
   sonde_niveau:   Gauge,
   chronometre:    Timer,
+  manchon_deversoir: Cylinder,
   autre:          Package,
 }
 
@@ -145,6 +147,7 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
             equipement.volume,
             equipement.poids,
             equipement.materiau ? equipement.materiau.charAt(0).toUpperCase() + equipement.materiau.slice(1) : '',
+            equipement.diametre ? `Ø ${equipement.diametre} mm` : '',
           ].filter(Boolean).join(' · ')}
         </p>
       </div>

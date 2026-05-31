@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Clock, FileText, Gauge, Wrench, Package, Plus, StickyNote, Trash2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Clock, FileText, Gauge, Wrench, Package, Plus, StickyNote, Trash2, Edit2 } from 'lucide-react'
 import { Timestamp } from 'firebase/firestore'
 import type { Equipement, Verification, Maintenance, FicheDeVieNote } from '@/types'
 
@@ -87,7 +88,7 @@ function exportFicheDeViePDF(equipement: Equipement, entries: TimelineEntry[]) {
   setTimeout(() => URL.revokeObjectURL(url), 10000)
 }
 
-function TimelineRow({ icon, iconBg, iconColor, date, title, subtitle, badge, isLast, onDelete }: {
+function TimelineRow({ icon, iconBg, iconColor, date, title, subtitle, badge, isLast, onDelete, onEdit }: {
   icon: React.ReactNode
   iconBg: string; iconColor: string
   date: string
@@ -96,6 +97,7 @@ function TimelineRow({ icon, iconBg, iconColor, date, title, subtitle, badge, is
   badge: { label: string; bg: string; color: string } | null
   isLast: boolean
   onDelete?: () => void
+  onEdit?: () => void
 }) {
   return (
     <div className="flex items-start gap-3 px-4 py-3.5 group"
@@ -118,26 +120,41 @@ function TimelineRow({ icon, iconBg, iconColor, date, title, subtitle, badge, is
             {badge.label}
           </span>
         )}
-        {onDelete && (
-          <button type="button"
-            onClick={onDelete}
-            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded"
-            style={{ color: 'var(--color-danger)' }}
-            title="Supprimer cette note"
-          >
-            <Trash2 size={13} />
-          </button>
+        {(onEdit || onDelete) && (
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {onEdit && (
+              <button type="button"
+                onClick={onEdit}
+                className="p-1 rounded"
+                style={{ color: 'var(--color-text-secondary)' }}
+                title="Modifier"
+              >
+                <Edit2 size={13} />
+              </button>
+            )}
+            {onDelete && (
+              <button type="button"
+                onClick={onDelete}
+                className="p-1 rounded"
+                style={{ color: 'var(--color-danger)' }}
+                title="Supprimer"
+              >
+                <Trash2 size={13} />
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>
   )
 }
 
-export function FicheDeVie({ equipement, verifications, maintenances, onAddNote, onDeleteNote, onAddVerification, initiales, uid, equipementId, equipementNom }: {
+export function FicheDeVie({ equipement, verifications, maintenances, onAddNote, onUpdateNote, onDeleteNote, onAddVerification, initiales, uid, equipementId, equipementNom }: {
   equipement: Equipement
   verifications: Verification[]
   maintenances: Maintenance[]
   onAddNote: (note: FicheDeVieNote) => void
+  onUpdateNote: (id: string, note: FicheDeVieNote) => void
   onDeleteNote: (id: string) => void
   onAddVerification: (v: Verification) => Promise<void>
   initiales: string
@@ -145,7 +162,9 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
   equipementId: string
   equipementNom: string
 }) {
+  const navigate = useNavigate()
   const [showForm,  setShowForm]  = useState(false)
+  const [editingNote, setEditingNote] = useState<FicheDeVieNote | null>(null)
   const [showVerif, setShowVerif] = useState(false)
   const [formDate,  setFormDate]  = useState(() => new Date().toISOString().slice(0, 10))
   const [formTitre, setFormTitre] = useState('')
@@ -157,17 +176,43 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
   const [verifProchain,  setVerifProchain]  = useState('')
   const [verifSaving,    setVerifSaving]    = useState(false)
 
-  function handleAddNote() {
+  function handleEditNoteClick(n: FicheDeVieNote) {
+    setEditingNote(n)
+    setFormDate(n.date)
+    setFormTitre(n.titre)
+    setFormNotes(n.notes ?? '')
+    setShowForm(false)
+    setShowVerif(false)
+  }
+
+  function handleCancelNote() {
+    setShowForm(false)
+    setEditingNote(null)
+    setFormDate(new Date().toISOString().slice(0, 10))
+    setFormTitre('')
+    setFormNotes('')
+  }
+
+  function handleSubmitNote() {
     if (!formTitre.trim()) return
-    const note: FicheDeVieNote = {
-      id: crypto.randomUUID(),
-      date: formDate,
-      titre: formTitre.trim(),
-      notes: formNotes.trim(),
-      auteur: initiales,
+    if (editingNote) {
+      onUpdateNote(editingNote.id, {
+        ...editingNote,
+        date: formDate,
+        titre: formTitre.trim(),
+        notes: formNotes.trim()
+      })
+    } else {
+      const note: FicheDeVieNote = {
+        id: crypto.randomUUID(),
+        date: formDate,
+        titre: formTitre.trim(),
+        notes: formNotes.trim(),
+        auteur: initiales,
+      }
+      onAddNote(note)
     }
-    onAddNote(note)
-    setFormTitre(''); setFormNotes(''); setShowForm(false)
+    handleCancelNote()
   }
 
   async function handleAddVerification() {
@@ -247,7 +292,10 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
             <Gauge size={12} /> Vérification
           </button>
           <button type="button"
-            onClick={() => { setShowForm(v => !v); setShowVerif(false) }}
+            onClick={() => { 
+              if (showForm) { handleCancelNote() } 
+              else { handleCancelNote(); setShowForm(true); setShowVerif(false) } 
+            }}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
             style={{ background: showForm ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)', color: showForm ? 'var(--color-accent)' : 'var(--color-text-secondary)', border: '1px solid var(--color-border-subtle)' }}
           >
@@ -256,10 +304,12 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
         </div>
       </div>
 
-      {showForm && (
+      {(showForm || editingNote) && (
         <div className="rounded-xl p-4 mb-3"
           style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-card)' }}>
-          <p className="text-xs font-semibold mb-3" style={{ color: 'var(--color-accent)' }}>Nouvelle note</p>
+          <p className="text-xs font-semibold mb-3" style={{ color: 'var(--color-accent)' }}>
+            {editingNote ? 'Modifier la note' : 'Nouvelle note'}
+          </p>
           <div className="flex gap-3 mb-2">
             <div className="flex-1">
               <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Titre</label>
@@ -277,11 +327,11 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
               placeholder="Observations, actions effectuées…" className="field-input w-full resize-none" />
           </div>
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setShowForm(false)} className="px-3 py-1.5 rounded-lg text-xs font-medium"
+            <button type="button" onClick={handleCancelNote} className="px-3 py-1.5 rounded-lg text-xs font-medium"
               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
               Annuler
             </button>
-            <button type="button" onClick={handleAddNote} disabled={!formTitre.trim()} className="px-3 py-1.5 rounded-lg text-xs font-medium"
+            <button type="button" onClick={handleSubmitNote} disabled={!formTitre.trim()} className="px-3 py-1.5 rounded-lg text-xs font-medium"
               style={{ background: 'var(--color-accent)', color: 'white', opacity: formTitre.trim() ? 1 : 0.5 }}>
               Enregistrer
             </button>
@@ -378,6 +428,7 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
                     isNok ? { label: 'Non conforme',  bg: 'var(--color-danger-light)',  color: 'var(--color-danger)'  } :
                             { label: 'À reprendre',   bg: 'var(--color-warning-light)', color: 'var(--color-warning)' }
                   }
+                  onEdit={() => navigate(`/metrologie/${v.id}`)}
                 />
               )
             }
@@ -393,25 +444,41 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
                   subtitle={[n.auteur, n.notes].filter(Boolean).join(' · ')}
                   badge={null}
                   onDelete={() => onDeleteNote(n.id)}
+                  onEdit={() => handleEditNoteClick(n)}
                 />
               )
             }
 
             const m = entry.data
             const isDone = m.statut === 'realisee'
+            
+            let maintDateLabel = dateLabel
+            if (m.datePrevue && m.dateRealisee && m.datePrevue !== m.dateRealisee) {
+              const start = new Date(m.datePrevue + 'T12:00:00').toLocaleDateString('fr-FR', {
+                day: 'numeric', month: 'long', year: 'numeric'
+              })
+              const end = new Date(m.dateRealisee + 'T12:00:00').toLocaleDateString('fr-FR', {
+                day: 'numeric', month: 'long', year: 'numeric'
+              })
+              maintDateLabel = m.type === 'panne' 
+                ? `Panne le ${start} — Retour le ${end}`
+                : `Du ${start} au ${end}`
+            }
+
             return (
               <TimelineRow key={m.id} isLast={isLast}
                 icon={<Wrench size={14} />}
                 iconBg={isDone ? 'var(--color-bg-tertiary)' : 'var(--color-warning-light)'}
                 iconColor={isDone ? 'var(--color-text-secondary)' : 'var(--color-warning)'}
-                date={dateLabel}
-                title={MAINT_TYPE[m.type] ?? m.type}
-                subtitle={[m.technicienNom, m.travauxRealises || m.description].filter(Boolean).join(' · ')}
+                date={maintDateLabel}
+                title={m.type === 'panne' && m.description ? `Panne : ${m.description}` : MAINT_TYPE[m.type] ?? m.type}
+                subtitle={[m.technicienNom, m.type === 'panne' && m.description ? m.travauxRealises : (m.travauxRealises || m.description)].filter(Boolean).join(' · ')}
                 badge={
                   isDone
                     ? { label: 'Réalisée',  bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)' }
                     : { label: 'Planifiée', bg: 'var(--color-warning-light)', color: 'var(--color-warning)'        }
                 }
+                onEdit={() => navigate(`/maintenances/${m.id}`)}
               />
             )
           })}

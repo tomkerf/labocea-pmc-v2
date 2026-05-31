@@ -166,6 +166,7 @@ export default function EquipementPage() {
         verifications={verifications.filter((v) => v.equipementId === equipementId)}
         maintenances={maintenances.filter((m) => m.equipementId === equipementId)}
         onAddNote={(note) => update('ficheDeVieNotes', [...(equipement.ficheDeVieNotes ?? []), note])}
+        onUpdateNote={(id, updatedNote) => update('ficheDeVieNotes', (equipement.ficheDeVieNotes ?? []).map((n) => n.id === id ? updatedNote : n))}
         onDeleteNote={(id) => update('ficheDeVieNotes', (equipement.ficheDeVieNotes ?? []).filter((n) => n.id !== id))}
         onAddVerification={async (verif) => { 
           if (uid) {

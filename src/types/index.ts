@@ -186,6 +186,7 @@ export type CategorieEquipement =
   | 'pompe_pz'
   | 'sonde_niveau'
   | 'chronometre'
+  | 'manchon_deversoir'
 
 export type CategorieType = CategorieEquipement
 export type EtatEquipement = 'operationnel' | 'en_maintenance' | 'hors_service' | 'prete'
@@ -223,6 +224,8 @@ export interface Equipement {
   volume?: string             // ex: "20L", "1L"
   poids?: string              // ex: "0.570 kg" (stocké en string pour flexibilité)
   materiau?: MateriauFlacon
+  // Champs spécifiques aux manchons
+  diametre?: string           // ex: "150", "200", "250", "300"
   createdBy: string
   updatedAt: Timestamp
 }

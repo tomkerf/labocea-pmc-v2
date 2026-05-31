@@ -24,8 +24,8 @@ const CATEGORIES = [
   { value: 'eprouvette',   label: 'Éprouvettes'    },
   { value: 'flacon',       label: 'Flacons'        },
   { value: 'pompe_pz',     label: 'Pompes PZ'      },
-  { value: 'sonde_niveau', label: 'Sondes niveau'  },
   { value: 'chronometre',  label: 'Chronomètres'   },
+  { value: 'manchon_deversoir', label: 'Manchons déversoirs' },
 ]
 
 const ETATS = [
