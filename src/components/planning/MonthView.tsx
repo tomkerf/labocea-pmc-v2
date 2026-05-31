@@ -68,6 +68,7 @@ export default function MonthView({
         {JOURS_COURT.map((j,i) => (
           <div key={j} className="py-2 text-center text-[10px] font-medium uppercase"
             style={{ color:'var(--color-text-tertiary)', letterSpacing:'0.04em',
+              background: i >= 5 ? 'rgba(0,0,0,0.05)' : 'transparent',
               borderRight:i<6?'1px solid var(--color-border-subtle)':'none' }}>
             {j}
           </div>
