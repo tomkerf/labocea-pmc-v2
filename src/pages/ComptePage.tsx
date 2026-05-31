@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { LogOut, KeyRound, ChevronDown, Bell, BellOff, LoaderCircle } from 'lucide-react'
 import { updateUserProfile } from '@/services/userService'
 import UserAvatar from '@/components/ui/UserAvatar'
+import { AVATAR_COLORS } from '@/components/ui/avatarColors'
 
 import type { AppUser } from '@/types'
 import {
@@ -119,6 +120,34 @@ export default function ComptePage() {
           onChange={(v) => update('initiales', v.toUpperCase())}
           hint="Utilisées comme identifiant préleveur"
         />
+
+        {/* Couleur personnelle (Avatar & Planning) */}
+        <div className="px-5 py-3 flex flex-col sm:flex-row justify-between sm:items-center gap-3"
+             style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+          <div>
+            <span className="text-sm block" style={{ color: 'var(--color-text-secondary)' }}>
+              Couleur personnelle
+            </span>
+            <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+              Utilisée pour ton avatar et dans le planning
+            </span>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {AVATAR_COLORS.map(c => (
+              <button
+                key={c.value}
+                onClick={() => update('avatarColor', c.value)}
+                className="w-6 h-6 rounded-full transition-transform"
+                style={{
+                  background: c.value,
+                  border: appUser?.avatarColor === c.value ? '2px solid var(--color-text-primary)' : '2px solid transparent',
+                  transform: appUser?.avatarColor === c.value ? 'scale(1.1)' : 'scale(1)'
+                }}
+                title={c.label}
+              />
+            ))}
+          </div>
+        </div>
 
         {/* Rôle (lecture seule) */}
         <div className="px-5 py-3 flex justify-between items-center">

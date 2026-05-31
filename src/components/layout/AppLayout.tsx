@@ -7,7 +7,7 @@ import MobileDrawer from './MobileDrawer'
 import ErrorBoundary from './ErrorBoundary'
 import ToastContainer from '@/components/ui/ToastContainer'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
-import { getAvatarColor, AVATAR_COLORS } from '@/components/ui/avatarColors'
+
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import SyncBadge from '@/components/ui/SyncBadge'
 
@@ -19,22 +19,12 @@ export default function AppLayout() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   useNetworkStatus()
 
-  const avatarColor = appUser?.avatarColor
 
   // Fermer le drawer à chaque changement de route
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setDrawerOpen(false) }, [pathname])
 
-  // Synchronise la couleur d'accentuation avec la couleur d'avatar
-  useEffect(() => {
-    const accent = getAvatarColor(avatarColor)
-    const match  = AVATAR_COLORS.find((c) => c.value === accent)
-    const accentLight = match?.accentLight ?? '#E8F1FB'
-    const root = document.documentElement
-    root.style.setProperty('--color-accent',       accent)
-    root.style.setProperty('--color-accent-hover',  accent)
-    root.style.setProperty('--color-accent-light',  accentLight)
-  }, [avatarColor])
+
 
   // Écouteur de scroll dynamique pour la barre supérieure mobile
   useEffect(() => {
