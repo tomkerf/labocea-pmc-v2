@@ -45,7 +45,7 @@ export default function DashboardPage() {
   const isGeneraliste = role === 'charge_mission' || role === 'admin'
 
   const [showWelcome, setShowWelcome] = useState(false)
-  const [activeTab, setActiveTab] = useState<'technicien' | 'manager'>(isGeneraliste ? 'manager' : 'technicien')
+  const [activeTab, setActiveTab] = useState<'technicien' | 'manager'>('technicien')
 
   useEffect(() => {
     if (appUser && appUser.hasSeenAide !== true) {
