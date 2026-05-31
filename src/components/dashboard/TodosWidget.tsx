@@ -40,10 +40,10 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
     await saveTodo(updated, uid)
   }
 
-  const prioColors = {
-    haute: { text: 'var(--color-danger)', bg: 'var(--color-danger-light)', label: 'Haute' },
-    moyenne: { text: 'var(--color-warning)', bg: 'var(--color-warning-light)', label: 'Moyenne' },
-    basse: { text: 'var(--color-accent)', bg: 'var(--color-accent-light)', label: 'Basse' },
+  const prioColors: Record<string, { bg: string; text: string; label: string; icon: string }> = {
+    haute:   { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-primary)',   label: 'Haute',   icon: '⏫' },
+    moyenne: { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-primary)',   label: 'Moyenne', icon: '➖' },
+    basse:   { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-secondary)', label: 'Basse',   icon: '⏬' },
   }
 
   // Permet de vérifier si une date d'échéance est dépassée (excluant aujourd'hui)
@@ -142,9 +142,10 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                           {todo.titre}
                         </p>
                         <span
-                          className="text-[10px] font-medium px-1.5 py-0.2 rounded"
+                          className="text-[10px] font-medium px-1.5 py-0.2 rounded flex items-center gap-1"
                           style={{ background: colors.bg, color: colors.text }}
                         >
+                          <span className="text-[11px]">{colors.icon}</span>
                           {colors.label}
                         </span>
                       </div>

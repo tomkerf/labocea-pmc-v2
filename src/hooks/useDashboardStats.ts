@@ -271,11 +271,11 @@ export function useDashboardStats({
         items.push({ kind: 'evenement', time: ev.heure ?? '', title: ev.titre, sub: evSub, badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, modalEvent: evModalEvent })
       })
 
-    const TODO_COLORS = { haute: { bg: 'var(--color-danger-light)', color: 'var(--color-danger)', dot: 'var(--color-danger)' }, moyenne: { bg: 'var(--color-warning-light)', color: 'var(--color-warning)', dot: 'var(--color-warning)' }, basse: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' } }
+    const TODO_COLORS = { haute: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)', dot: 'var(--color-text-primary)', label: '⏫ Tâche' }, moyenne: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)', dot: 'var(--color-text-primary)', label: '➖ Tâche' }, basse: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', dot: 'var(--color-text-secondary)', label: '⏬ Tâche' } }
     todos.forEach((t: Todo) => {
       if (!t.dueDate || t.statut === 'termine' || t.dueDate !== todayISO) return
       const cfg = TODO_COLORS[t.priorite] ?? TODO_COLORS.basse
-      items.push({ kind: 'todo', time: '', title: t.titre, sub: 'Tâche', badge: { label: 'Tâche', bg: cfg.bg, color: cfg.color }, dot: cfg.dot, link: '/todos' })
+      items.push({ kind: 'todo', time: '', title: t.titre, sub: 'Tâche', badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, link: '/todos' })
     })
 
     return items.sort((a, b) => {
@@ -354,11 +354,11 @@ export function useDashboardStats({
         items.push({ kind: 'evenement', time: ev.heure ?? '', title: ev.titre, sub: evSub, badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, modalEvent: evModalEvent })
       })
 
-    const TODO_COLORS = { haute: { bg: 'var(--color-danger-light)', color: 'var(--color-danger)', dot: 'var(--color-danger)' }, moyenne: { bg: 'var(--color-warning-light)', color: 'var(--color-warning)', dot: 'var(--color-warning)' }, basse: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' } }
+    const TODO_COLORS = { haute: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)', dot: 'var(--color-text-primary)', label: '⏫ Tâche' }, moyenne: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)', dot: 'var(--color-text-primary)', label: '➖ Tâche' }, basse: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', dot: 'var(--color-text-secondary)', label: '⏬ Tâche' } }
     todos.forEach((t: Todo) => {
       if (!t.dueDate || t.statut === 'termine' || t.dueDate !== tomorrowISO) return
       const cfg = TODO_COLORS[t.priorite] ?? TODO_COLORS.basse
-      items.push({ kind: 'todo', time: '', title: t.titre, sub: 'Tâche', badge: { label: 'Tâche', bg: cfg.bg, color: cfg.color }, dot: cfg.dot, link: '/todos' })
+      items.push({ kind: 'todo', time: '', title: t.titre, sub: 'Tâche', badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, link: '/todos' })
     })
 
     return items.sort((a, b) => {

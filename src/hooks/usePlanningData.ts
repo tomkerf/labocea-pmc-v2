@@ -176,10 +176,10 @@ export function usePlanningData({
       }
     })
 
-    const PRIORITY_COLORS: Record<string, { bg: string; color: string }> = {
-      haute:   { bg: 'var(--color-danger-light)',  color: 'var(--color-danger)'  },
-      moyenne: { bg: 'var(--color-warning-light)', color: 'var(--color-warning)' },
-      basse:   { bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)' },
+    const PRIORITY_COLORS: Record<string, { bg: string; color: string; label: string }> = {
+      haute:   { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)',   label: '⏫ Tâche' },
+      moyenne: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)',   label: '➖ Tâche' },
+      basse:   { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', label: '⏬ Tâche' },
     }
     clients.forEach((client: Client) => {
       client.plans.forEach(plan => {
@@ -212,7 +212,7 @@ export function usePlanningData({
         id: `todo_${t.id}`, type: 'todo', priority: t.priorite === 'haute' ? 0 : t.priorite === 'moyenne' ? 1 : 2,
         title: t.titre,
         subtitle: 'Tâche',
-        statusLabel: 'Tâche', statusBg: colors.bg, statusColor: colors.color,
+        statusLabel: colors.label, statusBg: colors.bg, statusColor: colors.color,
         link: '/todos', isDone: false,
         technicien: users.find(u => u.uid === t.assignedTo)?.initiales || t.assignedTo || '—',
         todoData: t,

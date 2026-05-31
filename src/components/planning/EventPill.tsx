@@ -146,7 +146,7 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
         {(isJ1 || isJ2) && (
           <span className="shrink-0 text-[8px] font-bold px-1 rounded"
             style={{ background: dotColor + '22', color: dotColor }}>
-            {isJ1 ? 'J1' : 'J2'}
+            {isJ2 ? 'J2' : 'J1'}
           </span>
         )}
         {hasTech && (

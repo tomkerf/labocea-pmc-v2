@@ -204,10 +204,10 @@ export default function TodosPage() {
     return dueDate < todayStr
   }
 
-  const prioColors = {
-    haute: { text: 'var(--color-danger)', bg: 'var(--color-danger-light)', label: 'Haute' },
-    moyenne: { text: 'var(--color-warning)', bg: 'var(--color-warning-light)', label: 'Moyenne' },
-    basse: { text: 'var(--color-accent)', bg: 'var(--color-accent-light)', label: 'Basse' },
+  const prioColors: Record<string, { text: string; bg: string; label: string; icon: string }> = {
+    haute:   { text: 'var(--color-text-primary)',   bg: 'var(--color-bg-tertiary)', label: 'Haute',   icon: '⏫' },
+    moyenne: { text: 'var(--color-text-primary)',   bg: 'var(--color-bg-tertiary)', label: 'Moyenne', icon: '➖' },
+    basse:   { text: 'var(--color-text-secondary)', bg: 'var(--color-bg-tertiary)', label: 'Basse',   icon: '⏬' },
   }
 
   return (
@@ -738,9 +738,10 @@ function TodoRow({
             {todo.titre}
           </p>
           <span
-            className="text-[9px] font-bold px-1.5 py-0.2 rounded shrink-0 uppercase tracking-wide mt-0.5"
+            className="text-[9px] font-bold px-1.5 py-0.2 rounded shrink-0 uppercase tracking-wide mt-0.5 flex items-center gap-1"
             style={{ background: colors.bg, color: colors.text }}
           >
+            <span className="text-[11px]">{colors.icon}</span>
             {colors.label}
           </span>
           {todo.statut === 'en_cours' && (

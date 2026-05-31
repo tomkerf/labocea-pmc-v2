@@ -81,24 +81,29 @@ export function usePlanningCalendar({
     const pairs: { j1Col: number; j2Col: number; j1: PlanningEvent; j2: PlanningEvent | null }[] = []
 
     wISOs.forEach((dateStr, colIdx) => {
-      ;(eventsByDate[dateStr] ?? []).forEach(e => {
-        if (e.type !== 'prelevement' || !e.dateFin) return
-        if (filterTech && normTech(e.technicien) !== filterTech) return
-        const j2DateStr = e.dateFin
+      const dayJ1s = (eventsByDate[dateStr] ?? []).filter(e => e.type === 'prelevement' && !!e.dateFin && !e.isGhost)
+      const filtered = filterTech ? dayJ1s.filter(e => normTech(e.technicien) === filterTech) : dayJ1s
+
+      filtered.forEach(j1 => {
+        const j2DateStr = j1.dateFin!
         const j2Col     = wISOs.indexOf(j2DateStr)
-        const j2        = j2Col !== -1
-          ? (eventsByDate[j2DateStr] ?? []).find(x => x.isJ2Continuation && x.samplingId === e.samplingId) ?? null
-          : null
-        pairs.push({ j1Col: colIdx, j2Col: j2 ? j2Col : -1, j1: e, j2 })
+        
+        const j2: PlanningEvent | null = j2Col !== -1 ? {
+          ...j1,
+          id: j1.id + '_j2_proxy',
+          isJ2Continuation: true,
+        } : null
+
+        pairs.push({ j1Col: colIdx, j2Col: j2 ? j2Col : -1, j1, j2 })
       })
     })
 
-    const colRowNext = new Array(5).fill(0) as number[]
+    const colRowNext = new Array(7).fill(0) as number[]
     const rows: BilanGroup[][] = []
 
     pairs.forEach(({ j1Col, j2Col, j1, j2 }) => {
       let rowIdx = colRowNext[j1Col]
-      if (j2Col !== -1) rowIdx = Math.max(rowIdx, colRowNext[j2Col])
+      if (j2Col !== -1) rowIdx = Math.max(rowIdx, colRowNext[j2Col] || 0)
       if (!rows[rowIdx]) rows[rowIdx] = []
 
       const tc = j1.technicien && j1.technicien !== '—' ? getTechColor(j1.technicien).color : 'var(--color-accent)'
