@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { LogOut, Check, KeyRound, ChevronDown, Bell, BellOff, LoaderCircle } from 'lucide-react'
 import { updateUserProfile } from '@/services/userService'
 import UserAvatar from '@/components/ui/UserAvatar'
-import { AVATAR_COLORS, getAvatarColor } from '@/components/ui/avatarColors'
+
 import type { AppUser } from '@/types'
 import {
   getAuth,
@@ -57,25 +57,13 @@ export default function ComptePage() {
     triggerSave({ ...appUser, [field]: value })
   }
 
-  async function handleColorSelect(colorValue: string) {
-    if (!appUser) return
-    const updated = { ...appUser, avatarColor: colorValue }
-    setSaving(true)
-    try {
-      await updateUserProfile(appUser.uid, { avatarColor: colorValue })
-      setAppUser(updated)
-    } finally {
-      setSaving(false)
-    }
-  }
-
   const roleLabel: Record<string, string> = {
     technicien: 'Technicien',
     charge_mission: 'Chargé de mission',
     admin: 'Administrateur',
   }
 
-  const currentColor = getAvatarColor(appUser?.avatarColor)
+
 
   return (
     <div className="p-6 max-w-lg">
@@ -141,49 +129,7 @@ export default function ComptePage() {
         </div>
       </div>
 
-      {/* Sélecteur d'avatar */}
-      <div className="rounded-xl mb-4 px-5 py-4"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
 
-        {/* Aperçu */}
-        <div className="flex items-center gap-3 mb-4 pb-4" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <UserAvatar initiales={appUser?.initiales} color={appUser?.avatarColor} size={48} />
-          <div>
-            <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-              {appUser?.prenom || appUser?.nom ? `${appUser?.prenom} ${appUser?.nom}`.trim() : 'Nom non renseigné'}
-            </p>
-            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Aperçu</p>
-          </div>
-        </div>
-
-        {/* Couleur */}
-        <p className="text-xs font-semibold uppercase mb-2.5"
-          style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>
-          Couleur d'accentuation
-        </p>
-        <div className="flex flex-wrap gap-2.5 mb-5">
-          {AVATAR_COLORS.map(({ id, value, label }) => {
-            const isSelected = value === currentColor
-            return (
-              <button type="button" key={id} title={label} onClick={() => handleColorSelect(value)}
-                style={{
-                  width: 30, height: 30, borderRadius: '50%',
-                  background: value,
-                  outline: isSelected ? `2px solid ${value}` : '2px solid transparent',
-                  outlineOffset: 2,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'transform 0.1s, outline 0.1s',
-                  transform: isSelected ? 'scale(1.15)' : 'scale(1)',
-                  cursor: 'pointer',
-                }}>
-                {isSelected && <Check size={13} color="white" strokeWidth={3} />}
-              </button>
-            )
-          })}
-        </div>
-
-
-      </div>
 
       {/* Notifications Push */}
       <PushNotificationsSection />
