@@ -136,6 +136,64 @@ async function getGoogleAccessToken(serviceAccount, scope) {
   return tokenData.access_token
 }
 
+// ── Utilitaires iCal ────────────────────────────────────────
+
+// Échappe les valeurs texte iCal (RFC 5545 §3.3.11)
+function icalEscape(str) {
+  return String(str || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n')
+}
+
+// Formate une date YYYYMMDD depuis année + mois 0-indexed + jour
+function icalDate(year, month0, day) {
+  const m = String(month0 + 1).padStart(2, '0')
+  const d = String(day).padStart(2, '0')
+  return `${year}${m}${d}`
+}
+
+// Incrémente une date YYYYMMDD d'un jour (pour DTEND journée entière)
+function icalDateNext(year, month0, day) {
+  const dt = new Date(Date.UTC(year, month0, day + 1))
+  const y = dt.getUTCFullYear()
+  const m = String(dt.getUTCMonth() + 1).padStart(2, '0')
+  const d = String(dt.getUTCDate()).padStart(2, '0')
+  return `${y}${m}${d}`
+}
+
+const STATUS_LABEL = {
+  planned: 'Planifié',
+  done: 'Effectué',
+  overdue: 'En retard',
+  non_effectue: 'Non effectué',
+}
+
+const STATUS_ICAL = {
+  planned: 'TENTATIVE',
+  done: 'CONFIRMED',
+  overdue: 'TENTATIVE',
+  non_effectue: 'CANCELLED',
+}
+
+// Extrait la valeur string d'un champ Firestore REST (stringValue, integerValue, booleanValue…)
+function fsVal(field) {
+  if (!field) return undefined
+  if ('stringValue' in field) return field.stringValue
+  if ('integerValue' in field) return Number(field.integerValue)
+  if ('doubleValue' in field) return field.doubleValue
+  if ('booleanValue' in field) return field.booleanValue
+  if ('nullValue' in field) return null
+  return undefined
+}
+
+// Extrait un tableau depuis un arrayValue Firestore REST
+function fsArr(field) {
+  return field?.arrayValue?.values ?? []
+}
+
+// Extrait les champs d'un document Firestore REST
+function fsFields(doc) {
+  return doc?.fields ?? {}
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url)
