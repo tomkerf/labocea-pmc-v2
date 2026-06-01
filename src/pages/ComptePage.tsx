@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react'
-import { useAuthStore, selectAppUser } from '@/stores/authStore'
+import { useAuthStore, selectAppUser, selectUid } from '@/stores/authStore'
 import { logout } from '@/hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, KeyRound, ChevronDown, Bell, BellOff, LoaderCircle } from 'lucide-react'
+import { LogOut, KeyRound, ChevronDown, Bell, BellOff, LoaderCircle, Calendar } from 'lucide-react'
 import { updateUserProfile } from '@/services/userService'
 import UserAvatar from '@/components/ui/UserAvatar'
 import { AVATAR_COLORS } from '@/components/ui/avatarColors'
@@ -22,9 +22,12 @@ const DEBOUNCE = 600
 export default function ComptePage() {
   const appUser = useAuthStore(selectAppUser)
   const setAppUser = useAuthStore(s => s.setAppUser)
+  const uid = useAuthStore(selectUid)
   const navigate = useNavigate()
   const [saving, setSaving] = useState(false)
+  const [copied, setCopied] = useState(false)
 
+  const feedUrl = uid ? `${window.location.origin}/api/calendar/${uid}.ics` : ''
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   async function handleLogout() {
@@ -62,6 +65,14 @@ export default function ComptePage() {
     technicien: 'Technicien',
     charge_mission: 'Chargé de mission',
     admin: 'Administrateur',
+  }
+
+  function copyFeedUrl() {
+    if (!feedUrl) return
+    navigator.clipboard.writeText(feedUrl).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
   }
 
 
@@ -165,6 +176,47 @@ export default function ComptePage() {
 
       {/* Changer le mot de passe */}
       <ChangePasswordSection email={appUser?.email ?? ''} />
+
+      {/* Synchronisation agenda */}
+      <div className="rounded-xl overflow-hidden mb-4"
+        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        <div className="px-5 py-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Calendar size={16} style={{ color: 'var(--color-accent)' }} />
+            <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              Synchronisation agenda
+            </span>
+          </div>
+          <p className="text-xs mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+            Abonnez-vous à votre planning depuis Google Agenda → Autres agendas → Via une URL.
+          </p>
+          <div className="flex items-center gap-2">
+            <input
+              readOnly
+              value={feedUrl}
+              className="flex-1 text-xs px-3 py-2 rounded-lg truncate"
+              style={{
+                background: 'var(--color-bg-tertiary)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-secondary)',
+              }}
+            />
+            <button
+              onClick={copyFeedUrl}
+              className="text-xs px-3 py-2 rounded-lg font-medium"
+              style={{
+                background: copied ? 'var(--color-success-light)' : 'var(--color-accent-light)',
+                color: copied ? 'var(--color-success)' : 'var(--color-accent)',
+                border: 'none',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {copied ? 'Copié !' : 'Copier'}
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Déconnexion */}
       <button type="button"
