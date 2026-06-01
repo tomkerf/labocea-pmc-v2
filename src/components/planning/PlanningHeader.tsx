@@ -195,7 +195,7 @@ export default function PlanningHeader({
                       }}
                       className="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer"
                       style={{
-                        background: isActive ? 'var(--color-text-secondary)' : 'var(--color-bg-secondary)',
+                        background: isActive ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
                         color: isActive ? 'white' : 'var(--color-text-secondary)',
                         border: `1px solid ${isActive ? 'transparent' : 'var(--color-border-subtle)'}`,
                       }}
