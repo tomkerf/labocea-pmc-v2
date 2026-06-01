@@ -172,14 +172,17 @@ export default function PlanningHeader({
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => { setFilterSite(''); localStorage.removeItem('planning_filter_site') }}
-                  className="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer"
+                  className="cursor-pointer"
                   style={{
+                    width: 28, height: 28, borderRadius: '50%',
                     background: !filterSite ? 'var(--color-text-primary)' : 'var(--color-bg-secondary)',
                     color: !filterSite ? 'white' : 'var(--color-text-secondary)',
                     border: `1px solid ${!filterSite ? 'transparent' : 'var(--color-border-subtle)'}`,
+                    fontSize: 10, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}
+                  title="Tous les sites"
                 >
-                  Tous les sites
+                  ✦
                 </motion.button>
                 {availableSites.map(site => {
                   const isActive = filterSite === site
@@ -194,11 +197,13 @@ export default function PlanningHeader({
                         if (v) localStorage.setItem('planning_filter_site', v)
                         else localStorage.removeItem('planning_filter_site')
                       }}
-                      className="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer"
+                      className="cursor-pointer"
                       style={{
+                        height: 28, padding: '0 10px', borderRadius: 14,
                         background: isActive ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
                         color: isActive ? 'white' : 'var(--color-text-secondary)',
                         border: `1px solid ${isActive ? 'transparent' : 'var(--color-border-subtle)'}`,
+                        fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center',
                       }}
                     >
                       {site}
@@ -210,17 +215,20 @@ export default function PlanningHeader({
             {allTechs.length > 1 && (
               <div className="flex items-center gap-1.5 flex-wrap">
                 <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => { setFilterTech(''); localStorage.removeItem('planning_filter_tech') }}
-                  className="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer"
+                  className="cursor-pointer"
                   style={{
+                    width: 28, height: 28, borderRadius: '50%',
                     background: !filterTech ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
                     color: !filterTech ? 'white' : 'var(--color-text-secondary)',
-                    border: `1px solid ${!filterTech ? 'transparent' : 'var(--color-border-subtle)'}`
+                    border: `1px solid ${!filterTech ? 'transparent' : 'var(--color-border-subtle)'}`,
+                    fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}
+                  title="Tous les techniciens"
                 >
-                  Tous
+                  ✦
                 </motion.button>
                 {allTechs.map(t => {
                   const isActive = filterTech === t
