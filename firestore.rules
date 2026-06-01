@@ -122,5 +122,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ── preleveurs-v1 (liste consolidée, lecture seule) ───────
+    match /preleveurs-v1/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
   }
 }
