@@ -3,6 +3,30 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 87 — Polissage UI/UX Dashboard & Tâches
+**1 juin 2026**
+
+### Améliorations
+
+**Widget planning — jours de pluie**
+- "Pluie prévue" s'affichait comme un item ordinaire avec badge "Autre" dans le widget planning.
+- Fix : les événements `type === 'meteo'` sont désormais exclus de `jourItems`/`lendemainItems`. À la place, une bannière bleue subtile `🌧 Temps de pluie prévu` s'affiche au-dessus de la liste quand `hasRainToday`/`hasRainTomorrow` est vrai.
+
+**Tâches supprimées du widget planning du jour**
+- Les tâches du jour apparaissaient dans le widget "Planning du jour" du dashboard, créant de la confusion avec les prélèvements et événements.
+- Fix : suppression des deux blocs `todos.forEach` dans `useDashboardStats.ts`.
+
+**Page Tâches — conformité design**
+- Date dueDate affichée en ISO (`2026-06-01`) → format français (`01/06/2026`) dans `TodosPage` et `TodosWidget`.
+- Icônes edit/delete désormais masquées au repos (`opacity-0`) et révélées au survol via `group`/`group-hover` Tailwind.
+- Priorités tâches : icônes ⏫/➖/⏬ remplacées par `!!!` / `!!` / `!` dans tous les fichiers (TodosPage, TodosWidget, useDashboardStats, usePlanningData).
+- Avatar couleur incorrecte (rouge par défaut) corrigé : `getTechColor(initiales)` utilisé à la place du lookup UID, cohérent avec le planning.
+
+### Prochaines étapes
+- Ordre de passage dans la tournée (heure planifiée ou drag & drop)
+
+---
+
 ## Session 86 — Bugfixes Bilan 24h, UI Planning, Hooks & Accessibilité
 **31 mai 2026**
 
