@@ -2,6 +2,7 @@ import { useMemo, type Dispatch, type SetStateAction } from 'react'
 import { ChevronLeft, ChevronRight, Calendar, Map as MapIcon, X, Printer, FileSpreadsheet } from 'lucide-react'
 import { type ViewMode, getTechColor } from '@/lib/planningUtils'
 import { motion } from 'framer-motion'
+import UserAvatar from '@/components/ui/UserAvatar'
 type Preleveur = { code: string; nom?: string; site?: string }
 
 interface PlanningHeaderProps {
@@ -224,22 +225,23 @@ export default function PlanningHeader({
                 {allTechs.map(t => {
                   const isActive = filterTech === t
                   const prel = preleveurs.find(p => p.code === t)
-                  const label = prel?.nom ? prel.nom.split(' ')[0] + ' · ' + t : t
+                  const tooltip = prel?.nom ? `${prel.nom} (${t})` : t
                   const tc = getTechColor(t)
                   return (
                     <motion.button
                       key={t}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => { const v=t===filterTech?'':t; setFilterTech(v); if (v) localStorage.setItem('planning_filter_tech',v); else localStorage.removeItem('planning_filter_tech') }}
-                      className="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer"
+                      title={tooltip}
+                      className="cursor-pointer rounded-full p-0"
                       style={{
-                        background: isActive ? tc.color : tc.bg,
-                        color: isActive ? 'white' : tc.color,
-                        border: `1px solid ${isActive ? 'transparent' : tc.color + '55'}`,
+                        outline: isActive ? `3px solid ${tc.color}` : '3px solid transparent',
+                        outlineOffset: '2px',
+                        transition: 'outline 0.15s',
                       }}
                     >
-                      {label}
+                      <UserAvatar initiales={t} color={tc.color} size={28} />
                     </motion.button>
                   )
                 })}
