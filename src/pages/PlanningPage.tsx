@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useClientsListener } from '@/hooks/useClients'
 // saveClient, createEvenement, deleteEvenement → usePlanningActions
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -78,6 +78,9 @@ const uid        = useAuthStore(selectUid)
   const [monthStart,  setMonthStart]  = useState(() => startOfMonth(today))
   const [selectedDate,setSelectedDate]= useState(today)
   const [filterTech,  setFilterTech]  = useState(() => localStorage.getItem('planning_filter_tech') ?? '')
+  const [filterSite, setFilterSite] = useState<string>(
+    () => localStorage.getItem('planning_filter_site') ?? ''
+  )
   const [filterRetard] = useState(false)
   const [selectedDay,         setSelectedDay]         = useState<string|null>(null)
   const [dayModalInitialTab,  setDayModalInitialTab]  = useState<'pool'|'evt'>('pool')
@@ -118,6 +121,21 @@ const uid        = useAuthStore(selectUid)
   const { eventsByDate, allTechs, techOptions, poolSamplings, overduePool } = usePlanningData({
     clients, maintenances, equipements, evenements, todos, users, preleveurs, selectedDay,
   })
+
+  const visibleTechs = useMemo(() => {
+    if (!filterSite) return allTechs
+    return allTechs.filter(code => {
+      const prel = preleveurs.find(p => p.code === code)
+      return (prel?.site ?? '') === filterSite
+    })
+  }, [allTechs, filterSite, preleveurs])
+
+  useEffect(() => {
+    if (filterTech && !visibleTechs.includes(filterTech)) {
+      setFilterTech('')
+      localStorage.removeItem('planning_filter_tech')
+    }
+  }, [visibleTechs, filterTech, setFilterTech])
 
   // ── Calculs calendrier (filtrage, bilanBand, allDayItems, periodList) ──
   const {
@@ -190,7 +208,8 @@ const uid        = useAuthStore(selectUid)
         periodLabel={periodLabel} viewMode={viewMode}
         prev={prev} next={next} goToday={goToday} switchView={switchView}
         showMiniCal={showMiniCal} setShowMiniCal={setShowMiniCal}
-        allTechs={allTechs} filterTech={filterTech} setFilterTech={setFilterTech}
+        allTechs={visibleTechs} filterTech={filterTech} setFilterTech={setFilterTech}
+        filterSite={filterSite} setFilterSite={setFilterSite}
         showRain={showRain} setShowRain={setShowRain} preleveurs={preleveurs}
         monthPoolCount={monthPoolCount} showDragHint={showDragHint} setShowDragHint={setShowDragHint}
         onExportPdf={handleExportPdf} onExportExcel={handleExportExcel}
