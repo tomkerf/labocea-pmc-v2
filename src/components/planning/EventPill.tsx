@@ -73,7 +73,7 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
     ? event.priority === 0 ? 'var(--color-danger)'   // overdue → rouge
     : event.priority === 1 ? 'var(--color-neutral)'  // non_effectué → gris
     : techColor                                        // planifié → couleur tech
-    : event.type === 'evenement' ? techColor
+    : event.type === 'evenement' || event.type === 'rapport' ? techColor
     : event.statusColor  // maintenance / vérification
 
   const isJ1 = event.type === 'prelevement' && !!event.dateFin
