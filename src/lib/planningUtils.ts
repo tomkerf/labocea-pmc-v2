@@ -62,7 +62,7 @@ export interface PoolItem {
   cofrac: boolean
 }
 
-export type ViewMode = 'jour' | 'semaine' | 'mois' | 'carte'
+export type ViewMode = 'jour' | 'semaine' | 'mois' | 'carte' | 'annee'
 
 export type TimedEvent = PlanningEvent & {
   startMin: number
@@ -368,6 +368,9 @@ export function getPeriodLabel(viewMode: ViewMode, selectedDate: Date, weekStart
     if (weekStart.getMonth() === end.getMonth())
       return `${weekStart.getDate()}–${end.getDate()} ${MOIS_LONG[weekStart.getMonth()]} ${weekStart.getFullYear()}`
     return `${weekStart.getDate()} ${MOIS_LONG[weekStart.getMonth()]} – ${end.getDate()} ${MOIS_LONG[end.getMonth()]} ${end.getFullYear()}`
+  }
+  if (viewMode === 'annee') {
+    return `Année ${selectedDate.getFullYear()}`
   }
   return `${MOIS_LONG[monthStart.getMonth()]} ${monthStart.getFullYear()}`
 }

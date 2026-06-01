@@ -43,6 +43,7 @@ import MonthView          from '@/components/planning/MonthView'
 import PeriodListView     from '@/components/planning/PeriodListView'
 import PlanningMiniCalendar from '@/components/planning/PlanningMiniCalendar'
 import MapView            from '@/components/planning/MapView'
+import YearMatrixView     from '@/components/planning/YearMatrixView'
 
 // ── Composant principal ─────────────────────────────────────
 
@@ -77,7 +78,18 @@ const uid        = useAuthStore(selectUid)
   const [weekStart,   setWeekStart]   = useState(() => startOfWeek(today))
   const [monthStart,  setMonthStart]  = useState(() => startOfMonth(today))
   const [selectedDate,setSelectedDate]= useState(today)
-  const [filterTech,  setFilterTech]  = useState(() => localStorage.getItem('planning_filter_tech') ?? '')
+  const [filterTech,  setFilterTech]  = useState(() => {
+    const saved = localStorage.getItem('planning_filter_tech')
+    return saved === 'ALL' ? '' : (saved ?? '')
+  })
+
+  // Appliquer le filtre par défaut au premier chargement
+  useEffect(() => {
+    if (initiales && !localStorage.getItem('planning_filter_tech')) {
+      setFilterTech(initiales)
+      localStorage.setItem('planning_filter_tech', initiales)
+    }
+  }, [initiales])
   const [filterSite, setFilterSite] = useState<string>(
     () => localStorage.getItem('planning_filter_site') ?? ''
   )
@@ -133,7 +145,7 @@ const uid        = useAuthStore(selectUid)
   useEffect(() => {
     if (filterTech && !visibleTechs.includes(filterTech)) {
       setFilterTech('')
-      localStorage.removeItem('planning_filter_tech')
+      localStorage.setItem('planning_filter_tech', 'ALL')
     }
   }, [visibleTechs, filterTech, setFilterTech])
 
@@ -258,6 +270,17 @@ const uid        = useAuthStore(selectUid)
           filterRetard={filterRetard}
           preleveurs={preleveurs}
           handleSelectEvent={handleSelectEvent}
+        />
+      )}
+
+      {/* ── VUE ANNÉE (toutes tailles) ── */}
+      {viewMode === 'annee' && (
+        <YearMatrixView
+          clients={clients}
+          year={selectedDate.getFullYear()}
+          filterTech={filterTech}
+          filterSite={filterSite}
+          preleveurs={preleveurs}
         />
       )}
 

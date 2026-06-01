@@ -160,6 +160,20 @@ export interface Client {
   montantTotal: number
   partPMC: number
   partSousTraitance: number
+  detailPrestations?: {
+    mpr1?: string
+    mpr1T?: string
+    mpr2?: string
+    mpr3?: string
+    mpr5?: string
+    mpr6Q?: string
+    mpr6T?: string
+    collecte?: string
+    boues?: string
+    coquillages?: string
+    debit?: string
+    autres?: string
+  }
   plans: Plan[]
   terrain?: TerrainEntry[]
   numBC?: string

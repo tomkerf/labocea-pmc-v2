@@ -53,97 +53,106 @@ export default function PlanningHeader({
         style={{ borderBottom:'1px solid var(--color-border-subtle)', background:'var(--color-bg-secondary)' }}>
 
         {/* Ligne 1 : navigation période + toggle vue */}
-        <div className="flex items-center justify-between px-4 md:px-6 pt-4 pb-3">
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={prev} className="p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
-              onMouseEnter={e=>(e.currentTarget.style.background='var(--color-bg-tertiary)')}
-              onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
-              <ChevronLeft size={18} />
-            </button>
-            <span className="text-sm font-semibold min-w-[120px] md:min-w-[180px] text-center" style={{ color:'var(--color-text-primary)' }}>
-              {periodLabel}
-            </span>
-            <button type="button" onClick={next} className="p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
-              onMouseEnter={e=>(e.currentTarget.style.background='var(--color-bg-tertiary)')}
-              onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
-              <ChevronRight size={18} />
-            </button>
-            <button type="button" onClick={goToday}
-              className="hidden md:block px-2.5 py-1 rounded-lg text-xs font-medium ml-1"
-              style={{ background:'var(--color-bg-tertiary)', color:'var(--color-text-secondary)', border:'1px solid var(--color-border-subtle)' }}>
-              Aujourd'hui
-            </button>
-            <button type="button" onClick={() => setShowMiniCal(v => !v)}
-              className="hidden md:flex items-center justify-center w-7 h-7 rounded-lg ml-1"
-              style={{
-                background: showMiniCal ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)',
-                color: showMiniCal ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                border: '1px solid var(--color-border-subtle)',
-              }}
-              title="Mini-calendrier">
-              <Calendar size={13} />
-            </button>
+        <div className="flex flex-col md:flex-row md:items-center justify-between px-4 md:px-6 pt-3 md:pt-4 pb-3 gap-3 md:gap-0">
+          
+          <div className="flex items-center justify-between md:justify-start gap-2 w-full md:w-auto">
+            {/* Nav Période */}
+            <div className="flex items-center gap-1 md:gap-2">
+              <button type="button" onClick={prev} className="p-1 md:p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
+                onMouseEnter={e=>(e.currentTarget.style.background='var(--color-bg-tertiary)')}
+                onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
+                <ChevronLeft size={18} />
+              </button>
+              <span className="text-sm font-semibold min-w-[100px] md:min-w-[180px] text-center" style={{ color:'var(--color-text-primary)' }}>
+                {periodLabel}
+              </span>
+              <button type="button" onClick={next} className="p-1 md:p-1.5 rounded-lg" style={{ color:'var(--color-text-secondary)' }}
+                onMouseEnter={e=>(e.currentTarget.style.background='var(--color-bg-tertiary)')}
+                onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
+                <ChevronRight size={18} />
+              </button>
+            </div>
 
-            {/* Bouton Carte mis en valeur séparément avec un icône Map premium (à droite du Mini-calendrier) */}
-            <button type="button" onClick={() => switchView(viewMode === 'carte' ? 'semaine' : 'carte')}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] ml-1 shrink-0"
-              style={{
-                background: viewMode === 'carte' ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
-                color: viewMode === 'carte' ? 'white' : 'var(--color-text-primary)',
-                border: viewMode === 'carte' ? '1px solid transparent' : '1px solid var(--color-border-subtle)',
-                boxShadow: viewMode === 'carte' ? 'none' : 'var(--shadow-card)',
-                cursor: 'pointer'
-              }}
-              title={viewMode === 'carte' ? 'Quitter la carte' : 'Afficher la carte'}
-            >
-              {viewMode === 'carte' ? (
-                <X size={13} style={{ color: 'white' }} />
-              ) : (
-                <MapIcon size={13} style={{ color: 'var(--color-accent)' }} />
-              )}
-              <span>{viewMode === 'carte' ? 'Fermer' : 'Carte'}</span>
-            </button>
-            <button type="button" onClick={() => { const v = !showRain; setShowRain(v); localStorage.setItem('planning_show_rain', String(v)) }}
-              className="flex items-center justify-center rounded-lg text-xs font-medium transition-all hover:scale-[1.02] active:scale-[0.98] ml-1 shrink-0"
-              title={showRain ? 'Temps de pluie activé' : 'Temps de pluie désactivé'}
-              style={{
-                width: 56, height: 30,
-                background: showRain ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
-                color: showRain ? 'white' : 'var(--color-text-primary)',
-                border: `1px solid ${showRain ? 'transparent' : 'var(--color-border-subtle)'}`,
-                boxShadow: showRain ? 'none' : 'var(--shadow-card)',
-              }}>
-              <span className="text-sm">🌧</span>
-            </button>
+            {/* Actions rapides */}
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <button type="button" onClick={goToday}
+                className="hidden md:block px-2.5 py-1 rounded-lg text-xs font-medium"
+                style={{ background:'var(--color-bg-tertiary)', color:'var(--color-text-secondary)', border:'1px solid var(--color-border-subtle)' }}>
+                Aujourd'hui
+              </button>
+              <button type="button" onClick={() => setShowMiniCal(v => !v)}
+                className="hidden md:flex items-center justify-center w-7 h-7 rounded-lg"
+                style={{
+                  background: showMiniCal ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)',
+                  color: showMiniCal ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                  border: '1px solid var(--color-border-subtle)',
+                }}
+                title="Mini-calendrier">
+                <Calendar size={13} />
+              </button>
+
+              <button type="button" onClick={() => switchView(viewMode === 'carte' ? 'semaine' : 'carte')}
+                className="px-2.5 md:px-3 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
+                style={{
+                  background: viewMode === 'carte' ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                  color: viewMode === 'carte' ? 'white' : 'var(--color-text-primary)',
+                  border: viewMode === 'carte' ? '1px solid transparent' : '1px solid var(--color-border-subtle)',
+                  boxShadow: viewMode === 'carte' ? 'none' : 'var(--shadow-card)',
+                  cursor: 'pointer'
+                }}
+                title={viewMode === 'carte' ? 'Quitter la carte' : 'Afficher la carte'}
+              >
+                {viewMode === 'carte' ? (
+                  <X size={13} style={{ color: 'white' }} />
+                ) : (
+                  <MapIcon size={13} style={{ color: 'var(--color-accent)' }} />
+                )}
+                <span className="hidden md:inline">{viewMode === 'carte' ? 'Fermer' : 'Carte'}</span>
+              </button>
+
+              <button type="button" onClick={() => { const v = !showRain; setShowRain(v); localStorage.setItem('planning_show_rain', String(v)) }}
+                className="flex items-center justify-center rounded-lg text-xs font-medium transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
+                title={showRain ? 'Temps de pluie activé' : 'Temps de pluie désactivé'}
+                style={{
+                  width: 40, height: 30, // Plus compact sur mobile
+                  background: showRain ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                  color: showRain ? 'white' : 'var(--color-text-primary)',
+                  border: `1px solid ${showRain ? 'transparent' : 'var(--color-border-subtle)'}`,
+                  boxShadow: showRain ? 'none' : 'var(--shadow-card)',
+                }}>
+                <span className="text-sm">🌧</span>
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Boutons d'export */}
-            <button type="button"
-              onClick={onExportPdf}
-              className="px-2.5 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] cursor-pointer"
-              title="Exporter la feuille de route PDF"
-            >
-              <Printer size={13} style={{ color: 'var(--color-text-secondary)' }} />
-              <span className="hidden md:inline">Feuille de route</span>
-            </button>
-            <button type="button"
-              onClick={onExportExcel}
-              className="px-2.5 py-1.5 text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] cursor-pointer mr-1"
-              title="Exporter au format Excel"
-            >
-              <FileSpreadsheet size={13} style={{ color: 'var(--color-success)' }} />
-              <span className="hidden md:inline">Excel</span>
-            </button>
+          {/* Toggle de vue et exports */}
+          <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
+            <div className="flex gap-1">
+              <button type="button"
+                onClick={onExportPdf}
+                className="hidden md:flex px-2.5 py-1.5 text-xs font-medium rounded-lg items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] cursor-pointer"
+                title="Exporter la feuille de route PDF"
+              >
+                <Printer size={13} style={{ color: 'var(--color-text-secondary)' }} />
+                <span>Feuille de route</span>
+              </button>
+              <button type="button"
+                onClick={onExportExcel}
+                className="hidden md:flex px-2.5 py-1.5 text-xs font-medium rounded-lg items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] cursor-pointer"
+                title="Exporter au format Excel"
+              >
+                <FileSpreadsheet size={13} style={{ color: 'var(--color-success)' }} />
+                <span className="hidden md:inline">Excel</span>
+              </button>
+            </div>
 
-            {/* Sélecteur de période de calendrier */}
-            <div className="relative flex p-0.5 rounded-lg shrink-0"
+            <div className="relative flex p-0.5 rounded-lg shrink-0 w-full md:w-auto overflow-x-auto no-scrollbar"
               style={{ border:'1px solid var(--color-border-subtle)', background:'var(--color-bg-tertiary)' }}>
-              {(['jour','semaine','mois'] as ViewMode[]).map(m => (
+              {(['jour','semaine','mois','annee'] as ViewMode[]).map(m => (
                 <button type="button"
                   key={m}
                   onClick={() => switchView(m)}
-                  className="relative px-3 py-1.5 text-xs font-medium capitalize z-10 transition-colors duration-200"
+                  className="relative px-3 py-1.5 text-xs font-medium capitalize z-10 transition-colors duration-200 flex-1 md:flex-none text-center"
                   style={{
                     color: viewMode === m ? 'white' : 'var(--color-text-secondary)'
                   }}
@@ -217,7 +226,7 @@ export default function PlanningHeader({
                 <motion.button
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => { setFilterTech(''); localStorage.removeItem('planning_filter_tech') }}
+                  onClick={() => { setFilterTech(''); localStorage.setItem('planning_filter_tech', 'ALL') }}
                   className="cursor-pointer"
                   style={{
                     width: 28, height: 28, borderRadius: '50%',
@@ -240,7 +249,7 @@ export default function PlanningHeader({
                       key={t}
                       whileHover={{ scale: 1.08 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => { const v=t===filterTech?'':t; setFilterTech(v); if (v) localStorage.setItem('planning_filter_tech',v); else localStorage.removeItem('planning_filter_tech') }}
+                      onClick={() => { const v=t===filterTech?'':t; setFilterTech(v); if (v) localStorage.setItem('planning_filter_tech',v); else localStorage.setItem('planning_filter_tech', 'ALL') }}
                       title={tooltip}
                       className="cursor-pointer rounded-full p-0"
                       style={{
@@ -267,7 +276,7 @@ export default function PlanningHeader({
             <span className="font-semibold">
               {monthPoolCount} prélèvement{monthPoolCount > 1 ? 's' : ''} à planifier ce mois
             </span>
-            <span className="font-normal" style={{ opacity: 0.75 }}>
+            <span className="hidden md:inline font-normal" style={{ opacity: 0.75 }}>
               {' '}— clic droit sur un jour pour les assigner
             </span>
           </p>

@@ -2,6 +2,27 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 90 — Détail analytique et Vue Matrice Annuelle
+**1er juin 2026**
+
+### Features ajoutées
+
+**Détail analytique (Facturation)**
+- Ajout d'une nouvelle section "Détail analytique (Facturation / Prestations)" dans `ClientInfoForm.tsx`.
+- Ajout des champs (MPR1, Collecte, Boues, etc.) pour correspondre à l'onglet "Base de travail" du fichier Excel de Cindy.
+- Stockage de ces informations dans un nouvel objet `detailPrestations` du document client.
+
+**Vue Matrice Annuelle (Planning)**
+- Nouveau mode de vue "Année" ajouté dans le sélecteur `PlanningHeader.tsx`.
+- Création du composant `YearMatrixView.tsx` reproduisant le tableau de pilotage annuel (lignes : client + point, colonnes : 12 mois).
+- Cellules avec pastilles de couleurs (statut) et date au survol.
+- Intégration du sticky scroll (légende + mois + colonne client) pour garder les repères lors du défilement vertical et horizontal.
+
+### Prochaines étapes
+- Ordre de passage dans la tournée (drag & drop ou heure planifiée).
+
+---
+
 ## Session 89 — Filtres site + technicien sur le Planning
 **1er juin 2026**
 

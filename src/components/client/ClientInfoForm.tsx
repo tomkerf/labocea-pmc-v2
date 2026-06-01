@@ -90,6 +90,57 @@ export function ClientInfoForm({ client, sitesInput, update, onSitesChange }: Pr
         </Field>
       </Section>
 
+      <Section title="Détail analytique (Facturation / Prestations)">
+        <Field label="MPR1">
+          <input aria-label="MPR1" value={client.detailPrestations?.mpr1 || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, mpr1: e.target.value })}
+            className="field-input" placeholder="ex: 1500" />
+        </Field>
+        <Field label="MPR1 T">
+          <input aria-label="MPR1 T" value={client.detailPrestations?.mpr1T || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, mpr1T: e.target.value })}
+            className="field-input" />
+        </Field>
+        <Field label="MPR2">
+          <input aria-label="MPR2" value={client.detailPrestations?.mpr2 || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, mpr2: e.target.value })}
+            className="field-input" />
+        </Field>
+        <Field label="MPR3">
+          <input aria-label="MPR3" value={client.detailPrestations?.mpr3 || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, mpr3: e.target.value })}
+            className="field-input" />
+        </Field>
+        <Field label="MPR5">
+          <input aria-label="MPR5" value={client.detailPrestations?.mpr5 || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, mpr5: e.target.value })}
+            className="field-input" />
+        </Field>
+        <Field label="MPR6 Q">
+          <input aria-label="MPR6 Q" value={client.detailPrestations?.mpr6Q || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, mpr6Q: e.target.value })}
+            className="field-input" />
+        </Field>
+        <Field label="MPR6 T">
+          <input aria-label="MPR6 T" value={client.detailPrestations?.mpr6T || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, mpr6T: e.target.value })}
+            className="field-input" />
+        </Field>
+        <Field label="Collecte">
+          <input aria-label="Collecte" value={client.detailPrestations?.collecte || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, collecte: e.target.value })}
+            className="field-input" />
+        </Field>
+        <Field label="Boues/SDT">
+          <input aria-label="Boues/SDT" value={client.detailPrestations?.boues || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, boues: e.target.value })}
+            className="field-input" />
+        </Field>
+        <Field label="Coquillages">
+          <input aria-label="Coquillages" value={client.detailPrestations?.coquillages || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, coquillages: e.target.value })}
+            className="field-input" />
+        </Field>
+        <Field label="Débit">
+          <input aria-label="Débit" value={client.detailPrestations?.debit || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, debit: e.target.value })}
+            className="field-input" />
+        </Field>
+        <Field label="Autres" last>
+          <input aria-label="Autres" value={client.detailPrestations?.autres || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, autres: e.target.value })}
+            className="field-input" />
+        </Field>
+      </Section>
+
       <Section title="Contrat">
         <Field label="N° Devis">
           <input aria-label="N° Devis" value={client.numDevis} onChange={(e) => update('numDevis', e.target.value)}
