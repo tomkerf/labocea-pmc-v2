@@ -291,6 +291,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-01 | Bugfix planning ✅ | Couleur rapport dans EventPill corrigée : utilise techColor au lieu de statusColor fixe. |
 | 2026-06-01 | Polissage UI/UX ✅ | Dashboard : bannière 🌧 à la place de "Pluie prévue" dans le planning, tâches retirées du widget planning. Page Tâches : dates en français, icônes edit/delete au hover, priorités !/!!/!!!, couleur avatar via getTechColor. |
 | 2026-05-31 | Bugfixes + Qualité ✅ | Bilan 24h : ghost events exclus, lignes séparées par site, badge J1/J2 corrigé, sous-titre nettoyé. UI planning : pill retard supprimée, bouton 🌧 repositionné et rectangulaire. Hooks useWeather/useVisites : setState-in-effect corrigé. Accessibilité : 137 aria-label ajoutés (score react-doctor control-has-associated-label → 0). |
+| 2026-06-01 | Planning — Filtres site + tech ✅ | Filtre par site (Quimper/Brest) + avatars circulaires pour les pills technicien. Fix usePreleveurs (collection vide → preleveurs-v1/data). Fix règles Firestore preleveurs-v1. |
 
 ---
 

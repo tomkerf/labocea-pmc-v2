@@ -2,6 +2,41 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 89 — Filtres site + technicien sur le Planning
+**1er juin 2026**
+
+### Features ajoutées
+
+**Filtre par site géographique (Quimper / Brest)**
+- Nouveau state `filterSite` dans `PlanningPage.tsx`, persisté dans `localStorage('planning_filter_site')`
+- `visibleTechs` dérivé via `useMemo` : filtre `allTechs` par `preleveur.site === filterSite` si un site est sélectionné
+- `useEffect` : reset automatique de `filterTech` si le tech sélectionné n'appartient plus aux techs visibles après changement de site
+- Pills site (Quimper / Brest) affichées avec séparateur visuel avant les pills tech
+- Bouton "Tous les sites" → cercle 28px avec ✦, même gabarit que les avatars
+
+**Avatars circulaires pour les pills technicien**
+- Remplacement des pills texte "Prénom · CODE" par des `UserAvatar` (28px, initiales colorées)
+- Anneau coloré (`outline`) quand le tech est actif
+- Tooltip au survol avec nom complet + code
+- Bouton "Tous" techniciens → même cercle 28px cohérent
+
+### Bugs corrigés
+
+**`usePreleveurs` lisait une collection vide**
+- Cause racine : le hook pointait vers la collection `preleveurs` (vide) alors que les données sont dans `preleveurs-v1/data` (document unique avec tableau `list`)
+- Fix : migration vers `doc(db, 'preleveurs-v1', 'data')` + extraction de `snap.data()?.list`
+
+**Règles Firestore manquantes pour `preleveurs-v1`**
+- Cause racine : `firestore.rules` n'avait pas de règle pour la collection `preleveurs-v1`, bloquant la lecture côté client
+- Fix : ajout `match /preleveurs-v1/{docId} { allow read: if isAuthenticated() }`
+- Règles déployées en production Firebase
+
+### Données Firestore
+- Tous les préleveurs avaient déjà le champ `site` renseigné (Quimper / Brest) — aucune migration nécessaire
+
+### Prochaines étapes
+- Ordre de passage dans la tournée (drag & drop ou heure planifiée)
+
 
 ## Session 88 — Fix couleur avatar rapport planning
 **1 juin 2026**
