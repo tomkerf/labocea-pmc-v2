@@ -165,7 +165,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                               fontWeight: isOverdue(todo.dueDate) ? 600 : 'normal',
                             }}
                           >
-                            📅 Échéance : {todo.dueDate} {isOverdue(todo.dueDate) && '(en retard)'}
+                            📅 Échéance : {todo.dueDate.split('-').reverse().join('/')} {isOverdue(todo.dueDate) && '(en retard)'}
                           </span>
                         )}
                         {todo.clientNom && (
