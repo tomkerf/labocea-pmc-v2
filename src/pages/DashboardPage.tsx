@@ -85,6 +85,7 @@ export default function DashboardPage() {
   const {
     missionsCeMois, verifiTotal, verifiConformes, conformitePct,
     aCalibrrer, rapportsAFaireMoi, jourItems, lendemainItems, parcEtat,
+    hasRainToday, hasRainTomorrow,
     prelevementsEnRetard, prelevementsPluie, maintenancesActives, metrologieAlertes,
     techOptions: rawTechOptions,
   } = useDashboardStats({ clients, verifications, equipements, evenements, maintenances, todos, uid, initiales, isGeneraliste })
@@ -291,6 +292,13 @@ export default function DashboardPage() {
                   </div>
 
                 </div>
+                {((planningMode === 'today' && hasRainToday) || (planningMode === 'tomorrow' && hasRainTomorrow)) && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl mb-2 text-sm font-medium"
+                    style={{ background: 'rgba(0,113,227,0.07)', color: 'var(--color-accent)', border: '1px solid rgba(0,113,227,0.15)' }}>
+                    <span>🌧</span>
+                    <span>Temps de pluie prévu</span>
+                  </div>
+                )}
                 {activeItems.length === 0 ? (
                   <EmptyCard>Aucune intervention ni événement{planningMode === 'today' ? " aujourd'hui" : " demain"}.</EmptyCard>
                 ) : (

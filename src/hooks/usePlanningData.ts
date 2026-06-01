@@ -177,9 +177,9 @@ export function usePlanningData({
     })
 
     const PRIORITY_COLORS: Record<string, { bg: string; color: string; label: string }> = {
-      haute:   { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)',   label: '⏫ Tâche' },
-      moyenne: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)',   label: '➖ Tâche' },
-      basse:   { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', label: '⏬ Tâche' },
+      haute:   { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)',   label: '!!! Tâche' },
+      moyenne: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)',   label: '!! Tâche' },
+      basse:   { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', label: '! Tâche' },
     }
     clients.forEach((client: Client) => {
       client.plans.forEach(plan => {

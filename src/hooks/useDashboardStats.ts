@@ -261,6 +261,7 @@ export function useDashboardStats({
         return ev.date === todayISO
       })
       .forEach((ev: EvenementPersonnel) => {
+        if (ev.type === 'meteo') return
         const cfg = EVENEMENT_CFG[ev.type] ?? EVENEMENT_CFG.autre
         const evSub = [ev.createdByInitiales, ev.notes].filter(Boolean).join(' · ') || cfg.label
         const evModalEvent: ModalEventRef = {
@@ -270,13 +271,6 @@ export function useDashboardStats({
         }
         items.push({ kind: 'evenement', time: ev.heure ?? '', title: ev.titre, sub: evSub, badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, modalEvent: evModalEvent })
       })
-
-    const TODO_COLORS = { haute: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)', dot: 'var(--color-text-primary)', label: '⏫ Tâche' }, moyenne: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)', dot: 'var(--color-text-primary)', label: '➖ Tâche' }, basse: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', dot: 'var(--color-text-secondary)', label: '⏬ Tâche' } }
-    todos.forEach((t: Todo) => {
-      if (!t.dueDate || t.statut === 'termine' || t.dueDate !== todayISO) return
-      const cfg = TODO_COLORS[t.priorite] ?? TODO_COLORS.basse
-      items.push({ kind: 'todo', time: '', title: t.titre, sub: 'Tâche', badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, link: '/todos' })
-    })
 
     return items.sort((a, b) => {
       if (!a.time && !b.time) return 0
@@ -344,6 +338,7 @@ export function useDashboardStats({
         return ev.date === tomorrowISO
       })
       .forEach((ev: EvenementPersonnel) => {
+        if (ev.type === 'meteo') return
         const cfg = EVENEMENT_CFG[ev.type] ?? EVENEMENT_CFG.autre
         const evSub = [ev.createdByInitiales, ev.notes].filter(Boolean).join(' · ') || cfg.label
         const evModalEvent: ModalEventRef = {
@@ -353,13 +348,6 @@ export function useDashboardStats({
         }
         items.push({ kind: 'evenement', time: ev.heure ?? '', title: ev.titre, sub: evSub, badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, modalEvent: evModalEvent })
       })
-
-    const TODO_COLORS = { haute: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)', dot: 'var(--color-text-primary)', label: '⏫ Tâche' }, moyenne: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)', dot: 'var(--color-text-primary)', label: '➖ Tâche' }, basse: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', dot: 'var(--color-text-secondary)', label: '⏬ Tâche' } }
-    todos.forEach((t: Todo) => {
-      if (!t.dueDate || t.statut === 'termine' || t.dueDate !== tomorrowISO) return
-      const cfg = TODO_COLORS[t.priorite] ?? TODO_COLORS.basse
-      items.push({ kind: 'todo', time: '', title: t.titre, sub: 'Tâche', badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, link: '/todos' })
-    })
 
     return items.sort((a, b) => {
       if (!a.time && !b.time) return 0
@@ -435,6 +423,16 @@ export function useDashboardStats({
     return Array.from(codes).sort().map(code => ({ code, label: code }))
   }, [clients])
 
+  const hasRainToday = useMemo(() => {
+    const todayISO = localISO(new Date())
+    return evenements.some((ev: EvenementPersonnel) => ev.type === 'meteo' && ev.date === todayISO)
+  }, [evenements])
+
+  const hasRainTomorrow = useMemo(() => {
+    const tomorrowISO = localISO(new Date(Date.now() + 86_400_000))
+    return evenements.some((ev: EvenementPersonnel) => ev.type === 'meteo' && ev.date === tomorrowISO)
+  }, [evenements])
+
   return {
     missionsCeMois,
     verifiTotal, verifiConformes, conformitePct,
@@ -444,6 +442,8 @@ export function useDashboardStats({
     rapportsEnvoyes,
     jourItems,
     lendemainItems,
+    hasRainToday,
+    hasRainTomorrow,
     parcEtat,
     prelevementsEnRetard,
     prelevementsPluie,

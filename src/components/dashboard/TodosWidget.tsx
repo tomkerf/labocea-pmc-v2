@@ -41,9 +41,9 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
   }
 
   const prioColors: Record<string, { bg: string; text: string; label: string; icon: string }> = {
-    haute:   { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-primary)',   label: 'Haute',   icon: '⏫' },
-    moyenne: { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-primary)',   label: 'Moyenne', icon: '➖' },
-    basse:   { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-secondary)', label: 'Basse',   icon: '⏬' },
+    haute:   { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-primary)',   label: 'Haute',   icon: '!!!' },
+    moyenne: { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-primary)',   label: 'Moyenne', icon: '!!' },
+    basse:   { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-secondary)', label: 'Basse',   icon: '!' },
   }
 
   // Permet de vérifier si une date d'échéance est dépassée (excluant aujourd'hui)

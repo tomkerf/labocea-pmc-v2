@@ -15,6 +15,7 @@ import { createTodo, saveTodo, deleteTodo } from '@/services/todoService'
 import type { Todo, TodoPriority, TodoStatus } from '@/types'
 import { SkeletonList } from '@/components/ui/Skeleton'
 import UserAvatar from '@/components/ui/UserAvatar'
+import { getTechColor } from '@/lib/planningUtils'
 
 export default function TodosPage() {
   // ── Listeners ──
@@ -205,9 +206,9 @@ export default function TodosPage() {
   }
 
   const prioColors: Record<string, { text: string; bg: string; label: string; icon: string }> = {
-    haute:   { text: 'var(--color-text-primary)',   bg: 'var(--color-bg-tertiary)', label: 'Haute',   icon: '⏫' },
-    moyenne: { text: 'var(--color-text-primary)',   bg: 'var(--color-bg-tertiary)', label: 'Moyenne', icon: '➖' },
-    basse:   { text: 'var(--color-text-secondary)', bg: 'var(--color-bg-tertiary)', label: 'Basse',   icon: '⏬' },
+    haute:   { text: 'var(--color-text-primary)',   bg: 'var(--color-bg-tertiary)', label: 'Haute',   icon: '!!!' },
+    moyenne: { text: 'var(--color-text-primary)',   bg: 'var(--color-bg-tertiary)', label: 'Moyenne', icon: '!!' },
+    basse:   { text: 'var(--color-text-secondary)', bg: 'var(--color-bg-tertiary)', label: 'Basse',   icon: '!' },
   }
 
   return (
@@ -708,9 +709,9 @@ function TodoRow({
   const isCompleted = todo.statut === 'termine'
   const isCnfDelete = deletingId === todo.id
   const colors = prioColors[todo.priorite]
-  
-  // Raccourci technicien
+
   const assigneeInitiales = todo.assignedToInitiales || (todo.assignedTo === 'equipe' ? 'Éq' : undefined)
+  const assigneeColor = assigneeInitiales ? getTechColor(assigneeInitiales).color : undefined
 
   return (
     <motion.div
@@ -825,7 +826,7 @@ function TodoRow({
               👥
             </div>
           ) : (
-            <UserAvatar initiales={assigneeInitiales} size={24} fontSize={9} />
+            <UserAvatar initiales={assigneeInitiales} color={assigneeColor} size={24} fontSize={9} />
           )}
         </div>
 
