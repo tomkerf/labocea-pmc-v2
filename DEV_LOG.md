@@ -2,6 +2,33 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 91 — Polish matrice annuelle (bimensuel + UX)
+**1er juin 2026**
+
+### Bugfixes
+
+**Ligne DREAL CORPEP — plan Bimensuel**
+- Cause : `generateSamplings` crée 2 prélèvements pour les 12 mois, `YearMatrixView` n'en affichait qu'un (le dernier écrasait le premier), et les mois hors-saison affichaient des ✗ "non_effectué".
+- Fix : `YearMatrixView` collecte maintenant jusqu'à 2 samplings par mois dans `pairsByMonth`. Les mois où les 2 sont `non_effectue` sont masqués (traitement hors-saison).
+
+### UX / Polish
+
+**Dots bimensuels**
+- Affichage de 2 dots chevauchants (overlap -7px) au lieu d'un seul par mois.
+- Taille harmonisée à 20px (w-5 h-5) identique aux dots mensuels.
+- Z-index corrigé : le statut le plus critique passe au premier plan (en retard > planifié > fait > non effectué).
+- Centrage dans la cellule (conteneur 32px fixe).
+
+**Réduction taille des dots (tous plans)**
+- Dots réduits de 24px à 20px pour réduire la densité visuelle sur 12 colonnes.
+
+**Badge "manuel" sur plans Personnalisés**
+- Ajout d'un badge gris discret "manuel" dans la colonne fréquence pour distinguer les plans à saisie manuelle des fréquences calculées.
+
+### Prochaines étapes
+- Point 1 : uniformiser les icônes dans les dots (✓ dans tous les statuts ou aucun)
+- Vérifier le rendu mobile de la matrice annuelle
+
 ## Session 90 — Détail analytique et Vue Matrice Annuelle
 **1er juin 2026**
 
