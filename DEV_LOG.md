@@ -3,6 +3,48 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 86 — Bugfixes Bilan 24h, UI Planning, Hooks & Accessibilité
+**31 mai 2026**
+
+### Bugs corrigés
+
+**Bilan 24h — ghost events incorrectement affichés**
+- Cause racine : le filtre dans `usePlanningCalendar` ne vérifiait pas `!e.isGhost`, donc les prélèvements "retirés" ou "reportés" (qui conservent leur `dateFin`) apparaissaient dans la bande Bilans 24h.
+- Fix : ajout de `&& !e.isGhost` dans le filtre `dayJ1s`.
+
+**Bilan 24h — bilans regroupés par client au lieu de lignes séparées**
+- Cause racine : appel à `groupByClient()` dans la bande bilan fusionnait plusieurs sites (ex. Le Glazik + Abattoir Croissant) en une seule pastille ×2.
+- Fix : suppression de `groupByClient()` dans le calcul `bilanBand` — chaque sampling J1 a sa propre ligne.
+
+**Badge J1/J2 — les deux cellules affichaient "J1"**
+- Cause racine : le proxy J2 hérite du spread de J1 incluant `dateFin`, donc `isJ1 = !!event.dateFin` était `true` pour les deux. Le ternaire `isJ1 ? 'J1' : 'J2'` retournait toujours J1.
+- Fix dans `EventPill.tsx` : condition inversée en `isJ2 ? 'J2' : 'J1'`.
+
+**Sous-titre redondant dans les bilans**
+- Les sous-titres affichaient "EU · Le Glazik · Bilan 24h J1" — le suffixe "Bilan 24h J1/J2" était superflu.
+- Fix dans `usePlanningData.ts` : suppression du suffixe, le badge J1/J2 suffit.
+
+**Hooks — setState dans useEffect sur changement de prop**
+- `useWeather.ts` : `setResult(EMPTY)` et `setResult(loading: true)` dans l'effet → forçait un rendu intermédiaire incohérent. Remplacé par une comparaison prev-key pendant le rendu.
+- `useVisites.ts` : `setLoading(false)` quand `!linkedId` dans l'effet. Remplacé par `useState(!!linkedId)` + comparaison `prevLinkedId` pendant le rendu.
+
+### Améliorations UI
+
+**Header planning simplifié**
+- Suppression de la pill "⚠ X en retard" (trop encombrante, le filtre reste actif en code).
+- Bouton 🌧 déplacé de la ligne des filtres vers la barre de navigation principale, à droite du bouton "Carte".
+- Bouton 🌧 rendu rectangulaire (56×30px) pour cohérence avec les boutons voisins.
+
+### Accessibilité
+
+**137 → 0 warnings `control-has-associated-label`**
+- Ajout systématique d'`aria-label` (en français) sur tous les contrôles interactifs sans label visible dans 20+ fichiers : boutons icône-only, inputs/selects/textareas dans formulaires, modales, vues planning.
+
+### Prochaines étapes
+- Ordre de passage dans la tournée (heure planifiée ou drag & drop)
+
+---
+
 ## Session 85 — Intégration des Tâches et Rapports au Planning
 **31 mai 2026**
 
