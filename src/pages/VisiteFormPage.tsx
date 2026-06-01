@@ -168,7 +168,7 @@ export default function VisiteFormPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-6 h-6 rounded-full border-2 animate-spin"
+        <div className="size-6 rounded-full border-2 animate-spin"
           style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
       </div>
     )
@@ -297,14 +297,14 @@ interface PointCardProps {
   onPhotoDelete: (url: string) => void
 }
 
+const FAISABILITE: { key: FaisabiliteVisite; label: string; color: string }[] = [
+  { key: 'ok', label: '✓ OK', color: 'var(--color-success)' },
+  { key: 'difficile', label: '⚠ Difficile', color: 'var(--color-warning)' },
+  { key: 'impossible', label: '✗ Impossible', color: 'var(--color-danger)' },
+]
+
 function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, onPhotoAdd, onPhotoDelete }: PointCardProps) {
   const fileRef = useRef<HTMLInputElement>(null)
-
-  const FAISABILITE: { key: FaisabiliteVisite; label: string; color: string }[] = [
-    { key: 'ok', label: '✓ OK', color: 'var(--color-success)' },
-    { key: 'difficile', label: '⚠ Difficile', color: 'var(--color-warning)' },
-    { key: 'impossible', label: '✗ Impossible', color: 'var(--color-danger)' },
-  ]
 
   return (
     <div className="rounded-xl p-5"
@@ -398,12 +398,12 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
             {point.photos.map(url => (
               <div key={url} className="relative rounded-lg overflow-hidden shrink-0"
                 style={{ width: 96, height: 96, border: '1px solid var(--color-border)' }}>
-                <a href={url} target="_blank" rel="noreferrer" className="block w-full h-full">
-                  <img src={url} alt="photo" className="w-full h-full object-cover cursor-zoom-in" loading="lazy" />
+                <a href={url} target="_blank" rel="noreferrer" className="block size-full">
+                  <img src={url} alt="photo" className="size-full object-cover cursor-zoom-in" loading="lazy" />
                 </a>
                 <button type="button" onClick={() => onPhotoDelete(url)}
                   aria-label="Supprimer cette photo"
-                  className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center bg-black/60 text-white hover:bg-black/80 transition-colors">
+                  className="absolute top-1 right-1 size-5 rounded-full flex items-center justify-center bg-black/60 text-white hover:bg-black/80 transition-colors">
                   <X size={10} strokeWidth={3} />
                 </button>
               </div>

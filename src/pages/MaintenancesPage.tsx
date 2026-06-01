@@ -112,7 +112,7 @@ export default function MaintenancesPage() {
         {/* Pills statut */}
         <div className="flex gap-2 flex-wrap">
           {STATUTS_FILTER.map((f) => (
-            <button key={f.value}
+            <button type="button" key={f.value}
               onClick={() => setFilterStatut(f.value)}
               className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
               style={{
@@ -132,7 +132,7 @@ export default function MaintenancesPage() {
             const Icon = cfg.icon
             return (
               <div key={key} className="flex items-center gap-1.5">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+                <div className="size-6 rounded-full flex items-center justify-center shrink-0"
                   style={{ background: cfg.bg }}>
                   <Icon size={12} strokeWidth={2} color={cfg.color} />
                 </div>
@@ -169,7 +169,7 @@ export default function MaintenancesPage() {
         <SkeletonList count={4} variant="card" />
       ) : maintenances.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
+          <div className="size-16 rounded-2xl flex items-center justify-center"
             style={{ background: 'var(--color-accent-light)' }}>
             <Hammer size={28} strokeWidth={1.5} style={{ color: 'var(--color-accent)' }} />
           </div>
@@ -219,7 +219,7 @@ export default function MaintenancesPage() {
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-bg-secondary)')}
               >
                 {/* Icône type */}
-                <div className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+                <div className="size-11 rounded-full flex items-center justify-center shrink-0"
                   style={{ background: typeCfg.bg }}>
                   <TypeIcon size={18} strokeWidth={1.8} color={typeCfg.color} />
                 </div>

@@ -77,7 +77,7 @@ export default function BugReportModal({ onClose }: Props) {
               Signaler un problème
             </h2>
           </div>
-          <button onClick={onClose} className="p-1 rounded-md"
+          <button type="button" onClick={onClose} className="p-1 rounded-md"
             style={{ color: 'var(--color-text-tertiary)' }}>
             <X size={18} />
           </button>
@@ -106,7 +106,7 @@ export default function BugReportModal({ onClose }: Props) {
         </p>
 
         <div className="flex gap-2 justify-end">
-          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm"
+          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm"
             style={{ color: 'var(--color-text-secondary)', background: 'var(--color-bg-tertiary)' }}>
             Annuler
           </button>

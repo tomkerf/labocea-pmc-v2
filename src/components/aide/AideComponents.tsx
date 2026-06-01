@@ -9,7 +9,7 @@ export function Section({ icon: Icon, title, children }: {
     <section className="rounded-xl p-6"
       style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+        <div className="size-9 rounded-lg flex items-center justify-center shrink-0"
           style={{ background: 'var(--color-accent-light)' }}>
           <Icon size={18} strokeWidth={1.8} style={{ color: 'var(--color-accent)' }} />
         </div>
@@ -25,7 +25,7 @@ export function Section({ icon: Icon, title, children }: {
 export function Step({ num, children }: { num: number; children: React.ReactNode }) {
   return (
     <div className="flex gap-3 items-start">
-      <span className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0 mt-0.5"
+      <span className="size-5 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0 mt-0.5"
         style={{ background: 'var(--color-accent)', color: 'white' }}>
         {num}
       </span>
@@ -43,7 +43,7 @@ export function StatusBadge({ bg, color, dot, label, desc }: {
     <div className="flex items-start gap-3 py-3" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0"
         style={{ background: bg, color }}>
-        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dot }} />
+        <span className="size-1.5 rounded-full shrink-0" style={{ background: dot }} />
         {label}
       </span>
       <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{desc}</p>

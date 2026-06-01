@@ -17,6 +17,12 @@ import { SkeletonList } from '@/components/ui/Skeleton'
 import UserAvatar from '@/components/ui/UserAvatar'
 import { getTechColor } from '@/lib/planningUtils'
 
+const prioColors: Record<string, { text: string; bg: string; label: string; icon: string }> = {
+  haute:   { text: 'var(--color-text-primary)',   bg: 'var(--color-bg-tertiary)', label: 'Haute',   icon: '!!!' },
+  moyenne: { text: 'var(--color-text-primary)',   bg: 'var(--color-bg-tertiary)', label: 'Moyenne', icon: '!!' },
+  basse:   { text: 'var(--color-text-secondary)', bg: 'var(--color-bg-tertiary)', label: 'Basse',   icon: '!' },
+}
+
 export default function TodosPage() {
   // ── Listeners ──
   useTodosListener()
@@ -86,7 +92,7 @@ export default function TodosPage() {
 
   // Tri des listes actives
   const sortTasks = (tasks: Todo[]) => {
-    return [...tasks].sort((a, b) => {
+    return tasks.toSorted((a, b) => {
       // Priorité haute > moyenne > basse
       const prioWeight = { haute: 3, moyenne: 2, basse: 1 }
       const prioA = prioWeight[a.priorite] || 0
@@ -105,7 +111,7 @@ export default function TodosPage() {
   
   // Les terminées sont triées par updatedAt inverse (les plus récemment fermées en premier)
   const sortedCompleted = useMemo(() => {
-    return [...listCompleted].sort((a, b) => {
+    return listCompleted.toSorted((a, b) => {
       const timeA = a.updatedAt?.toMillis() || 0
       const timeB = b.updatedAt?.toMillis() || 0
       return timeB - timeA
@@ -203,12 +209,6 @@ export default function TodosPage() {
   function isOverdue(dueDate?: string) {
     if (!dueDate) return false
     return dueDate < todayStr
-  }
-
-  const prioColors: Record<string, { text: string; bg: string; label: string; icon: string }> = {
-    haute:   { text: 'var(--color-text-primary)',   bg: 'var(--color-bg-tertiary)', label: 'Haute',   icon: '!!!' },
-    moyenne: { text: 'var(--color-text-primary)',   bg: 'var(--color-bg-tertiary)', label: 'Moyenne', icon: '!!' },
-    basse:   { text: 'var(--color-text-secondary)', bg: 'var(--color-bg-tertiary)', label: 'Basse',   icon: '!' },
   }
 
   return (
@@ -311,7 +311,7 @@ export default function TodosPage() {
           className="flex flex-col items-center justify-center py-16 px-4 rounded-xl text-center border-2 border-dashed"
           style={{ borderColor: 'var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}
         >
-          <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: 'var(--color-accent-light)' }}>
+          <div className="size-10 rounded-full flex items-center justify-center mb-3" style={{ background: 'var(--color-accent-light)' }}>
             <ListTodo size={20} style={{ color: 'var(--color-accent)' }} />
           </div>
           <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
@@ -728,7 +728,7 @@ function TodoRow({
       <button type="button"
         onClick={onToggle}
         aria-label={isCompleted ? 'Marquer comme non terminé' : 'Marquer comme terminé'}
-        className="mt-0.5 shrink-0 flex items-center justify-center w-5.5 h-5.5 rounded-full border transition-all cursor-pointer focus:outline-none"
+        className="mt-0.5 shrink-0 flex items-center justify-center size-5.5 rounded-full border transition-all cursor-pointer focus:outline-none"
         style={{
           borderColor: isCompleted ? 'var(--color-success)' : 'var(--color-border)',
           background: isCompleted ? 'var(--color-success-light)' : 'transparent',
@@ -816,7 +816,7 @@ function TodoRow({
         <div title={todo.assignedToNom || 'Équipe'}>
           {todo.assignedTo === 'equipe' ? (
             <div
-              className="flex items-center justify-center text-[9px] font-bold w-6 h-6 rounded-full border border-dashed select-none"
+              className="flex items-center justify-center text-[9px] font-bold size-6 rounded-full border border-dashed select-none"
               style={{
                 background: 'var(--color-bg-tertiary)',
                 borderColor: 'var(--color-border)',

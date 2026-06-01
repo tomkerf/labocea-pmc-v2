@@ -60,13 +60,13 @@ export function ClientPlans({
           </button>
           {!plansLocked && (
             <>
-              <button onClick={onAddSeparator}
+              <button type="button" onClick={onAddSeparator}
                 className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
                 style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
                 title="Ajouter un séparateur de section">
                 <Minus size={14} /> Séparateur
               </button>
-              <button onClick={onAddPlan}
+              <button type="button" onClick={onAddPlan}
                 className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
                 style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
                 <Plus size={14} /> Ajouter
@@ -79,7 +79,7 @@ export function ClientPlans({
       {plans.length === 0 ? (
         <div className="rounded-xl flex flex-col items-center gap-3 py-8"
           style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+          <div className="size-10 rounded-xl flex items-center justify-center"
             style={{ background: 'var(--color-accent-light)' }}>
             <Plus size={20} style={{ color: 'var(--color-accent)' }} />
           </div>
@@ -87,7 +87,7 @@ export function ClientPlans({
             <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>Aucun point de prélèvement</p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Crée le premier point pour commencer à planifier</p>
           </div>
-          <button onClick={onAddPlan}
+          <button type="button" onClick={onAddPlan}
             className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg"
             style={{ background: 'var(--color-accent)', color: 'white' }}>
             <Plus size={14} /> Ajouter un point
@@ -246,7 +246,7 @@ function SortableSeparatorRow({
           <div className="flex-1 h-px" style={{ background: 'var(--color-border)' }} />
         </div>
 
-        <button onClick={onDelete} aria-label="Supprimer le séparateur" className="shrink-0 p-1 rounded"
+        <button type="button" onClick={onDelete} aria-label="Supprimer le séparateur" className="shrink-0 p-1 rounded"
           style={{ color: isConfirmingDelete ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
           onMouseLeave={(e) => { if (!isConfirmingDelete) e.currentTarget.style.color = 'var(--color-text-tertiary)' }}>
@@ -261,12 +261,12 @@ function SortableSeparatorRow({
           <span className="text-xs font-medium flex-1" style={{ color: 'var(--color-danger)' }}>
             Supprimer ce séparateur ?
           </span>
-          <button onClick={onConfirmDelete}
+          <button type="button" onClick={onConfirmDelete}
             className="text-xs font-semibold px-2.5 py-1 rounded"
             style={{ background: 'var(--color-danger)', color: 'white' }}>
             Supprimer
           </button>
-          <button onClick={onCancelDelete}
+          <button type="button" onClick={onCancelDelete}
             className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
             Annuler
           </button>
@@ -357,12 +357,12 @@ function SortablePlanRow({
         >
           <BookOpen size={14} />
         </button>
-        <button onClick={onOpen}
+        <button type="button" onClick={onOpen}
           className="shrink-0 flex items-center gap-1 text-sm font-medium"
           style={{ color: 'var(--color-accent)' }}>
           Ouvrir <ChevronRight size={14} />
         </button>
-        <button onClick={onDelete} aria-label="Supprimer ce point" className="shrink-0 p-1 rounded"
+        <button type="button" onClick={onDelete} aria-label="Supprimer ce point" className="shrink-0 p-1 rounded"
           style={{ color: isConfirmingDelete ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
           onMouseLeave={(e) => { if (!isConfirmingDelete) e.currentTarget.style.color = 'var(--color-text-tertiary)' }}>
@@ -377,12 +377,12 @@ function SortablePlanRow({
           <span className="text-xs font-medium flex-1" style={{ color: 'var(--color-danger)' }}>
             Supprimer ce point et tous ses prélèvements ?
           </span>
-          <button onClick={onConfirmDelete}
+          <button type="button" onClick={onConfirmDelete}
             className="text-xs font-semibold px-2.5 py-1 rounded"
             style={{ background: 'var(--color-danger)', color: 'white' }}>
             Supprimer
           </button>
-          <button onClick={onCancelDelete}
+          <button type="button" onClick={onCancelDelete}
             className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
             Annuler
           </button>

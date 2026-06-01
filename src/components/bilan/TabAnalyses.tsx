@@ -97,7 +97,7 @@ export function TabAnalyses({ rows, setRows }: {
       {rows.length > 0 && rows.some(r => analyseConforme(r) !== null) && (
         <Card>
           <SectionTitle>Résultats</SectionTitle>
-          {rows.filter(r => r.parametre).map(row => {
+          {rows.flatMap(row => row.parametre ? [row] : []).map(row => {
             const conf = analyseConforme(row)
             const op = row.typeComp === 'max' ? '≤' : '≥'
             return (

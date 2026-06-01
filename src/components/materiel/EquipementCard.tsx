@@ -125,7 +125,7 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
         {metroPercent !== null ? (
           <CircleProgress percent={metroPercent} size={44} icon={categoryIcon} />
         ) : (
-          <div className="w-11 h-11 rounded-full flex items-center justify-center"
+          <div className="size-11 rounded-full flex items-center justify-center"
             style={{ background: 'var(--color-bg-tertiary)', border: '2px solid var(--color-border)' }}>
             <Icon size={iconSize} strokeWidth={1.8} color="var(--color-text-tertiary)" />
           </div>

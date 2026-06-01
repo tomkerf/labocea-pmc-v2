@@ -43,6 +43,13 @@ function F({ label, req, children }: { label: string; req?: boolean; children: R
   )
 }
 
+const wrap = {
+  background: 'var(--color-bg-tertiary)',
+  border: '1px solid var(--color-border)',
+  borderRadius: 'var(--radius-sm)',
+  padding: '8px 11px',
+} as const
+
 export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProps) {
   const [refLabo,      setRefLabo]      = useState(tuyau.refLabo      ?? '')
   const [materiau,     setMateriau]     = useState<MateriauTuyau>(tuyau.materiau ?? 'TEFLON')
@@ -72,13 +79,6 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
     })
   }
 
-  const wrap = {
-    background: 'var(--color-bg-tertiary)',
-    border: '1px solid var(--color-border)',
-    borderRadius: 'var(--radius-sm)',
-    padding: '8px 11px',
-  } as const
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
@@ -92,7 +92,7 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
           <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             {tuyau.id ? 'Modifier le tuyau' : 'Nouveau tuyau'}
           </h2>
-          <button onClick={onClose} aria-label="Fermer" className="w-7 h-7 flex items-center justify-center rounded-full text-sm"
+          <button type="button" onClick={onClose} aria-label="Fermer" className="size-7 flex items-center justify-center rounded-full text-sm"
             style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
             ✕
           </button>
@@ -181,12 +181,12 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
 
         <div className="flex gap-2 px-5 py-4 shrink-0"
           style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
-          <button onClick={onClose}
+          <button type="button" onClick={onClose}
             className="flex-1 px-4 py-2 rounded-lg text-sm font-medium"
             style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
             Annuler
           </button>
-          <button onClick={handleSave} disabled={!canSave}
+          <button type="button" onClick={handleSave} disabled={!canSave}
             className="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-opacity"
             style={{
               background: 'var(--color-accent)',

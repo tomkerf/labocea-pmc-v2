@@ -35,6 +35,29 @@ import { TodosWidget } from '@/components/dashboard/TodosWidget'
 import { useTodosListener } from '@/hooks/useTodos'
 import { useTodosStore } from '@/stores/todosStore'
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+} as const
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: 'spring',
+      stiffness: 300,
+      damping: 30
+    }
+  }
+} as const
+
 export default function DashboardPage() {
   const navigate = useNavigate()
   const appUser   = useAuthStore(s => s.appUser)
@@ -116,29 +139,6 @@ export default function DashboardPage() {
   }
 
   // ── Render ────────────────────────────────────────────────
-  
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.05
-      }
-    }
-  } as const
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 12 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: 'spring',
-        stiffness: 300,
-        damping: 30
-      }
-    }
-  } as const
 
   return (
     <motion.div
@@ -327,7 +327,7 @@ export default function DashboardPage() {
                               {item.time}
                             </span>
                           ) : (
-                            <span className="shrink-0 w-2 h-2 rounded-full mt-0.5" style={{ background: item.dot }} />
+                            <span className="shrink-0 size-2 rounded-full mt-0.5" style={{ background: item.dot }} />
                           )}
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium leading-snug" style={{ color: 'var(--color-text-primary)' }}>{item.title}</p>
@@ -463,7 +463,7 @@ export default function DashboardPage() {
               </button>
 
               <div className="p-6 text-center flex flex-col items-center">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+                <div className="size-12 rounded-full flex items-center justify-center mb-4"
                   style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
                   <BookOpen size={24} />
                 </div>

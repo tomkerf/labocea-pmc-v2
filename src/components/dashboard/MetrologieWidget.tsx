@@ -51,7 +51,7 @@ export function MetrologieWidget({ equipements }: { equipements: Equipement[] })
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: dotColor }} />
+                  <span className="shrink-0 size-2 rounded-full" style={{ background: dotColor }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{eq.nom}</p>
                     <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>

@@ -130,7 +130,7 @@ export function StatutsSection() {
         <div className="py-3">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0 mb-2"
             style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
-            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: 'var(--color-warning)' }} />
+            <span className="size-1.5 rounded-full shrink-0" style={{ background: 'var(--color-warning)' }} />
             Non effectué
           </span>
           <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>

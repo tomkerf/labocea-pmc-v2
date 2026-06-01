@@ -62,7 +62,7 @@ export default function TabBar() {
                 className="w-full flex items-center gap-4 px-5 py-3.5 text-left"
                 style={{ borderTop: i > 0 ? '1px solid var(--color-border-subtle)' : 'none' }}
               >
-                <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                <span className="size-9 rounded-xl flex items-center justify-center shrink-0"
                   style={{ background: `${color}22` }}>
                   <Icon size={18} style={{ color }} />
                 </span>
@@ -113,7 +113,7 @@ export default function TabBar() {
           <button type="button"
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
-            className="w-12 h-12 rounded-full flex items-center justify-center -mt-6 transition-transform"
+            className="size-12 rounded-full flex items-center justify-center -mt-6 transition-transform"
             style={{
               background: open ? 'var(--color-text-secondary)' : 'var(--color-accent)',
               boxShadow: '0 4px 14px rgba(0,113,227,0.4)',

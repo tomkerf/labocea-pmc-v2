@@ -43,7 +43,7 @@ export default function GhostDetailModal({ event, onClose }: { event: PlanningEv
 
         {/* Header */}
         <div className="flex items-start gap-3 px-5 pt-4 pb-4">
-          <span className="w-2.5 h-2.5 rounded-full shrink-0 mt-1.5" style={{ background: 'var(--color-neutral)' }} />
+          <span className="size-2.5 rounded-full shrink-0 mt-1.5" style={{ background: 'var(--color-neutral)' }} />
           <div className="flex-1 min-w-0">
             <p className="text-base font-semibold leading-snug"
               style={{ color: 'var(--color-text-primary)', textDecoration: isRetrait ? 'line-through' : 'none' }}>
@@ -61,7 +61,7 @@ export default function GhostDetailModal({ event, onClose }: { event: PlanningEv
               </span>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg shrink-0 mt-0.5"
+          <button type="button" onClick={onClose} className="p-1.5 rounded-lg shrink-0 mt-0.5"
             style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
             <X size={15} />
           </button>

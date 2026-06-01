@@ -2,6 +2,24 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 92 — React Doctor : 135 warnings fixés
+**1er juin 2026**
+
+### Qualité / Refactoring
+
+**react-doctor scan complet — 645 → 510 warnings, 2 règles éliminées**
+
+- `button-has-type` (−32) : `type="button"` ajouté sur tous les `<button>` sans type explicite dans 12 fichiers. Règle **éliminée**.
+- `prefer-module-scope-static-value` (−12) : 12 constantes statiques (tableaux/objets) hoistées du corps des composants vers le module scope. Règle **éliminée**.
+- `design-no-redundant-size-axes` (−79) : `w-N h-N` → `size-N` (Tailwind v3.4) dans 53 fichiers. 4 occurrences résiduelles restantes.
+- `js-combine-iterations` (−9) : chaînes `.filter().map()` et `.filter().forEach()` converties en `flatMap` ou `for...of`.
+- `js-tosorted-immutable` (−13) : `[...arr].sort(fn)` → `arr.toSorted(fn)` dans 12 fichiers.
+
+### Deferred
+- Accessibilité formulaires (`label-has-associated-control`, `control-has-associated-label`, `no-static-element-interactions`, `click-events-have-key-events`) — à traiter dans une session dédiée.
+- `prefer-useReducer` — refactors de stores, hors scope.
+- `no-array-index-key` — à corriger au cas par cas selon disponibilité d'un id stable.
+
 ## Session 91 — Polish matrice annuelle (bimensuel + UX)
 **1er juin 2026**
 

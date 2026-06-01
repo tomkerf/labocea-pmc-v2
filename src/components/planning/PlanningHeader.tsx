@@ -43,7 +43,7 @@ export default function PlanningHeader({
 }: PlanningHeaderProps) {
   const availableSites = useMemo(() => {
     const sites = new Set(preleveurs.map(p => p.site).filter(Boolean) as string[])
-    return [...sites].sort()
+    return sites.toSorted()
   }, [preleveurs])
 
   return (
@@ -81,7 +81,7 @@ export default function PlanningHeader({
                 Aujourd'hui
               </button>
               <button type="button" onClick={() => setShowMiniCal(v => !v)}
-                className="hidden md:flex items-center justify-center w-7 h-7 rounded-lg"
+                className="hidden md:flex items-center justify-center size-7 rounded-lg"
                 style={{
                   background: showMiniCal ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)',
                   color: showMiniCal ? 'var(--color-accent)' : 'var(--color-text-secondary)',
@@ -271,7 +271,7 @@ export default function PlanningHeader({
       {viewMode !== 'jour' && viewMode !== 'carte' && monthPoolCount > 0 && (
         <div className="flex items-center gap-2 px-4 md:px-6 py-2 shrink-0"
           style={{ background: 'var(--color-accent-light)', borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: 'var(--color-accent)' }} />
+          <span className="size-1.5 rounded-full shrink-0" style={{ background: 'var(--color-accent)' }} />
           <p className="text-xs" style={{ color: 'var(--color-accent)' }}>
             <span className="font-semibold">
               {monthPoolCount} prélèvement{monthPoolCount > 1 ? 's' : ''} à planifier ce mois

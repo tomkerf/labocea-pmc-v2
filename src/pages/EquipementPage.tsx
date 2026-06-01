@@ -82,7 +82,7 @@ export default function EquipementPage() {
 
   if (loading) return (
     <div className="flex justify-center py-20">
-      <div className="w-6 h-6 rounded-full border-2 animate-spin"
+      <div className="size-6 rounded-full border-2 animate-spin"
         style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
     </div>
   )
@@ -110,7 +110,7 @@ export default function EquipementPage() {
           {metroPercent !== null ? (
             <CircleProgress percent={metroPercent} size={64} strokeWidth={4} label="métrologie" />
           ) : (
-            <div className="w-16 h-16 rounded-full flex items-center justify-center"
+            <div className="size-16 rounded-full flex items-center justify-center"
               style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}>
               <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>—</span>
             </div>

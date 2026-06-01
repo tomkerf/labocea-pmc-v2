@@ -102,7 +102,7 @@ function TimelineRow({ icon, iconBg, iconColor, date, title, subtitle, badge, is
   return (
     <div className="flex items-start gap-3 px-4 py-3.5 group"
       style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)' }}>
-      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+      <div className="size-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
         style={{ background: iconBg, color: iconColor }}>
         {icon}
       </div>
@@ -256,9 +256,7 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
       ? [{ kind: 'acquisition' as const, date: equipement.dateAcquisition }]
       : []),
     ...verifications.map((v) => ({ kind: 'verification' as const, date: v.date, data: v })),
-    ...maintenances
-      .filter((m) => m.dateRealisee || m.datePrevue)
-      .map((m) => ({ kind: 'maintenance' as const, date: (m.dateRealisee || m.datePrevue) as string, data: m })),
+    ...maintenances.flatMap((m) => (m.dateRealisee || m.datePrevue) ? [{ kind: 'maintenance' as const, date: (m.dateRealisee || m.datePrevue) as string, data: m }] : []),
     ...(equipement.ficheDeVieNotes ?? []).map((n) => ({ kind: 'note' as const, date: n.date, data: n })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 

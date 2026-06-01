@@ -32,8 +32,7 @@ export default function DayView({
   const allDayEvtsFlat = allEvts.filter(e => !e.plannedTime)
   const allDayEvts = groupByClient(allDayEvtsFlat)
   const timedEvts  = assignColumns(
-    allEvts.filter(e => !!e.plannedTime)
-      .map(e => ({ ...e, startMin: parseHHMM(e.plannedTime!), durationMin: 60 }))
+    allEvts.flatMap(e => e.plannedTime ? [{ ...e, startMin: parseHHMM(e.plannedTime!), durationMin: 60 }] : [])
   )
   const now    = new Date()
   const nowMin = now.getHours() * 60 + now.getMinutes()
@@ -130,7 +129,7 @@ export default function DayView({
                     )}
                   </button>
                   {isExpanded && subEvts.map(sub => (
-                    <button key={sub.id}
+                    <button type="button" key={sub.id}
                       onClick={() => handleSelectEvent(sub, dateStr)}
                       className="w-full flex items-center gap-1.5 pl-6 pr-2 py-0.5 text-left"
                       style={{ background: 'transparent' }}>
@@ -176,7 +175,7 @@ export default function DayView({
           {showNow && (
             <div className="absolute flex items-center z-10 pointer-events-none"
               style={{ top: (nowMin - D_START * 60) * PX_M, left: 56 - 5, right: 0 }}>
-              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: '#FF3B30' }} />
+              <div className="size-2.5 rounded-full shrink-0" style={{ background: '#FF3B30' }} />
               <div className="flex-1" style={{ height: 2, background: '#FF3B30' }} />
             </div>
           )}
@@ -195,7 +194,7 @@ export default function DayView({
               const height = Math.max(evt.durationMin * PX_M, 28)
               const W      = 1 / evt.totalCols
               return (
-                <button key={evt.id}
+                <button type="button" key={evt.id}
                   onClick={() => handleSelectEvent(evt, dateStr)}
                   className="absolute text-left rounded-lg px-2 py-1 overflow-hidden"
                   style={{

@@ -53,7 +53,7 @@ export default function TourneePage() {
   // Construire TourneeItemData depuis jourItems (sampling uniquement)
   const tourneeItems = useMemo((): TourneeItemData[] => {
     return jourItems
-      .filter(i => i.kind === 'sampling')
+      .flatMap(i => i.kind === 'sampling' ? [i] : [])
       .map(i => {
         const ev = i.modalEvent
         const client = clients.find((c: Client) => c.id === ev.clientId)

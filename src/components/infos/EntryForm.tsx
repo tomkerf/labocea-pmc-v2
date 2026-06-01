@@ -19,6 +19,12 @@ export interface FormProps {
   onClose: () => void
 }
 
+const inputStyle = {
+  background: 'var(--color-bg-tertiary)',
+  border: '1px solid var(--color-border)',
+  color: 'var(--color-text-primary)',
+}
+
 export function EntryForm({ entry, clients, defaultClientId, error, onSave, onClose }: FormProps) {
   const isEdit = !!entry?.id
   const [type,     setType]     = useState<TerrainType>(entry?.type ?? 'contact')
@@ -55,11 +61,6 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
     : (libelle.trim().length > 0 || contenu.trim().length > 0)
 
   const inputCls = "w-full px-3 py-2.5 text-sm rounded-lg outline-none"
-  const inputStyle = {
-    background: 'var(--color-bg-tertiary)',
-    border: '1px solid var(--color-border)',
-    color: 'var(--color-text-primary)',
-  }
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center"

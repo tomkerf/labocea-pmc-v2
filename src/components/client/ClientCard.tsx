@@ -58,7 +58,7 @@ export default function ClientCard({ client }: Props) {
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
       {/* Initiale */}
-      <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold shrink-0"
+      <div className="size-9 rounded-full flex items-center justify-center text-sm font-semibold shrink-0"
         style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
         {client.nom.charAt(0).toUpperCase()}
       </div>

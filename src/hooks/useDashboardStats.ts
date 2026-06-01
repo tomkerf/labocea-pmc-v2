@@ -254,23 +254,23 @@ export function useDashboardStats({
       })
     })
 
-    evenements
-      .filter((ev: EvenementPersonnel) => {
+    for (const ev of evenements as EvenementPersonnel[]) {
+      const keep = (() => {
         if (!isGeneraliste && initiales && ev.createdByInitiales && ev.createdByInitiales !== initiales) return false
         if (ev.dateFin && ev.dateFin > ev.date) return ev.date <= todayISO && ev.dateFin >= todayISO
         return ev.date === todayISO
-      })
-      .forEach((ev: EvenementPersonnel) => {
-        if (ev.type === 'meteo') return
-        const cfg = EVENEMENT_CFG[ev.type] ?? EVENEMENT_CFG.autre
-        const evSub = [ev.createdByInitiales, ev.notes].filter(Boolean).join(' · ') || cfg.label
-        const evModalEvent: ModalEventRef = {
-          id: ev.id, type: 'evenement', title: ev.titre, subtitle: evSub,
-          statusLabel: cfg.label, statusBg: cfg.bg, statusColor: cfg.color,
-          link: '', isDone: false, technicien: ev.createdByInitiales || '—', evenementData: ev,
-        }
-        items.push({ kind: 'evenement', time: ev.heure ?? '', title: ev.titre, sub: evSub, badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, modalEvent: evModalEvent })
-      })
+      })()
+      if (!keep) continue
+      if (ev.type === 'meteo') continue
+      const cfg = EVENEMENT_CFG[ev.type] ?? EVENEMENT_CFG.autre
+      const evSub = [ev.createdByInitiales, ev.notes].filter(Boolean).join(' · ') || cfg.label
+      const evModalEvent: ModalEventRef = {
+        id: ev.id, type: 'evenement', title: ev.titre, subtitle: evSub,
+        statusLabel: cfg.label, statusBg: cfg.bg, statusColor: cfg.color,
+        link: '', isDone: false, technicien: ev.createdByInitiales || '—', evenementData: ev,
+      }
+      items.push({ kind: 'evenement', time: ev.heure ?? '', title: ev.titre, sub: evSub, badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, modalEvent: evModalEvent })
+    }
 
     return items.sort((a, b) => {
       if (!a.time && !b.time) return 0
@@ -331,23 +331,23 @@ export function useDashboardStats({
       })
     })
 
-    evenements
-      .filter((ev: EvenementPersonnel) => {
+    for (const ev of evenements as EvenementPersonnel[]) {
+      const keep = (() => {
         if (!isGeneraliste && initiales && ev.createdByInitiales && ev.createdByInitiales !== initiales) return false
         if (ev.dateFin && ev.dateFin > ev.date) return ev.date <= tomorrowISO && ev.dateFin >= tomorrowISO
         return ev.date === tomorrowISO
-      })
-      .forEach((ev: EvenementPersonnel) => {
-        if (ev.type === 'meteo') return
-        const cfg = EVENEMENT_CFG[ev.type] ?? EVENEMENT_CFG.autre
-        const evSub = [ev.createdByInitiales, ev.notes].filter(Boolean).join(' · ') || cfg.label
-        const evModalEvent: ModalEventRef = {
-          id: ev.id, type: 'evenement', title: ev.titre, subtitle: evSub,
-          statusLabel: cfg.label, statusBg: cfg.bg, statusColor: cfg.color,
-          link: '', isDone: false, technicien: ev.createdByInitiales || '—', evenementData: ev,
-        }
-        items.push({ kind: 'evenement', time: ev.heure ?? '', title: ev.titre, sub: evSub, badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, modalEvent: evModalEvent })
-      })
+      })()
+      if (!keep) continue
+      if (ev.type === 'meteo') continue
+      const cfg = EVENEMENT_CFG[ev.type] ?? EVENEMENT_CFG.autre
+      const evSub = [ev.createdByInitiales, ev.notes].filter(Boolean).join(' · ') || cfg.label
+      const evModalEvent: ModalEventRef = {
+        id: ev.id, type: 'evenement', title: ev.titre, subtitle: evSub,
+        statusLabel: cfg.label, statusBg: cfg.bg, statusColor: cfg.color,
+        link: '', isDone: false, technicien: ev.createdByInitiales || '—', evenementData: ev,
+      }
+      items.push({ kind: 'evenement', time: ev.heure ?? '', title: ev.titre, sub: evSub, badge: { label: cfg.label, bg: cfg.bg, color: cfg.color }, dot: cfg.dot, modalEvent: evModalEvent })
+    }
 
     return items.sort((a, b) => {
       if (!a.time && !b.time) return 0

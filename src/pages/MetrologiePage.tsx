@@ -104,7 +104,7 @@ export default function MerologiePage() {
       {/* Filtres */}
       <div className="flex gap-2 mb-5 flex-wrap">
         {FILTERS.map((f) => (
-          <button key={f.value}
+          <button type="button" key={f.value}
             onClick={() => setFilterStatut(f.value)}
             className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
             style={{
@@ -121,12 +121,12 @@ export default function MerologiePage() {
       {/* Liste */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <div className="w-6 h-6 rounded-full border-2 animate-spin"
+          <div className="size-6 rounded-full border-2 animate-spin"
             style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
         </div>
       ) : allRows.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
+          <div className="size-16 rounded-2xl flex items-center justify-center"
             style={{ background: 'var(--color-accent-light)' }}>
             <Ruler size={28} strokeWidth={1.5} style={{ color: 'var(--color-accent)' }} />
           </div>
@@ -161,7 +161,7 @@ export default function MerologiePage() {
               const iconColor = getMetroColor(percent)
 
               return (
-                <button key={v.id}
+                <button type="button" key={v.id}
                   onClick={() => navigate(`/metrologie/${v.id}`)}
                   className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
                   style={{
@@ -217,7 +217,7 @@ export default function MerologiePage() {
             const iconColor = getMetroColor(percent)
 
             return (
-              <button key={eq.id}
+              <button type="button" key={eq.id}
                 onClick={() => navigate(`/materiel/${eq.id}`)}
                 className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
                 style={{

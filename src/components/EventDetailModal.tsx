@@ -98,7 +98,7 @@ export function EventDetailModal({
 
         {/* Header */}
         <div className="flex items-start gap-3 px-5 pt-4 pb-4">
-          <span className="w-2.5 h-2.5 rounded-full shrink-0 mt-1.5" style={{ background: event.statusColor }} />
+          <span className="size-2.5 rounded-full shrink-0 mt-1.5" style={{ background: event.statusColor }} />
           <div className="flex-1 min-w-0">
             <p className="text-base font-semibold leading-snug" style={{ color: 'var(--color-text-primary)' }}>
               {event.title}

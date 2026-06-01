@@ -21,13 +21,13 @@ export default function TuyauxPage() {
   const allYears = useMemo(() => {
     const s = new Set<number>()
     tuyaux.forEach(t => { if (t.annee) s.add(t.annee) })
-    return [...s].sort((a, b) => b - a)
+    return s.toSorted((a, b) => b - a)
   }, [tuyaux])
 
   const allMats = useMemo(() => {
     const s = new Set<string>()
     tuyaux.forEach(t => s.add(t.materiau || 'AUTRE'))
-    return [...s].sort()
+    return s.toSorted()
   }, [tuyaux])
 
   const filtered = useMemo(() => tuyaux.filter(t => {
@@ -82,7 +82,7 @@ export default function TuyauxPage() {
 
   if (loading) return (
     <div className="flex justify-center py-20">
-      <div className="w-6 h-6 rounded-full border-2 animate-spin"
+      <div className="size-6 rounded-full border-2 animate-spin"
         style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
     </div>
   )
@@ -166,7 +166,7 @@ export default function TuyauxPage() {
         return (
           <div key={mat} className="mb-8">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: mc.text }} />
+              <div className="size-2.5 rounded-sm shrink-0" style={{ background: mc.text }} />
               <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{mat}</span>
               <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                 style={{ background: mc.bg, color: mc.text, border: `1px solid ${mc.border}` }}>

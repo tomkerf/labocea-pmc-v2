@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, type ElementType } from 'react'
 import { Search, X, Plus, ChevronDown, ChevronRight } from 'lucide-react'
 import { useClientsListener } from '@/hooks/useClients'
 import { saveClient } from '@/services/clientService'
@@ -8,6 +8,14 @@ import type { Client, TerrainEntry, TerrainType } from '@/types'
 import { Badge, EntryCard } from '@/components/infos/EntryCard'
 import { TYPE_CONFIG } from '@/components/infos/entryConfig'
 import { EntryForm } from '@/components/infos/EntryForm'
+
+const TABS: { key: TerrainType | 'all'; label: string; Icon?: ElementType }[] = [
+  { key: 'all',     label: 'Tout'     },
+  { key: 'contact', label: 'Contacts', Icon: TYPE_CONFIG.contact.Icon },
+  { key: 'acces',   label: 'Accès',    Icon: TYPE_CONFIG.acces.Icon   },
+  { key: 'site',    label: 'Sites',    Icon: TYPE_CONFIG.site.Icon    },
+  { key: 'note',    label: 'Notes',    Icon: TYPE_CONFIG.note.Icon    },
+]
 
 export default function InfosPage() {
   useClientsListener()
@@ -86,14 +94,6 @@ export default function InfosPage() {
     if (!client || !uid) return
     await saveClient({ ...client, terrain: (client.terrain ?? []).filter(t => t.id !== entryId) }, uid)
   }
-
-  const TABS: { key: TerrainType | 'all'; label: string; Icon?: React.ElementType }[] = [
-    { key: 'all',     label: 'Tout'     },
-    { key: 'contact', label: 'Contacts', Icon: TYPE_CONFIG.contact.Icon },
-    { key: 'acces',   label: 'Accès',    Icon: TYPE_CONFIG.acces.Icon   },
-    { key: 'site',    label: 'Sites',    Icon: TYPE_CONFIG.site.Icon    },
-    { key: 'note',    label: 'Notes',    Icon: TYPE_CONFIG.note.Icon    },
-  ]
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-bg-primary)' }}>

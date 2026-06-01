@@ -31,7 +31,7 @@ export default function LoginPage() {
 
         {/* Logo / Titre */}
         <div className="text-center mb-10">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: 'var(--color-accent)' }}>
+          <div className="size-14 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: 'var(--color-accent)' }}>
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
               <circle cx="14" cy="10" r="5" fill="white" />
               <path d="M4 24c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="white" strokeWidth="2.5" strokeLinecap="round" />

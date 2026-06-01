@@ -307,10 +307,10 @@ export function groupByClient(evts: PlanningEvent[]): PlanningEvent[] {
     const worst = group.reduce((best, e) => statusPri(e) < statusPri(best) ? e : best, group[0])
     // Noms de points uniques (retire "· Bilan 24h J1/J2" pour dédupliquer)
     const pointNames = [...new Set(
-      group.map(e => e.subtitle
-        .replace(/ · Bilan 24h J[12]$/, '')
-        .replace(/ · Rapport$/, '')
-      ).filter(s => s && s !== '—' && s !== 'Rapport')
+      group.flatMap(e => {
+        const s = e.subtitle.replace(/ · Bilan 24h J[12]$/, '').replace(/ · Rapport$/, '')
+        return s && s !== '—' && s !== 'Rapport' ? [s] : []
+      })
     )]
     
     let subtitle = ''

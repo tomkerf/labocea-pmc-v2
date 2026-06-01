@@ -87,7 +87,7 @@ export default function WeekView({
                 style={{ color:'var(--color-text-tertiary)', letterSpacing:'0.04em' }}>
                 {JOURS_COURT[i]}
               </div>
-              <div className="w-7 h-7 flex items-center justify-center rounded-full mx-auto text-sm font-semibold"
+              <div className="size-7 flex items-center justify-center rounded-full mx-auto text-sm font-semibold"
                 style={{
                   background: isToday ? '#FF3B30' : holidayName ? 'rgba(255,59,48,0.12)' : 'transparent',
                   color: isToday ? 'white' : holidayName ? '#FF3B30' : 'var(--color-text-primary)',

@@ -280,18 +280,18 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
               <div key={url}
                 className="relative rounded-lg overflow-hidden shrink-0"
                 style={{ width: 96, height: 96, border: '1px solid var(--color-border)' }}>
-                <a href={url} target="_blank" rel="noreferrer" className="block w-full h-full">
+                <a href={url} target="_blank" rel="noreferrer" className="block size-full">
                   <img
                     src={url}
                     alt={`Photo ${i + 1}`}
-                    className="w-full h-full object-cover cursor-zoom-in"
+                    className="size-full object-cover cursor-zoom-in"
                     loading="lazy"
                   />
                 </a>
                 <button type="button"
                   onClick={() => handlePhotoDelete(url)}
                   aria-label="Supprimer cette photo"
-                  className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center bg-black/60 text-white hover:bg-black/80 transition-colors"
+                  className="absolute top-1 right-1 size-5 rounded-full flex items-center justify-center bg-black/60 text-white hover:bg-black/80 transition-colors"
                   title="Supprimer cette photo"
                 >
                   <X size={10} strokeWidth={3} />

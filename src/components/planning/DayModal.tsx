@@ -18,6 +18,14 @@ export interface DayModalProps {
   holidays: Record<string, string>
 }
 
+const EVENEMENT_TYPES: { value: TypeEvenement; label: string; emoji: string }[] = [
+  { value: 'rappel',  label: 'Rappel',    emoji: '🔔' },
+  { value: 'reunion', label: 'Réunion',   emoji: '👥' },
+  { value: 'rapport', label: 'Rapport',   emoji: '📋' },
+  { value: 'conge',   label: 'Congé/RTT', emoji: '🏖️' },
+  { value: 'autre',   label: 'Autre',     emoji: '📌' },
+]
+
 export default function DayModal({
   dateStr, onClose, pool, overduePool, uid, initiales, onValidatePool, initialTab, holidays,
 }: DayModalProps) {
@@ -62,14 +70,6 @@ export default function DayModal({
     { id: 'evt'  as const, label: 'Événement',                 count: 0 },
   ]
 
-  const EVENEMENT_TYPES: { value: TypeEvenement; label: string; emoji: string }[] = [
-    { value: 'rappel',  label: 'Rappel',    emoji: '🔔' },
-    { value: 'reunion', label: 'Réunion',   emoji: '👥' },
-    { value: 'rapport', label: 'Rapport',   emoji: '📋' },
-    { value: 'conge',   label: 'Congé/RTT', emoji: '🏖️' },
-    { value: 'autre',   label: 'Autre',     emoji: '📌' },
-  ]
-
   return (
     <div className="fixed inset-0 z-[55] flex items-end md:items-center justify-center"
       style={{ background: 'rgba(0,0,0,0.35)' }}
@@ -106,7 +106,7 @@ export default function DayModal({
               }}>
               {tab.label}
               {tab.count > 0 && (
-                <span className="text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full"
+                <span className="text-[10px] font-bold size-4 flex items-center justify-center rounded-full"
                   style={{ background: activeTab === tab.id ? 'rgba(255,255,255,0.25)' : 'var(--color-border)' }}>
                   {tab.count}
                 </span>
@@ -212,7 +212,7 @@ export default function DayModal({
                           ? setPoolValidId(null)
                           : (setPoolValidId(item.sampling.id), setPoolDate(dateStr))
                         }>
-                        <span className="w-2 h-2 rounded-full shrink-0 mt-0.5" style={{ background: cfg.color }} />
+                        <span className="size-2 rounded-full shrink-0 mt-0.5" style={{ background: cfg.color }} />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
                             {item.clientNom}
@@ -264,7 +264,7 @@ export default function DayModal({
                             )}
                           </div>
                         </div>
-                        <span className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full transition-colors"
+                        <span className="shrink-0 size-7 flex items-center justify-center rounded-full transition-colors"
                           style={{
                             background: isValidating ? 'var(--color-bg-tertiary)' : 'var(--color-success-light)',
                             border: isValidating ? '1px solid var(--color-border)' : 'none',

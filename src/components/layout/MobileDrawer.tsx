@@ -79,7 +79,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
             {/* En-tête */}
             <div className="flex items-center justify-between px-4 h-14 shrink-0"
               style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-              <button onClick={onClose}
+              <button type="button" onClick={onClose}
                 aria-label="Fermer le menu"
                 className="p-1.5 rounded-lg"
                 style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
@@ -95,7 +95,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
                     V2
                   </span>
                 </div>
-                <img src="/logo.png" alt="Labocea" className="w-7 h-7 object-contain" />
+                <img src="/logo.png" alt="Labocea" className="size-7 object-contain" />
               </div>
             </div>
 

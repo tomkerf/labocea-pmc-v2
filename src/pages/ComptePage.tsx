@@ -19,6 +19,12 @@ import usePushNotifications from '@/hooks/usePushNotifications'
 
 const DEBOUNCE = 600
 
+const roleLabel: Record<string, string> = {
+  technicien: 'Technicien',
+  charge_mission: 'Chargé de mission',
+  admin: 'Administrateur',
+}
+
 export default function ComptePage() {
   const appUser = useAuthStore(selectAppUser)
   const setAppUser = useAuthStore(s => s.setAppUser)
@@ -72,12 +78,6 @@ export default function ComptePage() {
   function update(field: keyof AppUser, value: string) {
     if (!appUser) return
     triggerSave({ ...appUser, [field]: value })
-  }
-
-  const roleLabel: Record<string, string> = {
-    technicien: 'Technicien',
-    charge_mission: 'Chargé de mission',
-    admin: 'Administrateur',
   }
 
   function copyFeedUrl() {
@@ -158,10 +158,10 @@ export default function ComptePage() {
           </div>
           <div className="flex gap-2 flex-wrap">
             {AVATAR_COLORS.map(c => (
-              <button
+              <button type="button"
                 key={c.value}
                 onClick={() => update('avatarColor', c.value)}
-                className="w-6 h-6 rounded-full transition-transform"
+                className="size-6 rounded-full transition-transform"
                 style={{
                   background: c.value,
                   border: appUser?.avatarColor === c.value ? '2px solid var(--color-text-primary)' : '2px solid transparent',
@@ -214,7 +214,7 @@ export default function ComptePage() {
                 color: 'var(--color-text-secondary)',
               }}
             />
-            <button
+            <button type="button"
               onClick={copyFeedUrl}
               className="text-xs px-3 py-2 rounded-lg font-medium"
               style={{
@@ -345,7 +345,7 @@ function ChangePasswordSection({ email }: { email: string }) {
             <p className="text-xs" style={{ color: 'var(--color-success)' }}>Mot de passe mis à jour.</p>
           )}
 
-          <button
+          <button type="button"
             type="submit"
             disabled={status === 'saving'}
             className="text-sm font-medium px-4 py-2 rounded-lg mt-1"
@@ -453,7 +453,7 @@ function PushNotificationsSection() {
           }}
         >
           <span
-            className="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+            className="pointer-events-none inline-block size-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
             style={{
               transform: isPushEnabled ? 'translateX(20px)' : 'translateX(0px)',
               display: 'flex',

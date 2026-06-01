@@ -5,6 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { Todo } from '@/types'
 import { saveTodo } from '@/services/todoService'
 
+const prioColors: Record<string, { bg: string; text: string; label: string; icon: string }> = {
+  haute:   { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-primary)',   label: 'Haute',   icon: '!!!' },
+  moyenne: { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-primary)',   label: 'Moyenne', icon: '!!' },
+  basse:   { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-secondary)', label: 'Basse',   icon: '!' },
+}
+
 export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
@@ -38,12 +44,6 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
       statut: 'termine',
     }
     await saveTodo(updated, uid)
-  }
-
-  const prioColors: Record<string, { bg: string; text: string; label: string; icon: string }> = {
-    haute:   { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-primary)',   label: 'Haute',   icon: '!!!' },
-    moyenne: { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-primary)',   label: 'Moyenne', icon: '!!' },
-    basse:   { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-secondary)', label: 'Basse',   icon: '!' },
   }
 
   // Permet de vérifier si une date d'échéance est dépassée (excluant aujourd'hui)
@@ -112,7 +112,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                     <button type="button"
                       onClick={() => handleToggleComplete(todo)}
                       aria-label="Marquer comme terminé"
-                      className="mt-0.5 shrink-0 flex items-center justify-center w-5 h-5 rounded-md border transition-all cursor-pointer focus:outline-none"
+                      className="mt-0.5 shrink-0 flex items-center justify-center size-5 rounded-md border transition-all cursor-pointer focus:outline-none"
                       style={{
                         borderColor: 'var(--color-border)',
                         color: 'var(--color-accent)',

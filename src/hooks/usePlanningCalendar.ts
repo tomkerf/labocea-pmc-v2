@@ -133,41 +133,38 @@ export function usePlanningCalendar({
 
     const rawItems: Omit<AllDayItem, 'row'>[] = []
 
-    evenements
-      .filter(ev => {
-        if (!ev.dateFin || ev.dateFin <= ev.date) return false
-        if (ev.type === 'conge') return false
-        if (filterTech && normTech(ev.createdByInitiales || '') !== filterTech) return false
-        return ev.date <= weekEndISO && ev.dateFin >= weekStartISO
+    for (const ev of evenements) {
+      if (!ev.dateFin || ev.dateFin <= ev.date) continue
+      if (ev.type === 'conge') continue
+      if (filterTech && normTech(ev.createdByInitiales || '') !== filterTech) continue
+      if (!(ev.date <= weekEndISO && ev.dateFin >= weekStartISO)) continue
+      const tc = getTechColor(ev.createdByInitiales || '')
+      const startClamped = ev.date < weekStartISO ? weekStartISO : ev.date
+      const endClamped   = ev.dateFin! > weekEndISO ? weekEndISO : ev.dateFin!
+      const colStart = weekDayISOs.findIndex(d => d >= startClamped)
+      let colEnd = -1
+      for (let i = 4; i >= 0; i--) { if (weekDayISOs[i] <= endClamped) { colEnd = i; break } }
+      if (colStart === -1 || colEnd === -1 || colStart > colEnd) continue
+      const evObj: PlanningEvent = {
+        id: ev.id, type: 'evenement', priority: 2,
+        title: ev.titre,
+        subtitle: EVENEMENT_LABEL[ev.type] ?? 'Autre',
+        statusLabel: EVENEMENT_LABEL[ev.type] ?? 'Autre',
+        statusBg: 'var(--color-bg-tertiary)', statusColor: 'var(--color-text-tertiary)',
+        link: '', isDone: false,
+        technicien: ev.createdByInitiales || '—',
+        evenementData: ev,
+      }
+      rawItems.push({
+        key: ev.id,
+        colStart, colEnd,
+        bg: tc.bg,
+        label: ev.titre,
+        badge: ev.createdByInitiales || undefined,
+        onClick: () => handleSelectEvent(evObj, ev.date),
+        tooltip: `${ev.titre} (${ev.date} → ${ev.dateFin})`,
       })
-      .forEach(ev => {
-        const tc = getTechColor(ev.createdByInitiales || '')
-        const startClamped = ev.date < weekStartISO ? weekStartISO : ev.date
-        const endClamped   = ev.dateFin! > weekEndISO ? weekEndISO : ev.dateFin!
-        const colStart = weekDayISOs.findIndex(d => d >= startClamped)
-        let colEnd = -1
-        for (let i = 4; i >= 0; i--) { if (weekDayISOs[i] <= endClamped) { colEnd = i; break } }
-        if (colStart === -1 || colEnd === -1 || colStart > colEnd) return
-        const evObj: PlanningEvent = {
-          id: ev.id, type: 'evenement', priority: 2,
-          title: ev.titre,
-          subtitle: EVENEMENT_LABEL[ev.type] ?? 'Autre',
-          statusLabel: EVENEMENT_LABEL[ev.type] ?? 'Autre',
-          statusBg: 'var(--color-bg-tertiary)', statusColor: 'var(--color-text-tertiary)',
-          link: '', isDone: false,
-          technicien: ev.createdByInitiales || '—',
-          evenementData: ev,
-        }
-        rawItems.push({
-          key: ev.id,
-          colStart, colEnd,
-          bg: tc.bg,
-          label: ev.titre,
-          badge: ev.createdByInitiales || undefined,
-          onClick: () => handleSelectEvent(evObj, ev.date),
-          tooltip: `${ev.titre} (${ev.date} → ${ev.dateFin})`,
-        })
-      })
+    }
 
     const rowEnds: number[] = []
     return rawItems.map(item => {
@@ -186,13 +183,11 @@ export function usePlanningCalendar({
           { length: new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate() },
           (_, i) => new Date(monthStart.getFullYear(), monthStart.getMonth(), i + 1)
         )
-    return days
-      .map(date => ({
-        date,
-        dateStr: toISO(date),
-        events: filteredForDay(toISO(date)),
-      }))
-      .filter(g => g.events.length > 0)
+    return days.flatMap(date => {
+      const dateStr = toISO(date)
+      const events = filteredForDay(dateStr)
+      return events.length > 0 ? [{ date, dateStr, events }] : []
+    })
   }, [viewMode, weekDays, monthStart, filteredForDay])
 
   return {

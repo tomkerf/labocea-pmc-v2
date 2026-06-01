@@ -5,16 +5,16 @@ interface SyncBadgeProps {
   className?: string
 }
 
+const tooltips = {
+  synced:  'Données synchronisées',
+  syncing: 'Synchronisation en cours...',
+  offline: 'Hors connexion — modifications sauvegardées localement',
+}
+
 export default function SyncBadge({ className = '' }: SyncBadgeProps) {
   const pendingWrites = useSyncStore((s) => s.pendingWrites)
   const isOnline      = useSyncStore((s) => s.isOnline)
   const status        = getSyncStatus({ isOnline, pendingWrites })
-
-  const tooltips = {
-    synced:  'Données synchronisées',
-    syncing: 'Synchronisation en cours...',
-    offline: 'Hors connexion — modifications sauvegardées localement',
-  }
 
   return (
     <span
@@ -26,7 +26,7 @@ export default function SyncBadge({ className = '' }: SyncBadgeProps) {
         <span className="relative flex items-center">
           <Cloud size={16} strokeWidth={1.5} style={{ color: 'var(--color-success)' }} />
           <span
-            className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full flex items-center justify-center"
+            className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full flex items-center justify-center"
             style={{ background: 'var(--color-success)' }}
           >
             <svg width="5" height="5" viewBox="0 0 5 5" fill="none">

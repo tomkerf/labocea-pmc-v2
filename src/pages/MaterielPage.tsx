@@ -74,8 +74,7 @@ export default function MaterielPage() {
   const marquesFlacon = Array.from(
     new Set(
       equipements
-        .filter((e: Equipement) => normalizeCategorie(e.categorie) === 'flacon' && e.marque)
-        .map((e: Equipement) => e.marque)
+        .flatMap((e: Equipement) => normalizeCategorie(e.categorie) === 'flacon' && e.marque ? [e.marque] : [])
     )
   ).sort()
 
@@ -216,7 +215,7 @@ export default function MaterielPage() {
           { color: 'var(--color-danger)',  label: 'En retard / urgent' },
         ].map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full shrink-0" style={{ background: color }} />
+            <div className="size-3 rounded-full shrink-0" style={{ background: color }} />
             <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{label}</span>
           </div>
         ))}
@@ -227,7 +226,7 @@ export default function MaterielPage() {
         <SkeletonList count={4} variant="card" />
       ) : equipements.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
+          <div className="size-16 rounded-2xl flex items-center justify-center"
             style={{ background: 'var(--color-accent-light)' }}>
             <Package size={28} strokeWidth={1.5} style={{ color: 'var(--color-accent)' }} />
           </div>

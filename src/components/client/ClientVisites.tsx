@@ -39,7 +39,7 @@ export default function ClientVisites({ clientId, clientNom }: Props) {
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <div className="w-5 h-5 rounded-full border-2 animate-spin"
+          <div className="size-5 rounded-full border-2 animate-spin"
             style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
         </div>
       ) : visites.length === 0 ? (
@@ -68,7 +68,7 @@ export default function ClientVisites({ clientId, clientNom }: Props) {
               </div>
               <div className="flex gap-1 shrink-0">
                 {v.points.slice(0, 4).map(p => (
-                  <span key={p.id} className="w-2 h-2 rounded-full"
+                  <span key={p.id} className="size-2 rounded-full"
                     style={{ background: FAISABILITE_COLORS[p.faisabilite] ?? 'var(--color-neutral)' }} />
                 ))}
               </div>

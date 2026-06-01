@@ -58,7 +58,7 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
 
   // ── Sections plans ──
   const planSections = client.plans
-    .filter(plan => plan.samplings.length > 0)
+    .flatMap(plan => plan.samplings.length > 0 ? [plan] : [])
     .map(plan => {
       const sorted = [...plan.samplings].sort((a, b) => {
         if (a.plannedMonth !== b.plannedMonth) return a.plannedMonth - b.plannedMonth

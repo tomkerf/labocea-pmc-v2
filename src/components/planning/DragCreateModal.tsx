@@ -10,6 +10,14 @@ interface DragCreateModalProps {
   onSave: (titre: string, type: TypeEvenement, dateDebut: string, dateFin: string, heure: string, notes: string) => Promise<void>
 }
 
+const TYPES: { value: TypeEvenement; label: string; emoji: string }[] = [
+  { value: 'rappel',  label: 'Rappel',    emoji: '🔔' },
+  { value: 'reunion', label: 'Réunion',   emoji: '👥' },
+  { value: 'rapport', label: 'Rapport',   emoji: '📋' },
+  { value: 'conge',   label: 'Congé/RTT', emoji: '🏖️' },
+  { value: 'autre',   label: 'Autre',     emoji: '📌' },
+]
+
 export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }: DragCreateModalProps) {
   const [titre,  setTitre]  = useState('')
   const [type,   setType]   = useState<TypeEvenement>(dateDebut !== dateFin ? 'conge' : 'autre')
@@ -20,14 +28,6 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
   const [saving, setSaving] = useState(false)
 
   const isMultiDay = debut !== fin
-
-  const TYPES: { value: TypeEvenement; label: string; emoji: string }[] = [
-    { value: 'rappel',  label: 'Rappel',    emoji: '🔔' },
-    { value: 'reunion', label: 'Réunion',   emoji: '👥' },
-    { value: 'rapport', label: 'Rapport',   emoji: '📋' },
-    { value: 'conge',   label: 'Congé/RTT', emoji: '🏖️' },
-    { value: 'autre',   label: 'Autre',     emoji: '📌' },
-  ]
 
   async function handleSave() {
     const effectiveTitre = titre.trim() || (type === 'conge' ? 'Congé/RTT' : '')

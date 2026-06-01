@@ -204,7 +204,7 @@ export default function MapView({
                style="display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: 1; padding: 7px 10px; font-size: 11px; font-weight: 600; text-align: center; border-radius: var(--radius-sm); background: var(--color-accent); color: white; text-decoration: none;">
               🚗 GPS
             </a>
-            <button id="popup-btn-fiche-${evt.id}"
+            <button type="button" id="popup-btn-fiche-${evt.id}"
                style="display: inline-flex; align-items: center; justify-content: center; padding: 7px 10px; font-size: 11px; font-weight: 600; border-radius: var(--radius-sm); border: 1px solid var(--color-border); color: var(--color-text-primary); cursor: pointer; background: var(--color-bg-secondary);">
               Fiche ➔
             </button>
@@ -358,7 +358,7 @@ export default function MapView({
                       <div className="flex items-start gap-2.5">
                         {/* Numéro de séquence personnalisé */}
                         <div 
-                          className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white mt-0.5"
+                          className="size-5 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white mt-0.5"
                           style={{ background: color }}
                         >
                           {idx + 1}
@@ -431,7 +431,7 @@ export default function MapView({
         </div>
 
         {/* Bouton de repli de la barre latérale */}
-        <button 
+        <button type="button" 
           onClick={() => setSidebarOpen(false)}
           className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-12 bg-white border border-l-0 rounded-r-lg shadow-md flex items-center justify-center cursor-pointer hover:bg-gray-50 z-20"
           style={{ borderColor: 'var(--color-border-subtle)' }}
@@ -443,7 +443,7 @@ export default function MapView({
 
       {/* Bouton de réouverture si la barre latérale est repliée */}
       {!sidebarOpen && (
-        <button 
+        <button type="button" 
           onClick={() => setSidebarOpen(true)}
           className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 w-6 h-12 bg-white border border-l-0 rounded-r-lg shadow-md items-center justify-center cursor-pointer hover:bg-gray-50 z-20"
           style={{ borderColor: 'var(--color-border-subtle)' }}
@@ -454,8 +454,8 @@ export default function MapView({
       )}
 
       {/* ── LA CARTE (Leaflet) ── */}
-      <div className="flex-1 h-full w-full relative z-0">
-        <div ref={containerRef} className="w-full h-full" />
+      <div className="flex-1 size-full relative z-0">
+        <div ref={containerRef} className="size-full" />
         
         {/* Mobile Horizontal Overlay (Bottom) */}
         {mappedEvts.length > 0 && (
@@ -476,7 +476,7 @@ export default function MapView({
                 >
                   <div className="flex items-start gap-2.5">
                     <div 
-                      className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white mt-0.5"
+                      className="size-5 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white mt-0.5"
                       style={{ background: color }}
                     >
                       {idx + 1}
@@ -522,7 +522,7 @@ export default function MapView({
         {/* Mobile floating pill if there are unmapped events */}
         {noGpsEvts.length > 0 && (
           <div className="absolute top-4 left-4 z-[1000] md:hidden">
-            <button
+            <button type="button"
               onClick={() => alert(`Il y a ${noGpsEvts.length} prélèvement(s) aujourd'hui sans coordonnées GPS. Modifie-les dans l'onglet Missions pour les faire apparaître.`)}
               aria-label={`${noGpsEvts.length} prélèvement(s) sans coordonnées GPS`}
               className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 text-white rounded-full shadow-lg text-[10px] font-bold uppercase tracking-wider"

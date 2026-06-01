@@ -66,7 +66,7 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
                   <div key={r.samplingId}
                     className="flex items-center gap-3 px-4 py-3"
                     style={{ borderBottom: i < rapports.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                    <span className="shrink-0 w-2 h-2 rounded-full" style={{ background: dotColor }} />
+                    <span className="shrink-0 size-2 rounded-full" style={{ background: dotColor }} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{r.clientNom}</p>
                       <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>

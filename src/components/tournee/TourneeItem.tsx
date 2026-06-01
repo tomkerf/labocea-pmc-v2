@@ -53,7 +53,7 @@ export function TourneeItem({ item, onAction }: Props) {
             {item.time}
           </span>
         ) : (
-          <span className="shrink-0 w-2 h-2 rounded-full mt-1.5" style={{ background: 'var(--color-accent)' }} />
+          <span className="shrink-0 size-2 rounded-full mt-1.5" style={{ background: 'var(--color-accent)' }} />
         )}
         <div className="flex-1 min-w-0">
           <p className="text-base font-semibold leading-snug" style={{ color: 'var(--color-text-primary)' }}>

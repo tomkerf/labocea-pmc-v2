@@ -61,7 +61,7 @@ export default function MissionDetailPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-6 h-6 rounded-full border-2 animate-spin"
+        <div className="size-6 rounded-full border-2 animate-spin"
           style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
       </div>
     )
@@ -107,11 +107,11 @@ export default function MissionDetailPage() {
           <iframe
             title="map"
             src={`https://maps.google.com/maps?q=${plan.lat},${plan.lng}&z=15&output=embed`}
-            className="w-full h-full border-0"
+            className="size-full border-0"
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+          <div className="size-full flex flex-col items-center justify-center gap-2">
             <MapPin size={28} style={{ color: 'var(--color-text-tertiary)' }} />
             <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
               Coordonnées GPS non renseignées

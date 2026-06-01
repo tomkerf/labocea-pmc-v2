@@ -75,7 +75,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, o
               }
               const isActive = status === s
               return (
-                <button key={s}
+                <button type="button" key={s}
                   onClick={() => setStatus(s)}
                   className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
                   style={{
@@ -144,12 +144,12 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, o
           {error && <p className="text-xs mb-3" style={{ color: 'var(--color-danger)' }}>{error}</p>}
 
           <div className="flex gap-3">
-            <button onClick={onClose} aria-label="Annuler"
+            <button type="button" onClick={onClose} aria-label="Annuler"
               className="flex-1 py-2.5 rounded-lg text-sm font-medium"
               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
               Annuler
             </button>
-            <button onClick={handleConfirm} aria-label="Valider"
+            <button type="button" onClick={handleConfirm} aria-label="Valider"
               className="flex-1 py-2.5 rounded-lg text-sm font-medium"
               style={{ background: 'var(--color-accent)', color: 'white' }}>
               Valider

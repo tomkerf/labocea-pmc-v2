@@ -19,7 +19,7 @@ export function TourneeFinEcran({ items, onRetour }: Props) {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
-      <div className="w-16 h-16 rounded-full flex items-center justify-center mb-6"
+      <div className="size-16 rounded-full flex items-center justify-center mb-6"
         style={{ background: 'var(--color-success-light)' }}>
         <CheckCircle2 size={32} style={{ color: 'var(--color-success)' }} />
       </div>

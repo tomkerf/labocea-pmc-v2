@@ -39,7 +39,7 @@ export default function PointMesureFichePage() {
   if (clientLoading || visitesLoading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-6 h-6 rounded-full border-2 animate-spin"
+        <div className="size-6 rounded-full border-2 animate-spin"
           style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
       </div>
     )
@@ -51,14 +51,11 @@ export default function PointMesureFichePage() {
 
   // 1. Mappage des inspections du point dans les visites préliminaires
   const pointVisits = visites.flatMap(v =>
-    (v.points || [])
-      .filter(p => p.nom.trim().toLowerCase() === plan.nom.trim().toLowerCase())
-      .map(p => ({
-        visitId: v.id,
-        date: v.date,
-        technicienNom: v.technicienNom,
-        ...p
-      }))
+    (v.points || []).flatMap(p =>
+      p.nom.trim().toLowerCase() === plan.nom.trim().toLowerCase()
+        ? [{ visitId: v.id, date: v.date, technicienNom: v.technicienNom, ...p }]
+        : []
+    )
   )
 
   // 2. Historique des prélèvements réalisés sur ce plan
@@ -117,12 +114,12 @@ export default function PointMesureFichePage() {
           <iframe
             title="map"
             src={`https://maps.google.com/maps?q=${plan.lat},${plan.lng}&z=15&output=embed`}
-            className="w-full h-full border-0"
+            className="size-full border-0"
             loading="lazy"
             sandbox="allow-scripts allow-same-origin"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+          <div className="size-full flex flex-col items-center justify-center gap-2">
             <MapPin size={28} style={{ color: 'var(--color-text-tertiary)' }} />
             <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
               Coordonnées GPS non renseignées
@@ -224,7 +221,7 @@ export default function PointMesureFichePage() {
               {(plan.photos ?? []).map((url, i) => (
                 <div key={url} className="relative rounded-lg overflow-hidden shrink-0 bg-gray-50"
                   style={{ width: 80, height: 80, border: '1px solid var(--color-border)' }}>
-                  <img src={url} alt={`Repérage ${i + 1}`} className="w-full h-full object-cover" />
+                  <img src={url} alt={`Repérage ${i + 1}`} className="size-full object-cover" />
                   <a href={url} target="_blank" rel="noreferrer" 
                     className="absolute bottom-1 right-1 p-1 bg-white/80 backdrop-blur rounded-full text-gray-700 hover:text-blue-600"
                     title="Ouvrir la photo dans un nouvel onglet"
@@ -247,8 +244,8 @@ export default function PointMesureFichePage() {
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
             {allPhotos.map((url, i) => (
-              <div key={i} className="shrink-0 w-28 h-28 rounded-xl overflow-hidden border border-gray-200 relative bg-gray-50">
-                <img src={url} alt={`Point ${i}`} className="w-full h-full object-cover" />
+              <div key={i} className="shrink-0 size-28 rounded-xl overflow-hidden border border-gray-200 relative bg-gray-50">
+                <img src={url} alt={`Point ${i}`} className="size-full object-cover" />
                 <a href={url} target="_blank" rel="noreferrer" 
                   className="absolute bottom-1 right-1 p-1 bg-white/80 backdrop-blur rounded-full text-gray-700 hover:text-blue-600">
                   <Camera size={12} />

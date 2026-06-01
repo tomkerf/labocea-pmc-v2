@@ -38,7 +38,7 @@ const TodosPage             = lazy(() => import('@/pages/TodosPage'))
 function PageSpinner() {
   return (
     <div className="flex justify-center items-center py-20">
-      <div className="w-6 h-6 rounded-full border-2 animate-spin"
+      <div className="size-6 rounded-full border-2 animate-spin"
         style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
     </div>
   )

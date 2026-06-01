@@ -31,7 +31,7 @@ export default function EventRow({ event, isLast, onSelect }: EventRowProps) {
 
   return (
     <div style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)' }}>
-      <button className="w-full flex items-center gap-3 px-4 py-3.5 text-left cursor-pointer transition-colors hover:bg-[var(--color-bg-tertiary)]"
+      <button type="button" className="w-full flex items-center gap-3 px-4 py-3.5 text-left cursor-pointer transition-colors hover:bg-[var(--color-bg-tertiary)]"
         onClick={handleParentClick}>
         {isGrouped ? (
           isExpanded ? (
@@ -40,7 +40,7 @@ export default function EventRow({ event, isLast, onSelect }: EventRowProps) {
             <ChevronRight size={16} className="shrink-0" style={{ color: 'var(--color-text-secondary)' }} />
           )
         ) : (
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: dotColor }} />
+          <span className="size-2 rounded-full shrink-0" style={{ background: dotColor }} />
         )}
         
         <div className="flex-1 min-w-0">
@@ -104,7 +104,7 @@ export default function EventRow({ event, isLast, onSelect }: EventRowProps) {
                 }}
               >
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: sub.statusColor }} />
+                  <span className="size-1.5 rounded-full shrink-0" style={{ background: sub.statusColor }} />
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
                       {sub.subtitle}

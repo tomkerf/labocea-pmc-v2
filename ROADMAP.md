@@ -293,6 +293,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-05-31 | Bugfixes + Qualité ✅ | Bilan 24h : ghost events exclus, lignes séparées par site, badge J1/J2 corrigé, sous-titre nettoyé. UI planning : pill retard supprimée, bouton 🌧 repositionné et rectangulaire. Hooks useWeather/useVisites : setState-in-effect corrigé. Accessibilité : 137 aria-label ajoutés (score react-doctor control-has-associated-label → 0). |
 | 2026-06-01 | Planning — Filtres site + tech ✅ | Filtre par site (Quimper/Brest) + avatars circulaires pour les pills technicien. Fix usePreleveurs (collection vide → preleveurs-v1/data). Fix règles Firestore preleveurs-v1. |
 | 2026-06-01 | Alignement Excel Cindy (suite) ✅ | Ajout section "Détail analytique" dans la fiche client. Création vue "Matrice Annuelle" dans le planning avec défilement sticky (légende + en-têtes). |
+| 2026-06-01 | React Doctor — qualité code ✅ | 135 warnings fixés (645→510) : button-has-type éliminé, constantes hoistées, size-N, toSorted, flatMap. |
 | 2026-06-01 | Polish matrice annuelle ✅ | Fix ligne bimensuel (DREAL CORPEP) : 2 dots chevauchants, masquage hors-saison, z-index statut critique. Dots 20px uniforme. Badge "manuel" sur plans Personnalisés. |
 
 ---

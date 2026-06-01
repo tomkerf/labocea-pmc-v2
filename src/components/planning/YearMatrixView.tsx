@@ -103,10 +103,10 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
         
         {/* Légende (fixe) */}
         <div className="shrink-0 px-4 py-3 border-b border-[var(--color-border-subtle)] flex gap-4 text-xs font-medium bg-[var(--color-bg-secondary)] z-20">
-          <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[var(--color-success)]" /> Fait</div>
-          <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[var(--color-warning)]" /> Planifié</div>
-          <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[var(--color-danger)]" /> En retard</div>
-          <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[var(--color-neutral)]" /> Non effectué</div>
+          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-success)]" /> Fait</div>
+          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-warning)]" /> Planifié</div>
+          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-danger)]" /> En retard</div>
+          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-neutral)]" /> Non effectué</div>
         </div>
 
         {/* Table wrapper (scrollable) */}
@@ -166,7 +166,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                                   return sorted.slice(0, 2).map((ps, pi) => ps && (
                                     <div
                                       key={pi}
-                                      className="w-5 h-5 rounded-full flex items-center justify-center cursor-help transition-transform hover:scale-110 border-2 border-[var(--color-bg-secondary)]"
+                                      className="size-5 rounded-full flex items-center justify-center cursor-help transition-transform hover:scale-110 border-2 border-[var(--color-bg-secondary)]"
                                       style={{ backgroundColor: getStatusColor(ps), marginLeft: pi === 1 ? -7 : 0, zIndex: pi === 0 ? 2 : 1 }}
                                       title={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps)}${ps.doneDate ? ` le ${ps.doneDate}` : ''}`}
                                     >
@@ -181,7 +181,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                           ) : (
                             s && (
                               <div
-                                className="mx-auto w-5 h-5 rounded-full flex items-center justify-center cursor-help transition-transform hover:scale-110"
+                                className="mx-auto size-5 rounded-full flex items-center justify-center cursor-help transition-transform hover:scale-110"
                                 style={{ backgroundColor: getStatusColor(s) }}
                                 title={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s)}${s.doneDate ? ` le ${s.doneDate}` : ''}`}
                               >
