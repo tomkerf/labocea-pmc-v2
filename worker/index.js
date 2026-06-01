@@ -302,11 +302,14 @@ export default {
     }
 
     // ── Endpoint feed iCal ────────────────────────────────────────
-    const icalMatch = url.pathname.match(/^\/api\/calendar\/([^/]+)\.ics$/)
+    // Route : /api/calendar/:uid/:calendarToken.ics
+    // Le calendarToken est un UUID secret stocké dans users/{uid}.calendarToken
+    const icalMatch = url.pathname.match(/^\/api\/calendar\/([^/]+)\/([^/]+)\.ics$/)
     if (icalMatch && request.method === 'GET') {
       const uid = decodeURIComponent(icalMatch[1])
-      if (!/^[A-Za-z0-9_-]{1,128}$/.test(uid)) {
-        return new Response('UID invalide', { status: 400 })
+      const calendarToken = decodeURIComponent(icalMatch[2])
+      if (!/^[A-Za-z0-9_-]{1,128}$/.test(uid) || !/^[0-9a-f-]{36,36}$/.test(calendarToken)) {
+        return new Response('Paramètres invalides', { status: 400 })
       }
 
       try {
@@ -318,12 +321,18 @@ export default {
           'https://www.googleapis.com/auth/datastore'
         )
 
-        // 1. Récupérer les initiales du technicien
+        // 1. Récupérer le document utilisateur et valider le calendarToken
         const userUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${uid}`
         const userRes = await fetch(userUrl, { headers: { Authorization: `Bearer ${token}` } })
         if (!userRes.ok) return new Response('Utilisateur introuvable', { status: 404 })
         const userDoc = await userRes.json()
         const userFields = fsFields(userDoc)
+
+        const storedToken = fsVal(userFields.calendarToken) || ''
+        if (!storedToken || storedToken !== calendarToken) {
+          return new Response('Token invalide', { status: 403 })
+        }
+
         const initiales = fsVal(userFields.initiales) || ''
         const prenom = fsVal(userFields.prenom) || 'Technicien'
 
@@ -366,7 +375,8 @@ export default {
 
               for (const sVal of samplings) {
                 const s = sVal.mapValue?.fields ?? {}
-                const samplingId = fsVal(s.id) || fsVal(s.num) || Math.random().toString(36).slice(2)
+                const rawId = String(fsVal(s.id) || fsVal(s.num) || Math.random().toString(36).slice(2))
+                const samplingId = rawId.replace(/[^A-Za-z0-9_.-]/g, '_')
                 const plannedMonth = Number(fsVal(s.plannedMonth) ?? -1)
                 const plannedDay = Number(fsVal(s.plannedDay) ?? 0)
                 const status = fsVal(s.status) || 'planned'

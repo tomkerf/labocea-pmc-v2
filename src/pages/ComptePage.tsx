@@ -26,9 +26,22 @@ export default function ComptePage() {
   const navigate = useNavigate()
   const [saving, setSaving] = useState(false)
   const [copied, setCopied] = useState(false)
-
-  const feedUrl = uid ? `${window.location.origin}/api/calendar/${uid}.ics` : ''
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Génère le calendarToken si absent et le persiste dans Firestore
+  const calendarToken = appUser?.calendarToken
+  useState(() => {
+    if (uid && appUser && !appUser.calendarToken) {
+      const token = crypto.randomUUID()
+      const updated = { ...appUser, calendarToken: token }
+      setAppUser(updated)
+      updateUserProfile(uid, { calendarToken: token })
+    }
+  })
+
+  const feedUrl = uid && calendarToken
+    ? `${window.location.origin}/api/calendar/${uid}/${calendarToken}.ics`
+    : ''
 
   async function handleLogout() {
     await logout()

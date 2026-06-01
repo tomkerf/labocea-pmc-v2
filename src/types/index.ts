@@ -19,6 +19,7 @@ export interface AppUser {
   hasSeenAide?: boolean
   avatarColor?: string
   avatarSeed?: string    // seed DiceBear — si défini, affiche un avatar illustré
+  calendarToken?: string // token secret pour le feed iCal
   createdAt: Timestamp
   lastLoginAt: Timestamp
 }
