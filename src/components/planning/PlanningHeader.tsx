@@ -1,8 +1,8 @@
-import type { Dispatch, SetStateAction } from 'react'
+import { useMemo, type Dispatch, type SetStateAction } from 'react'
 import { ChevronLeft, ChevronRight, Calendar, Map as MapIcon, X, Printer, FileSpreadsheet } from 'lucide-react'
 import { type ViewMode, getTechColor } from '@/lib/planningUtils'
 import { motion } from 'framer-motion'
-type Preleveur = { code: string; nom?: string }
+type Preleveur = { code: string; nom?: string; site?: string }
 
 interface PlanningHeaderProps {
   // Navigation
@@ -18,6 +18,8 @@ interface PlanningHeaderProps {
   allTechs:       string[]
   filterTech:     string
   setFilterTech:  Dispatch<SetStateAction<string>>
+  filterSite:     string
+  setFilterSite:  Dispatch<SetStateAction<string>>
   showRain:       boolean
   setShowRain:    Dispatch<SetStateAction<boolean>>
   preleveurs:     Preleveur[]
@@ -33,11 +35,16 @@ interface PlanningHeaderProps {
 export default function PlanningHeader({
   periodLabel, viewMode, prev, next, goToday, switchView,
   showMiniCal, setShowMiniCal,
-  allTechs, filterTech, setFilterTech,
+  allTechs, filterTech, setFilterTech, filterSite, setFilterSite,
   showRain, setShowRain, preleveurs,
   monthPoolCount, showDragHint, setShowDragHint,
   onExportPdf, onExportExcel,
 }: PlanningHeaderProps) {
+  const availableSites = useMemo(() => {
+    const sites = new Set(preleveurs.map(p => p.site).filter(Boolean) as string[])
+    return [...sites].sort()
+  }, [preleveurs])
+
   return (
     <>
       {/* En-tête navigation */}
@@ -157,6 +164,48 @@ export default function PlanningHeader({
 
         {/* Ligne 2 : filtres technicien + pluie */}
         <div className="flex items-center gap-2 px-4 md:px-6 pb-3 flex-wrap">
+            {availableSites.length > 1 && (
+              <div className="flex items-center gap-1.5 flex-wrap mr-3"
+                style={{ borderRight: '1px solid var(--color-border-subtle)', paddingRight: '12px' }}>
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => { setFilterSite(''); localStorage.removeItem('planning_filter_site') }}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer"
+                  style={{
+                    background: !filterSite ? 'var(--color-text-primary)' : 'var(--color-bg-secondary)',
+                    color: !filterSite ? 'white' : 'var(--color-text-secondary)',
+                    border: `1px solid ${!filterSite ? 'transparent' : 'var(--color-border-subtle)'}`,
+                  }}
+                >
+                  Tous les sites
+                </motion.button>
+                {availableSites.map(site => {
+                  const isActive = filterSite === site
+                  return (
+                    <motion.button
+                      key={site}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => {
+                        const v = site === filterSite ? '' : site
+                        setFilterSite(v)
+                        if (v) localStorage.setItem('planning_filter_site', v)
+                        else localStorage.removeItem('planning_filter_site')
+                      }}
+                      className="px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer"
+                      style={{
+                        background: isActive ? 'var(--color-text-secondary)' : 'var(--color-bg-secondary)',
+                        color: isActive ? 'white' : 'var(--color-text-secondary)',
+                        border: `1px solid ${isActive ? 'transparent' : 'var(--color-border-subtle)'}`,
+                      }}
+                    >
+                      {site}
+                    </motion.button>
+                  )
+                })}
+              </div>
+            )}
             {allTechs.length > 1 && (
               <div className="flex items-center gap-1.5 flex-wrap">
                 <motion.button
