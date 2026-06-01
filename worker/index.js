@@ -301,6 +301,127 @@ export default {
       }
     }
 
+    // ── Endpoint feed iCal ────────────────────────────────────────
+    const icalMatch = url.pathname.match(/^\/api\/calendar\/([^/]+)\.ics$/)
+    if (icalMatch && request.method === 'GET') {
+      const uid = decodeURIComponent(icalMatch[1])
+      if (!/^[A-Za-z0-9_-]{1,128}$/.test(uid)) {
+        return new Response('UID invalide', { status: 400 })
+      }
+
+      try {
+        const sa = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT)
+        const projectId = sa.project_id
+
+        const token = await getGoogleAccessToken(
+          env.FIREBASE_SERVICE_ACCOUNT,
+          'https://www.googleapis.com/auth/datastore'
+        )
+
+        // 1. Récupérer les initiales du technicien
+        const userUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${uid}`
+        const userRes = await fetch(userUrl, { headers: { Authorization: `Bearer ${token}` } })
+        if (!userRes.ok) return new Response('Utilisateur introuvable', { status: 404 })
+        const userDoc = await userRes.json()
+        const userFields = fsFields(userDoc)
+        const initiales = fsVal(userFields.initiales) || ''
+        const prenom = fsVal(userFields.prenom) || 'Technicien'
+
+        if (!initiales) return new Response('Initiales manquantes', { status: 400 })
+
+        // 2. Récupérer tous les clients-v2 (pagination si nécessaire)
+        const year = new Date().getFullYear()
+        const vevents = []
+
+        let pageToken = null
+        do {
+          const clientsUrl = new URL(
+            `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/clients-v2`
+          )
+          clientsUrl.searchParams.set('pageSize', '100')
+          if (pageToken) clientsUrl.searchParams.set('pageToken', pageToken)
+
+          const clientsRes = await fetch(clientsUrl.toString(), {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          if (!clientsRes.ok) break
+
+          const clientsData = await clientsRes.json()
+          pageToken = clientsData.nextPageToken || null
+
+          for (const doc of (clientsData.documents || [])) {
+            const f = fsFields(doc)
+            const clientNom = fsVal(f.nom) || 'Client'
+            const plansArr = fsArr(f.plans)
+
+            for (const planVal of plansArr) {
+              const plan = planVal.mapValue?.fields ?? {}
+              const planPreleveur = fsVal(plan.preleveur) || ''
+              if (planPreleveur !== initiales) continue
+
+              const siteNom = fsVal(plan.siteNom) || ''
+              const nature = fsVal(plan.nature) || ''
+              const methode = fsVal(plan.methode) || ''
+              const samplings = fsArr(plan.samplings)
+
+              for (const sVal of samplings) {
+                const s = sVal.mapValue?.fields ?? {}
+                const samplingId = fsVal(s.id) || fsVal(s.num) || Math.random().toString(36).slice(2)
+                const plannedMonth = Number(fsVal(s.plannedMonth) ?? -1)
+                const plannedDay = Number(fsVal(s.plannedDay) ?? 0)
+                const status = fsVal(s.status) || 'planned'
+
+                if (plannedMonth < 0 || plannedMonth > 11 || plannedDay < 1) continue
+
+                const nappe = fsVal(s.nappe) || ''
+                const nappeStr = nappe ? ` · Nappe: ${nappe}` : ''
+                const desc = `Statut: ${STATUS_LABEL[status] || status} · Nature: ${icalEscape(nature)} · Méthode: ${icalEscape(methode)}${nappeStr}`
+
+                const dtStart = icalDate(year, plannedMonth, plannedDay)
+                const dtEnd = icalDateNext(year, plannedMonth, plannedDay)
+                const icalStatus = STATUS_ICAL[status] || 'TENTATIVE'
+
+                vevents.push([
+                  'BEGIN:VEVENT',
+                  `UID:${samplingId}@labocea-pmc`,
+                  `DTSTART;VALUE=DATE:${dtStart}`,
+                  `DTEND;VALUE=DATE:${dtEnd}`,
+                  `SUMMARY:${icalEscape(clientNom)} — ${icalEscape(siteNom)}`,
+                  `DESCRIPTION:${desc}`,
+                  `STATUS:${icalStatus}`,
+                  'END:VEVENT',
+                ].join('\r\n'))
+              }
+            }
+          }
+        } while (pageToken)
+
+        const ics = [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//Labocea PMC V2//FR',
+          `X-WR-CALNAME:Planning PMC – ${icalEscape(prenom)}`,
+          'X-WR-TIMEZONE:Europe/Paris',
+          'CALSCALE:GREGORIAN',
+          'METHOD:PUBLISH',
+          ...vevents,
+          'END:VCALENDAR',
+        ].join('\r\n')
+
+        return new Response(ics, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/calendar; charset=utf-8',
+            'Content-Disposition': 'inline; filename="planning-pmc.ics"',
+            'Cache-Control': 'public, max-age=3600',
+          },
+        })
+      } catch (err) {
+        console.error('[iCal] Erreur :', err)
+        return new Response('Erreur interne', { status: 500 })
+      }
+    }
+
     // Servir les assets statiques tels quels
     const assetResponse = await env.ASSETS.fetch(request)
     if (assetResponse.status !== 404) return assetResponse
