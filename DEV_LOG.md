@@ -3,6 +3,20 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 88 — Fix couleur avatar rapport planning
+**1 juin 2026**
+
+### Bug corrigé
+
+**Couleur incorrecte sur les pills rapport dans le planning**
+- Cause racine : `dotColor` dans `EventPill.tsx` utilisait `event.statusColor` pour les rapports, hardcodé à `var(--color-accent)` (bleu) dans `usePlanningData.ts`.
+- Fix : ajout de `event.type === 'rapport'` dans la branche `techColor`, identique aux prélèvements planifiés et aux événements. Les rapports utilisent maintenant la couleur du technicien assigné.
+
+### Prochaines étapes
+- Ordre de passage dans la tournée (heure planifiée ou drag & drop)
+
+---
+
 ## Session 87 — Polissage UI/UX Dashboard & Tâches
 **1 juin 2026**
 
