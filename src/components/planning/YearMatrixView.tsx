@@ -15,6 +15,8 @@ type RowData = {
   client: Client
   plan: Plan
   samplingsByMonth: (Sampling | null)[]
+  // Pour les plans bimensuels : jusqu'à 2 samplings par mois
+  pairsByMonth: (Sampling | null)[][]
 }
 
 export default function YearMatrixView({ clients, year, filterTech, filterSite, preleveurs }: YearMatrixViewProps) {
@@ -39,13 +41,29 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
 
         // Préparer les colonnes (0 à 11)
         const samplingsByMonth: (Sampling | null)[] = Array(12).fill(null)
+        const pairsByMonth: (Sampling | null)[][] = Array.from({ length: 12 }, () => [])
+
         p.samplings.forEach(s => {
           if (s.plannedMonth >= 0 && s.plannedMonth < 12) {
             samplingsByMonth[s.plannedMonth] = s
+            if (p.frequence === 'Bimensuel') {
+              pairsByMonth[s.plannedMonth].push(s)
+            }
           }
         })
 
-        list.push({ client: c, plan: p, samplingsByMonth })
+        // Pour les bimensuels : masquer les mois où TOUS les prélèvements sont non_effectué (hors saison)
+        if (p.frequence === 'Bimensuel') {
+          for (let m = 0; m < 12; m++) {
+            const pair = pairsByMonth[m]
+            if (pair.length > 0 && pair.every(s => s?.status === 'non_effectue')) {
+              pairsByMonth[m] = []
+              samplingsByMonth[m] = null
+            }
+          }
+        }
+
+        list.push({ client: c, plan: p, samplingsByMonth, pairsByMonth })
       })
     })
 
@@ -124,24 +142,58 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                     </td>
                     <td className="px-4 py-2 text-sm text-[var(--color-text-primary)] border-r border-[var(--color-border-subtle)]">
                       <div className="font-medium">{row.plan.nom}</div>
-                      <div className="text-xs text-[var(--color-text-secondary)] mt-0.5">{row.plan.siteNom} • {row.plan.frequence}</div>
+                      <div className="text-xs text-[var(--color-text-secondary)] mt-0.5 flex items-center gap-1.5">
+                        <span>{row.plan.siteNom} • {row.plan.frequence}</span>
+                        {row.plan.frequence === 'Personnalisé' && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--color-bg-tertiary)] text-[var(--color-text-tertiary)] border border-[var(--color-border)]">
+                            manuel
+                          </span>
+                        )}
+                      </div>
                     </td>
                     
-                    {row.samplingsByMonth.map((s, mIdx) => (
-                      <td key={mIdx} className="px-1 py-2 text-center border-r border-[var(--color-border-subtle)] relative">
-                        {s && (
-                          <div 
-                            className="mx-auto w-6 h-6 rounded-full flex items-center justify-center cursor-help transition-transform hover:scale-110"
-                            style={{ backgroundColor: getStatusColor(s) }}
-                            title={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s)}${s.doneDate ? ` le ${s.doneDate}` : ''}`}
-                          >
-                            <span className="text-[10px] font-bold text-white leading-none">
-                              {s.status === 'done' ? '✓' : (s.status === 'non_effectue' ? '✕' : (s.status === 'overdue' ? '!' : ''))}
-                            </span>
-                          </div>
-                        )}
-                      </td>
-                    ))}
+                    {row.samplingsByMonth.map((s, mIdx) => {
+                      const isBimensuel = row.plan.frequence === 'Bimensuel'
+                      const pair = row.pairsByMonth[mIdx]
+                      return (
+                        <td key={mIdx} className="px-1 py-2 text-center border-r border-[var(--color-border-subtle)] relative">
+                          {isBimensuel ? (
+                            pair.length > 0 && (
+                              <div className="flex items-center justify-center" style={{ width: 32 }}>
+                                {(() => {
+                                  const priority = (s: Sampling) => ({ overdue: 3, planned: 2, done: 1, non_effectue: 0 }[s.status] ?? 0)
+                                  const sorted = [...pair].filter(Boolean).sort((a, b) => priority(b!) - priority(a!))
+                                  return sorted.slice(0, 2).map((ps, pi) => ps && (
+                                    <div
+                                      key={pi}
+                                      className="w-5 h-5 rounded-full flex items-center justify-center cursor-help transition-transform hover:scale-110 border-2 border-[var(--color-bg-secondary)]"
+                                      style={{ backgroundColor: getStatusColor(ps), marginLeft: pi === 1 ? -7 : 0, zIndex: pi === 0 ? 2 : 1 }}
+                                      title={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps)}${ps.doneDate ? ` le ${ps.doneDate}` : ''}`}
+                                    >
+                                      <span className="text-[9px] font-bold text-white leading-none">
+                                        {ps.status === 'done' ? '✓' : (ps.status === 'overdue' ? '!' : '')}
+                                      </span>
+                                    </div>
+                                  ))
+                                })()}
+                              </div>
+                            )
+                          ) : (
+                            s && (
+                              <div
+                                className="mx-auto w-5 h-5 rounded-full flex items-center justify-center cursor-help transition-transform hover:scale-110"
+                                style={{ backgroundColor: getStatusColor(s) }}
+                                title={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s)}${s.doneDate ? ` le ${s.doneDate}` : ''}`}
+                              >
+                                <span className="text-[9px] font-bold text-white leading-none">
+                                  {s.status === 'done' ? '✓' : (s.status === 'non_effectue' ? '✕' : (s.status === 'overdue' ? '!' : ''))}
+                                </span>
+                              </div>
+                            )
+                          )}
+                        </td>
+                      )
+                    })}
                   </tr>
                 ))
               )}
