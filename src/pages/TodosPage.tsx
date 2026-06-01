@@ -719,7 +719,7 @@ function TodoRow({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.18 }}
-      className={`flex items-start gap-3 p-4 rounded-xl border transition-all ${
+      className={`group flex items-start gap-3 p-4 rounded-xl border transition-all ${
         isCompleted ? 'bg-neutral-50/50 opacity-60 border-neutral-200' : 'bg-white shadow-sm border-neutral-100 hover:shadow-md'
       }`}
     >
@@ -777,7 +777,7 @@ function TodoRow({
                 color: !isCompleted && isOverdue(todo.dueDate) ? 'var(--color-danger)' : 'inherit',
               }}
             >
-              📅 {todo.dueDate} {!isCompleted && isOverdue(todo.dueDate) && '(en retard)'}
+              📅 {todo.dueDate.split('-').reverse().join('/')} {!isCompleted && isOverdue(todo.dueDate) && '(en retard)'}
             </span>
           )}
 
@@ -849,7 +849,7 @@ function TodoRow({
           onClick={onEdit}
           aria-label="Modifier la tâche"
           title="Modifier"
-          className="p-1.5 rounded hover:bg-neutral-100 text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none transition-colors"
+          className="p-1.5 rounded hover:bg-neutral-100 text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none transition-colors opacity-0 group-hover:opacity-100"
         >
           <Edit2 size={13} />
         </button>
@@ -869,7 +869,7 @@ function TodoRow({
               onClick={() => setDeletingId(todo.id)}
               aria-label="Supprimer la tâche"
               title="Supprimer"
-              className="p-1.5 rounded hover:bg-neutral-100 text-gray-400 hover:text-red-500 cursor-pointer focus:outline-none transition-colors"
+              className="p-1.5 rounded hover:bg-neutral-100 text-gray-400 hover:text-red-500 cursor-pointer focus:outline-none transition-colors opacity-0 group-hover:opacity-100"
             >
               <Trash2 size={13} />
             </button>
