@@ -60,10 +60,11 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
     : type === 'acces' ? libelle.trim().length > 0 && code.trim().length > 0
     : (libelle.trim().length > 0 || contenu.trim().length > 0)
 
-  const inputCls = "w-full px-3 py-2.5 text-sm rounded-lg outline-none"
+  const inputCls = "w-full px-3 py-2.5 text-sm rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center"
+      role="presentation"
       style={{ background: 'rgba(0,0,0,0.35)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="w-full md:max-w-md rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden"
@@ -90,8 +91,8 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
 
           {/* Type */}
-          <div>
-            <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Type</label>
+          <div role="group" aria-labelledby="entry-type-label">
+            <p id="entry-type-label" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Type</p>
             <div className="grid grid-cols-4 gap-1.5">
               {(Object.keys(TYPE_CONFIG) as TerrainType[]).map(t => {
                 const cfg = TYPE_CONFIG[t]
@@ -115,8 +116,8 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           {/* Client */}
           {!isEdit && (
             <div>
-              <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Client</label>
-              <select value={clientId} onChange={e => setClientId(e.target.value)}
+              <label htmlFor="entry-client" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Client</label>
+              <select id="entry-client" value={clientId} onChange={e => setClientId(e.target.value)}
                 className={inputCls} style={inputStyle}>
                 {clients.map(c => (
                   <option key={c.id} value={c.id}>{c.nom}</option>
@@ -129,30 +130,30 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           {type === 'contact' && (
             <>
               <div>
-                <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Nom *</label>
-                <input value={nom} onChange={e => setNom(e.target.value)} placeholder="Prénom Nom"
+                <label htmlFor="entry-nom" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Nom *</label>
+                <input id="entry-nom" value={nom} onChange={e => setNom(e.target.value)} placeholder="Prénom Nom"
                   className={inputCls} style={inputStyle} />
               </div>
               <div>
-                <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Rôle / Poste</label>
-                <input value={role} onChange={e => setRole(e.target.value)} placeholder="Responsable exploitation…"
+                <label htmlFor="entry-role" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Rôle / Poste</label>
+                <input id="entry-role" value={role} onChange={e => setRole(e.target.value)} placeholder="Responsable exploitation…"
                   className={inputCls} style={inputStyle} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Mobile</label>
-                  <input type="tel" value={tel} onChange={e => setTel(e.target.value)} placeholder="06 XX XX XX XX"
+                  <label htmlFor="entry-tel" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Mobile</label>
+                  <input id="entry-tel" type="tel" value={tel} onChange={e => setTel(e.target.value)} placeholder="06 XX XX XX XX"
                     className={inputCls} style={inputStyle} />
                 </div>
                 <div>
-                  <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Fixe</label>
-                  <input type="tel" value={tel2} onChange={e => setTel2(e.target.value)} placeholder="02 XX XX XX XX"
+                  <label htmlFor="entry-tel2" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Fixe</label>
+                  <input id="entry-tel2" type="tel" value={tel2} onChange={e => setTel2(e.target.value)} placeholder="02 XX XX XX XX"
                     className={inputCls} style={inputStyle} />
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Email</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="prenom.nom@client.fr"
+                <label htmlFor="entry-email" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Email</label>
+                <input id="entry-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="prenom.nom@client.fr"
                   className={inputCls} style={inputStyle} />
               </div>
             </>
@@ -162,13 +163,13 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           {type === 'acces' && (
             <>
               <div>
-                <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Libellé *</label>
-                <input value={libelle} onChange={e => setLibelle(e.target.value)} placeholder="Portail nord, Digicode…"
+                <label htmlFor="entry-libelle-acces" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Libellé *</label>
+                <input id="entry-libelle-acces" value={libelle} onChange={e => setLibelle(e.target.value)} placeholder="Portail nord, Digicode…"
                   className={inputCls} style={inputStyle} />
               </div>
               <div>
-                <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Code *</label>
-                <input value={code} onChange={e => setCode(e.target.value)} placeholder="1234, A→B→C…"
+                <label htmlFor="entry-code" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Code *</label>
+                <input id="entry-code" value={code} onChange={e => setCode(e.target.value)} placeholder="1234, A→B→C…"
                   className={`${inputCls} font-mono font-semibold tracking-widest`} style={inputStyle} />
               </div>
             </>
@@ -179,16 +180,16 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
             <>
               {type === 'site' && (
                 <div>
-                  <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Titre</label>
-                  <input value={libelle} onChange={e => setLibelle(e.target.value)} placeholder="Localisation, consigne…"
+                  <label htmlFor="entry-libelle-site" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Titre</label>
+                  <input id="entry-libelle-site" value={libelle} onChange={e => setLibelle(e.target.value)} placeholder="Localisation, consigne…"
                     className={inputCls} style={inputStyle} />
                 </div>
               )}
               <div>
-                <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                <label htmlFor="entry-contenu" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                   {type === 'site' ? 'Description' : 'Note'}
                 </label>
-                <textarea value={contenu} onChange={e => setContenu(e.target.value)} rows={4}
+                <textarea id="entry-contenu" value={contenu} onChange={e => setContenu(e.target.value)} rows={4}
                   placeholder={type === 'site' ? 'Accès par la D5, contacter la garderie avant 8h…' : 'Information utile…'}
                   className={`${inputCls} resize-none`} style={inputStyle} />
               </div>
@@ -198,8 +199,8 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           {/* Notes communes */}
           {type !== 'note' && (
             <div>
-              <label className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Notes complémentaires</label>
-              <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optionnel"
+              <label htmlFor="entry-notes" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Notes complémentaires</label>
+              <input id="entry-notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optionnel"
                 className={inputCls} style={inputStyle} />
             </div>
           )}

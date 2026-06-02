@@ -21,13 +21,13 @@ export default function TuyauxPage() {
   const allYears = useMemo(() => {
     const s = new Set<number>()
     tuyaux.forEach(t => { if (t.annee) s.add(t.annee) })
-    return s.toSorted((a, b) => b - a)
+    return [...s].toSorted((a, b) => b - a)
   }, [tuyaux])
 
   const allMats = useMemo(() => {
     const s = new Set<string>()
     tuyaux.forEach(t => s.add(t.materiau || 'AUTRE'))
-    return s.toSorted()
+    return [...s].toSorted()
   }, [tuyaux])
 
   const filtered = useMemo(() => tuyaux.filter(t => {

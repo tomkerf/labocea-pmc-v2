@@ -53,10 +53,11 @@ export default function LoginPage() {
           >
             {/* Email */}
             <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+              <label htmlFor="login-email" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                 Email
               </label>
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -70,10 +71,11 @@ export default function LoginPage() {
 
             {/* Mot de passe */}
             <div className="px-4 py-3">
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+              <label htmlFor="login-password" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                 Mot de passe
               </label>
               <input
+                id="login-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

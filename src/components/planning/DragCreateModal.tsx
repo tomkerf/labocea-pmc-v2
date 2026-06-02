@@ -109,18 +109,18 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+              <label htmlFor="dcm-debut" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                 Début
               </label>
-              <input type="date" value={debut} onChange={e => setDebut(e.target.value)} aria-label="Date de début"
+              <input id="dcm-debut" type="date" value={debut} onChange={e => setDebut(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+              <label htmlFor="dcm-fin" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                 Fin
               </label>
-              <input type="date" value={fin} min={debut} onChange={e => setFin(e.target.value)} aria-label="Date de fin"
+              <input id="dcm-fin" type="date" value={fin} min={debut} onChange={e => setFin(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
             </div>
@@ -128,20 +128,20 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
 
           {!isMultiDay && (
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+              <label htmlFor="dcm-heure" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                 Heure (optionnel)
               </label>
-              <input type="time" value={heure} onChange={e => setHeure(e.target.value)} aria-label="Heure"
+              <input id="dcm-heure" type="time" value={heure} onChange={e => setHeure(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+            <label htmlFor="dcm-notes" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
               Notes (optionnel)
             </label>
-            <textarea rows={2} placeholder="Remarques…" value={notes} onChange={e => setNotes(e.target.value)} aria-label="Notes"
+            <textarea id="dcm-notes" rows={2} placeholder="Remarques…" value={notes} onChange={e => setNotes(e.target.value)}
               className="w-full px-3 py-2 rounded-lg text-sm resize-none"
               style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
           </div>

@@ -43,7 +43,7 @@ export default function PlanningHeader({
 }: PlanningHeaderProps) {
   const availableSites = useMemo(() => {
     const sites = new Set(preleveurs.map(p => p.site).filter(Boolean) as string[])
-    return sites.toSorted()
+    return [...sites].toSorted()
   }, [preleveurs])
 
   return (

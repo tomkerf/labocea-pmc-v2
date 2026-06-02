@@ -496,9 +496,9 @@ export default function TodosPage() {
               <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-4">
                 {/* Titre */}
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Titre de la tâche</label>
+                  <label htmlFor="todo-titre" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Titre de la tâche</label>
                   <input
-                    aria-label="Titre de la tâche"
+                    id="todo-titre"
                     value={formTitre}
                     onChange={(e) => setFormTitre(e.target.value)}
                     placeholder="Ex: Préparer flaconnage rivière"
@@ -514,9 +514,9 @@ export default function TodosPage() {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Description / Notes</label>
+                  <label htmlFor="todo-desc" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Description / Notes</label>
                   <textarea
-                    aria-label="Description / Notes"
+                    id="todo-desc"
                     value={formDesc}
                     onChange={(e) => setFormDesc(e.target.value)}
                     placeholder="Détails supplémentaires, consignes..."
@@ -531,8 +531,8 @@ export default function TodosPage() {
                 </div>
 
                 {/* Priorité (Segmented Control) */}
-                <div>
-                  <label className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Priorité</label>
+                <div role="group" aria-labelledby="todo-priority-label">
+                  <p id="todo-priority-label" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Priorité</p>
                   <div
                     className="flex p-0.5 rounded-lg text-xs font-semibold"
                     style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border-subtle)' }}
@@ -563,9 +563,9 @@ export default function TodosPage() {
 
                 {/* Assignation */}
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Assignée à</label>
+                  <label htmlFor="todo-assigned" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Assignée à</label>
                   <select
-                    aria-label="Assignée à"
+                    id="todo-assigned"
                     value={formAssignedTo}
                     onChange={(e) => setFormAssignedTo(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none"
@@ -586,10 +586,10 @@ export default function TodosPage() {
 
                 {/* Échéance */}
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Date d'échéance</label>
+                  <label htmlFor="todo-due-date" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Date d'échéance</label>
                   <input
+                    id="todo-due-date"
                     type="date"
-                    aria-label="Date d'échéance"
                     value={formDueDate}
                     onChange={(e) => setFormDueDate(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none"
@@ -604,9 +604,9 @@ export default function TodosPage() {
                 <div className="grid grid-cols-2 gap-3 mt-1">
                   {/* Liaison Client */}
                   <div>
-                    <label className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Client / Mission</label>
+                    <label htmlFor="todo-client" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Client / Mission</label>
                     <select
-                      aria-label="Client / Mission"
+                      id="todo-client"
                       value={formClientId}
                       onChange={(e) => setFormClientId(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border text-xs focus:outline-none"
@@ -627,9 +627,9 @@ export default function TodosPage() {
 
                   {/* Liaison Équipement */}
                   <div>
-                    <label className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Matériel / Instrument</label>
+                    <label htmlFor="todo-equipement" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Matériel / Instrument</label>
                     <select
-                      aria-label="Matériel / Instrument"
+                      id="todo-equipement"
                       value={formEquipementId}
                       onChange={(e) => setFormEquipementId(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border text-xs focus:outline-none"
@@ -785,26 +785,26 @@ function TodoRow({
           {todo.clientNom && (
             <>
               {todo.dueDate && <span>•</span>}
-              <span
-                className="hover:underline cursor-pointer font-semibold shrink-0"
+              <button type="button"
+                className="hover:underline font-semibold shrink-0 text-left"
                 style={{ color: 'var(--color-accent)' }}
                 onClick={() => navigate(`/missions/${todo.clientId}`)}
               >
                 💼 {todo.clientNom}
-              </span>
+              </button>
             </>
           )}
 
           {todo.equipementNom && (
             <>
               {(todo.dueDate || todo.clientNom) && <span>•</span>}
-              <span
-                className="hover:underline cursor-pointer font-semibold shrink-0"
+              <button type="button"
+                className="hover:underline font-semibold shrink-0 text-left"
                 style={{ color: 'var(--color-accent)' }}
                 onClick={() => navigate(`/materiel/${todo.equipementId}`)}
               >
                 🔧 {todo.equipementNom}
-              </span>
+              </button>
             </>
           )}
         </div>

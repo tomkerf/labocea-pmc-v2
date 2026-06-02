@@ -282,11 +282,10 @@ export default function DayModal({
                             style={{ background: 'var(--color-bg-tertiary)', borderTop: '1px solid var(--color-border-subtle)' }}>
                             <div className="flex items-end gap-3">
                               <div className="flex-1">
-                                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                                <label htmlFor="dm-pool-date" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                                   Planifier le
                                 </label>
-                                <input type="date" value={poolDate} onChange={e => setPoolDate(e.target.value)}
-                                  aria-label="Date de planification"
+                                <input id="dm-pool-date" type="date" value={poolDate} onChange={e => setPoolDate(e.target.value)}
                                   className="w-full px-3 py-2 rounded-lg text-sm"
                                   style={{
                                     background: 'var(--color-bg-secondary)',

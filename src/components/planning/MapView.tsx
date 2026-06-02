@@ -506,9 +506,9 @@ export default function MapView({
                             🚗 GPS
                           </a>
                           <span className="text-gray-300">|</span>
-                          <span className="text-gray-600" onClick={(e) => { e.stopPropagation(); handleSelectEvent(evt, dateStr) }}>
+                          <button type="button" className="text-gray-600 text-left" onClick={(e) => { e.stopPropagation(); handleSelectEvent(evt, dateStr) }}>
                             Fiche ➔
-                          </span>
+                          </button>
                         </div>
                       </div>
                     </div>

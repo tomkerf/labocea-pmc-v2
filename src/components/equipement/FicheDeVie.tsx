@@ -312,20 +312,18 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
           </p>
           <div className="flex gap-3 mb-2">
             <div className="flex-1">
-              <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Titre</label>
-              <input value={formTitre} onChange={(e) => setFormTitre(e.target.value)}
-                aria-label="Titre de la note"
+              <label htmlFor="fdv-titre" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Titre</label>
+              <input id="fdv-titre" value={formTitre} onChange={(e) => setFormTitre(e.target.value)}
                 placeholder="Ex : Inspection terrain, Réglage, Nettoyage…" className="field-input w-full" />
             </div>
             <div>
-              <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Date</label>
-              <input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} aria-label="Date de la note" className="field-input" />
+              <label htmlFor="fdv-date" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Date</label>
+              <input id="fdv-date" type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} className="field-input" />
             </div>
           </div>
           <div className="mb-3">
-            <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Détails (optionnel)</label>
-            <textarea value={formNotes} onChange={(e) => setFormNotes(e.target.value)} rows={2}
-              aria-label="Détails de la note"
+            <label htmlFor="fdv-notes" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Détails (optionnel)</label>
+            <textarea id="fdv-notes" value={formNotes} onChange={(e) => setFormNotes(e.target.value)} rows={2}
               placeholder="Observations, actions effectuées…" className="field-input w-full resize-none" />
           </div>
           <div className="flex justify-end gap-2">
@@ -347,34 +345,33 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
           <p className="text-xs font-semibold mb-3" style={{ color: 'var(--color-success)' }}>Nouvelle vérification</p>
           <div className="flex gap-3 mb-2 flex-wrap">
             <div>
-              <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Type</label>
-              <select value={verifType} onChange={e => setVerifType(e.target.value as typeof verifType)} aria-label="Type de vérification" className="field-input">
+              <label htmlFor="fdv-verif-type" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Type</label>
+              <select id="fdv-verif-type" value={verifType} onChange={e => setVerifType(e.target.value as typeof verifType)} className="field-input">
                 <option value="etalonnage_interne">Étalonnage interne</option>
                 <option value="verification_externe">Vérification externe</option>
                 <option value="controle_terrain">Contrôle terrain</option>
               </select>
             </div>
             <div>
-              <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Date</label>
-              <input type="date" value={verifDate} onChange={e => setVerifDate(e.target.value)} aria-label="Date de vérification" className="field-input" />
+              <label htmlFor="fdv-verif-date" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Date</label>
+              <input id="fdv-verif-date" type="date" value={verifDate} onChange={e => setVerifDate(e.target.value)} className="field-input" />
             </div>
             <div>
-              <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Résultat</label>
-              <select value={verifResultat} onChange={e => setVerifResultat(e.target.value as typeof verifResultat)} aria-label="Résultat de vérification" className="field-input">
+              <label htmlFor="fdv-verif-resultat" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Résultat</label>
+              <select id="fdv-verif-resultat" value={verifResultat} onChange={e => setVerifResultat(e.target.value as typeof verifResultat)} className="field-input">
                 <option value="conforme">Conforme</option>
                 <option value="non_conforme">Non conforme</option>
                 <option value="a_reprendre">À reprendre</option>
               </select>
             </div>
             <div>
-              <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Prochain contrôle</label>
-              <input type="date" value={verifProchain} onChange={e => setVerifProchain(e.target.value)} aria-label="Prochain contrôle" className="field-input" />
+              <label htmlFor="fdv-verif-prochain" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Prochain contrôle</label>
+              <input id="fdv-verif-prochain" type="date" value={verifProchain} onChange={e => setVerifProchain(e.target.value)} className="field-input" />
             </div>
           </div>
           <div className="mb-3">
-            <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Remarques (optionnel)</label>
-            <textarea value={verifRemarques} onChange={e => setVerifRemarques(e.target.value)} rows={2}
-              aria-label="Remarques de vérification"
+            <label htmlFor="fdv-verif-remarques" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Remarques (optionnel)</label>
+            <textarea id="fdv-verif-remarques" value={verifRemarques} onChange={e => setVerifRemarques(e.target.value)} rows={2}
               placeholder="Observations, dérives constatées…" className="field-input w-full resize-none" />
           </div>
           <div className="flex justify-end gap-2">

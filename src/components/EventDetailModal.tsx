@@ -143,21 +143,20 @@ export function EventDetailModal({
           <div className="px-5 py-3.5 flex flex-col gap-2.5"
             style={{ background: 'var(--color-bg-tertiary)', borderBottom: '1px solid var(--color-border-subtle)' }}>
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+              <label htmlFor="edm-move-date" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                 Nouvelle date
               </label>
-              <input type="date" value={moveDate} onChange={e => setMoveDate(e.target.value)} autoFocus
-                aria-label="Nouvelle date"
+              <input id="edm-move-date" type="date" value={moveDate} onChange={e => setMoveDate(e.target.value)} autoFocus
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+              <label htmlFor="edm-move-reason" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                 Motif du report <span style={{ color: 'var(--color-danger)' }}>*</span>
               </label>
               <textarea
+                id="edm-move-reason"
                 value={moveReason} onChange={e => setMoveReason(e.target.value)}
-                aria-label="Motif du report"
                 placeholder="Ex : météo défavorable, client indisponible…"
                 rows={2}
                 className="w-full px-3 py-2 rounded-lg text-sm resize-none"
@@ -176,11 +175,10 @@ export function EventDetailModal({
           <div className="px-5 py-3.5 flex items-end gap-3"
             style={{ background: 'var(--color-bg-tertiary)', borderBottom: '1px solid var(--color-border-subtle)' }}>
             <div className="flex-1">
-              <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+              <label htmlFor="edm-tech" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                 Technicien assigné
               </label>
-              <select value={techInitiales} onChange={e => setTechInitiales(e.target.value)} autoFocus
-                aria-label="Technicien assigné"
+              <select id="edm-tech" value={techInitiales} onChange={e => setTechInitiales(e.target.value)} autoFocus
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
                 {techOptions.map(o => (
@@ -241,12 +239,12 @@ export function EventDetailModal({
           {isPrelev && !event.isDone && !confirmCancel && (
             <div className="flex flex-col gap-2">
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                <label htmlFor="edm-cancel-reason" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
                   Motif du retrait <span style={{ color: 'var(--color-danger)' }}>*</span>
                 </label>
                 <textarea
+                  id="edm-cancel-reason"
                   value={cancelReason} onChange={e => setCancelReason(e.target.value)}
-                  aria-label="Motif du retrait"
                   placeholder="Ex : reporté à une date ultérieure, annulé par le client…"
                   rows={2}
                   className="w-full px-3 py-2 rounded-lg text-sm resize-none"

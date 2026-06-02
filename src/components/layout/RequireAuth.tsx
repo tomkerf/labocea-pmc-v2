@@ -58,10 +58,11 @@ function CompleteProfileModal() {
 
         <div className="flex flex-col gap-3">
           <div>
-            <label className="text-xs font-medium block mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+            <label htmlFor="ra-prenom" className="text-xs font-medium block mb-1" style={{ color: 'var(--color-text-secondary)' }}>
               Prénom
             </label>
             <input
+              id="ra-prenom"
               value={prenom}
               onChange={(e) => setPrenom(e.target.value)}
               className="field-input w-full"
@@ -70,10 +71,11 @@ function CompleteProfileModal() {
             />
           </div>
           <div>
-            <label className="text-xs font-medium block mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+            <label htmlFor="ra-nom" className="text-xs font-medium block mb-1" style={{ color: 'var(--color-text-secondary)' }}>
               Nom
             </label>
             <input
+              id="ra-nom"
               value={nom}
               onChange={(e) => setNom(e.target.value)}
               className="field-input w-full"
@@ -81,10 +83,11 @@ function CompleteProfileModal() {
             />
           </div>
           <div>
-            <label className="text-xs font-medium block mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+            <label htmlFor="ra-initiales" className="text-xs font-medium block mb-1" style={{ color: 'var(--color-text-secondary)' }}>
               Initiales <span style={{ color: 'var(--color-text-tertiary)' }}>(2 à 4 lettres, ex: THK)</span>
             </label>
             <input
+              id="ra-initiales"
               value={initiales}
               onChange={(e) => setInitiales(e.target.value.toUpperCase())}
               className="field-input w-full"

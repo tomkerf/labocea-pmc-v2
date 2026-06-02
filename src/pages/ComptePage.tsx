@@ -317,12 +317,15 @@ function ChangePasswordSection({ email }: { email: string }) {
               { label: 'Mot de passe actuel', value: current, onChange: setCurrent },
               { label: 'Nouveau mot de passe', value: next, onChange: setNext },
               { label: 'Confirmer', value: confirm, onChange: setConfirm },
-            ].map(({ label, value, onChange }) => (
+            ].map(({ label, value, onChange }) => {
+              const id = `cp-pwd-${label.toLowerCase().replace(/\s+/g, '-')}`
+              return (
               <div key={label}>
-                <label className="text-xs font-medium block mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                <label htmlFor={id} className="text-xs font-medium block mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                   {label}
                 </label>
                 <input
+                  id={id}
                   type="password"
                   value={value}
                   onChange={e => onChange(e.target.value)}
@@ -335,7 +338,7 @@ function ChangePasswordSection({ email }: { email: string }) {
                   }}
                 />
               </div>
-            ))}
+            )})}
           </div>
 
           {status === 'error' && (
@@ -345,8 +348,7 @@ function ChangePasswordSection({ email }: { email: string }) {
             <p className="text-xs" style={{ color: 'var(--color-success)' }}>Mot de passe mis à jour.</p>
           )}
 
-          <button type="button"
-            type="submit"
+          <button type="submit"
             disabled={status === 'saving'}
             className="text-sm font-medium px-4 py-2 rounded-lg mt-1"
             style={{

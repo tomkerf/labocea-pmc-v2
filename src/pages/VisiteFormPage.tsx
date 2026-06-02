@@ -202,18 +202,18 @@ export default function VisiteFormPage() {
         style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date de visite</label>
-            <input type="date" aria-label="Date de visite" value={date} onChange={e => setDate(e.target.value)}
+            <label htmlFor="vf-date" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date de visite</label>
+            <input id="vf-date" type="date" value={date} onChange={e => setDate(e.target.value)}
               className="field-input w-full" />
           </div>
           <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Technicien</label>
-            <input aria-label="Technicien" value={technicienNom} onChange={e => setTechnicienNom(e.target.value)}
+            <label htmlFor="vf-technicien" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Technicien</label>
+            <input id="vf-technicien" value={technicienNom} onChange={e => setTechnicienNom(e.target.value)}
               className="field-input w-full" placeholder="Prénom Nom" />
           </div>
           <div className="col-span-2">
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Notes générales</label>
-            <textarea aria-label="Notes générales" value={notes} onChange={e => setNotes(e.target.value)}
+            <label htmlFor="vf-notes" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Notes générales</label>
+            <textarea id="vf-notes" value={notes} onChange={e => setNotes(e.target.value)}
               rows={2} className="field-input w-full resize-none"
               placeholder="Remarques générales sur le site…" />
           </div>
@@ -342,15 +342,15 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
 
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Type d'eau</label>
-          <select value={point.typeEau} onChange={e => onChange('typeEau', e.target.value as NatureEauType)}
+          <label htmlFor={`pc-type-eau-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Type d'eau</label>
+          <select id={`pc-type-eau-${point.id}`} value={point.typeEau} onChange={e => onChange('typeEau', e.target.value as NatureEauType)}
             className="field-input w-full">
             {NATURE_EAU.map(n => <option key={n}>{n}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Méthode</label>
-          <select value={point.methode} onChange={e => onChange('methode', e.target.value as MethodeType)}
+          <label htmlFor={`pc-methode-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Méthode</label>
+          <select id={`pc-methode-${point.id}`} value={point.methode} onChange={e => onChange('methode', e.target.value as MethodeType)}
             className="field-input w-full">
             {METHODES.map(m => <option key={m}>{m}</option>)}
           </select>
@@ -358,8 +358,8 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
       </div>
 
       {/* Faisabilité */}
-      <div className="mb-3">
-        <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Faisabilité</label>
+      <div className="mb-3" role="group" aria-labelledby={`pc-faisabilite-label-${point.id}`}>
+        <p id={`pc-faisabilite-label-${point.id}`} className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Faisabilité</p>
         <div className="flex gap-2">
           {FAISABILITE.map(f => (
             <button type="button"
@@ -379,20 +379,20 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
       </div>
 
       <div className="mb-3">
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Sécurité</label>
-        <input aria-label="Sécurité" value={point.securite} onChange={e => onChange('securite', e.target.value)}
+        <label htmlFor={`pc-securite-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Sécurité</label>
+        <input id={`pc-securite-${point.id}`} value={point.securite} onChange={e => onChange('securite', e.target.value)}
           className="field-input w-full" placeholder="EPI requis, risques, accès…" />
       </div>
 
       <div className="mb-3">
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Notes</label>
-        <input aria-label="Notes du point" value={point.notes} onChange={e => onChange('notes', e.target.value)}
+        <label htmlFor={`pc-notes-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Notes</label>
+        <input id={`pc-notes-${point.id}`} value={point.notes} onChange={e => onChange('notes', e.target.value)}
           className="field-input w-full" placeholder="Remarques spécifiques…" />
       </div>
 
       {/* Photos */}
       <div>
-        <label className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>Photos</label>
+        <p className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>Photos</p>
         {point.photos.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
             {point.photos.map(url => (

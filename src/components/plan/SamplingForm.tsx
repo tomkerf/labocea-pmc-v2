@@ -70,7 +70,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
       <div>
-        <label className="flex items-center gap-1 text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+        <label htmlFor="sf-status" className="flex items-center gap-1 text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
           Statut
           <span className="relative group">
             <HelpCircle size={11} className="cursor-help" style={{ color: 'var(--color-text-tertiary)' }} />
@@ -81,7 +81,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
             </div>
           </span>
         </label>
-        <select aria-label="Statut du prélèvement" value={sampling.status}
+        <select id="sf-status" value={sampling.status}
           onChange={(e) => onUpdate('status', e.target.value as SamplingStatus)}
           className="field-input w-full">
           <option value="planned">Planifié</option>
@@ -92,10 +92,10 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       </div>
 
       <div>
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Heure prévue</label>
+        <label htmlFor="sf-planned-time" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Heure prévue</label>
         <input
+          id="sf-planned-time"
           type="time"
-          aria-label="Heure prévue"
           value={sampling.plannedTime ?? ''}
           onChange={(e) => onUpdate('plannedTime', e.target.value)}
           className="field-input w-full"
@@ -103,9 +103,9 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       </div>
 
       <div>
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Mois prévu</label>
+        <label htmlFor="sf-planned-month" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Mois prévu</label>
         <select
-          aria-label="Mois prévu"
+          id="sf-planned-month"
           value={sampling.plannedMonth}
           onChange={(e) => onUpdate('plannedMonth', parseInt(e.target.value))}
           className="field-input w-full">
@@ -114,13 +114,13 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       </div>
 
       <div>
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+        <label htmlFor="sf-planned-day" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
           Jour prévu
           <span className="ml-1 font-normal" style={{ color: 'var(--color-text-tertiary)' }}>(1–31)</span>
         </label>
         <input
+          id="sf-planned-day"
           type="number" min={1} max={31}
-          aria-label="Jour prévu"
           value={sampling.plannedDay || ''}
           onChange={(e) => {
             const v = parseInt(e.target.value)
@@ -133,17 +133,17 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       </div>
 
       <div>
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date réalisée</label>
-        <input type="date" aria-label="Date réalisée" value={sampling.doneDate}
+        <label htmlFor="sf-done-date" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date réalisée</label>
+        <input id="sf-done-date" type="date" value={sampling.doneDate}
           onChange={(e) => onUpdate('doneDate', e.target.value)}
           className="field-input w-full" />
       </div>
 
       {sampling.status === 'done' && users.length > 0 && (
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Effectué par</label>
+          <label htmlFor="sf-done-by" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Effectué par</label>
           <select
-            aria-label="Effectué par"
+            id="sf-done-by"
             value={sampling.doneBy ?? ''}
             onChange={(e) => onUpdate('doneBy', e.target.value)}
             className="field-input w-full">
@@ -158,8 +158,8 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       )}
 
       <div>
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Nappe</label>
-        <select aria-label="Nappe" value={sampling.nappe}
+        <label htmlFor="sf-nappe" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Nappe</label>
+        <select id="sf-nappe" value={sampling.nappe}
           onChange={(e) => onUpdate('nappe', e.target.value as NappeType)}
           className="field-input w-full">
           <option value="">—</option>
@@ -169,7 +169,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       </div>
 
       <div>
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Rapport prévu</label>
+        <p className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Rapport prévu</p>
         <label className="flex items-center gap-2 mt-2 cursor-pointer">
           <input type="checkbox" aria-label="Rapport prévu" checked={sampling.rapportPrevu}
             onChange={(e) => onUpdate('rapportPrevu', e.target.checked)} />
@@ -181,10 +181,10 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
 
       {sampling.rapportPrevu && (
         <div>
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date envoi prévue</label>
+          <label htmlFor="sf-rapport-date" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date envoi prévue</label>
           <input
+            id="sf-rapport-date"
             type="date"
-            aria-label="Date d'envoi prévue du rapport"
             value={sampling.rapportDatePrevue ?? ''}
             onChange={(e) => onUpdate('rapportDatePrevue', e.target.value)}
             className="field-input w-full"
@@ -193,8 +193,8 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       )}
 
       <div className="sm:col-span-2">
-        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Commentaire</label>
-        <input aria-label="Commentaire" value={sampling.comment}
+        <label htmlFor="sf-comment" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Commentaire</label>
+        <input id="sf-comment" value={sampling.comment}
           onChange={(e) => onUpdate('comment', e.target.value)}
           placeholder="Remarques…"
           className="field-input w-full" />
@@ -202,9 +202,9 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
 
       {/* Checklist */}
       <div className="sm:col-span-2">
-        <label className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
           Checklist terrain
-        </label>
+        </p>
         {checklist.length > 0 && (
           <div className="rounded-lg overflow-hidden mb-2"
             style={{ border: '1px solid var(--color-border-subtle)' }}>
@@ -255,11 +255,11 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       {/* Motif — visible uniquement si le prélèvement n'a pas été réalisé */}
       {(sampling.status === 'non_effectue' || sampling.status === 'overdue') && (
         <div className="sm:col-span-2">
-          <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+          <label htmlFor="sf-motif" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
             Motif de non-réalisation
           </label>
           <input
-            aria-label="Motif de non-réalisation"
+            id="sf-motif"
             value={sampling.motif ?? ''}
             onChange={(e) => onUpdate('motif', e.target.value)}
             placeholder="Ex : Pas d'eau sur site / Annulation client / Accès impossible…"
@@ -270,9 +270,9 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
 
       {/* Photos terrain */}
       <div className="sm:col-span-2">
-        <label className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
           Photos terrain
-        </label>
+        </p>
 
         {(sampling.photos ?? []).length > 0 && (
           <div className="flex flex-wrap gap-2 mb-3">
@@ -335,9 +335,9 @@ export function PlanField({ label, children, last }: { label: string; children: 
   return (
     <div className="flex items-center gap-4 px-5 py-3"
       style={{ borderBottom: last ? 'none' : '1px solid var(--color-border-subtle)' }}>
-      <label className="text-sm shrink-0" style={{ color: 'var(--color-text-secondary)', minWidth: '160px' }}>
+      <span className="text-sm shrink-0" style={{ color: 'var(--color-text-secondary)', minWidth: '160px' }}>
         {label}
-      </label>
+      </span>
       <div className="flex-1">{children}</div>
     </div>
   )
