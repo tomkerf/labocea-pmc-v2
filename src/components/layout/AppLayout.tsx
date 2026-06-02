@@ -6,6 +6,7 @@ import Sidebar from './Sidebar'
 import MobileDrawer from './MobileDrawer'
 import ErrorBoundary from './ErrorBoundary'
 import ToastContainer from '@/components/ui/ToastContainer'
+import ChangelogModal, { useChangelogState } from '@/components/ui/ChangelogModal'
 
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import SyncBadge from '@/components/ui/SyncBadge'
@@ -15,6 +16,7 @@ export default function AppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const changelog = useChangelogState()
   useNetworkStatus()
 
 
@@ -100,6 +102,9 @@ export default function AppLayout() {
 
       {/* Toasts */}
       <ToastContainer />
+
+      {/* Changelog */}
+      <ChangelogModal open={changelog.open} onClose={changelog.dismiss} />
     </div>
   )
 }
