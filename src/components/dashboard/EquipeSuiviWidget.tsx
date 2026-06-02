@@ -79,8 +79,10 @@ export function EquipeSuiviWidget({ clients }: Props) {
     const enRetardListItems: EnRetardItem[] = []
     const rapportsDusListItems: RapportDuItem[] = []
 
+    const currentYear = String(new Date().getFullYear())
     for (const client of clients) {
-      const year = parseInt(client.annee ?? String(new Date().getFullYear()))
+      if (client.annee && client.annee !== currentYear) continue
+      const year = parseInt(client.annee ?? currentYear)
       for (const plan of client.plans) {
         for (const s of plan.samplings) {
           if (s.status === 'done') {

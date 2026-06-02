@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { Client, Plan, Sampling } from '@/types'
 import { MOIS_LONG } from '@/lib/planningUtils'
+import { isSamplingOverdue } from '@/lib/overdue'
 import { Link } from 'react-router-dom'
 
 interface YearMatrixViewProps {
@@ -75,38 +76,55 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
     })
   }, [clients, year, filterTech, filterSite, preleveurs])
 
-  const getStatusColor = (s: Sampling | null) => {
+  const getStatusColor = (s: Sampling | null, planYear: number) => {
     if (!s) return 'transparent'
-    switch (s.status) {
-      case 'done': return 'var(--color-success)'
-      case 'planned': return 'var(--color-warning)'
-      case 'overdue': return 'var(--color-danger)'
-      case 'non_effectue': return 'var(--color-neutral)'
-      default: return 'var(--color-border)'
-    }
+    if (s.status === 'done') return 'var(--color-success)'
+    if (s.status === 'non_effectue') return 'var(--color-neutral)'
+    if (isSamplingOverdue(s, planYear)) return 'var(--color-danger)'
+    if (s.status === 'planned') return 'var(--color-warning)'
+    return 'var(--color-border)'
   }
 
-  const getStatusLabel = (s: Sampling | null) => {
+  const getStatusLabel = (s: Sampling | null, planYear: number) => {
     if (!s) return ''
-    switch (s.status) {
-      case 'done': return 'Fait'
-      case 'planned': return 'Planifié'
-      case 'overdue': return 'En retard'
-      case 'non_effectue': return 'Non fait'
-      default: return ''
-    }
+    if (s.status === 'done') return 'Fait'
+    if (s.status === 'non_effectue') return 'Non fait'
+    if (isSamplingOverdue(s, planYear)) return 'En retard'
+    if (s.status === 'planned') return 'Planifié'
+    return ''
   }
+
+  const getStatusIcon = (s: Sampling, planYear: number) => {
+    if (s.status === 'done') return '✓'
+    if (s.status === 'non_effectue') return '✕'
+    if (isSamplingOverdue(s, planYear)) return '!'
+    return ''
+  }
+
+  const counts = useMemo(() => {
+    const c = { done: 0, planned: 0, overdue: 0, non_effectue: 0 }
+    rows.forEach(({ client, plan }) => {
+      const planYear = parseInt(client.annee ?? String(year))
+      plan.samplings.forEach(s => {
+        if (s.status === 'done') { c.done++; return }
+        if (s.status === 'non_effectue') { c.non_effectue++; return }
+        if (isSamplingOverdue(s, planYear)) { c.overdue++; return }
+        if (s.status === 'planned') c.planned++
+      })
+    })
+    return c
+  }, [rows, year])
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[var(--color-bg-primary)] p-4 md:p-6">
       <div className="flex flex-col flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl shadow-[var(--shadow-card)] overflow-hidden min-h-0">
-        
+
         {/* Légende (fixe) */}
         <div className="shrink-0 px-4 py-3 border-b border-[var(--color-border-subtle)] flex gap-4 text-xs font-medium bg-[var(--color-bg-secondary)] z-20">
-          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-success)]" /> Fait</div>
-          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-warning)]" /> Planifié</div>
-          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-danger)]" /> En retard</div>
-          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-neutral)]" /> Non effectué</div>
+          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-success)]" /> Fait <span className="text-[var(--color-text-secondary)]">({counts.done})</span></div>
+          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-warning)]" /> Planifié <span className="text-[var(--color-text-secondary)]">({counts.planned})</span></div>
+          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-danger)]" /> En retard <span className="text-[var(--color-text-secondary)]">({counts.overdue})</span></div>
+          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-neutral)]" /> Non effectué <span className="text-[var(--color-text-secondary)]">({counts.non_effectue})</span></div>
         </div>
 
         {/* Table wrapper (scrollable) */}
@@ -155,23 +173,24 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                     {row.samplingsByMonth.map((s, mIdx) => {
                       const isBimensuel = row.plan.frequence === 'Bimensuel'
                       const pair = row.pairsByMonth[mIdx]
+                      const planYear = parseInt(row.client.annee ?? String(year))
                       return (
                         <td key={mIdx} className="px-1 py-2 text-center border-r border-[var(--color-border-subtle)] relative">
                           {isBimensuel ? (
                             pair.length > 0 && (
                               <div className="flex items-center justify-center" style={{ width: 32 }}>
                                 {(() => {
-                                  const priority = (s: Sampling) => ({ overdue: 3, planned: 2, done: 1, non_effectue: 0 }[s.status] ?? 0)
+                                  const priority = (s: Sampling) => isSamplingOverdue(s, planYear) ? 3 : s.status === 'planned' ? 2 : s.status === 'done' ? 1 : 0
                                   const sorted = [...pair].filter(Boolean).sort((a, b) => priority(b!) - priority(a!))
                                   return sorted.slice(0, 2).map((ps, pi) => ps && (
                                     <div
                                       key={pi}
                                       className="size-5 rounded-full flex items-center justify-center cursor-help transition-transform hover:scale-110 border-2 border-[var(--color-bg-secondary)]"
-                                      style={{ backgroundColor: getStatusColor(ps), marginLeft: pi === 1 ? -7 : 0, zIndex: pi === 0 ? 2 : 1 }}
-                                      title={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps)}${ps.doneDate ? ` le ${ps.doneDate}` : ''}`}
+                                      style={{ backgroundColor: getStatusColor(ps, planYear), marginLeft: pi === 1 ? -7 : 0, zIndex: pi === 0 ? 2 : 1 }}
+                                      title={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps, planYear)}${ps.doneDate ? ` le ${ps.doneDate}` : ''}`}
                                     >
                                       <span className="text-[9px] font-bold text-white leading-none">
-                                        {ps.status === 'done' ? '✓' : (ps.status === 'overdue' ? '!' : '')}
+                                        {getStatusIcon(ps, planYear)}
                                       </span>
                                     </div>
                                   ))
@@ -182,11 +201,11 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                             s && (
                               <div
                                 className="mx-auto size-5 rounded-full flex items-center justify-center cursor-help transition-transform hover:scale-110"
-                                style={{ backgroundColor: getStatusColor(s) }}
-                                title={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s)}${s.doneDate ? ` le ${s.doneDate}` : ''}`}
+                                style={{ backgroundColor: getStatusColor(s, planYear) }}
+                                title={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s, planYear)}${s.doneDate ? ` le ${s.doneDate}` : ''}`}
                               >
                                 <span className="text-[9px] font-bold text-white leading-none">
-                                  {s.status === 'done' ? '✓' : (s.status === 'non_effectue' ? '✕' : (s.status === 'overdue' ? '!' : ''))}
+                                  {getStatusIcon(s, planYear)}
                                 </span>
                               </div>
                             )
