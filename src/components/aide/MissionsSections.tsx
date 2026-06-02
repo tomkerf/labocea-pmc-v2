@@ -1,5 +1,5 @@
-import { FolderPlus, MapPin, Camera } from 'lucide-react'
-import { Section, Step, Divider, Tip } from './AideComponents'
+import { FolderPlus, MapPin, Camera, Users, FileText } from 'lucide-react'
+import { Section, Step, Divider, Tip, Note } from './AideComponents'
 
 export function MissionClientSection() {
   return (
@@ -19,9 +19,43 @@ export function MissionClientSection() {
               Va sur <strong>Missions</strong> et clique sur <strong>+ Nouveau client</strong>.
             </Step>
             <Step num={2}>
-              Remplis la fiche : <strong>nom</strong>, <strong>interlocuteur</strong>, <strong>segment</strong> (AEP, Eaux usées, Réseaux de mesure…),
-              <strong> technicien assigné</strong>, <strong>numéro de devis</strong> et <strong>sites</strong>.
-              Tout est sauvegardé automatiquement.
+              La fiche est organisée en 5 sections. Remplis dans l'ordre :
+            </Step>
+          </div>
+
+          <div className="mt-3 ml-8 flex flex-col rounded-xl overflow-hidden"
+            style={{ border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
+            {[
+              { label: 'Informations générales', desc: 'Nom, segment, type de demande, préleveur assigné, année, sites.' },
+              { label: 'Description de la mission', desc: 'Intitulé libre de la mission — visible dans les exports.' },
+              { label: 'Contact', desc: 'Interlocuteur client, fonction, tél/email, contact prévenance, et le commercial interne Labocea (Céline, CRO, JBE…).' },
+              { label: 'Contrat', desc: 'N° devis, convention, BC, durée, montants PMC/sous-traitance, mode facturation, situation administrative.' },
+              { label: 'Détail analytique', desc: 'Répartition par type de prestation : MPR1, MPR2, MPR3, MPR5, MPR6 Q/T, Collecte, Boues, Débit…' },
+            ].map(({ label, desc }, i, arr) => (
+              <div key={label} className="flex gap-3 px-4 py-3"
+                style={{ borderBottom: i < arr.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
+                <span className="text-xs font-semibold w-44 shrink-0 pt-0.5" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
+                <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <Divider />
+
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide mb-3"
+            style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+            Sous-traitance des analyses
+          </p>
+          <div className="flex flex-col gap-3">
+            <Step num={3}>
+              Dans la section <strong>Contrat</strong>, coche <strong>Analyses sous-traitées</strong> si les analyses
+              sont confiées à un laboratoire extérieur (Inovalys, Eurofins…). Un champ apparaît pour saisir le nom du sous-traitant.
+            </Step>
+            <Step num={4}>
+              À ne pas confondre avec la <strong>Part sous-traitance (€)</strong> qui est un montant financier.
+              La case "Analyses sous-traitées" concerne l'organisation terrain.
             </Step>
           </div>
         </div>
@@ -34,22 +68,23 @@ export function MissionClientSection() {
             Étape 2 — Créer un plan de prélèvement
           </p>
           <div className="flex flex-col gap-3">
-            <Step num={3}>
-              Dans la fiche client, clique sur <strong>+ Nouveau plan</strong>.
-              Un plan = un site + une fréquence d'intervention.
-            </Step>
-            <Step num={4}>
-              Renseigne : <strong>nom du site</strong>, <strong>fréquence</strong> (mensuel, trimestriel, semestriel, annuel…),
-              <strong> nature de l'eau</strong>, <strong>méthode</strong> (ponctuel, composite, automatique)
-              et <strong>conditions météo</strong> si applicable.
-            </Step>
             <Step num={5}>
-              Saisis les <strong>coordonnées GPS</strong> du point de prélèvement si disponibles.
-              Elles s'affichent dans la fiche d'intervention sur le terrain.
+              Dans la fiche client, clique sur <strong>+ Nouveau plan</strong>.
+              Un plan = un point de prélèvement + une fréquence.
             </Step>
             <Step num={6}>
-              L'app <strong>génère automatiquement le calendrier annuel</strong> selon la fréquence choisie.
-              Chaque prélèvement est créé avec le statut Planifié.
+              Renseigne : <strong>nom du site</strong>, <strong>fréquence</strong> (mensuel, trimestriel, semestriel, annuel…),
+              <strong> nature de l'eau</strong>, <strong>méthode</strong> (ponctuel, composite, automatique),
+              <strong> conditions météo</strong> et <strong>contraintes particulières</strong> si applicable.
+            </Step>
+            <Step num={7}>
+              Coche <strong>COFRAC</strong> si le point est accrédité. Cette information apparaît dans les exports et sur la matrice annuelle.
+            </Step>
+            <Step num={8}>
+              Saisis les <strong>coordonnées GPS</strong> du point si disponibles — elles s'affichent en fiche terrain.
+            </Step>
+            <Step num={9}>
+              L'app <strong>génère automatiquement le calendrier annuel</strong> selon la fréquence. Chaque prélèvement est créé avec le statut Planifié.
             </Step>
           </div>
         </div>
@@ -62,10 +97,10 @@ export function MissionClientSection() {
             Étape 3 — Ajuster le calendrier
           </p>
           <div className="flex flex-col gap-3">
-            <Step num={7}>
+            <Step num={10}>
               Dans la fiche plan, clique sur une pill pour modifier le jour prévu, le statut ou ajouter un commentaire.
             </Step>
-            <Step num={8}>
+            <Step num={11}>
               Pour les plans <strong>trimestriels</strong> ou <strong>bimestriels</strong>, tu peux choisir les mois actifs
               et définir un jour différent par mois si nécessaire.
             </Step>
@@ -80,17 +115,15 @@ export function MissionClientSection() {
             Étape 4 — Suivi des rapports
           </p>
           <div className="flex flex-col gap-3">
-            <Step num={9}>
-              Sur la fiche d'un prélèvement, coche <strong>Rapport prévu</strong> pour indiquer qu'un rapport
-              doit être envoyé au client. Saisis la date prévue d'envoi.
+            <Step num={12}>
+              Sur la fiche d'un prélèvement, coche <strong>Rapport prévu</strong> et saisis la date prévue d'envoi.
             </Step>
-            <Step num={10}>
-              Une fois le rapport envoyé, renseigne la <strong>date d'envoi effective</strong>.
-              Le badge passe de orange (prévu) à vert (envoyé) dans le planning.
+            <Step num={13}>
+              Une fois envoyé, renseigne la <strong>date d'envoi effective</strong>.
+              Le badge passe de orange à vert dans le planning.
             </Step>
-            <Step num={11}>
-              Le <strong>Dashboard</strong> affiche un bloc "Rapports à envoyer" avec tous les rapports
-              prévus mais non encore envoyés, triés par date.
+            <Step num={14}>
+              Le <strong>Dashboard</strong> liste tous les rapports prévus non encore envoyés, triés par date.
             </Step>
           </div>
         </div>
@@ -103,14 +136,9 @@ export function MissionClientSection() {
             Archiver ou supprimer un client
           </p>
           <div className="flex flex-col gap-3">
-            <Step num={12}>
-              Dans la fiche client, le bouton <strong>Supprimer</strong> est accessible en bas de page.
-              Une confirmation en deux étapes est demandée avant toute suppression définitive.
-            </Step>
-            <Step num={13}>
-              La suppression est <strong>irréversible</strong> et efface tous les plans et prélèvements associés.
-              Si la mission est terminée mais que tu veux garder l'historique, modifie plutôt le statut
-              du client ou laisse-le inactif dans la liste.
+            <Step num={15}>
+              Le bouton <strong>Supprimer</strong> est en bas de la fiche client.
+              Une confirmation en deux étapes est demandée. La suppression efface tous les plans et prélèvements associés — <strong>irréversible</strong>.
             </Step>
           </div>
         </div>
@@ -125,9 +153,14 @@ export function MissionClientSection() {
         </Tip>
         <Tip icon={Camera}>
           <span>
-            <strong>Photos terrain</strong> — dans la fiche d'un prélèvement (Missions → Client → Plan),
-            tu peux joindre des photos prises sur le terrain directement depuis le téléphone.
-            Elles sont stockées et consultables depuis n'importe quel appareil.
+            <strong>Photos terrain</strong> — dans la fiche d'un prélèvement, tu peux joindre des photos
+            prises depuis le téléphone. Elles sont consultables depuis n'importe quel appareil.
+          </span>
+        </Tip>
+        <Tip icon={FileText}>
+          <span>
+            <strong>Matrice annuelle</strong> — depuis le Planning en vue Année, filtre par agence (Brest / Quimper)
+            pour voir le planning de ton secteur en un coup d'œil.
           </span>
         </Tip>
       </div>
@@ -137,32 +170,34 @@ export function MissionClientSection() {
 
 export function VisitePreliminaireSection() {
   return (
-    <Section icon={Camera} title="Visites préliminaires">
+    <Section icon={Users} title="Visites préliminaires">
       <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
         Consigne tes repérages sur le terrain avant de définir un plan de prélèvement.
       </p>
 
       <div className="flex flex-col gap-4">
-        <div>
-          <div className="flex flex-col gap-3">
-            <Step num={1}>
-              Rends-toi sur la fiche d'un <strong>Client</strong> (Missions) ou d'une <strong>Demande</strong> (Demandes).
-            </Step>
-            <Step num={2}>
-              Descends jusqu'à la section <strong>Visites préliminaires</strong> et clique sur <strong>Nouvelle</strong>.
-            </Step>
-            <Step num={3}>
-              Renseigne tes notes générales et ajoute autant de <strong>points de prélèvement</strong> que nécessaire.
-            </Step>
-            <Step num={4}>
-              Pour chaque point, tu peux définir le type d'eau, la méthode, la faisabilité, les consignes de sécurité, et <strong>ajouter des photos</strong>.
-            </Step>
-            <Step num={5}>
-              Une fois la visite enregistrée, tu peux l'ouvrir pour la modifier ou l'<strong>exporter en PDF</strong> via le bouton Exporter.
-            </Step>
-          </div>
+        <div className="flex flex-col gap-3">
+          <Step num={1}>
+            Rends-toi sur la fiche d'un <strong>Client</strong> (Missions) ou d'une <strong>Demande</strong>.
+          </Step>
+          <Step num={2}>
+            Descends jusqu'à <strong>Visites préliminaires</strong> et clique sur <strong>Nouvelle</strong>.
+          </Step>
+          <Step num={3}>
+            Renseigne tes notes générales et ajoute autant de <strong>points de prélèvement</strong> que nécessaire.
+          </Step>
+          <Step num={4}>
+            Pour chaque point : type d'eau, méthode, faisabilité, consignes de sécurité, et <strong>photos</strong>.
+          </Step>
+          <Step num={5}>
+            Une fois enregistrée, la visite peut être <strong>exportée en PDF</strong> via le bouton Exporter.
+          </Step>
         </div>
       </div>
+
+      <Note>
+        Les visites préliminaires sont visibles uniquement par les chargés de mission et les admins.
+      </Note>
     </Section>
   )
 }
