@@ -18,19 +18,19 @@ export function DashboardSection() {
           <div className="flex flex-col gap-3">
             <Step num={1}>
               <strong>4 indicateurs clés</strong> en haut : missions réalisées ce mois,
-              taux de conformité métrologique, alertes actives, et équipements à calibrer cette semaine.
+              rapports à rédiger, conformité métrologique (%), et équipements à calibrer dans les 30 jours.
             </Step>
             <Step num={2}>
-              <strong>Planning du jour</strong> — liste chronologique des interventions prévues aujourd'hui,
-              avec leur statut et un lien direct vers la fiche de chaque mission.
+              <strong>Planning du jour</strong> — interventions prévues aujourd'hui (et demain en basculant),
+              avec statut et lien vers la fiche mission. Un badge météo s'affiche si des prélèvements pluie sont au programme.
             </Step>
             <Step num={3}>
-              <strong>État du matériel</strong> — graphique en donut avec le nombre d'équipements
-              par état (opérationnel, à calibrer, en maintenance, hors service).
+              <strong>Rapports à rédiger</strong> — liste des rapports prévus non encore envoyés, triés par date.
+              Clique sur "Marqué envoyé" pour valider directement depuis le dashboard.
             </Step>
             <Step num={4}>
-              <strong>Alertes</strong> — équipements dont l'étalonnage arrive à échéance dans les 7 jours
-              et maintenances en attente. Chaque alerte est un lien cliquable vers la fiche concernée.
+              <strong>État du matériel</strong> — répartition des équipements par état
+              (opérationnel, à calibrer, en maintenance, hors service).
             </Step>
           </div>
         </div>

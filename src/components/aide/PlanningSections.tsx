@@ -17,12 +17,13 @@ export function PlanningSection() {
           </p>
           <div className="flex flex-col gap-3">
             <Step num={1}>
-              Trois vues disponibles en haut à droite : <strong>Jour</strong>, <strong>Semaine</strong> (lun→ven) et <strong>Mois</strong>.
+              Quatre vues en haut à droite : <strong>Jour</strong>, <strong>Semaine</strong> (lun→ven), <strong>Mois</strong> et <strong>Année</strong> (matrice annuelle).
+              Le bouton <strong>Carte</strong> (à gauche des vues) bascule vers la vue géographique des points de prélèvement.
               Utilise les flèches ← → pour avancer ou reculer.
             </Step>
             <Step num={2}>
-              Le <strong>mini-calendrier</strong> latéral (icône calendrier en haut) permet de sauter directement à une date.
-              Il affiche trois mois consécutifs. La semaine ou le mois en cours est surligné en bleu.
+              Le <strong>mini-calendrier</strong> (icône calendrier en haut) permet de sauter directement à une date.
+              La semaine ou le mois en cours est surligné en bleu.
             </Step>
           </div>
         </div>
@@ -97,10 +98,10 @@ export function PlanningSection() {
           <div className="flex flex-col gap-3">
             <Step num={8}>
               <span>
-                En haut du Planning, deux filtres sont disponibles :{' '}
-                <strong>par technicien</strong> (affiche uniquement ses interventions) et{' '}
-                <strong>retards uniquement</strong> (masque tout sauf les prélèvements en retard).
-                Utile pour faire le point en début de semaine.
+                Trois filtres disponibles en haut du Planning :{' '}
+                <strong>agence</strong> (Brest / Quimper — si plusieurs agences dans l'équipe),{' '}
+                <strong>par technicien</strong> (affiche uniquement ses interventions),{' '}
+                et le toggle <strong>pluie</strong> (icône nuage — met en avant les prélèvements temps de pluie).
               </span>
             </Step>
           </div>

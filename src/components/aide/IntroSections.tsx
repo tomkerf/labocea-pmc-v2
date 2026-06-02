@@ -51,19 +51,24 @@ export function ParOuCommencerSection() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide mb-3"
             style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-            Les 6 modules de l'app
+            Les modules de l'app
           </p>
           <div className="flex flex-col gap-2">
             {[
-              { label: 'Dashboard', desc: "Vue synthétique du jour — interventions, alertes, état du matériel." },
-              { label: 'Missions', desc: "Clients, plans de prélèvement et calendrier annuel par site." },
-              { label: 'Planning', desc: "Calendrier commun de l'équipe — vue Jour, Semaine ou Mois." },
-              { label: 'Matériel', desc: "Inventaire du parc terrain et suivi de l'état des équipements." },
-              { label: 'Métrologie', desc: "Vérifications et étalonnages des instruments de mesure." },
-              { label: 'Maintenances', desc: "Interventions préventives et correctives sur les équipements." },
+              { label: 'Dashboard',      desc: "Vue synthétique du jour — interventions, rapports à rédiger, état du matériel." },
+              { label: 'Demandes',       desc: "Nouvelles demandes clients à qualifier avant création d'une mission." },
+              { label: 'Missions',       desc: "Clients, plans de prélèvement et calendrier annuel par site." },
+              { label: 'Planning',       desc: "Calendrier commun — vues Jour, Semaine, Mois, Année et Carte." },
+              { label: 'Tâches',         desc: "Suivi des actions internes de l'équipe." },
+              { label: 'Infos terrain',  desc: "Contacts, accès et notes sur les sites d'intervention." },
+              { label: 'Rapports',       desc: "Suivi des rapports à envoyer aux clients." },
+              { label: 'Matériel',       desc: "Inventaire du parc terrain et suivi de l'état des équipements." },
+              { label: 'Métrologie',     desc: "Vérifications et étalonnages des instruments de mesure." },
+              { label: 'Maintenances',   desc: "Interventions préventives et correctives sur les équipements." },
+              { label: 'Tuyaux',         desc: "Gestion des lots de tuyaux de prélèvement avec impression d'étiquettes." },
             ].map(({ label, desc }) => (
               <div key={label} className="flex gap-3 py-2" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                <span className="text-sm font-semibold w-28 shrink-0" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
+                <span className="text-sm font-semibold w-32 shrink-0" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
                 <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{desc}</span>
               </div>
             ))}
