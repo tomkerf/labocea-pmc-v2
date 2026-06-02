@@ -160,6 +160,8 @@ export interface Client {
   montantTotal: number
   partPMC: number
   partSousTraitance: number
+  hasSousTraitance?: boolean
+  nomSousTraitant?: string
   detailPrestations?: {
     mpr1?: string
     mpr1T?: string
@@ -179,6 +181,7 @@ export interface Client {
   numBC?: string
   modeFacturation?: string
   situationActuelle?: string
+  interlocuteurCommercial?: string
   contactPrevenance?: string
   _v2ts?: Timestamp
   createdBy: string

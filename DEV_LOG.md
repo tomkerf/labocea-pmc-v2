@@ -2,6 +2,39 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 93 — Accessibilité formulaires (a11y labels)
+**2 juin 2026**
+
+### Accessibilité
+
+**label-has-associated-control : 72 → 0 warnings — règle éliminée**
+
+- `htmlFor` + `id` ajoutés sur tous les formulaires clés (16 fichiers) :
+  `EntryForm`, `SamplingForm`, `VisiteFormPage` (PointCard avec ids dynamiques `point.id`),
+  `TodosPage`, `FicheDeVie`, `EventDetailModal` (×2), `DragCreateModal`, `DayModal`,
+  `RequireAuth`, `LoginPage`, `ComptePage`, `AdminCreateUserForm`.
+- Labels de section sans contrôle associé (`Checklist terrain`, `Photos terrain`, `Rapport prévu`)
+  convertis en `<p>` — sémantiquement corrects.
+- `PlanField` label → `<span>`, `PlanningHeader` groupe Type → `role="group"` + `aria-labelledby`.
+- `<span>` cliquables → `<button type="button">` dans TodosPage (liens client/équipement)
+  et MapView (lien "Fiche ➔").
+- `outline-none` → `focus-visible:outline-none focus-visible:ring-2` dans EntryForm.
+- Score react-doctor : 71 → 72/100.
+
+### Bugfixes
+
+- `Set.toSorted()` → `[...Set].toSorted()` dans `TuyauxPage.tsx` (allYears, allMats)
+  et `PlanningHeader.tsx` (availableSites) — `Set` n'a pas de méthode `toSorted()`, seul `Array` en a.
+  Bug introduit en session 92 lors du remplacement global `[...arr].sort()` → `arr.toSorted()`.
+- Double attribut `type="button"` + `type="submit"` sur le bouton mot de passe dans `ComptePage.tsx`.
+
+### Déploiement
+
+- Staging déployé : `https://labocea-pmc-v2-dev.tomkerf.workers.dev`
+- Commit : `691b460`
+
+---
+
 ## Session 92 — React Doctor : 135 warnings fixés
 **1er juin 2026**
 

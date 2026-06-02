@@ -295,6 +295,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-01 | Alignement Excel Cindy (suite) ✅ | Ajout section "Détail analytique" dans la fiche client. Création vue "Matrice Annuelle" dans le planning avec défilement sticky (légende + en-têtes). |
 | 2026-06-01 | React Doctor — qualité code ✅ | 135 warnings fixés (645→510) : button-has-type éliminé, constantes hoistées, size-N, toSorted, flatMap. |
 | 2026-06-01 | Polish matrice annuelle ✅ | Fix ligne bimensuel (DREAL CORPEP) : 2 dots chevauchants, masquage hors-saison, z-index statut critique. Dots 20px uniforme. Badge "manuel" sur plans Personnalisés. |
+| 2026-06-02 | Accessibilité formulaires ✅ | label-has-associated-control : 72 → 0 (htmlFor+id sur 16 fichiers). Spans cliquables → button. Bugfix Set.toSorted() (TuyauxPage, PlanningHeader). Score react-doctor 71→72. |
 
 ---
 

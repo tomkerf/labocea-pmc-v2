@@ -48,10 +48,21 @@ export function ClientInfoForm({ client, sitesInput, update, onSitesChange }: Pr
         </Field>
       </Section>
 
+      <Section title="Description de la mission">
+        <Field label="Mission" last>
+          <textarea aria-label="Description de la mission" value={client.mission} onChange={(e) => update('mission', e.target.value)}
+            rows={3} className="field-input resize-none" placeholder="Description libre de la mission…" />
+        </Field>
+      </Section>
+
       <Section title="Contact">
-        <Field label="Interlocuteur">
-          <input aria-label="Interlocuteur" value={client.interlocuteur} onChange={(e) => update('interlocuteur', e.target.value)}
+        <Field label="Interlocuteur client">
+          <input aria-label="Interlocuteur client" value={client.interlocuteur} onChange={(e) => update('interlocuteur', e.target.value)}
             className="field-input" placeholder="Prénom Nom" />
+        </Field>
+        <Field label="Commercial interne">
+          <input aria-label="Commercial interne" value={client.interlocuteurCommercial || ''} onChange={(e) => update('interlocuteurCommercial', e.target.value)}
+            className="field-input" placeholder="ex: Céline, CRO, JBE…" />
         </Field>
         <Field label="Fonction">
           <input aria-label="Fonction" value={client.fonction} onChange={(e) => update('fonction', e.target.value)}
@@ -75,14 +86,60 @@ export function ClientInfoForm({ client, sitesInput, update, onSitesChange }: Pr
         </Field>
       </Section>
 
-      <Section title="Facturation & Situation">
+      <Section title="Contrat">
+        <Field label="N° Devis">
+          <input aria-label="N° Devis" value={client.numDevis} onChange={(e) => update('numDevis', e.target.value)}
+            className="field-input" />
+        </Field>
+        <Field label="N° Convention">
+          <input aria-label="N° Convention" value={client.numConvention} onChange={(e) => update('numConvention', e.target.value)}
+            className="field-input" />
+        </Field>
+        <Field label="Durée contrat">
+          <input aria-label="Durée contrat" value={client.dureeContrat} onChange={(e) => update('dureeContrat', e.target.value)}
+            className="field-input" placeholder="12 mois" />
+        </Field>
         <Field label="N° Bon de commande (BC)">
           <input aria-label="N° Bon de commande" value={client.numBC || ''} onChange={(e) => update('numBC', e.target.value)}
             className="field-input" placeholder="ex: BC-12345" />
         </Field>
+        <Field label="Montant total (€)">
+          <input aria-label="Montant total (€)" type="number" value={client.montantTotal || ''} onChange={(e) => update('montantTotal', Number(e.target.value))}
+            className="field-input" />
+        </Field>
+        <Field label="Part PMC (€)">
+          <input aria-label="Part PMC (€)" type="number" value={client.partPMC || ''} onChange={(e) => update('partPMC', Number(e.target.value))}
+            className="field-input" />
+        </Field>
+        <Field label="Part sous-traitance (€)">
+          <input aria-label="Part sous-traitance (€)" type="number" value={client.partSousTraitance || ''} onChange={(e) => update('partSousTraitance', Number(e.target.value))}
+            className="field-input" />
+        </Field>
+        <Field label="Sous-traitance analyses">
+          <div className="flex flex-col gap-2">
+            <label htmlFor={`hasSousTraitance-${client.id}`} className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                id={`hasSousTraitance-${client.id}`}
+                type="checkbox"
+                checked={!!client.hasSousTraitance}
+                onChange={(e) => update('hasSousTraitance', e.target.checked)}
+              />
+              <span style={{ fontSize: 13, color: 'var(--color-text-primary)' }}>Analyses sous-traitées</span>
+            </label>
+            {client.hasSousTraitance && (
+              <input
+                aria-label="Nom du sous-traitant"
+                value={client.nomSousTraitant || ''}
+                onChange={(e) => update('nomSousTraitant', e.target.value)}
+                className="field-input"
+                placeholder="ex: Inovalys, Eurofins…"
+              />
+            )}
+          </div>
+        </Field>
         <Field label="Mode de facturation">
           <input aria-label="Mode de facturation" value={client.modeFacturation || ''} onChange={(e) => update('modeFacturation', e.target.value)}
-            className="field-input" placeholder="ex: Facturation mensuelle" />
+            className="field-input" placeholder="ex: À réception du rapport" />
         </Field>
         <Field label="Situation administrative" last>
           <input aria-label="Situation administrative" value={client.situationActuelle || ''} onChange={(e) => update('situationActuelle', e.target.value)}
@@ -90,7 +147,7 @@ export function ClientInfoForm({ client, sitesInput, update, onSitesChange }: Pr
         </Field>
       </Section>
 
-      <Section title="Détail analytique (Facturation / Prestations)">
+      <Section title="Détail analytique">
         <Field label="MPR1">
           <input aria-label="MPR1" value={client.detailPrestations?.mpr1 || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, mpr1: e.target.value })}
             className="field-input" placeholder="ex: 1500" />
@@ -138,40 +195,6 @@ export function ClientInfoForm({ client, sitesInput, update, onSitesChange }: Pr
         <Field label="Autres" last>
           <input aria-label="Autres" value={client.detailPrestations?.autres || ''} onChange={(e) => update('detailPrestations', { ...client.detailPrestations, autres: e.target.value })}
             className="field-input" />
-        </Field>
-      </Section>
-
-      <Section title="Contrat">
-        <Field label="N° Devis">
-          <input aria-label="N° Devis" value={client.numDevis} onChange={(e) => update('numDevis', e.target.value)}
-            className="field-input" />
-        </Field>
-        <Field label="N° Convention">
-          <input aria-label="N° Convention" value={client.numConvention} onChange={(e) => update('numConvention', e.target.value)}
-            className="field-input" />
-        </Field>
-        <Field label="Durée contrat">
-          <input aria-label="Durée contrat" value={client.dureeContrat} onChange={(e) => update('dureeContrat', e.target.value)}
-            className="field-input" placeholder="12 mois" />
-        </Field>
-        <Field label="Montant total (€)">
-          <input aria-label="Montant total (€)" type="number" value={client.montantTotal || ''} onChange={(e) => update('montantTotal', Number(e.target.value))}
-            className="field-input" />
-        </Field>
-        <Field label="Part PMC (€)">
-          <input aria-label="Part PMC (€)" type="number" value={client.partPMC || ''} onChange={(e) => update('partPMC', Number(e.target.value))}
-            className="field-input" />
-        </Field>
-        <Field label="Part sous-traitance (€)" last>
-          <input aria-label="Part sous-traitance (€)" type="number" value={client.partSousTraitance || ''} onChange={(e) => update('partSousTraitance', Number(e.target.value))}
-            className="field-input" />
-        </Field>
-      </Section>
-
-      <Section title="Description de la mission">
-        <Field label="Mission" last>
-          <textarea aria-label="Description de la mission" value={client.mission} onChange={(e) => update('mission', e.target.value)}
-            rows={3} className="field-input resize-none" placeholder="Description libre de la mission…" />
         </Field>
       </Section>
     </>
