@@ -14,6 +14,7 @@ interface MonthViewProps {
   holidays:             Record<string, string>
   eventsByDate:         Record<string, PlanningEvent[]>
   filterTech:           string
+  allowedTechs:         string[]
   filterRetard:         boolean
   showRain:             boolean
   isDragging:           boolean
@@ -33,7 +34,7 @@ interface MonthViewProps {
 
 export default function MonthView({
   monthGrid, today, holidays, eventsByDate,
-  filterTech, filterRetard, showRain,
+  filterTech, allowedTechs, filterRetard, showRain,
   isDragging, handleDragMouseDown, handleDragMouseEnter, handleDragMouseUp,
   setIsDragging, setDragStart, setDragEnd,
   handleSelectEvent, goToDay, setCtxMenu, isInDrag, prev, next,
@@ -57,7 +58,7 @@ export default function MonthView({
   }, [prev, next])
 
   function filteredForDay(dateStr: string): PlanningEvent[] {
-    return groupByClient(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
+    return groupByClient(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard, allowedTechs).filter(e => e.evenementData?.type !== 'meteo'))
   }
 
   return (

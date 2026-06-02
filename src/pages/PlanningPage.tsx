@@ -149,13 +149,19 @@ const uid        = useAuthStore(selectUid)
     }
   }, [visibleTechs, filterTech, setFilterTech])
 
+  // Quand un site est filtré sans tech spécifique, restreindre aux techs du site
+  const allowedTechs = useMemo(() => {
+    if (filterTech || !filterSite) return []
+    return visibleTechs
+  }, [filterTech, filterSite, visibleTechs])
+
   // ── Calculs calendrier (filtrage, bilanBand, allDayItems, periodList) ──
   const {
     monthPoolCount, bilanBand, allDayItems, periodList, filteredForDayFlat,
   } = usePlanningCalendar({
     eventsByDate, evenements, clients,
     viewMode, weekDays, monthStart, weekStart, selectedDate,
-    filterTech, filterRetard,
+    filterTech, allowedTechs, filterRetard,
     handleSelectEvent,
   })
 
@@ -251,6 +257,7 @@ const uid        = useAuthStore(selectUid)
           today={today}
           eventsByDate={eventsByDate}
           filterTech={filterTech}
+          allowedTechs={allowedTechs}
           filterRetard={filterRetard}
           showRain={showRain}
           handleTouchStart={handleTouchStart}
@@ -267,6 +274,7 @@ const uid        = useAuthStore(selectUid)
           today={today}
           eventsByDate={eventsByDate}
           filterTech={filterTech}
+          allowedTechs={allowedTechs}
           filterRetard={filterRetard}
           preleveurs={preleveurs}
           handleSelectEvent={handleSelectEvent}
@@ -296,6 +304,7 @@ const uid        = useAuthStore(selectUid)
             bilanBand={bilanBand}
             allDayItems={allDayItems}
             filterTech={filterTech}
+            allowedTechs={allowedTechs}
             filterRetard={filterRetard}
             showRain={showRain}
             isDragging={isDragging}
@@ -319,6 +328,7 @@ const uid        = useAuthStore(selectUid)
             holidays={holidays}
             eventsByDate={eventsByDate}
             filterTech={filterTech}
+            allowedTechs={allowedTechs}
             filterRetard={filterRetard}
             showRain={showRain}
             isDragging={isDragging}

@@ -30,6 +30,7 @@ interface UsePlanningCalendarParams {
 
   // Filtres
   filterTech:    string
+  allowedTechs:  string[]
   filterRetard:  boolean
 
   // Handler UI (pour allDayItems.onClick)
@@ -39,7 +40,7 @@ interface UsePlanningCalendarParams {
 export function usePlanningCalendar({
   eventsByDate, evenements, clients,
   viewMode, weekDays, monthStart, weekStart, selectedDate,
-  filterTech, filterRetard,
+  filterTech, allowedTechs, filterRetard,
   handleSelectEvent,
 }: UsePlanningCalendarParams) {
 
@@ -82,7 +83,11 @@ export function usePlanningCalendar({
 
     wISOs.forEach((dateStr, colIdx) => {
       const dayJ1s = (eventsByDate[dateStr] ?? []).filter(e => e.type === 'prelevement' && !!e.dateFin && !e.isGhost)
-      const filtered = filterTech ? dayJ1s.filter(e => normTech(e.technicien) === filterTech) : dayJ1s
+      const filtered = filterTech
+        ? dayJ1s.filter(e => normTech(e.technicien) === filterTech)
+        : allowedTechs.length > 0
+          ? dayJ1s.filter(e => allowedTechs.includes(normTech(e.technicien)))
+          : dayJ1s
 
       filtered.forEach(j1 => {
         const j2DateStr = j1.dateFin!
@@ -122,7 +127,7 @@ export function usePlanningCalendar({
     })
 
     return rows
-  }, [viewMode, weekDays, eventsByDate, filterTech])
+  }, [viewMode, weekDays, eventsByDate, filterTech, allowedTechs])
 
   // ── Items "toute la journée" — événements multi-jours (vue semaine) ──
   const allDayItems = useMemo((): AllDayItem[] => {

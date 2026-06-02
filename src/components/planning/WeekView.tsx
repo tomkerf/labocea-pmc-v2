@@ -16,6 +16,7 @@ interface WeekViewProps {
   bilanBand:            BilanGroup[][]
   allDayItems:          AllDayItem[]
   filterTech:           string
+  allowedTechs:         string[]
   filterRetard:         boolean
   showRain:             boolean
   isDragging:           boolean
@@ -34,7 +35,7 @@ interface WeekViewProps {
 export default function WeekView({
   weekDays, today, holidays, eventsByDate,
   bilanBand, allDayItems,
-  filterTech, filterRetard, showRain,
+  filterTech, allowedTechs, filterRetard, showRain,
   isDragging, handleDragMouseDown, handleDragMouseEnter, handleDragMouseUp,
   setIsDragging, setDragStart, setDragEnd,
   handleSelectEvent, goToDay, setCtxMenu, isInDrag,
@@ -57,7 +58,7 @@ export default function WeekView({
   }
 
   function filteredForDayFlat(dateStr: string): PlanningEvent[] {
-    return sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
+    return sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard, allowedTechs).filter(e => e.evenementData?.type !== 'meteo'))
   }
 
   const allDayNumRows = allDayItems.length > 0

@@ -11,6 +11,7 @@ interface DayViewProps {
   today:             Date
   eventsByDate:      Record<string, PlanningEvent[]>
   filterTech:        string
+  allowedTechs:      string[]
   filterRetard:      boolean
   showRain:          boolean
   handleTouchStart:  (e: React.TouchEvent) => void
@@ -21,14 +22,14 @@ interface DayViewProps {
 
 export default function DayView({
   selectedDate, today, eventsByDate,
-  filterTech, filterRetard, showRain,
+  filterTech, allowedTechs, filterRetard, showRain,
   handleTouchStart, handleTouchEnd,
   handleSelectEvent, setSelectedDay,
 }: DayViewProps) {
   const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set())
   const D_START = 7, D_END = 20, PX_H = 64, PX_M = PX_H / 60
   const dateStr = toISO(selectedDate)
-  const allEvts = sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard).filter(e => e.evenementData?.type !== 'meteo'))
+  const allEvts = sortEvts(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard, allowedTechs).filter(e => e.evenementData?.type !== 'meteo'))
   const allDayEvtsFlat = allEvts.filter(e => !e.plannedTime)
   const allDayEvts = groupByClient(allDayEvtsFlat)
   const timedEvts  = assignColumns(

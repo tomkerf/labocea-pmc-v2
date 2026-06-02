@@ -17,6 +17,7 @@ interface MapViewProps {
   today:             Date
   eventsByDate:      Record<string, PlanningEvent[]>
   filterTech:        string
+  allowedTechs:      string[]
   filterRetard:      boolean
   preleveurs:        Preleveur[]
   handleSelectEvent: (event: PlanningEvent, dateStr: string) => void
@@ -24,7 +25,7 @@ interface MapViewProps {
 
 export default function MapView({
   selectedDate, eventsByDate,
-  filterTech, filterRetard,
+  filterTech, allowedTechs, filterRetard,
   handleSelectEvent
 }: MapViewProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -38,7 +39,7 @@ export default function MapView({
     const rawEvts = eventsByDate[dateStr] ?? []
     // Filtrer les événements météo et ne garder que les prélèvements et maintenances
     const activeEvts = rawEvts.filter(e => e.evenementData?.type !== 'meteo' && (e.type === 'prelevement' || e.type === 'maintenance'))
-    return sortEvts(filterEvents(activeEvts, filterTech, filterRetard))
+    return sortEvts(filterEvents(activeEvts, filterTech, filterRetard, allowedTechs))
   }, [eventsByDate, dateStr, filterTech, filterRetard])
 
   // 2. Séparer les événements avec coordonnées GPS de ceux sans coordonnées

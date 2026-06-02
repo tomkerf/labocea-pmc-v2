@@ -379,8 +379,12 @@ export function filterEvents(
   evts: PlanningEvent[],
   filterTech: string,
   filterRetard: boolean,
+  allowedTechs?: string[],
 ): PlanningEvent[] {
-  if (filterTech)   evts = evts.filter(e => e.type === 'verification' || e.type === 'maintenance' || normTech(e.technicien) === filterTech)
+  if (filterTech)
+    evts = evts.filter(e => e.type === 'verification' || e.type === 'maintenance' || normTech(e.technicien) === filterTech)
+  else if (allowedTechs && allowedTechs.length > 0)
+    evts = evts.filter(e => e.type === 'verification' || e.type === 'maintenance' || allowedTechs.includes(normTech(e.technicien)))
   if (filterRetard) evts = evts.filter(e => e.priority === 0)
   return evts
 }
