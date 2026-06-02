@@ -2,6 +2,55 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 94 — Alignement Excel Cindy + Mode d'emploi
+**2 juin 2026**
+
+### Analyse comparative Excel / App
+
+Analyse du fichier `PMC- Planning 2026.xlsx` (planning de travail de Cindy, chargée de mission Brest).
+Comparaison colonne par colonne (24 colonnes) :
+- 19 colonnes déjà couvertes
+- 4 déjà implémentées mais non visibles dans la session (COFRAC, MPR1-6, BC, sous-traitance plan)
+- 1 champ absent confirmé : interlocuteur commercial interne
+
+### Nouveaux champs
+
+- `hasSousTraitance` (boolean) + `nomSousTraitant` (string) sur `Client` — checkbox "Analyses sous-traitées" avec champ texte conditionnel (Inovalys, Eurofins…)
+- `interlocuteurCommercial` (string) sur `Client` — commercial interne Labocea (Céline, CRO, JBE…)
+  Ajouté dans la section Contact, sous "Interlocuteur client"
+
+### Réorganisation fiche client
+
+Ordre des sections revu pour coller à la logique de saisie :
+1. Informations générales
+2. Description de la mission ← remonté (était tout en bas)
+3. Contact (+ nouveau champ Commercial interne)
+4. Contrat ← tout regroupé : devis, convention, durée, BC, montants, sous-traitance, facturation, situation
+5. Détail analytique (MPR1/2/3/5/6…) ← tout en bas
+
+### Mode d'emploi
+
+**Filtre par profil** : sélecteur en haut de la page avec 4 options (Tout / Technicien terrain / Chargé de mission / Admin).
+- Le profil réel de l'utilisateur connecté est sélectionné par défaut
+- Les sections non pertinentes pour le profil sont masquées
+- Technicien : Planning, Statuts, Bilan 24h, Matériel, Métrologie, Dashboard, Signaler
+- Chargé de mission : + Missions, Visites préliminaires
+- Admin : tout
+
+**Corrections d'inexactitudes** :
+- Intro : liste corrigée à 11 modules (Demandes, Tâches, Infos terrain, Rapports, Tuyaux manquaient)
+- Planning : 4 vues (Jour/Semaine/Mois/Année) + bouton Carte séparé ; filtres corrigés (Agence/Technicien/Pluie — suppression du faux filtre "retards" qui n'existait pas dans l'UI)
+- Dashboard : KPIs réels (Rapports à rédiger, calibrage 30j) ; bloc Rapports décrit
+
+**MissionClientSection mise à jour** : tableau des 5 sections de la fiche client, sous-traitance analyses, COFRAC, matrice annuelle Brest/Quimper.
+
+### Prochaines étapes
+
+- Présenter l'app à Cindy pour validation terrain (agence Brest)
+- Vérifier que les préleveurs Brest ont bien le champ `site` renseigné en Firestore (nécessaire pour le filtre Brest/Quimper)
+
+---
+
 ## Session 93 — Accessibilité formulaires (a11y labels)
 **2 juin 2026**
 
