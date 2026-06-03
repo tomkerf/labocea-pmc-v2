@@ -109,6 +109,7 @@ export default function MissionDetailPage() {
             src={`https://maps.google.com/maps?q=${plan.lat},${plan.lng}&z=15&output=embed`}
             className="size-full border-0"
             loading="lazy"
+            sandbox="allow-scripts allow-same-origin"
           />
         ) : (
           <div className="size-full flex flex-col items-center justify-center gap-2">

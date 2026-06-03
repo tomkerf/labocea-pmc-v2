@@ -60,7 +60,7 @@ export function useAuthInit() {
     })
 
     return () => unsubscribe()
-  }, [])
+  }, [setFirebaseUser, setAppUser, setLoading, setInitialized, reset])
 }
 
 export async function login(email: string, password: string) {

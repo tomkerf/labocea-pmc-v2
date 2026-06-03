@@ -1,6 +1,14 @@
 # Labocea PMC V2
 
-Application web interne de gestion opérationnelle pour l'équipe mesures de Labocea — bureau d'études environnementales spécialisé en analyses d'eau.
+> Application web interne de gestion opérationnelle pour l'équipe mesures de Labocea — bureau d'études environnementales spécialisé en analyses d'eau.
+
+[![React](https://img.shields.io/badge/React_19-TypeScript-blue?logo=react)](https://react.dev)
+[![Cloudflare Workers](https://img.shields.io/badge/Deployed_on-Cloudflare_Workers-orange?logo=cloudflare)](https://workers.cloudflare.com)
+[![Firebase](https://img.shields.io/badge/Backend-Firebase_Firestore-yellow?logo=firebase)](https://firebase.google.com)
+
+**[→ Demo staging](https://labocea-pmc-dev.tomkerf.workers.dev)**
+
+---
 
 ## Contexte
 
@@ -8,7 +16,18 @@ L'équipe mesures de Labocea gère quotidiennement des dizaines de missions terr
 
 PMC V2 centralise l'ensemble dans un outil unique, accessible depuis le terrain (mobile) et le bureau (desktop).
 
-## Fonctionnalités
+## Fonctionnalités principales
+
+| Module | Description |
+|--------|-------------|
+| **Missions** | Plans de prélèvement par client/site, calendrier annuel, matrice annuelle avec groupement par client |
+| **Planning** | Vues jour/semaine/mois, tournée du jour GPS, overlay météo et jours fériés, export iCal |
+| **Matériel** | Inventaire parc terrain, fiches équipement avec galerie photo et GPS |
+| **Métrologie** | Tableau de bord étalonnages, alertes automatiques d'échéance |
+| **Maintenances** | Interventions préventives et correctives, historique par équipement |
+| **Rapports** | Suivi des rapports à rédiger, widget dashboard, export PDF/XLSX |
+| **Tâches** | Todo list style Apple Reminders avec priorités et liaison missions |
+| **Dashboard** | KPIs journaliers, planning du jour, alertes, suivi équipe (CM/admin) |
 
 ### Missions & planification
 - Suivi des clients et missions (création, édition, archivage)
@@ -112,3 +131,7 @@ npx wrangler deploy           # production (après validation staging)
 - TypeScript strict — pas de `any`
 - Toujours tester sur staging avant prod
 - Ne jamais supprimer la collection `clients` (archive V1)
+
+---
+
+*Développé par Tom Kerfendal — Labocea, 2026*

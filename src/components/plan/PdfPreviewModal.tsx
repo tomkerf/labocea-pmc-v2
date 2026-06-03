@@ -42,6 +42,7 @@ export function PdfPreviewModal({ srcDoc, onClose, onPrint }: PdfPreviewModalPro
           </div>
         </div>
         <iframe
+          sandbox=""
           srcDoc={srcDoc}
           className="flex-1 w-full"
           style={{ border: 'none', background: 'white' }}

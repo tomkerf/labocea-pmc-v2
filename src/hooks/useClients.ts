@@ -24,5 +24,5 @@ export function useClientsListener() {
       },
     )
     return () => unsub()
-  }, [])
+  }, [setClients, setError])
 }

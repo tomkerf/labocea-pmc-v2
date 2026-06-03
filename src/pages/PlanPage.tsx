@@ -10,6 +10,8 @@ import { SamplingRow } from '@/components/plan/SamplingRow'
 import { PdfPreviewModal } from '@/components/plan/PdfPreviewModal'
 import { usePlanActions } from '@/hooks/usePlanActions'
 
+const currentYear = new Date().getFullYear()
+
 export default function PlanPage() {
   const { clientId, planId } = useParams<{ clientId: string; planId: string }>()
   const navigate = useNavigate()
@@ -108,7 +110,7 @@ export default function PlanPage() {
       <div className="mt-8">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            Prélèvements {new Date().getFullYear()}
+            Prélèvements {currentYear || ''}
           </h2>
           <div className="flex items-center gap-2">
             <button type="button"

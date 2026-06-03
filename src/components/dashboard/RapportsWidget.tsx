@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
@@ -16,7 +16,14 @@ interface RapportsWidgetProps {
 
 export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) {
   const [open, setOpen] = useState(false)
+  const [today, setToday] = useState<Date | null>(null)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const d = new Date()
+    d.setHours(0, 0, 0, 0)
+    setToday(d)
+  }, [])
 
   return (
     <div className="mb-6">
@@ -54,8 +61,7 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
                 const fmtPrevue = r.rapportDatePrevue
                   ? new Date(r.rapportDatePrevue + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
                   : '—'
-                const today = new Date(); today.setHours(0,0,0,0)
-                const joursAvant = r.rapportDatePrevue
+                const joursAvant = (r.rapportDatePrevue && today)
                   ? Math.floor((new Date(r.rapportDatePrevue).getTime() - today.getTime()) / 86400000)
                   : null
                 const dotColor = joursAvant === null ? 'var(--color-neutral)' : joursAvant < 0 ? 'var(--color-danger)' : joursAvant <= 7 ? 'var(--color-warning)' : 'var(--color-success)'
