@@ -1,8 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Client, Plan, Sampling } from '@/types'
 import { MOIS_LONG } from '@/lib/planningUtils'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { Link } from 'react-router-dom'
+import IssueListModal from './IssueListModal'
 
 interface YearMatrixViewProps {
   clients: Client[]
@@ -21,6 +22,8 @@ type RowData = {
 }
 
 export default function YearMatrixView({ clients, year, filterTech, filterSite, preleveurs }: YearMatrixViewProps) {
+  const [issueModalType, setIssueModalType] = useState<'overdue' | 'non_effectue' | null>(null)
+
   // Préparer les données
   const rows = useMemo(() => {
     const list: RowData[] = []
@@ -123,8 +126,26 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
         <div className="shrink-0 px-4 py-3 border-b border-[var(--color-border-subtle)] flex gap-4 text-xs font-medium bg-[var(--color-bg-secondary)] z-20">
           <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-success)]" /> Fait <span className="text-[var(--color-text-secondary)]">({counts.done})</span></div>
           <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-warning)]" /> Planifié <span className="text-[var(--color-text-secondary)]">({counts.planned})</span></div>
-          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-danger)]" /> En retard <span className="text-[var(--color-text-secondary)]">({counts.overdue})</span></div>
-          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-neutral)]" /> Non effectué <span className="text-[var(--color-text-secondary)]">({counts.non_effectue})</span></div>
+          
+          <button 
+            type="button"
+            onClick={() => setIssueModalType('overdue')}
+            className="flex items-center gap-1.5 cursor-pointer hover:bg-[var(--color-danger-light)] px-2 py-0.5 -mx-2 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-danger)]"
+          >
+            <span className="size-2.5 rounded-full bg-[var(--color-danger)]" />
+            En retard <span className="text-[var(--color-text-secondary)]">({counts.overdue})</span>
+            <span className="text-[var(--color-danger)] opacity-60">↗</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIssueModalType('non_effectue')}
+            className="flex items-center gap-1.5 cursor-pointer hover:bg-[var(--color-bg-tertiary)] px-2 py-0.5 -mx-2 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-border)]"
+          >
+            <span className="size-2.5 rounded-full bg-[var(--color-neutral)]" />
+            Non effectué <span className="text-[var(--color-text-secondary)]">({counts.non_effectue})</span>
+            <span className="text-[var(--color-neutral)] opacity-60">↗</span>
+          </button>
         </div>
 
         {/* Table wrapper (scrollable) */}
@@ -185,9 +206,10 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                                   return sorted.slice(0, 2).map((ps, pi) => ps && (
                                     <div
                                       key={pi}
-                                      className="size-5 rounded-full flex items-center justify-center cursor-help transition-transform hover:scale-110 border-2 border-[var(--color-bg-secondary)]"
+                                      onClick={() => { if (isSamplingOverdue(ps, planYear)) setIssueModalType('overdue'); else if (ps.status === 'non_effectue') setIssueModalType('non_effectue') }}
+                                      className={`size-5 rounded-full flex items-center justify-center transition-transform hover:scale-110 border-2 border-[var(--color-bg-secondary)] ${isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
                                       style={{ backgroundColor: getStatusColor(ps, planYear), marginLeft: pi === 1 ? -7 : 0, zIndex: pi === 0 ? 2 : 1 }}
-                                      title={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps, planYear)}${ps.doneDate ? ` le ${ps.doneDate}` : ''}`}
+                                      title={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps, planYear)}${ps.doneDate ? ` le ${ps.doneDate}` : ''}${isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? ' — cliquer pour voir la liste' : ''}`}
                                     >
                                       <span className="text-[9px] font-bold text-white leading-none">
                                         {getStatusIcon(ps, planYear)}
@@ -200,9 +222,10 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                           ) : (
                             s && (
                               <div
-                                className="mx-auto size-5 rounded-full flex items-center justify-center cursor-help transition-transform hover:scale-110"
+                                onClick={() => { if (isSamplingOverdue(s, planYear)) setIssueModalType('overdue'); else if (s.status === 'non_effectue') setIssueModalType('non_effectue') }}
+                                className={`mx-auto size-5 rounded-full flex items-center justify-center transition-transform hover:scale-110 ${isSamplingOverdue(s, planYear) || s.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
                                 style={{ backgroundColor: getStatusColor(s, planYear) }}
-                                title={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s, planYear)}${s.doneDate ? ` le ${s.doneDate}` : ''}`}
+                                title={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s, planYear)}${s.doneDate ? ` le ${s.doneDate}` : ''}${isSamplingOverdue(s, planYear) || s.status === 'non_effectue' ? ' — cliquer pour voir la liste' : ''}`}
                               >
                                 <span className="text-[9px] font-bold text-white leading-none">
                                   {getStatusIcon(s, planYear)}
@@ -220,6 +243,15 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
           </table>
         </div>
       </div>
+
+      {issueModalType && (
+        <IssueListModal
+          type={issueModalType}
+          rows={rows}
+          year={year}
+          onClose={() => setIssueModalType(null)}
+        />
+      )}
     </div>
   )
 }
