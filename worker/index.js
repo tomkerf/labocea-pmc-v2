@@ -150,9 +150,9 @@ function icalDate(year, month0, day) {
   return `${year}${m}${d}`
 }
 
-// Incrémente une date YYYYMMDD d'un jour (pour DTEND journée entière)
-function icalDateNext(year, month0, day) {
-  const dt = new Date(Date.UTC(year, month0, day + 1))
+// Incrémente une date YYYYMMDD d'un ou plusieurs jours (pour DTEND journée entière)
+function icalDateNext(year, month0, day, daysToAdd = 1) {
+  const dt = new Date(Date.UTC(year, month0, day + daysToAdd))
   const y = dt.getUTCFullYear()
   const m = String(dt.getUTCMonth() + 1).padStart(2, '0')
   const d = String(dt.getUTCDate()).padStart(2, '0')
@@ -361,12 +361,11 @@ export default {
           for (const doc of (clientsData.documents || [])) {
             const f = fsFields(doc)
             const clientNom = fsVal(f.nom) || 'Client'
+            const clientPreleveur = fsVal(f.preleveur) || ''
             const plansArr = fsArr(f.plans)
 
             for (const planVal of plansArr) {
               const plan = planVal.mapValue?.fields ?? {}
-              const planPreleveur = fsVal(plan.preleveur) || ''
-              if (planPreleveur !== initiales) continue
 
               const siteNom = fsVal(plan.siteNom) || ''
               const nature = fsVal(plan.nature) || ''
@@ -375,6 +374,9 @@ export default {
 
               for (const sVal of samplings) {
                 const s = sVal.mapValue?.fields ?? {}
+                const samplingPreleveur = fsVal(s.assignedTo) || clientPreleveur
+                if (samplingPreleveur !== initiales) continue
+
                 const rawId = String(fsVal(s.id) || fsVal(s.num) || Math.random().toString(36).slice(2))
                 const samplingId = rawId.replace(/[^A-Za-z0-9_.-]/g, '_')
                 const plannedMonth = Number(fsVal(s.plannedMonth) ?? -1)
@@ -388,7 +390,8 @@ export default {
                 const desc = `Statut: ${STATUS_LABEL[status] || status} · Nature: ${icalEscape(nature)} · Méthode: ${icalEscape(methode)}${nappeStr}`
 
                 const dtStart = icalDate(year, plannedMonth, plannedDay)
-                const dtEnd = icalDateNext(year, plannedMonth, plannedDay)
+                const durationDays = methode === 'Automatique' ? 2 : 1
+                const dtEnd = icalDateNext(year, plannedMonth, plannedDay, durationDays)
                 const icalStatus = STATUS_ICAL[status] || 'TENTATIVE'
 
                 vevents.push([
@@ -405,6 +408,78 @@ export default {
             }
           }
         } while (pageToken)
+
+        // 3. Récupérer les événements personnels de l'utilisateur
+        const TYPE_EVENEMENT_LABEL = {
+          rappel: 'Rappel', reunion: 'Réunion', rapport: 'Rapport',
+          autre: 'Événement', conge: 'Congé', meteo: 'Météo'
+        }
+
+        let evtPageToken = null
+        do {
+          const evtsUrl = new URL(
+            `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/evenements`
+          )
+          evtsUrl.searchParams.set('pageSize', '200')
+          if (evtPageToken) evtsUrl.searchParams.set('pageToken', evtPageToken)
+
+          const evtsRes = await fetch(evtsUrl.toString(), { headers: { Authorization: `Bearer ${token}` } })
+          if (!evtsRes.ok) break
+
+          const evtsData = await evtsRes.json()
+          evtPageToken = evtsData.nextPageToken || null
+
+          for (const doc of (evtsData.documents || [])) {
+            const f = fsFields(doc)
+            const createdBy = fsVal(f.createdBy) || ''
+            if (createdBy !== uid) continue
+
+            const evtId = (fsVal(f.id) || doc.name.split('/').pop()).replace(/[^A-Za-z0-9_.-]/g, '_')
+            const titre = fsVal(f.titre) || 'Événement'
+            const date = fsVal(f.date) || ''        // "2026-04-20"
+            const dateFin = fsVal(f.dateFin) || ''
+            const heure = fsVal(f.heure) || ''
+            const type = fsVal(f.type) || 'autre'
+            const notes = fsVal(f.notes) || ''
+
+            if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) continue
+
+            const typeLabel = TYPE_EVENEMENT_LABEL[type] || 'Événement'
+            const desc = notes
+              ? `${typeLabel} · ${icalEscape(notes)}`
+              : typeLabel
+
+            // Construire DTSTART : avec heure si dispo, sinon date seule
+            let dtStartLine, dtEndLine
+            if (heure && /^\d{2}:\d{2}$/.test(heure)) {
+              const [h, m] = heure.split(':')
+              const datePart = date.replace(/-/g, '')
+              dtStartLine = `DTSTART;TZID=Europe/Paris:${datePart}T${h}${m}00`
+              // Durée par défaut : 1 heure
+              const endH = String(Number(h) + 1).padStart(2, '0')
+              dtEndLine = `DTEND;TZID=Europe/Paris:${datePart}T${endH}${m}00`
+            } else {
+              dtStartLine = `DTSTART;VALUE=DATE:${date.replace(/-/g, '')}`
+              // DTEND = lendemain si pas de dateFin, sinon dateFin + 1 jour (iCal exclusive end)
+              const endDate = dateFin && /^\d{4}-\d{2}-\d{2}$/.test(dateFin) ? dateFin : date
+              const endTs = new Date(endDate)
+              endTs.setDate(endTs.getDate() + 1)
+              const endStr = endTs.toISOString().slice(0, 10).replace(/-/g, '')
+              dtEndLine = `DTEND;VALUE=DATE:${endStr}`
+            }
+
+            vevents.push([
+              'BEGIN:VEVENT',
+              `UID:evt-${evtId}@labocea-pmc`,
+              dtStartLine,
+              dtEndLine,
+              `SUMMARY:${icalEscape(titre)}`,
+              `DESCRIPTION:${desc}`,
+              'STATUS:CONFIRMED',
+              'END:VEVENT',
+            ].join('\r\n'))
+          }
+        } while (evtPageToken)
 
         const ics = [
           'BEGIN:VCALENDAR',
