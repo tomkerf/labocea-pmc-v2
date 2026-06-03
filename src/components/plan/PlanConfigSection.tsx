@@ -108,16 +108,15 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
           </label>
         </PlanField>
         <PlanField label="Conditions météo">
-          <label className="flex items-center gap-2 mt-1 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={plan.meteo === 'pluie'}
-              onChange={(e) => onUpdate('meteo', e.target.checked ? 'pluie' : '')}
-            />
-            <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
-              {plan.meteo === 'pluie' ? '🌧 Temps de pluie requis' : 'Pas de contrainte météo'}
-            </span>
-          </label>
+          <select
+            value={plan.meteo ?? ''}
+            onChange={(e) => onUpdate('meteo', e.target.value)}
+            className="mt-1 text-sm border border-[var(--color-border)] rounded-md px-2 py-1.5 bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]"
+          >
+            <option value="">Pas de contrainte météo</option>
+            <option value="pluie">🌧 Temps de pluie requis</option>
+            <option value="sec">☀️ Temps sec requis</option>
+          </select>
         </PlanField>
         <PlanField label="Analyses">
           <label className="flex items-center gap-2 mt-1 cursor-pointer">
