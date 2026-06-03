@@ -2,6 +2,44 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 96 — iCal événements + logo
+**3 juin 2026**
+
+### Features ajoutées
+
+**Synchronisation des événements personnels dans Google Agenda**
+- Les `EvenementPersonnel` (collection Firestore `evenements`) sont désormais inclus dans le feed iCal de chaque utilisateur
+- Filtre par `createdBy = uid` — chaque technicien ne voit que ses propres événements
+- Événements avec heure → créneau de 1h dans Google Agenda
+- Événements multi-jours (`dateFin`) → plage complète
+- Description affiche le type (Réunion, Congé, Rappel…) + notes
+
+### Divers
+
+**Logo** — tentative de refonte dans le style Google Drive (triangle/goutte tricolore) abandonnée à la demande. Logo original `logo.png` (feuille verte + goutte bleue) restauré.
+
+### Prochaines étapes
+- Ordre de passage dans la tournée (drag & drop ou heure planifiée) — reporté
+
+---
+
+## Session 95 — Correction Google Agenda iCal
+**2 juin 2026**
+
+### Bugs corrigés
+
+**Synchronisation des interventions sur le planning iCal**
+- Cause racine 1 : Le flux iCal généré par le worker cherchait le champ `preleveur` sur l'objet `plan` (qui n'existe pas) au lieu de regarder sur le `client` ou le `sampling`. Cela empêchait la synchronisation des plannings personnalisés.
+- Cause racine 2 : Les prélèvements en méthode "Automatique" (bilan 24h) étaient générés sur une seule journée dans Google Agenda.
+- Fix 1 : Mise à jour de `worker/index.js` pour résoudre le technicien assigné à partir du `client` et du `sampling`.
+- Fix 2 : Modification de `icalDateNext` pour supporter l'ajout de plusieurs jours, et configuration des événements "Automatique" pour durer 2 jours pleins.
+
+### Déploiement
+- Staging déployé (`bash deploy-dev.sh`)
+
+### Prochaines étapes
+- Continuer de recueillir les retours de l'équipe terrain sur l'utilisation du planning.
+
 ## Session 94 — Alignement Excel Cindy + Mode d'emploi
 **2 juin 2026**
 
