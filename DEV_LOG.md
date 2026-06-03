@@ -2,6 +2,36 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 97 — Matrice annuelle : UX + groupement + vue compacte
+**3 juin 2026**
+
+### Features ajoutées
+
+**Pastilles cliquables dans la matrice annuelle**
+- Les pastilles rouges (en retard) et grises (non effectué) ouvrent désormais la modale IssueListModal au clic
+- Indicateurs de clicabilité : ring blanc permanent, cursor pointer, tooltip "— cliquer pour voir la liste"
+- Légende : icône ↗ sur les entrées "En retard" et "Non effectué"
+
+**Groupement dépliable par client**
+- La matrice est restructurée en groupes par client (1 header + N lignes de plans)
+- Tous repliés par défaut — header cliquable avec chevron + résumé des statuts (✓ · ● · ! · ✕)
+- Bouton "Tout déplier / Tout replier" dans la barre de légende
+- Lien client dans le header cliquable sans déclencher le toggle
+
+**Vue compacte**
+- Bouton toggle "Vue compacte / Vue normale" dans la légende
+- En mode compact : padding réduit, pastilles 14px (vs 20px), texte plus petit
+- Toutes les interactions (click, ring, tooltip) conservées en mode compact
+
+**Conditions météo — temps sec**
+- Le champ météo passe d'une checkbox binaire à un select 3 options : aucune / 🌧 pluie / ☀️ sec
+- Icône ☀️ affichée dans IssueListModal pour les plans "temps sec requis"
+
+### Prochaines étapes
+- Ordre de passage dans la tournée (drag & drop ou heure planifiée)
+
+---
+
 ## Session 96 — iCal événements + logo
 **3 juin 2026**
 

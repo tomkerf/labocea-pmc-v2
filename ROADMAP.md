@@ -299,6 +299,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-02 | Alignement Excel Cindy + Mode d'emploi ✅ | Analyse comparative Excel Cindy (24 colonnes). Ajout hasSousTraitance+nomSousTraitant et interlocuteurCommercial sur Client. Réorganisation fiche client (5 sections logiques). Mode d'emploi : filtre par profil (Technicien/Chargé de mission/Admin), corrections inexactitudes (vues Planning, filtres, KPIs Dashboard, 11 modules). |
 | 2026-06-02 | Bugfix iCal Google Agenda ✅ | Correction de la durée des événements "Automatique" (2 jours pleins) et de l'assignation du technicien dans le flux iCal. Déploiement staging OK. |
 | 2026-06-03 | iCal événements personnels ✅ | Les EvenementPersonnel (congés, réunions, rappels…) sont désormais exportés dans le flux iCal Google Agenda de chaque utilisateur. |
+| 2026-06-03 | Matrice annuelle UX ✅ | Pastilles cliquables (overdue/non effectué → modale), groupement dépliable par client (tous repliés par défaut), vue compacte toggleable, conditions météo "temps sec" ajoutées. |
 
 ---
 
