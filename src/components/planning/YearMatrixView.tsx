@@ -3,6 +3,7 @@ import type { Client, Plan, Sampling } from '@/types'
 import { MOIS_LONG } from '@/lib/planningUtils'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { Link } from 'react-router-dom'
+import { ChevronRight, ChevronDown } from 'lucide-react'
 import IssueListModal from './IssueListModal'
 
 interface YearMatrixViewProps {
@@ -17,33 +18,31 @@ type RowData = {
   client: Client
   plan: Plan
   samplingsByMonth: (Sampling | null)[]
-  // Pour les plans bimensuels : jusqu'à 2 samplings par mois
   pairsByMonth: (Sampling | null)[][]
+}
+
+type GroupData = {
+  client: Client
+  plans: RowData[]
 }
 
 export default function YearMatrixView({ clients, year, filterTech, filterSite, preleveurs }: YearMatrixViewProps) {
   const [issueModalType, setIssueModalType] = useState<'overdue' | 'non_effectue' | null>(null)
 
-  // Préparer les données
   const rows = useMemo(() => {
     const list: RowData[] = []
 
     clients.forEach(c => {
-      // Filtrer par année de contrat (optionnel, selon la façon dont on gère les années)
-      // Souvent c.annee == '2026' ou autre, mais on peut juste tout afficher si pas spécifié.
       if (c.annee && c.annee !== year.toString()) return
 
       c.plans.forEach(p => {
         if (p.separator) return
 
-        // Appliquer filtres technicien/site sur le client/plan
         const assigned = c.preleveur || ''
         const prel = preleveurs.find(pr => pr.code === assigned)
-        
         if (filterSite && prel?.site !== filterSite) return
         if (filterTech && assigned !== filterTech) return
 
-        // Préparer les colonnes (0 à 11)
         const samplingsByMonth: (Sampling | null)[] = Array(12).fill(null)
         const pairsByMonth: (Sampling | null)[][] = Array.from({ length: 12 }, () => [])
 
@@ -56,7 +55,6 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
           }
         })
 
-        // Pour les bimensuels : masquer les mois où TOUS les prélèvements sont non_effectué (hors saison)
         if (p.frequence === 'Bimensuel') {
           for (let m = 0; m < 12; m++) {
             const pair = pairsByMonth[m]
@@ -71,13 +69,34 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
       })
     })
 
-    // Trier par Nom client puis par Nom du site
     return list.sort((a, b) => {
       const c = a.client.nom.localeCompare(b.client.nom)
       if (c !== 0) return c
       return a.plan.siteNom.localeCompare(b.plan.siteNom)
     })
   }, [clients, year, filterTech, filterSite, preleveurs])
+
+  const groupedRows = useMemo(() => {
+    const map = new Map<string, GroupData>()
+    rows.forEach(row => {
+      if (!map.has(row.client.id)) map.set(row.client.id, { client: row.client, plans: [] })
+      map.get(row.client.id)!.plans.push(row)
+    })
+    return Array.from(map.values())
+  }, [rows])
+
+  // Tous repliés par défaut
+  const [collapsedClients, setCollapsedClients] = useState<Set<string>>(
+    () => new Set(groupedRows.map(g => g.client.id))
+  )
+
+  const toggleClient = (id: string) => {
+    setCollapsedClients(prev => {
+      const s = new Set(prev)
+      s.has(id) ? s.delete(id) : s.add(id)
+      return s
+    })
+  }
 
   const getStatusColor = (s: Sampling | null, planYear: number) => {
     if (!s) return 'transparent'
@@ -118,16 +137,30 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
     return c
   }, [rows, year])
 
+  const getGroupSummary = (plans: RowData[]) => {
+    const c = { done: 0, overdue: 0, non_effectue: 0, planned: 0 }
+    plans.forEach(({ client, plan }) => {
+      const planYear = parseInt(client.annee ?? String(year))
+      plan.samplings.forEach(s => {
+        if (s.status === 'done') { c.done++; return }
+        if (s.status === 'non_effectue') { c.non_effectue++; return }
+        if (isSamplingOverdue(s, planYear)) { c.overdue++; return }
+        if (s.status === 'planned') c.planned++
+      })
+    })
+    return c
+  }
+
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[var(--color-bg-primary)] p-4 md:p-6">
       <div className="flex flex-col flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl shadow-[var(--shadow-card)] overflow-hidden min-h-0">
 
-        {/* Légende (fixe) */}
+        {/* Légende */}
         <div className="shrink-0 px-4 py-3 border-b border-[var(--color-border-subtle)] flex gap-4 text-xs font-medium bg-[var(--color-bg-secondary)] z-20">
           <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-success)]" /> Fait <span className="text-[var(--color-text-secondary)]">({counts.done})</span></div>
           <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-warning)]" /> Planifié <span className="text-[var(--color-text-secondary)]">({counts.planned})</span></div>
-          
-          <button 
+
+          <button
             type="button"
             onClick={() => setIssueModalType('overdue')}
             className="flex items-center gap-1.5 cursor-pointer hover:bg-[var(--color-danger-light)] px-2 py-0.5 -mx-2 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-danger)]"
@@ -148,7 +181,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
           </button>
         </div>
 
-        {/* Table wrapper (scrollable) */}
+        {/* Table */}
         <div className="flex-1 overflow-auto w-full relative">
           <table className="w-full text-left border-collapse" style={{ minWidth: 1000 }}>
             <thead className="sticky top-0 z-30">
@@ -163,81 +196,125 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 ? (
+              {groupedRows.length === 0 ? (
                 <tr>
                   <td colSpan={14} className="px-4 py-8 text-center text-[var(--color-text-secondary)] text-sm">
                     Aucun plan de prélèvement trouvé pour l'année {year} avec ces filtres.
                   </td>
                 </tr>
               ) : (
-                rows.map((row) => (
-                  <tr key={`${row.client.id}-${row.plan.id}`} 
-                    className="border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors group">
-                    <td className="px-4 py-2 text-sm sticky left-0 z-20 bg-[var(--color-bg-secondary)] group-hover:bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] transition-colors shadow-[1px_0_0_var(--color-border-subtle)]">
-                      <Link to={`/missions/${row.client.id}`} className="font-medium text-[var(--color-text-primary)] hover:text-[var(--color-accent)] hover:underline">
-                        {row.client.nom}
-                      </Link>
-                      <div className="text-xs text-[var(--color-text-secondary)] mt-0.5">{row.client.segment}</div>
-                    </td>
-                    <td className="px-4 py-2 text-sm text-[var(--color-text-primary)] border-r border-[var(--color-border-subtle)]">
-                      <div className="font-medium">{row.plan.nom}</div>
-                      <div className="text-xs text-[var(--color-text-secondary)] mt-0.5 flex items-center gap-1.5">
-                        <span>{row.plan.siteNom} • {row.plan.frequence}</span>
-                        {row.plan.frequence === 'Personnalisé' && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--color-bg-tertiary)] text-[var(--color-text-tertiary)] border border-[var(--color-border)]">
-                            manuel
+                groupedRows.map(({ client, plans }) => {
+                  const isCollapsed = collapsedClients.has(client.id)
+                  const summary = getGroupSummary(plans)
+                  const planYear = parseInt(client.annee ?? String(year))
+
+                  return [
+                    // Ligne header client
+                    <tr
+                      key={`header-${client.id}`}
+                      className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)] hover:bg-[#e8e8ec] transition-colors cursor-pointer"
+                      onClick={() => toggleClient(client.id)}
+                    >
+                      <td className="px-3 py-2 sticky left-0 z-20 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)]" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+                        <div className="flex items-center gap-2">
+                          {isCollapsed
+                            ? <ChevronRight size={14} className="text-[var(--color-text-secondary)] shrink-0" />
+                            : <ChevronDown size={14} className="text-[var(--color-text-secondary)] shrink-0" />
+                          }
+                          <div>
+                            <Link
+                              to={`/missions/${client.id}`}
+                              className="text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-accent)] hover:underline"
+                              onClick={e => e.stopPropagation()}
+                            >
+                              {client.nom}
+                            </Link>
+                            <div className="text-xs text-[var(--color-text-secondary)]">{client.segment}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 border-r border-[var(--color-border-subtle)]">
+                        <div className="flex items-center gap-3 text-xs text-[var(--color-text-secondary)]">
+                          <span>{plans.length} plan{plans.length > 1 ? 's' : ''}</span>
+                          <span className="flex items-center gap-1.5">
+                            {summary.done > 0 && <span className="text-[var(--color-success)] font-medium">✓ {summary.done}</span>}
+                            {summary.planned > 0 && <span className="text-[var(--color-warning)] font-medium">● {summary.planned}</span>}
+                            {summary.overdue > 0 && <span className="text-[var(--color-danger)] font-medium">! {summary.overdue}</span>}
+                            {summary.non_effectue > 0 && <span className="text-[var(--color-neutral)] font-medium">✕ {summary.non_effectue}</span>}
                           </span>
-                        )}
-                      </div>
-                    </td>
-                    
-                    {row.samplingsByMonth.map((s, mIdx) => {
-                      const isBimensuel = row.plan.frequence === 'Bimensuel'
-                      const pair = row.pairsByMonth[mIdx]
-                      const planYear = parseInt(row.client.annee ?? String(year))
-                      return (
-                        <td key={mIdx} className="px-1 py-2 text-center border-r border-[var(--color-border-subtle)] relative">
-                          {isBimensuel ? (
-                            pair.length > 0 && (
-                              <div className="flex items-center justify-center" style={{ width: 32 }}>
-                                {(() => {
-                                  const priority = (s: Sampling) => isSamplingOverdue(s, planYear) ? 3 : s.status === 'planned' ? 2 : s.status === 'done' ? 1 : 0
-                                  const sorted = [...pair].filter(Boolean).sort((a, b) => priority(b!) - priority(a!))
-                                  return sorted.slice(0, 2).map((ps, pi) => ps && (
-                                    <div
-                                      key={pi}
-                                      onClick={() => { if (isSamplingOverdue(ps, planYear)) setIssueModalType('overdue'); else if (ps.status === 'non_effectue') setIssueModalType('non_effectue') }}
-                                      className={`size-5 rounded-full flex items-center justify-center transition-transform hover:scale-110 border-2 border-[var(--color-bg-secondary)] ${isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
-                                      style={{ backgroundColor: getStatusColor(ps, planYear), marginLeft: pi === 1 ? -7 : 0, zIndex: pi === 0 ? 2 : 1 }}
-                                      title={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps, planYear)}${ps.doneDate ? ` le ${ps.doneDate}` : ''}${isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? ' — cliquer pour voir la liste' : ''}`}
-                                    >
-                                      <span className="text-[9px] font-bold text-white leading-none">
-                                        {getStatusIcon(ps, planYear)}
-                                      </span>
-                                    </div>
-                                  ))
-                                })()}
-                              </div>
-                            )
-                          ) : (
-                            s && (
-                              <div
-                                onClick={() => { if (isSamplingOverdue(s, planYear)) setIssueModalType('overdue'); else if (s.status === 'non_effectue') setIssueModalType('non_effectue') }}
-                                className={`mx-auto size-5 rounded-full flex items-center justify-center transition-transform hover:scale-110 ${isSamplingOverdue(s, planYear) || s.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
-                                style={{ backgroundColor: getStatusColor(s, planYear) }}
-                                title={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s, planYear)}${s.doneDate ? ` le ${s.doneDate}` : ''}${isSamplingOverdue(s, planYear) || s.status === 'non_effectue' ? ' — cliquer pour voir la liste' : ''}`}
-                              >
-                                <span className="text-[9px] font-bold text-white leading-none">
-                                  {getStatusIcon(s, planYear)}
-                                </span>
-                              </div>
-                            )
-                          )}
+                        </div>
+                      </td>
+                      {Array(12).fill(null).map((_, i) => (
+                        <td key={i} className="border-r border-[var(--color-border-subtle)]" />
+                      ))}
+                    </tr>,
+
+                    // Lignes de plans (conditionnelles)
+                    ...(!isCollapsed ? plans.map((row) => (
+                      <tr key={`${row.client.id}-${row.plan.id}`}
+                        className="border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors group">
+                        <td className="px-4 py-2 text-sm sticky left-0 z-20 bg-[var(--color-bg-secondary)] group-hover:bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] transition-colors shadow-[1px_0_0_var(--color-border-subtle)] pl-9">
+                          <div className="font-medium text-[var(--color-text-primary)]">{row.plan.nom}</div>
                         </td>
-                      )
-                    })}
-                  </tr>
-                ))
+                        <td className="px-4 py-2 text-sm text-[var(--color-text-primary)] border-r border-[var(--color-border-subtle)]">
+                          <div className="text-xs text-[var(--color-text-secondary)] flex items-center gap-1.5">
+                            <span>{row.plan.siteNom} • {row.plan.frequence}</span>
+                            {row.plan.frequence === 'Personnalisé' && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--color-bg-tertiary)] text-[var(--color-text-tertiary)] border border-[var(--color-border)]">
+                                manuel
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        {row.samplingsByMonth.map((s, mIdx) => {
+                          const isBimensuel = row.plan.frequence === 'Bimensuel'
+                          const pair = row.pairsByMonth[mIdx]
+                          return (
+                            <td key={mIdx} className="px-1 py-2 text-center border-r border-[var(--color-border-subtle)] relative">
+                              {isBimensuel ? (
+                                pair.length > 0 && (
+                                  <div className="flex items-center justify-center" style={{ width: 32 }}>
+                                    {(() => {
+                                      const priority = (s: Sampling) => isSamplingOverdue(s, planYear) ? 3 : s.status === 'planned' ? 2 : s.status === 'done' ? 1 : 0
+                                      const sorted = [...pair].filter(Boolean).sort((a, b) => priority(b!) - priority(a!))
+                                      return sorted.slice(0, 2).map((ps, pi) => ps && (
+                                        <div
+                                          key={pi}
+                                          onClick={() => { if (isSamplingOverdue(ps, planYear)) setIssueModalType('overdue'); else if (ps.status === 'non_effectue') setIssueModalType('non_effectue') }}
+                                          className={`size-5 rounded-full flex items-center justify-center transition-transform hover:scale-110 border-2 border-[var(--color-bg-secondary)] ${isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
+                                          style={{ backgroundColor: getStatusColor(ps, planYear), marginLeft: pi === 1 ? -7 : 0, zIndex: pi === 0 ? 2 : 1 }}
+                                          title={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps, planYear)}${ps.doneDate ? ` le ${ps.doneDate}` : ''}${isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? ' — cliquer pour voir la liste' : ''}`}
+                                        >
+                                          <span className="text-[9px] font-bold text-white leading-none">
+                                            {getStatusIcon(ps, planYear)}
+                                          </span>
+                                        </div>
+                                      ))
+                                    })()}
+                                  </div>
+                                )
+                              ) : (
+                                s && (
+                                  <div
+                                    onClick={() => { if (isSamplingOverdue(s, planYear)) setIssueModalType('overdue'); else if (s.status === 'non_effectue') setIssueModalType('non_effectue') }}
+                                    className={`mx-auto size-5 rounded-full flex items-center justify-center transition-transform hover:scale-110 ${isSamplingOverdue(s, planYear) || s.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
+                                    style={{ backgroundColor: getStatusColor(s, planYear) }}
+                                    title={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s, planYear)}${s.doneDate ? ` le ${s.doneDate}` : ''}${isSamplingOverdue(s, planYear) || s.status === 'non_effectue' ? ' — cliquer pour voir la liste' : ''}`}
+                                  >
+                                    <span className="text-[9px] font-bold text-white leading-none">
+                                      {getStatusIcon(s, planYear)}
+                                    </span>
+                                  </div>
+                                )
+                              )}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    )) : [])
+                  ]
+                })
               )}
             </tbody>
           </table>
