@@ -6,7 +6,11 @@
 [![Cloudflare Workers](https://img.shields.io/badge/Deployed_on-Cloudflare_Workers-orange?logo=cloudflare)](https://workers.cloudflare.com)
 [![Firebase](https://img.shields.io/badge/Backend-Firebase_Firestore-yellow?logo=firebase)](https://firebase.google.com)
 
-**[→ Demo staging](https://labocea-pmc-dev.tomkerf.workers.dev)**
+[![Demo](https://img.shields.io/badge/Demo-staging-brightgreen)](https://labocea-pmc-dev.tomkerf.workers.dev)
+
+| Tableau de bord | Planning semaine |
+|---|---|
+| ![Dashboard](img/screenshot-dashboard.png) | ![Planning](img/screenshot-planning.png) |
 
 ---
 
