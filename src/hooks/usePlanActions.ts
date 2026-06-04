@@ -60,6 +60,8 @@ export function usePlanActions({
 
       const patch: Partial<Sampling> = { [field]: value }
 
+      if ((field === 'plannedMonth' || field === 'plannedDay') && s.dateUndefined) patch.dateUndefined = false
+
       if (field === 'status' && value === 'done' && !s.doneBy) patch.doneBy = uid_
       if (field === 'status' && value !== 'done') patch.doneBy = ''
 
