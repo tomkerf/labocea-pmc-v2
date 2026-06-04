@@ -1,5 +1,7 @@
 import { calcVitesse } from '@/lib/bilanCalcs'
 import { Card, SectionTitle, FieldLabel, NumInput, ResultBox, ResultRow, NormInfo } from './BilanUI'
+import { COLORS } from '@/lib/constants'
+
 
 export function TabVitesse({ distD, setDistD, distF, setDistF, tD, setTD, tF, setTF }: {
   distD: string; setDistD: (v: string) => void
@@ -37,10 +39,10 @@ export function TabVitesse({ distD, setDistD, distF, setDistF, tD, setTD, tF, se
       </div>
       {res && (
         <ResultBox ok={res.conforme}>
-          <p className="px-4 pt-2.5 text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Vitesses DÉBUT</p>
+          <p className="px-4 pt-2.5 text-xs font-semibold" style={{ color: COLORS.TEXT_SECONDARY }}>Vitesses DÉBUT</p>
           {res.vD.map((v, i) => <ResultRow key={i + 1} label={`Essai ${i + 1}`} val={`${v.toFixed(2)} m/s`} ok={v >= 0.5} />)}
           <ResultRow label="Moyenne DÉBUT" val={`${res.moyVD.toFixed(2)} m/s`} />
-          <p className="px-4 pt-2.5 text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Vitesses FIN</p>
+          <p className="px-4 pt-2.5 text-xs font-semibold" style={{ color: COLORS.TEXT_SECONDARY }}>Vitesses FIN</p>
           {res.vFn.map((v, i) => <ResultRow key={`fin-${i + 1}`} label={`Essai ${i + 1}`} val={`${v.toFixed(2)} m/s`} ok={v >= 0.5} />)}
           <ResultRow label="Moyenne FIN" val={`${res.moyVFn.toFixed(2)} m/s`} />
         </ResultBox>

@@ -9,6 +9,8 @@ import { uploadVisitePhoto, deleteVisitePhoto } from '@/lib/uploadPhoto'
 import { generateVisiteHTML } from '@/lib/generateVisiteHTML'
 import type { VisitePreliminaire, PointVisite, NatureEauType, MethodeType, FaisabiliteVisite } from '@/types'
 import { Timestamp } from 'firebase/firestore'
+import { COLLECTIONS, COLORS } from '@/lib/constants'
+
 
 const NATURE_EAU: NatureEauType[] = ['Eau usée', 'Rivière', 'Souterraine', 'Eau pluviale', 'Eau saline', 'Boues', 'Autre']
 const METHODES: MethodeType[] = ['Ponctuel', 'Composite', 'Automatique']
@@ -60,7 +62,7 @@ export default function VisiteFormPage() {
 
   useEffect(() => {
     if (!visiteId) return
-    getDoc(doc(db, 'visites', visiteId)).then((snap) => {
+    getDoc(doc(db, COLLECTIONS.VISITES, visiteId)).then((snap) => {
       if (!snap.exists()) { navigate(-1); return }
       const v = { id: snap.id, ...snap.data() } as VisitePreliminaire
       setDate(v.date)
@@ -169,7 +171,7 @@ export default function VisiteFormPage() {
     return (
       <div className="flex justify-center py-20">
         <div className="size-6 rounded-full border-2 animate-spin"
-          style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+          style={{ borderColor: COLORS.BORDER, borderTopColor: COLORS.ACCENT }} />
       </div>
     )
   }
@@ -179,18 +181,18 @@ export default function VisiteFormPage() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button type="button" onClick={() => navigate(backPath)} aria-label="Retour" className="p-1.5 rounded-lg"
-          style={{ color: 'var(--color-text-secondary)' }}>
+          style={{ color: COLORS.TEXT_SECONDARY }}>
           <ArrowLeft size={18} />
         </button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             {isNew ? 'Nouvelle visite préliminaire' : 'Visite préliminaire'}
           </h1>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{linkedNomState}</p>
+          <p className="text-xs mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>{linkedNomState}</p>
         </div>
         {!isNew && (
           <button type="button" onClick={handleExport} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium"
-            style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>
+            style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_SECONDARY }}>
             <FileText size={14} />
             Exporter
           </button>
@@ -199,20 +201,20 @@ export default function VisiteFormPage() {
 
       {/* Champs généraux */}
       <div className="rounded-xl p-5 mb-4"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="vf-date" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date de visite</label>
+            <label htmlFor="vf-date" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Date de visite</label>
             <input id="vf-date" type="date" value={date} onChange={e => setDate(e.target.value)}
               className="field-input w-full" />
           </div>
           <div>
-            <label htmlFor="vf-technicien" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Technicien</label>
+            <label htmlFor="vf-technicien" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Technicien</label>
             <input id="vf-technicien" value={technicienNom} onChange={e => setTechnicienNom(e.target.value)}
               className="field-input w-full" placeholder="Prénom Nom" />
           </div>
           <div className="col-span-2">
-            <label htmlFor="vf-notes" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Notes générales</label>
+            <label htmlFor="vf-notes" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Notes générales</label>
             <textarea id="vf-notes" value={notes} onChange={e => setNotes(e.target.value)}
               rows={2} className="field-input w-full resize-none"
               placeholder="Remarques générales sur le site…" />
@@ -241,7 +243,7 @@ export default function VisiteFormPage() {
       <button type="button"
         onClick={() => setPoints(ps => [...ps, newPoint()])}
         className="flex items-center gap-2 w-full py-3 rounded-xl text-sm font-medium mb-6"
-        style={{ border: '1.5px dashed var(--color-border)', color: 'var(--color-accent)', background: 'var(--color-accent-light)' }}
+        style={{ border: '1.5px dashed var(--color-border)', color: COLORS.ACCENT, background: 'var(--color-accent-light)' }}
       >
         <Plus size={16} />
         Ajouter un point
@@ -253,17 +255,17 @@ export default function VisiteFormPage() {
           confirmDelete ? (
             <div className="flex items-center gap-2">
               <button type="button" onClick={handleDelete} className="text-sm px-3 py-1.5 rounded-lg font-medium"
-                style={{ background: 'var(--color-danger)', color: 'white' }}>
+                style={{ background: COLORS.DANGER, color: 'white' }}>
                 Confirmer la suppression
               </button>
               <button type="button" onClick={() => setConfirmDelete(false)} className="text-sm px-2 py-1.5 rounded-lg"
-                style={{ color: 'var(--color-text-secondary)' }}>
+                style={{ color: COLORS.TEXT_SECONDARY }}>
                 Annuler
               </button>
             </div>
           ) : (
             <button type="button" onClick={() => setConfirmDelete(true)} className="text-sm px-3 py-1.5 rounded-lg"
-              style={{ color: 'var(--color-danger)' }}>
+              style={{ color: COLORS.DANGER }}>
               <Trash2 size={14} className="inline mr-1" />
               Supprimer
             </button>
@@ -274,7 +276,7 @@ export default function VisiteFormPage() {
           onClick={() => handleSave()}
           disabled={saving || !date || !technicienNom.trim() || points.some(p => !p.nom.trim())}
           className="px-5 py-2 rounded-lg text-sm font-medium"
-          style={{ background: 'var(--color-accent)', color: 'white', opacity: saving ? 0.6 : 1 }}
+          style={{ background: COLORS.ACCENT, color: 'white', opacity: saving ? 0.6 : 1 }}
         >
           {saving ? 'Enregistrement…' : 'Enregistrer'}
         </button>
@@ -298,9 +300,9 @@ interface PointCardProps {
 }
 
 const FAISABILITE: { key: FaisabiliteVisite; label: string; color: string }[] = [
-  { key: 'ok', label: '✓ OK', color: 'var(--color-success)' },
-  { key: 'difficile', label: '⚠ Difficile', color: 'var(--color-warning)' },
-  { key: 'impossible', label: '✗ Impossible', color: 'var(--color-danger)' },
+  { key: 'ok', label: '✓ OK', color: COLORS.SUCCESS },
+  { key: 'difficile', label: '⚠ Difficile', color: COLORS.WARNING },
+  { key: 'impossible', label: '✗ Impossible', color: COLORS.DANGER },
 ]
 
 function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, onPhotoAdd, onPhotoDelete }: PointCardProps) {
@@ -308,11 +310,11 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
 
   return (
     <div className="rounded-xl p-5"
-      style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+      style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
       {/* Header point */}
       <div className="flex items-center gap-2 mb-4">
         <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
-          style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+          style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
           P{idx + 1}
         </span>
         <input
@@ -333,7 +335,7 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
           )}
           {total > 1 && (
             <button type="button" onClick={onRemove} aria-label="Supprimer ce point" className="p-1 rounded"
-              style={{ color: 'var(--color-danger)' }} title="Supprimer">
+              style={{ color: COLORS.DANGER }} title="Supprimer">
               <X size={14} />
             </button>
           )}
@@ -342,14 +344,14 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
 
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div>
-          <label htmlFor={`pc-type-eau-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Type d'eau</label>
+          <label htmlFor={`pc-type-eau-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Type d'eau</label>
           <select id={`pc-type-eau-${point.id}`} value={point.typeEau} onChange={e => onChange('typeEau', e.target.value as NatureEauType)}
             className="field-input w-full">
             {NATURE_EAU.map(n => <option key={n}>{n}</option>)}
           </select>
         </div>
         <div>
-          <label htmlFor={`pc-methode-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Méthode</label>
+          <label htmlFor={`pc-methode-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Méthode</label>
           <select id={`pc-methode-${point.id}`} value={point.methode} onChange={e => onChange('methode', e.target.value as MethodeType)}
             className="field-input w-full">
             {METHODES.map(m => <option key={m}>{m}</option>)}
@@ -359,7 +361,7 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
 
       {/* Faisabilité */}
       <div className="mb-3" role="group" aria-labelledby={`pc-faisabilite-label-${point.id}`}>
-        <p id={`pc-faisabilite-label-${point.id}`} className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Faisabilité</p>
+        <p id={`pc-faisabilite-label-${point.id}`} className="block text-xs font-medium mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Faisabilité</p>
         <div className="flex gap-2">
           {FAISABILITE.map(f => (
             <button type="button"
@@ -367,9 +369,9 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
               onClick={() => onChange('faisabilite', f.key)}
               className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
               style={{
-                background: point.faisabilite === f.key ? f.color : 'var(--color-bg-tertiary)',
-                color: point.faisabilite === f.key ? 'white' : 'var(--color-text-secondary)',
-                border: `1.5px solid ${point.faisabilite === f.key ? f.color : 'var(--color-border)'}`,
+                background: point.faisabilite === f.key ? f.color : COLORS.BG_TERTIARY,
+                color: point.faisabilite === f.key ? 'white' : COLORS.TEXT_SECONDARY,
+                border: `1.5px solid ${point.faisabilite === f.key ? f.color : COLORS.BORDER}`,
               }}
             >
               {f.label}
@@ -379,20 +381,20 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
       </div>
 
       <div className="mb-3">
-        <label htmlFor={`pc-securite-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Sécurité</label>
+        <label htmlFor={`pc-securite-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Sécurité</label>
         <input id={`pc-securite-${point.id}`} value={point.securite} onChange={e => onChange('securite', e.target.value)}
           className="field-input w-full" placeholder="EPI requis, risques, accès…" />
       </div>
 
       <div className="mb-3">
-        <label htmlFor={`pc-notes-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Notes</label>
+        <label htmlFor={`pc-notes-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Notes</label>
         <input id={`pc-notes-${point.id}`} value={point.notes} onChange={e => onChange('notes', e.target.value)}
           className="field-input w-full" placeholder="Remarques spécifiques…" />
       </div>
 
       {/* Photos */}
       <div>
-        <p className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>Photos</p>
+        <p className="block text-xs font-medium mb-2" style={{ color: COLORS.TEXT_SECONDARY }}>Photos</p>
         {point.photos.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
             {point.photos.map(url => (
@@ -413,9 +415,9 @@ function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, o
         <label
           className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer"
           style={{
-            background: 'var(--color-bg-tertiary)',
+            background: COLORS.BG_TERTIARY,
             border: '1px solid var(--color-border)',
-            color: uploading ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)',
+            color: uploading ? 'var(--color-text-tertiary)' : COLORS.TEXT_SECONDARY,
             opacity: uploading ? 0.6 : 1,
             pointerEvents: uploading ? 'none' : 'auto',
           }}

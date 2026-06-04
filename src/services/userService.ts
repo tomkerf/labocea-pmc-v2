@@ -1,6 +1,8 @@
 import { doc, setDoc, Timestamp, type Firestore } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { trackWrite } from '@/lib/trackWrite'
+import { COLLECTIONS } from '@/lib/constants'
+
 
 export interface NewUserData {
   uid:        string
@@ -21,5 +23,5 @@ export async function createUserDocument(uid: string, data: NewUserData, dbInsta
 }
 
 export async function updateUserProfile(uid: string, fields: Record<string, unknown>): Promise<void> {
-  await trackWrite(setDoc(doc(db, 'users', uid), fields, { merge: true }))
+  await trackWrite(setDoc(doc(db, COLLECTIONS.USERS, uid), fields, { merge: true }))
 }

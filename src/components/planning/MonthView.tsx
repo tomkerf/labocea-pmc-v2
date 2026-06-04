@@ -7,6 +7,8 @@ import {
   groupByClient, filterEvents,
 } from '@/lib/planningUtils'
 import EventPill from '@/components/planning/EventPill'
+import { COLORS } from '@/lib/constants'
+
 
 interface MonthViewProps {
   monthGrid:            (Date | null)[]
@@ -107,7 +109,7 @@ export default function MonthView({
                 position: 'relative',
                 borderRight:(i%7)<6?'1px solid var(--color-border-subtle)':'none',
                 borderBottom:'1px solid var(--color-border-subtle)',
-                background: inDrag ? 'rgba(0,113,227,0.1)' : isWeekend ? 'rgba(0,0,0,0.012)' : 'var(--color-bg-secondary)',
+                background: inDrag ? 'rgba(0,113,227,0.1)' : isWeekend ? 'rgba(0,0,0,0.012)' : COLORS.BG_SECONDARY,
                 outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
                 outlineOffset: '-1px',
                 minHeight: 90,
@@ -124,7 +126,7 @@ export default function MonthView({
                   <span className="w-[22px] h-[22px] flex items-center justify-center rounded-full text-[11px] font-semibold"
                     style={{
                       background: isToday ? '#FF3B30' : holidayName ? 'rgba(255,59,48,0.12)' : 'transparent',
-                      color: isToday ? 'white' : holidayName ? '#FF3B30' : 'var(--color-text-secondary)',
+                      color: isToday ? 'white' : holidayName ? '#FF3B30' : COLORS.TEXT_SECONDARY,
                     }}>
                     {day.getDate()}
                   </span>

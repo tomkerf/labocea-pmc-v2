@@ -7,6 +7,8 @@ import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { toast } from '@/stores/toastStore'
 import type { Client } from '@/types'
+import { COLLECTIONS } from '@/lib/constants'
+
 
 const DEBOUNCE = 800
 
@@ -39,7 +41,7 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
 
   useEffect(() => {
     if (!clientId) return
-    const ref = doc(db, 'clients-v2', clientId)
+    const ref = doc(db, COLLECTIONS.CLIENTS, clientId)
     const unsub = onSnapshot(ref, (snap) => {
       if (!snap.exists()) { setLoading(false); return }
       const data = { id: snap.id, ...snap.data() } as Client

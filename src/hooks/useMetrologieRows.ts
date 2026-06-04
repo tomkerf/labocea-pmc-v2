@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import type { Verification, Equipement } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 export type MetroRow =
   | { kind: 'verification'; data: Verification }
@@ -15,12 +17,12 @@ export interface StatutConfig {
 const STATUT_ORDER = { late: 0, soon: 1, ok: 2, none: 3 }
 
 export function calcStatut(prochainDate: string): StatutConfig {
-  if (!prochainDate) return { key: 'none', label: 'Non planifié', bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' }
+  if (!prochainDate) return { key: 'none', label: 'Non planifié', bg: COLORS.BG_TERTIARY, color: 'var(--color-text-tertiary)' }
   const diff = new Date(prochainDate).getTime() - Date.now()
   const days30 = 30 * 24 * 60 * 60 * 1000
-  if (diff < 0)      return { key: 'late', label: 'En retard', bg: 'var(--color-danger-light)',  color: 'var(--color-danger)'  }
-  if (diff < days30) return { key: 'soon', label: 'À prévoir',  bg: 'var(--color-warning-light)', color: 'var(--color-warning)' }
-  return                    { key: 'ok',   label: 'À jour',     bg: 'var(--color-success-light)', color: 'var(--color-success)' }
+  if (diff < 0)      return { key: 'late', label: 'En retard', bg: 'var(--color-danger-light)',  color: COLORS.DANGER  }
+  if (diff < days30) return { key: 'soon', label: 'À prévoir',  bg: 'var(--color-warning-light)', color: COLORS.WARNING }
+  return                    { key: 'ok',   label: 'À jour',     bg: 'var(--color-success-light)', color: COLORS.SUCCESS }
 }
 
 interface Params {

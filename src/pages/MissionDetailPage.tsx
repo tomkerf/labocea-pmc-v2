@@ -6,15 +6,17 @@ import { useClientData } from '@/hooks/useClientData'
 import type { Sampling, SamplingStatus } from '@/types'
 import { SaisieRapideModal } from '@/components/tournee/SaisieRapideModal'
 import type { SaisieRapideData } from '@/components/tournee/SaisieRapideModal'
+import { COLORS } from '@/lib/constants'
+
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
 
 const STATUS_CONFIG: Record<SamplingStatus, { label: string; bg: string; color: string }> = {
-  planned:      { label: 'À faire',      bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)' },
-  done:         { label: 'Réalisé',      bg: 'var(--color-success-light)', color: 'var(--color-success)' },
-  overdue:      { label: 'En retard',    bg: 'var(--color-danger-light)',  color: 'var(--color-danger)' },
-  non_effectue: { label: 'Non effectué', bg: 'var(--color-warning-light)', color: 'var(--color-warning)' },
+  planned:      { label: 'À faire',      bg: COLORS.BG_TERTIARY,   color: COLORS.TEXT_SECONDARY },
+  done:         { label: 'Réalisé',      bg: 'var(--color-success-light)', color: COLORS.SUCCESS },
+  overdue:      { label: 'En retard',    bg: 'var(--color-danger-light)',  color: COLORS.DANGER },
+  non_effectue: { label: 'Non effectué', bg: 'var(--color-warning-light)', color: COLORS.WARNING },
 }
 
 const MISSION_DURATION_MINUTES = 120;
@@ -26,7 +28,7 @@ function getEnCoursStatus(sampling: Sampling): { label: string; bg: string; colo
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
   const plannedMinutes = hours * 60 + minutes;
   if (currentMinutes >= plannedMinutes && currentMinutes < plannedMinutes + MISSION_DURATION_MINUTES) {
-    return { label: 'En cours', bg: 'var(--color-accent-light)', color: 'var(--color-accent)' };
+    return { label: 'En cours', bg: 'var(--color-accent-light)', color: COLORS.ACCENT };
   }
   return null;
 }
@@ -106,13 +108,13 @@ export default function MissionDetailPage() {
     return (
       <div className="flex justify-center py-20">
         <div className="size-6 rounded-full border-2 animate-spin"
-          style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+          style={{ borderColor: COLORS.BORDER, borderTopColor: COLORS.ACCENT }} />
       </div>
     )
   }
 
   if (!client || !plan || !sampling) {
-    return <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Mission introuvable.</div>
+    return <div className="p-6 text-sm" style={{ color: COLORS.DANGER }}>Mission introuvable.</div>
   }
 
   const statusConfig = getEnCoursStatus(sampling) ?? STATUS_CONFIG[sampling.status]
@@ -129,10 +131,10 @@ export default function MissionDetailPage() {
         <button type="button"
           onClick={() => navigate(-1)}
           className="flex items-center gap-1 text-sm font-medium"
-          style={{ color: 'var(--color-accent)' }}>
+          style={{ color: COLORS.ACCENT }}>
           <ChevronLeft size={18} /> Retour
         </button>
-        <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+        <span className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
           Détail mission
         </span>
         <button type="button"
@@ -146,7 +148,7 @@ export default function MissionDetailPage() {
 
       {/* Carte / GPS */}
       <div className="mx-4 mb-4 rounded-2xl overflow-hidden relative"
-        style={{ height: 160, background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border-subtle)' }}>
+        style={{ height: 160, background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border-subtle)' }}>
         {hasGps ? (
           <iframe
             title="map"
@@ -166,7 +168,7 @@ export default function MissionDetailPage() {
         {/* Bouton ouvrir Maps */}
         <a href={mapsUrl} target="_blank" rel="noreferrer"
           className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-          style={{ background: 'white', color: 'var(--color-accent)', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+          style={{ background: 'white', color: COLORS.ACCENT, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
           <Navigation size={12} />
           Ouvrir Maps
         </a>
@@ -174,11 +176,11 @@ export default function MissionDetailPage() {
 
       {/* Infos principales */}
       <div className="mx-4 mb-4 rounded-2xl px-5 py-4"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         <div className="flex items-center gap-2 mb-3">
           {sampling.plannedTime && (
             <span className="flex items-center gap-1 text-sm font-semibold px-3 py-1 rounded-full"
-              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+              style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
               <Clock size={13} />
               {sampling.plannedTime}
             </span>
@@ -194,10 +196,10 @@ export default function MissionDetailPage() {
           )}
         </div>
 
-        <h1 className="text-lg font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+        <h1 className="text-lg font-bold mb-1" style={{ color: COLORS.TEXT_PRIMARY }}>
           {client.nom}
         </h1>
-        <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-sm mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
           {plan.siteNom}{plan.nom ? ` · ${plan.nom}` : ''}
         </p>
         <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -224,8 +226,8 @@ export default function MissionDetailPage() {
             Contraintes terrain
           </h2>
           <div className="rounded-2xl px-5 py-4"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-            <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--color-text-primary)' }}>
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            <p className="text-sm whitespace-pre-wrap" style={{ color: COLORS.TEXT_PRIMARY }}>
               {plan.contraintesParticulieres}
             </p>
           </div>
@@ -235,12 +237,12 @@ export default function MissionDetailPage() {
       {/* Commentaire */}
       {sampling.comment && (
         <div className="mx-4 mb-4 px-5 py-4 rounded-2xl"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
           <p className="text-xs font-semibold uppercase mb-1"
             style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
             Commentaire
           </p>
-          <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{sampling.comment}</p>
+          <p className="text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>{sampling.comment}</p>
         </div>
       )}
 
@@ -260,7 +262,7 @@ export default function MissionDetailPage() {
                 onClick={() => setJ1Modal('reporte')}
                 className="w-full py-4 rounded-2xl text-base font-semibold flex items-center justify-center gap-2"
                 style={{
-                  background: 'var(--color-accent)',
+                  background: COLORS.ACCENT,
                   color: 'white',
                   boxShadow: '0 4px 16px rgba(0,113,227,0.35)',
                 }}>
@@ -270,7 +272,7 @@ export default function MissionDetailPage() {
               <button type="button"
                 onClick={() => setJ1Modal('non_effectue')}
                 className="w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5"
-                style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+                style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
                 <X size={15} />
                 Non effectué
               </button>
@@ -282,7 +284,7 @@ export default function MissionDetailPage() {
                 disabled={saving}
                 className="w-full py-4 rounded-2xl text-base font-semibold flex items-center justify-center gap-2"
                 style={{
-                  background: saving ? 'var(--color-border)' : 'var(--color-accent)',
+                  background: saving ? COLORS.BORDER : COLORS.ACCENT,
                   color: 'white',
                   boxShadow: saving ? 'none' : '0 4px 16px rgba(0,113,227,0.35)',
                 }}>
@@ -293,14 +295,14 @@ export default function MissionDetailPage() {
                 <button type="button"
                   onClick={() => setJ1Modal('non_effectue')}
                   className="flex-1 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5"
-                  style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+                  style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
                   <X size={15} />
                   Non effectué
                 </button>
                 <button type="button"
                   onClick={() => setJ1Modal('reporte')}
                   className="flex-1 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5"
-                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+                  style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}>
                   <CalendarClock size={15} />
                   Décaler
                 </button>
@@ -313,11 +315,11 @@ export default function MissionDetailPage() {
       {sampling.status === 'done' && (
         <div className="mx-4 px-5 py-4 rounded-2xl flex items-center gap-3"
           style={{ background: 'var(--color-success-light)', border: '1px solid var(--color-success)' }}>
-          <CheckCircle2 size={20} style={{ color: 'var(--color-success)' }} />
+          <CheckCircle2 size={20} style={{ color: COLORS.SUCCESS }} />
           <div>
-            <p className="text-sm font-semibold" style={{ color: 'var(--color-success)' }}>Mission réalisée</p>
+            <p className="text-sm font-semibold" style={{ color: COLORS.SUCCESS }}>Mission réalisée</p>
             {sampling.doneDate && (
-              <p className="text-xs" style={{ color: 'var(--color-success)' }}>
+              <p className="text-xs" style={{ color: COLORS.SUCCESS }}>
                 {new Date(sampling.doneDate).toLocaleDateString('fr-FR')}
               </p>
             )}

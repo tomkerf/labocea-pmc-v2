@@ -7,6 +7,8 @@ import {
 } from 'lucide-react'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import UserAvatar from '@/components/ui/UserAvatar'
+import { COLORS } from '@/lib/constants'
+
 
 const NAV_ITEMS = [
   { to: '/',           icon: LayoutDashboard, label: 'Tableau de bord', end: true },
@@ -82,16 +84,16 @@ export default function MobileDrawer({ open, onClose }: Props) {
               <button type="button" onClick={onClose}
                 aria-label="Fermer le menu"
                 className="p-1.5 rounded-lg"
-                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
                 <X size={16} strokeWidth={2} />
               </button>
               <div className="flex items-center gap-2.5">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                  <span className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
                     Labocea PMC
                   </span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded font-medium"
-                    style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                    style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
                     V2
                   </span>
                 </div>
@@ -108,7 +110,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
                   onClick={onClose}
                   className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
                   style={({ isActive }) => ({
-                    color: isActive ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                    color: isActive ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
                     fontWeight: isActive ? 500 : 400,
                   })}
                 >
@@ -149,7 +151,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
                   size={36}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                  <p className="text-sm font-medium truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                     {appUser?.prenom} {appUser?.nom}
                   </p>
                   <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>

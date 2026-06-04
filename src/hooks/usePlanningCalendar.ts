@@ -14,6 +14,8 @@ import {
   sortEvts, groupByClient, filterEvents,
 } from '@/lib/planningUtils'
 import type { Client, Sampling, EvenementPersonnel } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 interface UsePlanningCalendarParams {
   // Données
@@ -111,7 +113,7 @@ export function usePlanningCalendar({
       if (j2Col !== -1) rowIdx = Math.max(rowIdx, colRowNext[j2Col] || 0)
       if (!rows[rowIdx]) rows[rowIdx] = []
 
-      const tc = j1.technicien && j1.technicien !== '—' ? getTechColor(j1.technicien).color : 'var(--color-accent)'
+      const tc = j1.technicien && j1.technicien !== '—' ? getTechColor(j1.technicien).color : COLORS.ACCENT
       const hasPair = j2Col !== -1 && j2 !== null
 
       rows[rowIdx].push({
@@ -155,7 +157,7 @@ export function usePlanningCalendar({
         title: ev.titre,
         subtitle: EVENEMENT_LABEL[ev.type] ?? 'Autre',
         statusLabel: EVENEMENT_LABEL[ev.type] ?? 'Autre',
-        statusBg: 'var(--color-bg-tertiary)', statusColor: 'var(--color-text-tertiary)',
+        statusBg: COLORS.BG_TERTIARY, statusColor: 'var(--color-text-tertiary)',
         link: '', isDone: false,
         technicien: ev.createdByInitiales || '—',
         evenementData: ev,

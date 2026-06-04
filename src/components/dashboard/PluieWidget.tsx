@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
+import { COLORS } from '@/lib/constants'
+
 
 const MOIS_COURT = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc']
 
@@ -37,27 +39,27 @@ export function PluieWidget({ items }: { items: PluieItem[] }) {
       </button>
       {open && (
         <div className="rounded-xl overflow-hidden"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
           <div style={{ maxHeight: 280, overflowY: 'auto' }}>
             {items.map((r, i) => (
               <div key={r.samplingId}
                 className="flex items-center gap-3 px-4 py-3 cursor-pointer"
                 style={{ borderBottom: i < items.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
                 onClick={() => navigate(`/missions/${r.clientId}/plan/${r.planId}`)}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
                 <span className="shrink-0 text-base leading-none">🌧</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{r.clientNom}</p>
-                  <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-sm font-medium truncate" style={{ color: COLORS.TEXT_PRIMARY }}>{r.clientNom}</p>
+                  <p className="text-xs truncate" style={{ color: COLORS.TEXT_SECONDARY }}>
                     {[r.siteNom, r.planNom].filter(Boolean).join(' · ')}
                   </p>
                 </div>
                 <span className="shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full"
                   style={{
-                    background: r.overdue ? 'var(--color-danger-light)' : 'var(--color-bg-tertiary)',
-                    color:      r.overdue ? 'var(--color-danger)'       : 'var(--color-text-secondary)',
+                    background: r.overdue ? 'var(--color-danger-light)' : COLORS.BG_TERTIARY,
+                    color:      r.overdue ? COLORS.DANGER       : COLORS.TEXT_SECONDARY,
                   }}>
                   {r.plannedDay > 0
                     ? `${r.overdue ? '⚠ ' : ''}${MOIS_COURT[r.plannedMonth]} j${r.plannedDay}`

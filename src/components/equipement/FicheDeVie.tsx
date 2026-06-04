@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Clock, FileText, Gauge, Wrench, Package, Plus, StickyNote, Trash2, Edit2 } from 'lucide-react'
 import { Timestamp } from 'firebase/firestore'
 import type { Equipement, Verification, Maintenance, FicheDeVieNote } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 type TimelineEntry =
   | { kind: 'acquisition'; date: string }
@@ -107,9 +109,9 @@ function TimelineRow({ icon, iconBg, iconColor, date, title, subtitle, badge, is
         {icon}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{title}</p>
+        <p className="text-sm font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>{title}</p>
         {subtitle && (
-          <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>{subtitle}</p>
+          <p className="text-xs mt-0.5 truncate" style={{ color: COLORS.TEXT_SECONDARY }}>{subtitle}</p>
         )}
         <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>{date}</p>
       </div>
@@ -127,7 +129,7 @@ function TimelineRow({ icon, iconBg, iconColor, date, title, subtitle, badge, is
                 onClick={onEdit}
                 aria-label="Modifier"
                 className="p-1 rounded"
-                style={{ color: 'var(--color-text-secondary)' }}
+                style={{ color: COLORS.TEXT_SECONDARY }}
                 title="Modifier"
               >
                 <Edit2 size={13} />
@@ -138,7 +140,7 @@ function TimelineRow({ icon, iconBg, iconColor, date, title, subtitle, badge, is
                 onClick={onDelete}
                 aria-label="Supprimer"
                 className="p-1 rounded"
-                style={{ color: 'var(--color-danger)' }}
+                style={{ color: COLORS.DANGER }}
                 title="Supprimer"
               >
                 <Trash2 size={13} />
@@ -280,14 +282,14 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
           <button type="button"
             onClick={() => exportFicheDeViePDF(equipement, entries)}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
-            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border-subtle)' }}
+            style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}
           >
             <FileText size={12} /> Exporter PDF
           </button>
           <button type="button"
             onClick={() => { setShowVerif(v => !v); setShowForm(false) }}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
-            style={{ background: showVerif ? 'var(--color-success-light)' : 'var(--color-bg-tertiary)', color: showVerif ? 'var(--color-success)' : 'var(--color-text-secondary)', border: '1px solid var(--color-border-subtle)' }}
+            style={{ background: showVerif ? 'var(--color-success-light)' : COLORS.BG_TERTIARY, color: showVerif ? COLORS.SUCCESS : COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}
           >
             <Gauge size={12} /> Vérification
           </button>
@@ -297,7 +299,7 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
               else { handleCancelNote(); setShowForm(true); setShowVerif(false) } 
             }}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
-            style={{ background: showForm ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)', color: showForm ? 'var(--color-accent)' : 'var(--color-text-secondary)', border: '1px solid var(--color-border-subtle)' }}
+            style={{ background: showForm ? 'var(--color-accent-light)' : COLORS.BG_TERTIARY, color: showForm ? COLORS.ACCENT : COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}
           >
             <Plus size={12} /> Note
           </button>
@@ -306,33 +308,33 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
 
       {(showForm || editingNote) && (
         <div className="rounded-xl p-4 mb-3"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-card)' }}>
-          <p className="text-xs font-semibold mb-3" style={{ color: 'var(--color-accent)' }}>
+          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-card)' }}>
+          <p className="text-xs font-semibold mb-3" style={{ color: COLORS.ACCENT }}>
             {editingNote ? 'Modifier la note' : 'Nouvelle note'}
           </p>
           <div className="flex gap-3 mb-2">
             <div className="flex-1">
-              <label htmlFor="fdv-titre" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Titre</label>
+              <label htmlFor="fdv-titre" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Titre</label>
               <input id="fdv-titre" value={formTitre} onChange={(e) => setFormTitre(e.target.value)}
                 placeholder="Ex : Inspection terrain, Réglage, Nettoyage…" className="field-input w-full" />
             </div>
             <div>
-              <label htmlFor="fdv-date" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Date</label>
+              <label htmlFor="fdv-date" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Date</label>
               <input id="fdv-date" type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} className="field-input" />
             </div>
           </div>
           <div className="mb-3">
-            <label htmlFor="fdv-notes" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Détails (optionnel)</label>
+            <label htmlFor="fdv-notes" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Détails (optionnel)</label>
             <textarea id="fdv-notes" value={formNotes} onChange={(e) => setFormNotes(e.target.value)} rows={2}
               placeholder="Observations, actions effectuées…" className="field-input w-full resize-none" />
           </div>
           <div className="flex justify-end gap-2">
             <button type="button" onClick={handleCancelNote} className="px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
               Annuler
             </button>
             <button type="button" onClick={handleSubmitNote} disabled={!formTitre.trim()} className="px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background: 'var(--color-accent)', color: 'white', opacity: formTitre.trim() ? 1 : 0.5 }}>
+              style={{ background: COLORS.ACCENT, color: 'white', opacity: formTitre.trim() ? 1 : 0.5 }}>
               Enregistrer
             </button>
           </div>
@@ -341,11 +343,11 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
 
       {showVerif && (
         <div className="rounded-xl p-4 mb-3"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-success)', boxShadow: 'var(--shadow-card)' }}>
-          <p className="text-xs font-semibold mb-3" style={{ color: 'var(--color-success)' }}>Nouvelle vérification</p>
+          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-success)', boxShadow: 'var(--shadow-card)' }}>
+          <p className="text-xs font-semibold mb-3" style={{ color: COLORS.SUCCESS }}>Nouvelle vérification</p>
           <div className="flex gap-3 mb-2 flex-wrap">
             <div>
-              <label htmlFor="fdv-verif-type" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Type</label>
+              <label htmlFor="fdv-verif-type" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Type</label>
               <select id="fdv-verif-type" value={verifType} onChange={e => setVerifType(e.target.value as typeof verifType)} className="field-input">
                 <option value="etalonnage_interne">Étalonnage interne</option>
                 <option value="verification_externe">Vérification externe</option>
@@ -353,11 +355,11 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
               </select>
             </div>
             <div>
-              <label htmlFor="fdv-verif-date" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Date</label>
+              <label htmlFor="fdv-verif-date" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Date</label>
               <input id="fdv-verif-date" type="date" value={verifDate} onChange={e => setVerifDate(e.target.value)} className="field-input" />
             </div>
             <div>
-              <label htmlFor="fdv-verif-resultat" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Résultat</label>
+              <label htmlFor="fdv-verif-resultat" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Résultat</label>
               <select id="fdv-verif-resultat" value={verifResultat} onChange={e => setVerifResultat(e.target.value as typeof verifResultat)} className="field-input">
                 <option value="conforme">Conforme</option>
                 <option value="non_conforme">Non conforme</option>
@@ -365,22 +367,22 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
               </select>
             </div>
             <div>
-              <label htmlFor="fdv-verif-prochain" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Prochain contrôle</label>
+              <label htmlFor="fdv-verif-prochain" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Prochain contrôle</label>
               <input id="fdv-verif-prochain" type="date" value={verifProchain} onChange={e => setVerifProchain(e.target.value)} className="field-input" />
             </div>
           </div>
           <div className="mb-3">
-            <label htmlFor="fdv-verif-remarques" className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Remarques (optionnel)</label>
+            <label htmlFor="fdv-verif-remarques" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Remarques (optionnel)</label>
             <textarea id="fdv-verif-remarques" value={verifRemarques} onChange={e => setVerifRemarques(e.target.value)} rows={2}
               placeholder="Observations, dérives constatées…" className="field-input w-full resize-none" />
           </div>
           <div className="flex justify-end gap-2">
             <button type="button" onClick={() => setShowVerif(false)} className="px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
               Annuler
             </button>
             <button type="button" onClick={handleAddVerification} disabled={!verifDate || verifSaving} className="px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background: 'var(--color-success)', color: 'white', opacity: !verifDate || verifSaving ? 0.5 : 1 }}>
+              style={{ background: COLORS.SUCCESS, color: 'white', opacity: !verifDate || verifSaving ? 0.5 : 1 }}>
               {verifSaving ? '…' : 'Enregistrer'}
             </button>
           </div>
@@ -389,12 +391,12 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
 
       {entries.length === 0 ? (
         <div className="rounded-xl px-5 py-6 text-sm text-center"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-tertiary)' }}>
+          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-tertiary)' }}>
           Aucun événement enregistré. Ajoutez une note ou saisissez une vérification métrologique.
         </div>
       ) : (
         <div className="rounded-xl overflow-hidden"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
           {entries.map((entry, i) => {
             const isLast = i === entries.length - 1
             const dateLabel = new Date(entry.date + 'T12:00:00').toLocaleDateString('fr-FR', {
@@ -405,7 +407,7 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
               return (
                 <TimelineRow key="acquisition" isLast={isLast}
                   icon={<Package size={14} />}
-                  iconBg="var(--color-bg-tertiary)" iconColor="var(--color-text-secondary)"
+                  iconBg=COLORS.BG_TERTIARY iconColor=COLORS.TEXT_SECONDARY
                   date={dateLabel} title="Acquisition de l'équipement" badge={null}
                 />
               )
@@ -419,14 +421,14 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
                 <TimelineRow key={v.id} isLast={isLast}
                   icon={<Gauge size={14} />}
                   iconBg={isOk ? 'var(--color-success-light)' : isNok ? 'var(--color-danger-light)' : 'var(--color-warning-light)'}
-                  iconColor={isOk ? 'var(--color-success)' : isNok ? 'var(--color-danger)' : 'var(--color-warning)'}
+                  iconColor={isOk ? COLORS.SUCCESS : isNok ? COLORS.DANGER : COLORS.WARNING}
                   date={dateLabel}
                   title={VERIF_TYPE[v.type] ?? v.type}
                   subtitle={[v.technicienNom, v.remarques].filter(Boolean).join(' · ')}
                   badge={
-                    isOk  ? { label: 'Conforme',     bg: 'var(--color-success-light)', color: 'var(--color-success)' } :
-                    isNok ? { label: 'Non conforme',  bg: 'var(--color-danger-light)',  color: 'var(--color-danger)'  } :
-                            { label: 'À reprendre',   bg: 'var(--color-warning-light)', color: 'var(--color-warning)' }
+                    isOk  ? { label: 'Conforme',     bg: 'var(--color-success-light)', color: COLORS.SUCCESS } :
+                    isNok ? { label: 'Non conforme',  bg: 'var(--color-danger-light)',  color: COLORS.DANGER  } :
+                            { label: 'À reprendre',   bg: 'var(--color-warning-light)', color: COLORS.WARNING }
                   }
                   onEdit={() => navigate(`/metrologie/${v.id}`)}
                 />
@@ -438,7 +440,7 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
               return (
                 <TimelineRow key={n.id} isLast={isLast}
                   icon={<StickyNote size={14} />}
-                  iconBg="var(--color-accent-light)" iconColor="var(--color-accent)"
+                  iconBg="var(--color-accent-light)" iconColor=COLORS.ACCENT
                   date={dateLabel}
                   title={n.titre}
                   subtitle={[n.auteur, n.notes].filter(Boolean).join(' · ')}
@@ -468,15 +470,15 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
             return (
               <TimelineRow key={m.id} isLast={isLast}
                 icon={<Wrench size={14} />}
-                iconBg={isDone ? 'var(--color-bg-tertiary)' : 'var(--color-warning-light)'}
-                iconColor={isDone ? 'var(--color-text-secondary)' : 'var(--color-warning)'}
+                iconBg={isDone ? COLORS.BG_TERTIARY : 'var(--color-warning-light)'}
+                iconColor={isDone ? COLORS.TEXT_SECONDARY : COLORS.WARNING}
                 date={maintDateLabel}
                 title={m.type === 'panne' && m.description ? `Panne : ${m.description}` : MAINT_TYPE[m.type] ?? m.type}
                 subtitle={[m.technicienNom, m.type === 'panne' && m.description ? m.travauxRealises : (m.travauxRealises || m.description)].filter(Boolean).join(' · ')}
                 badge={
                   isDone
-                    ? { label: 'Réalisée',  bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)' }
-                    : { label: 'Planifiée', bg: 'var(--color-warning-light)', color: 'var(--color-warning)'        }
+                    ? { label: 'Réalisée',  bg: COLORS.BG_TERTIARY,   color: COLORS.TEXT_SECONDARY }
+                    : { label: 'Planifiée', bg: 'var(--color-warning-light)', color: COLORS.WARNING        }
                 }
                 onEdit={() => navigate(`/maintenances/${m.id}`)}
               />

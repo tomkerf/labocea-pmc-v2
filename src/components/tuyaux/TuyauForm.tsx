@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { MATERIAUX } from '@/lib/tuyauxUtils'
 import type { Tuyau, MateriauTuyau } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 interface TuyauFormProps {
   tuyau?: Partial<Tuyau>
@@ -14,7 +16,7 @@ export function Row({ label, value, mono }: { label: string; value: string; mono
       <span className="text-[10px] font-semibold uppercase tracking-wide shrink-0 w-14"
         style={{ color: 'var(--color-text-tertiary)' }}>{label}</span>
       <span className={`text-xs font-medium ${mono ? 'font-mono' : ''}`}
-        style={{ color: 'var(--color-text-primary)', background: 'var(--color-bg-tertiary)', padding: '1px 6px', borderRadius: 4 }}>
+        style={{ color: COLORS.TEXT_PRIMARY, background: COLORS.BG_TERTIARY, padding: '1px 6px', borderRadius: 4 }}>
         {value}
       </span>
     </div>
@@ -24,19 +26,19 @@ export function Row({ label, value, mono }: { label: string; value: string; mono
 export function Tag({ children }: { children: React.ReactNode }) {
   return (
     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded"
-      style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}>
+      style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_SECONDARY }}>
       {children}
     </span>
   )
 }
 
-const lbl = { color: 'var(--color-text-secondary)' } as const
+const lbl = { color: COLORS.TEXT_SECONDARY } as const
 
 function F({ label, req, children }: { label: string; req?: boolean; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
       <label className="text-xs font-medium" style={lbl}>
-        {label}{req && <span className="ml-0.5" style={{ color: 'var(--color-danger)' }}>*</span>}
+        {label}{req && <span className="ml-0.5" style={{ color: COLORS.DANGER }}>*</span>}
       </label>
       {children}
     </div>
@@ -44,7 +46,7 @@ function F({ label, req, children }: { label: string; req?: boolean; children: R
 }
 
 const wrap = {
-  background: 'var(--color-bg-tertiary)',
+  background: COLORS.BG_TERTIARY,
   border: '1px solid var(--color-border)',
   borderRadius: 'var(--radius-sm)',
   padding: '8px 11px',
@@ -84,16 +86,16 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
       style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
       onClick={onClose}>
       <div className="w-full max-w-xl rounded-xl overflow-hidden"
-        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
+        style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-modal)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
         onClick={e => e.stopPropagation()}>
 
         <div className="flex items-center justify-between px-5 py-4 shrink-0"
           style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h2 className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             {tuyau.id ? 'Modifier le tuyau' : 'Nouveau tuyau'}
           </h2>
           <button type="button" onClick={onClose} aria-label="Fermer" className="size-7 flex items-center justify-center rounded-full text-sm"
-            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+            style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
             ✕
           </button>
         </div>
@@ -101,7 +103,7 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
         <div className="px-5 py-4 flex flex-col gap-3 overflow-y-auto">
           <div className="grid grid-cols-3 gap-3">
             <F label="Réf Labo" req>
-              <div style={{ ...wrap, borderColor: refLabo ? 'var(--color-border)' : undefined }}>
+              <div style={{ ...wrap, borderColor: refLabo ? COLORS.BORDER : undefined }}>
                 <input value={refLabo} onChange={e => setRefLabo(e.target.value.toUpperCase())}
                   placeholder="Q25TFE1"
                   aria-label="Référence labo"
@@ -183,13 +185,13 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
           style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
           <button type="button" onClick={onClose}
             className="flex-1 px-4 py-2 rounded-lg text-sm font-medium"
-            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+            style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}>
             Annuler
           </button>
           <button type="button" onClick={handleSave} disabled={!canSave}
             className="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-opacity"
             style={{
-              background: 'var(--color-accent)',
+              background: COLORS.ACCENT,
               color: 'white',
               opacity: canSave ? 1 : 0.4,
               cursor: canSave ? 'pointer' : 'not-allowed',

@@ -9,14 +9,16 @@ import { useUsersStore } from '@/stores/usersStore'
 import { createClient } from '@/services/clientService'
 import { useVisites } from '@/hooks/useVisites'
 import type { AppUser, Demande, DemandeStatut } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 // ── Config statuts ────────────────────────────────────────────
 
 const STATUTS: { key: DemandeStatut; label: string; color: string }[] = [
-  { key: 'attente_devis', label: 'En attente de devis', color: 'var(--color-warning)'  },
-  { key: 'devis_envoye',  label: 'Devis envoyé',        color: 'var(--color-accent)'   },
+  { key: 'attente_devis', label: 'En attente de devis', color: COLORS.WARNING  },
+  { key: 'devis_envoye',  label: 'Devis envoyé',        color: COLORS.ACCENT   },
   { key: 'visite_prelim', label: 'Visite préliminaire', color: 'var(--color-neutral)'  },
-  { key: 'devis_signe',   label: 'Devis signé',         color: 'var(--color-success)'  },
+  { key: 'devis_signe',   label: 'Devis signé',         color: COLORS.SUCCESS  },
 ]
 
 const STATUTS_ARCHIVES: { key: DemandeStatut; label: string; color: string }[] = [
@@ -69,11 +71,11 @@ function DemandeVisites({ demandeId, demandeNom, onNavigate }: { demandeId: stri
   return (
     <div className="mt-2">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.05em' }}>
+        <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY, letterSpacing: '0.05em' }}>
           Visites préliminaires
         </span>
         <button type="button" onClick={handleNew} className="text-xs px-2.5 py-1 rounded-lg font-medium flex items-center gap-1"
-          style={{ background: 'var(--color-accent)', color: 'white' }}>
+          style={{ background: COLORS.ACCENT, color: 'white' }}>
           <Plus size={12} />
           Nouvelle
         </button>
@@ -89,8 +91,8 @@ function DemandeVisites({ demandeId, demandeNom, onNavigate }: { demandeId: stri
                 setTimeout(() => navigate(`/visites/${v.id}`), 10)
               }}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-left w-full"
-              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border-subtle)' }}>
-              <span className="flex-1 text-xs font-medium" style={{ color: 'var(--color-text-primary)' }}>
+              style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border-subtle)' }}>
+              <span className="flex-1 text-xs font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>
                 {new Date(v.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                 {' — '}{v.points.length} pt{v.points.length > 1 ? 's' : ''}
               </span>
@@ -131,17 +133,17 @@ function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }
     >
       <div
         className="w-full max-w-xl rounded-2xl p-6 mt-5 mb-10"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-modal)' }}
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-modal)' }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-start justify-between mb-5">
           <div>
-            <h2 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            <h2 className="text-lg font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
               {isNew ? 'Nouvelle demande' : (form.contactSociete || form.contactNom || 'Demande')}
             </h2>
             {!isNew && j !== null && (
-              <p className="text-xs mt-0.5" style={{ color: j > 30 ? 'var(--color-danger)' : j > 14 ? 'var(--color-warning)' : 'var(--color-text-tertiary)' }}>
+              <p className="text-xs mt-0.5" style={{ color: j > 30 ? COLORS.DANGER : j > 14 ? COLORS.WARNING : 'var(--color-text-tertiary)' }}>
                 {j === 0 ? "Reçue aujourd'hui" : `Reçue il y a ${j} jour${j > 1 ? 's' : ''}`}
               </p>
             )}
@@ -222,14 +224,14 @@ function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }
                 <button type="button"
                   onClick={onDelete}
                   className="text-sm px-3 py-1.5 rounded-lg font-medium"
-                  style={{ background: 'var(--color-danger)', color: 'white' }}
+                  style={{ background: COLORS.DANGER, color: 'white' }}
                 >
                   Confirmer la suppression
                 </button>
                 <button type="button"
                   onClick={() => setConfirmDelete(false)}
                   className="text-sm px-2 py-1.5 rounded-lg"
-                  style={{ color: 'var(--color-text-secondary)' }}
+                  style={{ color: COLORS.TEXT_SECONDARY }}
                 >
                   Annuler
                 </button>
@@ -238,7 +240,7 @@ function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }
               <button type="button"
                 onClick={() => setConfirmDelete(true)}
                 className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg font-medium"
-                style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}
+                style={{ color: COLORS.DANGER, background: 'var(--color-danger-light)' }}
               >
                 <Trash2 size={13} /> Supprimer
               </button>
@@ -246,19 +248,19 @@ function DemandeModal({ demande, onClose, onSave, onDelete, onConvertir, users }
           ) : <div />}
 
           <div className="flex items-center gap-2">
-            <button type="button" onClick={onClose} className="text-sm px-4 py-2 rounded-lg font-medium" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+            <button type="button" onClick={onClose} className="text-sm px-4 py-2 rounded-lg font-medium" style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}>
               Annuler
             </button>
             {form.statut === 'devis_signe' && !isNew && onConvertir && (
               <button type="button"
                 onClick={() => { handleSave(); onConvertir({ ...demande, ...form } as Demande) }}
                 className="text-sm px-4 py-2 rounded-lg font-semibold"
-                style={{ background: 'var(--color-success)', color: 'white' }}
+                style={{ background: COLORS.SUCCESS, color: 'white' }}
               >
                 → Créer la mission
               </button>
             )}
-            <button type="button" onClick={handleSave} className="text-sm px-4 py-2 rounded-lg font-medium" style={{ background: 'var(--color-accent)', color: 'white' }}>
+            <button type="button" onClick={handleSave} className="text-sm px-4 py-2 rounded-lg font-medium" style={{ background: COLORS.ACCENT, color: 'white' }}>
               {isNew ? 'Créer' : 'Enregistrer'}
             </button>
           </div>
@@ -279,7 +281,7 @@ function Sec({ label }: { label: string }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>{label}</label>
+      <label className="text-xs font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>{label}</label>
       {children}
     </div>
   )
@@ -291,27 +293,27 @@ function DemandeCard({ dem, onClick }: { dem: Demande; onClick: () => void }) {
   const titre = dem.contactSociete || dem.contactNom || 'Sans nom'
   const sous = dem.contactSociete && dem.contactNom ? dem.contactNom : dem.contactEmail
   const j = joursEcoules(dem.dateReception)
-  const jColor = j === null ? 'var(--color-text-tertiary)' : j > 30 ? 'var(--color-danger)' : j > 14 ? 'var(--color-warning)' : 'var(--color-text-tertiary)'
+  const jColor = j === null ? 'var(--color-text-tertiary)' : j > 30 ? COLORS.DANGER : j > 14 ? COLORS.WARNING : 'var(--color-text-tertiary)'
 
   return (
     <button type="button"
       onClick={onClick}
       className="w-full text-left rounded-xl p-3 transition-shadow"
       style={{
-        background: 'var(--color-bg-secondary)',
+        background: COLORS.BG_SECONDARY,
         border: '1px solid var(--color-border-subtle)',
         boxShadow: 'var(--shadow-card)',
       }}
       onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)')}
       onMouseLeave={e => (e.currentTarget.style.boxShadow = 'var(--shadow-card)')}
     >
-      <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>{titre}</p>
-      {sous && <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{sous}</p>}
+      <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>{titre}</p>
+      {sous && <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>{sous}</p>}
       <div className="flex items-center gap-2 mt-2 flex-wrap">
-        {dem.lieu && <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>📍 {dem.lieu}</span>}
+        {dem.lieu && <span className="text-xs" style={{ color: COLORS.TEXT_SECONDARY }}>📍 {dem.lieu}</span>}
         {dem.segment && (
           <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
-            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+            style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
             {dem.segment}
           </span>
         )}
@@ -399,17 +401,17 @@ export default function DemandesPage() {
       {/* Header */}
       <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Demandes clients
           </h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
             {activeCount} demande{activeCount !== 1 ? 's' : ''} en cours
           </p>
         </div>
         <button type="button"
           onClick={() => setModal({})}
           className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg"
-          style={{ background: 'var(--color-accent)', color: 'white' }}
+          style={{ background: COLORS.ACCENT, color: 'white' }}
         >
           <Plus size={15} /> Nouvelle demande
         </button>
@@ -420,7 +422,7 @@ export default function DemandesPage() {
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="size-6 rounded-full border-2 animate-spin"
-              style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+              style={{ borderColor: COLORS.BORDER, borderTopColor: COLORS.ACCENT }} />
           </div>
         ) : (
           <div className="flex gap-4 h-full min-h-0" style={{ minWidth: 'max-content' }}>
@@ -430,15 +432,15 @@ export default function DemandesPage() {
                 <div
                   className="flex items-center justify-between px-3 py-2.5 rounded-t-xl"
                   style={{
-                    background: 'var(--color-bg-secondary)',
+                    background: COLORS.BG_SECONDARY,
                     borderTop: '1px solid var(--color-border-subtle)',
                     borderLeft: '1px solid var(--color-border-subtle)',
                     borderRight: '1px solid var(--color-border-subtle)',
                   }}
                 >
-                  <span className="text-xs font-semibold" style={{ color: 'var(--color-text-primary)' }}>{col.label}</span>
+                  <span className="text-xs font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>{col.label}</span>
                   <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                    style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                    style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
                     {col.items.length}
                   </span>
                 </div>
@@ -449,7 +451,7 @@ export default function DemandesPage() {
                     borderLeft: '1px solid var(--color-border-subtle)',
                     borderRight: '1px solid var(--color-border-subtle)',
                     borderBottom: '1px solid var(--color-border-subtle)',
-                    background: 'var(--color-bg-primary)',
+                    background: COLORS.BG_PRIMARY,
                     minHeight: 120,
                   }}
                 >

@@ -1,5 +1,7 @@
 import { collection, query, where, getDocs, limit } from 'firebase/firestore'
 import { db, auth } from '@/lib/firebase'
+import { COLLECTIONS } from '@/lib/constants'
+
 
 interface PushPayload {
   recipientUid: string
@@ -68,7 +70,7 @@ export async function sendPushToTechnician(
     if (!initials || initials === '—') return false
 
     // 1. Chercher le technicien par ses initiales dans Firestore
-    const usersRef = collection(db, 'users')
+    const usersRef = collection(db, COLLECTIONS.USERS)
     const q = query(usersRef, where('initiales', '==', initials), limit(1))
     const querySnap = await getDocs(q)
 

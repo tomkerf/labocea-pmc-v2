@@ -6,6 +6,8 @@ import { PlanningSection, Bilan24hSection } from '@/components/aide/PlanningSect
 import { MissionClientSection, VisitePreliminaireSection } from '@/components/aide/MissionsSections'
 import { MaterielSection, MetrologieSection } from '@/components/aide/MaterielSections'
 import { DashboardSection, SignalerProblemeSection } from '@/components/aide/DashboardSections'
+import { COLORS } from '@/lib/constants'
+
 
 type RoleFilter = UserRole | 'tous'
 
@@ -37,17 +39,17 @@ export default function AidePage() {
 
       {/* En-tête */}
       <div>
-        <h1 className="text-xl font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+        <h1 className="text-xl font-semibold mb-1" style={{ color: COLORS.TEXT_PRIMARY }}>
           Mode d'emploi
         </h1>
-        <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-sm leading-relaxed" style={{ color: COLORS.TEXT_SECONDARY }}>
           Guide d'utilisation de Labocea PMC. Filtre par profil pour n'afficher que ce qui te concerne.
         </p>
       </div>
 
       {/* Sélecteur de profil */}
       <div className="rounded-xl p-4"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         <p className="text-xs font-semibold uppercase tracking-wider mb-3"
           style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
           Mon profil
@@ -62,9 +64,9 @@ export default function AidePage() {
                 onClick={() => setFilter(value)}
                 className="flex flex-col items-start px-3 py-2 rounded-lg text-left transition-all"
                 style={{
-                  background: active ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
-                  border: `1px solid ${active ? 'transparent' : 'var(--color-border)'}`,
-                  color: active ? 'white' : 'var(--color-text-primary)',
+                  background: active ? COLORS.ACCENT : COLORS.BG_TERTIARY,
+                  border: `1px solid ${active ? 'transparent' : COLORS.BORDER}`,
+                  color: active ? 'white' : COLORS.TEXT_PRIMARY,
                   minWidth: 120,
                 }}
               >
@@ -80,7 +82,7 @@ export default function AidePage() {
           <p className="text-xs mt-3" style={{ color: 'var(--color-text-tertiary)' }}>
             Ton profil réel est <strong>{defaultFilter}</strong> —{' '}
             <button type="button" onClick={() => setFilter(defaultFilter)}
-              className="underline" style={{ color: 'var(--color-accent)' }}>
+              className="underline" style={{ color: COLORS.ACCENT }}>
               revenir à mon profil
             </button>
           </p>

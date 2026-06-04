@@ -1,5 +1,7 @@
 import MiniCalendarPanel from './MiniCalendarPanel'
 import { type ViewMode } from '@/lib/planningUtils'
+import { COLORS } from '@/lib/constants'
+
 
 interface PlanningMiniCalendarProps {
   showMiniCal: boolean
@@ -36,7 +38,7 @@ export default function PlanningMiniCalendar({
       <div
         className="hidden md:flex flex-col absolute z-30 top-0 left-0 bottom-0 w-[220px]"
         style={{
-          background: 'var(--color-bg-secondary)',
+          background: COLORS.BG_SECONDARY,
           boxShadow: showMiniCal ? 'var(--shadow-modal)' : 'none',
           borderRight: '1px solid var(--color-border-subtle)',
           transform: showMiniCal ? 'translateX(0)' : 'translateX(-100%)',

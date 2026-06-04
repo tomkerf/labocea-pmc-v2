@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { getMessagingInstance, db } from '@/lib/firebase'
 import { doc, updateDoc, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
+import { COLLECTIONS } from '@/lib/constants'
+
 
 export default function usePushNotifications() {
   const appUser = useAuthStore(selectAppUser)
@@ -41,7 +43,7 @@ export default function usePushNotifications() {
 
       if (currentToken) {
         // Lire le document utilisateur pour voir si le token est déjà enregistré
-        const userRef = doc(db, 'users', appUser.uid)
+        const userRef = doc(db, COLLECTIONS.USERS, appUser.uid)
         const userSnap = await getDoc(userRef)
         if (userSnap.exists()) {
           const userData = userSnap.data()
@@ -86,7 +88,7 @@ export default function usePushNotifications() {
       }
 
       // 4. Synchroniser le token dans le profil Firestore du technicien
-      const userRef = doc(db, 'users', appUser.uid)
+      const userRef = doc(db, COLLECTIONS.USERS, appUser.uid)
       await updateDoc(userRef, {
         pushTokens: arrayUnion(token)
       })
@@ -120,7 +122,7 @@ export default function usePushNotifications() {
         await deleteToken(messaging).catch(() => null)
 
         // 2. Retirer le token du profil Firestore
-        const userRef = doc(db, 'users', appUser.uid)
+        const userRef = doc(db, COLLECTIONS.USERS, appUser.uid)
         await updateDoc(userRef, {
           pushTokens: arrayRemove(token)
         })

@@ -1,5 +1,7 @@
 import { useUsersStore } from '@/stores/usersStore'
 import type { Equipement, CategorieType, EtatType, LocalisationType, SiteEquipement, MateriauFlacon } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 const CATS_AVEC_TECHNICIEN = new Set([
   'reglet', 'thermometre', 'enregistreur', 'eprouvette',
@@ -43,7 +45,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
         {title}
       </h2>
       <div className="rounded-xl overflow-hidden"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         {children}
       </div>
     </div>
@@ -54,7 +56,7 @@ function Field({ label, children, last }: { label: string; children: React.React
   return (
     <div className="flex items-center gap-4 px-5 py-3"
       style={{ borderBottom: last ? 'none' : '1px solid var(--color-border-subtle)' }}>
-      <label className="text-sm shrink-0" style={{ color: 'var(--color-text-secondary)', minWidth: '180px' }}>
+      <label className="text-sm shrink-0" style={{ color: COLORS.TEXT_SECONDARY, minWidth: '180px' }}>
         {label}
       </label>
       <div className="flex-1">{children}</div>
@@ -172,7 +174,7 @@ export function EquipementForm({ equipement, update }: {
             placeholder="Remarques, historique, informations complémentaires…"
             aria-label="Notes sur l'équipement"
             className="w-full text-sm resize-none bg-transparent outline-none"
-            style={{ color: 'var(--color-text-primary)' }}
+            style={{ color: COLORS.TEXT_PRIMARY }}
           />
         </div>
       </Section>

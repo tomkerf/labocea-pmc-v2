@@ -1,10 +1,12 @@
 import { Wrench, FlaskConical, Filter } from 'lucide-react'
 import { Section, Step, Divider, Tip } from './AideComponents'
+import { COLORS } from '@/lib/constants'
+
 
 export function MaterielSection() {
   return (
     <Section icon={Wrench} title="Matériel — parc équipements">
-      <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+      <p className="text-sm mb-4" style={{ color: COLORS.TEXT_SECONDARY }}>
         La page <strong>Matériel</strong> liste tous les équipements terrain (multiparamètres, turbidimètres, préleveurs automatiques, débitmètres…).
       </p>
 
@@ -49,7 +51,7 @@ export function MaterielSection() {
 export function MetrologieSection() {
   return (
     <Section icon={FlaskConical} title="Métrologie et Maintenances">
-      <p className="text-sm mb-5" style={{ color: 'var(--color-text-secondary)' }}>
+      <p className="text-sm mb-5" style={{ color: COLORS.TEXT_SECONDARY }}>
         Deux modules distincts pour le suivi des instruments et des interventions techniques.
       </p>
 

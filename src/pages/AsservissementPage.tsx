@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronDown, ClipboardList, Copy, Check } from 'lucide-react'
+import { COLORS } from '@/lib/constants'
+
 
 // ── Constantes ────────────────────────────────────────────────
 
@@ -100,7 +102,7 @@ function Stepper({ label, hint, value, onChange, unit, step, min, max }: {
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+        <span className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
           {label}
         </span>
         {hint && (
@@ -108,14 +110,14 @@ function Stepper({ label, hint, value, onChange, unit, step, min, max }: {
         )}
       </div>
       <div className="flex items-center rounded-xl overflow-hidden"
-        style={{ border: '1px solid var(--color-border)', background: 'var(--color-bg-secondary)' }}>
+        style={{ border: '1px solid var(--color-border)', background: COLORS.BG_SECONDARY }}>
         {/* Bouton − */}
         <button type="button"
           onPointerDown={() => startPress(-1)} onPointerUp={stopPress}
           onPointerLeave={stopPress} onContextMenu={e => e.preventDefault()}
           className="flex items-center justify-center shrink-0 select-none"
-          style={{ width: 52, height: 52, background: 'var(--color-bg-tertiary)',
-            fontSize: 24, fontWeight: 300, color: 'var(--color-text-secondary)',
+          style={{ width: 52, height: 52, background: COLORS.BG_TERTIARY,
+            fontSize: 24, fontWeight: 300, color: COLORS.TEXT_SECONDARY,
             borderRight: '1px solid var(--color-border)' }}>
           −
         </button>
@@ -130,7 +132,7 @@ function Stepper({ label, hint, value, onChange, unit, step, min, max }: {
             className="asserv-inp text-center font-bold"
             style={{
               width: '100%', height: 52, border: 'none', background: 'transparent',
-              fontSize: 22, color: 'var(--color-text-primary)',
+              fontSize: 22, color: COLORS.TEXT_PRIMARY,
               fontVariantNumeric: 'tabular-nums', outline: 'none',
             }}
           />
@@ -144,8 +146,8 @@ function Stepper({ label, hint, value, onChange, unit, step, min, max }: {
           onPointerDown={() => startPress(1)} onPointerUp={stopPress}
           onPointerLeave={stopPress} onContextMenu={e => e.preventDefault()}
           className="flex items-center justify-center shrink-0 select-none"
-          style={{ width: 52, height: 52, background: 'var(--color-bg-tertiary)',
-            fontSize: 24, fontWeight: 300, color: 'var(--color-accent)',
+          style={{ width: 52, height: 52, background: COLORS.BG_TERTIARY,
+            fontSize: 24, fontWeight: 300, color: COLORS.ACCENT,
             borderLeft: '1px solid var(--color-border)' }}>
           +
         </button>
@@ -167,9 +169,9 @@ function Chips({ values, current, unit, onSelect }: {
           onClick={() => onSelect(String(v))}
           className="px-3 py-1.5 rounded-full text-xs font-semibold"
           style={{
-            background: Math.abs(cur - v) < 0.001 ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
-            color:      Math.abs(cur - v) < 0.001 ? 'white'               : 'var(--color-text-secondary)',
-            border: `1px solid ${Math.abs(cur - v) < 0.001 ? 'var(--color-accent)' : 'var(--color-border)'}`,
+            background: Math.abs(cur - v) < 0.001 ? COLORS.ACCENT : COLORS.BG_TERTIARY,
+            color:      Math.abs(cur - v) < 0.001 ? 'white'               : COLORS.TEXT_SECONDARY,
+            border: `1px solid ${Math.abs(cur - v) < 0.001 ? COLORS.ACCENT : COLORS.BORDER}`,
           }}>
           {v} {unit}
         </button>
@@ -194,9 +196,9 @@ export default function AsservissementPage() {
   const res = calcResult(v24h, vFlacon, vUnit, mode, vEntre)
 
   const tauxNum   = res ? parseInt(res.taux) : 0
-  const tauxColor = tauxNum > 95 ? 'var(--color-danger)'
-    : tauxNum > 85 ? 'var(--color-warning)'
-    : 'var(--color-text-primary)'
+  const tauxColor = tauxNum > 95 ? COLORS.DANGER
+    : tauxNum > 85 ? COLORS.WARNING
+    : COLORS.TEXT_PRIMARY
 
   const hasError = res?.warns.some(w => w.type === 'error') ?? false
 
@@ -227,7 +229,7 @@ export default function AsservissementPage() {
   ] : []
 
   return (
-    <div className="min-h-screen pb-32" style={{ background: 'var(--color-bg-primary)' }}>
+    <div className="min-h-screen pb-32" style={{ background: COLORS.BG_PRIMARY }}>
 
       {/* Header sticky */}
       <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3"
@@ -238,12 +240,12 @@ export default function AsservissementPage() {
         }}>
         <button type="button" onClick={() => navigate(-1)}
           className="p-1.5 rounded-lg shrink-0"
-          style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+          style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
           <ChevronLeft size={18} strokeWidth={1.8} />
         </button>
         <div className="flex-1 min-w-0">
           <h1 className="text-base font-semibold leading-tight truncate"
-            style={{ color: 'var(--color-text-primary)' }}>
+            style={{ color: COLORS.TEXT_PRIMARY }}>
             Asservissement 24h
           </h1>
           <p className="text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -253,8 +255,8 @@ export default function AsservissementPage() {
         {/* Badge mode actif */}
         <span className="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-full"
           style={{
-            background: mode === 'auto' ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)',
-            color:      mode === 'auto' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+            background: mode === 'auto' ? 'var(--color-accent-light)' : COLORS.BG_TERTIARY,
+            color:      mode === 'auto' ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
           }}>
           {mode === 'auto' ? 'Auto' : 'Manuel'}
         </span>
@@ -264,13 +266,13 @@ export default function AsservissementPage() {
 
         {/* Mode toggle — gros boutons */}
         <div className="flex gap-1.5 p-1.5 rounded-xl"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
           {(['auto', 'manuel'] as const).map(m => (
             <button type="button" key={m} onClick={() => setMode(m)}
               className="flex-1 py-3 rounded-lg text-sm font-semibold transition-all"
               style={{
-                background: mode === m ? 'var(--color-accent)' : 'transparent',
-                color: mode === m ? 'white' : 'var(--color-text-secondary)',
+                background: mode === m ? COLORS.ACCENT : 'transparent',
+                color: mode === m ? 'white' : COLORS.TEXT_SECONDARY,
               }}>
               {m === 'auto' ? '⚡ Automatique' : '✎ Manuel'}
             </button>
@@ -279,7 +281,7 @@ export default function AsservissementPage() {
 
         {/* Rejet 24h */}
         <div className="rounded-xl p-4"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
           <Stepper
             label="Rejet 24h"
             hint="Volume total rejeté"
@@ -291,7 +293,7 @@ export default function AsservissementPage() {
 
         {/* Flacon + Volume unitaire */}
         <div className="rounded-xl p-4 flex flex-col gap-4"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
           <div>
             <Stepper
               label="Capacité du flacon"
@@ -314,7 +316,7 @@ export default function AsservissementPage() {
         {/* Volume entre prélèvements — uniquement en mode manuel */}
         {mode === 'manuel' && (
           <div className="rounded-xl p-4"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             <Stepper
               label="Volume écoulé entre prélèvements"
               hint="Valeur à programmer"
@@ -327,15 +329,15 @@ export default function AsservissementPage() {
         {/* Résultats détaillés (stats + avertissements) */}
         {res && (
           <div className="rounded-xl overflow-hidden"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             {/* Stats */}
             {stats.map((s, i) => (
               <div key={s.label}
                 className="flex items-center justify-between px-4 py-3"
                 style={{ borderBottom: i < stats.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{s.label}</span>
+                <span className="text-sm" style={{ color: COLORS.TEXT_SECONDARY }}>{s.label}</span>
                 <span className="text-sm font-semibold tabular-nums"
-                  style={{ color: 'danger' in s && s.danger ? tauxColor : 'var(--color-text-primary)' }}>
+                  style={{ color: 'danger' in s && s.danger ? tauxColor : COLORS.TEXT_PRIMARY }}>
                   {s.val}
                   {s.unit && <span className="text-xs font-normal ml-0.5" style={{ color: 'var(--color-text-tertiary)' }}>{s.unit}</span>}
                 </span>
@@ -347,13 +349,13 @@ export default function AsservissementPage() {
               <div className="px-4 py-3 flex flex-col gap-1.5"
                 style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
                 {res.warns.map((w) => {
-                  const bg    = w.type === 'ok' ? 'var(--color-success-light)' : w.type === 'error' ? 'var(--color-danger-light)' : w.type === 'warn' ? 'var(--color-warning-light)' : 'var(--color-bg-tertiary)'
-                  const color = w.type === 'ok' ? 'var(--color-success)'       : w.type === 'error' ? 'var(--color-danger)'       : w.type === 'warn' ? 'var(--color-warning)'       : 'var(--color-text-secondary)'
+                  const bg    = w.type === 'ok' ? 'var(--color-success-light)' : w.type === 'error' ? 'var(--color-danger-light)' : w.type === 'warn' ? 'var(--color-warning-light)' : COLORS.BG_TERTIARY
+                  const color = w.type === 'ok' ? COLORS.SUCCESS       : w.type === 'error' ? COLORS.DANGER       : w.type === 'warn' ? COLORS.WARNING       : COLORS.TEXT_SECONDARY
                   const dot   = w.type === 'ok' ? '✓' : w.type === 'error' ? '✕' : '•'
                   return (
                     <div key={w.txt} className="flex items-start gap-2 px-3 py-2 rounded-lg" style={{ background: bg }}>
                       <span className="text-xs font-bold shrink-0 mt-px" style={{ color }}>{dot}</span>
-                      <span className="text-xs leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>{w.txt}</span>
+                      <span className="text-xs leading-relaxed" style={{ color: COLORS.TEXT_PRIMARY }}>{w.txt}</span>
                     </div>
                   )
                 })}
@@ -364,13 +366,13 @@ export default function AsservissementPage() {
 
         {/* Réglementation — accordéon */}
         <div className="rounded-xl overflow-hidden mb-2"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
           <button type="button"
             onClick={() => setRegleOpen(v => !v)}
             className="w-full flex items-center gap-3 px-4 py-3.5 text-left">
             <ClipboardList size={15} strokeWidth={1.8} className="shrink-0"
               style={{ color: 'var(--color-text-tertiary)' }} />
-            <span className="text-sm font-medium flex-1" style={{ color: 'var(--color-text-primary)' }}>
+            <span className="text-sm font-medium flex-1" style={{ color: COLORS.TEXT_PRIMARY }}>
               Réglementation & bonnes pratiques
             </span>
             <ChevronDown size={14} strokeWidth={2}
@@ -381,7 +383,7 @@ export default function AsservissementPage() {
               <div className="flex flex-col pt-1">
                 {REGLE.map((t, i) => (
                   <div key={t.slice(0, 30)} className="flex gap-3 py-2.5 text-xs leading-relaxed"
-                    style={{ borderBottom: i < REGLE.length - 1 ? '1px solid var(--color-border-subtle)' : 'none', color: 'var(--color-text-secondary)' }}>
+                    style={{ borderBottom: i < REGLE.length - 1 ? '1px solid var(--color-border-subtle)' : 'none', color: COLORS.TEXT_SECONDARY }}>
                     <span className="text-xs font-semibold tabular-nums shrink-0 mt-px"
                       style={{ color: 'var(--color-text-tertiary)' }}>
                       {String(i + 1).padStart(2, '0')}
@@ -418,10 +420,10 @@ export default function AsservissementPage() {
               </p>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-4xl font-bold tabular-nums"
-                  style={{ color: 'var(--color-accent)', letterSpacing: '-0.02em' }}>
+                  style={{ color: COLORS.ACCENT, letterSpacing: '-0.02em' }}>
                   {res.vEP}
                 </span>
-                <span className="text-lg font-medium" style={{ color: 'var(--color-text-secondary)' }}>m³</span>
+                <span className="text-lg font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>m³</span>
                 <span className="text-xs ml-1" style={{ color: 'var(--color-text-tertiary)' }}>
                   · {res.nbP} prélèv. · {res.freq}/h
                 </span>
@@ -431,7 +433,7 @@ export default function AsservissementPage() {
               onClick={handleCopy}
               className="flex items-center gap-1.5 px-4 py-3 rounded-xl font-semibold text-sm shrink-0"
               style={{
-                background: copied ? 'var(--color-success)' : 'var(--color-accent)',
+                background: copied ? COLORS.SUCCESS : COLORS.ACCENT,
                 color: 'white',
                 minWidth: 88,
                 justifyContent: 'center',
@@ -445,7 +447,7 @@ export default function AsservissementPage() {
         ) : (
           <div className="flex items-center justify-center py-2">
             {hasError ? (
-              <p className="text-sm font-medium" style={{ color: 'var(--color-danger)' }}>
+              <p className="text-sm font-medium" style={{ color: COLORS.DANGER }}>
                 ✕ Configuration invalide — vérifiez les paramètres
               </p>
             ) : (

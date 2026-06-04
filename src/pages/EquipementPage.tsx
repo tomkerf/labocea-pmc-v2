@@ -15,6 +15,8 @@ import CircleProgress from '@/components/materiel/CircleProgress'
 import { EquipementForm } from '@/components/equipement/EquipementForm'
 import { FicheDeVie } from '@/components/equipement/FicheDeVie'
 import type { Equipement } from '@/types'
+import { COLLECTIONS, COLORS } from '@/lib/constants'
+
 
 const DEBOUNCE = 800
 
@@ -46,7 +48,7 @@ export default function EquipementPage() {
 
   useEffect(() => {
     if (!equipementId) return
-    const ref = doc(db, 'equipements', equipementId)
+    const ref = doc(db, COLLECTIONS.EQUIPEMENTS, equipementId)
     const unsub = onSnapshot(ref, (snap) => {
       if (snap.exists()) setEquipement({ id: snap.id, ...snap.data() } as Equipement)
       else setEquipement(null)
@@ -74,7 +76,7 @@ export default function EquipementPage() {
   async function handleDelete() {
     if (!equipementId) return
     if (saveTimer.current) clearTimeout(saveTimer.current)
-    await deleteDoc(doc(db, 'equipements', equipementId))
+    await deleteDoc(doc(db, COLLECTIONS.EQUIPEMENTS, equipementId))
     navigate('/materiel')
   }
 
@@ -83,11 +85,11 @@ export default function EquipementPage() {
   if (loading) return (
     <div className="flex justify-center py-20">
       <div className="size-6 rounded-full border-2 animate-spin"
-        style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+        style={{ borderColor: COLORS.BORDER, borderTopColor: COLORS.ACCENT }} />
     </div>
   )
   if (!equipement) return (
-    <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Équipement introuvable.</div>
+    <div className="p-6 text-sm" style={{ color: COLORS.DANGER }}>Équipement introuvable.</div>
   )
 
   const metroPercent = calcMetroPercent(equipement.prochainEtalonnage)
@@ -101,7 +103,7 @@ export default function EquipementPage() {
   return (
     <div className="p-6 max-w-2xl">
       <button type="button" onClick={() => navigate('/materiel')}
-        className="flex items-center gap-1 text-sm mb-6" style={{ color: 'var(--color-accent)' }}>
+        className="flex items-center gap-1 text-sm mb-6" style={{ color: COLORS.ACCENT }}>
         <ChevronLeft size={16} /> Matériel
       </button>
 
@@ -111,15 +113,15 @@ export default function EquipementPage() {
             <CircleProgress percent={metroPercent} size={64} strokeWidth={4} label="métrologie" />
           ) : (
             <div className="size-16 rounded-full flex items-center justify-center"
-              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)' }}>
+              style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)' }}>
               <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>—</span>
             </div>
           )}
           <div>
-            <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
               {equipement.nom || 'Nouvel équipement'}
             </h1>
-            <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+            <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
               {[equipement.marque, equipement.modele].filter(Boolean).join(' ') || '—'}
             </p>
           </div>
@@ -130,18 +132,18 @@ export default function EquipementPage() {
             <div className="flex items-center gap-1.5">
               <button type="button" onClick={() => { setConfirmDelete(false); handleDelete() }}
                 className="text-sm px-3 py-1.5 rounded-lg font-medium"
-                style={{ background: 'var(--color-danger)', color: 'white' }}>
+                style={{ background: COLORS.DANGER, color: 'white' }}>
                 Supprimer
               </button>
               <button type="button" onClick={() => setConfirmDelete(false)}
                 className="text-sm px-2 py-1.5 rounded-lg"
-                style={{ color: 'var(--color-text-secondary)' }}>
+                style={{ color: COLORS.TEXT_SECONDARY }}>
                 Annuler
               </button>
             </div>
           ) : (
             <button type="button" onClick={() => setConfirmDelete(true)} className="p-2 rounded-lg transition-colors"
-              style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }} title="Supprimer">
+              style={{ color: COLORS.DANGER, background: 'var(--color-danger-light)' }} title="Supprimer">
               <Trash2 size={16} />
             </button>
           )}
@@ -151,8 +153,8 @@ export default function EquipementPage() {
       {isMetroOverdue && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-6"
           style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
-          <AlertTriangle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-          <p className="text-sm font-medium" style={{ color: 'var(--color-danger)' }}>
+          <AlertTriangle size={16} style={{ color: COLORS.DANGER, flexShrink: 0 }} />
+          <p className="text-sm font-medium" style={{ color: COLORS.DANGER }}>
             Étalonnage en retard de {metroOverdueDays} jour{metroOverdueDays > 1 ? 's' : ''}
             {' '}— prévu le {new Date(equipement.prochainEtalonnage).toLocaleDateString('fr-FR')}
           </p>

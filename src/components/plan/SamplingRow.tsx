@@ -1,15 +1,17 @@
 import { X, Trash2, Clock, ChevronRight } from 'lucide-react'
 import { SamplingForm } from './SamplingForm'
 import type { Sampling, SamplingStatus, AppUser } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
 
 const STATUS_CONFIG: Record<SamplingStatus, { label: string; bg: string; color: string }> = {
-  planned:       { label: 'Planifié',     bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)' },
-  done:          { label: 'Réalisé',      bg: 'var(--color-success-light)', color: 'var(--color-success)' },
-  overdue:       { label: 'En retard',    bg: 'var(--color-danger-light)',  color: 'var(--color-danger)' },
-  non_effectue:  { label: 'Non effectué', bg: 'var(--color-warning-light)', color: 'var(--color-warning)' },
+  planned:       { label: 'Planifié',     bg: COLORS.BG_TERTIARY,   color: COLORS.TEXT_SECONDARY },
+  done:          { label: 'Réalisé',      bg: 'var(--color-success-light)', color: COLORS.SUCCESS },
+  overdue:       { label: 'En retard',    bg: 'var(--color-danger-light)',  color: COLORS.DANGER },
+  non_effectue:  { label: 'Non effectué', bg: 'var(--color-warning-light)', color: COLORS.WARNING },
 }
 
 interface SamplingRowProps {
@@ -63,12 +65,12 @@ export function SamplingRow({
           <span className="text-sm font-medium w-6 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
             {s.num}
           </span>
-          <span className="text-sm font-medium flex-1" style={{ color: 'var(--color-text-primary)' }}>
+          <span className="text-sm font-medium flex-1" style={{ color: COLORS.TEXT_PRIMARY }}>
             {dateLabel}
           </span>
           {s.plannedTime && (
             <span className="flex items-center gap-1 text-xs"
-              style={{ color: 'var(--color-accent)' }}>
+              style={{ color: COLORS.ACCENT }}>
               <Clock size={11} />
               {s.plannedTime}
             </span>
@@ -91,14 +93,14 @@ export function SamplingRow({
               <button type="button"
                 onClick={onDeleteConfirm}
                 className="text-xs px-2 py-1 rounded-md font-medium"
-                style={{ background: 'var(--color-danger)', color: 'white' }}
+                style={{ background: COLORS.DANGER, color: 'white' }}
               >
                 Supprimer
               </button>
               <button type="button"
                 onClick={onDeleteCancel}
                 className="text-xs px-1.5 py-1 rounded-md"
-                style={{ color: 'var(--color-text-secondary)' }}
+                style={{ color: COLORS.TEXT_SECONDARY }}
               >
                 <X size={12} />
               </button>
@@ -120,7 +122,7 @@ export function SamplingRow({
         <div
           className="px-5 py-4"
           style={{
-            background: 'var(--color-bg-tertiary)',
+            background: COLORS.BG_TERTIARY,
             borderBottom: i < total - 1 ? '1px solid var(--color-border-subtle)' : 'none',
           }}
         >

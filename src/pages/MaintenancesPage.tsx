@@ -8,18 +8,20 @@ import { useAuthStore, selectUid, selectPrenom, selectInitiales } from '@/stores
 import { SkeletonList } from '@/components/ui/Skeleton'
 import type { Maintenance } from '@/types'
 import type { LucideIcon } from 'lucide-react'
+import { COLORS } from '@/lib/constants'
+
 
 const TYPE_CONFIG: Record<string, { label: string; icon: LucideIcon; color: string; bg: string }> = {
-  preventive: { label: 'Préventive',  icon: Wrench,         color: 'var(--color-accent)',   bg: 'var(--color-accent-light)'   },
-  corrective: { label: 'Corrective',  icon: Zap,            color: 'var(--color-warning)',  bg: 'var(--color-warning-light)'  },
-  panne:      { label: 'Panne',       icon: Wrench,         color: 'var(--color-danger)',   bg: 'var(--color-danger-light)'   },
+  preventive: { label: 'Préventive',  icon: Wrench,         color: COLORS.ACCENT,   bg: 'var(--color-accent-light)'   },
+  corrective: { label: 'Corrective',  icon: Zap,            color: COLORS.WARNING,  bg: 'var(--color-warning-light)'  },
+  panne:      { label: 'Panne',       icon: Wrench,         color: COLORS.DANGER,   bg: 'var(--color-danger-light)'   },
 }
 
 const STATUT_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
-  planifiee:  { label: 'Planifiée',  bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)' },
-  en_cours:   { label: 'En cours',   bg: 'var(--color-warning-light)', color: 'var(--color-warning)'        },
-  realisee:   { label: 'Réalisée',   bg: 'var(--color-success-light)', color: 'var(--color-success)'        },
-  abandonnee: { label: 'Abandonnée', bg: 'var(--color-danger-light)',  color: 'var(--color-danger)'         },
+  planifiee:  { label: 'Planifiée',  bg: COLORS.BG_TERTIARY,   color: COLORS.TEXT_SECONDARY },
+  en_cours:   { label: 'En cours',   bg: 'var(--color-warning-light)', color: COLORS.WARNING        },
+  realisee:   { label: 'Réalisée',   bg: 'var(--color-success-light)', color: COLORS.SUCCESS        },
+  abandonnee: { label: 'Abandonnée', bg: 'var(--color-danger-light)',  color: COLORS.DANGER         },
 }
 
 const STATUTS_FILTER = [
@@ -91,8 +93,8 @@ export default function MaintenancesPage() {
       {/* En-tête */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>Maintenances</h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+          <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Maintenances</h1>
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
             {maintenances.length} intervention{maintenances.length !== 1 ? 's' : ''}
           </p>
         </div>
@@ -100,7 +102,7 @@ export default function MaintenancesPage() {
           onClick={handleCreate}
           disabled={creating}
           className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg"
-          style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
+          style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
         >
           <Plus size={16} />
           Nouvelle intervention
@@ -116,8 +118,8 @@ export default function MaintenancesPage() {
               onClick={() => setFilterStatut(f.value)}
               className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
               style={{
-                background: filterStatut === f.value ? 'var(--color-accent-light)' : 'var(--color-bg-secondary)',
-                color: filterStatut === f.value ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                background: filterStatut === f.value ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
+                color: filterStatut === f.value ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
                 border: '1px solid var(--color-border-subtle)',
               }}
             >
@@ -136,7 +138,7 @@ export default function MaintenancesPage() {
                   style={{ background: cfg.bg }}>
                   <Icon size={12} strokeWidth={2} color={cfg.color} />
                 </div>
-                <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{cfg.label}</span>
+                <span className="text-xs" style={{ color: COLORS.TEXT_SECONDARY }}>{cfg.label}</span>
               </div>
             )
           })}
@@ -148,7 +150,7 @@ export default function MaintenancesPage() {
             value={filterAppareil}
             onChange={(e) => setFilterAppareil(e.target.value)}
             className="flex-1 px-3 py-2 rounded-lg text-sm"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
             <option value="">Tous appareils</option>
             {appareils.map((a) => <option key={a} value={a}>{a}</option>)}
@@ -157,7 +159,7 @@ export default function MaintenancesPage() {
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
             className="flex-1 px-3 py-2 rounded-lg text-sm"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
             {TYPES_FILTER.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
@@ -171,11 +173,11 @@ export default function MaintenancesPage() {
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <div className="size-16 rounded-2xl flex items-center justify-center"
             style={{ background: 'var(--color-accent-light)' }}>
-            <Hammer size={28} strokeWidth={1.5} style={{ color: 'var(--color-accent)' }} />
+            <Hammer size={28} strokeWidth={1.5} style={{ color: COLORS.ACCENT }} />
           </div>
           <div className="text-center">
-            <p className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>Aucune intervention</p>
-            <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+            <p className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Aucune intervention</p>
+            <p className="text-sm mt-1" style={{ color: COLORS.TEXT_SECONDARY }}>
               Planifiez votre première intervention de maintenance.
             </p>
           </div>
@@ -183,7 +185,7 @@ export default function MaintenancesPage() {
             onClick={handleCreate}
             disabled={creating}
             className="flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-lg transition-opacity"
-            style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
+            style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
           >
             <Plus size={16} />
             Nouvelle intervention
@@ -211,12 +213,12 @@ export default function MaintenancesPage() {
                 onClick={() => navigate(`/maintenances/${m.id}`)}
                 className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
                 style={{
-                  background: 'var(--color-bg-secondary)',
+                  background: COLORS.BG_SECONDARY,
                   border: '1px solid var(--color-border-subtle)',
                   boxShadow: 'var(--shadow-card)',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-bg-secondary)')}
+                onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
+                onMouseLeave={(e) => (e.currentTarget.style.background = COLORS.BG_SECONDARY)}
               >
                 {/* Icône type */}
                 <div className="size-11 rounded-full flex items-center justify-center shrink-0"
@@ -226,11 +228,11 @@ export default function MaintenancesPage() {
 
                 {/* Infos */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                  <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                     {m.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }}>Équipement non défini</span>}
                   </p>
                   {m.description && (
-                    <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                    <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                       {m.description}
                     </p>
                   )}
@@ -259,11 +261,11 @@ export default function MaintenancesPage() {
               background: 'transparent',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-accent)'
-              e.currentTarget.style.color = 'var(--color-accent)'
+              e.currentTarget.style.borderColor = COLORS.ACCENT
+              e.currentTarget.style.color = COLORS.ACCENT
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-border)'
+              e.currentTarget.style.borderColor = COLORS.BORDER
               e.currentTarget.style.color = 'var(--color-text-tertiary)'
             }}
           >

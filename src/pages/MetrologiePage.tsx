@@ -10,6 +10,8 @@ import { useAuthStore, selectUid, selectPrenom, selectInitiales } from '@/stores
 import { useMetrologieRows, calcStatut } from '@/hooks/useMetrologieRows'
 import CircleProgress from '@/components/materiel/CircleProgress'
 import type { Verification } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 const TYPE_LABELS: Record<string, string> = {
   etalonnage_interne:   'Étalonnage interne',
@@ -18,9 +20,9 @@ const TYPE_LABELS: Record<string, string> = {
 }
 
 const RESULTAT_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
-  conforme:     { label: 'Conforme',     bg: 'var(--color-success-light)', color: 'var(--color-success)' },
-  non_conforme: { label: 'Non conforme', bg: 'var(--color-danger-light)',  color: 'var(--color-danger)'  },
-  a_reprendre:  { label: 'À reprendre',  bg: 'var(--color-warning-light)', color: 'var(--color-warning)' },
+  conforme:     { label: 'Conforme',     bg: 'var(--color-success-light)', color: COLORS.SUCCESS },
+  non_conforme: { label: 'Non conforme', bg: 'var(--color-danger-light)',  color: COLORS.DANGER  },
+  a_reprendre:  { label: 'À reprendre',  bg: 'var(--color-warning-light)', color: COLORS.WARNING },
 }
 
 const FILTERS = [
@@ -40,9 +42,9 @@ function calcMetroPercent(prochainDate: string): number {
 }
 
 function getMetroColor(percent: number): string {
-  if (percent >= 60) return 'var(--color-success)'
-  if (percent >= 30) return 'var(--color-warning)'
-  return 'var(--color-danger)'
+  if (percent >= 60) return COLORS.SUCCESS
+  if (percent >= 30) return COLORS.WARNING
+  return COLORS.DANGER
 }
 
 export default function MerologiePage() {
@@ -78,12 +80,12 @@ export default function MerologiePage() {
       {/* En-tête */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>Métrologie</h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+          <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Métrologie</h1>
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
             {allRows.length} instrument{allRows.length !== 1 ? 's' : ''} suivis
             {lateCount > 0 && (
               <span className="ml-2 text-xs px-2 py-0.5 rounded-full font-medium"
-                style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+                style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
                 {lateCount} en retard
               </span>
             )}
@@ -93,7 +95,7 @@ export default function MerologiePage() {
           onClick={handleCreate}
           disabled={creating}
           className="shrink-0 flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg"
-          style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
+          style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
         >
           <Plus size={16} />
           <span className="hidden sm:inline">Saisir une vérification</span>
@@ -108,8 +110,8 @@ export default function MerologiePage() {
             onClick={() => setFilterStatut(f.value)}
             className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
             style={{
-              background: filterStatut === f.value ? 'var(--color-accent-light)' : 'var(--color-bg-secondary)',
-              color: filterStatut === f.value ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+              background: filterStatut === f.value ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
+              color: filterStatut === f.value ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
               border: '1px solid var(--color-border-subtle)',
             }}
           >
@@ -122,17 +124,17 @@ export default function MerologiePage() {
       {loading ? (
         <div className="flex justify-center py-20">
           <div className="size-6 rounded-full border-2 animate-spin"
-            style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+            style={{ borderColor: COLORS.BORDER, borderTopColor: COLORS.ACCENT }} />
         </div>
       ) : allRows.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <div className="size-16 rounded-2xl flex items-center justify-center"
             style={{ background: 'var(--color-accent-light)' }}>
-            <Ruler size={28} strokeWidth={1.5} style={{ color: 'var(--color-accent)' }} />
+            <Ruler size={28} strokeWidth={1.5} style={{ color: COLORS.ACCENT }} />
           </div>
           <div className="text-center">
-            <p className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>Aucune vérification</p>
-            <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+            <p className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Aucune vérification</p>
+            <p className="text-sm mt-1" style={{ color: COLORS.TEXT_SECONDARY }}>
               Saisissez votre première vérification métrologique.
             </p>
           </div>
@@ -140,7 +142,7 @@ export default function MerologiePage() {
             onClick={handleCreate}
             disabled={creating}
             className="flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-lg transition-opacity"
-            style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
+            style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
           >
             <Plus size={16} />
             Saisir une vérification
@@ -165,12 +167,12 @@ export default function MerologiePage() {
                   onClick={() => navigate(`/metrologie/${v.id}`)}
                   className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
                   style={{
-                    background: 'var(--color-bg-secondary)',
+                    background: COLORS.BG_SECONDARY,
                     border: '1px solid var(--color-border-subtle)',
                     boxShadow: 'var(--shadow-card)',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-bg-secondary)')}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = COLORS.BG_SECONDARY)}
                 >
                   <div className="shrink-0">
                     <CircleProgress
@@ -181,10 +183,10 @@ export default function MerologiePage() {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                    <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                       {v.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }}>Équipement non défini</span>}
                     </p>
-                    <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                    <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                       {TYPE_LABELS[v.type] ?? v.type}
                     </p>
                     <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -221,12 +223,12 @@ export default function MerologiePage() {
                 onClick={() => navigate(`/materiel/${eq.id}`)}
                 className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
                 style={{
-                  background: 'var(--color-bg-secondary)',
+                  background: COLORS.BG_SECONDARY,
                   border: '1px solid var(--color-border-subtle)',
                   boxShadow: 'var(--shadow-card)',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-bg-secondary)')}
+                onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
+                onMouseLeave={(e) => (e.currentTarget.style.background = COLORS.BG_SECONDARY)}
               >
                 <div className="shrink-0">
                   <CircleProgress
@@ -237,10 +239,10 @@ export default function MerologiePage() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                  <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                     {eq.nom || <span style={{ color: 'var(--color-text-tertiary)' }}>Sans nom</span>}
                   </p>
-                  <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                     {[eq.marque, eq.modele].filter(Boolean).join(' ') || '—'}
                   </p>
                   <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -269,11 +271,11 @@ export default function MerologiePage() {
               background: 'transparent',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-accent)'
-              e.currentTarget.style.color = 'var(--color-accent)'
+              e.currentTarget.style.borderColor = COLORS.ACCENT
+              e.currentTarget.style.color = COLORS.ACCENT
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-border)'
+              e.currentTarget.style.borderColor = COLORS.BORDER
               e.currentTarget.style.color = 'var(--color-text-tertiary)'
             }}
           >

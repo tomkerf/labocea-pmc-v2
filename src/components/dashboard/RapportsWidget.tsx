@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { COLORS } from '@/lib/constants'
+
 
 interface RapportItem {
   clientId: string; planId: string; samplingId: string
@@ -37,7 +39,7 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
         </span>
         {rapports.length > 0 && (
           <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-            style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+            style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
             {rapports.length}
           </span>
         )}
@@ -49,12 +51,12 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
       {open && (
         rapports.length === 0 ? (
           <div className="rounded-xl px-5 py-4 text-sm"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)', color: 'var(--color-text-secondary)' }}>
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)', color: COLORS.TEXT_SECONDARY }}>
             ✓ Tous les rapports ont été envoyés.
           </div>
         ) : (
           <div className="rounded-xl overflow-hidden"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             <div style={{ maxHeight: 280, overflowY: 'auto' }}>
               {rapports.map((r, i) => {
                 const fmtDone = new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
@@ -64,9 +66,9 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
                 const joursAvant = (r.rapportDatePrevue && today)
                   ? Math.floor((new Date(r.rapportDatePrevue).getTime() - today.getTime()) / 86400000)
                   : null
-                const dotColor = joursAvant === null ? 'var(--color-neutral)' : joursAvant < 0 ? 'var(--color-danger)' : joursAvant <= 7 ? 'var(--color-warning)' : 'var(--color-success)'
-                const tagBg    = joursAvant === null ? 'var(--color-bg-tertiary)' : joursAvant < 0 ? 'var(--color-danger-light)' : joursAvant <= 7 ? 'var(--color-warning-light)' : 'var(--color-success-light)'
-                const tagColor = joursAvant === null ? 'var(--color-text-secondary)' : joursAvant < 0 ? 'var(--color-danger)' : joursAvant <= 7 ? 'var(--color-warning)' : 'var(--color-success)'
+                const dotColor = joursAvant === null ? 'var(--color-neutral)' : joursAvant < 0 ? COLORS.DANGER : joursAvant <= 7 ? COLORS.WARNING : COLORS.SUCCESS
+                const tagBg    = joursAvant === null ? COLORS.BG_TERTIARY : joursAvant < 0 ? 'var(--color-danger-light)' : joursAvant <= 7 ? 'var(--color-warning-light)' : 'var(--color-success-light)'
+                const tagColor = joursAvant === null ? COLORS.TEXT_SECONDARY : joursAvant < 0 ? COLORS.DANGER : joursAvant <= 7 ? COLORS.WARNING : COLORS.SUCCESS
                 const tagLabel = joursAvant === null ? '—' : joursAvant < 0 ? `${Math.abs(joursAvant)}j de retard` : joursAvant === 0 ? "aujourd'hui" : `dans ${joursAvant}j`
                 return (
                   <div key={r.samplingId}
@@ -74,8 +76,8 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
                     style={{ borderBottom: i < rapports.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
                     <span className="shrink-0 size-2 rounded-full" style={{ background: dotColor }} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{r.clientNom}</p>
-                      <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                      <p className="text-sm font-medium truncate" style={{ color: COLORS.TEXT_PRIMARY }}>{r.clientNom}</p>
+                      <p className="text-xs truncate" style={{ color: COLORS.TEXT_SECONDARY }}>
                         {r.siteNom === r.planNom ? r.siteNom : [r.siteNom, r.planNom].filter(Boolean).join(' · ')} · intervention {fmtDone} · envoi prévu {fmtPrevue}
                       </p>
                     </div>
@@ -86,9 +88,9 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
                     <button type="button"
                       onClick={() => onMarkEnvoye(r.clientId, r.planId, r.samplingId)}
                       className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium"
-                      style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-accent)', (e.currentTarget.style.color = 'white'))}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-accent-light)', (e.currentTarget.style.color = 'var(--color-accent)'))}
+                      style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}
+                      onMouseEnter={e => (e.currentTarget.style.background = COLORS.ACCENT, (e.currentTarget.style.color = 'white'))}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-accent-light)', (e.currentTarget.style.color = COLORS.ACCENT))}
                     >
                       Rédigé ✓
                     </button>
@@ -100,7 +102,7 @@ export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) 
               <button type="button"
                 onClick={() => navigate('/rapports')}
                 className="text-xs font-medium"
-                style={{ color: 'var(--color-accent)' }}
+                style={{ color: COLORS.ACCENT }}
               >
                 Voir tous les rapports →
               </button>

@@ -4,6 +4,8 @@ import { PlanField } from '@/components/plan/SamplingForm'
 import type { Plan, FrequenceType, NatureEauType, MethodeType } from '@/types'
 import { uploadPlanPhoto, deletePlanPhoto } from '@/lib/uploadPhoto'
 import { toast } from '@/stores/toastStore'
+import { COLORS } from '@/lib/constants'
+
 
 const FREQUENCES: FrequenceType[] = ['Mensuel', 'Bimensuel', 'Trimestriel', 'Semestriel', 'Annuel', 'Personnalisé']
 const NATURES: NatureEauType[] = ['Eau usée', 'Rivière', 'Souterraine', 'Eau pluviale', 'Eau saline', 'Boues', 'Autre']
@@ -51,12 +53,12 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
       <h2 className="text-xs font-semibold uppercase mb-2" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
         Configuration
       </h2>
-      <div className="rounded-xl overflow-hidden" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+      <div className="rounded-xl overflow-hidden" style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         <PlanField label="Nom du point">
           <input value={plan.nom} onChange={(e) => onUpdate('nom', e.target.value)} className="field-input"
-            style={!plan.nom.trim() ? { borderColor: 'var(--color-danger)' } : undefined} />
+            style={!plan.nom.trim() ? { borderColor: COLORS.DANGER } : undefined} />
           {!plan.nom.trim() && (
-            <p className="text-xs mt-1" style={{ color: 'var(--color-danger)' }}>Le nom du point est obligatoire.</p>
+            <p className="text-xs mt-1" style={{ color: COLORS.DANGER }}>Le nom du point est obligatoire.</p>
           )}
         </PlanField>
         <PlanField label="Site">
@@ -102,7 +104,7 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
               checked={plan.gpsApprox}
               onChange={(e) => onUpdate('gpsApprox', e.target.checked)}
             />
-            <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+            <span className="text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>
               {plan.gpsApprox ? 'Oui — position approchée' : 'Non — position précise'}
             </span>
           </label>
@@ -125,7 +127,7 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
               checked={!!plan.analysesSousTraitees}
               onChange={(e) => onUpdate('analysesSousTraitees', e.target.checked)}
             />
-            <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+            <span className="text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>
               {plan.analysesSousTraitees
                 ? '⚠️ Analyses sous-traitées — ne pas prélever la veille d\'un jour férié'
                 : 'Analyses en interne (labo Labocea)'}
@@ -141,7 +143,7 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
               className="sr-only peer"
             />
             <div className="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600" />
-            <span className="ml-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            <span className="ml-2 text-sm" style={{ color: COLORS.TEXT_SECONDARY }}>
               {plan.cofrac ? 'Point accrédité COFRAC' : 'Non accrédité'}
             </span>
           </label>
@@ -182,9 +184,9 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
             {/* Upload Button */}
             <label className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all active:scale-95"
               style={{
-                background: 'var(--color-bg-tertiary)',
+                background: COLORS.BG_TERTIARY,
                 border: '1px solid var(--color-border)',
-                color: uploading ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+                color: uploading ? 'var(--color-text-tertiary)' : COLORS.TEXT_PRIMARY,
                 opacity: uploading ? 0.6 : 1,
                 pointerEvents: uploading ? 'none' : 'auto',
                 maxWidth: 'fit-content'

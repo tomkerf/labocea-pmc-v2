@@ -1,5 +1,7 @@
 import { calcPesee } from '@/lib/bilanCalcs'
 import { Card, FieldLabel, NumInput, ResultBox, ResultRow, NormInfo } from './BilanUI'
+import { COLORS } from '@/lib/constants'
+
 
 export function TabPesee({ fields, set }: { fields: Record<string, string>; set: (k: string, v: string) => void }) {
   const f = (k: string) => fields[k] ?? ''
@@ -20,13 +22,13 @@ export function TabPesee({ fields, set }: { fields: Record<string, string>; set:
       {res && (
         <div className="flex flex-col gap-3">
           <ResultBox ok={res.confNb}>
-            <p className="px-4 pt-2.5 text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>1. Nombre de prélèvements</p>
+            <p className="px-4 pt-2.5 text-xs font-semibold" style={{ color: COLORS.TEXT_SECONDARY }}>1. Nombre de prélèvements</p>
             <ResultRow label="Attendus" val={res.nbAtt.toFixed(0)} />
             <ResultRow label="Réalisés" val={res.nbReal.toFixed(0)} />
             <ResultRow label="Écart (≤ 5 %)" val={`${res.ecartNbPct >= 0 ? '+' : ''}${res.ecartNbPct.toFixed(1)} %`} ok={res.confNb} />
           </ResultBox>
           <ResultBox ok={res.confVol}>
-            <p className="px-4 pt-2.5 text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>2. Volume collecté (pesée)</p>
+            <p className="px-4 pt-2.5 text-xs font-semibold" style={{ color: COLORS.TEXT_SECONDARY }}>2. Volume collecté (pesée)</p>
             <ResultRow label="Volume théorique" val={`${res.volTheo.toFixed(2)} L`} />
             <ResultRow label="Volume réel (pesée)" val={`${res.volReel.toFixed(2)} L`} />
             <ResultRow label="Écart (≤ 10 %)" val={`${res.ecartVolPct >= 0 ? '+' : ''}${res.ecartVolPct.toFixed(1)} %`} ok={res.confVol} />

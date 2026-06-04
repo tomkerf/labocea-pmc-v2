@@ -1,3 +1,5 @@
+import { COLORS } from '@/lib/constants'
+
 interface SkeletonProps {
   className?: string
   height?: string
@@ -9,7 +11,7 @@ export function Skeleton({ className = '', height = 'h-4', width = 'w-full', rou
   return (
     <div
       className={`animate-pulse ${height} ${width} ${rounded} ${className}`}
-      style={{ background: 'var(--color-bg-tertiary)' }}
+      style={{ background: COLORS.BG_TERTIARY }}
     />
   )
 }
@@ -17,7 +19,7 @@ export function Skeleton({ className = '', height = 'h-4', width = 'w-full', rou
 export function SkeletonCard() {
   return (
     <div className="rounded-xl p-4 flex flex-col gap-3"
-      style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+      style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
       <div className="flex items-center justify-between">
         <Skeleton height="h-4" width="w-1/3" />
         <Skeleton height="h-5" width="w-16" rounded="rounded-full" />
@@ -46,7 +48,7 @@ export function SkeletonList({ count = 4, variant = 'card' }: { count?: number; 
   return (
     <div className={variant === 'card' ? 'flex flex-col gap-3' : 'rounded-xl overflow-hidden'
       + (variant === 'row' ? ' border' : '')}
-      style={variant === 'row' ? { borderColor: 'var(--color-border-subtle)', background: 'var(--color-bg-secondary)' } : undefined}>
+      style={variant === 'row' ? { borderColor: 'var(--color-border-subtle)', background: COLORS.BG_SECONDARY } : undefined}>
       {Array.from({ length: count }).map((_, i) => (
         variant === 'card'
           ? <SkeletonCard key={i} />

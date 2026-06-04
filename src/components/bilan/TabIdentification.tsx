@@ -1,4 +1,6 @@
 import { Card, SectionTitle, FieldLabel, TextInput, NumInput } from './BilanUI'
+import { COLORS } from '@/lib/constants'
+
 
 export function TabIdentification({ fields, set }: {
   fields: Record<string, string>
@@ -25,7 +27,7 @@ export function TabIdentification({ fields, set }: {
             <FieldLabel>Nature échantillon</FieldLabel>
             <select value={f('nature')} onChange={e => set('nature', e.target.value)}
               className="w-full px-3 py-2 rounded-lg text-sm"
-              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)', outline: 'none' }}>
+              style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY, outline: 'none' }}>
               <option value="">Sélectionner…</option>
               <option>Effluent brut</option>
               <option>Effluent prétraité</option>

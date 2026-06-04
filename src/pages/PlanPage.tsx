@@ -9,6 +9,8 @@ import { PlanConfigSection } from '@/components/plan/PlanConfigSection'
 import { SamplingRow } from '@/components/plan/SamplingRow'
 import { PdfPreviewModal } from '@/components/plan/PdfPreviewModal'
 import { usePlanActions } from '@/hooks/usePlanActions'
+import { COLORS } from '@/lib/constants'
+
 
 const currentYear = new Date().getFullYear()
 
@@ -58,11 +60,11 @@ export default function PlanPage() {
   if (loading) return (
     <div className="flex justify-center py-20">
       <div className="size-6 rounded-full border-2 animate-spin"
-        style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+        style={{ borderColor: COLORS.BORDER, borderTopColor: COLORS.ACCENT }} />
     </div>
   )
   if (!client || !plan) return (
-    <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Point introuvable.</div>
+    <div className="p-6 text-sm" style={{ color: COLORS.DANGER }}>Point introuvable.</div>
   )
 
   const isCustom = plan.frequence === 'Personnalisé'
@@ -70,13 +72,13 @@ export default function PlanPage() {
   return (
     <div className="p-4 sm:p-6 max-w-2xl pb-10">
       <button type="button" onClick={() => navigate(`/missions/${clientId}`)}
-        className="flex items-center gap-1 text-sm mb-6" style={{ color: 'var(--color-accent)' }}>
+        className="flex items-center gap-1 text-sm mb-6" style={{ color: COLORS.ACCENT }}>
         <ChevronLeft size={16} /> {client.nom}
       </button>
 
       {remoteChanged && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg px-4 py-3 text-sm"
-          style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+          style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
           <span className="flex items-center gap-1.5">
             <AlertTriangle size={15} />
             Modifié par <strong>{remoteChanged.byName}</strong> pendant votre édition.
@@ -86,7 +88,7 @@ export default function PlanPage() {
               Recharger
             </button>
             <button type="button" onClick={dismissRemoteChanged}
-              style={{ color: 'var(--color-text-secondary)' }} className="text-xs">
+              style={{ color: COLORS.TEXT_SECONDARY }} className="text-xs">
               Ignorer
             </button>
           </div>
@@ -95,10 +97,10 @@ export default function PlanPage() {
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             {plan.nom || 'Point sans nom'}
           </h1>
-          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm" style={{ color: COLORS.TEXT_SECONDARY }}>
             {plan.siteNom || 'Site non renseigné'}
           </p>
         </div>
@@ -109,14 +111,14 @@ export default function PlanPage() {
 
       <div className="mt-8">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h2 className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Prélèvements {currentYear || ''}
           </h2>
           <div className="flex items-center gap-2">
             <button type="button"
               onClick={() => navigate(`/missions/${clientId}/plan/${planId}/fiche`)}
               className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium cursor-pointer"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
+              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}
             >
               <BookOpen size={14} />
               <span>Fiche du point</span>
@@ -125,7 +127,7 @@ export default function PlanPage() {
               <button type="button"
                 onClick={() => openPdfPreview(false)}
                 className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
-                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
+                style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}
               >
                 <FileText size={14} />
                 <span className="hidden sm:inline">Aperçu PDF</span>
@@ -135,7 +137,7 @@ export default function PlanPage() {
               <button type="button"
                 onClick={() => addCustomSampling()}
                 className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
-                style={{ background: 'var(--color-accent)', color: 'white' }}
+                style={{ background: COLORS.ACCENT, color: 'white' }}
               >
                 <Plus size={14} /> Ajouter une intervention
               </button>
@@ -143,19 +145,19 @@ export default function PlanPage() {
               <div className="flex items-center gap-1.5">
                 <button type="button" onClick={() => { setConfirmGen(false); generateSamplingsForPlan() }}
                   className="text-sm px-3 py-1.5 rounded-lg font-medium"
-                  style={{ background: 'var(--color-danger)', color: 'white' }}>
+                  style={{ background: COLORS.DANGER, color: 'white' }}>
                   Confirmer
                 </button>
                 <button type="button" onClick={() => setConfirmGen(false)}
                   className="text-sm px-2 py-1.5 rounded-lg"
-                  style={{ color: 'var(--color-text-secondary)' }}>
+                  style={{ color: COLORS.TEXT_SECONDARY }}>
                   Annuler
                 </button>
               </div>
             ) : (
               <button type="button" onClick={() => setConfirmGen(true)}
                 className="text-sm px-3 py-1.5 rounded-lg font-medium"
-                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+                style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}>
                 Générer
               </button>
             )}
@@ -170,7 +172,7 @@ export default function PlanPage() {
           </p>
         ) : (
           <div className="rounded-xl overflow-hidden"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             {plan.samplings.map((s, i) => (
               <SamplingRow
                 key={s.id}

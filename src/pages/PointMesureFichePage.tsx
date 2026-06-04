@@ -3,11 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, MapPin, Camera, Navigation, AlertTriangle } from 'lucide-react'
 import { useClientData } from '@/hooks/useClientData'
 import { useVisites } from '@/hooks/useVisites'
+import { COLORS } from '@/lib/constants'
+
 
 const FAISABILITE_CONFIG = {
-  ok:         { label: 'Faisable (OK)',   bg: 'var(--color-success-light)', color: 'var(--color-success)' },
-  difficile:  { label: 'Difficile',       bg: 'var(--color-warning-light)', color: 'var(--color-warning)' },
-  impossible: { label: 'Impossible',      bg: 'var(--color-danger-light)',  color: 'var(--color-danger)' },
+  ok:         { label: 'Faisable (OK)',   bg: 'var(--color-success-light)', color: COLORS.SUCCESS },
+  difficile:  { label: 'Difficile',       bg: 'var(--color-warning-light)', color: COLORS.WARNING },
+  impossible: { label: 'Impossible',      bg: 'var(--color-danger-light)',  color: COLORS.DANGER },
 }
 
 export default function PointMesureFichePage() {
@@ -40,13 +42,13 @@ export default function PointMesureFichePage() {
     return (
       <div className="flex justify-center py-20">
         <div className="size-6 rounded-full border-2 animate-spin"
-          style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+          style={{ borderColor: COLORS.BORDER, borderTopColor: COLORS.ACCENT }} />
       </div>
     )
   }
 
   if (!client || !plan) {
-    return <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Point de prélèvement introuvable.</div>
+    return <div className="p-6 text-sm" style={{ color: COLORS.DANGER }}>Point de prélèvement introuvable.</div>
   }
 
   // 1. Mappage des inspections du point dans les visites préliminaires
@@ -98,10 +100,10 @@ export default function PointMesureFichePage() {
         <button type="button"
           onClick={() => navigate(-1)}
           className="flex items-center gap-1 text-sm font-medium"
-          style={{ color: 'var(--color-accent)' }}>
+          style={{ color: COLORS.ACCENT }}>
           <ChevronLeft size={18} /> Retour
         </button>
-        <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+        <span className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
           Mémoire du point
         </span>
         <div className="w-16" /> {/* Spacer pour équilibrer */}
@@ -109,7 +111,7 @@ export default function PointMesureFichePage() {
 
       {/* Carte GPS */}
       <div className="mx-4 mb-4 rounded-2xl overflow-hidden relative"
-        style={{ height: 160, background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border-subtle)' }}>
+        style={{ height: 160, background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border-subtle)' }}>
         {hasGps ? (
           <iframe
             title="map"
@@ -128,7 +130,7 @@ export default function PointMesureFichePage() {
         )}
         <a href={mapsUrl} target="_blank" rel="noreferrer"
           className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-          style={{ background: 'white', color: 'var(--color-accent)', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+          style={{ background: 'white', color: COLORS.ACCENT, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
           <Navigation size={12} />
           Ouvrir Maps
         </a>
@@ -136,16 +138,16 @@ export default function PointMesureFichePage() {
 
       {/* Infos Générales */}
       <div className="mx-4 mb-6 rounded-2xl px-5 py-4"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         <div className="flex items-center gap-2 mb-3">
           {plan.cofrac && (
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+              style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
               COFRAC
             </span>
           )}
           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+            style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
             {plan.nature}
           </span>
           {saving && (
@@ -155,15 +157,15 @@ export default function PointMesureFichePage() {
           )}
         </div>
 
-        <h1 className="text-lg font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+        <h1 className="text-lg font-bold mb-1" style={{ color: COLORS.TEXT_PRIMARY }}>
           {client.nom}
         </h1>
-        <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-sm font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>
           {plan.siteNom}{plan.nom ? ` · ${plan.nom}` : ''}
         </p>
 
         <div className="mt-3 pt-3 flex flex-col gap-2 text-xs"
-          style={{ borderTop: '1px solid var(--color-border-subtle)', color: 'var(--color-text-secondary)' }}>
+          style={{ borderTop: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_SECONDARY }}>
           <div className="flex justify-between">
             <span>Fréquence :</span>
             <span className="font-medium text-right">{plan.frequence}</span>
@@ -187,10 +189,10 @@ export default function PointMesureFichePage() {
             Mémoire Terrain & Contraintes
           </h2>
           {saveStatus === 'saving' && (
-            <span className="text-[11px]" style={{ color: 'var(--color-accent)' }}>Enregistrement…</span>
+            <span className="text-[11px]" style={{ color: COLORS.ACCENT }}>Enregistrement…</span>
           )}
           {saveStatus === 'saved' && (
-            <span className="text-[11px]" style={{ color: 'var(--color-success)' }}>Enregistré ✓</span>
+            <span className="text-[11px]" style={{ color: COLORS.SUCCESS }}>Enregistré ✓</span>
           )}
         </div>
         <div className="rounded-2xl overflow-hidden"
@@ -202,7 +204,7 @@ export default function PointMesureFichePage() {
             rows={4}
             aria-label="Contraintes terrain et mémoire du point"
             className="w-full p-4 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
-            style={{ background: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)' }}
+            style={{ background: COLORS.BG_SECONDARY, color: COLORS.TEXT_PRIMARY }}
             placeholder="Saisissez ici les contraintes d'accès, codes barrières, équipements spécifiques requis..."
           />
         </div>
@@ -216,7 +218,7 @@ export default function PointMesureFichePage() {
             Photos de repérage
           </h2>
           <div className="rounded-2xl p-4 flex flex-col gap-3"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             <div className="flex flex-wrap gap-2">
               {(plan.photos ?? []).map((url, i) => (
                 <div key={url} className="relative rounded-lg overflow-hidden shrink-0 bg-gray-50"
@@ -269,9 +271,9 @@ export default function PointMesureFichePage() {
               const visitDateStr = new Date(pv.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
               return (
                 <div key={pv.visitId} className="rounded-2xl px-4 py-3.5"
-                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                  style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                    <span className="text-xs font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
                       Visite du {visitDateStr}
                     </span>
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
@@ -281,7 +283,7 @@ export default function PointMesureFichePage() {
                   </div>
                   
                   {pv.notes && (
-                    <p className="text-xs mb-2 whitespace-pre-wrap" style={{ color: 'var(--color-text-secondary)' }}>
+                    <p className="text-xs mb-2 whitespace-pre-wrap" style={{ color: COLORS.TEXT_SECONDARY }}>
                       {pv.notes}
                     </p>
                   )}
@@ -310,19 +312,19 @@ export default function PointMesureFichePage() {
         </h2>
         {samplingHistory.length === 0 ? (
           <div className="rounded-2xl px-5 py-4 text-xs text-center"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-secondary)' }}>
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_SECONDARY }}>
             Aucun prélèvement encore réalisé sur ce point.
           </div>
         ) : (
           <div className="rounded-2xl overflow-hidden"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             {samplingHistory.map((s, idx) => {
               const fmtDate = new Date(s.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
               return (
                 <div key={s.id} className="px-5 py-3 text-left"
                   style={{ borderBottom: idx < samplingHistory.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                    <span className="text-xs font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
                       Prélèvement le {fmtDate}
                     </span>
                     <span className="text-[10px] font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -330,7 +332,7 @@ export default function PointMesureFichePage() {
                     </span>
                   </div>
                   {s.comment ? (
-                    <p className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-secondary)' }}>
+                    <p className="text-xs whitespace-pre-wrap" style={{ color: COLORS.TEXT_SECONDARY }}>
                       {s.comment}
                     </p>
                   ) : (

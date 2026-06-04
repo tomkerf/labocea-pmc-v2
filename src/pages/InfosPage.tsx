@@ -8,6 +8,8 @@ import type { Client, TerrainEntry, TerrainType } from '@/types'
 import { Badge, EntryCard } from '@/components/infos/EntryCard'
 import { TYPE_CONFIG } from '@/components/infos/entryConfig'
 import { EntryForm } from '@/components/infos/EntryForm'
+import { COLORS } from '@/lib/constants'
+
 
 const TABS: { key: TerrainType | 'all'; label: string; Icon?: ElementType }[] = [
   { key: 'all',     label: 'Tout'     },
@@ -96,19 +98,19 @@ export default function InfosPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-bg-primary)' }}>
+    <div className="min-h-screen" style={{ background: COLORS.BG_PRIMARY }}>
 
       {/* Header + recherche */}
       <div className="sticky top-0 z-20 px-4 pt-4 pb-3 flex flex-col gap-3"
-        style={{ background: 'var(--color-bg-primary)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+        style={{ background: COLORS.BG_PRIMARY, borderBottom: '1px solid var(--color-border-subtle)' }}>
 
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Infos terrain
           </h1>
           <button type="button" onClick={() => setModal('new')}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium"
-            style={{ background: 'var(--color-accent)', color: 'white' }}>
+            style={{ background: COLORS.ACCENT, color: 'white' }}>
             <Plus size={15} strokeWidth={2} />
             Ajouter
           </button>
@@ -124,9 +126,9 @@ export default function InfosPage() {
             placeholder="Rechercher un client, contact, code…"
             className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: COLORS.BG_SECONDARY,
               border: '1px solid var(--color-border)',
-              color: 'var(--color-text-primary)',
+              color: COLORS.TEXT_PRIMARY,
               outline: 'none',
             }}
           />
@@ -148,16 +150,16 @@ export default function InfosPage() {
               <button type="button" key={tab.key} onClick={() => setFilter(tab.key)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium shrink-0 transition-all"
                 style={{
-                  background: active ? (cfg?.bg ?? 'var(--color-accent-light)') : 'var(--color-bg-secondary)',
-                  color:      active ? (cfg?.color ?? 'var(--color-accent)') : 'var(--color-text-secondary)',
-                  border:     `1px solid ${active ? (cfg?.color ?? 'var(--color-accent)') + '40' : 'var(--color-border-subtle)'}`,
+                  background: active ? (cfg?.bg ?? 'var(--color-accent-light)') : COLORS.BG_SECONDARY,
+                  color:      active ? (cfg?.color ?? COLORS.ACCENT) : COLORS.TEXT_SECONDARY,
+                  border:     `1px solid ${active ? (cfg?.color ?? COLORS.ACCENT) + '40' : 'var(--color-border-subtle)'}`,
                 }}>
                 {tab.Icon && <tab.Icon size={11} strokeWidth={2} />}
                 {tab.label}
                 {n > 0 && (
                   <span className="text-[10px] font-semibold px-1.5 py-px rounded-full"
                     style={{
-                      background: active ? 'rgba(0,0,0,0.12)' : 'var(--color-bg-tertiary)',
+                      background: active ? 'rgba(0,0,0,0.12)' : COLORS.BG_TERTIARY,
                       color: active ? 'inherit' : 'var(--color-text-tertiary)',
                     }}>
                     {n}
@@ -187,8 +189,8 @@ export default function InfosPage() {
           return (
             <div key={g.clientId} className="rounded-[var(--radius-md)] overflow-hidden"
               style={{
-                background: 'var(--color-bg-secondary)',
-                border: `1px solid ${isOpen ? 'var(--color-border)' : 'var(--color-border-subtle)'}`,
+                background: COLORS.BG_SECONDARY,
+                border: `1px solid ${isOpen ? COLORS.BORDER : 'var(--color-border-subtle)'}`,
                 boxShadow: 'var(--shadow-card)',
               }}>
 
@@ -198,7 +200,7 @@ export default function InfosPage() {
                 className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
                 style={{ borderBottom: isOpen ? '1px solid var(--color-border-subtle)' : 'none' }}>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                  <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                     {g.clientNom}
                   </p>
                   <div className="flex items-center gap-1.5 mt-1">
@@ -216,7 +218,7 @@ export default function InfosPage() {
                   </div>
                 </div>
                 <span className="text-xs font-medium px-2 py-0.5 rounded-full shrink-0"
-                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' }}>
+                  style={{ background: COLORS.BG_TERTIARY, color: 'var(--color-text-tertiary)' }}>
                   {g.entries.length}
                 </span>
                 {isOpen

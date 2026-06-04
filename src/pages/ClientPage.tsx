@@ -12,6 +12,8 @@ import { ClientPlans } from '@/components/client/ClientPlans'
 import ClientVisites from '@/components/client/ClientVisites'
 import { PdfPreviewModal } from '@/components/client/PdfPreviewModal'
 import type { Plan } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 export default function ClientPage() {
   const { clientId } = useParams<{ clientId: string }>()
@@ -85,11 +87,11 @@ export default function ClientPage() {
     return (
       <div className="flex justify-center py-20">
         <div className="size-6 rounded-full border-2 animate-spin"
-          style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+          style={{ borderColor: COLORS.BORDER, borderTopColor: COLORS.ACCENT }} />
       </div>
     )
   }
-  if (!client) return <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Client introuvable.</div>
+  if (!client) return <div className="p-6 text-sm" style={{ color: COLORS.DANGER }}>Client introuvable.</div>
 
   return (
     <div className="p-4 sm:p-6 max-w-2xl pb-10">

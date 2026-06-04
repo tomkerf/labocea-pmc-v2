@@ -9,6 +9,8 @@ import UserAvatar from '@/components/ui/UserAvatar'
 import BugReportModal from '@/components/ui/BugReportModal'
 import SyncBadge from '@/components/ui/SyncBadge'
 import { useChangelogState } from '@/components/ui/ChangelogModal'
+import { COLORS } from '@/lib/constants'
+
 
 const navItems: { to: string; icon?: React.ElementType; label: string; end?: boolean; badge?: boolean; isAccount?: boolean }[] = [
   { to: '/',             icon: LayoutDashboard, label: 'Tableau de bord', end: true },
@@ -55,11 +57,11 @@ export default function Sidebar() {
       <div className="px-4 py-4 flex items-center gap-3" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
         <img src="/logo.png" alt="Labocea" className="size-10 object-contain shrink-0" />
         <div className="flex items-baseline gap-1.5">
-          <span className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <span className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Labocea PMC
           </span>
           <span className="text-xs px-1.5 py-0.5 rounded font-medium"
-            style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+            style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
             V2
           </span>
         </div>
@@ -74,7 +76,7 @@ export default function Sidebar() {
             end={end}
             className="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
             style={({ isActive }) => ({
-              color: isActive ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+              color: isActive ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
               fontWeight: isActive ? 500 : 400,
             })}
           >
@@ -101,7 +103,7 @@ export default function Sidebar() {
                 <span className="flex-1 z-10">{label}</span>
                 {badge && overdueCount > 0 && (
                   <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full z-10"
-                    style={{ background: 'var(--color-danger)', color: 'white', minWidth: 18, textAlign: 'center' }}>
+                    style={{ background: COLORS.DANGER, color: 'white', minWidth: 18, textAlign: 'center' }}>
                     {overdueCount}
                   </span>
                 )}
@@ -120,29 +122,27 @@ export default function Sidebar() {
           onClick={() => changelog.show()}
           className="relative flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs transition-colors"
           style={{ color: 'var(--color-text-tertiary)' }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-text-secondary)')}
+          onMouseEnter={e => (e.currentTarget.style.color = COLORS.TEXT_SECONDARY)}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
           <Sparkles size={14} strokeWidth={1.8} />
           Nouveautés
           {changelog.hasNew && (
             <span className="size-2 rounded-full shrink-0 ml-auto"
-              style={{ background: 'var(--color-accent)' }} />
+              style={{ background: COLORS.ACCENT }} />
           )}
         </button>
         <button type="button"
           onClick={() => setBugOpen(true)}
           className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs transition-colors"
           style={{ color: 'var(--color-text-tertiary)' }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-text-secondary)')}
+          onMouseEnter={e => (e.currentTarget.style.color = COLORS.TEXT_SECONDARY)}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
           <Bug size={14} strokeWidth={1.8} />
           Signaler un problème
         </button>
       </div>
 
-      <AnimatePresence>
-        {bugOpen && <BugReportModal onClose={() => setBugOpen(false)} />}
-      </AnimatePresence>
+      <BugReportModal isOpen={bugOpen} onClose={() => setBugOpen(false)} />
     </aside>
   )
 }

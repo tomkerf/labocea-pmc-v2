@@ -19,6 +19,8 @@ import { SaisieRapideModal } from '@/components/tournee/SaisieRapideModal'
 import type { SaisieRapideData } from '@/components/tournee/SaisieRapideModal'
 import { TourneeFinEcran } from '@/components/tournee/TourneeFinEcran'
 import type { TourneeFinItem } from '@/components/tournee/TourneeFinEcran'
+import { COLORS } from '@/lib/constants'
+
 
 type LocalStatus = 'todo' | 'done' | 'non_effectue' | 'reporte'
 
@@ -204,11 +206,11 @@ export default function TourneePage() {
       {/* En-tête */}
       <div className="flex items-center gap-3 mb-6">
         <button type="button" onClick={() => navigate(-1)} className="p-1 -ml-1" aria-label="Retour">
-          <ArrowLeft size={20} style={{ color: 'var(--color-text-secondary)' }} />
+          <ArrowLeft size={20} style={{ color: COLORS.TEXT_SECONDARY }} />
         </button>
         <div className="flex-1">
-          <h1 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>Tournée du jour</h1>
-          <p className="text-xs capitalize" style={{ color: 'var(--color-text-secondary)' }}>
+          <h1 className="text-lg font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Tournée du jour</h1>
+          <p className="text-xs capitalize" style={{ color: COLORS.TEXT_SECONDARY }}>
             {dateLabel} · {tourneeItems.length} site{tourneeItems.length > 1 ? 's' : ''}
           </p>
         </div>
@@ -216,19 +218,19 @@ export default function TourneePage() {
 
       {/* Barre de progression */}
       <div className="mb-6">
-        <div className="flex justify-between text-xs mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+        <div className="flex justify-between text-xs mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>
           <span>{doneCount}/{tourneeItems.length} traité{doneCount > 1 ? 's' : ''}</span>
           <span>{Math.round((doneCount / Math.max(tourneeItems.length, 1)) * 100)}%</span>
         </div>
-        <div className="h-1.5 rounded-full w-full" style={{ background: 'var(--color-border)' }}>
+        <div className="h-1.5 rounded-full w-full" style={{ background: COLORS.BORDER }}>
           <div className="h-1.5 rounded-full transition-all"
-            style={{ width: `${(doneCount / Math.max(tourneeItems.length, 1)) * 100}%`, background: 'var(--color-accent)' }} />
+            style={{ width: `${(doneCount / Math.max(tourneeItems.length, 1)) * 100}%`, background: COLORS.ACCENT }} />
         </div>
       </div>
 
       {/* Liste */}
       {tourneeItems.length === 0 ? (
-        <p className="text-sm text-center py-12" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-sm text-center py-12" style={{ color: COLORS.TEXT_SECONDARY }}>
           Aucun prélèvement prévu aujourd'hui.
         </p>
       ) : (

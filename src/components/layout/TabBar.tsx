@@ -3,6 +3,8 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, ClipboardList, CalendarDays, BookOpen, Wrench, Plus, X, UserPlus, Hammer, Gauge } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { isSamplingOverdue } from '@/lib/overdue'
+import { COLORS } from '@/lib/constants'
+
 
 const navItems: { to: string; icon: React.ElementType; label: string; end?: boolean; badge?: boolean }[] = [
   { to: '/',          icon: LayoutDashboard, label: 'Accueil',  end: true },
@@ -13,9 +15,9 @@ const navItems: { to: string; icon: React.ElementType; label: string; end?: bool
 ]
 
 const actions = [
-  { label: 'Nouveau client',       icon: UserPlus, path: '/missions?new=1',      color: 'var(--color-accent)'   },
-  { label: 'Nouvelle maintenance', icon: Hammer,   path: '/maintenances?new=1',  color: 'var(--color-warning)'  },
-  { label: 'Nouvelle métrologie',  icon: Gauge,    path: '/metrologie?new=1',    color: 'var(--color-success)'  },
+  { label: 'Nouveau client',       icon: UserPlus, path: '/missions?new=1',      color: COLORS.ACCENT   },
+  { label: 'Nouvelle maintenance', icon: Hammer,   path: '/maintenances?new=1',  color: COLORS.WARNING  },
+  { label: 'Nouvelle métrologie',  icon: Gauge,    path: '/metrologie?new=1',    color: COLORS.SUCCESS  },
 ]
 
 export default function TabBar() {
@@ -48,7 +50,7 @@ export default function TabBar() {
         >
           <div
             className="mx-4 mb-24 rounded-2xl overflow-hidden"
-            style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)' }}
+            style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-modal)' }}
             onClick={(e) => e.stopPropagation()}
           >
             <p className="text-xs font-semibold uppercase px-5 pt-4 pb-2"
@@ -66,7 +68,7 @@ export default function TabBar() {
                   style={{ background: `${color}22` }}>
                   <Icon size={18} style={{ color }} />
                 </span>
-                <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                <span className="text-sm font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>
                   {label}
                 </span>
               </button>
@@ -92,14 +94,14 @@ export default function TabBar() {
             end={end}
             className="flex-1 flex flex-col items-center justify-center py-2 gap-1 text-[10px] font-medium transition-colors"
             style={({ isActive }) => ({
-              color: isActive ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
+              color: isActive ? COLORS.ACCENT : 'var(--color-text-tertiary)',
             })}
           >
             <div className="relative">
               <Icon size={22} strokeWidth={1.8} />
               {badge && overdueCount > 0 && (
                 <span className="absolute -top-1 -right-2 text-[9px] font-bold px-1 py-px rounded-full leading-none"
-                  style={{ background: 'var(--color-danger)', color: 'white', minWidth: 14, textAlign: 'center' }}>
+                  style={{ background: COLORS.DANGER, color: 'white', minWidth: 14, textAlign: 'center' }}>
                   {overdueCount}
                 </span>
               )}
@@ -115,7 +117,7 @@ export default function TabBar() {
             aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
             className="size-12 rounded-full flex items-center justify-center -mt-6 transition-transform"
             style={{
-              background: open ? 'var(--color-text-secondary)' : 'var(--color-accent)',
+              background: open ? COLORS.TEXT_SECONDARY : COLORS.ACCENT,
               boxShadow: '0 4px 14px rgba(0,113,227,0.4)',
               transform: open ? 'rotate(45deg)' : 'rotate(0deg)',
             }}
@@ -134,7 +136,7 @@ export default function TabBar() {
             end={end}
             className="flex-1 flex flex-col items-center justify-center py-2 gap-1 text-[10px] font-medium transition-colors"
             style={({ isActive }) => ({
-              color: isActive ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
+              color: isActive ? COLORS.ACCENT : 'var(--color-text-tertiary)',
             })}
           >
             <Icon size={22} strokeWidth={1.8} />

@@ -1,4 +1,6 @@
 import { Calendar, Bell, CloudRain } from 'lucide-react'
+import { COLORS } from '@/lib/constants'
+
 
 export default function CellContextMenu({ x, y, onClose, onPlanifier, onEvenement, onToggleRain, hasRain, holidayName }: {
   x: number; y: number
@@ -34,30 +36,30 @@ export default function CellContextMenu({ x, y, onClose, onPlanifier, onEvenemen
           onClick={() => { if (!holidayName) { onPlanifier(); onClose() } }}
           disabled={!!holidayName}
           className="flex items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium"
-          style={{ color: holidayName ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)', cursor: holidayName ? 'not-allowed' : 'pointer' }}
-          onMouseEnter={e => { if (!holidayName) e.currentTarget.style.background = 'var(--color-bg-tertiary)' }}
+          style={{ color: holidayName ? 'var(--color-text-tertiary)' : COLORS.TEXT_PRIMARY, cursor: holidayName ? 'not-allowed' : 'pointer' }}
+          onMouseEnter={e => { if (!holidayName) e.currentTarget.style.background = COLORS.BG_TERTIARY }}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-          <Calendar size={15} style={{ color: holidayName ? 'var(--color-text-tertiary)' : 'var(--color-accent)' }} />
+          <Calendar size={15} style={{ color: holidayName ? 'var(--color-text-tertiary)' : COLORS.ACCENT }} />
           Planifier un prélèvement
         </button>
         <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
         <button type="button"
           onClick={() => { onEvenement(); onClose() }}
           className="flex items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium"
-          style={{ color: 'var(--color-text-primary)' }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+          style={{ color: COLORS.TEXT_PRIMARY }}
+          onMouseEnter={e => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-          <Bell size={15} style={{ color: 'var(--color-accent)' }} />
+          <Bell size={15} style={{ color: COLORS.ACCENT }} />
           Nouvel événement
         </button>
         <div style={{ height: 1, background: 'var(--color-border-subtle)' }} />
         <button type="button"
           onClick={() => { onToggleRain(); onClose() }}
           className="flex items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium"
-          style={{ color: hasRain ? 'var(--color-danger)' : 'var(--color-text-primary)' }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+          style={{ color: hasRain ? COLORS.DANGER : COLORS.TEXT_PRIMARY }}
+          onMouseEnter={e => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-          <CloudRain size={15} style={{ color: hasRain ? 'var(--color-danger)' : '#0071E3' }} />
+          <CloudRain size={15} style={{ color: hasRain ? COLORS.DANGER : '#0071E3' }} />
           {hasRain ? 'Retirer "Temps de pluie"' : 'Marquer "Temps de pluie"'}
         </button>
       </div>

@@ -10,6 +10,8 @@ import ChangelogModal, { useChangelogState } from '@/components/ui/ChangelogModa
 
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import SyncBadge from '@/components/ui/SyncBadge'
+import { COLORS } from '@/lib/constants'
+
 
 export default function AppLayout() {
   const { pathname } = useLocation()
@@ -40,7 +42,7 @@ export default function AppLayout() {
   }, [pathname])
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--color-bg-primary)' }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: COLORS.BG_PRIMARY }}>
       {/* Sidebar desktop */}
       <Sidebar />
 
@@ -62,7 +64,7 @@ export default function AppLayout() {
           {/* Titre app — mobile */}
           <div className="md:hidden flex items-center gap-2 flex-1">
             <img src="/logo.png" alt="Labocea" className="size-8 object-contain" />
-            <span className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            <span className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
               Labocea PMC
             </span>
           </div>
@@ -72,7 +74,7 @@ export default function AppLayout() {
             <SyncBadge />
             <button type="button"
               className="p-2 rounded-xl"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}
+              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}
               onClick={() => setDrawerOpen(true)}
               aria-label="Menu"
             >

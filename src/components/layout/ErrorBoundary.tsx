@@ -1,4 +1,6 @@
 import { Component, type ReactNode } from 'react'
+import { COLORS } from '@/lib/constants'
+
 
 interface Props { children: ReactNode }
 interface State { error: Error | null }
@@ -26,16 +28,16 @@ export default class ErrorBoundary extends Component<Props, State> {
     if (this.state.error) {
       return (
         <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
-          <p className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+          <p className="text-lg font-semibold mb-2" style={{ color: COLORS.TEXT_PRIMARY }}>
             Une erreur est survenue
           </p>
-          <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm mb-4" style={{ color: COLORS.TEXT_SECONDARY }}>
             {this.state.error.message}
           </p>
           <button type="button"
             onClick={() => { this.setState({ error: null }); history.back() }}
             className="text-sm px-4 py-2 rounded-lg font-medium"
-            style={{ background: 'var(--color-accent)', color: 'white' }}
+            style={{ background: COLORS.ACCENT, color: 'white' }}
           >
             Retour
           </button>

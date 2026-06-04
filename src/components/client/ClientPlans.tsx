@@ -11,6 +11,8 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { isSamplingOverdue } from '@/lib/overdue'
 import type { Plan } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 interface Props {
   plans: Plan[]
@@ -42,7 +44,7 @@ export function ClientPlans({
   return (
     <div className="mt-8">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+        <h2 className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
           Points de prélèvement
         </h2>
         <div className="flex items-center gap-2">
@@ -50,9 +52,9 @@ export function ClientPlans({
             onClick={onToggleLock}
             className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
             style={{
-              background: plansLocked ? 'var(--color-bg-tertiary)' : 'var(--color-accent-light)',
-              color: plansLocked ? 'var(--color-text-tertiary)' : 'var(--color-accent)',
-              border: `1px solid ${plansLocked ? 'var(--color-border)' : 'var(--color-accent)'}`,
+              background: plansLocked ? COLORS.BG_TERTIARY : 'var(--color-accent-light)',
+              color: plansLocked ? 'var(--color-text-tertiary)' : COLORS.ACCENT,
+              border: `1px solid ${plansLocked ? COLORS.BORDER : COLORS.ACCENT}`,
             }}
             aria-label={plansLocked ? 'Déverrouiller pour réorganiser' : 'Verrouiller la réorganisation'}
             title={plansLocked ? 'Déverrouiller pour réorganiser' : 'Verrouiller la réorganisation'}>
@@ -62,13 +64,13 @@ export function ClientPlans({
             <>
               <button type="button" onClick={onAddSeparator}
                 className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
-                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
+                style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}
                 title="Ajouter un séparateur de section">
                 <Minus size={14} /> Séparateur
               </button>
               <button type="button" onClick={onAddPlan}
                 className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg"
-                style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
                 <Plus size={14} /> Ajouter
               </button>
             </>
@@ -78,18 +80,18 @@ export function ClientPlans({
 
       {plans.length === 0 ? (
         <div className="rounded-xl flex flex-col items-center gap-3 py-8"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
           <div className="size-10 rounded-xl flex items-center justify-center"
             style={{ background: 'var(--color-accent-light)' }}>
-            <Plus size={20} style={{ color: 'var(--color-accent)' }} />
+            <Plus size={20} style={{ color: COLORS.ACCENT }} />
           </div>
           <div className="text-center">
-            <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>Aucun point de prélèvement</p>
+            <p className="text-sm font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>Aucun point de prélèvement</p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Crée le premier point pour commencer à planifier</p>
           </div>
           <button type="button" onClick={onAddPlan}
             className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg"
-            style={{ background: 'var(--color-accent)', color: 'white' }}>
+            style={{ background: COLORS.ACCENT, color: 'white' }}>
             <Plus size={14} /> Ajouter un point
           </button>
         </div>
@@ -97,19 +99,19 @@ export function ClientPlans({
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onReorder}>
           <SortableContext items={plans.map((p) => p.id)} strategy={verticalListSortingStrategy}>
             <div className="rounded-xl overflow-hidden"
-              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+              style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
               {buildDisplayItems(plans).map((item, displayIdx) => {
                 if (item.kind === 'header') {
                   return (
                     <div key={item.key}
                       className="px-4 py-1.5"
                       style={{
-                        background: 'var(--color-bg-tertiary)',
+                        background: COLORS.BG_TERTIARY,
                         borderTop: displayIdx === 0 ? 'none' : '1px solid var(--color-border-subtle)',
                         borderBottom: '1px solid var(--color-border-subtle)',
                       }}>
                       <span className="text-xs font-semibold uppercase"
-                        style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.05em' }}>
+                        style={{ color: COLORS.TEXT_SECONDARY, letterSpacing: '0.05em' }}>
                         {item.site}
                       </span>
                     </div>
@@ -153,7 +155,7 @@ export function ClientPlans({
                   color: 'var(--color-text-tertiary)',
                   background: 'transparent',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-accent)'; e.currentTarget.style.background = 'var(--color-accent-light)' }}
+                onMouseEnter={e => { e.currentTarget.style.color = COLORS.ACCENT; e.currentTarget.style.background = 'var(--color-accent-light)' }}
                 onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text-tertiary)'; e.currentTarget.style.background = 'transparent' }}
               >
                 <Plus size={14} /> Ajouter un point
@@ -227,7 +229,7 @@ function SortableSeparatorRow({
         </button>
 
         <div className="flex-1 flex items-center gap-3">
-          <div className="flex-1 h-px" style={{ background: 'var(--color-border)' }} />
+          <div className="flex-1 h-px" style={{ background: COLORS.BORDER }} />
           <input
             value={plan.nom}
             onChange={(e) => onLabelChange(e.target.value)}
@@ -243,12 +245,12 @@ function SortableSeparatorRow({
               letterSpacing: '0.03em',
             }}
           />
-          <div className="flex-1 h-px" style={{ background: 'var(--color-border)' }} />
+          <div className="flex-1 h-px" style={{ background: COLORS.BORDER }} />
         </div>
 
         <button type="button" onClick={onDelete} aria-label="Supprimer le séparateur" className="shrink-0 p-1 rounded"
-          style={{ color: isConfirmingDelete ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
+          style={{ color: isConfirmingDelete ? COLORS.DANGER : 'var(--color-text-tertiary)' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.DANGER)}
           onMouseLeave={(e) => { if (!isConfirmingDelete) e.currentTarget.style.color = 'var(--color-text-tertiary)' }}>
           <Trash2 size={14} />
         </button>
@@ -257,17 +259,17 @@ function SortableSeparatorRow({
       {isConfirmingDelete && (
         <div className="flex items-center gap-2 mx-3 mb-2 px-3 py-2 rounded-lg"
           style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
-          <AlertTriangle size={13} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-          <span className="text-xs font-medium flex-1" style={{ color: 'var(--color-danger)' }}>
+          <AlertTriangle size={13} style={{ color: COLORS.DANGER, flexShrink: 0 }} />
+          <span className="text-xs font-medium flex-1" style={{ color: COLORS.DANGER }}>
             Supprimer ce séparateur ?
           </span>
           <button type="button" onClick={onConfirmDelete}
             className="text-xs font-semibold px-2.5 py-1 rounded"
-            style={{ background: 'var(--color-danger)', color: 'white' }}>
+            style={{ background: COLORS.DANGER, color: 'white' }}>
             Supprimer
           </button>
           <button type="button" onClick={onCancelDelete}
-            className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+            className="text-xs font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>
             Annuler
           </button>
         </div>
@@ -326,24 +328,24 @@ function SortablePlanRow({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+            <p className="text-sm font-medium truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
               {plan.nom || 'Point sans nom'}
             </p>
             {overdueCount > 0 && (
               <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0 flex items-center gap-1"
-                style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+                style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
                 <AlertTriangle size={10} />
                 {overdueCount} en retard
               </span>
             )}
           </div>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-xs mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
             {[plan.siteNom, plan.frequence, plan.nature].filter(Boolean).join(' · ')}
           </p>
         </div>
 
         <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0"
-          style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+          style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
           {(plan.samplings ?? []).length} prélèv.
         </span>
         <button type="button"
@@ -359,12 +361,12 @@ function SortablePlanRow({
         </button>
         <button type="button" onClick={onOpen}
           className="shrink-0 flex items-center gap-1 text-sm font-medium"
-          style={{ color: 'var(--color-accent)' }}>
+          style={{ color: COLORS.ACCENT }}>
           Ouvrir <ChevronRight size={14} />
         </button>
         <button type="button" onClick={onDelete} aria-label="Supprimer ce point" className="shrink-0 p-1 rounded"
-          style={{ color: isConfirmingDelete ? 'var(--color-danger)' : 'var(--color-text-tertiary)' }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
+          style={{ color: isConfirmingDelete ? COLORS.DANGER : 'var(--color-text-tertiary)' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.DANGER)}
           onMouseLeave={(e) => { if (!isConfirmingDelete) e.currentTarget.style.color = 'var(--color-text-tertiary)' }}>
           <Trash2 size={14} />
         </button>
@@ -373,17 +375,17 @@ function SortablePlanRow({
       {isConfirmingDelete && (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg"
           style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
-          <AlertTriangle size={13} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-          <span className="text-xs font-medium flex-1" style={{ color: 'var(--color-danger)' }}>
+          <AlertTriangle size={13} style={{ color: COLORS.DANGER, flexShrink: 0 }} />
+          <span className="text-xs font-medium flex-1" style={{ color: COLORS.DANGER }}>
             Supprimer ce point et tous ses prélèvements ?
           </span>
           <button type="button" onClick={onConfirmDelete}
             className="text-xs font-semibold px-2.5 py-1 rounded"
-            style={{ background: 'var(--color-danger)', color: 'white' }}>
+            style={{ background: COLORS.DANGER, color: 'white' }}>
             Supprimer
           </button>
           <button type="button" onClick={onCancelDelete}
-            className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+            className="text-xs font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>
             Annuler
           </button>
         </div>

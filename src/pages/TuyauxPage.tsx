@@ -7,13 +7,15 @@ import { toast } from '@/stores/toastStore'
 import { matColor, fmtDate, printLabel } from '@/lib/tuyauxUtils'
 import TuyauForm, { Row, Tag } from '@/components/tuyaux/TuyauForm'
 import type { Tuyau } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 const chipStyle = (active: boolean, color?: string) => ({
   display: 'inline-flex', alignItems: 'center', padding: '5px 12px',
   borderRadius: 20, fontSize: 12, fontWeight: active ? 600 : 400,
-  cursor: 'pointer', border: `1.5px solid ${active ? (color ?? 'var(--color-accent)') : 'var(--color-border)'}`,
-  background: active ? (color ?? 'var(--color-accent)') : 'transparent',
-  color: active ? 'white' : 'var(--color-text-secondary)',
+  cursor: 'pointer', border: `1.5px solid ${active ? (color ?? COLORS.ACCENT) : COLORS.BORDER}`,
+  background: active ? (color ?? COLORS.ACCENT) : 'transparent',
+  color: active ? 'white' : COLORS.TEXT_SECONDARY,
   whiteSpace: 'nowrap' as const,
   transition: 'all .15s',
 })
@@ -84,7 +86,7 @@ export default function TuyauxPage() {
   if (loading) return (
     <div className="flex justify-center py-20">
       <div className="size-6 rounded-full border-2 animate-spin"
-        style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+        style={{ borderColor: COLORS.BORDER, borderTopColor: COLORS.ACCENT }} />
     </div>
   )
 
@@ -93,17 +95,17 @@ export default function TuyauxPage() {
       {/* En-tête + stats */}
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div>
-          <h1 className="text-xl font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-            <FlaskConical size={20} strokeWidth={1.8} style={{ color: 'var(--color-accent)' }} />
+          <h1 className="text-xl font-semibold flex items-center gap-2" style={{ color: COLORS.TEXT_PRIMARY }}>
+            <FlaskConical size={20} strokeWidth={1.8} style={{ color: COLORS.ACCENT }} />
             Tuyaux de prélèvement
           </h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
             {tuyaux.length} lot{tuyaux.length !== 1 ? 's' : ''} · {allMats.length} matériau{allMats.length !== 1 ? 'x' : ''} · {allYears.length} campagne{allYears.length !== 1 ? 's' : ''}
           </p>
         </div>
         <button type="button" onClick={() => setEditing({})}
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium"
-          style={{ background: 'var(--color-accent)', color: 'white', borderRadius: 'var(--radius-sm)' }}>
+          style={{ background: COLORS.ACCENT, color: 'white', borderRadius: 'var(--radius-sm)' }}>
           <Plus size={15} /> Nouveau tuyau
         </button>
       </div>
@@ -146,15 +148,15 @@ export default function TuyauxPage() {
       {/* État vide */}
       {tuyaux.length === 0 && (
         <div className="text-center py-20 rounded-2xl"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
           <div className="text-5xl mb-4">🧪</div>
-          <p className="text-base font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>Aucun tuyau enregistré</p>
-          <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-base font-semibold mb-1" style={{ color: COLORS.TEXT_PRIMARY }}>Aucun tuyau enregistré</p>
+          <p className="text-sm mb-6" style={{ color: COLORS.TEXT_SECONDARY }}>
             Ajoutez un lot de tubes pour gérer vos tuyaux de prélèvement.
           </p>
           <button type="button" onClick={() => setEditing({})}
             className="px-5 py-2 text-sm font-medium"
-            style={{ background: 'var(--color-accent)', color: 'white', borderRadius: 'var(--radius-sm)' }}>
+            style={{ background: COLORS.ACCENT, color: 'white', borderRadius: 'var(--radius-sm)' }}>
             + Ajouter un premier tuyau
           </button>
         </div>
@@ -168,7 +170,7 @@ export default function TuyauxPage() {
           <div key={mat} className="mb-8">
             <div className="flex items-center gap-2.5 mb-3">
               <div className="size-2.5 rounded-sm shrink-0" style={{ background: mc.text }} />
-              <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{mat}</span>
+              <span className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>{mat}</span>
               <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                 style={{ background: mc.bg, color: mc.text, border: `1px solid ${mc.border}` }}>
                 {items.length} lot{items.length > 1 ? 's' : ''}
@@ -180,19 +182,19 @@ export default function TuyauxPage() {
                 const ds = fmtDate(t.dateCreation)
                 return (
                   <div key={t.id} className="flex flex-col"
-                    style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-card)', overflow: 'hidden' }}>
+                    style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-card)', overflow: 'hidden' }}>
 
                     <div className="px-4 pt-4 pb-3"
                       style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="text-base font-bold tracking-tight truncate"
-                            style={{ color: 'var(--color-text-primary)' }}>
+                            style={{ color: COLORS.TEXT_PRIMARY }}>
                             {t.refLabo || '—'}
                           </p>
                           {t.objet && (
                             <p className="text-xs mt-0.5 truncate"
-                              style={{ color: 'var(--color-text-secondary)' }}>
+                              style={{ color: COLORS.TEXT_SECONDARY }}>
                               {t.objet}
                             </p>
                           )}
@@ -200,7 +202,7 @@ export default function TuyauxPage() {
                         <div className="flex items-center gap-1.5 shrink-0">
                           {t.annee && (
                             <span className="text-xs font-medium px-2 py-0.5 rounded-full"
-                              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+                              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}>
                               {t.annee}
                             </span>
                           )}
@@ -235,12 +237,12 @@ export default function TuyauxPage() {
                       style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
                       <button type="button" onClick={() => setEditing(t)}
                         className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium"
-                        style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', borderRadius: 'var(--radius-sm)' }}>
+                        style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_SECONDARY, borderRadius: 'var(--radius-sm)' }}>
                         <Pencil size={12} /> Modifier
                       </button>
                       <button type="button" onClick={() => printLabel(t)} title="Imprimer étiquette"
                         className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium"
-                        style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', borderRadius: 'var(--radius-sm)' }}>
+                        style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_SECONDARY, borderRadius: 'var(--radius-sm)' }}>
                         <Printer size={12} /> Étiquette
                       </button>
                       <button type="button" onClick={() => setConfirmDel(t.id)}
@@ -253,17 +255,17 @@ export default function TuyauxPage() {
                     {confirmDel === t.id && (
                       <div className="px-4 py-3 flex items-center gap-3"
                         style={{ background: 'var(--color-danger-light)', borderTop: '1px solid var(--color-danger)' }}>
-                        <p className="text-xs flex-1 font-medium" style={{ color: 'var(--color-danger)' }}>
+                        <p className="text-xs flex-1 font-medium" style={{ color: COLORS.DANGER }}>
                           Supprimer {t.refLabo} ?
                         </p>
                         <button type="button" onClick={() => handleDelete(t.id)}
                           className="px-3 py-1 rounded-lg text-xs font-semibold"
-                          style={{ background: 'var(--color-danger)', color: 'white' }}>
+                          style={{ background: COLORS.DANGER, color: 'white' }}>
                           Supprimer
                         </button>
                         <button type="button" onClick={() => setConfirmDel(null)}
                           className="px-3 py-1 rounded-lg text-xs"
-                          style={{ background: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+                          style={{ background: COLORS.BG_SECONDARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}>
                           Annuler
                         </button>
                       </div>

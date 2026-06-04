@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import { COLORS } from '@/lib/constants'
+
 
 interface CircleProgressProps {
   /** Pourcentage restant avant échéance (0-100) */
@@ -11,9 +13,9 @@ interface CircleProgressProps {
 }
 
 function getColor(percent: number): string {
-  if (percent >= 60) return 'var(--color-success)'
-  if (percent >= 30) return 'var(--color-warning)'
-  return 'var(--color-danger)'
+  if (percent >= 60) return COLORS.SUCCESS
+  if (percent >= 30) return COLORS.WARNING
+  return COLORS.DANGER
 }
 
 export default function CircleProgress({ percent, size = 40, strokeWidth = 3, label, icon }: CircleProgressProps) {
@@ -33,7 +35,7 @@ export default function CircleProgress({ percent, size = 40, strokeWidth = 3, la
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="var(--color-border)"
+            stroke=COLORS.BORDER
             strokeWidth={strokeWidth}
           />
           {/* Fill */}

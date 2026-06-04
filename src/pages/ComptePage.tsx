@@ -15,6 +15,8 @@ import {
   EmailAuthProvider,
 } from 'firebase/auth'
 import usePushNotifications from '@/hooks/usePushNotifications'
+import { COLORS } from '@/lib/constants'
+
 
 
 const DEBOUNCE = 600
@@ -93,7 +95,7 @@ export default function ComptePage() {
   return (
     <div className="p-6 max-w-lg">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+        <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
           Mon compte
         </h1>
         {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
@@ -101,7 +103,7 @@ export default function ComptePage() {
 
       {/* Profil */}
       <div className="rounded-xl overflow-hidden mb-4"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
 
         {/* En-tête avatar + email */}
         <div className="px-5 py-4 flex items-center gap-4" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
@@ -112,13 +114,13 @@ export default function ComptePage() {
             size={48}
           />
           <div>
-            <p className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            <p className="font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
               {appUser?.prenom || appUser?.nom
                 ? `${appUser?.prenom} ${appUser?.nom}`.trim()
                 : <span style={{ color: 'var(--color-text-tertiary)' }}>Nom non renseigné</span>
               }
             </p>
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            <p className="text-sm" style={{ color: COLORS.TEXT_SECONDARY }}>
               {appUser?.email}
             </p>
           </div>
@@ -149,7 +151,7 @@ export default function ComptePage() {
         <div className="px-5 py-3 flex flex-col sm:flex-row justify-between sm:items-center gap-3"
              style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
           <div>
-            <span className="text-sm block" style={{ color: 'var(--color-text-secondary)' }}>
+            <span className="text-sm block" style={{ color: COLORS.TEXT_SECONDARY }}>
               Couleur personnelle
             </span>
             <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -175,8 +177,8 @@ export default function ComptePage() {
 
         {/* Rôle (lecture seule) */}
         <div className="px-5 py-3 flex justify-between items-center">
-          <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Rôle</span>
-          <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+          <span className="text-sm" style={{ color: COLORS.TEXT_SECONDARY }}>Rôle</span>
+          <span className="text-sm font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>
             {roleLabel[appUser?.role ?? ''] ?? '—'}
           </span>
         </div>
@@ -192,15 +194,15 @@ export default function ComptePage() {
 
       {/* Synchronisation agenda */}
       <div className="rounded-xl overflow-hidden mb-4"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         <div className="px-5 py-4">
           <div className="flex items-center gap-2 mb-3">
-            <Calendar size={16} style={{ color: 'var(--color-accent)' }} />
-            <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            <Calendar size={16} style={{ color: COLORS.ACCENT }} />
+            <span className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
               Synchronisation agenda
             </span>
           </div>
-          <p className="text-xs mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-xs mb-3" style={{ color: COLORS.TEXT_SECONDARY }}>
             Abonnez-vous à votre planning depuis Google Agenda → Autres agendas → Via une URL.
           </p>
           <div className="flex items-center gap-2">
@@ -209,9 +211,9 @@ export default function ComptePage() {
               value={feedUrl}
               className="flex-1 text-xs px-3 py-2 rounded-lg truncate"
               style={{
-                background: 'var(--color-bg-tertiary)',
+                background: COLORS.BG_TERTIARY,
                 border: '1px solid var(--color-border)',
-                color: 'var(--color-text-secondary)',
+                color: COLORS.TEXT_SECONDARY,
               }}
             />
             <button type="button"
@@ -219,7 +221,7 @@ export default function ComptePage() {
               className="text-xs px-3 py-2 rounded-lg font-medium"
               style={{
                 background: copied ? 'var(--color-success-light)' : 'var(--color-accent-light)',
-                color: copied ? 'var(--color-success)' : 'var(--color-accent)',
+                color: copied ? COLORS.SUCCESS : COLORS.ACCENT,
                 border: 'none',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
@@ -236,9 +238,9 @@ export default function ComptePage() {
         onClick={handleLogout}
         className="flex items-center gap-2 w-full px-5 py-4 rounded-xl text-sm font-medium"
         style={{
-          background: 'var(--color-bg-secondary)',
+          background: COLORS.BG_SECONDARY,
           border: '1px solid var(--color-border-subtle)',
-          color: 'var(--color-danger)',
+          color: COLORS.DANGER,
           boxShadow: 'var(--shadow-card)',
         }}
       >
@@ -291,14 +293,14 @@ function ChangePasswordSection({ email }: { email: string }) {
 
   return (
     <div className="rounded-xl mb-4 overflow-hidden"
-      style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+      style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
       <button type="button"
         onClick={() => setOpen(o => !o)}
         className="w-full px-5 py-4 flex items-center justify-between"
       >
         <div className="flex items-center gap-3">
-          <KeyRound size={16} strokeWidth={1.8} style={{ color: 'var(--color-text-secondary)' }} />
-          <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+          <KeyRound size={16} strokeWidth={1.8} style={{ color: COLORS.TEXT_SECONDARY }} />
+          <span className="text-sm font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>
             Changer le mot de passe
           </span>
         </div>
@@ -321,7 +323,7 @@ function ChangePasswordSection({ email }: { email: string }) {
               const id = `cp-pwd-${label.toLowerCase().replace(/\s+/g, '-')}`
               return (
               <div key={label}>
-                <label htmlFor={id} className="text-xs font-medium block mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                <label htmlFor={id} className="text-xs font-medium block mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
                   {label}
                 </label>
                 <input
@@ -332,9 +334,9 @@ function ChangePasswordSection({ email }: { email: string }) {
                   required
                   className="w-full text-sm px-3 py-2 rounded-lg outline-none"
                   style={{
-                    background: 'var(--color-bg-tertiary)',
+                    background: COLORS.BG_TERTIARY,
                     border: '1px solid var(--color-border)',
-                    color: 'var(--color-text-primary)',
+                    color: COLORS.TEXT_PRIMARY,
                   }}
                 />
               </div>
@@ -342,17 +344,17 @@ function ChangePasswordSection({ email }: { email: string }) {
           </div>
 
           {status === 'error' && (
-            <p className="text-xs" style={{ color: 'var(--color-danger)' }}>{errorMsg}</p>
+            <p className="text-xs" style={{ color: COLORS.DANGER }}>{errorMsg}</p>
           )}
           {status === 'success' && (
-            <p className="text-xs" style={{ color: 'var(--color-success)' }}>Mot de passe mis à jour.</p>
+            <p className="text-xs" style={{ color: COLORS.SUCCESS }}>Mot de passe mis à jour.</p>
           )}
 
           <button type="submit"
             disabled={status === 'saving'}
             className="text-sm font-medium px-4 py-2 rounded-lg mt-1"
             style={{
-              background: 'var(--color-accent)',
+              background: COLORS.ACCENT,
               color: 'white',
               opacity: status === 'saving' ? 0.6 : 1,
             }}
@@ -383,7 +385,7 @@ function EditRow({
   return (
     <div className="px-5 py-3" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
       <div className="flex items-center gap-4">
-        <label className="text-sm shrink-0" style={{ color: 'var(--color-text-secondary)', minWidth: 80 }}>
+        <label className="text-sm shrink-0" style={{ color: COLORS.TEXT_SECONDARY, minWidth: 80 }}>
           {label}
         </label>
         <input
@@ -392,7 +394,7 @@ function EditRow({
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
           className="flex-1 text-sm bg-transparent outline-none"
-          style={{ color: 'var(--color-text-primary)' }}
+          style={{ color: COLORS.TEXT_PRIMARY }}
         />
       </div>
       {hint && (
@@ -417,7 +419,7 @@ function PushNotificationsSection() {
   if (!isSupported) {
     return (
       <div className="rounded-xl mb-4 px-5 py-4 flex items-center gap-3 text-sm"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-secondary)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_SECONDARY }}>
         <BellOff size={18} style={{ color: 'var(--color-text-tertiary)' }} />
         <div>
           <p className="font-semibold">Notifications indisponibles</p>
@@ -429,16 +431,16 @@ function PushNotificationsSection() {
 
   return (
     <div className="rounded-xl mb-4 px-5 py-4 flex flex-col gap-3"
-      style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+      style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
       
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Bell size={18} style={{ color: isPushEnabled ? 'var(--color-accent)' : 'var(--color-text-secondary)' }} />
+          <Bell size={18} style={{ color: isPushEnabled ? COLORS.ACCENT : COLORS.TEXT_SECONDARY }} />
           <div>
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            <h3 className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
               Notifications Push
             </h3>
-            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+            <p className="text-xs" style={{ color: COLORS.TEXT_SECONDARY }}>
               Recevoir les changements de planning
             </p>
           </div>
@@ -449,7 +451,7 @@ function PushNotificationsSection() {
           disabled={loading}
           className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
           style={{
-            backgroundColor: isPushEnabled ? 'var(--color-accent)' : 'var(--color-border)',
+            backgroundColor: isPushEnabled ? COLORS.ACCENT : COLORS.BORDER,
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.7 : 1
           }}
@@ -463,13 +465,13 @@ function PushNotificationsSection() {
               justifyContent: 'center'
             }}
           >
-            {loading && <LoaderCircle size={10} className="animate-spin" style={{ color: 'var(--color-accent)' }} />}
+            {loading && <LoaderCircle size={10} className="animate-spin" style={{ color: COLORS.ACCENT }} />}
           </span>
         </button>
       </div>
 
       {permission === 'denied' && (
-        <p className="text-xs" style={{ color: 'var(--color-danger)' }}>
+        <p className="text-xs" style={{ color: COLORS.DANGER }}>
           Les notifications sont bloquées par ton navigateur. Active-les dans les paramètres du site.
         </p>
       )}

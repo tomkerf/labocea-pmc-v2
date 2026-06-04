@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import { daysDiff } from '@/lib/dashboardUtils'
 import type { Equipement } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 export function MetrologieWidget({ equipements }: { equipements: Equipement[] }) {
   const [open, setOpen] = useState(false)
@@ -21,7 +23,7 @@ export function MetrologieWidget({ equipements }: { equipements: Equipement[] })
           Métrologie à prévoir (J-14)
         </span>
         <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-          style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+          style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
           {equipements.length}
         </span>
         <ChevronDown size={14} strokeWidth={2} style={{
@@ -31,16 +33,16 @@ export function MetrologieWidget({ equipements }: { equipements: Equipement[] })
       </button>
       {open && (
         <div className="rounded-xl overflow-hidden"
-          style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
           <div style={{ maxHeight: 280, overflowY: 'auto' }}>
             {equipements.map((eq, i) => {
               if (!eq.prochainEtalonnage) return null
               const dateObj = eq.prochainEtalonnage.split('T')[0]
               const diff = daysDiff(dateObj)
               const enRetard = diff < 0
-              const dotColor   = enRetard ? 'var(--color-danger)' : 'var(--color-warning)'
+              const dotColor   = enRetard ? COLORS.DANGER : COLORS.WARNING
               const badgeBg    = enRetard ? 'var(--color-danger-light)' : 'var(--color-warning-light)'
-              const badgeColor = enRetard ? 'var(--color-danger)' : 'var(--color-warning)'
+              const badgeColor = enRetard ? COLORS.DANGER : COLORS.WARNING
               const badgeLabel = enRetard ? 'En retard' : diff === 0 ? "Aujourd'hui" : `Dans ${diff}j`
               
               return (
@@ -48,13 +50,13 @@ export function MetrologieWidget({ equipements }: { equipements: Equipement[] })
                   className="flex items-center gap-3 px-4 py-3 cursor-pointer"
                   style={{ borderBottom: i < equipements.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
                   onClick={() => navigate(`/materiel/${eq.id}`)}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
                   <span className="shrink-0 size-2 rounded-full" style={{ background: dotColor }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{eq.nom}</p>
-                    <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                    <p className="text-sm font-medium truncate" style={{ color: COLORS.TEXT_PRIMARY }}>{eq.nom}</p>
+                    <p className="text-xs truncate" style={{ color: COLORS.TEXT_SECONDARY }}>
                       {eq.marque} {eq.modele} — {eq.numSerie}
                     </p>
                   </div>

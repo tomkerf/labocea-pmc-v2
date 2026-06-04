@@ -10,6 +10,8 @@ import { useUsersStore } from '@/stores/usersStore'
 import EquipementCard from '@/components/materiel/EquipementCard'
 import { SkeletonList } from '@/components/ui/Skeleton'
 import type { Equipement } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 
 const CATEGORIES = [
@@ -106,8 +108,8 @@ export default function MaterielPage() {
       {/* En-tête */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>Matériel</h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+          <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Matériel</h1>
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
             {equipements.length} équipement{equipements.length !== 1 ? 's' : ''}
           </p>
         </div>
@@ -115,7 +117,7 @@ export default function MaterielPage() {
           onClick={handleCreate}
           disabled={creating}
           className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-opacity"
-          style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
+          style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
         >
           <Plus size={16} />
           Ajouter un équipement
@@ -132,9 +134,9 @@ export default function MaterielPage() {
             placeholder="Rechercher un équipement…"
             className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: COLORS.BG_SECONDARY,
               border: '1px solid var(--color-border-subtle)',
-              color: 'var(--color-text-primary)',
+              color: COLORS.TEXT_PRIMARY,
             }}
           />
         </div>
@@ -144,7 +146,7 @@ export default function MaterielPage() {
             value={filterCategorie}
             onChange={(e) => { setFilterCategorie(e.target.value); setFilterMateriau(''); setFilterMarque('') }}
             className="flex-1 px-3 py-2 rounded-lg text-sm"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
             {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
@@ -152,7 +154,7 @@ export default function MaterielPage() {
             value={filterEtat}
             onChange={(e) => setFilterEtat(e.target.value)}
             className="flex-1 px-3 py-2 rounded-lg text-sm"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
             {ETATS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
           </select>
@@ -163,7 +165,7 @@ export default function MaterielPage() {
             value={filterSite}
             onChange={(e) => setFilterSite(e.target.value)}
             className="flex-1 px-3 py-2 rounded-lg text-sm"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
             <option value="">Tous sites</option>
             <option value="quimper">Quimper</option>
@@ -173,7 +175,7 @@ export default function MaterielPage() {
             value={filterTechnicien}
             onChange={(e) => setFilterTechnicien(e.target.value)}
             className="flex-1 px-3 py-2 rounded-lg text-sm"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
             <option value="">Tous techniciens</option>
             {techniciens.map(t => (
@@ -188,7 +190,7 @@ export default function MaterielPage() {
               value={filterMateriau}
               onChange={(e) => setFilterMateriau(e.target.value)}
               className="flex-1 px-3 py-2 rounded-lg text-sm"
-              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
+              style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
             >
               <option value="">Tous matériaux</option>
               <option value="plastique">Plastique</option>
@@ -198,7 +200,7 @@ export default function MaterielPage() {
               value={filterMarque}
               onChange={(e) => setFilterMarque(e.target.value)}
               className="flex-1 px-3 py-2 rounded-lg text-sm"
-              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)' }}
+              style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
             >
               <option value="">Toutes marques</option>
               {marquesFlacon.map((m) => <option key={m} value={m}>{m}</option>)}
@@ -210,13 +212,13 @@ export default function MaterielPage() {
       {/* Légende anneau métrologique */}
       <div className="flex gap-4 flex-wrap mb-4">
         {[
-          { color: 'var(--color-success)', label: 'Étalonnage à jour' },
-          { color: 'var(--color-warning)', label: 'À prévoir (< 30%)' },
-          { color: 'var(--color-danger)',  label: 'En retard / urgent' },
+          { color: COLORS.SUCCESS, label: 'Étalonnage à jour' },
+          { color: COLORS.WARNING, label: 'À prévoir (< 30%)' },
+          { color: COLORS.DANGER,  label: 'En retard / urgent' },
         ].map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1.5">
             <div className="size-3 rounded-full shrink-0" style={{ background: color }} />
-            <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{label}</span>
+            <span className="text-xs" style={{ color: COLORS.TEXT_SECONDARY }}>{label}</span>
           </div>
         ))}
       </div>
@@ -228,11 +230,11 @@ export default function MaterielPage() {
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <div className="size-16 rounded-2xl flex items-center justify-center"
             style={{ background: 'var(--color-accent-light)' }}>
-            <Package size={28} strokeWidth={1.5} style={{ color: 'var(--color-accent)' }} />
+            <Package size={28} strokeWidth={1.5} style={{ color: COLORS.ACCENT }} />
           </div>
           <div className="text-center">
-            <p className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>Aucun équipement</p>
-            <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+            <p className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Aucun équipement</p>
+            <p className="text-sm mt-1" style={{ color: COLORS.TEXT_SECONDARY }}>
               Commencez par ajouter votre premier équipement.
             </p>
           </div>
@@ -240,7 +242,7 @@ export default function MaterielPage() {
             onClick={handleCreate}
             disabled={creating}
             className="flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-lg transition-opacity"
-            style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.6 : 1 }}
+            style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
           >
             <Plus size={16} />
             Ajouter un équipement
@@ -265,11 +267,11 @@ export default function MaterielPage() {
               background: 'transparent',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-accent)'
-              e.currentTarget.style.color = 'var(--color-accent)'
+              e.currentTarget.style.borderColor = COLORS.ACCENT
+              e.currentTarget.style.color = COLORS.ACCENT
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-border)'
+              e.currentTarget.style.borderColor = COLORS.BORDER
               e.currentTarget.style.color = 'var(--color-text-tertiary)'
             }}
           >

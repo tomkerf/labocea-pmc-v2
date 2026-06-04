@@ -1,10 +1,12 @@
 import { CalendarDays, CheckCircle2, XCircle, MousePointer2, AlertTriangle, Droplets } from 'lucide-react'
 import { Section, Step, Divider, Tip, Note } from './AideComponents'
+import { COLORS } from '@/lib/constants'
+
 
 export function PlanningSection() {
   return (
     <Section icon={CalendarDays} title="Le Planning au quotidien">
-      <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+      <p className="text-sm mb-4" style={{ color: COLORS.TEXT_SECONDARY }}>
         Le Planning regroupe tous les prélèvements, maintenances et événements de l'équipe sur un calendrier commun.
       </p>
 
@@ -45,7 +47,7 @@ export function PlanningSection() {
               <span>
                 Après le prélèvement sur le terrain, passe le statut à{' '}
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                  style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>
+                  style={{ background: 'var(--color-success-light)', color: COLORS.SUCCESS }}>
                   <CheckCircle2 size={11} /> Réalisé
                 </span>
                 {' '}et saisis la date effective.
@@ -55,7 +57,7 @@ export function PlanningSection() {
               <span>
                 Si l'intervention n'a pas pu être réalisée, passe à{' '}
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                  style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
                   <XCircle size={11} /> Non effectué
                 </span>
                 {' '}et saisis un motif.
@@ -131,7 +133,7 @@ export function PlanningSection() {
 export function Bilan24hSection() {
   return (
     <Section icon={Droplets} title="Bilans 24h — prélèvements J1 et J2">
-      <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+      <p className="text-sm mb-4" style={{ color: COLORS.TEXT_SECONDARY }}>
         Un bilan 24h génère deux interventions liées : la <strong>pose</strong> du préleveur automatique en J1
         et la <strong>récupération</strong> en J2.
       </p>
@@ -142,14 +144,14 @@ export function Bilan24hSection() {
             En vue <strong>Semaine</strong>, les bilans 24h apparaissent dans la <strong>bande en haut du calendrier</strong>,
             sous la forme d'une barre de J1 à J2 avec le badge{' '}
             <span className="px-1.5 py-0.5 rounded text-[11px] font-medium"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>J1→J2</span>.
+              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>J1→J2</span>.
           </span>
         </Step>
         <Step num={2}>
           <span>
             <strong>J1 — Pose :</strong> clique sur la barre pour ouvrir la fiche. Passe le statut à{' '}
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-              style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>Réalisé</span>{' '}
+              style={{ background: 'var(--color-success-light)', color: COLORS.SUCCESS }}>Réalisé</span>{' '}
             en fin de journée.
           </span>
         </Step>
@@ -158,7 +160,7 @@ export function Bilan24hSection() {
             <strong>J2 — Récupération :</strong> retrouve le prélèvement J2 dans le jour suivant.
             Passe-le à{' '}
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-              style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>Réalisé</span>{' '}
+              style={{ background: 'var(--color-success-light)', color: COLORS.SUCCESS }}>Réalisé</span>{' '}
             après récupération du flacon.
           </span>
         </Step>

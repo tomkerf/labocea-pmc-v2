@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion'
+import { COLORS } from '@/lib/constants'
+
 
 interface StatCardProps {
   value: string | number
@@ -12,14 +14,14 @@ interface StatCardProps {
 
 export function StatCard({ value, label, sub, accent, warning, danger, onClick }: StatCardProps) {
   const color = danger
-    ? 'var(--color-danger)'
+    ? COLORS.DANGER
     : warning
-    ? 'var(--color-warning)'
+    ? COLORS.WARNING
     : accent
-    ? 'var(--color-accent)'
-    : 'var(--color-text-primary)'
+    ? COLORS.ACCENT
+    : COLORS.TEXT_PRIMARY
 
-  const gradient = 'var(--color-bg-secondary)'
+  const gradient = COLORS.BG_SECONDARY
 
   return (
     <motion.div
@@ -53,7 +55,7 @@ export function SectionTitle({ children }: { children: React.ReactNode }) {
 export function EmptyCard({ children }: { children: React.ReactNode }) {
   return (
     <div className="rounded-xl px-5 py-8 text-center"
-      style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+      style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
       <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{children}</p>
     </div>
   )

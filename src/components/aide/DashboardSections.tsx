@@ -1,10 +1,12 @@
 import { LayoutDashboard, ChevronRight, Bug } from 'lucide-react'
 import { Section, Step, Tip } from './AideComponents'
+import { COLORS } from '@/lib/constants'
+
 
 export function DashboardSection() {
   return (
     <Section icon={LayoutDashboard} title="Le tableau de bord">
-      <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+      <p className="text-sm mb-4" style={{ color: COLORS.TEXT_SECONDARY }}>
         Le tableau de bord est la première page que tu vois en ouvrant l'app.
         Il synthétise l'essentiel de la journée en un seul écran.
       </p>

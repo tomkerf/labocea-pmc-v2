@@ -7,6 +7,8 @@ import {
   isMultiDay, sortEvts, filterEvents, groupByClient,
 } from '@/lib/planningUtils'
 import EventPill from '@/components/planning/EventPill'
+import { COLORS } from '@/lib/constants'
+
 
 interface WeekViewProps {
   weekDays:             Date[]
@@ -91,7 +93,7 @@ export default function WeekView({
               <div className="size-7 flex items-center justify-center rounded-full mx-auto text-sm font-semibold"
                 style={{
                   background: isToday ? '#FF3B30' : holidayName ? 'rgba(255,59,48,0.12)' : 'transparent',
-                  color: isToday ? 'white' : holidayName ? '#FF3B30' : 'var(--color-text-primary)',
+                  color: isToday ? 'white' : holidayName ? '#FF3B30' : COLORS.TEXT_PRIMARY,
                 }}>
                 {day.getDate()}
               </div>
@@ -108,7 +110,7 @@ export default function WeekView({
 
       {/* ── Bande bilan 24h — groupe J1+J2 avec bordure commune (colspan) ── */}
       {bilanBand.length > 0 && (
-        <div className="shrink-0 animate-fade-in" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 0', position: 'relative' }}>
+        <div className="shrink-0 animate-fade-in" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: COLORS.BG_SECONDARY, padding: '3px 0', position: 'relative' }}>
           {/* Overlay weekend gris par colonne */}
           <div style={{ position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', pointerEvents: 'none' }}>
             {weekDays.map((day, i) => {
@@ -161,7 +163,7 @@ export default function WeekView({
       {/* ── Bande "toute la journée" — multi-jours (style Apple Calendar) ── */}
       {allDayItems.length > 0 && (
         <div className="shrink-0"
-          style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)', padding: '3px 2px' }}>
+          style={{ borderBottom: '1px solid var(--color-border-subtle)', background: COLORS.BG_SECONDARY, padding: '3px 2px' }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(7, 1fr)',
@@ -184,9 +186,9 @@ export default function WeekView({
                   title={tooltip}
                   aria-label={tooltip ?? label}
                 >
-                  <span className="text-[11px] font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
+                  <span className="text-[11px] font-medium truncate" style={{ color: COLORS.TEXT_PRIMARY }}>{label}</span>
                   {badge && (
-                    <span className="shrink-0 text-[9px] opacity-60" style={{ color: 'var(--color-text-secondary)' }}>{badge}</span>
+                    <span className="shrink-0 text-[9px] opacity-60" style={{ color: COLORS.TEXT_SECONDARY }}>{badge}</span>
                   )}
                 </button>
               ))}
@@ -215,7 +217,7 @@ export default function WeekView({
               style={{
                 position: 'relative',
                 borderRight: i<6?'1px solid var(--color-border-subtle)':'none',
-                background: inDrag ? 'rgba(0,113,227,0.1)' : isWeekend ? 'rgba(0,0,0,0.012)' : 'var(--color-bg-secondary)',
+                background: inDrag ? 'rgba(0,113,227,0.1)' : isWeekend ? 'rgba(0,0,0,0.012)' : COLORS.BG_SECONDARY,
                 outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
                 outlineOffset: '-1px',
                 minHeight: 120,
@@ -240,7 +242,7 @@ export default function WeekView({
                       onMouseDown={e => e.stopPropagation()}
                       onClick={e => { e.stopPropagation(); toggleGroup(dateStr, groupKey) }}
                       className="w-full text-center text-[9px] font-medium rounded py-[2px]"
-                      style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border-subtle)' }}
+                      style={{ color: 'var(--color-text-tertiary)', background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border-subtle)' }}
                     >
                       ▲ replier
                     </button>

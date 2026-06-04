@@ -11,6 +11,8 @@ import {
   toISO, getTechColor, filterEvents, sortEvts
 } from '@/lib/planningUtils'
 import type { Preleveur } from '@/stores/preleveursStore'
+import { COLORS } from '@/lib/constants'
+
 
 interface MapViewProps {
   selectedDate:      Date
@@ -193,7 +195,7 @@ export default function MapView({
       })
 
       const tc = getTechColor(evt.technicien)
-      const color = evt.isDone ? 'var(--color-success)' : tc.color
+      const color = evt.isDone ? COLORS.SUCCESS : tc.color
 
       // Popup HTML premium style Apple
       const popupHtml = `
@@ -307,7 +309,7 @@ export default function MapView({
           width: sidebarOpen ? '320px' : '0px',
           minWidth: sidebarOpen ? '320px' : '0px',
           overflow: 'hidden',
-          background: 'var(--color-bg-secondary)',
+          background: COLORS.BG_SECONDARY,
           borderRight: sidebarOpen ? '1px solid var(--color-border-subtle)' : 'none',
           boxShadow: sidebarOpen ? 'var(--shadow-card)' : 'none'
         }}
@@ -315,12 +317,12 @@ export default function MapView({
         <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 scrollbar-none">
           {/* Bandeau météo */}
           {centroid && (
-            <div className="mb-3 rounded-lg px-3 py-2" style={{ background: 'var(--color-bg-tertiary)' }}>
+            <div className="mb-3 rounded-lg px-3 py-2" style={{ background: COLORS.BG_TERTIARY }}>
               {weather.loading ? (
-                <div className="h-4 rounded animate-pulse" style={{ background: 'var(--color-border)', width: '75%' }} />
+                <div className="h-4 rounded animate-pulse" style={{ background: COLORS.BORDER, width: '75%' }} />
               ) : weather.error ? null : (
                 <div className="flex flex-col gap-0.5">
-                  <p className="text-[11px] leading-snug" style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-[11px] leading-snug" style={{ color: COLORS.TEXT_SECONDARY }}>
                     {formatRainLabel(weather)}
                   </p>
                   <p className="text-[9px]" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -331,29 +333,29 @@ export default function MapView({
             </div>
           )}
           <div className="mb-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+            <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: COLORS.TEXT_SECONDARY }}>
               Tournée du jour ({mappedEvts.length})
             </h3>
             
             {mappedEvts.length === 0 ? (
-              <div className="text-center py-8 px-4 rounded-xl border border-dashed border-gray-200" style={{ background: 'var(--color-bg-primary)' }}>
+              <div className="text-center py-8 px-4 rounded-xl border border-dashed border-gray-200" style={{ background: COLORS.BG_PRIMARY }}>
                 <MapPin className="mx-auto text-gray-300 mb-2" size={32} />
-                <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Aucun point de prélèvement avec coordonnées GPS aujourd'hui.</p>
+                <p className="text-xs" style={{ color: COLORS.TEXT_SECONDARY }}>Aucun point de prélèvement avec coordonnées GPS aujourd'hui.</p>
               </div>
             ) : (
               <div className="flex flex-col gap-2">
                 {mappedEvts.map((evt, idx) => {
                   const tc = getTechColor(evt.technicien)
                   const isSelected = selectedEventId === evt.id
-                  const color = evt.isDone ? 'var(--color-success)' : tc.color
+                  const color = evt.isDone ? COLORS.SUCCESS : tc.color
                   return (
                     <div 
                       key={evt.id}
                       onClick={() => handleCenterOnMarker(evt)}
                       className="p-3 rounded-lg border text-left cursor-pointer transition-all hover:scale-[1.01]"
                       style={{
-                        background: isSelected ? 'var(--color-accent-light)' : 'var(--color-bg-secondary)',
-                        borderColor: isSelected ? 'var(--color-accent)' : 'var(--color-border-subtle)',
+                        background: isSelected ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
+                        borderColor: isSelected ? COLORS.ACCENT : 'var(--color-border-subtle)',
                         boxShadow: 'var(--shadow-card)'
                       }}
                     >
@@ -367,16 +369,16 @@ export default function MapView({
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-start gap-1">
-                            <span className="text-[11px] font-bold uppercase truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                            <span className="text-[11px] font-bold uppercase truncate" style={{ color: COLORS.TEXT_SECONDARY }}>
                               {evt.title}
                             </span>
                             {evt.plannedTime && (
-                              <span className="text-[11px] font-medium shrink-0 px-1.5 py-0.5 rounded" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)' }}>
+                              <span className="text-[11px] font-medium shrink-0 px-1.5 py-0.5 rounded" style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }}>
                                 {evt.plannedTime}
                               </span>
                             )}
                           </div>
-                          <h4 className="text-xs font-semibold truncate mt-0.5" style={{ color: 'var(--color-text-primary)' }}>
+                          <h4 className="text-xs font-semibold truncate mt-0.5" style={{ color: COLORS.TEXT_PRIMARY }}>
                             {evt.subtitle}
                           </h4>
                           
@@ -411,7 +413,7 @@ export default function MapView({
                     onClick={() => handleSelectEvent(evt, dateStr)}
                     className="p-2.5 rounded-lg border flex items-center justify-between gap-2 hover:bg-amber-50/50 cursor-pointer transition-colors"
                     style={{
-                      background: 'var(--color-bg-secondary)',
+                      background: COLORS.BG_SECONDARY,
                       borderColor: '#f59e0b44'
                     }}
                     title="Cliquer pour configurer ce point"
@@ -439,7 +441,7 @@ export default function MapView({
           style={{ borderColor: 'var(--color-border-subtle)' }}
           aria-label="Fermer le panneau"
         >
-          <ChevronLeft size={16} style={{ color: 'var(--color-text-secondary)' }} />
+          <ChevronLeft size={16} style={{ color: COLORS.TEXT_SECONDARY }} />
         </button>
       </div>
 
@@ -451,7 +453,7 @@ export default function MapView({
           style={{ borderColor: 'var(--color-border-subtle)' }}
           aria-label="Ouvrir le panneau"
         >
-          <ChevronRight size={16} style={{ color: 'var(--color-text-secondary)' }} />
+          <ChevronRight size={16} style={{ color: COLORS.TEXT_SECONDARY }} />
         </button>
       )}
 
@@ -465,15 +467,15 @@ export default function MapView({
             {mappedEvts.map((evt, idx) => {
               const tc = getTechColor(evt.technicien)
               const isSelected = selectedEventId === evt.id
-              const color = evt.isDone ? 'var(--color-success)' : tc.color
+              const color = evt.isDone ? COLORS.SUCCESS : tc.color
               return (
                 <div 
                   key={evt.id}
                   onClick={() => handleCenterOnMarker(evt)}
                   className="w-[280px] p-3 shrink-0 rounded-xl border text-left cursor-pointer transition-all snap-center shadow-lg"
                   style={{
-                    background: isSelected ? 'var(--color-accent-light)' : 'var(--color-bg-secondary)',
-                    borderColor: isSelected ? 'var(--color-accent)' : 'var(--color-border-subtle)',
+                    background: isSelected ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
+                    borderColor: isSelected ? COLORS.ACCENT : 'var(--color-border-subtle)',
                   }}
                 >
                   <div className="flex items-start gap-2.5">
@@ -485,16 +487,16 @@ export default function MapView({
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start gap-1">
-                        <span className="text-[10px] font-bold uppercase truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                        <span className="text-[10px] font-bold uppercase truncate" style={{ color: COLORS.TEXT_SECONDARY }}>
                           {evt.title}
                         </span>
                         {evt.plannedTime && (
-                          <span className="text-[10px] font-medium shrink-0 px-1 py-0.2 rounded" style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)' }}>
+                          <span className="text-[10px] font-medium shrink-0 px-1 py-0.2 rounded" style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }}>
                             {evt.plannedTime}
                           </span>
                         )}
                       </div>
-                      <h4 className="text-xs font-semibold truncate mt-0.5" style={{ color: 'var(--color-text-primary)' }}>
+                      <h4 className="text-xs font-semibold truncate mt-0.5" style={{ color: COLORS.TEXT_PRIMARY }}>
                         {evt.subtitle}
                       </h4>
                       

@@ -1,26 +1,33 @@
 import { useState } from 'react'
-import { X, Bug } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Bug } from 'lucide-react'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useAuthStore, selectUid, selectAppUser } from '@/stores/authStore'
 import { toast } from '@/stores/toastStore'
+import { COLLECTIONS, COLORS } from '@/lib/constants'
+import BaseModal from '@/components/ui/BaseModal'
 
 interface Props {
+  isOpen: boolean
   onClose: () => void
 }
 
-export default function BugReportModal({ onClose }: Props) {
+export default function BugReportModal({ isOpen, onClose }: Props) {
   const [description, setDescription] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const uid = useAuthStore(selectUid)
   const appUser = useAuthStore(selectAppUser)
 
+  function handleClose() {
+    setDescription('')
+    onClose()
+  }
+
   async function handleSubmit() {
     if (!description.trim() || !uid) return
     setSubmitting(true)
     try {
-      await addDoc(collection(db, 'bugs'), {
+      await addDoc(collection(db, COLLECTIONS.BUGS), {
         description: description.trim(),
         page: window.location.pathname,
         userUid: uid,
@@ -29,19 +36,18 @@ export default function BugReportModal({ onClose }: Props) {
         createdAt: serverTimestamp(),
       })
 
-      // Déclencher une notification push pour l'administrateur
       import('@/services/notificationService').then(({ sendPushToTechnician }) => {
         sendPushToTechnician(
           'THK',
           '🐞 Nouveau bug signalé',
           `${appUser ? `${appUser.prenom} ${appUser.nom}` : 'Un utilisateur'} a signalé un problème sur ${window.location.pathname}`,
           undefined,
-          true // allowSelfNotification
+          true
         )
       }).catch(err => console.error('[Notification] Failed to load notificationService:', err))
 
       toast.success('Signalement envoyé, merci !')
-      onClose()
+      handleClose()
     } catch {
       toast.error('Échec de l\'envoi. Vérifie ta connexion.')
     } finally {
@@ -50,43 +56,34 @@ export default function BugReportModal({ onClose }: Props) {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-0"
-      style={{
-        background: 'rgba(0, 0, 0, 0.25)',
-        backdropFilter: 'blur(5px)',
-        WebkitBackdropFilter: 'blur(5px)',
-      }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0, y: 15 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.95, opacity: 0, y: 15 }}
-        transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-        className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 flex flex-col gap-4"
-        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)' }}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bug size={17} strokeWidth={1.8} style={{ color: 'var(--color-accent)' }} />
-            <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-              Signaler un problème
-            </h2>
-          </div>
-          <button type="button" onClick={onClose} className="p-1 rounded-md"
-            style={{ color: 'var(--color-text-tertiary)' }}>
-            <X size={18} />
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Signaler un problème"
+      icon={<Bug size={17} strokeWidth={1.8} style={{ color: COLORS.ACCENT }} />}
+      footer={
+        <>
+          <button type="button" onClick={handleClose} className="px-4 py-2 rounded-lg text-sm"
+            style={{ color: COLORS.TEXT_SECONDARY, background: COLORS.BG_TERTIARY }}>
+            Annuler
           </button>
-        </div>
-
-        <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          <button type="button"
+            onClick={handleSubmit}
+            disabled={!description.trim() || submitting}
+            className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors"
+            style={{
+              background: description.trim() && !submitting ? COLORS.ACCENT : 'var(--color-text-tertiary)',
+              cursor: description.trim() && !submitting ? 'pointer' : 'not-allowed',
+            }}>
+            {submitting ? 'Envoi…' : 'Envoyer'}
+          </button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <p className="text-sm" style={{ color: COLORS.TEXT_SECONDARY }}>
           Décris ce qui ne fonctionne pas. La page actuelle sera jointe automatiquement.
         </p>
-
         <textarea
           autoFocus
           rows={4}
@@ -95,33 +92,15 @@ export default function BugReportModal({ onClose }: Props) {
           placeholder="Ex : Le bouton Enregistrer ne répond pas sur la fiche client Plounerin…"
           className="w-full resize-none rounded-lg px-3 py-2.5 text-sm outline-none"
           style={{
-            border: '1px solid var(--color-border)',
-            background: 'var(--color-bg-tertiary)',
-            color: 'var(--color-text-primary)',
+            border: `1px solid ${COLORS.BORDER}`,
+            background: COLORS.BG_TERTIARY,
+            color: COLORS.TEXT_PRIMARY,
           }}
         />
-
-        <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+        <p className="text-xs" style={{ color: COLORS.TEXT_TERTIARY || 'var(--color-text-tertiary)' }}>
           Page : <code>{window.location.pathname}</code>
         </p>
-
-        <div className="flex gap-2 justify-end">
-          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm"
-            style={{ color: 'var(--color-text-secondary)', background: 'var(--color-bg-tertiary)' }}>
-            Annuler
-          </button>
-          <button type="button"
-            onClick={handleSubmit}
-            disabled={!description.trim() || submitting}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-white"
-            style={{
-              background: description.trim() && !submitting ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
-              cursor: description.trim() && !submitting ? 'pointer' : 'not-allowed',
-            }}>
-            {submitting ? 'Envoi…' : 'Envoyer'}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </BaseModal>
   )
 }

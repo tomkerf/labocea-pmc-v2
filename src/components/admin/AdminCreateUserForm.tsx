@@ -4,6 +4,8 @@ import { Check, Loader2, UserPlus, Mail, Lock, User, Hash } from 'lucide-react'
 import { authSecondary, dbSecondary } from '@/lib/firebase'
 import { createUserDocument } from '@/services/userService'
 import type { UserRole } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 const AVATAR_COLORS = [
   '#0071E3', '#34C759', '#FF9F0A', '#FF3B30',
@@ -89,36 +91,36 @@ export function AdminCreateUserForm() {
   return (
     <section>
       <h2 className="text-sm font-semibold mb-3"
-        style={{ color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        style={{ color: COLORS.TEXT_SECONDARY, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         Créer un compte
       </h2>
 
       <form onSubmit={handleSubmit}
         className="rounded-xl p-5 flex flex-col gap-4"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="acuf-prenom" className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Prénom</label>
+            <label htmlFor="acuf-prenom" className="text-xs font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>Prénom</label>
             <div className="relative">
               <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
               <input id="acuf-prenom" type="text" value={prenom}
                 onChange={e => { setPrenom(e.target.value); handleNameChange(e.target.value, nom) }}
                 placeholder="Thomas"
                 className="w-full pl-8 pr-3 py-2 text-sm rounded-lg"
-                style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+                style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}
               />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="acuf-nom" className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Nom</label>
+            <label htmlFor="acuf-nom" className="text-xs font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>Nom</label>
             <div className="relative">
               <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
               <input id="acuf-nom" type="text" value={nom}
                 onChange={e => { setNom(e.target.value); handleNameChange(prenom, e.target.value) }}
                 placeholder="Kerfendal"
                 className="w-full pl-8 pr-3 py-2 text-sm rounded-lg"
-                style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+                style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}
               />
             </div>
           </div>
@@ -126,22 +128,22 @@ export function AdminCreateUserForm() {
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="acuf-initiales" className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Initiales</label>
+            <label htmlFor="acuf-initiales" className="text-xs font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>Initiales</label>
             <div className="relative">
               <Hash size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
               <input id="acuf-initiales" type="text" value={initiales}
                 onChange={e => setInitiales(e.target.value.toUpperCase().slice(0, 4))}
                 placeholder="THK" maxLength={4}
                 className="w-full pl-8 pr-3 py-2 text-sm rounded-lg font-mono"
-                style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+                style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}
               />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="acuf-role" className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Rôle</label>
+            <label htmlFor="acuf-role" className="text-xs font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>Rôle</label>
             <select id="acuf-role" value={role} onChange={e => setRole(e.target.value as UserRole)}
               className="w-full px-3 py-2 text-sm rounded-lg"
-              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
+              style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}>
               <option value="technicien">Technicien</option>
               <option value="charge_mission">Chargé de mission</option>
               <option value="admin">Admin</option>
@@ -150,20 +152,20 @@ export function AdminCreateUserForm() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="acuf-email" className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Email</label>
+          <label htmlFor="acuf-email" className="text-xs font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>Email</label>
           <div className="relative">
             <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
             <input id="acuf-email" type="email" value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="prenom.nom@labocea.fr"
               className="w-full pl-8 pr-3 py-2 text-sm rounded-lg"
-              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+              style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}
             />
           </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="acuf-password" className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+          <label htmlFor="acuf-password" className="text-xs font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>
             Mot de passe provisoire
           </label>
           <div className="relative">
@@ -172,7 +174,7 @@ export function AdminCreateUserForm() {
               onChange={e => setPassword(e.target.value)}
               placeholder="6 caractères minimum"
               className="w-full pl-8 pr-3 py-2 text-sm rounded-lg"
-              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+              style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}
             />
           </div>
           <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -182,14 +184,14 @@ export function AdminCreateUserForm() {
 
         {error && (
           <p className="text-sm px-3 py-2 rounded-lg"
-            style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+            style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
             {error}
           </p>
         )}
 
         {success && (
           <div className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg"
-            style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>
+            style={{ background: 'var(--color-success-light)', color: COLORS.SUCCESS }}>
             <Check size={15} />
             Compte créé avec succès.
           </div>
@@ -197,7 +199,7 @@ export function AdminCreateUserForm() {
 
         <button type="submit" disabled={loading}
           className="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium"
-          style={{ background: 'var(--color-accent)', color: 'white', opacity: loading ? 0.7 : 1 }}>
+          style={{ background: COLORS.ACCENT, color: 'white', opacity: loading ? 0.7 : 1 }}>
           {loading ? (
             <><Loader2 size={15} className="animate-spin" /> Création en cours…</>
           ) : (

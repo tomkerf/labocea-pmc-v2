@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { VisitePreliminaire } from '@/types'
+import { COLLECTIONS } from '@/lib/constants'
+
 
 export function useVisites(linkedId: string) {
   const [visites, setVisites] = useState<VisitePreliminaire[]>([])
@@ -19,7 +21,7 @@ export function useVisites(linkedId: string) {
   useEffect(() => {
     if (!linkedId) return
     const q = query(
-      collection(db, 'visites'),
+      collection(db, COLLECTIONS.VISITES),
       where('linkedTo.id', '==', linkedId),
     )
     const unsub = onSnapshot(q, (snap) => {

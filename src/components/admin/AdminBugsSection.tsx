@@ -3,9 +3,11 @@ import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase
 import { Bug } from 'lucide-react'
 import { db } from '@/lib/firebase'
 import type { BugReport } from '@/types'
+import { COLLECTIONS, COLORS } from '@/lib/constants'
+
 
 async function markTraite(id: string) {
-  await updateDoc(doc(db, 'bugs', id), { status: 'traite' })
+  await updateDoc(doc(db, COLLECTIONS.BUGS, id), { status: 'traite' })
 }
 
 export function AdminBugsSection() {
@@ -13,7 +15,7 @@ export function AdminBugsSection() {
   const [showTraites, setShowTraites] = useState(false)
 
   useEffect(() => {
-    const q = query(collection(db, 'bugs'), orderBy('createdAt', 'desc'))
+    const q = query(collection(db, COLLECTIONS.BUGS), orderBy('createdAt', 'desc'))
     return onSnapshot(q, snap => {
       setBugs(snap.docs.map(d => ({ id: d.id, ...d.data() }) as BugReport))
     })
@@ -26,11 +28,11 @@ export function AdminBugsSection() {
   return (
     <section>
       <h2 className="text-sm font-semibold mb-3"
-        style={{ color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        style={{ color: COLORS.TEXT_SECONDARY, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         Problèmes signalés ({ouverts.length})
       </h2>
       <div className="flex flex-col rounded-xl overflow-hidden"
-        style={{ border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
+        style={{ border: '1px solid var(--color-border-subtle)', background: COLORS.BG_SECONDARY }}>
         {ouverts.length === 0 && !showTraites && (
           <p className="px-5 py-4 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
             Aucun signalement en attente.
@@ -42,7 +44,7 @@ export function AdminBugsSection() {
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Bug size={13} strokeWidth={1.8} style={{ color: 'var(--color-text-tertiary)' }} />
-                <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                <span className="text-xs font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>
                   {bug.userInitiales || bug.userNom}
                 </span>
                 <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -52,13 +54,13 @@ export function AdminBugsSection() {
               <div className="flex items-center gap-2">
                 {bug.status === 'traite' ? (
                   <span className="text-xs font-medium px-2 py-0.5 rounded-full"
-                    style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>
+                    style={{ background: 'var(--color-success-light)', color: COLORS.SUCCESS }}>
                     Traité
                   </span>
                 ) : (
                   <button type="button" onClick={() => markTraite(bug.id)}
                     className="text-xs font-medium px-2 py-0.5 rounded-full"
-                    style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+                    style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}>
                     Marquer traité
                   </button>
                 )}
@@ -69,7 +71,7 @@ export function AdminBugsSection() {
                 </span>
               </div>
             </div>
-            <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+            <p className="text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>
               {bug.description}
             </p>
           </div>
@@ -77,7 +79,7 @@ export function AdminBugsSection() {
         {traites.length > 0 && (
           <div className="px-5 py-3" style={{ borderTop: visible.length > 0 || ouverts.length === 0 ? '1px solid var(--color-border-subtle)' : 'none' }}>
             <button type="button" onClick={() => setShowTraites(v => !v)}
-              className="text-xs" style={{ color: 'var(--color-accent)' }}>
+              className="text-xs" style={{ color: COLORS.ACCENT }}>
               {showTraites ? 'Masquer les traités' : `Voir les ${traites.length} traité${traites.length > 1 ? 's' : ''}`}
             </button>
           </div>

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import type { Client, TerrainEntry, TerrainType } from '@/types'
 import { TYPE_CONFIG } from './entryConfig'
+import { COLORS } from '@/lib/constants'
+
 
 /** Supprime les champs undefined d'un objet — Firestore les rejette */
 function stripUndef<T extends object>(obj: T): T {
@@ -20,9 +22,9 @@ export interface FormProps {
 }
 
 const inputStyle = {
-  background: 'var(--color-bg-tertiary)',
+  background: COLORS.BG_TERTIARY,
   border: '1px solid var(--color-border)',
-  color: 'var(--color-text-primary)',
+  color: COLORS.TEXT_PRIMARY,
 }
 
 export function EntryForm({ entry, clients, defaultClientId, error, onSave, onClose }: FormProps) {
@@ -68,21 +70,21 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
       style={{ background: 'rgba(0,0,0,0.35)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="w-full md:max-w-md rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden"
-        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)', maxHeight: '92dvh' }}>
+        style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-modal)', maxHeight: '92dvh' }}>
 
         {/* Handle mobile */}
         <div className="md:hidden flex justify-center pt-2.5 pb-1 shrink-0">
-          <div className="w-9 h-1 rounded-full" style={{ background: 'var(--color-border)' }} />
+          <div className="w-9 h-1 rounded-full" style={{ background: COLORS.BORDER }} />
         </div>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 shrink-0"
           style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h2 className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             {isEdit ? 'Modifier' : 'Nouvelle entrée'}
           </h2>
           <button type="button" onClick={onClose} aria-label="Fermer" className="p-1.5 rounded-lg"
-            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+            style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
             <X size={15} />
           </button>
         </div>
@@ -92,7 +94,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
 
           {/* Type */}
           <div role="group" aria-labelledby="entry-type-label">
-            <p id="entry-type-label" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Type</p>
+            <p id="entry-type-label" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Type</p>
             <div className="grid grid-cols-4 gap-1.5">
               {(Object.keys(TYPE_CONFIG) as TerrainType[]).map(t => {
                 const cfg = TYPE_CONFIG[t]
@@ -101,7 +103,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
                   <button type="button" key={t} onClick={() => setType(t)}
                     className="flex flex-col items-center gap-1 py-2.5 px-1 rounded-lg text-[10px] font-semibold transition-all"
                     style={{
-                      background: active ? cfg.bg : 'var(--color-bg-tertiary)',
+                      background: active ? cfg.bg : COLORS.BG_TERTIARY,
                       color: active ? cfg.color : 'var(--color-text-tertiary)',
                       border: `1px solid ${active ? cfg.color + '40' : 'var(--color-border-subtle)'}`,
                     }}>
@@ -116,7 +118,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           {/* Client */}
           {!isEdit && (
             <div>
-              <label htmlFor="entry-client" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Client</label>
+              <label htmlFor="entry-client" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Client</label>
               <select id="entry-client" value={clientId} onChange={e => setClientId(e.target.value)}
                 className={inputCls} style={inputStyle}>
                 {clients.map(c => (
@@ -130,29 +132,29 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           {type === 'contact' && (
             <>
               <div>
-                <label htmlFor="entry-nom" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Nom *</label>
+                <label htmlFor="entry-nom" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Nom *</label>
                 <input id="entry-nom" value={nom} onChange={e => setNom(e.target.value)} placeholder="Prénom Nom"
                   className={inputCls} style={inputStyle} />
               </div>
               <div>
-                <label htmlFor="entry-role" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Rôle / Poste</label>
+                <label htmlFor="entry-role" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Rôle / Poste</label>
                 <input id="entry-role" value={role} onChange={e => setRole(e.target.value)} placeholder="Responsable exploitation…"
                   className={inputCls} style={inputStyle} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="entry-tel" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Mobile</label>
+                  <label htmlFor="entry-tel" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Mobile</label>
                   <input id="entry-tel" type="tel" value={tel} onChange={e => setTel(e.target.value)} placeholder="06 XX XX XX XX"
                     className={inputCls} style={inputStyle} />
                 </div>
                 <div>
-                  <label htmlFor="entry-tel2" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Fixe</label>
+                  <label htmlFor="entry-tel2" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Fixe</label>
                   <input id="entry-tel2" type="tel" value={tel2} onChange={e => setTel2(e.target.value)} placeholder="02 XX XX XX XX"
                     className={inputCls} style={inputStyle} />
                 </div>
               </div>
               <div>
-                <label htmlFor="entry-email" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Email</label>
+                <label htmlFor="entry-email" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Email</label>
                 <input id="entry-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="prenom.nom@client.fr"
                   className={inputCls} style={inputStyle} />
               </div>
@@ -163,12 +165,12 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           {type === 'acces' && (
             <>
               <div>
-                <label htmlFor="entry-libelle-acces" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Libellé *</label>
+                <label htmlFor="entry-libelle-acces" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Libellé *</label>
                 <input id="entry-libelle-acces" value={libelle} onChange={e => setLibelle(e.target.value)} placeholder="Portail nord, Digicode…"
                   className={inputCls} style={inputStyle} />
               </div>
               <div>
-                <label htmlFor="entry-code" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Code *</label>
+                <label htmlFor="entry-code" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Code *</label>
                 <input id="entry-code" value={code} onChange={e => setCode(e.target.value)} placeholder="1234, A→B→C…"
                   className={`${inputCls} font-mono font-semibold tracking-widest`} style={inputStyle} />
               </div>
@@ -180,13 +182,13 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
             <>
               {type === 'site' && (
                 <div>
-                  <label htmlFor="entry-libelle-site" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Titre</label>
+                  <label htmlFor="entry-libelle-site" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Titre</label>
                   <input id="entry-libelle-site" value={libelle} onChange={e => setLibelle(e.target.value)} placeholder="Localisation, consigne…"
                     className={inputCls} style={inputStyle} />
                 </div>
               )}
               <div>
-                <label htmlFor="entry-contenu" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                <label htmlFor="entry-contenu" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                   {type === 'site' ? 'Description' : 'Note'}
                 </label>
                 <textarea id="entry-contenu" value={contenu} onChange={e => setContenu(e.target.value)} rows={4}
@@ -199,7 +201,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           {/* Notes communes */}
           {type !== 'note' && (
             <div>
-              <label htmlFor="entry-notes" className="text-xs font-medium block mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>Notes complémentaires</label>
+              <label htmlFor="entry-notes" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Notes complémentaires</label>
               <input id="entry-notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optionnel"
                 className={inputCls} style={inputStyle} />
             </div>
@@ -208,7 +210,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           {/* Erreur */}
           {error && (
             <p className="text-xs px-3 py-2 rounded-lg"
-              style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+              style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
               {error}
             </p>
           )}
@@ -217,7 +219,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           <button type="button" onClick={handleSave} disabled={!canSave}
             className="w-full py-2.5 rounded-lg text-sm font-medium"
             style={{
-              background: canSave ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
+              background: canSave ? COLORS.ACCENT : COLORS.BG_TERTIARY,
               color: canSave ? 'white' : 'var(--color-text-tertiary)',
             }}>
             {isEdit ? 'Enregistrer' : 'Créer'}

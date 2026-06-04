@@ -1,6 +1,8 @@
 import { FileText } from 'lucide-react'
 import { type VolumeResult, type VitesseResult, type PeseeResult, type TempResult, type AnalyseRow, analyseConforme } from '@/lib/bilanCalcs'
 import { Card, SectionTitle, StatusBadge, ResultRow } from './BilanUI'
+import { COLORS } from '@/lib/constants'
+
 
 export function TabSynthese({
   fields, volRes, vitRes, pesRes, tmpRes, analyses
@@ -126,14 +128,14 @@ export function TabSynthese({
     <div className="flex flex-col gap-4">
       <div className="rounded-[var(--radius-md)] p-6 text-center"
         style={{
-          background: !allDone ? 'var(--color-bg-secondary)'
+          background: !allDone ? COLORS.BG_SECONDARY
             : allConf ? 'var(--color-success-light)' : 'var(--color-danger-light)',
           border: `1px solid ${!allDone ? 'var(--color-border-subtle)'
-            : allConf ? 'var(--color-success)' : 'var(--color-danger)'}`,
+            : allConf ? COLORS.SUCCESS : COLORS.DANGER}`,
           boxShadow: 'var(--shadow-card)',
         }}>
         <div className="text-4xl mb-2">{!allDone ? '⏳' : allConf ? '✅' : '❌'}</div>
-        <div className="text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>
+        <div className="text-base font-bold" style={{ color: COLORS.TEXT_PRIMARY }}>
           {!allDone ? 'En attente des vérifications' : allConf ? 'Appareil CONFORME' : 'Appareil NON CONFORME'}
         </div>
         <div className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -145,12 +147,12 @@ export function TabSynthese({
         {items.map(item => (
           <div key={item.label} className="rounded-[var(--radius-md)] p-4 flex items-center justify-between"
             style={{
-              background: 'var(--color-bg-secondary)',
-              border: `1px solid ${item.conf === null ? 'var(--color-border-subtle)' : item.conf ? 'var(--color-success)' : 'var(--color-danger)'}`,
+              background: COLORS.BG_SECONDARY,
+              border: `1px solid ${item.conf === null ? 'var(--color-border-subtle)' : item.conf ? COLORS.SUCCESS : COLORS.DANGER}`,
               boxShadow: 'var(--shadow-card)',
             }}>
             <div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{item.label}</p>
+              <p className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>{item.label}</p>
               <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{item.sub}</p>
             </div>
             <StatusBadge conforme={item.conf} />
@@ -178,7 +180,7 @@ export function TabSynthese({
 
       <button type="button" onClick={generatePDF}
         className="flex items-center justify-center gap-2 w-full py-3 rounded-[var(--radius-md)] font-semibold text-sm"
-        style={{ background: 'var(--color-accent)', color: '#fff' }}>
+        style={{ background: COLORS.ACCENT, color: '#fff' }}>
         <FileText size={16} strokeWidth={1.8} />
         Générer le rapport PDF
       </button>

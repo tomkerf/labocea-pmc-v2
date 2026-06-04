@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronRight, AlertTriangle } from 'lucide-react'
 import type { Client } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
+import { COLORS } from '@/lib/constants'
+
 
 const MOIS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 
@@ -50,36 +52,36 @@ export default function ClientCard({ client }: Props) {
       onClick={() => navigate(`/missions/${client.id}`)}
       className="w-full text-left flex items-center gap-4 px-5 py-4 rounded-xl transition-colors"
       style={{
-        background: 'var(--color-bg-secondary)',
+        background: COLORS.BG_SECONDARY,
         border: '1px solid var(--color-border-subtle)',
         boxShadow: 'var(--shadow-card)',
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+      onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
       {/* Initiale */}
       <div className="size-9 rounded-full flex items-center justify-center text-sm font-semibold shrink-0"
-        style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+        style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
         {client.nom.charAt(0).toUpperCase()}
       </div>
 
       {/* Infos principales */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+          <span className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
             {client.nom}
           </span>
           {counts.overdue > 0 && (
-            <AlertTriangle size={14} strokeWidth={2} className="shrink-0" style={{ color: 'var(--color-danger)' }} />
+            <AlertTriangle size={14} strokeWidth={2} className="shrink-0" style={{ color: COLORS.DANGER }} />
           )}
         </div>
         <div className="flex items-center gap-3 mt-0.5">
-          <span className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+          <span className="text-xs truncate" style={{ color: COLORS.TEXT_SECONDARY }}>
             {client.segment || '—'}
           </span>
           {client.preleveur && (
             <span className="text-xs px-1.5 py-0.5 rounded font-medium"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
               {client.preleveur}
             </span>
           )}
@@ -91,12 +93,12 @@ export default function ClientCard({ client }: Props) {
         {next ? (
           <>
             <p className="text-xs font-medium flex items-center justify-end gap-1"
-              style={{ color: next.overdue ? 'var(--color-danger)' : 'var(--color-text-secondary)' }}>
+              style={{ color: next.overdue ? COLORS.DANGER : COLORS.TEXT_SECONDARY }}>
               {next.overdue
                 ? <AlertTriangle size={12} strokeWidth={2} />
                 : 'Prochain'}
             </p>
-            <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            <p className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
               {next.label}
             </p>
           </>

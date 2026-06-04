@@ -1,4 +1,6 @@
 import { X, MapPin, CalendarClock } from 'lucide-react'
+import { COLORS } from '@/lib/constants'
+
 
 export interface TourneeItemData {
   samplingId: string
@@ -34,11 +36,11 @@ export function TourneeItem({ item, onAction }: Props) {
     ? 'var(--color-warning-light)'
     : isReporte
     ? 'var(--color-accent-light)'
-    : 'var(--color-bg-secondary)'
+    : COLORS.BG_SECONDARY
 
   const badgeLabel = isDone ? 'Réalisé' : isNonFait ? 'Non effectué' : isReporte ? 'Reporté' : 'À faire'
-  const badgeBg    = isDone ? 'var(--color-success-light)' : isNonFait ? 'var(--color-warning-light)' : isReporte ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)'
-  const badgeColor = isDone ? 'var(--color-success)' : isNonFait ? 'var(--color-warning)' : isReporte ? 'var(--color-accent)' : 'var(--color-text-secondary)'
+  const badgeBg    = isDone ? 'var(--color-success-light)' : isNonFait ? 'var(--color-warning-light)' : isReporte ? 'var(--color-accent-light)' : COLORS.BG_TERTIARY
+  const badgeColor = isDone ? COLORS.SUCCESS : isNonFait ? COLORS.WARNING : isReporte ? COLORS.ACCENT : COLORS.TEXT_SECONDARY
 
   const hasGps = item.lat !== '' && item.lng !== ''
   const mapsUrl = `https://maps.apple.com/?q=${item.lat},${item.lng}`
@@ -50,17 +52,17 @@ export function TourneeItem({ item, onAction }: Props) {
       <div className="flex items-start gap-3 px-4 pt-4 pb-2">
         {item.time ? (
           <span className="text-xs font-semibold shrink-0 w-12 text-center px-1.5 py-1 rounded-lg"
-            style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+            style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
             {item.time}
           </span>
         ) : (
-          <span className="shrink-0 size-2 rounded-full mt-1.5" style={{ background: 'var(--color-accent)' }} />
+          <span className="shrink-0 size-2 rounded-full mt-1.5" style={{ background: COLORS.ACCENT }} />
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-base font-semibold leading-snug" style={{ color: 'var(--color-text-primary)' }}>
+          <p className="text-base font-semibold leading-snug" style={{ color: COLORS.TEXT_PRIMARY }}>
             {item.clientNom}
           </p>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
             {item.siteNom} · {item.planNom}
           </p>
         </div>
@@ -81,14 +83,14 @@ export function TourneeItem({ item, onAction }: Props) {
               aria-label="Réalisé"
               onClick={() => onAction(item.samplingId, 'done')}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all"
-              style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>
+              style={{ background: 'var(--color-success-light)', color: COLORS.SUCCESS }}>
               Réalisé
             </button>
             <button type="button"
               aria-label="Non effectué"
               onClick={() => onAction(item.samplingId, 'non_effectue')}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all"
-              style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+              style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
               <X size={15} />
               Non effectué
             </button>
@@ -96,7 +98,7 @@ export function TourneeItem({ item, onAction }: Props) {
               aria-label="Décaler"
               onClick={() => onAction(item.samplingId, 'reporter')}
               className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}>
               <CalendarClock size={15} />
             </button>
             {hasGps && (
@@ -106,7 +108,7 @@ export function TourneeItem({ item, onAction }: Props) {
                 rel="noopener noreferrer"
                 aria-label="GPS"
                 className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium"
-                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
                 <MapPin size={15} />
               </a>
             )}
@@ -119,7 +121,7 @@ export function TourneeItem({ item, onAction }: Props) {
             aria-label="Décaler"
             onClick={() => onAction(item.samplingId, 'reporter')}
             className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold"
-            style={{ background: 'var(--color-accent)', color: 'white' }}>
+            style={{ background: COLORS.ACCENT, color: 'white' }}>
             <CalendarClock size={15} />
             Décaler la mission
           </button>
@@ -127,7 +129,7 @@ export function TourneeItem({ item, onAction }: Props) {
             aria-label="Non effectué"
             onClick={() => onAction(item.samplingId, 'non_effectue')}
             className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-medium"
-            style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+            style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
             <X size={14} />
             Non effectué
           </button>

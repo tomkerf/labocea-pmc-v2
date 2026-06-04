@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom'
 import { X, ExternalLink } from 'lucide-react'
 import { useUsersStore } from '@/stores/usersStore'
 import type { PlanningEvent } from '@/lib/planningUtils'
+import { COLORS } from '@/lib/constants'
+
 
 function fmtDate(iso?: string) {
   if (!iso) return '—'
@@ -34,11 +36,11 @@ export default function GhostDetailModal({ event, onClose }: { event: PlanningEv
       style={{ background: 'rgba(0,0,0,0.4)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="w-full md:max-w-sm flex flex-col rounded-t-[20px] md:rounded-2xl"
-        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)', maxHeight: '90dvh', overflow: 'hidden' }}>
+        style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-modal)', maxHeight: '90dvh', overflow: 'hidden' }}>
 
         {/* Handle mobile */}
         <div className="md:hidden flex justify-center pt-2.5 pb-1 shrink-0">
-          <div className="w-9 h-1 rounded-full" style={{ background: 'var(--color-border)' }} />
+          <div className="w-9 h-1 rounded-full" style={{ background: COLORS.BORDER }} />
         </div>
 
         {/* Header */}
@@ -46,23 +48,23 @@ export default function GhostDetailModal({ event, onClose }: { event: PlanningEv
           <span className="size-2.5 rounded-full shrink-0 mt-1.5" style={{ background: 'var(--color-neutral)' }} />
           <div className="flex-1 min-w-0">
             <p className="text-base font-semibold leading-snug"
-              style={{ color: 'var(--color-text-primary)', textDecoration: isRetrait ? 'line-through' : 'none' }}>
+              style={{ color: COLORS.TEXT_PRIMARY, textDecoration: isRetrait ? 'line-through' : 'none' }}>
               {event.title}
             </p>
             {event.subtitle && event.subtitle !== '—' && (
-              <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+              <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                 {event.subtitle}
               </p>
             )}
             <div className="flex items-center gap-1.5 mt-2">
               <span className="text-[11px] px-2 py-0.5 rounded-full font-medium"
-                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
                 {isRetrait ? '↩ Retiré du calendrier' : '→ Reporté'}
               </span>
             </div>
           </div>
           <button type="button" onClick={onClose} className="p-1.5 rounded-lg shrink-0 mt-0.5"
-            style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
+            style={{ color: 'var(--color-text-tertiary)', background: COLORS.BG_TERTIARY }}>
             <X size={15} />
           </button>
         </div>
@@ -76,7 +78,7 @@ export default function GhostDetailModal({ event, onClose }: { event: PlanningEv
           {event.ghostNewDate && !isRetrait && (
             <div>
               <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Reporté au</p>
-              <p className="text-sm font-medium capitalize" style={{ color: 'var(--color-text-primary)' }}>
+              <p className="text-sm font-medium capitalize" style={{ color: COLORS.TEXT_PRIMARY }}>
                 {fmtDate(event.ghostNewDate)}
               </p>
             </div>
@@ -85,7 +87,7 @@ export default function GhostDetailModal({ event, onClose }: { event: PlanningEv
           {event.ghostReason && (
             <div>
               <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Motif</p>
-              <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+              <p className="text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>
                 {event.ghostReason}
               </p>
             </div>
@@ -94,14 +96,14 @@ export default function GhostDetailModal({ event, onClose }: { event: PlanningEv
           {event.ghostBy && (
             <div>
               <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Par</p>
-              <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{resolveUser(event.ghostBy)}</p>
+              <p className="text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>{resolveUser(event.ghostBy)}</p>
             </div>
           )}
 
           {event.ghostAt && (
             <div>
               <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--color-text-tertiary)' }}>Le</p>
-              <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{fmtDateTime(event.ghostAt)}</p>
+              <p className="text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>{fmtDateTime(event.ghostAt)}</p>
             </div>
           )}
 
@@ -112,7 +114,7 @@ export default function GhostDetailModal({ event, onClose }: { event: PlanningEv
                 setTimeout(() => navigate(event.link), 50)
               }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full mt-1"
-              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+              style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
               <ExternalLink size={15} />
               Voir la mission
             </button>

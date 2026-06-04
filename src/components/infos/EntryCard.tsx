@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Phone, Mail, Copy, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react'
 import type { TerrainEntry, TerrainType } from '@/types'
 import { TYPE_CONFIG } from './entryConfig'
+import { COLORS } from '@/lib/constants'
+
 
 export function Badge({ type }: { type: TerrainType }) {
   const cfg = TYPE_CONFIG[type]
@@ -33,7 +35,7 @@ export function EntryCard({
   return (
     <div className="rounded-[var(--radius-md)] overflow-hidden"
       style={{
-        background: 'var(--color-bg-secondary)',
+        background: COLORS.BG_SECONDARY,
         border: '1px solid var(--color-border-subtle)',
         boxShadow: 'var(--shadow-card)',
       }}>
@@ -48,11 +50,11 @@ export function EntryCard({
           {/* Contact */}
           {entry.type === 'contact' && (
             <div>
-              <p className="text-sm font-semibold leading-snug" style={{ color: 'var(--color-text-primary)' }}>
+              <p className="text-sm font-semibold leading-snug" style={{ color: COLORS.TEXT_PRIMARY }}>
                 {entry.nom || '—'}
               </p>
               {entry.role && (
-                <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                <p className="text-xs mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                   {entry.role}
                 </p>
               )}
@@ -60,7 +62,7 @@ export function EntryCard({
                 {entry.tel && (
                   <a href={`tel:${entry.tel}`}
                     className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg"
-                    style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                    style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
                     <Phone size={11} strokeWidth={2} />
                     {entry.tel}
                     <button type="button" onClick={e => { e.preventDefault(); copy(entry.tel!) }}
@@ -72,7 +74,7 @@ export function EntryCard({
                 {entry.tel2 && (
                   <a href={`tel:${entry.tel2}`}
                     className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg"
-                    style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                    style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
                     <Phone size={11} strokeWidth={2} />
                     {entry.tel2}
                     <button type="button" onClick={e => { e.preventDefault(); copy(entry.tel2!) }}
@@ -84,7 +86,7 @@ export function EntryCard({
                 {entry.email && (
                   <a href={`mailto:${entry.email}`}
                     className="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded"
-                    style={{ color: 'var(--color-text-secondary)' }}>
+                    style={{ color: COLORS.TEXT_SECONDARY }}>
                     <Mail size={11} strokeWidth={1.8} />
                     {entry.email}
                   </a>
@@ -96,7 +98,7 @@ export function EntryCard({
           {/* Accès */}
           {entry.type === 'acces' && (
             <div>
-              <p className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              <p className="text-sm font-semibold mb-2" style={{ color: COLORS.TEXT_PRIMARY }}>
                 {entry.libelle || 'Code'}
               </p>
               <div className="flex items-center gap-2">
@@ -104,9 +106,9 @@ export function EntryCard({
                   onClick={() => setRevealed(v => !v)}
                   className="flex-1 px-3 py-2 rounded-lg text-sm font-semibold font-mono cursor-pointer select-none transition-all"
                   style={{
-                    background: 'var(--color-bg-tertiary)',
+                    background: COLORS.BG_TERTIARY,
                     border: '1px solid var(--color-border)',
-                    color: 'var(--color-warning)',
+                    color: COLORS.WARNING,
                     filter: revealed ? 'none' : 'blur(6px)',
                     userSelect: revealed ? 'text' : 'none',
                   }}>
@@ -115,7 +117,7 @@ export function EntryCard({
                 <button type="button"
                   onClick={() => setRevealed(v => !v)}
                   className="p-2 rounded-lg shrink-0"
-                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                  style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
                   {revealed ? <EyeOff size={15} strokeWidth={1.8} /> : <Eye size={15} strokeWidth={1.8} />}
                 </button>
                 {revealed && entry.code && (
@@ -123,8 +125,8 @@ export function EntryCard({
                     onClick={() => copy(entry.code!)}
                     className="p-2 rounded-lg shrink-0"
                     style={{
-                      background: copied ? 'var(--color-success-light)' : 'var(--color-bg-tertiary)',
-                      color: copied ? 'var(--color-success)' : 'var(--color-text-secondary)',
+                      background: copied ? 'var(--color-success-light)' : COLORS.BG_TERTIARY,
+                      color: copied ? COLORS.SUCCESS : COLORS.TEXT_SECONDARY,
                     }}>
                     <Copy size={15} strokeWidth={1.8} />
                   </button>
@@ -137,12 +139,12 @@ export function EntryCard({
           {(entry.type === 'site' || entry.type === 'note') && (
             <div>
               {entry.libelle && (
-                <p className="text-sm font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                <p className="text-sm font-semibold mb-1" style={{ color: COLORS.TEXT_PRIMARY }}>
                   {entry.libelle}
                 </p>
               )}
               {entry.contenu && (
-                <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--color-text-secondary)' }}>
+                <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: COLORS.TEXT_SECONDARY }}>
                   {entry.contenu}
                 </p>
               )}
@@ -162,7 +164,7 @@ export function EntryCard({
         <div className="flex flex-col gap-1 p-2 shrink-0 justify-start">
           <button type="button" onClick={onEdit}
             className="p-2 rounded-lg"
-            style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+            style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
             <Pencil size={13} strokeWidth={1.8} />
           </button>
           <button type="button" onClick={onDelete}

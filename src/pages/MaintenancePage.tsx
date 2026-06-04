@@ -7,6 +7,8 @@ import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useDocumentData } from '@/hooks/useDocumentData'
 import type { Maintenance, TypeMaintenance, StatutMaintenance } from '@/types'
+import { COLLECTIONS, COLORS } from '@/lib/constants'
+
 
 const TYPES: { value: TypeMaintenance; label: string }[] = [
   { value: 'preventive', label: 'Préventive' },
@@ -35,9 +37,9 @@ export default function MaintenancePage() {
     onAfterSave: async (updated) => {
       if (!updated.equipementId) return
       if (updated.statut === 'en_cours') {
-        await updateDoc(doc(db, 'equipements', updated.equipementId), { etat: 'en_maintenance' })
+        await updateDoc(doc(db, COLLECTIONS.EQUIPEMENTS, updated.equipementId), { etat: 'en_maintenance' })
       } else if (updated.statut === 'realisee' || updated.statut === 'abandonnee') {
-        await updateDoc(doc(db, 'equipements', updated.equipementId), { etat: 'operationnel' })
+        await updateDoc(doc(db, COLLECTIONS.EQUIPEMENTS, updated.equipementId), { etat: 'operationnel' })
       }
     },
     deleteRedirect: '/maintenances',
@@ -56,28 +58,28 @@ export default function MaintenancePage() {
   if (loading) return (
     <div className="flex justify-center py-20">
       <div className="size-6 rounded-full border-2 animate-spin"
-        style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+        style={{ borderColor: COLORS.BORDER, borderTopColor: COLORS.ACCENT }} />
     </div>
   )
   if (!maintenance) return (
-    <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Intervention introuvable.</div>
+    <div className="p-6 text-sm" style={{ color: COLORS.DANGER }}>Intervention introuvable.</div>
   )
 
   return (
     <div className="p-6 max-w-2xl">
       {/* Retour */}
       <button type="button" onClick={() => navigate('/maintenances')}
-        className="flex items-center gap-1 text-sm mb-6" style={{ color: 'var(--color-accent)' }}>
+        className="flex items-center gap-1 text-sm mb-6" style={{ color: COLORS.ACCENT }}>
         <ChevronLeft size={16} /> Maintenances
       </button>
 
       {/* En-tête */}
       <div className="flex items-start justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             {maintenance.equipementNom || 'Nouvelle intervention'}
           </h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
             {maintenance.type === 'preventive' ? 'Maintenance préventive'
               : maintenance.type === 'corrective' ? 'Maintenance corrective'
               : 'Panne'}
@@ -88,13 +90,13 @@ export default function MaintenancePage() {
           {confirmDelete ? (
             <div className="flex items-center gap-1.5">
               <button type="button" onClick={handleDelete} className="text-sm px-3 py-1.5 rounded-lg font-medium"
-                style={{ background: 'var(--color-danger)', color: 'white' }}>Supprimer</button>
+                style={{ background: COLORS.DANGER, color: 'white' }}>Supprimer</button>
               <button type="button" onClick={cancelDelete} className="text-sm px-2 py-1.5 rounded-lg"
-                style={{ color: 'var(--color-text-secondary)' }}>Annuler</button>
+                style={{ color: COLORS.TEXT_SECONDARY }}>Annuler</button>
             </div>
           ) : (
             <button type="button" onClick={requestDelete} className="p-2 rounded-lg"
-              style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}>
+              style={{ color: COLORS.DANGER, background: 'var(--color-danger-light)' }}>
               <Trash2 size={16} />
             </button>
           )}
@@ -144,25 +146,25 @@ export default function MaintenancePage() {
       {/* Description */}
       <Section title="Description">
         <div className="px-5 py-3" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <p className="text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Problème / motif</p>
+          <p className="text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Problème / motif</p>
           <textarea value={maintenance.description} onChange={(e) => update('description', e.target.value)}
             rows={2} placeholder="Description du problème ou motif de l'intervention…"
             aria-label="Problème ou motif de l'intervention"
-            className="w-full text-sm resize-none bg-transparent outline-none" style={{ color: 'var(--color-text-primary)' }} />
+            className="w-full text-sm resize-none bg-transparent outline-none" style={{ color: COLORS.TEXT_PRIMARY }} />
         </div>
         <div className="px-5 py-3" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <p className="text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Travaux réalisés</p>
+          <p className="text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Travaux réalisés</p>
           <textarea value={maintenance.travauxRealises} onChange={(e) => update('travauxRealises', e.target.value)}
             rows={2} placeholder="Détail des travaux effectués…"
             aria-label="Travaux réalisés"
-            className="w-full text-sm resize-none bg-transparent outline-none" style={{ color: 'var(--color-text-primary)' }} />
+            className="w-full text-sm resize-none bg-transparent outline-none" style={{ color: COLORS.TEXT_PRIMARY }} />
         </div>
         <div className="px-5 py-3">
-          <p className="text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Pièces remplacées</p>
+          <p className="text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Pièces remplacées</p>
           <textarea value={maintenance.piecesRemplacees} onChange={(e) => update('piecesRemplacees', e.target.value)}
             rows={2} placeholder="Liste des pièces remplacées…"
             aria-label="Pièces remplacées"
-            className="w-full text-sm resize-none bg-transparent outline-none" style={{ color: 'var(--color-text-primary)' }} />
+            className="w-full text-sm resize-none bg-transparent outline-none" style={{ color: COLORS.TEXT_PRIMARY }} />
         </div>
       </Section>
 
@@ -188,7 +190,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       <h2 className="text-xs font-semibold uppercase mb-2"
         style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>{title}</h2>
       <div className="rounded-xl overflow-hidden"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         {children}
       </div>
     </div>
@@ -199,7 +201,7 @@ function Field({ label, children, last }: { label: string; children: React.React
   return (
     <div className="flex items-center gap-4 px-5 py-3"
       style={{ borderBottom: last ? 'none' : '1px solid var(--color-border-subtle)' }}>
-      <label className="text-sm shrink-0" style={{ color: 'var(--color-text-secondary)', minWidth: '180px' }}>{label}</label>
+      <label className="text-sm shrink-0" style={{ color: COLORS.TEXT_SECONDARY, minWidth: '180px' }}>{label}</label>
       <div className="flex-1">{children}</div>
     </div>
   )

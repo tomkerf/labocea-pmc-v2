@@ -8,6 +8,8 @@
 import { useNavigate } from 'react-router-dom'
 import { CheckCircle2, FileText, Bell, Wrench, CheckSquare, CalendarDays, Droplet } from 'lucide-react'
 import { getTechColor, isVeilleJourFerie, type PlanningEvent } from '@/lib/planningUtils'
+import { COLORS } from '@/lib/constants'
+
 
 interface EventPillProps {
   event:     PlanningEvent
@@ -48,17 +50,17 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
         onClick={handleClick}
         onMouseDown={e => e.stopPropagation()}
         className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
-        style={{ cursor: 'pointer', border: '1px dashed var(--color-border)', background: 'var(--color-bg-tertiary)' }}
+        style={{ cursor: 'pointer', border: '1px dashed var(--color-border)', background: COLORS.BG_TERTIARY }}
         title={`${event.title} — ${event.ghostAction}${event.ghostReason ? ' · ' + event.ghostReason : ''}`}
       >
         <div className="flex items-center gap-1">
           <span className="shrink-0 text-[9px]">{isRetrait ? '↩' : '→'}</span>
           <span className="flex-1 truncate text-[10px]"
-            style={{ color: 'var(--color-text-secondary)', textDecoration: isRetrait ? 'line-through' : 'none', fontStyle: 'italic' }}>
+            style={{ color: COLORS.TEXT_SECONDARY, textDecoration: isRetrait ? 'line-through' : 'none', fontStyle: 'italic' }}>
             {event.title}
           </span>
           <span className="shrink-0 text-[9px] font-medium px-1 rounded"
-            style={{ background: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
+            style={{ background: COLORS.BORDER, color: COLORS.TEXT_SECONDARY }}>
             {ghostLabel}
           </span>
         </div>
@@ -70,7 +72,7 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
   const isConge   = event.type === 'evenement' && event.evenementData?.type === 'conge'
   const techColor = getTechColor(event.technicien).color
   const dotColor  = event.type === 'prelevement'
-    ? event.priority === 0 ? 'var(--color-danger)'   // overdue → rouge
+    ? event.priority === 0 ? COLORS.DANGER   // overdue → rouge
     : event.priority === 1 ? 'var(--color-neutral)'  // non_effectué → gris
     : techColor                                        // planifié → couleur tech
     : event.type === 'evenement' || event.type === 'rapport' ? techColor
@@ -87,12 +89,12 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
     return (
       <div
         className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
-        style={{ background: 'var(--color-bg-tertiary)', cursor: 'default', opacity: 0.85 }}
+        style={{ background: COLORS.BG_TERTIARY, cursor: 'default', opacity: 0.85 }}
         title={event.title}
       >
         <div className="flex items-center gap-1">
           <span className="shrink-0 text-[10px]">🏖️</span>
-          <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+          <span className="flex-1 truncate text-[11px] font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>
             {event.title || 'Congé/RTT'}
           </span>
           {hasTech && (
@@ -113,7 +115,7 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
       onMouseDown={e => e.stopPropagation()}
       className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
       style={{
-        background: 'var(--color-bg-secondary)',
+        background: COLORS.BG_SECONDARY,
         border: `1px solid ${techColor}30`,
         cursor: isGrouped ? 'zoom-in' : event.type === 'evenement' ? 'default' : 'pointer',
       }}
@@ -140,7 +142,7 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
         {veilleFerrieNom && (
           <span className="shrink-0 text-[10px]" title={`Analyses sous-traitées — veille de ${veilleFerrieNom}`}>⚠️</span>
         )}
-        <span className="flex-1 truncate text-[11px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
+        <span className="flex-1 truncate text-[11px] font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>
           {event.title}
         </span>
         {(isJ1 || isJ2) && (
@@ -157,7 +159,7 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
         )}
         {isGrouped && (
           <span className="shrink-0 text-[9px] font-bold px-1 rounded"
-            style={{ background: expanded ? dotColor + '22' : 'var(--color-bg-tertiary)', color: expanded ? dotColor : 'var(--color-text-secondary)' }}>
+            style={{ background: expanded ? dotColor + '22' : COLORS.BG_TERTIARY, color: expanded ? dotColor : COLORS.TEXT_SECONDARY }}>
             {expanded ? '▲' : `×${event.count}`}
           </span>
         )}
@@ -169,7 +171,7 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
       </div>
       {/* Ligne 2 : sous-titre (masqué en vue mois compact) */}
       {hasSubtitle && (
-        <div className="text-[10px] truncate pl-[14px]" style={{ color: 'var(--color-text-secondary)' }}>
+        <div className="text-[10px] truncate pl-[14px]" style={{ color: COLORS.TEXT_SECONDARY }}>
           {event.subtitle}
         </div>
       )}

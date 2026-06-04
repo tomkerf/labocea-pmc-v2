@@ -1,5 +1,7 @@
 import { Cloud, CloudOff, CloudUpload } from 'lucide-react'
 import { useSyncStore, getSyncStatus } from '@/stores/syncStore'
+import { COLORS } from '@/lib/constants'
+
 
 interface SyncBadgeProps {
   className?: string
@@ -24,10 +26,10 @@ export default function SyncBadge({ className = '' }: SyncBadgeProps) {
     >
       {status === 'synced' && (
         <span className="relative flex items-center">
-          <Cloud size={16} strokeWidth={1.5} style={{ color: 'var(--color-success)' }} />
+          <Cloud size={16} strokeWidth={1.5} style={{ color: COLORS.SUCCESS }} />
           <span
             className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full flex items-center justify-center"
-            style={{ background: 'var(--color-success)' }}
+            style={{ background: COLORS.SUCCESS }}
           >
             <svg width="5" height="5" viewBox="0 0 5 5" fill="none">
               <path d="M1 2.5L2 3.5L4 1.5" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>

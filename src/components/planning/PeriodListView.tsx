@@ -4,6 +4,8 @@ import {
   JOURS_LONG, MOIS_LONG, sameDay,
 } from '@/lib/planningUtils'
 import EventRow from '@/components/planning/EventRow'
+import { COLORS } from '@/lib/constants'
+
 
 interface PeriodListViewProps {
   periodList:        { date: Date; dateStr: string; events: PlanningEvent[] }[]
@@ -22,11 +24,11 @@ export default function PeriodListView({
     <div className="px-4 py-4 space-y-4">
       {periodList.length===0 ? (
         <div className="rounded-xl px-5 py-12 text-center"
-          style={{ background:'var(--color-bg-secondary)', border:'1px solid var(--color-border-subtle)' }}>
+          style={{ background:COLORS.BG_SECONDARY, border:'1px solid var(--color-border-subtle)' }}>
           <p className="text-sm" style={{ color:'var(--color-text-tertiary)' }}>
             {filterRetard ? 'Aucun prélèvement en retard.' : 'Aucune intervention cette période.'}
           </p>
-          <button type="button" onClick={goToday} className="mt-3 text-xs" style={{ color:'var(--color-accent)' }}>
+          <button type="button" onClick={goToday} className="mt-3 text-xs" style={{ color:COLORS.ACCENT }}>
             Revenir à aujourd'hui
           </button>
         </div>
@@ -38,7 +40,7 @@ export default function PeriodListView({
             <div key={dateStr}>
               <div className="flex items-center gap-2 mb-1.5 px-1">
                 <span className="text-xs font-semibold capitalize"
-                  style={{ color:isToday?'#FF3B30':'var(--color-text-secondary)' }}>
+                  style={{ color:isToday?'#FF3B30':COLORS.TEXT_SECONDARY }}>
                   {JOURS_LONG[dayIdx]} {date.getDate()} {MOIS_LONG[date.getMonth()]}
                 </span>
                 {isToday && (
@@ -54,7 +56,7 @@ export default function PeriodListView({
                 </button>
               </div>
               <div className="rounded-xl overflow-hidden"
-                style={{ background:'var(--color-bg-secondary)', border:'1px solid var(--color-border-subtle)', boxShadow:'var(--shadow-card)' }}>
+                style={{ background:COLORS.BG_SECONDARY, border:'1px solid var(--color-border-subtle)', boxShadow:'var(--shadow-card)' }}>
                 {events.map((evt,i) => <EventRow key={evt.id} event={evt} isLast={i===events.length-1} onSelect={e => handleSelectEvent(e, dateStr)} />)}
               </div>
             </div>

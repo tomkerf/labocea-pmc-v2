@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { ExternalLink, ChevronRight, X, Trash2, AlertTriangle } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import type { EvenementPersonnel } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 // ── Types exportés ───────────────────────────────────────────
 
@@ -89,22 +91,22 @@ export function EventDetailModal({
       style={{ background: 'rgba(0,0,0,0.4)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="w-full md:max-w-sm flex flex-col rounded-t-[20px] md:rounded-2xl"
-        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)', maxHeight: '90dvh', overflow: 'hidden' }}>
+        style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-modal)', maxHeight: '90dvh', overflow: 'hidden' }}>
 
         {/* Handle mobile */}
         <div className="md:hidden flex justify-center pt-2.5 pb-1 shrink-0">
-          <div className="w-9 h-1 rounded-full" style={{ background: 'var(--color-border)' }} />
+          <div className="w-9 h-1 rounded-full" style={{ background: COLORS.BORDER }} />
         </div>
 
         {/* Header */}
         <div className="flex items-start gap-3 px-5 pt-4 pb-4">
           <span className="size-2.5 rounded-full shrink-0 mt-1.5" style={{ background: event.statusColor }} />
           <div className="flex-1 min-w-0">
-            <p className="text-base font-semibold leading-snug" style={{ color: 'var(--color-text-primary)' }}>
+            <p className="text-base font-semibold leading-snug" style={{ color: COLORS.TEXT_PRIMARY }}>
               {event.title}
             </p>
             {event.subtitle && event.subtitle !== '—' && (
-              <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+              <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                 {event.subtitle}
               </p>
             )}
@@ -115,13 +117,13 @@ export function EventDetailModal({
               </span>
               {event.technicien && event.technicien !== '—' && (
                 <span className="text-[11px] px-2 py-0.5 rounded-full font-medium"
-                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                  style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
                   {event.technicien}
                 </span>
               )}
               {event.plannedTime && (
                 <span className="text-[11px] px-2 py-0.5 rounded font-semibold"
-                  style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                  style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
                   {event.plannedTime}
                 </span>
               )}
@@ -131,7 +133,7 @@ export function EventDetailModal({
             </p>
           </div>
           <button type="button" onClick={onClose} aria-label="Fermer" className="p-1.5 rounded-lg shrink-0 mt-0.5"
-            style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
+            style={{ color: 'var(--color-text-tertiary)', background: COLORS.BG_TERTIARY }}>
             <X size={15} />
           </button>
         </div>
@@ -141,18 +143,18 @@ export function EventDetailModal({
         {/* Panneau déplacer */}
         {isMoving && (
           <div className="px-5 py-3.5 flex flex-col gap-2.5"
-            style={{ background: 'var(--color-bg-tertiary)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+            style={{ background: COLORS.BG_TERTIARY, borderBottom: '1px solid var(--color-border-subtle)' }}>
             <div>
-              <label htmlFor="edm-move-date" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+              <label htmlFor="edm-move-date" className="block text-xs font-medium mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                 Nouvelle date
               </label>
               <input id="edm-move-date" type="date" value={moveDate} onChange={e => setMoveDate(e.target.value)} autoFocus
                 className="w-full px-3 py-2 rounded-lg text-sm"
-                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+                style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
             </div>
             <div>
-              <label htmlFor="edm-move-reason" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
-                Motif du report <span style={{ color: 'var(--color-danger)' }}>*</span>
+              <label htmlFor="edm-move-reason" className="block text-xs font-medium mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+                Motif du report <span style={{ color: COLORS.DANGER }}>*</span>
               </label>
               <textarea
                 id="edm-move-reason"
@@ -160,11 +162,11 @@ export function EventDetailModal({
                 placeholder="Ex : météo défavorable, client indisponible…"
                 rows={2}
                 className="w-full px-3 py-2 rounded-lg text-sm resize-none"
-                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+                style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
             </div>
             <button type="button" onClick={handleMove} disabled={!moveDate || !moveReason.trim() || saving}
               className="px-4 py-2 rounded-lg text-sm font-medium self-end"
-              style={{ background: 'var(--color-accent)', color: 'white', opacity: (!moveDate || !moveReason.trim() || saving) ? 0.5 : 1 }}>
+              style={{ background: COLORS.ACCENT, color: 'white', opacity: (!moveDate || !moveReason.trim() || saving) ? 0.5 : 1 }}>
               {saving ? '…' : 'Déplacer'}
             </button>
           </div>
@@ -173,14 +175,14 @@ export function EventDetailModal({
         {/* Panneau changer technicien */}
         {isChangingTech && (
           <div className="px-5 py-3.5 flex items-end gap-3"
-            style={{ background: 'var(--color-bg-tertiary)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+            style={{ background: COLORS.BG_TERTIARY, borderBottom: '1px solid var(--color-border-subtle)' }}>
             <div className="flex-1">
-              <label htmlFor="edm-tech" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+              <label htmlFor="edm-tech" className="block text-xs font-medium mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                 Technicien assigné
               </label>
               <select id="edm-tech" value={techInitiales} onChange={e => setTechInitiales(e.target.value)} autoFocus
                 className="w-full px-3 py-2 rounded-lg text-sm"
-                style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}>
+                style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}>
                 {techOptions.map(o => (
                   <option key={o.code} value={o.code}>{o.label}</option>
                 ))}
@@ -188,7 +190,7 @@ export function EventDetailModal({
             </div>
             <button type="button" onClick={handleChangeTech} disabled={saving || !techInitiales.trim()}
               className="px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: 'var(--color-accent)', color: 'white', opacity: (saving || !techInitiales.trim()) ? 0.5 : 1 }}>
+              style={{ background: COLORS.ACCENT, color: 'white', opacity: (saving || !techInitiales.trim()) ? 0.5 : 1 }}>
               {saving ? '…' : 'Confirmer'}
             </button>
           </div>
@@ -208,7 +210,7 @@ export function EventDetailModal({
                 setTimeout(() => navigate(dest), 50)
               }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
-              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+              style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
               <ExternalLink size={15} />
               {event.type === 'prelevement' ? 'Voir la mission' :
                event.type === 'maintenance' ? 'Voir la maintenance' :
@@ -219,7 +221,7 @@ export function EventDetailModal({
           {isPrelev && !event.isDone && (
             <button type="button" onClick={() => { setIsMoving(v => !v); setIsChangingTech(false) }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border-subtle)' }}>
+              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY, border: '1px solid var(--color-border-subtle)' }}>
               <ChevronRight size={15} style={{ transform: isMoving ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
               Déplacer à une autre date
             </button>
@@ -228,7 +230,7 @@ export function EventDetailModal({
           {isPrelev && (
             <button type="button" onClick={() => { setIsChangingTech(v => !v); setIsMoving(false) }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border-subtle)' }}>
+              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY, border: '1px solid var(--color-border-subtle)' }}>
               <ChevronRight size={15} style={{ transform: isChangingTech ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
               Changer le technicien
             </button>
@@ -237,8 +239,8 @@ export function EventDetailModal({
           {isPrelev && !event.isDone && !confirmCancel && (
             <div className="flex flex-col gap-2">
               <div>
-                <label htmlFor="edm-cancel-reason" className="block text-xs font-medium mb-1.5" style={{ color: 'var(--color-text-secondary)' }}>
-                  Motif du retrait <span style={{ color: 'var(--color-danger)' }}>*</span>
+                <label htmlFor="edm-cancel-reason" className="block text-xs font-medium mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+                  Motif du retrait <span style={{ color: COLORS.DANGER }}>*</span>
                 </label>
                 <textarea
                   id="edm-cancel-reason"
@@ -246,11 +248,11 @@ export function EventDetailModal({
                   placeholder="Ex : reporté à une date ultérieure, annulé par le client…"
                   rows={2}
                   className="w-full px-3 py-2 rounded-lg text-sm resize-none"
-                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+                  style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
               </div>
               <button type="button" onClick={handleCancel} disabled={saving || !cancelReason.trim()}
                 className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
-                style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)', opacity: !cancelReason.trim() ? 0.5 : 1 }}>
+                style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER, opacity: !cancelReason.trim() ? 0.5 : 1 }}>
                 ↩ Retirer du calendrier
               </button>
             </div>
@@ -260,8 +262,8 @@ export function EventDetailModal({
             <div className="rounded-xl p-4 flex flex-col gap-3"
               style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
               <div className="flex items-start gap-2">
-                <AlertTriangle size={15} style={{ color: 'var(--color-danger)', flexShrink: 0, marginTop: 1 }} />
-                <p className="text-sm font-medium" style={{ color: 'var(--color-danger)' }}>
+                <AlertTriangle size={15} style={{ color: COLORS.DANGER, flexShrink: 0, marginTop: 1 }} />
+                <p className="text-sm font-medium" style={{ color: COLORS.DANGER }}>
                   Cette intervention appartient à <strong>{event.technicien}</strong>.
                   Es-tu sûr de vouloir la retirer du calendrier ?
                 </p>
@@ -269,12 +271,12 @@ export function EventDetailModal({
               <div className="flex gap-2">
                 <button type="button" onClick={handleCancel} disabled={saving}
                   className="flex-1 py-2 rounded-lg text-sm font-semibold"
-                  style={{ background: 'var(--color-danger)', color: 'white' }}>
+                  style={{ background: COLORS.DANGER, color: 'white' }}>
                   {saving ? 'Retrait…' : 'Oui, retirer'}
                 </button>
                 <button type="button" onClick={() => setConfirmCancel(false)} disabled={saving}
                   className="flex-1 py-2 rounded-lg text-sm font-medium"
-                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                  style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
                   Annuler
                 </button>
               </div>
@@ -284,7 +286,7 @@ export function EventDetailModal({
           {isEvt && (
             <button type="button" onClick={() => { onDelete(event); onClose() }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
-              style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+              style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
               <Trash2 size={15} /> Supprimer
             </button>
           )}

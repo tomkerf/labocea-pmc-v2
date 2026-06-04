@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { CheckCircle2, ChevronRight, ChevronDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { type PlanningEvent, getTechColor } from '@/lib/planningUtils'
+import { COLORS } from '@/lib/constants'
+
 
 interface EventRowProps {
   event:    PlanningEvent
@@ -35,27 +37,27 @@ export default function EventRow({ event, isLast, onSelect }: EventRowProps) {
         onClick={handleParentClick}>
         {isGrouped ? (
           isExpanded ? (
-            <ChevronDown size={16} className="shrink-0" style={{ color: 'var(--color-text-secondary)' }} />
+            <ChevronDown size={16} className="shrink-0" style={{ color: COLORS.TEXT_SECONDARY }} />
           ) : (
-            <ChevronRight size={16} className="shrink-0" style={{ color: 'var(--color-text-secondary)' }} />
+            <ChevronRight size={16} className="shrink-0" style={{ color: COLORS.TEXT_SECONDARY }} />
           )
         ) : (
           <span className="size-2 rounded-full shrink-0" style={{ background: dotColor }} />
         )}
         
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{event.title}</p>
-          <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--color-text-secondary)' }}>{event.subtitle}</p>
+          <p className="text-sm font-medium truncate" style={{ color: COLORS.TEXT_PRIMARY }}>{event.title}</p>
+          <p className="text-xs mt-0.5 truncate" style={{ color: COLORS.TEXT_SECONDARY }}>{event.subtitle}</p>
           <div className="flex items-center gap-1.5 mt-1">
             {event.plannedTime && (
               <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold"
-                style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
                 {event.plannedTime}
               </span>
             )}
             {event.technicien && event.technicien !== '—' && (
               <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
                 {event.technicien}
               </span>
             )}
@@ -71,7 +73,7 @@ export default function EventRow({ event, isLast, onSelect }: EventRowProps) {
         <div className="flex items-center gap-2 shrink-0">
           {isGrouped && (
             <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
-              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+              style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
               ×{event.count}
             </span>
           )}
@@ -90,7 +92,7 @@ export default function EventRow({ event, isLast, onSelect }: EventRowProps) {
       </button>
 
       {isGrouped && isExpanded && event.subEvents && (
-        <div className="pl-9 pr-4 pb-2 flex flex-col" style={{ background: 'var(--color-bg-primary)' }}>
+        <div className="pl-9 pr-4 pb-2 flex flex-col" style={{ background: COLORS.BG_PRIMARY }}>
           {event.subEvents.map((sub, idx) => {
             const subTechColor = getTechColor(sub.technicien).color
             return (
@@ -106,19 +108,19 @@ export default function EventRow({ event, isLast, onSelect }: EventRowProps) {
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <span className="size-1.5 rounded-full shrink-0" style={{ background: sub.statusColor }} />
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                    <p className="text-xs font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                       {sub.subtitle}
                     </p>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       {sub.frequence && (
                         <span className="text-[9px] px-1 rounded shrink-0 font-medium"
-                          style={{ background: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+                          style={{ background: COLORS.BG_SECONDARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
                           {sub.frequence}
                         </span>
                       )}
                       {sub.technicien && sub.technicien !== '—' && (
                         <span className="text-[9px] px-1 rounded shrink-0 font-medium"
-                          style={{ background: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+                          style={{ background: COLORS.BG_SECONDARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
                           {sub.technicien}
                         </span>
                       )}

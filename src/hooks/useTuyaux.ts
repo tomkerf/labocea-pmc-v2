@@ -6,12 +6,14 @@ import {
 import { db } from '@/lib/firebase'
 import { useTuyauxStore } from '@/stores/tuyauxStore'
 import type { Tuyau } from '@/types'
+import { COLLECTIONS } from '@/lib/constants'
+
 
 export function useTuyauxListener() {
   const { setTuyaux, setError } = useTuyauxStore()
 
   useEffect(() => {
-    const q = query(collection(db, 'tuyaux'), orderBy('annee', 'desc'))
+    const q = query(collection(db, COLLECTIONS.TUYAUX), orderBy('annee', 'desc'))
     const unsub = onSnapshot(
       q,
       (snap) => {
@@ -25,12 +27,12 @@ export function useTuyauxListener() {
 }
 
 export async function saveTuyau(tuyau: Tuyau, uid: string): Promise<void> {
-  const ref = doc(db, 'tuyaux', tuyau.id)
+  const ref = doc(db, COLLECTIONS.TUYAUX, tuyau.id)
   await setDoc(ref, { ...tuyau, updatedAt: serverTimestamp(), createdBy: uid }, { merge: true })
 }
 
 export async function createTuyau(uid: string): Promise<string> {
-  const ref = await addDoc(collection(db, 'tuyaux'), {
+  const ref = await addDoc(collection(db, COLLECTIONS.TUYAUX), {
     refLabo: '',
     materiau: 'TEFLON',
     annee: new Date().getFullYear(),
@@ -50,5 +52,5 @@ export async function createTuyau(uid: string): Promise<string> {
 }
 
 export async function deleteTuyau(id: string): Promise<void> {
-  await deleteDoc(doc(db, 'tuyaux', id))
+  await deleteDoc(doc(db, COLLECTIONS.TUYAUX, id))
 }

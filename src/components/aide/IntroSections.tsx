@@ -1,10 +1,12 @@
 import { LogIn, User, ClipboardList, Clock } from 'lucide-react'
 import { Section, Step, Divider, Tip, StatusBadge, Note } from './AideComponents'
+import { COLORS } from '@/lib/constants'
+
 
 export function ParOuCommencerSection() {
   return (
     <Section icon={LogIn} title="Par où commencer">
-      <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+      <p className="text-sm mb-4" style={{ color: COLORS.TEXT_SECONDARY }}>
         Bienvenue sur Labocea PMC. Voici les trois étapes pour démarrer efficacement.
       </p>
 
@@ -68,8 +70,8 @@ export function ParOuCommencerSection() {
               { label: 'Tuyaux',         desc: "Gestion des lots de tuyaux de prélèvement avec impression d'étiquettes." },
             ].map(({ label, desc }) => (
               <div key={label} className="flex gap-3 py-2" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                <span className="text-sm font-semibold w-32 shrink-0" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
-                <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{desc}</span>
+                <span className="text-sm font-semibold w-32 shrink-0" style={{ color: COLORS.TEXT_PRIMARY }}>{label}</span>
+                <span className="text-sm" style={{ color: COLORS.TEXT_SECONDARY }}>{desc}</span>
               </div>
             ))}
           </div>
@@ -112,33 +114,33 @@ export function ParOuCommencerSection() {
 export function StatutsSection() {
   return (
     <Section icon={ClipboardList} title="Statuts des prélèvements">
-      <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+      <p className="text-sm mb-4" style={{ color: COLORS.TEXT_SECONDARY }}>
         Chaque prélèvement a un statut. Il évolue au fil de l'intervention.
       </p>
 
       <div className="flex flex-col">
         <StatusBadge
-          bg="var(--color-bg-tertiary)" color="var(--color-text-secondary)" dot="var(--color-neutral)"
+          bg=COLORS.BG_TERTIARY color=COLORS.TEXT_SECONDARY dot="var(--color-neutral)"
           label="Planifié"
           desc="Statut par défaut. L'intervention est programmée, pas encore réalisée."
         />
         <StatusBadge
-          bg="var(--color-success-light)" color="var(--color-success)" dot="var(--color-success)"
+          bg="var(--color-success-light)" color=COLORS.SUCCESS dot=COLORS.SUCCESS
           label="Réalisé"
           desc="Prélèvement effectué. La date de réalisation est enregistrée."
         />
         <StatusBadge
-          bg="var(--color-danger-light)" color="var(--color-danger)" dot="var(--color-danger)"
+          bg="var(--color-danger-light)" color=COLORS.DANGER dot=COLORS.DANGER
           label="En retard"
           desc="La date planifiée est dépassée sans validation. L'app le détecte automatiquement chaque jour. Peut encore être réalisé."
         />
         <div className="py-3">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium shrink-0 mb-2"
-            style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
-            <span className="size-1.5 rounded-full shrink-0" style={{ background: 'var(--color-warning)' }} />
+            style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
+            <span className="size-1.5 rounded-full shrink-0" style={{ background: COLORS.WARNING }} />
             Non effectué
           </span>
-          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm" style={{ color: COLORS.TEXT_SECONDARY }}>
             Intervention abandonnée définitivement. Un <strong>motif obligatoire</strong> doit être saisi :
             accès impossible, conditions météo, report client, panne matériel…
           </p>

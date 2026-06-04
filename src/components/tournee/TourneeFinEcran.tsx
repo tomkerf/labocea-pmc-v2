@@ -1,4 +1,6 @@
 import { CheckCircle2, X } from 'lucide-react'
+import { COLORS } from '@/lib/constants'
+
 
 export interface TourneeFinItem {
   samplingId: string
@@ -21,32 +23,32 @@ export function TourneeFinEcran({ items, onRetour }: Props) {
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
       <div className="size-16 rounded-full flex items-center justify-center mb-6"
         style={{ background: 'var(--color-success-light)' }}>
-        <CheckCircle2 size={32} style={{ color: 'var(--color-success)' }} />
+        <CheckCircle2 size={32} style={{ color: COLORS.SUCCESS }} />
       </div>
 
-      <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+      <h2 className="text-2xl font-bold mb-2" style={{ color: COLORS.TEXT_PRIMARY }}>
         Tournée terminée !
       </h2>
-      <p className="text-sm mb-8" style={{ color: 'var(--color-text-secondary)' }}>
+      <p className="text-sm mb-8" style={{ color: COLORS.TEXT_SECONDARY }}>
         {items.length} prélèvement{items.length > 1 ? 's' : ''} · {done} réalisé{done > 1 ? 's' : ''}{nonFait > 0 ? `, ${nonFait} non effectué${nonFait > 1 ? 's' : ''}` : ''}
       </p>
 
       <div className="w-full max-w-sm rounded-xl overflow-hidden mb-8"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
         {items.map((item, i) => (
           <div key={item.samplingId}
             className="flex items-start gap-3 px-4 py-3"
             style={{ borderBottom: i < items.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
             {item.status === 'done'
-              ? <CheckCircle2 size={16} className="mt-0.5 shrink-0" style={{ color: 'var(--color-success)' }} />
-              : <X size={16} className="mt-0.5 shrink-0" style={{ color: 'var(--color-warning)' }} />
+              ? <CheckCircle2 size={16} className="mt-0.5 shrink-0" style={{ color: COLORS.SUCCESS }} />
+              : <X size={16} className="mt-0.5 shrink-0" style={{ color: COLORS.WARNING }} />
             }
             <div className="text-left">
-              <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+              <p className="text-sm font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>
                 {item.clientNom} — {item.siteNom}
               </p>
               {item.motif && (
-                <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{item.motif}</p>
+                <p className="text-xs mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>{item.motif}</p>
               )}
             </div>
           </div>
@@ -56,7 +58,7 @@ export function TourneeFinEcran({ items, onRetour }: Props) {
       <button type="button"
         onClick={onRetour}
         className="px-6 py-3 rounded-lg text-sm font-medium"
-        style={{ background: 'var(--color-accent)', color: 'white' }}>
+        style={{ background: COLORS.ACCENT, color: 'white' }}>
         Retour au dashboard
       </button>
     </div>

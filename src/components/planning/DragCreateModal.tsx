@@ -7,6 +7,8 @@ function fmtDate(d: string) {
   return `${dt.getDate()} ${MOIS_LONG[dt.getMonth()]}`
 }
 import type { TypeEvenement } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 interface DragCreateModalProps {
   dateDebut: string
@@ -52,7 +54,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
       onClick={onClose}>
       <div className="w-full md:w-[400px] rounded-t-2xl md:rounded-2xl overflow-hidden"
         style={{
-          background: 'var(--color-bg-secondary)',
+          background: COLORS.BG_SECONDARY,
           boxShadow: 'var(--shadow-modal)',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
@@ -61,7 +63,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <div>
-            <p className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            <p className="text-[15px] font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
               Nouvel événement
             </p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -69,7 +71,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
             </p>
           </div>
           <button type="button" onClick={onClose} aria-label="Fermer" className="p-1.5 rounded-lg"
-            style={{ color: 'var(--color-text-tertiary)', background: 'var(--color-bg-tertiary)' }}>
+            style={{ color: 'var(--color-text-tertiary)', background: COLORS.BG_TERTIARY }}>
             <X size={15} />
           </button>
         </div>
@@ -86,9 +88,9 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
             onKeyDown={e => e.key === 'Enter' && handleSave()}
             className="w-full px-3 py-2.5 rounded-xl text-sm"
             style={{
-              background: 'var(--color-bg-tertiary)',
-              border: `1px solid ${type === 'conge' && !titre.trim() ? 'var(--color-border-subtle)' : 'var(--color-border)'}`,
-              color: 'var(--color-text-primary)',
+              background: COLORS.BG_TERTIARY,
+              border: `1px solid ${type === 'conge' && !titre.trim() ? 'var(--color-border-subtle)' : COLORS.BORDER}`,
+              color: COLORS.TEXT_PRIMARY,
               opacity: type === 'conge' && !titre.trim() ? 0.6 : 1,
             }} />
 
@@ -97,9 +99,9 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
               <button type="button" key={t.value} onClick={() => setType(t.value)}
                 className="flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl text-[11px] font-medium"
                 style={{
-                  background: type === t.value ? 'var(--color-accent-light)' : 'var(--color-bg-tertiary)',
-                  color: type === t.value ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                  border: `1px solid ${type === t.value ? 'var(--color-accent)' : 'transparent'}`,
+                  background: type === t.value ? 'var(--color-accent-light)' : COLORS.BG_TERTIARY,
+                  color: type === t.value ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
+                  border: `1px solid ${type === t.value ? COLORS.ACCENT : 'transparent'}`,
                 }}>
                 <span className="text-base">{t.emoji}</span>
                 {t.label}
@@ -109,41 +111,41 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label htmlFor="dcm-debut" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+              <label htmlFor="dcm-debut" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
                 Début
               </label>
               <input id="dcm-debut" type="date" value={debut} onChange={e => setDebut(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg text-sm"
-                style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+                style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
             </div>
             <div>
-              <label htmlFor="dcm-fin" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+              <label htmlFor="dcm-fin" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
                 Fin
               </label>
               <input id="dcm-fin" type="date" value={fin} min={debut} onChange={e => setFin(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg text-sm"
-                style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+                style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
             </div>
           </div>
 
           {!isMultiDay && (
             <div>
-              <label htmlFor="dcm-heure" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+              <label htmlFor="dcm-heure" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
                 Heure (optionnel)
               </label>
               <input id="dcm-heure" type="time" value={heure} onChange={e => setHeure(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg text-sm"
-                style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+                style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
             </div>
           )}
 
           <div>
-            <label htmlFor="dcm-notes" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+            <label htmlFor="dcm-notes" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
               Notes (optionnel)
             </label>
             <textarea id="dcm-notes" rows={2} placeholder="Remarques…" value={notes} onChange={e => setNotes(e.target.value)}
               className="w-full px-3 py-2 rounded-lg text-sm resize-none"
-              style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
+              style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
           </div>
 
           {(() => {
@@ -152,7 +154,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
               <button type="button" onClick={handleSave} disabled={!canSave || saving}
                 className="w-full py-3 rounded-xl text-sm font-semibold"
                 style={{
-                  background: canSave ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
+                  background: canSave ? COLORS.ACCENT : COLORS.BG_TERTIARY,
                   color: canSave ? 'white' : 'var(--color-text-tertiary)',
                 }}>
                 {saving ? 'Enregistrement…' : 'Créer l\'événement'}

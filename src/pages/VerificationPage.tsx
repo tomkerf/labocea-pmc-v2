@@ -7,6 +7,8 @@ import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useDocumentData } from '@/hooks/useDocumentData'
 import type { Verification, TypeVerification, ResultatVerification } from '@/types'
+import { COLLECTIONS, COLORS } from '@/lib/constants'
+
 
 const TYPES: { value: TypeVerification; label: string }[] = [
   { value: 'etalonnage_interne',   label: 'Étalonnage interne' },
@@ -33,7 +35,7 @@ export default function VerificationPage() {
     saveFn: saveVerification,
     onAfterSave: async (updated) => {
       if (updated.equipementId && updated.prochainControle) {
-        await updateDoc(doc(db, 'equipements', updated.equipementId), {
+        await updateDoc(doc(db, COLLECTIONS.EQUIPEMENTS, updated.equipementId), {
           prochainEtalonnage: updated.prochainControle,
         })
       }
@@ -54,28 +56,28 @@ export default function VerificationPage() {
   if (loading) return (
     <div className="flex justify-center py-20">
       <div className="size-6 rounded-full border-2 animate-spin"
-        style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+        style={{ borderColor: COLORS.BORDER, borderTopColor: COLORS.ACCENT }} />
     </div>
   )
   if (!verification) return (
-    <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Vérification introuvable.</div>
+    <div className="p-6 text-sm" style={{ color: COLORS.DANGER }}>Vérification introuvable.</div>
   )
 
   return (
     <div className="p-6 max-w-2xl">
       {/* Retour */}
       <button type="button" onClick={() => navigate('/metrologie')}
-        className="flex items-center gap-1 text-sm mb-6" style={{ color: 'var(--color-accent)' }}>
+        className="flex items-center gap-1 text-sm mb-6" style={{ color: COLORS.ACCENT }}>
         <ChevronLeft size={16} /> Métrologie
       </button>
 
       {/* En-tête */}
       <div className="flex items-start justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             {verification.equipementNom || 'Nouvelle vérification'}
           </h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
             {verification.date ? new Date(verification.date).toLocaleDateString('fr-FR', { dateStyle: 'long' }) : '—'}
           </p>
         </div>
@@ -84,13 +86,13 @@ export default function VerificationPage() {
           {confirmDelete ? (
             <div className="flex items-center gap-1.5">
               <button type="button" onClick={handleDelete} className="text-sm px-3 py-1.5 rounded-lg font-medium"
-                style={{ background: 'var(--color-danger)', color: 'white' }}>Supprimer</button>
+                style={{ background: COLORS.DANGER, color: 'white' }}>Supprimer</button>
               <button type="button" onClick={cancelDelete} className="text-sm px-2 py-1.5 rounded-lg"
-                style={{ color: 'var(--color-text-secondary)' }}>Annuler</button>
+                style={{ color: COLORS.TEXT_SECONDARY }}>Annuler</button>
             </div>
           ) : (
             <button type="button" onClick={requestDelete} className="p-2 rounded-lg"
-              style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}>
+              style={{ color: COLORS.DANGER, background: 'var(--color-danger-light)' }}>
               <Trash2 size={16} />
             </button>
           )}
@@ -151,7 +153,7 @@ export default function VerificationPage() {
             rows={3}
             placeholder="Observations, écarts constatés, actions correctives…"
             className="w-full text-sm resize-none bg-transparent outline-none"
-            style={{ color: 'var(--color-text-primary)' }}
+            style={{ color: COLORS.TEXT_PRIMARY }}
           />
         </div>
       </Section>
@@ -165,7 +167,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       <h2 className="text-xs font-semibold uppercase mb-2"
         style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>{title}</h2>
       <div className="rounded-xl overflow-hidden"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         {children}
       </div>
     </div>
@@ -176,7 +178,7 @@ function Field({ label, children, last }: { label: string; children: React.React
   return (
     <div className="flex items-center gap-4 px-5 py-3"
       style={{ borderBottom: last ? 'none' : '1px solid var(--color-border-subtle)' }}>
-      <label className="text-sm shrink-0" style={{ color: 'var(--color-text-secondary)', minWidth: '180px' }}>{label}</label>
+      <label className="text-sm shrink-0" style={{ color: COLORS.TEXT_SECONDARY, minWidth: '180px' }}>{label}</label>
       <div className="flex-1">{children}</div>
     </div>
   )

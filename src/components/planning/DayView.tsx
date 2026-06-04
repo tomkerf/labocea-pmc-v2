@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Plus, ChevronDown, ChevronRight } from 'lucide-react'
 import {
+import { COLORS } from '@/lib/constants'
+
   type PlanningEvent,
   toISO, sameDay,
   parseHHMM, assignColumns, sortEvts, filterEvents, getISOWeek, groupByClient,
@@ -48,7 +50,7 @@ export default function DayView({
 
       {/* Sous-titre : numéro de semaine + météo */}
       <div className="px-4 py-1.5 shrink-0 flex items-center gap-2"
-        style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
+        style={{ borderBottom: '1px solid var(--color-border-subtle)', background: COLORS.BG_SECONDARY }}>
         <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
           Semaine {weekNum}
         </span>
@@ -66,7 +68,7 @@ export default function DayView({
       </div>
 
       {/* Section "Toute la journée" */}
-      <div className="shrink-0 relative" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
+      <div className="shrink-0 relative" style={{ borderBottom: '1px solid var(--color-border-subtle)', background: COLORS.BG_SECONDARY }}>
         {showRain && isRainyDay && <div className="rain-overlay opacity-30" />}
         <div className="flex relative z-10">
           <div className="w-14 shrink-0 flex items-start justify-end pr-2 pt-2 pb-1">
@@ -100,25 +102,25 @@ export default function DayView({
                     style={{ background: evt.statusBg }}>
                     {isGrouped
                       ? (isExpanded
-                          ? <ChevronDown size={10} className="shrink-0" style={{ color: 'var(--color-text-secondary)' }} />
-                          : <ChevronRight size={10} className="shrink-0" style={{ color: 'var(--color-text-secondary)' }} />)
+                          ? <ChevronDown size={10} className="shrink-0" style={{ color: COLORS.TEXT_SECONDARY }} />
+                          : <ChevronRight size={10} className="shrink-0" style={{ color: COLORS.TEXT_SECONDARY }} />)
                       : <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: evt.statusColor }} />
                     }
-                    <span className="text-[11px] font-medium flex-1 truncate" style={{ color: 'var(--color-text-primary)' }}>
+                    <span className="text-[11px] font-medium flex-1 truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                       {evt.title}
                     </span>
-                    <span className="text-[10px] truncate max-w-[160px]" style={{ color: 'var(--color-text-secondary)' }}>
+                    <span className="text-[10px] truncate max-w-[160px]" style={{ color: COLORS.TEXT_SECONDARY }}>
                       {evt.subtitle}
                     </span>
                     {isGrouped && (
                       <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold shrink-0"
-                        style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                        style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
                         ×{evt.count}
                       </span>
                     )}
                     {evt.technicien && evt.technicien !== '—' && (
                       <span className="text-[9px] px-1 rounded shrink-0"
-                        style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                        style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
                         {evt.technicien}
                       </span>
                     )}
@@ -135,7 +137,7 @@ export default function DayView({
                       className="w-full flex items-center gap-1.5 pl-6 pr-2 py-0.5 text-left"
                       style={{ background: 'transparent' }}>
                       <span className="w-[4px] h-[4px] rounded-full shrink-0" style={{ background: sub.statusColor }} />
-                      <span className="text-[10px] flex-1 truncate" style={{ color: 'var(--color-text-primary)' }}>{sub.subtitle}</span>
+                      <span className="text-[10px] flex-1 truncate" style={{ color: COLORS.TEXT_PRIMARY }}>{sub.subtitle}</span>
                       {sub.frequence && (
                         <span className="text-[9px] shrink-0" style={{ color: 'var(--color-text-tertiary)' }}>{sub.frequence}</span>
                       )}
@@ -153,7 +155,7 @@ export default function DayView({
       </div>
 
       {/* Grille horaire */}
-      <div className="flex-1 overflow-y-auto relative" style={{ background: 'var(--color-bg-primary)' }}>
+      <div className="flex-1 overflow-y-auto relative" style={{ background: COLORS.BG_PRIMARY }}>
         {showRain && isRainyDay && <div className="rain-overlay" />}
         <div className="relative z-10" style={{ height: (D_END - D_START) * PX_H }}>
 
@@ -207,12 +209,12 @@ export default function DayView({
                   }}>
                   <div className="flex items-center gap-1">
                     <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: evt.statusColor }} />
-                    <span className="text-[11px] font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                    <span className="text-[11px] font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                       {evt.title}
                     </span>
                   </div>
                   {height >= 38 && (
-                    <p className="text-[10px] truncate pl-[13px] mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                    <p className="text-[10px] truncate pl-[13px] mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                       {evt.plannedTime} · {evt.subtitle}
                     </p>
                   )}
@@ -229,7 +231,7 @@ export default function DayView({
         onClick={() => setSelectedDay(dateStr)}
         className="absolute bottom-6 right-6 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-lg"
         style={{
-          background: 'var(--color-accent)',
+          background: COLORS.ACCENT,
           color: 'white',
           boxShadow: '0 4px 16px rgba(0,113,227,0.35)',
           zIndex: 20,

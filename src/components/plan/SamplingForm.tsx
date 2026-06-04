@@ -3,6 +3,8 @@ import { Plus, Trash2, Camera, X, Loader2, HelpCircle } from 'lucide-react'
 import { uploadSamplingPhoto, deleteSamplingPhoto } from '@/lib/uploadPhoto'
 import { toast } from '@/stores/toastStore'
 import type { AppUser, Sampling, SamplingStatus, NappeType, ChecklistItem } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
@@ -70,14 +72,14 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
       <div>
-        <label htmlFor="sf-status" className="flex items-center gap-1 text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+        <label htmlFor="sf-status" className="flex items-center gap-1 text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
           Statut
           <span className="relative group">
             <HelpCircle size={11} className="cursor-help" style={{ color: 'var(--color-text-tertiary)' }} />
             <div className="absolute bottom-full left-0 mb-1.5 w-60 p-2.5 rounded-lg text-xs z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ background: 'var(--color-text-primary)', color: 'white', boxShadow: 'var(--shadow-modal)' }}>
-              <p><strong style={{ color: 'var(--color-danger)' }}>En retard</strong> — date dépassée, mais peut encore être réalisé.</p>
-              <p className="mt-1.5"><strong style={{ color: 'var(--color-warning)' }}>Non effectué</strong> — définitif. Nécessite un motif. Archive l'intervention.</p>
+              style={{ background: COLORS.TEXT_PRIMARY, color: 'white', boxShadow: 'var(--shadow-modal)' }}>
+              <p><strong style={{ color: COLORS.DANGER }}>En retard</strong> — date dépassée, mais peut encore être réalisé.</p>
+              <p className="mt-1.5"><strong style={{ color: COLORS.WARNING }}>Non effectué</strong> — définitif. Nécessite un motif. Archive l'intervention.</p>
             </div>
           </span>
         </label>
@@ -92,7 +94,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       </div>
 
       <div>
-        <label htmlFor="sf-planned-time" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Heure prévue</label>
+        <label htmlFor="sf-planned-time" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Heure prévue</label>
         <input
           id="sf-planned-time"
           type="time"
@@ -103,7 +105,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       </div>
 
       <div>
-        <label htmlFor="sf-planned-month" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Mois prévu</label>
+        <label htmlFor="sf-planned-month" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Mois prévu</label>
         <select
           id="sf-planned-month"
           value={sampling.plannedMonth}
@@ -114,7 +116,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       </div>
 
       <div>
-        <label htmlFor="sf-planned-day" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+        <label htmlFor="sf-planned-day" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
           Jour prévu
           <span className="ml-1 font-normal" style={{ color: 'var(--color-text-tertiary)' }}>(1–31)</span>
         </label>
@@ -133,7 +135,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       </div>
 
       <div>
-        <label htmlFor="sf-done-date" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date réalisée</label>
+        <label htmlFor="sf-done-date" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Date réalisée</label>
         <input id="sf-done-date" type="date" value={sampling.doneDate}
           onChange={(e) => onUpdate('doneDate', e.target.value)}
           className="field-input w-full" />
@@ -141,7 +143,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
 
       {sampling.status === 'done' && users.length > 0 && (
         <div>
-          <label htmlFor="sf-done-by" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Effectué par</label>
+          <label htmlFor="sf-done-by" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Effectué par</label>
           <select
             id="sf-done-by"
             value={sampling.doneBy ?? ''}
@@ -158,7 +160,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       )}
 
       <div>
-        <label htmlFor="sf-nappe" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Nappe</label>
+        <label htmlFor="sf-nappe" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Nappe</label>
         <select id="sf-nappe" value={sampling.nappe}
           onChange={(e) => onUpdate('nappe', e.target.value as NappeType)}
           className="field-input w-full">
@@ -169,11 +171,11 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       </div>
 
       <div>
-        <p className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Rapport prévu</p>
+        <p className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Rapport prévu</p>
         <label className="flex items-center gap-2 mt-2 cursor-pointer">
           <input type="checkbox" aria-label="Rapport prévu" checked={sampling.rapportPrevu}
             onChange={(e) => onUpdate('rapportPrevu', e.target.checked)} />
-          <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+          <span className="text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>
             {sampling.rapportPrevu ? 'Oui' : 'Non'}
           </span>
         </label>
@@ -181,7 +183,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
 
       {sampling.rapportPrevu && (
         <div>
-          <label htmlFor="sf-rapport-date" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Date envoi prévue</label>
+          <label htmlFor="sf-rapport-date" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Date envoi prévue</label>
           <input
             id="sf-rapport-date"
             type="date"
@@ -193,7 +195,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       )}
 
       <div className="sm:col-span-2">
-        <label htmlFor="sf-comment" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Commentaire</label>
+        <label htmlFor="sf-comment" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Commentaire</label>
         <input id="sf-comment" value={sampling.comment}
           onChange={(e) => onUpdate('comment', e.target.value)}
           placeholder="Remarques…"
@@ -202,7 +204,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
 
       {/* Checklist */}
       <div className="sm:col-span-2">
-        <p className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="block text-xs font-medium mb-2" style={{ color: COLORS.TEXT_SECONDARY }}>
           Checklist terrain
         </p>
         {checklist.length > 0 && (
@@ -217,7 +219,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
                   className="cursor-pointer" />
                 <span className="flex-1 text-sm"
                   style={{
-                    color: item.done ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+                    color: item.done ? 'var(--color-text-tertiary)' : COLORS.TEXT_PRIMARY,
                     textDecoration: item.done ? 'line-through' : 'none',
                   }}>
                   {item.label}
@@ -226,7 +228,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
                   aria-label="Supprimer la tâche"
                   className="shrink-0 flex items-center justify-center rounded"
                   style={{ color: 'var(--color-text-tertiary)', minWidth: 44, minHeight: 44 }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-danger)')}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.DANGER)}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
                   <Trash2 size={15} />
                 </button>
@@ -246,7 +248,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
           <button type="button" onClick={addTask}
             aria-label="Ajouter la tâche"
             className="px-3 py-1.5 rounded-lg text-sm font-medium"
-            style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+            style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
             <Plus size={15} />
           </button>
         </div>
@@ -255,7 +257,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       {/* Motif — visible uniquement si le prélèvement n'a pas été réalisé */}
       {(sampling.status === 'non_effectue' || sampling.status === 'overdue') && (
         <div className="sm:col-span-2">
-          <label htmlFor="sf-motif" className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+          <label htmlFor="sf-motif" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
             Motif de non-réalisation
           </label>
           <input
@@ -270,7 +272,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
 
       {/* Photos terrain */}
       <div className="sm:col-span-2">
-        <p className="block text-xs font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="block text-xs font-medium mb-2" style={{ color: COLORS.TEXT_SECONDARY }}>
           Photos terrain
         </p>
 
@@ -304,9 +306,9 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
         <label
           className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer"
           style={{
-            background: 'var(--color-bg-tertiary)',
+            background: COLORS.BG_TERTIARY,
             border: '1px solid var(--color-border)',
-            color: uploading ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)',
+            color: uploading ? 'var(--color-text-tertiary)' : COLORS.TEXT_SECONDARY,
             opacity: uploading ? 0.6 : 1,
             pointerEvents: uploading ? 'none' : 'auto',
           }}
@@ -335,7 +337,7 @@ export function PlanField({ label, children, last }: { label: string; children: 
   return (
     <div className="flex items-center gap-4 px-5 py-3"
       style={{ borderBottom: last ? 'none' : '1px solid var(--color-border-subtle)' }}>
-      <span className="text-sm shrink-0" style={{ color: 'var(--color-text-secondary)', minWidth: '160px' }}>
+      <span className="text-sm shrink-0" style={{ color: COLORS.TEXT_SECONDARY, minWidth: '160px' }}>
         {label}
       </span>
       <div className="flex-1">{children}</div>

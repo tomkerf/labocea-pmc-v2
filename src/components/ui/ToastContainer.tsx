@@ -1,5 +1,7 @@
 import { useToastStore } from '@/stores/toastStore'
 import type { Toast } from '@/stores/toastStore'
+import { COLORS } from '@/lib/constants'
+
 
 const ICONS: Record<Toast['type'], string> = {
   success: '✓',
@@ -8,9 +10,9 @@ const ICONS: Record<Toast['type'], string> = {
 }
 
 const COLORS: Record<Toast['type'], { bg: string; color: string; border: string }> = {
-  success: { bg: 'var(--color-success-light)', color: 'var(--color-success)', border: 'var(--color-success)' },
-  error:   { bg: 'var(--color-danger-light)',  color: 'var(--color-danger)',  border: 'var(--color-danger)'  },
-  info:    { bg: 'var(--color-accent-light)',  color: 'var(--color-accent)',  border: 'var(--color-accent)'  },
+  success: { bg: 'var(--color-success-light)', color: COLORS.SUCCESS, border: COLORS.SUCCESS },
+  error:   { bg: 'var(--color-danger-light)',  color: COLORS.DANGER,  border: COLORS.DANGER  },
+  info:    { bg: 'var(--color-accent-light)',  color: COLORS.ACCENT,  border: COLORS.ACCENT  },
 }
 
 export default function ToastContainer() {

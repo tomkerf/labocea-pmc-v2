@@ -9,6 +9,8 @@ import { isSamplingOverdue } from '@/lib/overdue'
 import ClientCard from '@/components/client/ClientCard'
 import { SkeletonList } from '@/components/ui/Skeleton'
 import type { Client } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 function hasOverdue(client: Client): boolean {
   const year = Number(client.annee) || undefined
@@ -78,10 +80,10 @@ export default function MissionsPage() {
       {/* En-tête */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Missions
           </h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
             {loading ? '…' : `${clients.length} client${clients.length > 1 ? 's' : ''}`}
           </p>
         </div>
@@ -89,7 +91,7 @@ export default function MissionsPage() {
           onClick={handleNewClient}
           disabled={creating}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
-          style={{ background: 'var(--color-accent)', color: 'white', opacity: creating ? 0.7 : 1 }}
+          style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.7 : 1 }}
         >
           <Plus size={16} />
           Nouveau client
@@ -108,9 +110,9 @@ export default function MissionsPage() {
             placeholder="Rechercher un client, segment, préleveur…"
             className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: COLORS.BG_SECONDARY,
               border: '1px solid var(--color-border-subtle)',
-              color: 'var(--color-text-primary)',
+              color: COLORS.TEXT_PRIMARY,
             }}
           />
         </div>
@@ -120,8 +122,8 @@ export default function MissionsPage() {
             onClick={() => setOnlyRetard((v) => !v)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium shrink-0 transition-colors"
             style={{
-              background: onlyRetard ? 'var(--color-danger)' : 'var(--color-danger-light)',
-              color: onlyRetard ? 'white' : 'var(--color-danger)',
+              background: onlyRetard ? COLORS.DANGER : 'var(--color-danger-light)',
+              color: onlyRetard ? 'white' : COLORS.DANGER,
               border: '1px solid var(--color-danger)',
             }}
           >

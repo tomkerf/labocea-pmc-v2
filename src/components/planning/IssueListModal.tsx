@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom'
 import type { Client, Plan, Sampling } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { MOIS_LONG } from '@/lib/planningUtils'
+import { COLORS } from '@/lib/constants'
+
 
 interface IssueListModalProps {
   onClose: () => void
@@ -38,7 +40,7 @@ export default function IssueListModal({ onClose, type, rows, year }: IssueListM
 
   const title = type === 'overdue' ? 'Prélèvements en retard' : 'Prélèvements non effectués'
   const icon = type === 'overdue' 
-    ? <AlertTriangle size={17} style={{ color: 'var(--color-danger)' }} /> 
+    ? <AlertTriangle size={17} style={{ color: COLORS.DANGER }} /> 
     : <AlertCircle size={17} style={{ color: 'var(--color-neutral)' }} />
 
   return (
@@ -61,12 +63,12 @@ export default function IssueListModal({ onClose, type, rows, year }: IssueListM
           exit={{ scale: 0.95, opacity: 0, y: 15 }}
           transition={{ type: 'spring', stiffness: 350, damping: 28 }}
           className="w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl p-0 flex flex-col overflow-hidden max-h-[85vh]"
-          style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)' }}
+          style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-modal)' }}
         >
           <div className="flex items-center justify-between p-4 border-b border-[var(--color-border-subtle)] shrink-0 bg-[var(--color-bg-secondary)] z-10">
             <div className="flex items-center gap-2">
               {icon}
-              <h2 className="text-base font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              <h2 className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
                 {title} <span className="text-sm font-normal text-[var(--color-text-secondary)]">({issues.length})</span>
               </h2>
             </div>
@@ -78,7 +80,7 @@ export default function IssueListModal({ onClose, type, rows, year }: IssueListM
 
           <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
             {issues.length === 0 ? (
-              <p className="text-center text-sm py-8" style={{ color: 'var(--color-text-secondary)' }}>
+              <p className="text-center text-sm py-8" style={{ color: COLORS.TEXT_SECONDARY }}>
                 Aucun prélèvement dans cette catégorie.
               </p>
             ) : (
@@ -95,8 +97,8 @@ export default function IssueListModal({ onClose, type, rows, year }: IssueListM
                     </div>
                     <div className="shrink-0 flex items-center gap-2">
                       <span className="text-xs font-medium px-2 py-1 rounded-md" style={{ 
-                        background: type === 'overdue' ? 'var(--color-danger-light)' : 'var(--color-bg-tertiary)',
-                        color: type === 'overdue' ? 'var(--color-danger)' : 'var(--color-text-secondary)'
+                        background: type === 'overdue' ? 'var(--color-danger-light)' : COLORS.BG_TERTIARY,
+                        color: type === 'overdue' ? COLORS.DANGER : COLORS.TEXT_SECONDARY
                       }}>
                         {MOIS_LONG[item.sampling.plannedMonth]} {item.planYear}
                       </span>

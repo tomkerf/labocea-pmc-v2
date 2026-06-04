@@ -5,6 +5,8 @@ import { auth, db } from '@/lib/firebase'
 import { useAuthStore } from '@/stores/authStore'
 import type { AppUser } from '@/types'
 import type { Timestamp } from 'firebase/firestore'
+import { COLLECTIONS } from '@/lib/constants'
+
 
 /** Profil tel qu'il est écrit dans Firestore à la création (timestamps = FieldValue) */
 type NewUserDoc = Omit<AppUser, 'uid' | 'createdAt' | 'lastLoginAt'> & {
@@ -22,7 +24,7 @@ export function useAuthInit() {
       if (user) {
         try {
           // Charger le profil Firestore
-          const userRef = doc(db, 'users', user.uid)
+          const userRef = doc(db, COLLECTIONS.USERS, user.uid)
           const snap = await getDoc(userRef)
 
           if (snap.exists()) {

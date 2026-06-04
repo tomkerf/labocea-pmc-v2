@@ -2,6 +2,8 @@ import { collection, doc, addDoc, deleteDoc, serverTimestamp } from 'firebase/fi
 import { db } from '@/lib/firebase'
 import { trackWrite } from '@/lib/trackWrite'
 import type { TypeEvenement } from '@/types'
+import { COLLECTIONS } from '@/lib/constants'
+
 
 export async function createEvenement(
   titre: string,
@@ -13,7 +15,7 @@ export async function createEvenement(
   initiales?: string,
   dateFin?: string,
 ): Promise<string> {
-  const ref = await trackWrite(addDoc(collection(db, 'evenements'), {
+  const ref = await trackWrite(addDoc(collection(db, COLLECTIONS.EVENEMENTS), {
     titre,
     date,
     type,
@@ -28,5 +30,5 @@ export async function createEvenement(
 }
 
 export async function deleteEvenement(id: string): Promise<void> {
-  await trackWrite(deleteDoc(doc(db, 'evenements', id)))
+  await trackWrite(deleteDoc(doc(db, COLLECTIONS.EVENEMENTS, id)))
 }

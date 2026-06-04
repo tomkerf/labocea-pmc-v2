@@ -1,10 +1,12 @@
 import { FolderPlus, MapPin, Camera, Users, FileText } from 'lucide-react'
 import { Section, Step, Divider, Tip, Note } from './AideComponents'
+import { COLORS } from '@/lib/constants'
+
 
 export function MissionClientSection() {
   return (
     <Section icon={FolderPlus} title="Créer une mission client">
-      <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+      <p className="text-sm mb-4" style={{ color: COLORS.TEXT_SECONDARY }}>
         Une mission regroupe un client, ses sites de prélèvement et ses plans d'échantillonnage.
       </p>
 
@@ -24,7 +26,7 @@ export function MissionClientSection() {
           </div>
 
           <div className="mt-3 ml-8 flex flex-col rounded-xl overflow-hidden"
-            style={{ border: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}>
+            style={{ border: '1px solid var(--color-border-subtle)', background: COLORS.BG_SECONDARY }}>
             {[
               { label: 'Informations générales', desc: 'Nom, segment, type de demande, préleveur assigné, année, sites.' },
               { label: 'Description de la mission', desc: 'Intitulé libre de la mission — visible dans les exports.' },
@@ -34,8 +36,8 @@ export function MissionClientSection() {
             ].map(({ label, desc }, i, arr) => (
               <div key={label} className="flex gap-3 px-4 py-3"
                 style={{ borderBottom: i < arr.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                <span className="text-xs font-semibold w-44 shrink-0 pt-0.5" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
-                <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{desc}</span>
+                <span className="text-xs font-semibold w-44 shrink-0 pt-0.5" style={{ color: COLORS.TEXT_PRIMARY }}>{label}</span>
+                <span className="text-xs" style={{ color: COLORS.TEXT_SECONDARY }}>{desc}</span>
               </div>
             ))}
           </div>
@@ -171,7 +173,7 @@ export function MissionClientSection() {
 export function VisitePreliminaireSection() {
   return (
     <Section icon={Users} title="Visites préliminaires">
-      <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+      <p className="text-sm mb-4" style={{ color: COLORS.TEXT_SECONDARY }}>
         Consigne tes repérages sur le terrain avant de définir un plan de prélèvement.
       </p>
 

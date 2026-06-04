@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useReducer } from 'react'
 import { Plus, Search, Check, ListTodo, ChevronRight, ChevronDown, Edit2, Trash2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, type NavigateFunction } from 'react-router-dom'
@@ -29,11 +29,65 @@ function sortTasks(tasks: Todo[]) {
 import { SkeletonList } from '@/components/ui/Skeleton'
 import UserAvatar from '@/components/ui/UserAvatar'
 import { getTechColor } from '@/lib/planningUtils'
+import BaseModal from '@/components/ui/BaseModal'
+import { COLORS } from '@/lib/constants'
+
+
+type FormState = {
+  titre: string;
+  desc: string;
+  priorite: TodoPriority;
+  assignedTo: string;
+  dueDate: string;
+  clientId: string;
+  equipementId: string;
+  saving: boolean;
+  deletingId: string | null;
+}
+
+const initialFormState: FormState = {
+  titre: '',
+  desc: '',
+  priorite: 'moyenne',
+  assignedTo: 'equipe',
+  dueDate: '',
+  clientId: '',
+  equipementId: '',
+  saving: false,
+  deletingId: null,
+}
+
+type FormAction =
+  | { type: 'SET_FIELD'; field: keyof FormState; value: any }
+  | { type: 'RESET_FORM' }
+  | { type: 'LOAD_TODO'; payload: Todo }
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case 'SET_FIELD':
+      return { ...state, [action.field]: action.value }
+    case 'RESET_FORM':
+      return { ...initialFormState, deletingId: state.deletingId }
+    case 'LOAD_TODO':
+      return {
+        ...state,
+        titre: action.payload.titre,
+        desc: action.payload.description || '',
+        priorite: action.payload.priorite,
+        assignedTo: action.payload.assignedTo || 'equipe',
+        dueDate: action.payload.dueDate || '',
+        clientId: action.payload.clientId || '',
+        equipementId: action.payload.equipementId || '',
+      }
+    default:
+      return state
+  }
+}
 
 const prioColors: Record<string, { text: string; bg: string; label: string; icon: string }> = {
-  haute:   { text: 'var(--color-text-primary)',   bg: 'var(--color-bg-tertiary)', label: 'Haute',   icon: '!!!' },
-  moyenne: { text: 'var(--color-text-primary)',   bg: 'var(--color-bg-tertiary)', label: 'Moyenne', icon: '!!' },
-  basse:   { text: 'var(--color-text-secondary)', bg: 'var(--color-bg-tertiary)', label: 'Basse',   icon: '!' },
+  haute:   { text: COLORS.TEXT_PRIMARY,   bg: COLORS.BG_TERTIARY, label: 'Haute',   icon: '!!!' },
+  moyenne: { text: COLORS.TEXT_PRIMARY,   bg: COLORS.BG_TERTIARY, label: 'Moyenne', icon: '!!' },
+  basse:   { text: COLORS.TEXT_SECONDARY, bg: COLORS.BG_TERTIARY, label: 'Basse',   icon: '!' },
 }
 
 export default function TodosPage() {
@@ -66,15 +120,7 @@ export default function TodosPage() {
   const [showTodo, setShowTodo] = useState(true)
 
   // Form states
-  const [formTitre, setFormTitre] = useState('')
-  const [formDesc, setFormDesc] = useState('')
-  const [formPriority, setFormPriority] = useState<TodoPriority>('moyenne')
-  const [formAssignedTo, setFormAssignedTo] = useState<string>('equipe')
-  const [formDueDate, setFormDueDate] = useState('')
-  const [formClientId, setFormClientId] = useState('')
-  const [formEquipementId, setFormEquipementId] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [deletingId, setDeletingId] = useState<string | null>(null) // Pour confirmation suppression double-étape
+  const [state, dispatch] = useReducer(formReducer, initialFormState)
 
   // ── Filtres et Tris ──
   const filteredTodos = useMemo(() => {
@@ -118,48 +164,36 @@ export default function TodosPage() {
   // ── Actions ──
   function openAddModal() {
     setEditingTodo(null)
-    setFormTitre('')
-    setFormDesc('')
-    setFormPriority('moyenne')
-    setFormAssignedTo('equipe')
-    setFormDueDate('')
-    setFormClientId('')
-    setFormEquipementId('')
+    dispatch({ type: 'RESET_FORM' })
     setShowModal(true)
   }
 
   function openEditModal(todo: Todo) {
     setEditingTodo(todo)
-    setFormTitre(todo.titre)
-    setFormDesc(todo.description || '')
-    setFormPriority(todo.priorite)
-    setFormAssignedTo(todo.assignedTo || 'equipe')
-    setFormDueDate(todo.dueDate || '')
-    setFormClientId(todo.clientId || '')
-    setFormEquipementId(todo.equipementId || '')
+    dispatch({ type: 'LOAD_TODO', payload: todo })
     setShowModal(true)
   }
 
   async function handleSave() {
-    if (!formTitre.trim() || !uid || saving) return
-    setSaving(true)
+    if (!state.titre.trim() || !uid || state.saving) return
+    dispatch({ type: 'SET_FIELD', field: 'saving', value: true })
     try {
-      const selectedUser = formAssignedTo === 'equipe' ? null : users.find((u) => u.uid === formAssignedTo)
-      const selectedClient = formClientId ? clients.find((c) => c.id === formClientId) : null
-      const selectedEquipement = formEquipementId ? equipements.find((e) => e.id === formEquipementId) : null
+      const selectedUser = state.assignedTo === 'equipe' ? null : users.find((u) => u.uid === state.assignedTo)
+      const selectedClient = state.clientId ? clients.find((c) => c.id === state.clientId) : null
+      const selectedEquipement = state.equipementId ? equipements.find((e) => e.id === state.equipementId) : null
 
       const partial: Omit<Todo, 'id' | 'createdBy' | 'createdAt' | 'updatedAt'> = {
-        titre: formTitre.trim(),
-        description: formDesc.trim() || undefined,
+        titre: state.titre.trim(),
+        description: state.desc.trim() || undefined,
         statut: editingTodo ? editingTodo.statut : 'a_faire',
-        priorite: formPriority,
-        assignedTo: formAssignedTo,
-        assignedToNom: selectedUser ? `${selectedUser.prenom} ${selectedUser.nom}` : formAssignedTo === 'equipe' ? 'Équipe' : undefined,
+        priorite: state.priorite,
+        assignedTo: state.assignedTo,
+        assignedToNom: selectedUser ? `${selectedUser.prenom} ${selectedUser.nom}` : state.assignedTo === 'equipe' ? 'Équipe' : undefined,
         assignedToInitiales: selectedUser ? selectedUser.initiales : undefined,
-        dueDate: formDueDate || undefined,
-        clientId: formClientId || undefined,
+        dueDate: state.dueDate || undefined,
+        clientId: state.clientId || undefined,
         clientNom: selectedClient ? selectedClient.nom : undefined,
-        equipementId: formEquipementId || undefined,
+        equipementId: state.equipementId || undefined,
         equipementNom: selectedEquipement ? selectedEquipement.nom : undefined,
         createdByNom: appUser ? `${appUser.prenom} ${appUser.nom}` : undefined,
       }
@@ -173,7 +207,7 @@ export default function TodosPage() {
     } catch (e) {
       console.error(e)
     } finally {
-      setSaving(false)
+      dispatch({ type: 'SET_FIELD', field: 'saving', value: false })
     }
   }
 
@@ -195,7 +229,7 @@ export default function TodosPage() {
   async function handleDelete(todoId: string) {
     try {
       await deleteTodo(todoId)
-      setDeletingId(null)
+      dispatch({ type: 'SET_FIELD', field: 'deletingId', value: null })
     } catch (e) {
       console.error(e)
     }
@@ -213,17 +247,17 @@ export default function TodosPage() {
       {/* En-tête de la page */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Tâches
           </h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
             {todos.filter((t) => t.statut !== 'termine').length} tâches actives · {listCompleted.length} terminées
           </p>
         </div>
         <button type="button"
           onClick={openAddModal}
           className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-transform active:scale-95 cursor-pointer"
-          style={{ background: 'var(--color-accent)', color: 'white' }}
+          style={{ background: COLORS.ACCENT, color: 'white' }}
         >
           <Plus size={16} />
           Nouvelle tâche
@@ -241,9 +275,9 @@ export default function TodosPage() {
             placeholder="Rechercher une tâche par titre, client, matériel..."
             className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: COLORS.BG_SECONDARY,
               border: '1px solid var(--color-border-subtle)',
-              color: 'var(--color-text-primary)',
+              color: COLORS.TEXT_PRIMARY,
             }}
           />
         </div>
@@ -252,7 +286,7 @@ export default function TodosPage() {
           {/* Onglets coulissants Apple-style */}
           <div
             className="relative flex p-0.5 rounded-lg text-xs font-medium"
-            style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border-subtle)' }}
+            style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border-subtle)' }}
           >
             {([
               { id: 'toutes', label: 'Toutes' },
@@ -265,13 +299,13 @@ export default function TodosPage() {
                   key={tab.id}
                   onClick={() => setFilterTab(tab.id)}
                   className="relative z-10 px-3.5 py-1.5 rounded-md transition-colors cursor-pointer focus:outline-none"
-                  style={{ color: isActive ? 'var(--color-accent)' : 'var(--color-text-secondary)' }}
+                  style={{ color: isActive ? COLORS.ACCENT : COLORS.TEXT_SECONDARY }}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="active-todo-tab"
                       className="absolute inset-0 rounded-md -z-10 shadow-sm"
-                      style={{ background: 'var(--color-bg-secondary)' }}
+                      style={{ background: COLORS.BG_SECONDARY }}
                       transition={{ type: 'spring', stiffness: 350, damping: 28 }}
                     />
                   )}
@@ -288,9 +322,9 @@ export default function TodosPage() {
             aria-label="Filtrer par priorité"
             className="px-3 py-1.5 rounded-lg text-xs border"
             style={{
-              background: 'var(--color-bg-secondary)',
+              background: COLORS.BG_SECONDARY,
               borderColor: 'var(--color-border-subtle)',
-              color: 'var(--color-text-primary)',
+              color: COLORS.TEXT_PRIMARY,
             }}
           >
             <option value="">Toutes priorités</option>
@@ -306,21 +340,21 @@ export default function TodosPage() {
       ) : filteredTodos.length === 0 ? (
         <div
           className="flex flex-col items-center justify-center py-16 px-4 rounded-xl text-center border-2 border-dashed"
-          style={{ borderColor: 'var(--color-border-subtle)', background: 'var(--color-bg-secondary)' }}
+          style={{ borderColor: 'var(--color-border-subtle)', background: COLORS.BG_SECONDARY }}
         >
           <div className="size-10 rounded-full flex items-center justify-center mb-3" style={{ background: 'var(--color-accent-light)' }}>
-            <ListTodo size={20} style={{ color: 'var(--color-accent)' }} />
+            <ListTodo size={20} style={{ color: COLORS.ACCENT }} />
           </div>
-          <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+          <p className="text-sm font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>
             Aucune tâche trouvée
           </p>
-          <p className="text-xs mt-1 max-w-[280px]" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-xs mt-1 max-w-[280px]" style={{ color: COLORS.TEXT_SECONDARY }}>
             Créez une nouvelle tâche pour planifier vos interventions, calibrations ou autres devoirs.
           </p>
           <button type="button"
             onClick={openAddModal}
             className="mt-4 text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer"
-            style={{ background: 'var(--color-accent)', color: 'white' }}
+            style={{ background: COLORS.ACCENT, color: 'white' }}
           >
             + Créer la première tâche
           </button>
@@ -332,7 +366,7 @@ export default function TodosPage() {
             <button type="button"
               onClick={() => setShowTodo((s) => !s)}
               className="flex items-center gap-2 w-full text-left font-semibold text-xs uppercase mb-3 focus:outline-none"
-              style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.04em' }}
+              style={{ color: COLORS.TEXT_SECONDARY, letterSpacing: '0.04em' }}
             >
               {showTodo ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               🔴 À faire ({sortedTodo.length})
@@ -355,8 +389,8 @@ export default function TodosPage() {
                         onCycle={() => handleToggleStatus(todo)}
                         onEdit={() => openEditModal(todo)}
                         onDelete={() => handleDelete(todo.id)}
-                        deletingId={deletingId}
-                        setDeletingId={setDeletingId}
+                        deletingId={state.deletingId}
+                        setDeletingId={(id) => dispatch({ type: 'SET_FIELD', field: 'deletingId', value: id })}
                         isOverdue={isOverdue}
                         navigate={navigate}
                       />
@@ -372,7 +406,7 @@ export default function TodosPage() {
             <button type="button"
               onClick={() => setShowInProgress((s) => !s)}
               className="flex items-center gap-2 w-full text-left font-semibold text-xs uppercase mb-3 focus:outline-none"
-              style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.04em' }}
+              style={{ color: COLORS.TEXT_SECONDARY, letterSpacing: '0.04em' }}
             >
               {showInProgress ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               🟡 En cours ({sortedInProgress.length})
@@ -412,7 +446,7 @@ export default function TodosPage() {
             <button type="button"
               onClick={() => setShowCompleted((s) => !s)}
               className="flex items-center gap-2 w-full text-left font-semibold text-xs uppercase mb-3 focus:outline-none"
-              style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.04em' }}
+              style={{ color: COLORS.TEXT_SECONDARY, letterSpacing: '0.04em' }}
             >
               {showCompleted ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               🟢 Terminées ({sortedCompleted.length})
@@ -450,229 +484,191 @@ export default function TodosPage() {
       )}
 
       {/* MODAL : AJOUT / ÉDITION (Apple Style Zoom) */}
-      <AnimatePresence>
-        {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            {/* Overlay flouté */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0"
-              style={{ background: 'rgba(0, 0, 0, 0.35)', backdropFilter: 'blur(3px)' }}
+      <BaseModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingTodo ? 'Modifier la tâche' : 'Nouvelle tâche'}
+        footer={
+          <>
+            <button type="button"
               onClick={() => setShowModal(false)}
-            />
-
-            {/* Corps Modal */}
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-              className="bg-white rounded-2xl w-full max-w-md overflow-hidden relative shadow-2xl flex flex-col max-h-[90vh]"
+              className="px-4 py-2 text-xs font-semibold rounded-lg hover:bg-neutral-100 transition-colors focus:outline-none cursor-pointer"
+              style={{ color: COLORS.TEXT_SECONDARY }}
+            >
+              Annuler
+            </button>
+            <button type="button"
+              onClick={handleSave}
+              disabled={!state.titre.trim() || state.saving}
+              className="px-5 py-2 text-xs font-semibold rounded-lg cursor-pointer focus:outline-none transition-opacity"
               style={{
-                background: 'var(--color-bg-secondary)',
-                border: '1px solid var(--color-border-subtle)',
+                background: COLORS.ACCENT,
+                color: 'white',
+                opacity: !state.titre.trim() || state.saving ? 0.6 : 1,
               }}
             >
-              {/* Header */}
-              <div className="px-6 py-4 flex items-center justify-between shrink-0" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                <h3 className="text-md font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                  {editingTodo ? 'Modifier la tâche' : 'Nouvelle tâche'}
-                </h3>
-                <button type="button"
-                  onClick={() => setShowModal(false)}
-                  aria-label="Fermer"
-                  className="text-gray-400 hover:text-gray-600 font-bold focus:outline-none cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Body (Scrollable) */}
-              <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-4">
-                {/* Titre */}
-                <div>
-                  <label htmlFor="todo-titre" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Titre de la tâche</label>
-                  <input
-                    id="todo-titre"
-                    value={formTitre}
-                    onChange={(e) => setFormTitre(e.target.value)}
-                    placeholder="Ex: Préparer flaconnage rivière"
-                    className="w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none"
-                    style={{
-                      background: 'var(--color-bg-primary)',
-                      borderColor: 'var(--color-border-subtle)',
-                      color: 'var(--color-text-primary)',
-                    }}
-                    autoFocus
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label htmlFor="todo-desc" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Description / Notes</label>
-                  <textarea
-                    id="todo-desc"
-                    value={formDesc}
-                    onChange={(e) => setFormDesc(e.target.value)}
-                    placeholder="Détails supplémentaires, consignes..."
-                    rows={3}
-                    className="w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none resize-none"
-                    style={{
-                      background: 'var(--color-bg-primary)',
-                      borderColor: 'var(--color-border-subtle)',
-                      color: 'var(--color-text-primary)',
-                    }}
-                  />
-                </div>
-
-                {/* Priorité (Segmented Control) */}
-                <div role="group" aria-labelledby="todo-priority-label">
-                  <p id="todo-priority-label" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Priorité</p>
-                  <div
-                    className="flex p-0.5 rounded-lg text-xs font-semibold"
-                    style={{ background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border-subtle)' }}
-                  >
-                    {([
-                      { value: 'basse', label: '🔵 Basse' },
-                      { value: 'moyenne', label: '🟡 Moyenne' },
-                      { value: 'haute', label: '🔴 Haute' },
-                    ] as const).map((p) => {
-                      const isSel = formPriority === p.value
-                      return (
-                        <button type="button"
-                          key={p.value}
-                          onClick={() => setFormPriority(p.value)}
-                          className="flex-1 py-2 text-center rounded-md cursor-pointer transition-colors focus:outline-none"
-                          style={{
-                            color: isSel ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
-                            background: isSel ? 'var(--color-bg-secondary)' : 'transparent',
-                            boxShadow: isSel ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
-                          }}
-                        >
-                          {p.label}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {/* Assignation */}
-                <div>
-                  <label htmlFor="todo-assigned" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Assignée à</label>
-                  <select
-                    id="todo-assigned"
-                    value={formAssignedTo}
-                    onChange={(e) => setFormAssignedTo(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none"
-                    style={{
-                      background: 'var(--color-bg-primary)',
-                      borderColor: 'var(--color-border-subtle)',
-                      color: 'var(--color-text-primary)',
-                    }}
-                  >
-                    <option value="equipe">👥 Toute l'équipe (Équipe)</option>
-                    {users.map((u) => (
-                      <option key={u.uid} value={u.uid}>
-                        👤 {u.prenom} {u.nom} ({u.initiales})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Échéance */}
-                <div>
-                  <label htmlFor="todo-due-date" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Date d'échéance</label>
-                  <input
-                    id="todo-due-date"
-                    type="date"
-                    value={formDueDate}
-                    onChange={(e) => setFormDueDate(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none"
-                    style={{
-                      background: 'var(--color-bg-primary)',
-                      borderColor: 'var(--color-border-subtle)',
-                      color: 'var(--color-text-primary)',
-                    }}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mt-1">
-                  {/* Liaison Client */}
-                  <div>
-                    <label htmlFor="todo-client" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Client / Mission</label>
-                    <select
-                      id="todo-client"
-                      value={formClientId}
-                      onChange={(e) => setFormClientId(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border text-xs focus:outline-none"
-                      style={{
-                        background: 'var(--color-bg-primary)',
-                        borderColor: 'var(--color-border-subtle)',
-                        color: 'var(--color-text-primary)',
-                      }}
-                    >
-                      <option value="">(Aucun)</option>
-                      {clients.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.nom} ({c.annee})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Liaison Équipement */}
-                  <div>
-                    <label htmlFor="todo-equipement" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Matériel / Instrument</label>
-                    <select
-                      id="todo-equipement"
-                      value={formEquipementId}
-                      onChange={(e) => setFormEquipementId(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border text-xs focus:outline-none"
-                      style={{
-                        background: 'var(--color-bg-primary)',
-                        borderColor: 'var(--color-border-subtle)',
-                        color: 'var(--color-text-primary)',
-                      }}
-                    >
-                      <option value="">(Aucun)</option>
-                      {equipements.map((e) => (
-                        <option key={e.id} value={e.id}>
-                          {e.nom}{e.diametre ? ` Ø${e.diametre}` : ''}{e.numSerie ? ` (${e.numSerie})` : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="px-6 py-4 flex items-center justify-end gap-3 shrink-0" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
-                <button type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-xs font-semibold rounded-lg hover:bg-neutral-100 transition-colors focus:outline-none cursor-pointer"
-                  style={{ color: 'var(--color-text-secondary)' }}
-                >
-                  Annuler
-                </button>
-                <button type="button"
-                  onClick={handleSave}
-                  disabled={!formTitre.trim() || saving}
-                  className="px-5 py-2 text-xs font-semibold rounded-lg cursor-pointer focus:outline-none transition-opacity"
-                  style={{
-                    background: 'var(--color-accent)',
-                    color: 'white',
-                    opacity: !formTitre.trim() || saving ? 0.6 : 1,
-                  }}
-                >
-                  {saving ? 'Enregistrement...' : 'Enregistrer'}
-                </button>
-              </div>
-            </motion.div>
+              {state.saving ? 'Enregistrement...' : 'Enregistrer'}
+            </button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          {/* Titre */}
+          <div>
+            <label htmlFor="todo-titre" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Titre de la tâche</label>
+            <input
+              id="todo-titre"
+              value={state.titre}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'titre', value: e.target.value })}
+              placeholder="Ex: Préparer flaconnage rivière"
+              className="w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none"
+              style={{
+                background: COLORS.BG_PRIMARY,
+                borderColor: 'var(--color-border-subtle)',
+                color: COLORS.TEXT_PRIMARY,
+              }}
+              autoFocus
+            />
           </div>
-        )}
-      </AnimatePresence>
+
+          {/* Description */}
+          <div>
+            <label htmlFor="todo-desc" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Description / Notes</label>
+            <textarea
+              id="todo-desc"
+              value={state.desc}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'desc', value: e.target.value })}
+              placeholder="Détails supplémentaires, consignes..."
+              rows={3}
+              className="w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none resize-none"
+              style={{
+                background: COLORS.BG_PRIMARY,
+                borderColor: 'var(--color-border-subtle)',
+                color: COLORS.TEXT_PRIMARY,
+              }}
+            />
+          </div>
+
+          {/* Priorité (Segmented Control) */}
+          <div role="group" aria-labelledby="todo-priority-label">
+            <p id="todo-priority-label" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Priorité</p>
+            <div
+              className="flex p-0.5 rounded-lg text-xs font-semibold"
+              style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border-subtle)' }}
+            >
+              {([
+                { value: 'basse', label: '🔵 Basse' },
+                { value: 'moyenne', label: '🟡 Moyenne' },
+                { value: 'haute', label: '🔴 Haute' },
+              ] as const).map((p) => {
+                const isSel = state.priorite === p.value
+                return (
+                  <button type="button"
+                    key={p.value}
+                    onClick={() => dispatch({ type: 'SET_FIELD', field: 'priorite', value: p.value })}
+                    className="flex-1 py-2 text-center rounded-md cursor-pointer transition-colors focus:outline-none"
+                    style={{
+                      color: isSel ? COLORS.TEXT_PRIMARY : COLORS.TEXT_SECONDARY,
+                      background: isSel ? COLORS.BG_SECONDARY : 'transparent',
+                      boxShadow: isSel ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+                    }}
+                  >
+                    {p.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Assignation */}
+          <div>
+            <label htmlFor="todo-assigned" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Assignée à</label>
+            <select
+              id="todo-assigned"
+              value={state.assignedTo}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'assignedTo', value: e.target.value })}
+              className="w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none"
+              style={{
+                background: COLORS.BG_PRIMARY,
+                borderColor: 'var(--color-border-subtle)',
+                color: COLORS.TEXT_PRIMARY,
+              }}
+            >
+              <option value="equipe">👥 Toute l'équipe (Équipe)</option>
+              {users.map((u) => (
+                <option key={u.uid} value={u.uid}>
+                  👤 {u.prenom} {u.nom} ({u.initiales})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Échéance */}
+          <div>
+            <label htmlFor="todo-due-date" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Date d'échéance</label>
+            <input
+              id="todo-due-date"
+              type="date"
+              value={state.dueDate}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'dueDate', value: e.target.value })}
+              className="w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none"
+              style={{
+                background: COLORS.BG_PRIMARY,
+                borderColor: 'var(--color-border-subtle)',
+                color: COLORS.TEXT_PRIMARY,
+              }}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 mt-1">
+            {/* Liaison Client */}
+            <div>
+              <label htmlFor="todo-client" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Client / Mission</label>
+              <select
+                id="todo-client"
+                value={state.clientId}
+                onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'clientId', value: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border text-xs focus:outline-none"
+                style={{
+                  background: COLORS.BG_PRIMARY,
+                  borderColor: 'var(--color-border-subtle)',
+                  color: COLORS.TEXT_PRIMARY,
+                }}
+              >
+                <option value="">(Aucun)</option>
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nom} ({c.annee})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Liaison Équipement */}
+            <div>
+              <label htmlFor="todo-equipement" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Matériel / Instrument</label>
+              <select
+                id="todo-equipement"
+                value={state.equipementId}
+                onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'equipementId', value: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border text-xs focus:outline-none"
+                style={{
+                  background: COLORS.BG_PRIMARY,
+                  borderColor: 'var(--color-border-subtle)',
+                  color: COLORS.TEXT_PRIMARY,
+                }}
+              >
+                <option value="">(Aucun)</option>
+                {equipements.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.nom}{e.diametre ? ` Ø${e.diametre}` : ''}{e.numSerie ? ` (${e.numSerie})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      </BaseModal>
     </div>
   )
 }
@@ -727,9 +723,9 @@ function TodoRow({
         aria-label={isCompleted ? 'Marquer comme non terminé' : 'Marquer comme terminé'}
         className="mt-0.5 shrink-0 flex items-center justify-center size-5.5 rounded-full border transition-all cursor-pointer focus:outline-none"
         style={{
-          borderColor: isCompleted ? 'var(--color-success)' : 'var(--color-border)',
+          borderColor: isCompleted ? COLORS.SUCCESS : COLORS.BORDER,
           background: isCompleted ? 'var(--color-success-light)' : 'transparent',
-          color: 'var(--color-success)',
+          color: COLORS.SUCCESS,
         }}
       >
         {isCompleted && <Check size={11} strokeWidth={3.5} />}
@@ -755,7 +751,7 @@ function TodoRow({
           {todo.statut === 'en_cours' && (
             <span
               className="text-[9px] font-semibold px-1.5 py-0.2 rounded shrink-0 uppercase tracking-wide mt-0.5"
-              style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}
+              style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}
             >
               En cours
             </span>
@@ -772,7 +768,7 @@ function TodoRow({
             <span
               className="font-medium shrink-0"
               style={{
-                color: !isCompleted && isOverdue(todo.dueDate) ? 'var(--color-danger)' : 'inherit',
+                color: !isCompleted && isOverdue(todo.dueDate) ? COLORS.DANGER : 'inherit',
               }}
             >
               📅 {todo.dueDate.split('-').reverse().join('/')} {!isCompleted && isOverdue(todo.dueDate) && '(en retard)'}
@@ -784,7 +780,7 @@ function TodoRow({
               {todo.dueDate && <span>•</span>}
               <button type="button"
                 className="hover:underline font-semibold shrink-0 text-left"
-                style={{ color: 'var(--color-accent)' }}
+                style={{ color: COLORS.ACCENT }}
                 onClick={() => navigate(`/missions/${todo.clientId}`)}
               >
                 💼 {todo.clientNom}
@@ -797,7 +793,7 @@ function TodoRow({
               {(todo.dueDate || todo.clientNom) && <span>•</span>}
               <button type="button"
                 className="hover:underline font-semibold shrink-0 text-left"
-                style={{ color: 'var(--color-accent)' }}
+                style={{ color: COLORS.ACCENT }}
                 onClick={() => navigate(`/materiel/${todo.equipementId}`)}
               >
                 🔧 {todo.equipementNom}
@@ -815,9 +811,9 @@ function TodoRow({
             <div
               className="flex items-center justify-center text-[9px] font-bold size-6 rounded-full border border-dashed select-none"
               style={{
-                background: 'var(--color-bg-tertiary)',
-                borderColor: 'var(--color-border)',
-                color: 'var(--color-text-secondary)',
+                background: COLORS.BG_TERTIARY,
+                borderColor: COLORS.BORDER,
+                color: COLORS.TEXT_SECONDARY,
               }}
             >
               👥

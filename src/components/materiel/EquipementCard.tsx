@@ -7,6 +7,8 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import CircleProgress from './CircleProgress'
 import type { Equipement } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 const CATEGORIE_LABELS: Record<string, string> = {
   // V2 — nouvelles catégories
@@ -53,10 +55,10 @@ const CATEGORIE_ICONS: Record<string, LucideIcon> = {
 }
 
 const ETAT_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
-  operationnel:    { label: 'Opérationnel',    bg: 'var(--color-success-light)', color: 'var(--color-success)' },
-  en_maintenance:  { label: 'En maintenance',  bg: 'var(--color-warning-light)', color: 'var(--color-warning)' },
-  hors_service:    { label: 'Hors service',    bg: 'var(--color-danger-light)',  color: 'var(--color-danger)'  },
-  prete:           { label: 'Prêté',           bg: 'var(--color-bg-tertiary)',   color: 'var(--color-text-secondary)' },
+  operationnel:    { label: 'Opérationnel',    bg: 'var(--color-success-light)', color: COLORS.SUCCESS },
+  en_maintenance:  { label: 'En maintenance',  bg: 'var(--color-warning-light)', color: COLORS.WARNING },
+  hors_service:    { label: 'Hors service',    bg: 'var(--color-danger-light)',  color: COLORS.DANGER  },
+  prete:           { label: 'Prêté',           bg: COLORS.BG_TERTIARY,   color: COLORS.TEXT_SECONDARY },
 }
 
 function calcMetroTooltip(prochainEtalonnage: string): string {
@@ -78,9 +80,9 @@ function calcMetroPercent(prochainEtalonnage: string): number | null {
 }
 
 function getMetroColor(percent: number): string {
-  if (percent >= 60) return 'var(--color-success)'
-  if (percent >= 30) return 'var(--color-warning)'
-  return 'var(--color-danger)'
+  if (percent >= 60) return COLORS.SUCCESS
+  if (percent >= 30) return COLORS.WARNING
+  return COLORS.DANGER
 }
 
 interface EquipementCardProps {
@@ -107,18 +109,18 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
       onClick={() => navigate(`/materiel/${equipement.id}`)}
       className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
       style={{
-        background: 'var(--color-bg-secondary)',
+        background: COLORS.BG_SECONDARY,
         border: '1px solid var(--color-border-subtle)',
         boxShadow: 'var(--shadow-card)',
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
-      onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-bg-secondary)')}
+      onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
+      onMouseLeave={(e) => (e.currentTarget.style.background = COLORS.BG_SECONDARY)}
     >
       {/* Anneau métrologie avec icône au centre */}
       <div className="relative group shrink-0">
         {metroPercent !== null && (
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 whitespace-nowrap px-2 py-1 rounded text-xs z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-100"
-            style={{ background: 'var(--color-text-primary)', color: 'white' }}>
+            style={{ background: COLORS.TEXT_PRIMARY, color: 'white' }}>
             {calcMetroTooltip(equipement.prochainEtalonnage)}
           </div>
         )}
@@ -126,7 +128,7 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
           <CircleProgress percent={metroPercent} size={44} icon={categoryIcon} />
         ) : (
           <div className="size-11 rounded-full flex items-center justify-center"
-            style={{ background: 'var(--color-bg-tertiary)', border: '2px solid var(--color-border)' }}>
+            style={{ background: COLORS.BG_TERTIARY, border: '2px solid var(--color-border)' }}>
             <Icon size={iconSize} strokeWidth={1.8} color="var(--color-text-tertiary)" />
           </div>
         )}
@@ -134,10 +136,10 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
 
       {/* Infos */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+        <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
           {equipement.nom || 'Sans nom'}
         </p>
-        <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
           {[equipement.marque, equipement.modele].filter(Boolean).join(' ') || '—'}
         </p>
         <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -156,7 +158,7 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
       <div className="flex flex-col items-end gap-1 shrink-0">
         {metroPercent === 0 && (
           <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-            style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+            style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
             À étalonner
           </span>
         )}

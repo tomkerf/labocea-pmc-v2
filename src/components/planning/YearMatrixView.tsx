@@ -6,11 +6,11 @@ import { isSamplingOverdue } from '@/lib/overdue'
 
 function getStatusColor(s: Sampling | null, planYear: number) {
   if (!s) return 'transparent'
-  if (s.status === 'done') return 'var(--color-success)'
+  if (s.status === 'done') return COLORS.SUCCESS
   if (s.status === 'non_effectue') return 'var(--color-neutral)'
-  if (isSamplingOverdue(s, planYear)) return 'var(--color-danger)'
-  if (s.status === 'planned') return 'var(--color-warning)'
-  return 'var(--color-border)'
+  if (isSamplingOverdue(s, planYear)) return COLORS.DANGER
+  if (s.status === 'planned') return COLORS.WARNING
+  return COLORS.BORDER
 }
 
 function getStatusLabel(s: Sampling | null, planYear: number) {
@@ -31,6 +31,8 @@ function getStatusIcon(s: Sampling, planYear: number) {
 import { Link } from 'react-router-dom'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 import IssueListModal from './IssueListModal'
+import { COLORS } from '@/lib/constants'
+
 
 interface YearMatrixViewProps {
   clients: Client[]
@@ -232,7 +234,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                       className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)] hover:bg-[#e8e8ec] transition-colors cursor-pointer"
                       onClick={() => toggleClient(client.id)}
                     >
-                      <td className="px-3 py-2 sticky left-0 z-20 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)]" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+                      <td className="px-3 py-2 sticky left-0 z-20 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)]" style={{ backgroundColor: COLORS.BG_TERTIARY }}>
                         <div className="flex items-center gap-2">
                           {isCollapsed
                             ? <ChevronRight size={14} className="text-[var(--color-text-secondary)] shrink-0" />

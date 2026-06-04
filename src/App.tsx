@@ -8,6 +8,8 @@ import AppLayout from '@/components/layout/AppLayout'
 // ── Chargement différé des pages (code-splitting) ───────────
 // LoginPage reste eager — elle est la première page affichée sans auth
 import LoginPage from '@/pages/LoginPage'
+import { COLORS } from '@/lib/constants'
+
 
 const DashboardPage     = lazy(() => import('@/pages/DashboardPage'))
 const MissionsPage      = lazy(() => import('@/pages/MissionsPage'))
@@ -39,7 +41,7 @@ function PageSpinner() {
   return (
     <div className="flex justify-center items-center py-20">
       <div className="size-6 rounded-full border-2 animate-spin"
-        style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+        style={{ borderColor: COLORS.BORDER, borderTopColor: COLORS.ACCENT }} />
     </div>
   )
 }

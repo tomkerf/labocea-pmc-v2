@@ -1,4 +1,6 @@
 import type { Client, SegmentType, NouvelleDemandeType } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 const SEGMENTS: SegmentType[] = ['SRA', 'Réseau de mesure', 'RSDE']
 const NOUVELLES_DEMANDES: NouvelleDemandeType[] = ['Annuelle', 'Avenant', 'Ponctuelle']
@@ -17,9 +19,9 @@ export function ClientInfoForm({ client, sitesInput, update, onSitesChange }: Pr
         <Field label="Nom du client">
           <input aria-label="Nom du client" value={client.nom} onChange={(e) => update('nom', e.target.value)}
             className="field-input" placeholder="Nom du client"
-            style={!client.nom.trim() ? { borderColor: 'var(--color-danger)' } : undefined} />
+            style={!client.nom.trim() ? { borderColor: COLORS.DANGER } : undefined} />
           {!client.nom.trim() && (
-            <p className="text-xs mt-1" style={{ color: 'var(--color-danger)' }}>Le nom est obligatoire.</p>
+            <p className="text-xs mt-1" style={{ color: COLORS.DANGER }}>Le nom est obligatoire.</p>
           )}
         </Field>
         <Field label="Segment">
@@ -124,7 +126,7 @@ export function ClientInfoForm({ client, sitesInput, update, onSitesChange }: Pr
                 checked={!!client.hasSousTraitance}
                 onChange={(e) => update('hasSousTraitance', e.target.checked)}
               />
-              <span style={{ fontSize: 13, color: 'var(--color-text-primary)' }}>Analyses sous-traitées</span>
+              <span style={{ fontSize: 13, color: COLORS.TEXT_PRIMARY }}>Analyses sous-traitées</span>
             </label>
             {client.hasSousTraitance && (
               <input
@@ -209,7 +211,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
         {title}
       </h2>
       <div className="rounded-xl overflow-hidden"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         {children}
       </div>
     </div>
@@ -220,7 +222,7 @@ function Field({ label, children, last }: { label: string; children: React.React
   return (
     <div className="flex items-start gap-4 px-5 py-3"
       style={{ borderBottom: last ? 'none' : '1px solid var(--color-border-subtle)' }}>
-      <label className="text-sm shrink-0 pt-0.5" style={{ color: 'var(--color-text-secondary)', minWidth: '160px' }}>
+      <label className="text-sm shrink-0 pt-0.5" style={{ color: COLORS.TEXT_SECONDARY, minWidth: '160px' }}>
         {label}
       </label>
       <div className="flex-1">{children}</div>

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import {
+import { COLORS } from '@/lib/constants'
+
   type ViewMode,
   MOIS_LONG,
   startOfWeek, startOfMonth, addDays, addMonths, toISO,
@@ -43,7 +45,7 @@ function MonthGrid({ offset, baseMonth, viewMode, monthStart, weekStart, selecte
   return (
     <div className="px-3 pt-3 pb-2">
       <p className="text-[11px] font-semibold mb-2 capitalize text-center"
-        style={{ color: 'var(--color-text-primary)' }}>{label}</p>
+        style={{ color: COLORS.TEXT_PRIMARY }}>{label}</p>
       {offset === 0 && (
         <div className="grid grid-cols-7 mb-1">
           {DAYS.map((d, i) => (
@@ -67,8 +69,8 @@ function MonthGrid({ offset, baseMonth, viewMode, monthStart, weekStart, selecte
               style={{
                 width: 22, height: 22,
                 fontSize: 11,
-                background: isToday ? 'var(--color-accent)' : highlighted ? 'var(--color-accent-light)' : 'transparent',
-                color: isToday ? 'white' : highlighted ? 'var(--color-accent)' : 'var(--color-text-primary)',
+                background: isToday ? COLORS.ACCENT : highlighted ? 'var(--color-accent-light)' : 'transparent',
+                color: isToday ? 'white' : highlighted ? COLORS.ACCENT : COLORS.TEXT_PRIMARY,
                 fontWeight: isToday || highlighted ? 600 : 400,
               }}>
               {d.getDate()}
@@ -105,23 +107,23 @@ export default function MiniCalendarPanel({
         style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
         <button type="button" onClick={() => setBaseMonth(m => addMonths(m, -1))}
           className="p-1.5 rounded-md"
-          onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+          onMouseEnter={e => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-          style={{ color: 'var(--color-text-secondary)' }}>
+          style={{ color: COLORS.TEXT_SECONDARY }}>
           <ChevronLeft size={13} />
         </button>
         <button type="button" onClick={() => setBaseMonth(startOfMonth(today))}
           className="text-[10px] font-medium px-2 py-0.5 rounded"
-          onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+          onMouseEnter={e => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-          style={{ color: 'var(--color-text-secondary)' }}>
+          style={{ color: COLORS.TEXT_SECONDARY }}>
           Aujourd'hui
         </button>
         <button type="button" onClick={() => setBaseMonth(m => addMonths(m, 1))}
           className="p-1.5 rounded-md"
-          onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+          onMouseEnter={e => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-          style={{ color: 'var(--color-text-secondary)' }}>
+          style={{ color: COLORS.TEXT_SECONDARY }}>
           <ChevronRight size={13} />
         </button>
       </div>

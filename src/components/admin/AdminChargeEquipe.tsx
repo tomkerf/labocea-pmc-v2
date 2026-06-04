@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react'
 import { ChevronLeft, ChevronRight, BarChart2, Clock } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
+import { COLORS } from '@/lib/constants'
+
 
 const MOIS_COURT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun',
                     'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
@@ -121,23 +123,23 @@ export function AdminChargeEquipe() {
   return (
     <section>
       <h2 className="text-sm font-semibold mb-3"
-        style={{ color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        style={{ color: COLORS.TEXT_SECONDARY, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         Charge équipe
       </h2>
 
       <div className="rounded-xl overflow-hidden"
-        style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)' }}>
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
 
         <div className="flex items-center justify-between px-5 py-3.5"
           style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <div className="flex gap-1 p-1 rounded-lg" style={{ background: 'var(--color-bg-tertiary)' }}>
+          <div className="flex gap-1 p-1 rounded-lg" style={{ background: COLORS.BG_TERTIARY }}>
             {(['semaine', 'mois'] as const).map(v => (
               <button type="button" key={v}
                 onClick={() => { setViewMode(v); setRefDate(new Date()) }}
                 className="px-3 py-1 rounded-md text-xs font-medium transition-colors"
                 style={{
-                  background: viewMode === v ? 'var(--color-bg-secondary)' : 'transparent',
-                  color:      viewMode === v ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+                  background: viewMode === v ? COLORS.BG_SECONDARY : 'transparent',
+                  color:      viewMode === v ? COLORS.TEXT_PRIMARY : COLORS.TEXT_SECONDARY,
                   boxShadow:  viewMode === v ? 'var(--shadow-card)' : 'none',
                 }}>
                 {v.charAt(0).toUpperCase() + v.slice(1)}
@@ -148,23 +150,23 @@ export function AdminChargeEquipe() {
           <div className="flex items-center gap-2">
             <button type="button" onClick={() => navigate_(-1)}
               className="p-1 rounded-md"
-              style={{ color: 'var(--color-text-secondary)', background: 'var(--color-bg-tertiary)' }}>
+              style={{ color: COLORS.TEXT_SECONDARY, background: COLORS.BG_TERTIARY }}>
               <ChevronLeft size={15} />
             </button>
             <span className="text-sm font-medium w-32 text-center"
-              style={{ color: 'var(--color-text-primary)' }}>
+              style={{ color: COLORS.TEXT_PRIMARY }}>
               {label}
             </span>
             <button type="button" onClick={() => navigate_(1)}
               className="p-1 rounded-md"
-              style={{ color: 'var(--color-text-secondary)', background: 'var(--color-bg-tertiary)' }}>
+              style={{ color: COLORS.TEXT_SECONDARY, background: COLORS.BG_TERTIARY }}>
               <ChevronRight size={15} />
             </button>
           </div>
         </div>
 
         <div className="flex items-center gap-4 px-5 py-2.5"
-          style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-bg-primary)' }}>
+          style={{ borderBottom: '1px solid var(--color-border-subtle)', background: COLORS.BG_PRIMARY }}>
           <div className="flex items-center gap-1.5">
             <Clock size={11} style={{ color: 'var(--color-text-tertiary)' }} />
             <span className="text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -202,23 +204,23 @@ export function AdminChargeEquipe() {
               const donePct    = maxH > 0 ? row.doneH    / maxH : 0
               const plannedPct = maxH > 0 ? row.plannedH / maxH : 0
               const remainColor = plannedPct > 0.6
-                ? 'var(--color-danger)'
+                ? COLORS.DANGER
                 : plannedPct > 0.3
-                  ? 'var(--color-warning)'
-                  : 'var(--color-accent)'
+                  ? COLORS.WARNING
+                  : COLORS.ACCENT
 
               return (
                 <div key={row.tech}
                   className="grid items-center px-5 py-3"
                   style={{ gridTemplateColumns: '90px 1fr 72px 72px 64px', borderTop: i > 0 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                  <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                  <span className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
                     {row.tech}
                   </span>
                   <div className="h-2 rounded-full mx-2 overflow-hidden flex"
-                    style={{ background: 'var(--color-bg-tertiary)' }}>
+                    style={{ background: COLORS.BG_TERTIARY }}>
                     {row.doneH > 0 && (
                       <div className="h-full shrink-0"
-                        style={{ width: `${Math.round(donePct * 100)}%`, background: 'var(--color-success)' }} />
+                        style={{ width: `${Math.round(donePct * 100)}%`, background: COLORS.SUCCESS }} />
                     )}
                     {row.plannedH > 0 && (
                       <div className="h-full shrink-0"
@@ -226,7 +228,7 @@ export function AdminChargeEquipe() {
                     )}
                   </div>
                   <span className="text-sm font-medium text-center"
-                    style={{ color: row.doneH > 0 ? 'var(--color-success)' : 'var(--color-text-tertiary)' }}>
+                    style={{ color: row.doneH > 0 ? COLORS.SUCCESS : 'var(--color-text-tertiary)' }}>
                     {row.doneH > 0 ? formatH(row.doneH) : '—'}
                   </span>
                   <span className="text-sm font-medium text-center"
@@ -234,7 +236,7 @@ export function AdminChargeEquipe() {
                     {row.plannedH > 0 ? formatH(row.plannedH) : '—'}
                   </span>
                   <span className="text-sm font-semibold text-center"
-                    style={{ color: 'var(--color-text-primary)' }}>
+                    style={{ color: COLORS.TEXT_PRIMARY }}>
                     {formatH(row.totalH)}
                   </span>
                 </div>
@@ -246,22 +248,22 @@ export function AdminChargeEquipe() {
               const totPlanned = rows.reduce((s, r) => s + r.plannedH, 0)
               return (
                 <div className="grid items-center px-5 py-3"
-                  style={{ gridTemplateColumns: '90px 1fr 72px 72px 64px', borderTop: '1px solid var(--color-border)', background: 'var(--color-bg-primary)' }}>
+                  style={{ gridTemplateColumns: '90px 1fr 72px 72px 64px', borderTop: '1px solid var(--color-border)', background: COLORS.BG_PRIMARY }}>
                   <span className="text-xs font-semibold uppercase"
                     style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em' }}>
                     Total équipe
                   </span>
                   <span />
                   <span className="text-xs font-semibold text-center"
-                    style={{ color: totDone > 0 ? 'var(--color-success)' : 'var(--color-text-tertiary)' }}>
+                    style={{ color: totDone > 0 ? COLORS.SUCCESS : 'var(--color-text-tertiary)' }}>
                     {totDone > 0 ? formatH(totDone) : '—'}
                   </span>
                   <span className="text-xs font-semibold text-center"
-                    style={{ color: 'var(--color-text-secondary)' }}>
+                    style={{ color: COLORS.TEXT_SECONDARY }}>
                     {totPlanned > 0 ? formatH(totPlanned) : '—'}
                   </span>
                   <span className="text-xs font-semibold text-center"
-                    style={{ color: 'var(--color-text-primary)' }}>
+                    style={{ color: COLORS.TEXT_PRIMARY }}>
                     {formatH(totDone + totPlanned)}
                   </span>
                 </div>

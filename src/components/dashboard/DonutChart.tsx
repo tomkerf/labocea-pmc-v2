@@ -1,3 +1,5 @@
+import { COLORS } from '@/lib/constants'
+
 interface Segment {
   value: number
   color: string
@@ -36,7 +38,7 @@ export default function DonutChart({ segments, total, size = 120, strokeWidth = 
           <circle
             cx={center} cy={center} r={radius}
             fill="none"
-            stroke="var(--color-border)"
+            stroke=COLORS.BORDER
             strokeWidth={strokeWidth}
           />
           {/* Segments */}
@@ -55,7 +57,7 @@ export default function DonutChart({ segments, total, size = 120, strokeWidth = 
         </svg>
         {/* Texte centré */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)', letterSpacing: '-0.5px' }}>
+          <span className="text-2xl font-bold" style={{ color: COLORS.TEXT_PRIMARY, letterSpacing: '-0.5px' }}>
             {total}
           </span>
           <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>équip.</span>
@@ -67,8 +69,8 @@ export default function DonutChart({ segments, total, size = 120, strokeWidth = 
         {segments.map((s) => (
           <div key={s.label} className="flex items-center gap-2">
             <span className="size-2.5 rounded-full shrink-0" style={{ background: s.color }} />
-            <span className="text-sm whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>{s.label}</span>
-            <span className="text-sm font-semibold ml-auto pl-4" style={{ color: 'var(--color-text-primary)' }}>
+            <span className="text-sm whitespace-nowrap" style={{ color: COLORS.TEXT_SECONDARY }}>{s.label}</span>
+            <span className="text-sm font-semibold ml-auto pl-4" style={{ color: COLORS.TEXT_PRIMARY }}>
               {s.value}
             </span>
           </div>

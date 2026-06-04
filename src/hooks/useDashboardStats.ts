@@ -4,12 +4,14 @@ import { calcStatut } from '@/hooks/useMetrologieRows'
 import { isThisMonth, localISO, isToday, daysDiff } from '@/lib/dashboardUtils'
 
 import type { Client, Sampling, Verification, Equipement, Plan, EvenementPersonnel, Maintenance, Todo } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 const EVENEMENT_CFG: Record<string, { label: string; bg: string; color: string; dot: string }> = {
-  rappel:  { label: 'Rappel',  bg: 'var(--color-bg-tertiary)',  color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' },
+  rappel:  { label: 'Rappel',  bg: COLORS.BG_TERTIARY,  color: COLORS.TEXT_SECONDARY, dot: 'var(--color-text-tertiary)' },
   reunion: { label: 'Réunion', bg: '#F3EEFF',                   color: '#7C3AED',                     dot: '#7C3AED'                    },
-  rapport: { label: 'Rapport', bg: 'var(--color-bg-tertiary)',  color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' },
-  autre:   { label: 'Autre',   bg: 'var(--color-bg-tertiary)',  color: 'var(--color-text-secondary)', dot: 'var(--color-text-tertiary)' },
+  rapport: { label: 'Rapport', bg: COLORS.BG_TERTIARY,  color: COLORS.TEXT_SECONDARY, dot: 'var(--color-text-tertiary)' },
+  autre:   { label: 'Autre',   bg: COLORS.BG_TERTIARY,  color: COLORS.TEXT_SECONDARY, dot: 'var(--color-text-tertiary)' },
 }
 
 export type SamplingBadge = { label: string; bg: string; color: string }
@@ -61,15 +63,15 @@ interface Params {
 
 function getSamplingBadge(s: Sampling): SamplingBadge {
   const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes()
-  if (s.status === 'done')         return { label: 'Réalisé',  bg: 'var(--color-success-light)', color: 'var(--color-success)' }
-  if (s.status === 'overdue')      return { label: 'Urgent',   bg: 'var(--color-danger-light)',  color: 'var(--color-danger)' }
-  if (s.status === 'non_effectue') return { label: 'Non fait', bg: 'var(--color-warning-light)', color: 'var(--color-warning)' }
+  if (s.status === 'done')         return { label: 'Réalisé',  bg: 'var(--color-success-light)', color: COLORS.SUCCESS }
+  if (s.status === 'overdue')      return { label: 'Urgent',   bg: 'var(--color-danger-light)',  color: COLORS.DANGER }
+  if (s.status === 'non_effectue') return { label: 'Non fait', bg: 'var(--color-warning-light)', color: COLORS.WARNING }
   if (s.plannedTime) {
     const [h, m] = s.plannedTime.split(':').map(Number)
     const tMin = h * 60 + m
-    if (nowMinutes >= tMin && nowMinutes < tMin + 120) return { label: 'En cours', bg: 'var(--color-accent-light)', color: 'var(--color-accent)' }
+    if (nowMinutes >= tMin && nowMinutes < tMin + 120) return { label: 'En cours', bg: 'var(--color-accent-light)', color: COLORS.ACCENT }
   }
-  return { label: 'À faire', bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }
+  return { label: 'À faire', bg: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }
 }
 
 export function useDashboardStats({
@@ -240,7 +242,7 @@ export function useDashboardStats({
           const isJ2Today = baseDate === yesterdayISO && s.status === 'planned'
           if (!isToday(baseDate) && !isJ2Today) return
           const badge = getSamplingBadge(s)
-          const dot = s.status === 'done' ? 'var(--color-success)' : s.status === 'overdue' ? 'var(--color-danger)' : 'var(--color-accent)'
+          const dot = s.status === 'done' ? COLORS.SUCCESS : s.status === 'overdue' ? COLORS.DANGER : COLORS.ACCENT
           const sub = [plan.siteNom, plan.nom].filter(Boolean).join(' · ') || '—'
           const modalEvent: ModalEventRef = {
             id: s.id, type: 'prelevement', title: client.nom, subtitle: sub,
@@ -302,7 +304,7 @@ export function useDashboardStats({
           // Bilan 24h : J1 aujourd'hui → ajouter J2 (récupération) demain
           if (isAuto && baseDate === todayISO && s.status !== 'done') {
             const badge = getSamplingBadge(s)
-            const dot = 'var(--color-accent)'
+            const dot = COLORS.ACCENT
             const sub = [plan.siteNom, plan.nom].filter(Boolean).join(' · ') || '—'
             const subJ2 = `${sub} · Bilan 24h J2`
             const modalEvent: ModalEventRef = {
@@ -318,7 +320,7 @@ export function useDashboardStats({
           if (baseDate !== tomorrowISO) return
           if (s.status === 'done') return
           const badge = getSamplingBadge(s)
-          const dot = s.status === 'overdue' ? 'var(--color-danger)' : 'var(--color-accent)'
+          const dot = s.status === 'overdue' ? COLORS.DANGER : COLORS.ACCENT
           const sub = [plan.siteNom, plan.nom].filter(Boolean).join(' · ') || '—'
           const subtitle = isAuto ? `${sub} · Bilan 24h J1` : sub
           const modalEvent: ModalEventRef = {

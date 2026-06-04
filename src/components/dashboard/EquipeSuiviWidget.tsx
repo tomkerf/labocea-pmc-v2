@@ -4,6 +4,8 @@ import { ChevronDown } from 'lucide-react'
 import { isSamplingIncomplet, isSamplingOverdue } from '@/lib/overdue'
 import { useUsersStore } from '@/stores/usersStore'
 import type { Client, Sampling, NatureEauType } from '@/types'
+import { COLORS } from '@/lib/constants'
+
 
 interface IncompletItem {
   samplingId: string
@@ -160,18 +162,18 @@ export function EquipeSuiviWidget({ clients }: Props) {
       {/* KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         {[
-          { label: 'Réalisés',    sub: "Faits sur l'année",          value: kpis.realises,   color: 'var(--color-success)' },
-          { label: 'Incomplets',  sub: 'Date, tech ou nappe requis', value: kpis.incomplets, color: 'var(--color-warning)' },
-          { label: 'En retard',   sub: 'Échéances dépassées',        value: kpis.enRetard,   color: 'var(--color-danger)'  },
-          { label: 'Rapports dus',sub: 'Prévus non rédigés',        value: kpis.rapportsDus,color: 'var(--color-accent)'  },
+          { label: 'Réalisés',    sub: "Faits sur l'année",          value: kpis.realises,   color: COLORS.SUCCESS },
+          { label: 'Incomplets',  sub: 'Date, tech ou nappe requis', value: kpis.incomplets, color: COLORS.WARNING },
+          { label: 'En retard',   sub: 'Échéances dépassées',        value: kpis.enRetard,   color: COLORS.DANGER  },
+          { label: 'Rapports dus',sub: 'Prévus non rédigés',        value: kpis.rapportsDus,color: COLORS.ACCENT  },
         ].map(({ label, sub, value, color }) => (
           <div key={label} className="rounded-xl p-3 flex flex-col justify-between"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             <div>
               <div className="text-xl font-bold" style={{ color }}>{value}</div>
-              <div className="text-xs font-semibold mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{label}</div>
+              <div className="text-xs font-semibold mt-0.5" style={{ color: COLORS.TEXT_PRIMARY }}>{label}</div>
             </div>
-            <div className="text-xs mt-1.5 leading-tight" style={{ color: 'var(--color-text-secondary)' }}>{sub}</div>
+            <div className="text-xs mt-1.5 leading-tight" style={{ color: COLORS.TEXT_SECONDARY }}>{sub}</div>
           </div>
         ))}
       </div>
@@ -180,7 +182,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
         {/* Liste incomplets */}
         {incomplets.length > 0 && (
           <div className="rounded-xl overflow-hidden"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             <button
               type="button"
               onClick={() => setOpenIncomplets(o => !o)}
@@ -188,16 +190,16 @@ export function EquipeSuiviWidget({ clients }: Props) {
               style={{ borderBottom: openIncomplets ? '1px solid var(--color-border-subtle)' : 'none' }}
             >
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                <span className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
                   Prélèvements incomplets
                 </span>
                 <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                  style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+                  style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
                   {incomplets.length}
                 </span>
               </div>
               <ChevronDown size={14} strokeWidth={2.5} style={{
-                color: 'var(--color-text-secondary)',
+                color: COLORS.TEXT_SECONDARY,
                 transform: openIncomplets ? 'rotate(0deg)' : 'rotate(-90deg)',
                 transition: 'transform 0.2s ease',
               }} />
@@ -207,19 +209,19 @@ export function EquipeSuiviWidget({ clients }: Props) {
                 className="flex items-center gap-3 px-4 py-3 cursor-pointer"
                 style={{ borderBottom: i < incomplets.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
                 onClick={() => navigate(`/missions/${item.clientId}/plan/${item.planId}`)}
-                onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                onMouseEnter={e => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                  <p className="text-sm font-medium truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                     {item.clientNom}
                   </p>
-                  <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-xs truncate" style={{ color: COLORS.TEXT_SECONDARY }}>
                     {[item.siteNom, item.planNom].filter(Boolean).join(' · ')} · tech: {resolveInitials(item.doneBy, item.preleveur)}{item.doneDate ? ` · fait le ${new Date(item.doneDate + 'T12:00:00').toLocaleDateString('fr-FR')}` : ''}
                   </p>
                 </div>
                 <span className="shrink-0 text-xs font-medium px-2.5 py-1 rounded-full"
-                  style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+                  style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
                   {item.champManquant}
                 </span>
                 <span style={{ color: 'var(--color-text-tertiary)', fontSize: 16 }}>›</span>
@@ -231,7 +233,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
         {/* Liste en retard */}
         {enRetardList.length > 0 && (
           <div className="rounded-xl overflow-hidden"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             <button
               type="button"
               onClick={() => setOpenRetard(o => !o)}
@@ -239,16 +241,16 @@ export function EquipeSuiviWidget({ clients }: Props) {
               style={{ borderBottom: openRetard ? '1px solid var(--color-border-subtle)' : 'none' }}
             >
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                <span className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
                   Prélèvements en retard (équipe)
                 </span>
                 <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                  style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+                  style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
                   {enRetardList.length}
                 </span>
               </div>
               <ChevronDown size={14} strokeWidth={2.5} style={{
-                color: 'var(--color-text-secondary)',
+                color: COLORS.TEXT_SECONDARY,
                 transform: openRetard ? 'rotate(0deg)' : 'rotate(-90deg)',
                 transition: 'transform 0.2s ease',
               }} />
@@ -261,14 +263,14 @@ export function EquipeSuiviWidget({ clients }: Props) {
                   className="flex items-center gap-3 px-4 py-3 cursor-pointer"
                   style={{ borderBottom: i < enRetardList.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
                   onClick={() => navigate(`/missions/${item.clientId}/plan/${item.planId}`)}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                  onMouseEnter={e => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                    <p className="text-sm font-medium truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                       {item.clientNom}
                     </p>
-                    <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                    <p className="text-xs truncate" style={{ color: COLORS.TEXT_SECONDARY }}>
                       {[item.siteNom, item.planNom].filter(Boolean).join(' · ')} · tech: {item.preleveur} · {dateStr}
                     </p>
                   </div>
@@ -276,7 +278,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
                     <span title="Prélèvement temps de pluie" className="shrink-0 text-base leading-none">🌧</span>
                   )}
                   <span className="shrink-0 text-xs font-medium px-2.5 py-1 rounded-full"
-                    style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+                    style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
                     En retard
                   </span>
                   <span style={{ color: 'var(--color-text-tertiary)', fontSize: 16 }}>›</span>
@@ -289,7 +291,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
         {/* Liste rapports dus */}
         {rapportsDusList.length > 0 && (
           <div className="rounded-xl overflow-hidden"
-            style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
             <button
               type="button"
               onClick={() => setOpenRapports(o => !o)}
@@ -297,16 +299,16 @@ export function EquipeSuiviWidget({ clients }: Props) {
               style={{ borderBottom: openRapports ? '1px solid var(--color-border-subtle)' : 'none' }}
             >
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                <span className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
                   Rapports dus (équipe)
                 </span>
                 <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                  style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                  style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
                   {rapportsDusList.length}
                 </span>
               </div>
               <ChevronDown size={14} strokeWidth={2.5} style={{
-                color: 'var(--color-text-secondary)',
+                color: COLORS.TEXT_SECONDARY,
                 transform: openRapports ? 'rotate(0deg)' : 'rotate(-90deg)',
                 transition: 'transform 0.2s ease',
               }} />
@@ -316,19 +318,19 @@ export function EquipeSuiviWidget({ clients }: Props) {
                 className="flex items-center gap-3 px-4 py-3 cursor-pointer"
                 style={{ borderBottom: i < rapportsDusList.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
                 onClick={() => navigate(`/missions/${item.clientId}/plan/${item.planId}`)}
-                onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                onMouseEnter={e => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                  <p className="text-sm font-medium truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                     {item.clientNom}
                   </p>
-                  <p className="text-xs truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-xs truncate" style={{ color: COLORS.TEXT_SECONDARY }}>
                     {[item.siteNom, item.planNom].filter(Boolean).join(' · ')} · tech: {resolveInitials(item.doneBy, item.preleveur)}{item.doneDate ? ` · fait le ${new Date(item.doneDate + 'T12:00:00').toLocaleDateString('fr-FR')}` : ''}
                   </p>
                 </div>
                 <span className="shrink-0 text-xs font-medium px-2.5 py-1 rounded-full"
-                  style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                  style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
                   Rapport dû
                 </span>
                 <span style={{ color: 'var(--color-text-tertiary)', fontSize: 16 }}>›</span>

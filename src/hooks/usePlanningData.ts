@@ -16,6 +16,8 @@ import {
 } from '@/lib/planningUtils'
 import type { Client, Sampling, Maintenance, Equipement, EvenementPersonnel, AppUser, Todo } from '@/types'
 import type { Preleveur } from '@/stores/preleveursStore'
+import { COLORS } from '@/lib/constants'
+
 
 interface UsePlanningDataParams {
   clients:       Client[]
@@ -71,7 +73,7 @@ export function usePlanningData({
           const tc          = getTechColor(technicien)
           const isDone      = s.status === 'done'
           const statusBg    = isDone ? 'var(--color-success-light)' : overdue ? 'var(--color-danger-light)' : tc.bg
-          const statusColor = isDone ? 'var(--color-success)'       : overdue ? 'var(--color-danger)'       : tc.color
+          const statusColor = isDone ? COLORS.SUCCESS       : overdue ? COLORS.DANGER       : tc.color
           const common = {
             type: 'prelevement' as const,
             statusLabel, statusBg, statusColor, priority,
@@ -146,7 +148,7 @@ export function usePlanningData({
         id: `cal_${eq.id}`, type: 'verification', priority: 2,
         title: eq.nom,
         subtitle: `À calibrer (${eq.numSerie || eq.marque})`,
-        statusLabel: 'Métrologie', statusBg: 'var(--color-warning-light)', statusColor: 'var(--color-warning)',
+        statusLabel: 'Métrologie', statusBg: 'var(--color-warning-light)', statusColor: COLORS.WARNING,
         link: `/materiel/${eq.id}`, isDone: false, technicien: eq.technicien || '—',
       })
       
@@ -158,7 +160,7 @@ export function usePlanningData({
         id: `cal_warn_${eq.id}`, type: 'verification', priority: 3,
         title: eq.nom,
         subtitle: `Rappel : calibration prévue le ${dateStr.split('-').reverse().join('/')}`,
-        statusLabel: 'J-14 Métro', statusBg: 'var(--color-bg-tertiary)', statusColor: 'var(--color-text-secondary)',
+        statusLabel: 'J-14 Métro', statusBg: COLORS.BG_TERTIARY, statusColor: COLORS.TEXT_SECONDARY,
         link: `/materiel/${eq.id}`, isDone: false, technicien: eq.technicien || '—',
       })
     })
@@ -168,7 +170,7 @@ export function usePlanningData({
         id: ev.id, type: 'evenement', priority: 2,
         title: ev.titre, subtitle: EVENEMENT_LABEL[ev.type] ?? 'Autre',
         statusLabel: EVENEMENT_LABEL[ev.type] ?? 'Autre',
-        statusBg: 'var(--color-bg-tertiary)', statusColor: 'var(--color-text-tertiary)',
+        statusBg: COLORS.BG_TERTIARY, statusColor: 'var(--color-text-tertiary)',
         link: '', isDone: false, technicien: ev.createdByInitiales || '—',
         plannedTime: ev.heure || undefined, evenementData: ev,
       }
@@ -186,9 +188,9 @@ export function usePlanningData({
     })
 
     const PRIORITY_COLORS: Record<string, { bg: string; color: string; label: string }> = {
-      haute:   { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)',   label: '!!! Tâche' },
-      moyenne: { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-primary)',   label: '!! Tâche' },
-      basse:   { bg: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', label: '! Tâche' },
+      haute:   { bg: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY,   label: '!!! Tâche' },
+      moyenne: { bg: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY,   label: '!! Tâche' },
+      basse:   { bg: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, label: '! Tâche' },
     }
     clients.forEach((client: Client) => {
       client.plans.forEach(plan => {
@@ -205,7 +207,7 @@ export function usePlanningData({
             id: `rapport_${s.id}`, type: 'rapport', priority: 1,
             title: client.nom,
             subtitle: plan.nom ? `${plan.nom} · Rapport` : 'Rapport',
-            statusLabel: 'Rapport dû', statusBg: 'var(--color-accent-light)', statusColor: 'var(--color-accent)',
+            statusLabel: 'Rapport dû', statusBg: 'var(--color-accent-light)', statusColor: COLORS.ACCENT,
             link: `/missions/${client.id}/plan/${plan.id}`,
             isDone: false, technicien: s.assignedTo || client.preleveur || '—',
             clientId: client.id, planId: plan.id, samplingId: s.id,

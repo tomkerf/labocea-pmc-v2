@@ -34,6 +34,8 @@ import type { Sampling, Client, Plan } from '@/types'
 import { TodosWidget } from '@/components/dashboard/TodosWidget'
 import { useTodosListener } from '@/hooks/useTodos'
 import { useTodosStore } from '@/stores/todosStore'
+import { COLORS } from '@/lib/constants'
+
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -150,10 +152,10 @@ export default function DashboardPage() {
 
       {/* Salutation */}
       <motion.div variants={itemVariants} className="mb-8">
-        <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--color-text-primary)', letterSpacing: '-0.5px' }}>
+        <h1 className="text-2xl font-bold mb-1" style={{ color: COLORS.TEXT_PRIMARY, letterSpacing: '-0.5px' }}>
           {getGreeting()} {prenom || 'Thomas'} 👋
         </h1>
-        <p className="text-base capitalize" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-base capitalize" style={{ color: COLORS.TEXT_SECONDARY }}>
           {formatDate()}
         </p>
       </motion.div>
@@ -161,20 +163,20 @@ export default function DashboardPage() {
       {/* Switcher de rôle (uniquement pour les chargés de mission / admins) */}
       {isGeneraliste && (
         <motion.div variants={itemVariants} className="mb-6 flex">
-          <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--color-bg-tertiary)' }}>
+          <div className="flex gap-1 p-1 rounded-xl" style={{ background: COLORS.BG_TERTIARY }}>
             <button
               type="button"
               onClick={() => setActiveTab('technicien')}
               className="relative px-4 py-2 text-sm font-semibold rounded-lg z-10 transition-colors duration-200 cursor-pointer"
               style={{
-                color: activeTab === 'technicien' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                color: activeTab === 'technicien' ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
               }}
             >
               {activeTab === 'technicien' && (
                 <motion.div
                   layoutId="active-role-tab"
                   className="absolute inset-0 rounded-lg -z-10"
-                  style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-card)' }}
+                  style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-card)' }}
                   transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 />
               )}
@@ -185,14 +187,14 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('manager')}
               className="relative px-4 py-2 text-sm font-semibold rounded-lg z-10 transition-colors duration-200 cursor-pointer"
               style={{
-                color: activeTab === 'manager' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                color: activeTab === 'manager' ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
               }}
             >
               {activeTab === 'manager' && (
                 <motion.div
                   layoutId="active-role-tab"
                   className="absolute inset-0 rounded-lg -z-10"
-                  style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-card)' }}
+                  style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-card)' }}
                   transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 />
               )}
@@ -253,12 +255,12 @@ export default function DashboardPage() {
                 <div className="flex flex-col gap-2 mb-3">
                   <div className="flex items-center justify-between gap-2">
                     <SectionTitle>{planningMode === 'today' ? 'Planning du jour' : 'Planning de demain'}</SectionTitle>
-                    <div className="relative flex gap-1 p-1 rounded-lg shrink-0" style={{ background: 'var(--color-bg-tertiary)' }}>
+                    <div className="relative flex gap-1 p-1 rounded-lg shrink-0" style={{ background: COLORS.BG_TERTIARY }}>
                       <button type="button"
                         onClick={() => setPlanningMode('today')}
                         className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200 cursor-pointer"
                         style={{
-                          color: planningMode === 'today' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                          color: planningMode === 'today' ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
                         }}
                       >
                         {planningMode === 'today' && (
@@ -275,7 +277,7 @@ export default function DashboardPage() {
                         onClick={() => setPlanningMode('tomorrow')}
                         className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200 cursor-pointer"
                         style={{
-                          color: planningMode === 'tomorrow' ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                          color: planningMode === 'tomorrow' ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
                         }}
                       >
                         {planningMode === 'tomorrow' && (
@@ -294,7 +296,7 @@ export default function DashboardPage() {
                 </div>
                 {((planningMode === 'today' && hasRainToday) || (planningMode === 'tomorrow' && hasRainTomorrow)) && (
                   <div className="flex items-center gap-2 px-3 py-2 rounded-xl mb-2 text-sm font-medium"
-                    style={{ background: 'rgba(0,113,227,0.07)', color: 'var(--color-accent)', border: '1px solid rgba(0,113,227,0.15)' }}>
+                    style={{ background: 'rgba(0,113,227,0.07)', color: COLORS.ACCENT, border: '1px solid rgba(0,113,227,0.15)' }}>
                     <span>🌧</span>
                     <span>Temps de pluie prévu</span>
                   </div>
@@ -305,7 +307,7 @@ export default function DashboardPage() {
                   <motion.div
                     layout
                     className="rounded-xl overflow-hidden"
-                    style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}
+                    style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}
                   >
                     <AnimatePresence mode="popLayout">
                       {activeItems.slice(0, 8).map((item, idx) => (
@@ -318,24 +320,24 @@ export default function DashboardPage() {
                           onClick={() => item.kind === 'todo' ? navigate(item.link) : setEventDetail({ event: item.modalEvent as ModalEvent, dateStr: activeDateISO })}
                           className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer"
                           style={{ borderBottom: idx < activeItems.slice(0, 8).length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-tertiary)')}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
                           onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                         >
                           {item.time ? (
                             <span className="text-xs font-semibold shrink-0 w-10 text-center px-1.5 py-1 rounded-lg"
-                              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                              style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
                               {item.time}
                             </span>
                           ) : (
                             <span className="shrink-0 size-2 rounded-full mt-0.5" style={{ background: item.dot }} />
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium leading-snug" style={{ color: 'var(--color-text-primary)' }}>{item.title}</p>
-                            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>{item.sub}</p>
+                            <p className="text-sm font-medium leading-snug" style={{ color: COLORS.TEXT_PRIMARY }}>{item.title}</p>
+                            <p className="text-xs mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>{item.sub}</p>
                           </div>
                           {'cofrac' in item && item.cofrac && (
                             <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0"
-                              style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                              style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
                               COFRAC
                             </span>
                           )}
@@ -355,19 +357,19 @@ export default function DashboardPage() {
               <div>
                 <SectionTitle>État du parc matériel</SectionTitle>
                 <div className="rounded-xl px-6 py-5"
-                  style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                  style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
                   <DonutChart
                     total={equipements.length}
                     segments={[
-                      { value: parcEtat.operationnel,   color: 'var(--color-success)', label: 'En service'     },
-                      { value: aCalibrrer,              color: 'var(--color-warning)', label: 'À calibrer'     },
-                      { value: parcEtat.en_maintenance, color: 'var(--color-accent)',  label: 'En maintenance' },
-                      { value: parcEtat.hors_service,   color: 'var(--color-danger)',  label: 'Hors service'   },
+                      { value: parcEtat.operationnel,   color: COLORS.SUCCESS, label: 'En service'     },
+                      { value: aCalibrrer,              color: COLORS.WARNING, label: 'À calibrer'     },
+                      { value: parcEtat.en_maintenance, color: COLORS.ACCENT,  label: 'En maintenance' },
+                      { value: parcEtat.hors_service,   color: COLORS.DANGER,  label: 'Hors service'   },
                       { value: parcEtat.prete,          color: 'var(--color-neutral)', label: 'Prêté'          },
                     ]}
                   />
                 </div>
-                <button type="button" onClick={() => navigate('/materiel')} className="mt-2 text-xs cursor-pointer" style={{ color: 'var(--color-accent)' }}>
+                <button type="button" onClick={() => navigate('/materiel')} className="mt-2 text-xs cursor-pointer" style={{ color: COLORS.ACCENT }}>
                   Voir tout le matériel →
                 </button>
               </div>
@@ -451,28 +453,28 @@ export default function DashboardPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               className="w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl relative"
-              style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}
+              style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border)' }}
             >
               <button type="button"
                 onClick={() => dismissWelcome(false)}
                 aria-label="Fermer"
                 className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 transition-colors"
-                style={{ color: 'var(--color-text-secondary)' }}
+                style={{ color: COLORS.TEXT_SECONDARY }}
               >
                 <X size={18} />
               </button>
 
               <div className="p-6 text-center flex flex-col items-center">
                 <div className="size-12 rounded-full flex items-center justify-center mb-4"
-                  style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                  style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
                   <BookOpen size={24} />
                 </div>
                 
-                <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                <h3 className="text-lg font-semibold mb-2" style={{ color: COLORS.TEXT_PRIMARY }}>
                   Bienvenue sur PMC V2 ! 👋
                 </h3>
                 
-                <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                <p className="text-sm mb-6 leading-relaxed" style={{ color: COLORS.TEXT_SECONDARY }}>
                   L'application a fait peau neuve. Pour découvrir les nouveautés et le fonctionnement général, n'hésite pas à consulter le mode d'emploi.
                 </p>
 
@@ -480,14 +482,14 @@ export default function DashboardPage() {
                   <button type="button"
                     onClick={() => dismissWelcome(true)}
                     className="w-full py-2.5 rounded-xl text-sm font-medium transition-transform active:scale-95"
-                    style={{ background: 'var(--color-accent)', color: 'white' }}
+                    style={{ background: COLORS.ACCENT, color: 'white' }}
                   >
                     Lire le mode d'emploi
                   </button>
                   <button type="button"
                     onClick={() => dismissWelcome(false)}
                     className="w-full py-2 text-sm font-medium transition-colors"
-                    style={{ color: 'var(--color-text-secondary)' }}
+                    style={{ color: COLORS.TEXT_SECONDARY }}
                   >
                     Plus tard
                   </button>

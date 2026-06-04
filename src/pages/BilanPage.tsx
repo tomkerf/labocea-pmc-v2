@@ -9,6 +9,8 @@ import { TabPesee } from '@/components/bilan/TabPesee'
 import { TabTemperature } from '@/components/bilan/TabTemperature'
 import { TabAnalyses } from '@/components/bilan/TabAnalyses'
 import { TabSynthese } from '@/components/bilan/TabSynthese'
+import { COLORS } from '@/lib/constants'
+
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'identification', label: 'Identification' },
@@ -69,16 +71,16 @@ export default function BilanPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-bg-primary)' }}>
+    <div className="min-h-screen" style={{ background: COLORS.BG_PRIMARY }}>
 
       <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3"
-        style={{ background: 'var(--color-bg-primary)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+        style={{ background: COLORS.BG_PRIMARY, backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--color-border-subtle)' }}>
         <button type="button" onClick={() => navigate(-1)} className="p-1.5 rounded-lg"
-          style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+          style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
           <ChevronLeft size={18} strokeWidth={1.8} />
         </button>
         <div>
-          <h1 className="text-base font-semibold leading-tight" style={{ color: 'var(--color-text-primary)' }}>
+          <h1 className="text-base font-semibold leading-tight" style={{ color: COLORS.TEXT_PRIMARY }}>
             Vérification bilan 24h
           </h1>
           <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -96,9 +98,9 @@ export default function BilanPage() {
             <button type="button" key={t.id} onClick={() => setTab(t.id)}
               className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{
-                background: active ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
-                color: active ? '#fff' : 'var(--color-text-secondary)',
-                border: `1px solid ${active ? 'var(--color-accent)' : 'var(--color-border-subtle)'}`,
+                background: active ? COLORS.ACCENT : COLORS.BG_SECONDARY,
+                color: active ? '#fff' : COLORS.TEXT_SECONDARY,
+                border: `1px solid ${active ? COLORS.ACCENT : 'var(--color-border-subtle)'}`,
                 boxShadow: active ? '0 2px 6px rgba(0,113,227,0.25)' : 'var(--shadow-card)',
               }}>
               {t.label}{dot}

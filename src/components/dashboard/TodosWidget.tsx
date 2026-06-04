@@ -4,11 +4,13 @@ import { ChevronDown, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Todo } from '@/types'
 import { saveTodo } from '@/services/todoService'
+import { COLORS } from '@/lib/constants'
+
 
 const prioColors: Record<string, { bg: string; text: string; label: string; icon: string }> = {
-  haute:   { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-primary)',   label: 'Haute',   icon: '!!!' },
-  moyenne: { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-primary)',   label: 'Moyenne', icon: '!!' },
-  basse:   { bg: 'var(--color-bg-tertiary)', text: 'var(--color-text-secondary)', label: 'Basse',   icon: '!' },
+  haute:   { bg: COLORS.BG_TERTIARY, text: COLORS.TEXT_PRIMARY,   label: 'Haute',   icon: '!!!' },
+  moyenne: { bg: COLORS.BG_TERTIARY, text: COLORS.TEXT_PRIMARY,   label: 'Moyenne', icon: '!!' },
+  basse:   { bg: COLORS.BG_TERTIARY, text: COLORS.TEXT_SECONDARY, label: 'Basse',   icon: '!' },
 }
 
 export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
@@ -67,7 +69,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
         </span>
         <span
           className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-          style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}
+          style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}
         >
           {pendingTodos.length}
         </span>
@@ -87,7 +89,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
         <div
           className="rounded-xl overflow-hidden"
           style={{
-            background: 'var(--color-bg-secondary)',
+            background: COLORS.BG_SECONDARY,
             border: '1px solid var(--color-border-subtle)',
             boxShadow: 'var(--shadow-card)',
           }}
@@ -114,15 +116,15 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                       aria-label="Marquer comme terminé"
                       className="mt-0.5 shrink-0 flex items-center justify-center size-5 rounded-md border transition-all cursor-pointer focus:outline-none"
                       style={{
-                        borderColor: 'var(--color-border)',
-                        color: 'var(--color-accent)',
+                        borderColor: COLORS.BORDER,
+                        color: COLORS.ACCENT,
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = 'var(--color-accent)'
+                        e.currentTarget.style.borderColor = COLORS.ACCENT
                         e.currentTarget.style.background = 'var(--color-accent-light)'
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = 'var(--color-border)'
+                        e.currentTarget.style.borderColor = COLORS.BORDER
                         e.currentTarget.style.background = 'transparent'
                       }}
                     >
@@ -137,7 +139,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                       <div className="flex items-center gap-2">
                         <p
                           className="text-sm font-medium truncate cursor-pointer hover:text-[var(--color-accent)] transition-colors"
-                          style={{ color: 'var(--color-text-primary)' }}
+                          style={{ color: COLORS.TEXT_PRIMARY }}
                           onClick={() => navigate('/todos')}
                         >
                           {todo.titre}
@@ -151,7 +153,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                         </span>
                       </div>
                       {todo.description && (
-                        <p className="text-xs truncate mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>
+                        <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                           {todo.description}
                         </p>
                       )}
@@ -161,7 +163,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                         {todo.dueDate && (
                           <span
                             style={{
-                              color: isOverdue(todo.dueDate) ? 'var(--color-danger)' : 'inherit',
+                              color: isOverdue(todo.dueDate) ? COLORS.DANGER : 'inherit',
                               fontWeight: isOverdue(todo.dueDate) ? 600 : 'normal',
                             }}
                           >
@@ -173,7 +175,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                             {todo.dueDate && <span>•</span>}
                             <span
                               className="hover:underline cursor-pointer font-medium"
-                              style={{ color: 'var(--color-accent)' }}
+                              style={{ color: COLORS.ACCENT }}
                               onClick={(e) => {
                                 e.stopPropagation()
                                 navigate(`/missions/${todo.clientId}`)
@@ -188,7 +190,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                             {(todo.dueDate || todo.clientNom) && <span>•</span>}
                             <span
                               className="hover:underline cursor-pointer font-medium"
-                              style={{ color: 'var(--color-accent)' }}
+                              style={{ color: COLORS.ACCENT }}
                               onClick={(e) => {
                                 e.stopPropagation()
                                 navigate(`/materiel/${todo.equipementId}`)
@@ -211,11 +213,11 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
             className="px-4 py-2.5 text-center cursor-pointer hover:bg-neutral-100 transition-colors"
             style={{
               borderTop: '1px solid var(--color-border-subtle)',
-              background: 'var(--color-bg-tertiary)',
+              background: COLORS.BG_TERTIARY,
             }}
             onClick={() => navigate('/todos')}
           >
-            <span className="text-xs font-semibold" style={{ color: 'var(--color-accent)' }}>
+            <span className="text-xs font-semibold" style={{ color: COLORS.ACCENT }}>
               Voir toutes les tâches
             </span>
           </div>

@@ -1,4 +1,6 @@
 import { FileText, X } from 'lucide-react'
+import { COLORS } from '@/lib/constants'
+
 
 interface PdfPreviewModalProps {
   srcDoc: string
@@ -15,19 +17,19 @@ export function PdfPreviewModal({ srcDoc, onClose, onPrint }: PdfPreviewModalPro
     >
       <div
         className="flex flex-col m-4 md:m-8 rounded-2xl overflow-hidden flex-1"
-        style={{ background: 'var(--color-bg-secondary)', boxShadow: 'var(--shadow-modal)', maxHeight: 'calc(100dvh - 32px)' }}
+        style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-modal)', maxHeight: 'calc(100dvh - 32px)' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-3 shrink-0"
           style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          <p className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Aperçu du rapport PDF
           </p>
           <div className="flex items-center gap-2">
             <button type="button"
               onClick={onPrint}
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: 'var(--color-accent)', color: 'white' }}
+              style={{ background: COLORS.ACCENT, color: 'white' }}
             >
               <FileText size={14} />
               Imprimer / Télécharger
@@ -35,7 +37,7 @@ export function PdfPreviewModal({ srcDoc, onClose, onPrint }: PdfPreviewModalPro
             <button type="button"
               onClick={onClose}
               className="p-1.5 rounded-lg"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-tertiary)' }}
+              style={{ background: COLORS.BG_TERTIARY, color: 'var(--color-text-tertiary)' }}
             >
               <X size={15} />
             </button>

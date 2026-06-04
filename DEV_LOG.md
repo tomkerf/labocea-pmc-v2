@@ -2,6 +2,17 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 100 — Refactoring final (Dette technique)
+**4 juin 2026**
+
+### Ce qui a été fait
+- **Constants** : Centralisation des collections (`COLLECTIONS`), couleurs (`COLORS`) et Z-index (`Z_INDEX`) dans `src/lib/constants.ts`. Remplacement dans plus de 100 fichiers via regex pour harmoniser le code.
+- **BaseModal** : Création du wrapper `BaseModal.tsx` avec Framer Motion. Migration de `BugReportModal`, `ChangelogModal`, et les modales de `TodosPage` pour utiliser ce wrapper unifié. Simplification de `Sidebar.tsx`.
+- **TodosPage (useReducer)** : Remplacement des 9 `useState` par un seul `useReducer` pour centraliser l'état du formulaire de création de tâches.
+- **Storybook** : Installation de Storybook initiée (`npx storybook init`), marquant la fin du backlog de dette technique (Section 6 de `TODO_REFACTORING.md` terminée à 100%).
+
+---
+
 ## Session 99 — Bugfixes + élimination TypeScript `any`
 **4 juin 2026**
 
