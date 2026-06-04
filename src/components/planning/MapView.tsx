@@ -23,6 +23,23 @@ interface MapViewProps {
   handleSelectEvent: (event: PlanningEvent, dateStr: string) => void
 }
 
+function formatRainLabel(w: { rainWindows: { hour: number }[]; maxProba: number; maxMm: number }): string {
+  if (w.rainWindows.length === 0) return '☀️ Pas de précipitations prévues'
+  const groups: string[] = []
+  let i = 0
+  while (i < w.rainWindows.length) {
+    const start = w.rainWindows[i].hour
+    let end = start
+    while (i + 1 < w.rainWindows.length && w.rainWindows[i + 1].hour === end + 1) {
+      i++
+      end = w.rainWindows[i].hour
+    }
+    groups.push(start === end ? `${start}h` : `${start}h–${end + 1}h`)
+    i++
+  }
+  return `🌧️ Pluie probable ${groups.join(', ')} (${w.maxProba}%) · max ${w.maxMm.toFixed(1)} mm`
+}
+
 export default function MapView({
   selectedDate, eventsByDate,
   filterTech, allowedTechs, filterRetard,
@@ -279,22 +296,6 @@ export default function MapView({
     }
   }
 
-  function formatRainLabel(w: typeof weather): string {
-    if (w.rainWindows.length === 0) return '☀️ Pas de précipitations prévues'
-    const groups: string[] = []
-    let i = 0
-    while (i < w.rainWindows.length) {
-      const start = w.rainWindows[i].hour
-      let end = start
-      while (i + 1 < w.rainWindows.length && w.rainWindows[i + 1].hour === end + 1) {
-        i++
-        end = w.rainWindows[i].hour
-      }
-      groups.push(start === end ? `${start}h` : `${start}h–${end + 1}h`)
-      i++
-    }
-    return `🌧️ Pluie probable ${groups.join(', ')} (${w.maxProba}%) · max ${w.maxMm.toFixed(1)} mm`
-  }
 
   return (
     <div className="flex-1 min-h-0 flex flex-col md:flex-row relative overflow-hidden bg-gray-100">

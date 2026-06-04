@@ -3,6 +3,19 @@ import { X, ExternalLink } from 'lucide-react'
 import { useUsersStore } from '@/stores/usersStore'
 import type { PlanningEvent } from '@/lib/planningUtils'
 
+function fmtDate(iso?: string) {
+  if (!iso) return '—'
+  const d = new Date(iso.length > 10 ? iso : iso + 'T12:00:00')
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+function fmtDateTime(iso?: string) {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+}
+
 export default function GhostDetailModal({ event, onClose }: { event: PlanningEvent; onClose: () => void }) {
   const navigate = useNavigate()
   const users    = useUsersStore(s => s.users)
@@ -12,19 +25,6 @@ export default function GhostDetailModal({ event, onClose }: { event: PlanningEv
     const u = users.find(u => u.uid === uid)
     if (!u) return uid
     return `${u.prenom} ${u.nom}`
-  }
-
-  const fmtDate = (iso?: string) => {
-    if (!iso) return '—'
-    const d = new Date(iso.length > 10 ? iso : iso + 'T12:00:00')
-    return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-  }
-
-  const fmtDateTime = (iso?: string) => {
-    if (!iso) return '—'
-    const d = new Date(iso)
-    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-      + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
   }
 
   const isRetrait = event.ghostAction === 'retiré'

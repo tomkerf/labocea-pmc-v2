@@ -13,6 +13,19 @@ import { useUsersStore } from '@/stores/usersStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { createTodo, saveTodo, deleteTodo } from '@/services/todoService'
 import type { Todo, TodoPriority, TodoStatus } from '@/types'
+
+const PRIO_WEIGHT: Record<string, number> = { haute: 3, moyenne: 2, basse: 1 }
+
+function sortTasks(tasks: Todo[]) {
+  return tasks.toSorted((a, b) => {
+    const prioA = PRIO_WEIGHT[a.priorite] || 0
+    const prioB = PRIO_WEIGHT[b.priorite] || 0
+    if (prioB !== prioA) return prioB - prioA
+    if (!a.dueDate) return 1
+    if (!b.dueDate) return -1
+    return a.dueDate.localeCompare(b.dueDate)
+  })
+}
 import { SkeletonList } from '@/components/ui/Skeleton'
 import UserAvatar from '@/components/ui/UserAvatar'
 import { getTechColor } from '@/lib/planningUtils'
@@ -89,22 +102,6 @@ export default function TodosPage() {
   const listTodo = useMemo(() => filteredTodos.filter((t) => t.statut === 'a_faire'), [filteredTodos])
   const listInProgress = useMemo(() => filteredTodos.filter((t) => t.statut === 'en_cours'), [filteredTodos])
   const listCompleted = useMemo(() => filteredTodos.filter((t) => t.statut === 'termine'), [filteredTodos])
-
-  // Tri des listes actives
-  const sortTasks = (tasks: Todo[]) => {
-    return tasks.toSorted((a, b) => {
-      // Priorité haute > moyenne > basse
-      const prioWeight = { haute: 3, moyenne: 2, basse: 1 }
-      const prioA = prioWeight[a.priorite] || 0
-      const prioB = prioWeight[b.priorite] || 0
-      if (prioB !== prioA) return prioB - prioA
-
-      // Échéance
-      if (!a.dueDate) return 1
-      if (!b.dueDate) return -1
-      return a.dueDate.localeCompare(b.dueDate)
-    })
-  }
 
   const sortedTodo = useMemo(() => sortTasks(listTodo), [listTodo])
   const sortedInProgress = useMemo(() => sortTasks(listInProgress), [listInProgress])

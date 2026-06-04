@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import { MOIS_LONG } from '@/lib/planningUtils'
+
+function fmtDate(d: string) {
+  const dt = new Date(d + 'T12:00:00')
+  return `${dt.getDate()} ${MOIS_LONG[dt.getMonth()]}`
+}
 import type { TypeEvenement } from '@/types'
 
 interface DragCreateModalProps {
@@ -39,11 +44,6 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
     } finally {
       setSaving(false)
     }
-  }
-
-  function fmtDate(d: string) {
-    const dt = new Date(d + 'T12:00:00')
-    return `${dt.getDate()} ${MOIS_LONG[dt.getMonth()]}`
   }
 
   return (

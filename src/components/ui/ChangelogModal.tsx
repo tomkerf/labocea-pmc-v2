@@ -55,6 +55,13 @@ function setGlobalOpen(v: boolean) {
   _listeners.forEach(fn => fn(v))
 }
 
+function dismissChangelog() {
+  localStorage.setItem(STORAGE_KEY, CHANGELOG_VERSION)
+  setGlobalOpen(false)
+}
+
+function showChangelog() { setGlobalOpen(true) }
+
 export function useChangelogState() {
   const [open, setOpen] = useState(_open)
 
@@ -63,12 +70,8 @@ export function useChangelogState() {
     return () => { _listeners = _listeners.filter(fn => fn !== setOpen) }
   }, [])
 
-  function dismiss() {
-    localStorage.setItem(STORAGE_KEY, CHANGELOG_VERSION)
-    setGlobalOpen(false)
-  }
-
-  function show() { setGlobalOpen(true) }
+  const dismiss = dismissChangelog
+  const show = showChangelog
 
   const hasNew = localStorage.getItem(STORAGE_KEY) !== CHANGELOG_VERSION
 

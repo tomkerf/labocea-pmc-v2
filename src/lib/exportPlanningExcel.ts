@@ -56,7 +56,7 @@ export function exportPlanningExcel(
   ]
 
   // Trier les événements par date/heure
-  const sortedEvents = [...events].sort((a, b) => {
+  const sortedEvents = events.toSorted((a, b) => {
     if (a.priority !== b.priority) return a.priority - b.priority
     const timeA = a.plannedTime || '23:59'
     const timeB = b.plannedTime || '23:59'

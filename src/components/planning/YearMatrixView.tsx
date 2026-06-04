@@ -2,6 +2,31 @@ import { useMemo, useState } from 'react'
 import type { Client, Plan, Sampling } from '@/types'
 import { MOIS_LONG } from '@/lib/planningUtils'
 import { isSamplingOverdue } from '@/lib/overdue'
+
+function getStatusColor(s: Sampling | null, planYear: number) {
+  if (!s) return 'transparent'
+  if (s.status === 'done') return 'var(--color-success)'
+  if (s.status === 'non_effectue') return 'var(--color-neutral)'
+  if (isSamplingOverdue(s, planYear)) return 'var(--color-danger)'
+  if (s.status === 'planned') return 'var(--color-warning)'
+  return 'var(--color-border)'
+}
+
+function getStatusLabel(s: Sampling | null, planYear: number) {
+  if (!s) return ''
+  if (s.status === 'done') return 'Fait'
+  if (s.status === 'non_effectue') return 'Non fait'
+  if (isSamplingOverdue(s, planYear)) return 'En retard'
+  if (s.status === 'planned') return 'Planifié'
+  return ''
+}
+
+function getStatusIcon(s: Sampling, planYear: number) {
+  if (s.status === 'done') return '✓'
+  if (s.status === 'non_effectue') return '✕'
+  if (isSamplingOverdue(s, planYear)) return '!'
+  return ''
+}
 import { Link } from 'react-router-dom'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 import IssueListModal from './IssueListModal'
@@ -97,31 +122,6 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
       s.has(id) ? s.delete(id) : s.add(id)
       return s
     })
-  }
-
-  const getStatusColor = (s: Sampling | null, planYear: number) => {
-    if (!s) return 'transparent'
-    if (s.status === 'done') return 'var(--color-success)'
-    if (s.status === 'non_effectue') return 'var(--color-neutral)'
-    if (isSamplingOverdue(s, planYear)) return 'var(--color-danger)'
-    if (s.status === 'planned') return 'var(--color-warning)'
-    return 'var(--color-border)'
-  }
-
-  const getStatusLabel = (s: Sampling | null, planYear: number) => {
-    if (!s) return ''
-    if (s.status === 'done') return 'Fait'
-    if (s.status === 'non_effectue') return 'Non fait'
-    if (isSamplingOverdue(s, planYear)) return 'En retard'
-    if (s.status === 'planned') return 'Planifié'
-    return ''
-  }
-
-  const getStatusIcon = (s: Sampling, planYear: number) => {
-    if (s.status === 'done') return '✓'
-    if (s.status === 'non_effectue') return '✕'
-    if (isSamplingOverdue(s, planYear)) return '!'
-    return ''
   }
 
   const counts = useMemo(() => {

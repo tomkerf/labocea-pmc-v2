@@ -4,13 +4,13 @@ import { Bug } from 'lucide-react'
 import { db } from '@/lib/firebase'
 import type { BugReport } from '@/types'
 
+async function markTraite(id: string) {
+  await updateDoc(doc(db, 'bugs', id), { status: 'traite' })
+}
+
 export function AdminBugsSection() {
   const [bugs, setBugs] = useState<BugReport[]>([])
   const [showTraites, setShowTraites] = useState(false)
-
-  async function markTraite(id: string) {
-    await updateDoc(doc(db, 'bugs', id), { status: 'traite' })
-  }
 
   useEffect(() => {
     const q = query(collection(db, 'bugs'), orderBy('createdAt', 'desc'))

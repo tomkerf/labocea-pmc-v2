@@ -22,7 +22,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
 
   if (pendingTodos.length === 0) return null
 
-  const sortedTodos = [...pendingTodos].sort((a, b) => {
+  const sortedTodos = pendingTodos.toSorted((a, b) => {
     // Trier par priorité : haute > moyenne > basse
     const prioWeight = { haute: 3, moyenne: 2, basse: 1 }
     const prioA = prioWeight[a.priorite] || 0

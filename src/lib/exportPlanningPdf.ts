@@ -79,7 +79,7 @@ export function exportPlanningPdf(
   y += 6
 
   // Trier les événements chronologiquement si possible
-  const sortedEvents = [...events].sort((a, b) => {
+  const sortedEvents = events.toSorted((a, b) => {
     // 1. Par priorité d'abord (en retard en premier)
     if (a.priority !== b.priority) return a.priority - b.priority
     // 2. Par heure si disponible

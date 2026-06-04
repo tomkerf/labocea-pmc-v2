@@ -242,7 +242,7 @@ export function assignColumns(
   evts: Array<PlanningEvent & { startMin: number; durationMin: number }>
 ): TimedEvent[] {
   if (!evts.length) return []
-  const sorted = [...evts].sort((a, b) => a.startMin - b.startMin)
+  const sorted = evts.toSorted((a, b) => a.startMin - b.startMin)
   const colEnds: number[] = []
   const assigned: TimedEvent[] = sorted.map(evt => {
     let col = colEnds.findIndex(end => end <= evt.startMin)

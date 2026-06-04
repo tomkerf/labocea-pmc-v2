@@ -60,7 +60,7 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
   const planSections = client.plans
     .flatMap(plan => plan.samplings.length > 0 ? [plan] : [])
     .map(plan => {
-      const sorted = [...plan.samplings].sort((a, b) => {
+      const sorted = plan.samplings.toSorted((a, b) => {
         if (a.plannedMonth !== b.plannedMonth) return a.plannedMonth - b.plannedMonth
         return (a.plannedDay ?? 0) - (b.plannedDay ?? 0)
       })

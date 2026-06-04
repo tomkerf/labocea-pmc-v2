@@ -235,7 +235,7 @@ function buildCalendrier(client: Client, plan: Plan): XLSX.WorkSheet {
   const byNum = new Map<number, Sampling>()
   for (const s of plan.samplings) byNum.set(s.num, s)
 
-  for (const [num, s] of [...byNum.entries()].sort((a, b) => a[0] - b[0])) {
+  for (const [num, s] of [...byNum.entries()].toSorted((a, b) => a[0] - b[0])) {
     const status = resolveStatus(s, client.annee)
     const row: (string | number)[] = [num, plan.siteNom]
     for (let m = 0; m < 12; m++) {

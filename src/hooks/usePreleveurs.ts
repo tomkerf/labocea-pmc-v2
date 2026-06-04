@@ -9,7 +9,7 @@ export function usePreleveursListener() {
   useEffect(() => {
     const unsub = onSnapshot(doc(db, 'preleveurs-v1', 'data'), (snap) => {
       const list = (snap.data()?.list ?? []) as Preleveur[]
-      setPreleveurs([...list].sort((a, b) => a.code.localeCompare(b.code)))
+      setPreleveurs(list.toSorted((a, b) => a.code.localeCompare(b.code)))
     })
     return () => unsub()
   }, [setPreleveurs])

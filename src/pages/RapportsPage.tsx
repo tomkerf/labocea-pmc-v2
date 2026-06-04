@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -15,6 +15,7 @@ import type { Client, Plan, Sampling } from '@/types'
 
 export default function RapportsPage() {
   const navigate = useNavigate()
+  const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), [])
   const { clients } = useMissionsStore()
   const uid = useAuthStore(selectUid)
   const appUser = useAuthStore(selectAppUser)
@@ -165,9 +166,8 @@ export default function RapportsPage() {
                         const fmtDone = r.doneDate
                           ? new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
                           : '—'
-                        const today = new Date().toISOString().slice(0, 10)
                         const joursAvant = r.rapportDatePrevue
-                          ? Math.floor((new Date(r.rapportDatePrevue).getTime() - new Date(today).getTime()) / 86400000)
+                          ? Math.floor((new Date(r.rapportDatePrevue).getTime() - new Date(todayStr).getTime()) / 86400000)
                           : null
                         const delaiColor = joursAvant === null ? 'var(--color-text-tertiary)'
                           : joursAvant < 0 ? 'var(--color-danger)'

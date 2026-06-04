@@ -8,6 +8,16 @@ import { matColor, fmtDate, printLabel } from '@/lib/tuyauxUtils'
 import TuyauForm, { Row, Tag } from '@/components/tuyaux/TuyauForm'
 import type { Tuyau } from '@/types'
 
+const chipStyle = (active: boolean, color?: string) => ({
+  display: 'inline-flex', alignItems: 'center', padding: '5px 12px',
+  borderRadius: 20, fontSize: 12, fontWeight: active ? 600 : 400,
+  cursor: 'pointer', border: `1.5px solid ${active ? (color ?? 'var(--color-accent)') : 'var(--color-border)'}`,
+  background: active ? (color ?? 'var(--color-accent)') : 'transparent',
+  color: active ? 'white' : 'var(--color-text-secondary)',
+  whiteSpace: 'nowrap' as const,
+  transition: 'all .15s',
+})
+
 export default function TuyauxPage() {
   useTuyauxListener()
   const { tuyaux, loading } = useTuyauxStore()
@@ -70,15 +80,6 @@ export default function TuyauxPage() {
     }
   }
 
-  const chipStyle = (active: boolean, color?: string) => ({
-    display: 'inline-flex', alignItems: 'center', padding: '5px 12px',
-    borderRadius: 20, fontSize: 12, fontWeight: active ? 600 : 400,
-    cursor: 'pointer', border: `1.5px solid ${active ? (color ?? 'var(--color-accent)') : 'var(--color-border)'}`,
-    background: active ? (color ?? 'var(--color-accent)') : 'transparent',
-    color: active ? 'white' : 'var(--color-text-secondary)',
-    whiteSpace: 'nowrap' as const,
-    transition: 'all .15s',
-  })
 
   if (loading) return (
     <div className="flex justify-center py-20">

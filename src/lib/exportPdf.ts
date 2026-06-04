@@ -158,7 +158,7 @@ function buildClientPdfDoc(client: Client): jsPDF {
     const rowsMeta: RowMeta[] = []
     const rows: string[][] = []
 
-    const sorted = [...plan.samplings].sort((a, b) => {
+    const sorted = plan.samplings.toSorted((a, b) => {
       if (a.plannedMonth !== b.plannedMonth) return a.plannedMonth - b.plannedMonth
       return a.plannedDay - b.plannedDay
     })
