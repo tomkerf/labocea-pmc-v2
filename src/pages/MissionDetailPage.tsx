@@ -17,16 +17,26 @@ const STATUS_CONFIG: Record<SamplingStatus, { label: string; bg: string; color: 
   non_effectue: { label: 'Non effectué', bg: 'var(--color-warning-light)', color: 'var(--color-warning)' },
 }
 
-function getEnCoursStatus(s: Sampling): { label: string; bg: string; color: string } | null {
-  if (s.status !== 'planned' || !s.plannedTime) return null
-  const [h, m] = s.plannedTime.split(':').map(Number)
-  const now = new Date()
-  const nowMin = now.getHours() * 60 + now.getMinutes()
-  const tMin = h * 60 + m
-  if (nowMin >= tMin && nowMin < tMin + 120) {
-    return { label: 'En cours', bg: 'var(--color-accent-light)', color: 'var(--color-accent)' }
+const MISSION_DURATION_MINUTES = 120;
+
+function getEnCoursStatus(sampling: Sampling): { label: string; bg: string; color: string } | null {
+  if (sampling.status !== 'planned' || !sampling.plannedTime) return null;
+  const [hours, minutes] = sampling.plannedTime.split(':').map(Number);
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const plannedMinutes = hours * 60 + minutes;
+  if (currentMinutes >= plannedMinutes && currentMinutes < plannedMinutes + MISSION_DURATION_MINUTES) {
+    return { label: 'En cours', bg: 'var(--color-accent-light)', color: 'var(--color-accent)' };
   }
-  return null
+  return null;
+}
+
+function getFormattedISODate(sampling: Sampling): string {
+  if (!sampling.plannedDay || sampling.plannedMonth === undefined) return '';
+  const year = new Date().getFullYear();
+  const month = String(sampling.plannedMonth + 1).padStart(2, '0');
+  const day = String(sampling.plannedDay).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export default function MissionDetailPage() {
@@ -46,57 +56,50 @@ export default function MissionDetailPage() {
   const plan = client?.plans.find((p) => p.id === planId) ?? null
   const sampling = plan?.samplings.find((s) => s.id === samplingId) ?? null
 
+  function saveSamplingPatch(patch: Partial<Sampling>) {
+    if (!client || !plan) return;
+    const updatedSamplings = plan.samplings.map((s) =>
+      s.id === samplingId ? { ...s, ...patch } : s
+    );
+    const updatedPlans = client.plans.map((p) =>
+      p.id === planId ? { ...p, samplings: updatedSamplings } : p
+    );
+    triggerSave({ ...client, plans: updatedPlans });
+  }
+
   // J1 Bilan 24h : calculé à partir des dates, pas du param URL
   // Bloque la validation uniquement si aujourd'hui == date planifiée (= jour de pose)
-  const todayISO = new Date().toISOString().split('T')[0]
-  const plannedISO = sampling?.plannedDay
-    ? `${new Date().getFullYear()}-${String((sampling.plannedMonth ?? 0) + 1).padStart(2, '0')}-${String(sampling.plannedDay).padStart(2, '0')}`
-    : ''
-  const isAutoJ1 = plan?.methode === 'Automatique' && !!plannedISO && plannedISO === todayISO
+  const todayISO = new Date().toISOString().split('T')[0];
+  const plannedISO = sampling ? getFormattedISODate(sampling) : '';
+  const isAutoJ1 = plan?.methode === 'Automatique' && !!plannedISO && plannedISO === todayISO;
 
   function handleTerminer() {
-    if (!client || !plan || !sampling || saving) return
-    const today = new Date().toISOString().split('T')[0]
-    const updatedSamplings = plan.samplings.map((s) =>
-      s.id === samplingId
-        ? { ...s, status: 'done' as SamplingStatus, doneDate: today, doneBy: uid ?? '' }
-        : s
-    )
-    triggerSave({
-      ...client,
-      plans: client.plans.map((p) => p.id === planId ? { ...p, samplings: updatedSamplings } : p),
-    })
-    navigate(-1)
+    if (!client || !plan || !sampling || saving) return;
+    const today = new Date().toISOString().split('T')[0];
+    saveSamplingPatch({ status: 'done' as SamplingStatus, doneDate: today, doneBy: uid ?? '' });
+    navigate(-1);
   }
 
   function handleJ1Action(data: SaisieRapideData) {
-    if (!client || !plan || !sampling) return
-    let patch: Partial<Sampling>
+    if (!client || !plan || !sampling) return;
+    let patch: Partial<Sampling>;
     if (data.status === 'non_effectue') {
-      patch = { status: 'non_effectue', motif: data.motif }
+      patch = { status: 'non_effectue', motif: data.motif };
     } else {
-      const nd = new Date(data.newPlannedDate + 'T12:00:00')
-      const fromISO = sampling.plannedDay
-        ? `${new Date().getFullYear()}-${String(sampling.plannedMonth + 1).padStart(2, '0')}-${String(sampling.plannedDay).padStart(2, '0')}`
-        : ''
+      const newDate = new Date(data.newPlannedDate + 'T12:00:00');
+      const fromISO = getFormattedISODate(sampling);
       patch = {
-        plannedMonth: nd.getMonth(),
-        plannedDay: nd.getDate(),
+        plannedMonth: newDate.getMonth(),
+        plannedDay: newDate.getDate(),
         reportHistory: [
           ...(sampling.reportHistory ?? []),
           { from: fromISO, to: data.newPlannedDate, by: uid ?? '', reason: data.motif, at: new Date().toISOString() },
         ],
-      }
+      };
     }
-    const updatedSamplings = plan.samplings.map((s) =>
-      s.id === samplingId ? { ...s, ...patch } : s
-    )
-    triggerSave({
-      ...client,
-      plans: client.plans.map((p) => p.id === planId ? { ...p, samplings: updatedSamplings } : p),
-    })
-    setJ1Modal(null)
-    navigate(-1)
+    saveSamplingPatch(patch);
+    setJ1Modal(null);
+    navigate(-1);
   }
 
   if (loading) {
@@ -112,7 +115,7 @@ export default function MissionDetailPage() {
     return <div className="p-6 text-sm" style={{ color: 'var(--color-danger)' }}>Mission introuvable.</div>
   }
 
-  const cfg = getEnCoursStatus(sampling) ?? STATUS_CONFIG[sampling.status]
+  const statusConfig = getEnCoursStatus(sampling) ?? STATUS_CONFIG[sampling.status]
   const hasGps = plan.lat && plan.lng && plan.lat !== '' && plan.lng !== ''
   const mapsUrl = hasGps
     ? `https://maps.google.com/?q=${plan.lat},${plan.lng}`
@@ -181,8 +184,8 @@ export default function MissionDetailPage() {
             </span>
           )}
           <span className="text-sm font-semibold px-3 py-1 rounded-full"
-            style={{ background: cfg.bg, color: cfg.color }}>
-            {cfg.label}
+            style={{ background: statusConfig.bg, color: statusConfig.color }}>
+            {statusConfig.label}
           </span>
           {saving && (
             <span className="text-xs ml-auto" style={{ color: 'var(--color-text-tertiary)' }}>
