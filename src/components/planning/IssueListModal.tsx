@@ -9,7 +9,7 @@ import { MOIS_LONG } from '@/lib/planningUtils'
 interface IssueListModalProps {
   onClose: () => void
   type: 'overdue' | 'non_effectue' | null
-  rows: { client: Client; plan: Plan; samplingsByMonth?: any; pairsByMonth?: any }[]
+  rows: { client: Client; plan: Plan; samplingsByMonth?: (Sampling | null)[]; pairsByMonth?: (Sampling | null)[][] }[]
   year: number
 }
 

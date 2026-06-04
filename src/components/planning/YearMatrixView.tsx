@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Client, Plan, Sampling } from '@/types'
+import type { Preleveur } from '@/stores/preleveursStore'
 import { MOIS_LONG } from '@/lib/planningUtils'
 import { isSamplingOverdue } from '@/lib/overdue'
 
@@ -36,7 +37,7 @@ interface YearMatrixViewProps {
   year: number
   filterTech: string
   filterSite: string
-  preleveurs: any[]
+  preleveurs: Preleveur[]
 }
 
 type RowData = {
@@ -202,8 +203,8 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
           <table className="w-full text-left border-collapse" style={{ minWidth: 1000 }}>
             <thead className="sticky top-0 z-30">
               <tr className="bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] text-[11px] uppercase tracking-wider border-b border-[var(--color-border-subtle)]">
-                <th className="px-4 py-3 font-semibold sticky left-0 z-40 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)]">Client & Mission</th>
-                <th className="px-4 py-3 font-semibold border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)]">Point de prélèvement</th>
+                <th className="px-4 py-3 font-semibold sticky left-0 z-40 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)]">Client & Point de prélèvement</th>
+                <th className="px-4 py-3 font-semibold border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)]">Plan</th>
                 {MOIS_LONG.map(m => (
                   <th key={m} className="px-2 py-3 font-semibold text-center border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)] w-14">
                     {m.substring(0, 3)}
@@ -270,9 +271,6 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                       <tr key={`${row.client.id}-${row.plan.id}`}
                         className="border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors group h-7">
                         <td className="px-4 py-0.5 text-sm sticky left-0 z-20 bg-[var(--color-bg-secondary)] group-hover:bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] transition-colors shadow-[1px_0_0_var(--color-border-subtle)] pl-9">
-                          <div className="font-medium text-[var(--color-text-primary)] text-xs">{row.plan.nom}</div>
-                        </td>
-                        <td className="px-4 py-0.5 text-sm text-[var(--color-text-primary)] border-r border-[var(--color-border-subtle)]">
                           <div className="text-[10px] text-[var(--color-text-secondary)] flex items-center gap-1.5">
                             <span>{row.plan.siteNom} • {row.plan.frequence}</span>
                             {row.plan.frequence === 'Personnalisé' && (
@@ -281,6 +279,9 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                               </span>
                             )}
                           </div>
+                        </td>
+                        <td className="px-4 py-0.5 text-sm text-[var(--color-text-primary)] border-r border-[var(--color-border-subtle)]">
+                          <div className="font-medium text-[var(--color-text-primary)] text-xs">{row.plan.nom}</div>
                         </td>
 
                         {row.samplingsByMonth.map((s, mIdx) => {

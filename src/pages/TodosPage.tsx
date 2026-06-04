@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Plus, Search, Check, ListTodo, ChevronRight, ChevronDown, Edit2, Trash2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, type NavigateFunction } from 'react-router-dom'
 import { useTodosListener } from '@/hooks/useTodos'
 import { useClientsListener } from '@/hooks/useClients'
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -680,7 +680,7 @@ export default function TodosPage() {
 // ── COMPOSANT INTERNE : Ligne de tâche (TodoRow) ──
 interface TodoRowProps {
   todo: Todo
-  prioColors: any
+  prioColors: typeof prioColors
   onToggle: () => void
   onCycle: () => void
   onEdit: () => void
@@ -688,7 +688,7 @@ interface TodoRowProps {
   deletingId: string | null
   setDeletingId: (id: string | null) => void
   isOverdue: (date?: string) => boolean
-  navigate: any
+  navigate: NavigateFunction
 }
 
 function TodoRow({

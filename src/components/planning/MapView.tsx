@@ -284,7 +284,7 @@ export default function MapView({
 
     // Parcourir le groupe pour ouvrir la popup correspondante
     if (markerGroupRef.current) {
-      markerGroupRef.current.eachLayer((layer: any) => {
+      markerGroupRef.current.eachLayer((layer: L.Layer) => {
         if (layer instanceof L.Marker) {
           const latLng = layer.getLatLng()
           // Vérification à epsilon près pour parer aux soucis de float

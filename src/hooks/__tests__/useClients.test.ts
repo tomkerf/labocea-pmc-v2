@@ -1,5 +1,8 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
+
+type SnapCallback = (snapshot: { docs: Array<{ id: string; data: () => Record<string, unknown> }> }) => void
+type ErrorCallback = (error: Error) => void
 import { useClientsListener } from '../useClients'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { toast } from '@/stores/toastStore'
@@ -32,10 +35,10 @@ describe('useClientsListener', () => {
   })
 
   it('correctly subscribes to the collection and updates the store on success', () => {
-    let capturedOnNext: any = null
+    let capturedOnNext: SnapCallback | null = null
 
     vi.mocked(onSnapshot).mockImplementation((_q, onNext, _onError) => {
-      capturedOnNext = onNext
+      capturedOnNext = onNext as unknown as SnapCallback
       return mockUnsubscribe
     })
 
@@ -77,10 +80,10 @@ describe('useClientsListener', () => {
   })
 
   it('handles snapshot error by updating store and showing a toast', () => {
-    let capturedOnError: any = null
+    let capturedOnError: ErrorCallback | null = null
 
     vi.mocked(onSnapshot).mockImplementation((_q, _onNext, onError) => {
-      capturedOnError = onError
+      capturedOnError = onError as unknown as ErrorCallback
       return mockUnsubscribe
     })
 
