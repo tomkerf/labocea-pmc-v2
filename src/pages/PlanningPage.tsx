@@ -44,6 +44,7 @@ import PeriodListView     from '@/components/planning/PeriodListView'
 import PlanningMiniCalendar from '@/components/planning/PlanningMiniCalendar'
 import MapView            from '@/components/planning/MapView'
 import YearMatrixView     from '@/components/planning/YearMatrixView'
+import BilanMoisModal     from '@/components/planning/BilanMoisModal'
 
 // ── Composant principal ─────────────────────────────────────
 
@@ -101,6 +102,7 @@ const uid        = useAuthStore(selectUid)
   const [eventDetail,   setEventDetail]   = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
   const [ghostDetail,   setGhostDetail]   = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
   const [showMiniCal,   setShowMiniCal]   = useState(false)
+  const [showBilanMois, setShowBilanMois] = useState(false)
 
   function handleSelectEvent(event: PlanningEvent, dateStr: string) {
     if (event.isGhost) setGhostDetail({ event, dateStr })
@@ -231,6 +233,7 @@ const uid        = useAuthStore(selectUid)
         showRain={showRain} setShowRain={setShowRain} preleveurs={preleveurs}
         monthPoolCount={monthPoolCount} showDragHint={showDragHint} setShowDragHint={setShowDragHint}
         onExportPdf={handleExportPdf} onExportExcel={handleExportExcel}
+        onBilanMois={() => setShowBilanMois(true)}
       />
 
       {/* ── Panneau mini-calendrier overlay (desktop) ── */}
@@ -429,6 +432,15 @@ const uid        = useAuthStore(selectUid)
         />
       )}
 
+      {/* ── BilanMoisModal ── */}
+      {showBilanMois && (
+        <BilanMoisModal
+          onClose={() => setShowBilanMois(false)}
+          month={selectedDate.getMonth()}
+          year={selectedDate.getFullYear()}
+          clients={clients}
+        />
+      )}
     </div>
   )
 }

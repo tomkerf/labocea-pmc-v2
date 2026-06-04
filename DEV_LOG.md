@@ -2,6 +2,16 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 101 — Bilan du mois (UX Planning)
+**4 juin 2026**
+
+### Ce qui a été fait
+- **Modale "Bilan du mois"** : Création d'une vue de synthèse `BilanMoisModal.tsx` listant pour le mois sélectionné l'ensemble des prélèvements prévus (réalisés, non effectués, en retard, planifiés), classés par statut.
+- **Header Planning** : Ajout du bouton "Bilan" dans `PlanningHeader.tsx` situé directement à gauche du groupe "Jour / Semaine / Mois / Année" suite au retour utilisateur sur son placement initial.
+- **Déploiement staging** : Build et déploiement réussis.
+
+---
+
 ## Session 100 — Refactoring final (Dette technique)
 **4 juin 2026**
 

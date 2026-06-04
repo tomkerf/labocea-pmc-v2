@@ -33,6 +33,7 @@ interface PlanningHeaderProps {
   // Exports
   onExportPdf:    () => void
   onExportExcel:  () => void
+  onBilanMois:    () => void
 }
 
 export default function PlanningHeader({
@@ -41,7 +42,7 @@ export default function PlanningHeader({
   allTechs, filterTech, setFilterTech, filterSite, setFilterSite,
   showRain, setShowRain, preleveurs,
   monthPoolCount, showDragHint, setShowDragHint,
-  onExportPdf, onExportExcel,
+  onExportPdf, onExportExcel, onBilanMois,
 }: PlanningHeaderProps) {
   const availableSites = useMemo(() => {
     const sites = new Set(preleveurs.map(p => p.site).filter(Boolean) as string[])
@@ -148,9 +149,18 @@ export default function PlanningHeader({
               </button>
             </div>
 
-            <div className="relative flex p-0.5 rounded-lg shrink-0 w-full md:w-auto overflow-x-auto no-scrollbar"
-              style={{ border:'1px solid var(--color-border-subtle)', background:COLORS.BG_TERTIARY }}>
-              {(['jour','semaine','mois','annee'] as ViewMode[]).map(m => (
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={onBilanMois}
+                className="hidden md:flex px-2.5 py-1.5 text-xs font-medium rounded-lg items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                style={{ background:COLORS.ACCENT, color:'white', border:'1px solid transparent' }}
+                title="Afficher le bilan du mois en cours">
+                <Calendar size={13} style={{ color: 'white' }} />
+                Bilan
+              </button>
+              
+              <div className="relative flex p-0.5 rounded-lg shrink-0 w-full md:w-auto overflow-x-auto no-scrollbar"
+                style={{ border:'1px solid var(--color-border-subtle)', background:COLORS.BG_TERTIARY }}>
+                {(['jour','semaine','mois','annee'] as ViewMode[]).map(m => (
                 <button type="button"
                   key={m}
                   onClick={() => switchView(m)}
@@ -173,8 +183,9 @@ export default function PlanningHeader({
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Ligne 2 : filtres technicien + pluie */}
+      {/* Ligne 2 : filtres technicien + pluie */}
         <div className="flex items-center gap-2 px-4 md:px-6 pb-3 flex-wrap">
             {availableSites.length > 1 && (
               <div className="flex items-center gap-1.5 flex-wrap mr-3"

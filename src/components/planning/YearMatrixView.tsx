@@ -197,7 +197,6 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
               : <><ChevronRight size={12} /> Tout replier</>
             }
           </button>
-
         </div>
 
         {/* Table */}

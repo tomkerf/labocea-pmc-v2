@@ -303,6 +303,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-04 | Nettoyage repo + vue compacte ✅ | Toggle vue compacte/normale supprimé — vue compacte en dur. Alerte GitHub secret scanning dismissée (clé Firebase publique dans historique). Staging déployé. |
 | 2026-06-04 | Bugfixes + TypeScript any ✅ | Fix "Date à définir" (clear dateUndefined), inversion colonnes YearMatrixView, élimination 13 `any` TypeScript (prod + tests). |
 | 2026-06-04 | Refactoring final ✅ | Constants unifiées (100+ fichiers), BaseModal créé, useReducer TodosPage, Storybook installé. Dette technique soldée. |
+| 2026-06-04 | Bilan du mois ✅ | Création de la modale Bilan du mois (BilanMoisModal) affichant la liste des tâches (retard, effectuées, planifiées, etc) par mois. Ajout du bouton d'ouverture dans PlanningHeader à gauche des filtres de vue (Jour/Sem/Mois/An). Staging déployé. |
 
 ---
 
