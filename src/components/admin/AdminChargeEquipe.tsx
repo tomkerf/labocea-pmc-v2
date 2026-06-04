@@ -190,8 +190,8 @@ export function AdminChargeEquipe() {
                 { label: 'Réalisé',    align: 'center' },
                 { label: 'À faire',    align: 'center' },
                 { label: 'Total',      align: 'center' },
-              ].map((h, i) => (
-                <span key={i} className="text-[11px] font-semibold uppercase"
+              ].map((h) => (
+                <span key={h.label} className="text-[11px] font-semibold uppercase"
                   style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.05em', textAlign: h.align as 'left' | 'center' }}>
                   {h.label}
                 </span>

@@ -109,7 +109,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
           value={sampling.plannedMonth}
           onChange={(e) => onUpdate('plannedMonth', parseInt(e.target.value))}
           className="field-input w-full">
-          {MOIS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+          {MOIS.map((m, i) => <option key={m} value={i}>{m}</option>)}
         </select>
       </div>
 

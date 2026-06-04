@@ -82,7 +82,7 @@ export default function MonthView({
         onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
         {monthGrid.map((day,i) => {
           if (!day) return (
-            <div key={i} style={{
+            <div key={`empty-${i}`} style={{
               borderRight:(i%7)<6?'1px solid var(--color-border-subtle)':'none',
               borderBottom:'1px solid var(--color-border-subtle)',
               background:'rgba(0,0,0,0.015)',
@@ -98,7 +98,7 @@ export default function MonthView({
           const isRainyDay  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
           const MAX = 3
           return (
-            <div key={i}
+            <div key={dateStr}
               className="p-1 flex flex-col gap-0.5 cursor-crosshair group"
               onMouseDown={e => handleDragMouseDown(e, dateStr)}
               onMouseEnter={() => handleDragMouseEnter(dateStr)}

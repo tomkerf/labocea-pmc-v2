@@ -33,8 +33,8 @@ function ChangelogContent({ entries }: { entries: ChangelogEntry[] }) {
             </span>
           </div>
           <ul className="flex flex-col gap-1.5">
-            {entry.items.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm" style={{ color: 'var(--color-text-primary)' }}>
+            {entry.items.map((item) => (
+              <li key={item.label} className="flex items-start gap-2 text-sm" style={{ color: 'var(--color-text-primary)' }}>
                 <Badge type={item.type} />
                 <span>{item.label}</span>
               </li>

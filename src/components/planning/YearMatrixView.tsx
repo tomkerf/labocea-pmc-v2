@@ -306,7 +306,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                                       const sorted = [...pair].filter(Boolean).sort((a, b) => priority(b!) - priority(a!))
                                       return sorted.slice(0, 2).map((ps, pi) => ps && (
                                         <div
-                                          key={pi}
+                                          key={ps.id}
                                           onClick={() => { if (isSamplingOverdue(ps, planYear)) setIssueModalType('overdue'); else if (ps.status === 'non_effectue') setIssueModalType('non_effectue') }}
                                           className={`${dotSize} rounded-full flex items-center justify-center transition-transform hover:scale-110 border-2 border-[var(--color-bg-secondary)] ${isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
                                           style={{ backgroundColor: getStatusColor(ps, planYear), marginLeft: pi === 1 ? (compact ? -5 : -7) : 0, zIndex: pi === 0 ? 2 : 1 }}

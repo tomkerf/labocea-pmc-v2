@@ -18,7 +18,7 @@ export function TabVolume({ vTheo, setVTheo, vD, setVD, vF, setVF }: {
         <Card>
           <SectionTitle>Mesures DÉBUT de mission</SectionTitle>
           {([1, 2, 3] as const).map((n, i) => (
-            <div key={i} className="mb-3">
+            <div key={n} className="mb-3">
               <FieldLabel>Essai {n} (mL)</FieldLabel>
               <NumInput value={vD[i]} onChange={v => setVD(i, v)} unit="mL" placeholder="0.0" />
             </div>
@@ -27,7 +27,7 @@ export function TabVolume({ vTheo, setVTheo, vD, setVD, vF, setVF }: {
         <Card>
           <SectionTitle>Mesures FIN de mission</SectionTitle>
           {([1, 2, 3] as const).map((n, i) => (
-            <div key={i} className="mb-3">
+            <div key={n} className="mb-3">
               <FieldLabel>Essai {n} (mL)</FieldLabel>
               <NumInput value={vF[i]} onChange={v => setVF(i, v)} unit="mL" placeholder="0.0" />
             </div>

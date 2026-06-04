@@ -346,12 +346,12 @@ export default function AsservissementPage() {
             {res.warns.length > 0 && (
               <div className="px-4 py-3 flex flex-col gap-1.5"
                 style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
-                {res.warns.map((w, i) => {
+                {res.warns.map((w) => {
                   const bg    = w.type === 'ok' ? 'var(--color-success-light)' : w.type === 'error' ? 'var(--color-danger-light)' : w.type === 'warn' ? 'var(--color-warning-light)' : 'var(--color-bg-tertiary)'
                   const color = w.type === 'ok' ? 'var(--color-success)'       : w.type === 'error' ? 'var(--color-danger)'       : w.type === 'warn' ? 'var(--color-warning)'       : 'var(--color-text-secondary)'
                   const dot   = w.type === 'ok' ? '✓' : w.type === 'error' ? '✕' : '•'
                   return (
-                    <div key={i} className="flex items-start gap-2 px-3 py-2 rounded-lg" style={{ background: bg }}>
+                    <div key={w.txt} className="flex items-start gap-2 px-3 py-2 rounded-lg" style={{ background: bg }}>
                       <span className="text-xs font-bold shrink-0 mt-px" style={{ color }}>{dot}</span>
                       <span className="text-xs leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>{w.txt}</span>
                     </div>
@@ -380,7 +380,7 @@ export default function AsservissementPage() {
             <div className="px-4 pb-4" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
               <div className="flex flex-col pt-1">
                 {REGLE.map((t, i) => (
-                  <div key={i} className="flex gap-3 py-2.5 text-xs leading-relaxed"
+                  <div key={t.slice(0, 30)} className="flex gap-3 py-2.5 text-xs leading-relaxed"
                     style={{ borderBottom: i < REGLE.length - 1 ? '1px solid var(--color-border-subtle)' : 'none', color: 'var(--color-text-secondary)' }}>
                     <span className="text-xs font-semibold tabular-nums shrink-0 mt-px"
                       style={{ color: 'var(--color-text-tertiary)' }}>

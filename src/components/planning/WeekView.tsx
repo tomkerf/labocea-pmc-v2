@@ -77,7 +77,7 @@ export default function WeekView({
           const isRainyDay  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
           const isWeekend   = day.getDay() === 0 || day.getDay() === 6
           return (
-            <div key={i} className="py-2 px-2 text-center relative overflow-hidden"
+            <div key={dateStr} className="py-2 px-2 text-center relative overflow-hidden"
               style={{
                 borderRight: i<6?'1px solid var(--color-border-subtle)':'none',
                 background: holidayName ? 'rgba(255,59,48,0.04)' : isWeekend ? 'rgba(0,0,0,0.05)' : 'transparent',
@@ -114,7 +114,7 @@ export default function WeekView({
             {weekDays.map((day, i) => {
               const isWeekend = day.getDay() === 0 || day.getDay() === 6
               return (
-                <div key={i} style={{
+                <div key={toISO(day)} style={{
                   height: '100%',
                   borderRight: i < 6 ? '1px solid var(--color-border-subtle)' : 'none',
                   background: isWeekend ? 'rgba(0,0,0,0.028)' : 'transparent',
@@ -207,7 +207,7 @@ export default function WeekView({
           const isRainyDay = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
           const isWeekend  = day.getDay() === 0 || day.getDay() === 6
           return (
-            <div key={i}
+            <div key={dateStr}
               className="p-1.5 flex flex-col gap-1 cursor-crosshair group"
               onMouseDown={e => handleDragMouseDown(e, dateStr)}
               onMouseEnter={() => handleDragMouseEnter(dateStr)}

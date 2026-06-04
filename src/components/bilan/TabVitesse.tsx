@@ -18,7 +18,7 @@ export function TabVitesse({ distD, setDistD, distF, setDistF, tD, setTD, tF, se
           <SectionTitle>Mesures DÉBUT</SectionTitle>
           <div className="mb-3"><FieldLabel>Distance tube (m)</FieldLabel><NumInput value={distD} onChange={setDistD} unit="m" placeholder="Ex: 1.5" /></div>
           {([1, 2, 3] as const).map((n, i) => (
-            <div key={i} className="mb-3">
+            <div key={n} className="mb-3">
               <FieldLabel>Temps essai {n} (s)</FieldLabel>
               <NumInput value={tD[i]} onChange={v => setTD(i, v)} unit="s" placeholder="0.0" />
             </div>
@@ -28,7 +28,7 @@ export function TabVitesse({ distD, setDistD, distF, setDistF, tD, setTD, tF, se
           <SectionTitle>Mesures FIN</SectionTitle>
           <div className="mb-3"><FieldLabel>Distance tube (m)</FieldLabel><NumInput value={distF} onChange={setDistF} unit="m" placeholder="Ex: 1.5" /></div>
           {([1, 2, 3] as const).map((n, i) => (
-            <div key={i} className="mb-3">
+            <div key={n} className="mb-3">
               <FieldLabel>Temps essai {n} (s)</FieldLabel>
               <NumInput value={tF[i]} onChange={v => setTF(i, v)} unit="s" placeholder="0.0" />
             </div>
@@ -38,10 +38,10 @@ export function TabVitesse({ distD, setDistD, distF, setDistF, tD, setTD, tF, se
       {res && (
         <ResultBox ok={res.conforme}>
           <p className="px-4 pt-2.5 text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Vitesses DÉBUT</p>
-          {res.vD.map((v, i) => <ResultRow key={i} label={`Essai ${i + 1}`} val={`${v.toFixed(2)} m/s`} ok={v >= 0.5} />)}
+          {res.vD.map((v, i) => <ResultRow key={i + 1} label={`Essai ${i + 1}`} val={`${v.toFixed(2)} m/s`} ok={v >= 0.5} />)}
           <ResultRow label="Moyenne DÉBUT" val={`${res.moyVD.toFixed(2)} m/s`} />
           <p className="px-4 pt-2.5 text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Vitesses FIN</p>
-          {res.vFn.map((v, i) => <ResultRow key={i} label={`Essai ${i + 1}`} val={`${v.toFixed(2)} m/s`} ok={v >= 0.5} />)}
+          {res.vFn.map((v, i) => <ResultRow key={`fin-${i + 1}`} label={`Essai ${i + 1}`} val={`${v.toFixed(2)} m/s`} ok={v >= 0.5} />)}
           <ResultRow label="Moyenne FIN" val={`${res.moyVFn.toFixed(2)} m/s`} />
         </ResultBox>
       )}

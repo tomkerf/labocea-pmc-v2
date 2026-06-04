@@ -243,9 +243,9 @@ export default function PointMesureFichePage() {
             Photos du point ({allPhotos.length})
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
-            {allPhotos.map((url, i) => (
-              <div key={i} className="shrink-0 size-28 rounded-xl overflow-hidden border border-gray-200 relative bg-gray-50">
-                <img src={url} alt={`Point ${i}`} className="size-full object-cover" />
+            {allPhotos.map((url) => (
+              <div key={url} className="shrink-0 size-28 rounded-xl overflow-hidden border border-gray-200 relative bg-gray-50">
+                <img src={url} alt="Photo du point de mesure" className="size-full object-cover" />
                 <a href={url} target="_blank" rel="noreferrer" 
                   className="absolute bottom-1 right-1 p-1 bg-white/80 backdrop-blur rounded-full text-gray-700 hover:text-blue-600">
                   <Camera size={12} />

@@ -159,7 +159,7 @@ export default function DayView({
 
           {/* Lignes horaires */}
           {Array.from({ length: D_END - D_START }, (_, i) => (
-            <div key={i} className="absolute left-0 right-0"
+            <div key={D_START + i} className="absolute left-0 right-0"
               style={{ top: i * PX_H, height: PX_H, borderTop: '1px solid var(--color-border-subtle)' }}>
               <div className="absolute w-14 pr-2 text-right -top-2.5">
                 <span className="text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>
