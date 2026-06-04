@@ -29,8 +29,6 @@ skills/
 .github/workflows/react-doctor.yml
 
 # Fichiers de gestion de projet interne
-DEV_LOG.md
-ROADMAP.md
 TODO_REFACTORING.md
 skills-lock.json
 AGENTS.md
