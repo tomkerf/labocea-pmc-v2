@@ -1,9 +1,11 @@
-import { useEffect } from 'react'
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ChevronLeft, MapPin, Clock, CheckCircle2, Navigation, ExternalLink } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { ChevronLeft, MapPin, Clock, CheckCircle2, Navigation, ExternalLink, CalendarClock, X } from 'lucide-react'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useClientData } from '@/hooks/useClientData'
 import type { Sampling, SamplingStatus } from '@/types'
+import { SaisieRapideModal } from '@/components/tournee/SaisieRapideModal'
+import type { SaisieRapideData } from '@/components/tournee/SaisieRapideModal'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
@@ -32,10 +34,8 @@ export default function MissionDetailPage() {
     clientId: string; planId: string; samplingId: string
   }>()
   const navigate = useNavigate()
-  const location = useLocation()
-  const searchParams = new URLSearchParams(location.search)
-  const isJ1 = searchParams.get('j') === '1'
   const uid = useAuthStore(selectUid)
+  const [j1Modal, setJ1Modal] = useState<'non_effectue' | 'reporte' | null>(null)
 
   const { client, loading, saving, triggerSave } = useClientData(clientId)
 
@@ -45,6 +45,14 @@ export default function MissionDetailPage() {
 
   const plan = client?.plans.find((p) => p.id === planId) ?? null
   const sampling = plan?.samplings.find((s) => s.id === samplingId) ?? null
+
+  // J1 Bilan 24h : calculé à partir des dates, pas du param URL
+  // Bloque la validation uniquement si aujourd'hui == date planifiée (= jour de pose)
+  const todayISO = new Date().toISOString().split('T')[0]
+  const plannedISO = sampling?.plannedDay
+    ? `${new Date().getFullYear()}-${String((sampling.plannedMonth ?? 0) + 1).padStart(2, '0')}-${String(sampling.plannedDay).padStart(2, '0')}`
+    : ''
+  const isAutoJ1 = plan?.methode === 'Automatique' && !!plannedISO && plannedISO === todayISO
 
   function handleTerminer() {
     if (!client || !plan || !sampling || saving) return
@@ -58,6 +66,36 @@ export default function MissionDetailPage() {
       ...client,
       plans: client.plans.map((p) => p.id === planId ? { ...p, samplings: updatedSamplings } : p),
     })
+    navigate(-1)
+  }
+
+  function handleJ1Action(data: SaisieRapideData) {
+    if (!client || !plan || !sampling) return
+    let patch: Partial<Sampling>
+    if (data.status === 'non_effectue') {
+      patch = { status: 'non_effectue', motif: data.motif }
+    } else {
+      const nd = new Date(data.newPlannedDate + 'T12:00:00')
+      const fromISO = sampling.plannedDay
+        ? `${new Date().getFullYear()}-${String(sampling.plannedMonth + 1).padStart(2, '0')}-${String(sampling.plannedDay).padStart(2, '0')}`
+        : ''
+      patch = {
+        plannedMonth: nd.getMonth(),
+        plannedDay: nd.getDate(),
+        reportHistory: [
+          ...(sampling.reportHistory ?? []),
+          { from: fromISO, to: data.newPlannedDate, by: uid ?? '', reason: data.motif, at: new Date().toISOString() },
+        ],
+      }
+    }
+    const updatedSamplings = plan.samplings.map((s) =>
+      s.id === samplingId ? { ...s, ...patch } : s
+    )
+    triggerSave({
+      ...client,
+      plans: client.plans.map((p) => p.id === planId ? { ...p, samplings: updatedSamplings } : p),
+    })
+    setJ1Modal(null)
     navigate(-1)
   }
 
@@ -213,24 +251,58 @@ export default function MissionDetailPage() {
             borderTop: '1px solid var(--color-border-subtle)',
             paddingBottom: '12px',
           }}>
-          {plan.methode === 'Automatique' && isJ1 ? (
-            <div className="w-full py-4 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
-                 style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-              Validation possible uniquement à J2
+          {isAutoJ1 ? (
+            <div className="flex flex-col gap-2">
+              <button type="button"
+                onClick={() => setJ1Modal('reporte')}
+                className="w-full py-4 rounded-2xl text-base font-semibold flex items-center justify-center gap-2"
+                style={{
+                  background: 'var(--color-accent)',
+                  color: 'white',
+                  boxShadow: '0 4px 16px rgba(0,113,227,0.35)',
+                }}>
+                <CalendarClock size={20} />
+                Décaler la mission
+              </button>
+              <button type="button"
+                onClick={() => setJ1Modal('non_effectue')}
+                className="w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5"
+                style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+                <X size={15} />
+                Non effectué
+              </button>
             </div>
           ) : (
-            <button type="button"
-              onClick={handleTerminer}
-              disabled={saving}
-              className="w-full py-4 rounded-2xl text-base font-semibold flex items-center justify-center gap-2"
-              style={{
-                background: saving ? 'var(--color-border)' : 'var(--color-accent)',
-                color: 'white',
-                boxShadow: saving ? 'none' : '0 4px 16px rgba(0,113,227,0.35)',
-              }}>
-              <CheckCircle2 size={20} />
-              {saving ? 'Enregistrement…' : 'Terminer la mission'}
-            </button>
+            <div className="flex flex-col gap-2">
+              <button type="button"
+                onClick={handleTerminer}
+                disabled={saving}
+                className="w-full py-4 rounded-2xl text-base font-semibold flex items-center justify-center gap-2"
+                style={{
+                  background: saving ? 'var(--color-border)' : 'var(--color-accent)',
+                  color: 'white',
+                  boxShadow: saving ? 'none' : '0 4px 16px rgba(0,113,227,0.35)',
+                }}>
+                <CheckCircle2 size={20} />
+                {saving ? 'Enregistrement…' : 'Terminer la mission'}
+              </button>
+              <div className="flex gap-2">
+                <button type="button"
+                  onClick={() => setJ1Modal('non_effectue')}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5"
+                  style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+                  <X size={15} />
+                  Non effectué
+                </button>
+                <button type="button"
+                  onClick={() => setJ1Modal('reporte')}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5"
+                  style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+                  <CalendarClock size={15} />
+                  Décaler
+                </button>
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -248,6 +320,18 @@ export default function MissionDetailPage() {
             )}
           </div>
         </div>
+      )}
+
+      {j1Modal && plan && (
+        <SaisieRapideModal
+          clientNom={client.nom}
+          siteNom={plan.siteNom ?? ''}
+          nature={plan.nature ?? ''}
+          initialStatus={j1Modal}
+          hideRealise
+          onConfirm={handleJ1Action}
+          onClose={() => setJ1Modal(null)}
+        />
       )}
     </div>
   )

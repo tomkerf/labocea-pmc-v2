@@ -203,9 +203,7 @@ export function EventDetailModal({
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                const dest = (event.type === 'prelevement' && event.clientId && event.planId && event.samplingId)
-                  ? `/missions/${event.clientId}/plan/${event.planId}/sampling/${event.samplingId}`
-                  : event.link
+                const dest = event.link
                 onClose()
                 setTimeout(() => navigate(dest), 50)
               }}

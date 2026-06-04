@@ -29,7 +29,8 @@ interface ModalState {
   clientNom: string
   siteNom: string
   nature: string
-  initialStatus: 'done' | 'non_effectue'
+  initialStatus: 'done' | 'non_effectue' | 'reporte'
+  hideRealise?: boolean
 }
 
 export default function TourneePage() {
@@ -102,9 +103,22 @@ export default function TourneePage() {
     return s === 'done' || s === 'non_effectue' || s === 'reporte'
   }).length
 
-  function handleAction(samplingId: string, action: 'done' | 'non_effectue') {
+  function handleAction(samplingId: string, action: 'done' | 'non_effectue' | 'reporter') {
     const item = tourneeItems.find(i => i.samplingId === samplingId)
     if (!item) return
+    if (action === 'reporter') {
+      setModal({
+        samplingId,
+        clientId: item.clientId,
+        planId:   item.planId,
+        clientNom: item.clientNom,
+        siteNom:  item.siteNom,
+        nature:   item.nature,
+        initialStatus: 'reporte',
+        hideRealise: true,
+      })
+      return
+    }
     setModal({
       samplingId,
       clientId: item.clientId,
@@ -113,6 +127,7 @@ export default function TourneePage() {
       siteNom:  item.siteNom,
       nature:   item.nature,
       initialStatus: action,
+      hideRealise: item.isJ1Bilan24 ? true : undefined,
     })
   }
 
@@ -233,6 +248,7 @@ export default function TourneePage() {
           siteNom={modal.siteNom}
           nature={modal.nature}
           initialStatus={modal.initialStatus}
+          hideRealise={modal.hideRealise}
           onConfirm={handleConfirm}
           onClose={() => setModal(null)}
         />

@@ -109,7 +109,7 @@ export default function GhostDetailModal({ event, onClose }: { event: PlanningEv
             <button type="button"
               onClick={() => {
                 onClose()
-                setTimeout(() => navigate(`/missions/${event.clientId}/plan/${event.planId}/sampling/${event.samplingId}`), 50)
+                setTimeout(() => navigate(event.link), 50)
               }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full mt-1"
               style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>

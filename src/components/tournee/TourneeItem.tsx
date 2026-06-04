@@ -1,4 +1,4 @@
-import { CheckCircle2, X, MapPin } from 'lucide-react'
+import { X, MapPin, CalendarClock } from 'lucide-react'
 
 export interface TourneeItemData {
   samplingId: string
@@ -19,7 +19,7 @@ export interface TourneeItemData {
 
 interface Props {
   item: TourneeItemData
-  onAction: (samplingId: string, action: 'done' | 'non_effectue') => void
+  onAction: (samplingId: string, action: 'done' | 'non_effectue' | 'reporter') => void
 }
 
 export function TourneeItem({ item, onAction }: Props) {
@@ -75,43 +75,62 @@ export function TourneeItem({ item, onAction }: Props) {
 
       {/* Actions */}
       {!isTerminal && !item.isJ1Bilan24 && (
-        <div className="flex gap-2 px-4 pb-4 pt-1">
+        <div className="flex flex-col gap-1.5 px-4 pb-4 pt-1">
+          <div className="flex gap-2">
+            <button type="button"
+              aria-label="Réalisé"
+              onClick={() => onAction(item.samplingId, 'done')}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>
+              Réalisé
+            </button>
+            <button type="button"
+              aria-label="Non effectué"
+              onClick={() => onAction(item.samplingId, 'non_effectue')}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+              <X size={15} />
+              Non effectué
+            </button>
+            <button type="button"
+              aria-label="Décaler"
+              onClick={() => onAction(item.samplingId, 'reporter')}
+              className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium"
+              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
+              <CalendarClock size={15} />
+            </button>
+            {hasGps && (
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GPS"
+                className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium"
+                style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+                <MapPin size={15} />
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+      {!isTerminal && item.isJ1Bilan24 && (
+        <div className="px-4 pb-4 pt-1 flex flex-col gap-1.5">
           <button type="button"
-            aria-label="Réalisé"
-            onClick={() => onAction(item.samplingId, 'done')}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all"
-            style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>
-            <CheckCircle2 size={15} />
-            Réalisé
+            aria-label="Décaler"
+            onClick={() => onAction(item.samplingId, 'reporter')}
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold"
+            style={{ background: 'var(--color-accent)', color: 'white' }}>
+            <CalendarClock size={15} />
+            Décaler la mission
           </button>
           <button type="button"
             aria-label="Non effectué"
             onClick={() => onAction(item.samplingId, 'non_effectue')}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all"
+            className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-medium"
             style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
-            <X size={15} />
+            <X size={14} />
             Non effectué
           </button>
-          {hasGps && (
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="GPS"
-              className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium"
-              style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-              <MapPin size={15} />
-              GPS
-            </a>
-          )}
-        </div>
-      )}
-      {!isTerminal && item.isJ1Bilan24 && (
-        <div className="px-4 pb-4 pt-1">
-          <div className="w-full py-2 rounded-lg text-sm font-medium text-center"
-               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
-            Validation possible uniquement sur J2
-          </div>
         </div>
       )}
     </div>

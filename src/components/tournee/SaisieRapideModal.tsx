@@ -16,15 +16,16 @@ interface Props {
   clientNom: string
   siteNom: string
   nature: string
-  initialStatus: 'done' | 'non_effectue'
+  initialStatus: 'done' | 'non_effectue' | 'reporte'
+  hideRealise?: boolean
   onConfirm: (data: SaisieRapideData) => void
   onClose: () => void
 }
 
 const todayISO = () => new Date().toISOString().slice(0, 10)
 
-export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, onConfirm, onClose }: Props) {
-  const [status, setStatus]           = useState<'done' | 'non_effectue' | 'reporte'>(initialStatus)
+export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, hideRealise, onConfirm, onClose }: Props) {
+  const [status, setStatus]           = useState<'done' | 'non_effectue' | 'reporte'>(initialStatus === 'done' && hideRealise ? 'non_effectue' : initialStatus)
   const [doneDate, setDoneDate]       = useState(todayISO())
   const [newPlannedDate, setNewPlannedDate] = useState(todayISO())
   const [nappe, setNappe]             = useState<NappeType>('')
@@ -66,7 +67,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, o
 
           {/* Statut */}
           <div className="flex gap-2 mb-4">
-            {(['done', 'non_effectue', 'reporte'] as const).map(s => {
+            {(['done', 'non_effectue', 'reporte'] as const).filter(s => !(s === 'done' && hideRealise)).map(s => {
               const labels = { done: 'Réalisé', non_effectue: 'Non effectué', reporte: 'Reporter' }
               const activeColors = {
                 done:         { bg: 'var(--color-success-light)',  text: 'var(--color-success)' },
