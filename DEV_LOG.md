@@ -2,6 +2,39 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 99 — Bugfixes + élimination TypeScript `any`
+**4 juin 2026**
+
+### Bugs corrigés
+
+**"Date à définir" affiché sur un prélèvement planifié**
+- Cause racine : le flag `dateUndefined` était posé à la création mais jamais effacé quand `plannedMonth` ou `plannedDay` était ensuite modifié. `updateSampling` ne patchait qu'un seul champ sans nettoyer ce flag.
+- Fix : dans `updateSampling`, si `plannedMonth` ou `plannedDay` est présent dans le patch, on force `dateUndefined: false`. Commit `17b3507`.
+
+**Colonnes inversées dans YearMatrixView**
+- Les colonnes sticky 1 et 2 (siteNom/fréquence ↔ plan.nom) étaient dans le mauvais ordre.
+- Fix : swap du contenu des deux colonnes dans `YearMatrixView.tsx` ligne ~280. Déployé en staging.
+
+### Refactoring TypeScript
+
+**Élimination complète des `any` (13 occurrences)**
+- Audit complet : 5 fichiers production + 4 fichiers de test.
+- Remplacement par des types explicites (`Preleveur`, `Plan`, `Sampling`, `QueryDocumentSnapshot<DocumentData>`, etc.).
+- Tests : types locaux (alias `SnapCallback`, `Unsub`) pour éviter les imports Firebase SDK dans les tests.
+- Non-null assertions `!` ajoutées sur les 8 call sites de callbacks `SnapCallback | null` dans les fichiers de test.
+- Commits `521e758` (production) + `1b68fe3` (tests).
+- Compilation TypeScript : zéro erreur après fix.
+
+### Tâches clean code identifiées (non implémentées)
+- `src/lib/constants.ts` — centraliser noms de collections + z-index + couleurs (2h)
+- Factoriser les 9 `useState` de `TodosPage` en `useReducer` (1h)
+- Composant `BaseModal` partagé (2h)
+
+### Prochaines étapes
+- Implémenter les 3 tâches clean code ci-dessus
+
+---
+
 ## Session 98 — Nettoyage repo + vue compacte matrice en dur
 **4 juin 2026**
 

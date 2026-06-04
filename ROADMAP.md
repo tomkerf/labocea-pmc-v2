@@ -301,6 +301,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-03 | iCal événements personnels ✅ | Les EvenementPersonnel (congés, réunions, rappels…) sont désormais exportés dans le flux iCal Google Agenda de chaque utilisateur. |
 | 2026-06-03 | Matrice annuelle UX ✅ | Pastilles cliquables (overdue/non effectué → modale), groupement dépliable par client (tous repliés par défaut), vue compacte toggleable, conditions météo "temps sec" ajoutées. |
 | 2026-06-04 | Nettoyage repo + vue compacte ✅ | Toggle vue compacte/normale supprimé — vue compacte en dur. Alerte GitHub secret scanning dismissée (clé Firebase publique dans historique). Staging déployé. |
+| 2026-06-04 | Bugfixes + TypeScript any ✅ | Fix "Date à définir" (clear dateUndefined), inversion colonnes YearMatrixView, élimination 13 `any` TypeScript (prod + tests). |
 
 ---
 
