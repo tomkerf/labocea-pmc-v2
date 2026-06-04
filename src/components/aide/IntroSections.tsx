@@ -120,17 +120,17 @@ export function StatutsSection() {
 
       <div className="flex flex-col">
         <StatusBadge
-          bg=COLORS.BG_TERTIARY color=COLORS.TEXT_SECONDARY dot="var(--color-neutral)"
+          bg={COLORS.BG_TERTIARY} color={COLORS.TEXT_SECONDARY} dot="var(--color-neutral)"
           label="Planifié"
           desc="Statut par défaut. L'intervention est programmée, pas encore réalisée."
         />
         <StatusBadge
-          bg="var(--color-success-light)" color=COLORS.SUCCESS dot=COLORS.SUCCESS
+          bg="var(--color-success-light)" color={COLORS.SUCCESS} dot={COLORS.SUCCESS}
           label="Réalisé"
           desc="Prélèvement effectué. La date de réalisation est enregistrée."
         />
         <StatusBadge
-          bg="var(--color-danger-light)" color=COLORS.DANGER dot=COLORS.DANGER
+          bg="var(--color-danger-light)" color={COLORS.DANGER} dot={COLORS.DANGER}
           label="En retard"
           desc="La date planifiée est dépassée sans validation. L'app le détecte automatiquement chaque jour. Peut encore être réalisé."
         />

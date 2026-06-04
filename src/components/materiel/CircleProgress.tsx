@@ -35,7 +35,7 @@ export default function CircleProgress({ percent, size = 40, strokeWidth = 3, la
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke=COLORS.BORDER
+            stroke={COLORS.BORDER}
             strokeWidth={strokeWidth}
           />
           {/* Fill */}

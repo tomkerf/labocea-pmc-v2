@@ -9,7 +9,7 @@ const ICONS: Record<Toast['type'], string> = {
   info:    'ℹ',
 }
 
-const COLORS: Record<Toast['type'], { bg: string; color: string; border: string }> = {
+const TOAST_COLORS: Record<Toast['type'], { bg: string; color: string; border: string }> = {
   success: { bg: 'var(--color-success-light)', color: COLORS.SUCCESS, border: COLORS.SUCCESS },
   error:   { bg: 'var(--color-danger-light)',  color: COLORS.DANGER,  border: COLORS.DANGER  },
   info:    { bg: 'var(--color-accent-light)',  color: COLORS.ACCENT,  border: COLORS.ACCENT  },
@@ -26,7 +26,7 @@ export default function ToastContainer() {
       style={{ maxWidth: '360px', width: 'calc(100vw - 32px)' }}
     >
       {toasts.map((t) => {
-        const c = COLORS[t.type]
+        const c = TOAST_COLORS[t.type]
         return (
           <div
             key={t.id}

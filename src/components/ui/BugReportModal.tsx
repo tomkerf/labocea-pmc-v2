@@ -97,7 +97,7 @@ export default function BugReportModal({ isOpen, onClose }: Props) {
             color: COLORS.TEXT_PRIMARY,
           }}
         />
-        <p className="text-xs" style={{ color: COLORS.TEXT_TERTIARY || 'var(--color-text-tertiary)' }}>
+        <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
           Page : <code>{window.location.pathname}</code>
         </p>
       </div>

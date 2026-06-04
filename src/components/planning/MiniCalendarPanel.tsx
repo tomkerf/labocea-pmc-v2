@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import {
 import { COLORS } from '@/lib/constants'
-
+import {
   type ViewMode,
   MOIS_LONG,
   startOfWeek, startOfMonth, addDays, addMonths, toISO,

@@ -407,7 +407,7 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
               return (
                 <TimelineRow key="acquisition" isLast={isLast}
                   icon={<Package size={14} />}
-                  iconBg=COLORS.BG_TERTIARY iconColor=COLORS.TEXT_SECONDARY
+                  iconBg={COLORS.BG_TERTIARY} iconColor={COLORS.TEXT_SECONDARY}
                   date={dateLabel} title="Acquisition de l'équipement" badge={null}
                 />
               )
@@ -440,7 +440,7 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
               return (
                 <TimelineRow key={n.id} isLast={isLast}
                   icon={<StickyNote size={14} />}
-                  iconBg="var(--color-accent-light)" iconColor=COLORS.ACCENT
+                  iconBg="var(--color-accent-light)" iconColor={COLORS.ACCENT}
                   date={dateLabel}
                   title={n.titre}
                   subtitle={[n.auteur, n.notes].filter(Boolean).join(' · ')}

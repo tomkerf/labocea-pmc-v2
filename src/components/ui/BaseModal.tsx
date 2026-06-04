@@ -1,4 +1,5 @@
-import { ReactNode, useEffect } from 'react'
+import { useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import { COLORS, Z_INDEX } from '@/lib/constants'

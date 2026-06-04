@@ -38,7 +38,7 @@ export default function DonutChart({ segments, total, size = 120, strokeWidth = 
           <circle
             cx={center} cy={center} r={radius}
             fill="none"
-            stroke=COLORS.BORDER
+            stroke={COLORS.BORDER}
             strokeWidth={strokeWidth}
           />
           {/* Segments */}

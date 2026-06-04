@@ -429,8 +429,8 @@ export default function TodosPage() {
                         onCycle={() => handleToggleStatus(todo)}
                         onEdit={() => openEditModal(todo)}
                         onDelete={() => handleDelete(todo.id)}
-                        deletingId={deletingId}
-                        setDeletingId={setDeletingId}
+                        deletingId={state.deletingId}
+                        setDeletingId={(id) => dispatch({ type: 'SET_FIELD', field: 'deletingId', value: id })}
                         isOverdue={isOverdue}
                         navigate={navigate}
                       />
@@ -469,8 +469,8 @@ export default function TodosPage() {
                         onCycle={() => handleToggleStatus(todo)}
                         onEdit={() => openEditModal(todo)}
                         onDelete={() => handleDelete(todo.id)}
-                        deletingId={deletingId}
-                        setDeletingId={setDeletingId}
+                        deletingId={state.deletingId}
+                        setDeletingId={(id) => dispatch({ type: 'SET_FIELD', field: 'deletingId', value: id })}
                         isOverdue={isOverdue}
                         navigate={navigate}
                       />
