@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { ChevronLeft, MapPin, Clock, CheckCircle2, Navigation, ExternalLink } from 'lucide-react'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useClientData } from '@/hooks/useClientData'
@@ -32,6 +32,9 @@ export default function MissionDetailPage() {
     clientId: string; planId: string; samplingId: string
   }>()
   const navigate = useNavigate()
+  const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const isJ1 = searchParams.get('j') === '1'
   const uid = useAuthStore(selectUid)
 
   const { client, loading, saving, triggerSave } = useClientData(clientId)
@@ -200,7 +203,6 @@ export default function MissionDetailPage() {
         </div>
       )}
 
-      {/* Bouton Terminer — positionné au-dessus de la TabBar sur mobile */}
       {sampling.status !== 'done' && (
         <div
           className="fixed left-0 right-0 px-4 pt-3 md:bottom-0"
@@ -211,18 +213,25 @@ export default function MissionDetailPage() {
             borderTop: '1px solid var(--color-border-subtle)',
             paddingBottom: '12px',
           }}>
-          <button type="button"
-            onClick={handleTerminer}
-            disabled={saving}
-            className="w-full py-4 rounded-2xl text-base font-semibold flex items-center justify-center gap-2"
-            style={{
-              background: saving ? 'var(--color-border)' : 'var(--color-accent)',
-              color: 'white',
-              boxShadow: saving ? 'none' : '0 4px 16px rgba(0,113,227,0.35)',
-            }}>
-            <CheckCircle2 size={20} />
-            {saving ? 'Enregistrement…' : 'Terminer la mission'}
-          </button>
+          {plan.methode === 'Automatique' && isJ1 ? (
+            <div className="w-full py-4 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
+                 style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+              Validation possible uniquement à J2
+            </div>
+          ) : (
+            <button type="button"
+              onClick={handleTerminer}
+              disabled={saving}
+              className="w-full py-4 rounded-2xl text-base font-semibold flex items-center justify-center gap-2"
+              style={{
+                background: saving ? 'var(--color-border)' : 'var(--color-accent)',
+                color: 'white',
+                boxShadow: saving ? 'none' : '0 4px 16px rgba(0,113,227,0.35)',
+              }}>
+              <CheckCircle2 size={20} />
+              {saving ? 'Enregistrement…' : 'Terminer la mission'}
+            </button>
+          )}
         </div>
       )}
 

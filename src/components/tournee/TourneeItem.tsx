@@ -14,6 +14,7 @@ export interface TourneeItemData {
   lng: string
   status: 'todo' | 'done' | 'non_effectue' | 'reporte'
   motif: string
+  isJ1Bilan24?: boolean
 }
 
 interface Props {
@@ -73,7 +74,7 @@ export function TourneeItem({ item, onAction }: Props) {
       </div>
 
       {/* Actions */}
-      {!isTerminal && (
+      {!isTerminal && !item.isJ1Bilan24 && (
         <div className="flex gap-2 px-4 pb-4 pt-1">
           <button type="button"
             aria-label="Réalisé"
@@ -103,6 +104,14 @@ export function TourneeItem({ item, onAction }: Props) {
               GPS
             </a>
           )}
+        </div>
+      )}
+      {!isTerminal && item.isJ1Bilan24 && (
+        <div className="px-4 pb-4 pt-1">
+          <div className="w-full py-2 rounded-lg text-sm font-medium text-center"
+               style={{ background: 'var(--color-bg-tertiary)', color: 'var(--color-text-secondary)' }}>
+            Validation possible uniquement sur J2
+          </div>
         </div>
       )}
     </div>

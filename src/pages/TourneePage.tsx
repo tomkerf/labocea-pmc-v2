@@ -73,6 +73,7 @@ export default function TourneePage() {
           lng:        plan?.lng     ?? '',
           status:     (s?.status === 'done' ? 'done' : s?.status === 'non_effectue' ? 'non_effectue' : 'todo') as TourneeItemData['status'],
           motif:      s?.motif ?? '',
+          isJ1Bilan24: i.isJ1Bilan24,
         }
       })
       .sort((a, b) => {

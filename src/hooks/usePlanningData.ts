@@ -87,8 +87,8 @@ export function usePlanningData({
           }
           if (isAuto) {
             const dateStr2 = toISO(addDays(new Date(dateStr + 'T12:00:00'), 1))
-            add(dateStr, { ...common, id: s.id, title: client.nom, subtitle: baseSub, dateFin: dateStr2 })
-            add(dateStr2, { ...common, id: `${s.id}_j2`, title: client.nom, subtitle: baseSub, isJ2Continuation: true })
+            add(dateStr, { ...common, id: s.id, title: client.nom, subtitle: baseSub, dateFin: dateStr2, link: `${common.link}?j=1` })
+            add(dateStr2, { ...common, id: `${s.id}_j2`, title: client.nom, subtitle: baseSub, isJ2Continuation: true, link: `${common.link}?j=2` })
           } else {
             add(dateStr, { ...common, id: s.id, title: client.nom, subtitle: baseSub })
           }

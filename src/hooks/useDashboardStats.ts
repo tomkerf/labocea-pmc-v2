@@ -15,7 +15,7 @@ const EVENEMENT_CFG: Record<string, { label: string; bg: string; color: string; 
 export type SamplingBadge = { label: string; bg: string; color: string }
 
 export type JourItem =
-  | { kind: 'sampling';  time: string; title: string; sub: string; badge: SamplingBadge; dot: string; meteo: string; cofrac: boolean; modalEvent: ModalEventRef }
+  | { kind: 'sampling';  time: string; title: string; sub: string; badge: SamplingBadge; dot: string; meteo: string; cofrac: boolean; modalEvent: ModalEventRef; isJ1Bilan24?: boolean }
   | { kind: 'evenement'; time: string; title: string; sub: string; badge: SamplingBadge; dot: string; modalEvent: ModalEventRef }
   | { kind: 'todo';      time: string; title: string; sub: string; badge: SamplingBadge; dot: string; link: string }
 
@@ -245,11 +245,13 @@ export function useDashboardStats({
           const modalEvent: ModalEventRef = {
             id: s.id, type: 'prelevement', title: client.nom, subtitle: sub,
             statusLabel: badge.label, statusBg: badge.bg, statusColor: dot,
-            link: `/missions/${client.id}/plan/${plan.id}`,
+            link: `/missions/${client.id}/plan/${plan.id}/sampling/${s.id}?j=${isJ2Today ? '2' : '1'}`,
             isDone: s.status === 'done', technicien: client.preleveur || '—',
             clientId: client.id, planId: plan.id, samplingId: s.id, plannedTime: s.plannedTime,
           }
-          items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub, badge, dot, meteo: plan.meteo || '', cofrac: plan.cofrac ?? false, modalEvent })
+          const isAuto = plan.methode === 'Automatique'
+          const isJ1Bilan24 = isAuto && isToday(baseDate)
+          items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub, badge, dot, meteo: plan.meteo || '', cofrac: plan.cofrac ?? false, modalEvent, isJ1Bilan24 })
         })
       })
     })
@@ -306,7 +308,7 @@ export function useDashboardStats({
             const modalEvent: ModalEventRef = {
               id: `${s.id}_j2`, type: 'prelevement', title: client.nom, subtitle: subJ2,
               statusLabel: badge.label, statusBg: badge.bg, statusColor: dot,
-              link: `/missions/${client.id}/plan/${plan.id}`,
+              link: `/missions/${client.id}/plan/${plan.id}/sampling/${s.id}?j=2`,
               isDone: false, technicien: client.preleveur || '—',
               clientId: client.id, planId: plan.id, samplingId: s.id, plannedTime: s.plannedTime,
             }
@@ -322,7 +324,7 @@ export function useDashboardStats({
           const modalEvent: ModalEventRef = {
             id: s.id, type: 'prelevement', title: client.nom, subtitle,
             statusLabel: badge.label, statusBg: badge.bg, statusColor: dot,
-            link: `/missions/${client.id}/plan/${plan.id}`,
+            link: `/missions/${client.id}/plan/${plan.id}/sampling/${s.id}?j=1`,
             isDone: false, technicien: client.preleveur || '—',
             clientId: client.id, planId: plan.id, samplingId: s.id, plannedTime: s.plannedTime,
           }
