@@ -61,7 +61,7 @@ describe('useVerificationsListener', () => {
 
     expect(capturedOnNext).not.toBeNull()
     act(() => {
-      capturedOnNext(mockSnap)
+      capturedOnNext!(mockSnap)
     })
 
     // Check store state
@@ -95,7 +95,7 @@ describe('useVerificationsListener', () => {
 
     expect(capturedOnError).not.toBeNull()
     act(() => {
-      capturedOnError(new Error('Firestore read error'))
+      capturedOnError!(new Error('Firestore read error'))
     })
 
     // Check store error state

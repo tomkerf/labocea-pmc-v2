@@ -56,7 +56,7 @@ describe('useEquipementsListener', () => {
 
     expect(capturedOnNext).not.toBeNull()
     act(() => {
-      capturedOnNext(mockSnap)
+      capturedOnNext!(mockSnap)
     })
 
     // Check store state
@@ -84,7 +84,7 @@ describe('useEquipementsListener', () => {
 
     expect(capturedOnError).not.toBeNull()
     act(() => {
-      capturedOnError(new Error('Firestore read failed'))
+      capturedOnError!(new Error('Firestore read failed'))
     })
 
     // Check store error state

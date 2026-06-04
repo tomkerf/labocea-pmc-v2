@@ -63,7 +63,7 @@ describe('useClientsListener', () => {
 
     expect(capturedOnNext).not.toBeNull()
     act(() => {
-      capturedOnNext(mockSnap)
+      capturedOnNext!(mockSnap)
     })
 
     // Check store state
@@ -91,7 +91,7 @@ describe('useClientsListener', () => {
 
     expect(capturedOnError).not.toBeNull()
     act(() => {
-      capturedOnError(new Error('Permission denied'))
+      capturedOnError!(new Error('Permission denied'))
     })
 
     // Check store error state
