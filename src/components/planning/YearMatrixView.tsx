@@ -53,7 +53,6 @@ type GroupData = {
 
 export default function YearMatrixView({ clients, year, filterTech, filterSite, preleveurs }: YearMatrixViewProps) {
   const [issueModalType, setIssueModalType] = useState<'overdue' | 'non_effectue' | null>(null)
-  const [compact, setCompact] = useState(false)
 
   const rows = useMemo(() => {
     const list: RowData[] = []
@@ -196,13 +195,6 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
             }
           </button>
 
-          <button
-            type="button"
-            onClick={() => setCompact(c => !c)}
-            className="flex items-center gap-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors border border-[var(--color-border)] rounded px-2 py-0.5"
-          >
-            {compact ? 'Vue normale' : 'Vue compacte'}
-          </button>
         </div>
 
         {/* Table */}
@@ -276,12 +268,12 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                     // Lignes de plans (conditionnelles)
                     ...(!isCollapsed ? plans.map((row) => (
                       <tr key={`${row.client.id}-${row.plan.id}`}
-                        className={`border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors group ${compact ? 'h-7' : ''}`}>
-                        <td className={`${compact ? 'px-4 py-0.5' : 'px-4 py-2'} text-sm sticky left-0 z-20 bg-[var(--color-bg-secondary)] group-hover:bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] transition-colors shadow-[1px_0_0_var(--color-border-subtle)] pl-9`}>
-                          <div className={`font-medium text-[var(--color-text-primary)] ${compact ? 'text-xs' : 'text-sm'}`}>{row.plan.nom}</div>
+                        className="border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors group h-7">
+                        <td className="px-4 py-0.5 text-sm sticky left-0 z-20 bg-[var(--color-bg-secondary)] group-hover:bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] transition-colors shadow-[1px_0_0_var(--color-border-subtle)] pl-9">
+                          <div className="font-medium text-[var(--color-text-primary)] text-xs">{row.plan.nom}</div>
                         </td>
-                        <td className={`${compact ? 'px-4 py-0.5' : 'px-4 py-2'} text-sm text-[var(--color-text-primary)] border-r border-[var(--color-border-subtle)]`}>
-                          <div className={`${compact ? 'text-[10px]' : 'text-xs'} text-[var(--color-text-secondary)] flex items-center gap-1.5`}>
+                        <td className="px-4 py-0.5 text-sm text-[var(--color-text-primary)] border-r border-[var(--color-border-subtle)]">
+                          <div className="text-[10px] text-[var(--color-text-secondary)] flex items-center gap-1.5">
                             <span>{row.plan.siteNom} • {row.plan.frequence}</span>
                             {row.plan.frequence === 'Personnalisé' && (
                               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--color-bg-tertiary)] text-[var(--color-text-tertiary)] border border-[var(--color-border)]">
@@ -294,13 +286,13 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                         {row.samplingsByMonth.map((s, mIdx) => {
                           const isBimensuel = row.plan.frequence === 'Bimensuel'
                           const pair = row.pairsByMonth[mIdx]
-                          const dotSize = compact ? 'size-3.5' : 'size-5'
-                          const iconSize = compact ? 'text-[7px]' : 'text-[9px]'
+                          const dotSize = 'size-3.5'
+                          const iconSize = 'text-[7px]'
                           return (
-                            <td key={mIdx} className={`px-1 ${compact ? 'py-0.5' : 'py-2'} text-center border-r border-[var(--color-border-subtle)] relative`}>
+                            <td key={mIdx} className="px-1 py-0.5 text-center border-r border-[var(--color-border-subtle)] relative">
                               {isBimensuel ? (
                                 pair.length > 0 && (
-                                  <div className="flex items-center justify-center" style={{ width: compact ? 24 : 32 }}>
+                                  <div className="flex items-center justify-center" style={{ width: 24 }}>
                                     {(() => {
                                       const priority = (s: Sampling) => isSamplingOverdue(s, planYear) ? 3 : s.status === 'planned' ? 2 : s.status === 'done' ? 1 : 0
                                       const sorted = [...pair].filter(Boolean).sort((a, b) => priority(b!) - priority(a!))
@@ -309,7 +301,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                                           key={ps.id}
                                           onClick={() => { if (isSamplingOverdue(ps, planYear)) setIssueModalType('overdue'); else if (ps.status === 'non_effectue') setIssueModalType('non_effectue') }}
                                           className={`${dotSize} rounded-full flex items-center justify-center transition-transform hover:scale-110 border-2 border-[var(--color-bg-secondary)] ${isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
-                                          style={{ backgroundColor: getStatusColor(ps, planYear), marginLeft: pi === 1 ? (compact ? -5 : -7) : 0, zIndex: pi === 0 ? 2 : 1 }}
+                                          style={{ backgroundColor: getStatusColor(ps, planYear), marginLeft: pi === 1 ? -5 : 0, zIndex: pi === 0 ? 2 : 1 }}
                                           title={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps, planYear)}${ps.doneDate ? ` le ${ps.doneDate}` : ''}${isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? ' — cliquer pour voir la liste' : ''}`}
                                         >
                                           <span className={`${iconSize} font-bold text-white leading-none`}>
