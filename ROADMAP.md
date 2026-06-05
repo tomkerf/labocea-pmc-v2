@@ -308,6 +308,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-05 | UI/UX Modale événement ✅ | Clarification du bouton principal (label + style primaire) et masquage du formulaire de retrait d'événement dans un accordéon. Staging déployé. |
 | 2026-06-05 | Refactoring ✅ | Découpage de MissionDetailPage.tsx en sous-composants dédiés. Validation React Doctor à 100/100. |
 | 2026-06-05 | Qualité / ESLint ✅ | Zéro erreur TypeScript et ESLint. Suppression des types `any`, variables non utilisées, et correction exhaustive des deps dans les React Hooks. |
+| 2026-06-05 | Refactoring god components ✅ | Suppression doublon EventDetailModal. Découpage FicheDeVie (491→226L), DemandesPage (501→162L), ComptePage (480→97L), AsservissementPage (464→110L). 20 nouveaux composants extraits. 0 erreurs TS/ESLint. |
 
 ---
 

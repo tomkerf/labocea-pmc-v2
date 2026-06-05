@@ -2,6 +2,27 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 107 — Refactoring god components (doublon + 4 pages)
+**5 juin 2026**
+
+### Ce qui a été fait
+
+- **Suppression doublon `EventDetailModal`** : `src/components/EventDetailModal.tsx` (version ancienne, sans badge météo ni types `todo`/`rapport`) supprimé. `DashboardPage` et `DashboardPlanningWidget` basculent sur `planning/EventDetailModal`. Types `ModalEvent` → `PlanningEvent` (planningUtils). Cast `ModalEventRef` inutile retiré.
+- **Refactoring `FicheDeVie.tsx`** : 491L → 226L (-54%). Extraction de `ficheDeVieExport.ts` (fonction PDF + types), `FicheDeVieTimelineRow.tsx`, `FicheDeVieNoteForm.tsx` (key-based reset), `FicheDeVieVerifForm.tsx`.
+- **Refactoring `DemandesPage.tsx`** : 501L → 162L (-68%). Extraction de `demandesConfig.ts` (constantes + helpers), `DemandeCard.tsx`, `DemandeVisites.tsx`, `DemandeModal.tsx`.
+- **Refactoring `ComptePage.tsx`** : 480L → 97L (-80%). Extraction de `EditRow.tsx`, `CompteProfileSection.tsx`, `CompteCalendarSection.tsx`, `PushNotificationsSection.tsx`, `ChangePasswordSection.tsx`.
+- **Refactoring `AsservissementPage.tsx`** : 464L → 110L (-76%). Extraction de `asservissementConfig.ts` (constantes + `calcResult`), `AsservissementStepper.tsx`, `AsservissementResultCard.tsx`, `AsservissementResultBar.tsx`, `AsservissementRegle.tsx`.
+- **Validation** : 0 erreurs TS/ESLint après chaque refacto. 5 commits propres sur `main`.
+
+### Prochaines étapes
+- Refactoring `PlanningPage.tsx` (448L)
+- Refactoring `VisiteFormPage.tsx` (441L)
+- Refactoring `ClientPlans.tsx` (395L)
+- Refactoring `DayModal.tsx` (377L)
+- Deploy staging + git push
+
+---
+
 ## Session 106 — Linting React Doctor & Typage strict (Zéro Erreur)
 **5 juin 2026**
 
