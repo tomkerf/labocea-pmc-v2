@@ -222,7 +222,7 @@ export default function MissionDetailPage() {
       {plan.contraintesParticulieres && (
         <div className="mx-4 mb-4">
           <h2 className="text-xs font-semibold uppercase mb-2"
-            style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+            style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             Contraintes terrain
           </h2>
           <div className="rounded-2xl px-5 py-4"
@@ -239,7 +239,7 @@ export default function MissionDetailPage() {
         <div className="mx-4 mb-4 px-5 py-4 rounded-2xl"
           style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
           <p className="text-xs font-semibold uppercase mb-1"
-            style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
+            style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.04em' }}>
             Commentaire
           </p>
           <p className="text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>{sampling.comment}</p>
@@ -254,7 +254,7 @@ export default function MissionDetailPage() {
             style={{
               bottom: 'calc(65px + env(safe-area-inset-bottom))',
               background: 'rgba(245,245,247,0.92)',
-              backdropFilter: 'blur(12px)',
+              backdropFilter: 'blur(8px)',
               borderTop: '1px solid var(--color-border-subtle)',
               paddingBottom: '12px',
             }}>
