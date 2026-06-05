@@ -1,157 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Clock, FileText, Gauge, Wrench, Package, Plus, StickyNote, Trash2, Edit2 } from 'lucide-react'
-import { Timestamp } from 'firebase/firestore'
+import { Clock, FileText, Gauge, Wrench, Package, Plus, StickyNote } from 'lucide-react'
 import type { Equipement, Verification, Maintenance, FicheDeVieNote } from '@/types'
 import { COLORS } from '@/lib/constants'
-
-
-type TimelineEntry =
-  | { kind: 'acquisition'; date: string }
-  | { kind: 'verification'; date: string; data: Verification }
-  | { kind: 'maintenance';  date: string; data: Maintenance }
-  | { kind: 'note';         date: string; data: FicheDeVieNote }
-
-const VERIF_TYPE: Record<string, string> = {
-  etalonnage_interne: 'Étalonnage interne',
-  verification_externe: 'Vérification externe',
-  controle_terrain: 'Contrôle terrain',
-}
-const MAINT_TYPE: Record<string, string> = {
-  preventive: 'Maintenance préventive',
-  corrective: 'Maintenance corrective',
-  panne: 'Panne',
-}
-
-function exportFicheDeViePDF(equipement: Equipement, entries: TimelineEntry[]) {
-  const fmt = (d: string) =>
-    new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-
-  const rows = entries.map((e) => {
-    if (e.kind === 'acquisition') {
-      return `<tr><td>${fmt(e.date)}</td><td>Acquisition</td><td>—</td><td>—</td><td>—</td></tr>`
-    }
-    if (e.kind === 'verification') {
-      const v = e.data
-      const resultat = v.resultat === 'conforme' ? '✓ Conforme' : v.resultat === 'non_conforme' ? '✗ Non conforme' : '↻ À reprendre'
-      return `<tr><td>${fmt(v.date)}</td><td>Métrologie</td><td>${VERIF_TYPE[v.type] ?? v.type}</td><td>${resultat}</td><td>${[v.technicienNom, v.remarques].filter(Boolean).join(' · ')}</td></tr>`
-    }
-    if (e.kind === 'maintenance') {
-      const m = e.data
-      return `<tr><td>${fmt(m.dateRealisee || m.datePrevue)}</td><td>Maintenance</td><td>${MAINT_TYPE[m.type] ?? m.type}</td><td>${m.statut}</td><td>${[m.technicienNom, m.travauxRealises || m.description].filter(Boolean).join(' · ')}</td></tr>`
-    }
-    const n = e.data
-    return `<tr><td>${fmt(n.date)}</td><td>Note</td><td>${n.titre}</td><td>—</td><td>${[n.auteur, n.notes].filter(Boolean).join(' · ')}</td></tr>`
-  }).join('')
-
-  const html = `<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8"/>
-<title>Fiche de vie — ${equipement.nom}</title>
-<style>
-  body { font-family: -apple-system, Helvetica, Arial, sans-serif; font-size: 13px; color: #1D1D1F; margin: 40px; }
-  h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-  .meta { color: #6E6E73; font-size: 13px; margin-bottom: 24px; }
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; background: #F5F5F7; border-radius: 10px; padding: 16px; margin-bottom: 28px; font-size: 12px; }
-  .info-grid dt { color: #6E6E73; }
-  .info-grid dd { font-weight: 500; margin: 0; }
-  table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  th { text-align: left; padding: 8px 10px; background: #F5F5F7; font-weight: 600; color: #6E6E73; text-transform: uppercase; letter-spacing: 0.04em; font-size: 10px; border-bottom: 1px solid #D2D2D7; }
-  td { padding: 10px 10px; border-bottom: 1px solid #E5E5EA; vertical-align: top; }
-  tr:last-child td { border-bottom: none; }
-  .footer { margin-top: 32px; font-size: 11px; color: #AEAEB2; }
-  @media print { body { margin: 20px; } }
-</style>
-</head>
-<body>
-<h1>${equipement.nom || 'Équipement'}</h1>
-<div class="meta">${[equipement.marque, equipement.modele].filter(Boolean).join(' ')} — N° série : ${equipement.numSerie || '—'}</div>
-<dl class="info-grid">
-  <dt>Catégorie</dt><dd>${equipement.categorie}</dd>
-  <dt>État</dt><dd>${equipement.etat}</dd>
-  <dt>Localisation</dt><dd>${equipement.localisation}</dd>
-  <dt>Site</dt><dd>${equipement.site === 'quimper' ? 'Quimper' : equipement.site === 'brest' ? 'Brest' : '—'}</dd>
-  <dt>Date acquisition</dt><dd>${equipement.dateAcquisition ? fmt(equipement.dateAcquisition) : '—'}</dd>
-  <dt>Prochain étalonnage</dt><dd>${equipement.prochainEtalonnage ? fmt(equipement.prochainEtalonnage) : '—'}</dd>
-  <dt>Notes</dt><dd>${equipement.notes || '—'}</dd>
-</dl>
-<table>
-  <thead><tr><th>Date</th><th>Catégorie</th><th>Type / Titre</th><th>Résultat</th><th>Détails</th></tr></thead>
-  <tbody>${rows || '<tr><td colspan="5" style="color:#AEAEB2;text-align:center">Aucun événement</td></tr>'}</tbody>
-</table>
-<div class="footer">Généré le ${new Date().toLocaleDateString('fr-FR')} · Labocea PMC</div>
-</body>
-</html>`
-
-  const blob = new Blob([html], { type: 'text/html' })
-  const url = URL.createObjectURL(blob)
-  window.open(url, '_blank')
-  setTimeout(() => URL.revokeObjectURL(url), 10000)
-}
-
-function TimelineRow({ icon, iconBg, iconColor, date, title, subtitle, badge, isLast, onDelete, onEdit }: {
-  icon: React.ReactNode
-  iconBg: string; iconColor: string
-  date: string
-  title: string
-  subtitle?: string
-  badge: { label: string; bg: string; color: string } | null
-  isLast: boolean
-  onDelete?: () => void
-  onEdit?: () => void
-}) {
-  return (
-    <div className="flex items-start gap-3 px-4 py-3.5 group"
-      style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)' }}>
-      <div className="size-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-        style={{ background: iconBg, color: iconColor }}>
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>{title}</p>
-        {subtitle && (
-          <p className="text-xs mt-0.5 truncate" style={{ color: COLORS.TEXT_SECONDARY }}>{subtitle}</p>
-        )}
-        <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>{date}</p>
-      </div>
-      <div className="flex items-center gap-2 shrink-0 self-start mt-0.5">
-        {badge && (
-          <span className="text-[11px] px-2 py-0.5 rounded-full font-medium"
-            style={{ background: badge.bg, color: badge.color }}>
-            {badge.label}
-          </span>
-        )}
-        {(onEdit || onDelete) && (
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            {onEdit && (
-              <button type="button"
-                onClick={onEdit}
-                aria-label="Modifier"
-                className="p-1 rounded"
-                style={{ color: COLORS.TEXT_SECONDARY }}
-                title="Modifier"
-              >
-                <Edit2 size={13} />
-              </button>
-            )}
-            {onDelete && (
-              <button type="button"
-                onClick={onDelete}
-                aria-label="Supprimer"
-                className="p-1 rounded"
-                style={{ color: COLORS.DANGER }}
-                title="Supprimer"
-              >
-                <Trash2 size={13} />
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
+import { exportFicheDeViePDF, VERIF_TYPE, MAINT_TYPE } from './ficheDeVieExport'
+import type { TimelineEntry } from './ficheDeVieExport'
+import { FicheDeVieTimelineRow } from './FicheDeVieTimelineRow'
+import { FicheDeVieNoteForm } from './FicheDeVieNoteForm'
+import { FicheDeVieVerifForm } from './FicheDeVieVerifForm'
 
 export function FicheDeVie({ equipement, verifications, maintenances, onAddNote, onUpdateNote, onDeleteNote, onAddVerification, initiales, uid, equipementId, equipementNom }: {
   equipement: Equipement
@@ -167,78 +23,25 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
   equipementNom: string
 }) {
   const navigate = useNavigate()
-  const [showForm,  setShowForm]  = useState(false)
+  const [showForm,    setShowForm]    = useState(false)
   const [editingNote, setEditingNote] = useState<FicheDeVieNote | null>(null)
-  const [showVerif, setShowVerif] = useState(false)
-  const [formDate,  setFormDate]  = useState(() => new Date().toISOString().slice(0, 10))
-  const [formTitre, setFormTitre] = useState('')
-  const [formNotes, setFormNotes] = useState('')
-  const [verifDate,      setVerifDate]      = useState(() => new Date().toISOString().slice(0, 10))
-  const [verifType,      setVerifType]      = useState<'etalonnage_interne'|'verification_externe'|'controle_terrain'>('etalonnage_interne')
-  const [verifResultat,  setVerifResultat]  = useState<'conforme'|'non_conforme'|'a_reprendre'>('conforme')
-  const [verifRemarques, setVerifRemarques] = useState('')
-  const [verifProchain,  setVerifProchain]  = useState('')
-  const [verifSaving,    setVerifSaving]    = useState(false)
+  const [showVerif,   setShowVerif]   = useState(false)
 
   function handleEditNoteClick(n: FicheDeVieNote) {
-    setEditingNote(n)
-    setFormDate(n.date)
-    setFormTitre(n.titre)
-    setFormNotes(n.notes ?? '')
-    setShowForm(false)
-    setShowVerif(false)
+    setEditingNote(n); setShowForm(true); setShowVerif(false)
   }
 
   function handleCancelNote() {
-    setShowForm(false)
-    setEditingNote(null)
-    setFormDate(new Date().toISOString().slice(0, 10))
-    setFormTitre('')
-    setFormNotes('')
+    setShowForm(false); setEditingNote(null)
   }
 
-  function handleSubmitNote() {
-    if (!formTitre.trim()) return
+  function handleSaveNote(note: FicheDeVieNote) {
     if (editingNote) {
-      onUpdateNote(editingNote.id, {
-        ...editingNote,
-        date: formDate,
-        titre: formTitre.trim(),
-        notes: formNotes.trim()
-      })
+      onUpdateNote(editingNote.id, note)
     } else {
-      const note: FicheDeVieNote = {
-        id: crypto.randomUUID(),
-        date: formDate,
-        titre: formTitre.trim(),
-        notes: formNotes.trim(),
-        auteur: initiales,
-      }
       onAddNote(note)
     }
     handleCancelNote()
-  }
-
-  async function handleAddVerification() {
-    if (!verifDate || verifSaving) return
-    setVerifSaving(true)
-    const verif: Verification = {
-      id: crypto.randomUUID(),
-      equipementId,
-      equipementNom,
-      type: verifType,
-      date: verifDate,
-      resultat: verifResultat,
-      remarques: verifRemarques.trim(),
-      prochainControle: verifProchain,
-      technicienUid: uid,
-      technicienNom: initiales,
-      documentUrl: '',
-      createdAt: Timestamp.now(),
-    }
-    await onAddVerification(verif)
-    setVerifRemarques(''); setVerifProchain(''); setShowVerif(false)
-    setVerifSaving(false)
   }
 
   const [nowMs] = useState(() => Date.now())
@@ -264,6 +67,7 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
 
   return (
     <div className="mb-5">
+      {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <h2 className="text-xs font-semibold uppercase"
@@ -282,113 +86,51 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
           <button type="button"
             onClick={() => exportFicheDeViePDF(equipement, entries)}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
-            style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}
-          >
+            style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
             <FileText size={12} /> Exporter PDF
           </button>
           <button type="button"
-            onClick={() => { setShowVerif(v => !v); setShowForm(false) }}
+            onClick={() => { setShowVerif(v => !v); setShowForm(false); setEditingNote(null) }}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
-            style={{ background: showVerif ? 'var(--color-success-light)' : COLORS.BG_TERTIARY, color: showVerif ? COLORS.SUCCESS : COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}
-          >
+            style={{ background: showVerif ? 'var(--color-success-light)' : COLORS.BG_TERTIARY, color: showVerif ? COLORS.SUCCESS : COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
             <Gauge size={12} /> Vérification
           </button>
           <button type="button"
-            onClick={() => { 
-              if (showForm) { handleCancelNote() } 
-              else { handleCancelNote(); setShowForm(true); setShowVerif(false) } 
+            onClick={() => {
+              if (showForm) { handleCancelNote() }
+              else { handleCancelNote(); setShowForm(true); setShowVerif(false) }
             }}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
-            style={{ background: showForm ? 'var(--color-accent-light)' : COLORS.BG_TERTIARY, color: showForm ? COLORS.ACCENT : COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}
-          >
+            style={{ background: showForm ? 'var(--color-accent-light)' : COLORS.BG_TERTIARY, color: showForm ? COLORS.ACCENT : COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
             <Plus size={12} /> Note
           </button>
         </div>
       </div>
 
+      {/* Formulaire note */}
       {(showForm || editingNote) && (
-        <div className="rounded-xl p-4 mb-3"
-          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-card)' }}>
-          <p className="text-xs font-semibold mb-3" style={{ color: COLORS.ACCENT }}>
-            {editingNote ? 'Modifier la note' : 'Nouvelle note'}
-          </p>
-          <div className="flex gap-3 mb-2">
-            <div className="flex-1">
-              <label htmlFor="fdv-titre" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Titre</label>
-              <input id="fdv-titre" value={formTitre} onChange={(e) => setFormTitre(e.target.value)}
-                placeholder="Ex : Inspection terrain, Réglage, Nettoyage…" className="field-input w-full" />
-            </div>
-            <div>
-              <label htmlFor="fdv-date" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Date</label>
-              <input id="fdv-date" type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} className="field-input" />
-            </div>
-          </div>
-          <div className="mb-3">
-            <label htmlFor="fdv-notes" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Détails (optionnel)</label>
-            <textarea id="fdv-notes" value={formNotes} onChange={(e) => setFormNotes(e.target.value)} rows={2}
-              placeholder="Observations, actions effectuées…" className="field-input w-full resize-none" />
-          </div>
-          <div className="flex justify-end gap-2">
-            <button type="button" onClick={handleCancelNote} className="px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
-              Annuler
-            </button>
-            <button type="button" onClick={handleSubmitNote} disabled={!formTitre.trim()} className="px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background: COLORS.ACCENT, color: 'white', opacity: formTitre.trim() ? 1 : 0.5 }}>
-              Enregistrer
-            </button>
-          </div>
-        </div>
+        <FicheDeVieNoteForm
+          key={editingNote?.id ?? 'new'}
+          editingNote={editingNote}
+          initiales={initiales}
+          onSave={handleSaveNote}
+          onCancel={handleCancelNote}
+        />
       )}
 
+      {/* Formulaire vérification */}
       {showVerif && (
-        <div className="rounded-xl p-4 mb-3"
-          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-success)', boxShadow: 'var(--shadow-card)' }}>
-          <p className="text-xs font-semibold mb-3" style={{ color: COLORS.SUCCESS }}>Nouvelle vérification</p>
-          <div className="flex gap-3 mb-2 flex-wrap">
-            <div>
-              <label htmlFor="fdv-verif-type" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Type</label>
-              <select id="fdv-verif-type" value={verifType} onChange={e => setVerifType(e.target.value as typeof verifType)} className="field-input">
-                <option value="etalonnage_interne">Étalonnage interne</option>
-                <option value="verification_externe">Vérification externe</option>
-                <option value="controle_terrain">Contrôle terrain</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="fdv-verif-date" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Date</label>
-              <input id="fdv-verif-date" type="date" value={verifDate} onChange={e => setVerifDate(e.target.value)} className="field-input" />
-            </div>
-            <div>
-              <label htmlFor="fdv-verif-resultat" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Résultat</label>
-              <select id="fdv-verif-resultat" value={verifResultat} onChange={e => setVerifResultat(e.target.value as typeof verifResultat)} className="field-input">
-                <option value="conforme">Conforme</option>
-                <option value="non_conforme">Non conforme</option>
-                <option value="a_reprendre">À reprendre</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="fdv-verif-prochain" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Prochain contrôle</label>
-              <input id="fdv-verif-prochain" type="date" value={verifProchain} onChange={e => setVerifProchain(e.target.value)} className="field-input" />
-            </div>
-          </div>
-          <div className="mb-3">
-            <label htmlFor="fdv-verif-remarques" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Remarques (optionnel)</label>
-            <textarea id="fdv-verif-remarques" value={verifRemarques} onChange={e => setVerifRemarques(e.target.value)} rows={2}
-              placeholder="Observations, dérives constatées…" className="field-input w-full resize-none" />
-          </div>
-          <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setShowVerif(false)} className="px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
-              Annuler
-            </button>
-            <button type="button" onClick={handleAddVerification} disabled={!verifDate || verifSaving} className="px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ background: COLORS.SUCCESS, color: 'white', opacity: !verifDate || verifSaving ? 0.5 : 1 }}>
-              {verifSaving ? '…' : 'Enregistrer'}
-            </button>
-          </div>
-        </div>
+        <FicheDeVieVerifForm
+          equipementId={equipementId}
+          equipementNom={equipementNom}
+          uid={uid}
+          initiales={initiales}
+          onSave={onAddVerification}
+          onCancel={() => setShowVerif(false)}
+        />
       )}
 
+      {/* Timeline */}
       {entries.length === 0 ? (
         <div className="rounded-xl px-5 py-6 text-sm text-center"
           style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-tertiary)' }}>
@@ -405,7 +147,7 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
 
             if (entry.kind === 'acquisition') {
               return (
-                <TimelineRow key="acquisition" isLast={isLast}
+                <FicheDeVieTimelineRow key="acquisition" isLast={isLast}
                   icon={<Package size={14} />}
                   iconBg={COLORS.BG_TERTIARY} iconColor={COLORS.TEXT_SECONDARY}
                   date={dateLabel} title="Acquisition de l'équipement" badge={null}
@@ -418,7 +160,7 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
               const isOk = v.resultat === 'conforme'
               const isNok = v.resultat === 'non_conforme'
               return (
-                <TimelineRow key={v.id} isLast={isLast}
+                <FicheDeVieTimelineRow key={v.id} isLast={isLast}
                   icon={<Gauge size={14} />}
                   iconBg={isOk ? 'var(--color-success-light)' : isNok ? 'var(--color-danger-light)' : 'var(--color-warning-light)'}
                   iconColor={isOk ? COLORS.SUCCESS : isNok ? COLORS.DANGER : COLORS.WARNING}
@@ -438,7 +180,7 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
             if (entry.kind === 'note') {
               const n = entry.data
               return (
-                <TimelineRow key={n.id} isLast={isLast}
+                <FicheDeVieTimelineRow key={n.id} isLast={isLast}
                   icon={<StickyNote size={14} />}
                   iconBg="var(--color-accent-light)" iconColor={COLORS.ACCENT}
                   date={dateLabel}
@@ -453,22 +195,15 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
 
             const m = entry.data
             const isDone = m.statut === 'realisee'
-            
             let maintDateLabel = dateLabel
             if (m.datePrevue && m.dateRealisee && m.datePrevue !== m.dateRealisee) {
-              const start = new Date(m.datePrevue + 'T12:00:00').toLocaleDateString('fr-FR', {
-                day: 'numeric', month: 'long', year: 'numeric'
-              })
-              const end = new Date(m.dateRealisee + 'T12:00:00').toLocaleDateString('fr-FR', {
-                day: 'numeric', month: 'long', year: 'numeric'
-              })
-              maintDateLabel = m.type === 'panne' 
-                ? `Panne le ${start} — Retour le ${end}`
-                : `Du ${start} au ${end}`
+              const start = new Date(m.datePrevue + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+              const end   = new Date(m.dateRealisee + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+              maintDateLabel = m.type === 'panne' ? `Panne le ${start} — Retour le ${end}` : `Du ${start} au ${end}`
             }
 
             return (
-              <TimelineRow key={m.id} isLast={isLast}
+              <FicheDeVieTimelineRow key={m.id} isLast={isLast}
                 icon={<Wrench size={14} />}
                 iconBg={isDone ? COLORS.BG_TERTIARY : 'var(--color-warning-light)'}
                 iconColor={isDone ? COLORS.TEXT_SECONDARY : COLORS.WARNING}
@@ -478,7 +213,7 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
                 badge={
                   isDone
                     ? { label: 'Réalisée',  bg: COLORS.BG_TERTIARY,   color: COLORS.TEXT_SECONDARY }
-                    : { label: 'Planifiée', bg: 'var(--color-warning-light)', color: COLORS.WARNING        }
+                    : { label: 'Planifiée', bg: 'var(--color-warning-light)', color: COLORS.WARNING }
                 }
                 onEdit={() => navigate(`/maintenances/${m.id}`)}
               />
