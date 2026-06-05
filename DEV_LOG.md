@@ -2,6 +2,16 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 104 — UI/UX Modale d'événement
+**5 juin 2026**
+
+### Ce qui a été fait
+- **Refonte UI modale événement** : Le label du bouton principal pour les prélèvements non effectués a été changé de "Voir la mission" à "Ouvrir la mission (valider/annuler)" pour clarifier l'action. Le bouton a également reçu un style primaire (fond bleu, texte blanc) pour être plus évident.
+- **Accordion "Retirer du calendrier"** : Le formulaire de retrait d'événement (qui prenait beaucoup de place et attirait trop l'attention pour une action destructrice) a été placé dans un accordéon replié par défaut, similairement à l'option "Déplacer à une autre date".
+- **Déploiements staging** : Modifications validées et déployées.
+
+---
+
 ## Session 103 — Code review Gemini + bugfixes isSamplingOverdue
 **5 juin 2026**
 

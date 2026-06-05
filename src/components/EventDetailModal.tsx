@@ -5,7 +5,6 @@ import { useAuthStore } from '@/stores/authStore'
 import type { EvenementPersonnel } from '@/types'
 import { COLORS } from '@/lib/constants'
 
-
 // ── Types exportés ───────────────────────────────────────────
 
 export interface TechOption { code: string; label: string }
@@ -47,7 +46,7 @@ export function EventDetailModal({
   const connectedInitiales = useAuthStore(s => s.appUser?.initiales) ?? ''
   const [isMoving,       setIsMoving]       = useState(false)
   const [isChangingTech, setIsChangingTech] = useState(false)
-  const [confirmCancel,  setConfirmCancel]  = useState(false)
+  const [isCanceling,    setIsCanceling]    = useState(false)
   const [moveDate,       setMoveDate]       = useState(dateStr)
   const [moveReason,     setMoveReason]     = useState('')
   const [cancelReason,   setCancelReason]   = useState('')
@@ -68,13 +67,8 @@ export function EventDetailModal({
   }
 
   async function handleCancel() {
-    if (event.technicien && event.technicien !== '—' && event.technicien !== connectedInitiales && !confirmCancel) {
-      setConfirmCancel(true)
-      return
-    }
     if (!cancelReason.trim()) return  // motif obligatoire
     setSaving(true)
-    setConfirmCancel(false)
     try { await onCancel(event, cancelReason.trim()); onClose() }
     finally { setSaving(false) }
   }
@@ -196,9 +190,44 @@ export function EventDetailModal({
           </div>
         )}
 
+        {/* Panneau retirer du calendrier */}
+        {isCanceling && (
+          <div className="px-5 py-3.5 flex flex-col gap-2.5"
+            style={{ background: 'var(--color-danger-light)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+            <div>
+              <label htmlFor="edm-cancel-reason" className="block text-xs font-medium mb-1.5" style={{ color: COLORS.DANGER }}>
+                Motif du retrait <span style={{ color: COLORS.DANGER }}>*</span>
+              </label>
+              <textarea
+                id="edm-cancel-reason"
+                value={cancelReason} onChange={e => setCancelReason(e.target.value)}
+                placeholder="Ex : reporté à une date ultérieure, annulé par le client…"
+                rows={2}
+                autoFocus
+                className="w-full px-3 py-2 rounded-lg text-sm resize-none"
+                style={{ background: COLORS.BG_SECONDARY, border: '1px solid rgba(255,59,48,0.3)', color: COLORS.TEXT_PRIMARY }} />
+            </div>
+            
+            {event.technicien && event.technicien !== '—' && event.technicien !== connectedInitiales && (
+              <div className="flex items-start gap-2 mt-1">
+                <AlertTriangle size={15} style={{ color: COLORS.DANGER, flexShrink: 0, marginTop: 1 }} />
+                <p className="text-xs font-medium" style={{ color: COLORS.DANGER }}>
+                  Cette intervention appartient à <strong>{event.technicien}</strong>.<br/>Es-tu sûr de vouloir la retirer ?
+                </p>
+              </div>
+            )}
+            
+            <button type="button" onClick={handleCancel} disabled={saving || !cancelReason.trim()}
+              className="px-4 py-2 rounded-lg text-sm font-medium self-end mt-1"
+              style={{ background: COLORS.DANGER, color: 'white', opacity: (saving || !cancelReason.trim()) ? 0.5 : 1 }}>
+              {saving ? '…' : 'Confirmer le retrait'}
+            </button>
+          </div>
+        )}
+
         {/* Actions */}
-        <div className="flex flex-col px-4 py-3 gap-2 overflow-y-auto"
-          style={{ paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' }}>
+        <div className="flex flex-col px-4 py-4 gap-2.5 overflow-y-auto"
+          style={{ paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' }}>
 
           {event.link && (
             <button type="button"
@@ -209,17 +238,17 @@ export function EventDetailModal({
                 onClose()
                 setTimeout(() => navigate(dest), 50)
               }}
-              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
-              style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
-              <ExternalLink size={15} />
-              {event.type === 'prelevement' ? 'Voir la mission' :
+              className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl text-[15px] font-semibold w-full mb-1"
+              style={{ background: COLORS.ACCENT, color: 'white', boxShadow: '0 2px 8px rgba(0, 113, 227, 0.2)' }}>
+              <ExternalLink size={16} />
+              {event.type === 'prelevement' ? (event.isDone ? 'Voir la mission' : 'Ouvrir la mission (valider/annuler)') :
                event.type === 'maintenance' ? 'Voir la maintenance' :
                'Voir la métrologie'}
             </button>
           )}
 
           {isPrelev && !event.isDone && (
-            <button type="button" onClick={() => { setIsMoving(v => !v); setIsChangingTech(false) }}
+            <button type="button" onClick={() => { setIsMoving(v => !v); setIsChangingTech(false); setIsCanceling(false); }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
               style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY, border: '1px solid var(--color-border-subtle)' }}>
               <ChevronRight size={15} style={{ transform: isMoving ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
@@ -228,7 +257,7 @@ export function EventDetailModal({
           )}
 
           {isPrelev && (
-            <button type="button" onClick={() => { setIsChangingTech(v => !v); setIsMoving(false) }}
+            <button type="button" onClick={() => { setIsChangingTech(v => !v); setIsMoving(false); setIsCanceling(false); }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
               style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY, border: '1px solid var(--color-border-subtle)' }}>
               <ChevronRight size={15} style={{ transform: isChangingTech ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
@@ -236,58 +265,20 @@ export function EventDetailModal({
             </button>
           )}
 
-          {isPrelev && !event.isDone && !confirmCancel && (
-            <div className="flex flex-col gap-2">
-              <div>
-                <label htmlFor="edm-cancel-reason" className="block text-xs font-medium mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-                  Motif du retrait <span style={{ color: COLORS.DANGER }}>*</span>
-                </label>
-                <textarea
-                  id="edm-cancel-reason"
-                  value={cancelReason} onChange={e => setCancelReason(e.target.value)}
-                  placeholder="Ex : reporté à une date ultérieure, annulé par le client…"
-                  rows={2}
-                  className="w-full px-3 py-2 rounded-lg text-sm resize-none"
-                  style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
-              </div>
-              <button type="button" onClick={handleCancel} disabled={saving || !cancelReason.trim()}
-                className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
-                style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER, opacity: !cancelReason.trim() ? 0.5 : 1 }}>
-                ↩ Retirer du calendrier
-              </button>
-            </div>
-          )}
-
-          {isPrelev && !event.isDone && confirmCancel && (
-            <div className="rounded-xl p-4 flex flex-col gap-3"
-              style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
-              <div className="flex items-start gap-2">
-                <AlertTriangle size={15} style={{ color: COLORS.DANGER, flexShrink: 0, marginTop: 1 }} />
-                <p className="text-sm font-medium" style={{ color: COLORS.DANGER }}>
-                  Cette intervention appartient à <strong>{event.technicien}</strong>.
-                  Es-tu sûr de vouloir la retirer du calendrier ?
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <button type="button" onClick={handleCancel} disabled={saving}
-                  className="flex-1 py-2 rounded-lg text-sm font-semibold"
-                  style={{ background: COLORS.DANGER, color: 'white' }}>
-                  {saving ? 'Retrait…' : 'Oui, retirer'}
-                </button>
-                <button type="button" onClick={() => setConfirmCancel(false)} disabled={saving}
-                  className="flex-1 py-2 rounded-lg text-sm font-medium"
-                  style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
-                  Annuler
-                </button>
-              </div>
-            </div>
+          {isPrelev && !event.isDone && (
+            <button type="button" onClick={() => { setIsCanceling(v => !v); setIsMoving(false); setIsChangingTech(false); }}
+              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
+              style={{ background: COLORS.BG_TERTIARY, color: COLORS.DANGER, border: '1px solid var(--color-border-subtle)' }}>
+              <ChevronRight size={15} style={{ transform: isCanceling ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
+              Retirer du calendrier
+            </button>
           )}
 
           {isEvt && (
             <button type="button" onClick={() => { onDelete(event); onClose() }}
-              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
+              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full mt-1"
               style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
-              <Trash2 size={15} /> Supprimer
+              <Trash2 size={15} /> Supprimer l'événement
             </button>
           )}
 
