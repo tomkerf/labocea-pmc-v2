@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '96'
+export const CHANGELOG_VERSION = '104'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,15 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '104',
+    date: '5 juin 2026',
+    items: [
+      { type: 'feat', label: 'Modale d\'événement : Nouveau bouton de validation plus visible' },
+      { type: 'feat', label: 'Modale d\'événement : Le formulaire de retrait est désormais masqué dans un accordéon pour alléger l\'interface' },
+      { type: 'feat', label: 'Planning : Ajout du bouton "Bilan du mois"' },
+    ],
+  },
   {
     version: '96',
     date: '2 juin 2026',
