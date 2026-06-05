@@ -24,18 +24,18 @@ export default function BilanMoisModal({ onClose, month, year, clients }: BilanM
     }
 
     clients.forEach(client => {
-      const planYear = parseInt(client.annee ?? String(year))
-      // On ne regarde que si l'année du client matche l'année demandée, ou si on s'en fiche
-      if (planYear !== year) return
+      const planYear = client.annee ? parseInt(client.annee) : year
+      if (isNaN(planYear) || planYear !== year) return
 
       client.plans.forEach(plan => {
+        const isAuto = plan.methode === 'Automatique'
         plan.samplings.forEach(s => {
           if (s.plannedMonth === month) {
             if (s.status === 'done') {
               res.done.push({ client, plan, sampling: s })
             } else if (s.status === 'non_effectue') {
               res.notDone.push({ client, plan, sampling: s })
-            } else if (isSamplingOverdue(s, year)) {
+            } else if (isSamplingOverdue(s, year, isAuto)) {
               res.overdue.push({ client, plan, sampling: s })
             } else {
               res.planned.push({ client, plan, sampling: s })

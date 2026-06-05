@@ -31,6 +31,7 @@ import UserAvatar from '@/components/ui/UserAvatar'
 import { getTechColor } from '@/lib/planningUtils'
 import BaseModal from '@/components/ui/BaseModal'
 import { COLORS } from '@/lib/constants'
+import { toast } from '@/stores/toastStore'
 
 
 type FormState = {
@@ -67,7 +68,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
     case 'SET_FIELD':
       return { ...state, [action.field]: action.value }
     case 'RESET_FORM':
-      return { ...initialFormState, deletingId: state.deletingId }
+      return { ...initialFormState }
     case 'LOAD_TODO':
       return {
         ...state,
@@ -206,6 +207,7 @@ export default function TodosPage() {
       setShowModal(false)
     } catch (e) {
       console.error(e)
+      toast.error('Erreur lors de la sauvegarde. Vérifie ta connexion.')
     } finally {
       dispatch({ type: 'SET_FIELD', field: 'saving', value: false })
     }

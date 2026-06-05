@@ -192,7 +192,7 @@ export default function DayModal({
                 ].filter(g => g.items.length > 0)
 
                 const renderItem = (item: typeof pool[0], i: number, groupItems: typeof pool) => {
-                  const overdue  = isSamplingOverdue(item.sampling)
+                  const overdue  = isSamplingOverdue(item.sampling, new Date().getFullYear(), item.methode === 'Automatique')
                   const cfgLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[item.sampling.status] ?? SAMPLING_LABEL.planned
                   const cfgColor = overdue ? COLORS.DANGER
                     : item.sampling.status === 'non_effectue' ? COLORS.WARNING

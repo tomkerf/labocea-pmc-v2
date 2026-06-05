@@ -250,9 +250,13 @@ export function usePlanningData({
 
   const totalOverdue = useMemo(() => {
     let n = 0
-    clients.forEach((c: Client) => c.plans.forEach(p =>
-      p.samplings.forEach((s: Sampling) => { if (isSamplingOverdue(s)) n++ })
-    ))
+    clients.forEach((c: Client) => {
+      const cYear = c.annee ? parseInt(c.annee) : new Date().getFullYear()
+      c.plans.forEach(p => {
+        const isAuto = p.methode === 'Automatique'
+        p.samplings.forEach((s: Sampling) => { if (isSamplingOverdue(s, isNaN(cYear) ? undefined : cYear, isAuto)) n++ })
+      })
+    })
     return n
   }, [clients])
 
@@ -293,14 +297,15 @@ export function usePlanningData({
               meteo: plan.meteo || '',
               analysesSousTraitees: plan.analysesSousTraitees ?? false,
               cofrac: plan.cofrac ?? false,
+              methode: plan.methode || '',
             })
           }
         })
       })
     })
     return result.sort((a, b) => {
-      const aOvr = isSamplingOverdue(a.sampling) ? 0 : 1
-      const bOvr = isSamplingOverdue(b.sampling) ? 0 : 1
+      const aOvr = isSamplingOverdue(a.sampling, undefined, a.methode === 'Automatique') ? 0 : 1
+      const bOvr = isSamplingOverdue(b.sampling, undefined, b.methode === 'Automatique') ? 0 : 1
       if (aOvr !== bOvr) return aOvr - bOvr
       return a.clientNom.localeCompare(b.clientNom)
     })
@@ -314,7 +319,7 @@ export function usePlanningData({
       const clientYear = Number(client.annee) || undefined
       client.plans.forEach(plan => {
         plan.samplings.forEach((s: Sampling) => {
-          if (isSamplingOverdue(s, clientYear)) {
+          if (isSamplingOverdue(s, clientYear, plan.methode === 'Automatique')) {
             result.push({
               sampling: s,
               clientId: client.id, clientNom: client.nom,
@@ -324,6 +329,7 @@ export function usePlanningData({
               meteo: plan.meteo || '',
               analysesSousTraitees: plan.analysesSousTraitees ?? false,
               cofrac: plan.cofrac ?? false,
+              methode: plan.methode || '',
             })
           }
         })

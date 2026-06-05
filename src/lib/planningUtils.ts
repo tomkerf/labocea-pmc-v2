@@ -60,6 +60,7 @@ export interface PoolItem {
   meteo: string
   analysesSousTraitees: boolean
   cofrac: boolean
+  methode: string
 }
 
 export type ViewMode = 'jour' | 'semaine' | 'mois' | 'carte' | 'annee'
