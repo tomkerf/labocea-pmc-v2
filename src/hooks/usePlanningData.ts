@@ -52,7 +52,7 @@ export function usePlanningData({
         const baseSub = [plan.nom, plan.siteNom].filter(Boolean).join(' · ') || '—'
         plan.samplings.forEach((s: Sampling) => {
           if (!s.plannedDay && !s.doneDate) return
-          const overdue = isSamplingOverdue(s)
+          const overdue = isSamplingOverdue(s, year, isAuto)
           const dateStrRaw = s.status === 'done' && s.doneDate
             ? s.doneDate
             : s.plannedDay

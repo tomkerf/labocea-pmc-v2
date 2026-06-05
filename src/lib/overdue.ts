@@ -12,7 +12,7 @@ export const NATURES_NAPPE: NatureEauType[] = ['Souterraine']
  *  @param year    - l'année du plan (ex: 2026). Si absent, utilise l'année courante.
  *                   Passer l'année du client évite de marquer en retard les plans des années passées.
  */
-export function isSamplingOverdue(s: Sampling, year?: number): boolean {
+export function isSamplingOverdue(s: Sampling, year?: number, isAutomatique?: boolean): boolean {
   if (s.status === 'overdue') return true
   if (s.status !== 'planned') return false
 
@@ -22,7 +22,9 @@ export function isSamplingOverdue(s: Sampling, year?: number): boolean {
   if (s.dateUndefined) return false  // date non définie → pas en retard
 
   if (s.plannedDay && s.plannedDay > 0) {
-    deadline = new Date(planYear, s.plannedMonth, s.plannedDay, 23, 59, 59, 999)
+    // Pour les Bilans 24h (Automatique) : J1 = plannedDay, J2 = J1+1 → deadline = J2
+    const deadlineDay = isAutomatique ? s.plannedDay + 1 : s.plannedDay
+    deadline = new Date(planYear, s.plannedMonth, deadlineDay, 23, 59, 59, 999)
   } else {
     deadline = new Date(planYear, s.plannedMonth + 1, 0, 23, 59, 59, 999)
   }
