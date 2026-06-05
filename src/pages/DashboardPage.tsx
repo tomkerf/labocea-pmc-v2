@@ -14,8 +14,8 @@ import { EquipeSuiviWidget } from '@/components/dashboard/EquipeSuiviWidget'
 import { WelcomeModal } from '@/components/dashboard/WelcomeModal'
 import { DashboardPlanningWidget } from '@/components/dashboard/DashboardPlanningWidget'
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
-import { EventDetailModal } from '@/components/EventDetailModal'
-import type { ModalEvent, TechOption } from '@/components/EventDetailModal'
+import EventDetailModal from '@/components/planning/EventDetailModal'
+import type { PlanningEvent, TechOption } from '@/lib/planningUtils'
 import { useAuthStore, selectPrenom, selectInitiales, selectUid, selectRole } from '@/stores/authStore'
 import { updateUserProfile } from '@/services/userService'
 import { useClientsListener } from '@/hooks/useClients'
@@ -31,7 +31,6 @@ import { useEvenementsStore } from '@/stores/evenementsStore'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
-import type { ModalEventRef } from '@/hooks/useDashboardStats'
 import { localISO } from '@/lib/dashboardUtils'
 import type { Sampling, Client, Plan } from '@/types'
 import { TodosWidget } from '@/components/dashboard/TodosWidget'
@@ -95,7 +94,7 @@ export default function DashboardPage() {
   const { maintenances }  = useMaintenancesStore()
   const todos             = useTodosStore(s => s.todos)
 
-  const [eventDetail, setEventDetail] = useState<{ event: ModalEvent; dateStr: string } | null>(null)
+  const [eventDetail, setEventDetail] = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
   const [planningMode, setPlanningMode] = useState<'today' | 'tomorrow'>('today')
 
   const {
@@ -287,7 +286,7 @@ export default function DashboardPage() {
               }),
             }, uid)
           }}
-          onDelete={(ev) => { if ((ev as unknown as ModalEventRef).evenementData) deleteEvenement((ev as unknown as ModalEventRef).evenementData!.id) }}
+          onDelete={(ev) => { if (ev.evenementData) deleteEvenement(ev.evenementData.id) }}
           onChangeTech={async (ev, initiales_) => {
             if (!uid || !ev.clientId) return
             const client = clients.find((c: Client) => c.id === ev.clientId)

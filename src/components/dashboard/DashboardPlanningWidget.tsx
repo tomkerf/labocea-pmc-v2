@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { SectionTitle, EmptyCard } from '@/components/dashboard/StatCard'
-import type { ModalEvent } from '@/components/EventDetailModal'
+import type { PlanningEvent } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
 
 interface DashboardPlanningWidgetProps {
@@ -12,7 +12,7 @@ interface DashboardPlanningWidgetProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   activeItems: any[];
   activeDateISO: string;
-  setEventDetail: (detail: { event: ModalEvent, dateStr: string }) => void;
+  setEventDetail: (detail: { event: PlanningEvent, dateStr: string }) => void;
 }
 
 export function DashboardPlanningWidget({
@@ -93,7 +93,7 @@ export function DashboardPlanningWidget({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
-                onClick={() => item.kind === 'todo' ? navigate(item.link) : setEventDetail({ event: item.modalEvent as ModalEvent, dateStr: activeDateISO })}
+                onClick={() => item.kind === 'todo' ? navigate(item.link) : setEventDetail({ event: item.modalEvent as unknown as PlanningEvent, dateStr: activeDateISO })}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer"
                 style={{ borderBottom: idx < activeItems.slice(0, 8).length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
