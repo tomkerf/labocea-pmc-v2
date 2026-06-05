@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { getMessagingInstance, db } from '@/lib/firebase'
 import { doc, updateDoc, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
@@ -7,32 +7,24 @@ import { COLLECTIONS } from '@/lib/constants'
 
 export default function usePushNotifications() {
   const appUser = useAuthStore(selectAppUser)
-  const [permission, setPermission] = useState<NotificationPermission>('default')
+  const [permission, setPermission] = useState<NotificationPermission>(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) return Notification.permission
+    return 'default'
+  })
   const [loading, setLoading] = useState(false)
-  const [isSupported, setIsSupported] = useState(false)
+  const [isSupported] = useState(() =>
+    typeof window !== 'undefined' &&
+    'Notification' in window &&
+    'serviceWorker' in navigator &&
+    'PushManager' in window
+  )
   const [isPushEnabled, setIsPushEnabled] = useState(false)
 
   // Clé VAPID Firebase FCM pour le Web Push
   const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY || ''
 
-  useEffect(() => {
-    // Vérifier si les API de notification et service workers sont disponibles
-    const supported =
-      typeof window !== 'undefined' &&
-      'Notification' in window &&
-      'serviceWorker' in navigator &&
-      'PushManager' in window
-
-    setIsSupported(supported)
-
-    if (supported) {
-      setPermission(Notification.permission)
-      checkIfTokenSynced()
-    }
-  }, [appUser])
-
   // Vérifier si un token FCM valide existe déjà sur cet appareil et est synchronisé dans Firestore
-  const checkIfTokenSynced = async () => {
+  const checkIfTokenSynced = useCallback(async () => {
     if (!appUser) return
     try {
       const messaging = await getMessagingInstance()
@@ -57,7 +49,16 @@ export default function usePushNotifications() {
       console.warn('[Push Notification] Impossible de vérifier la synchro du token :', err)
       setIsPushEnabled(false)
     }
-  }
+  }, [appUser, VAPID_KEY])
+
+  useEffect(() => {
+    if (isSupported) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      checkIfTokenSynced()
+    }
+  }, [isSupported, appUser, checkIfTokenSynced])
+
+
 
   // Activer les notifications push sur l'appareil actuel
   const enableNotifications = async (): Promise<boolean> => {

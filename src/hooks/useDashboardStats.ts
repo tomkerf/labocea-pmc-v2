@@ -75,7 +75,7 @@ function getSamplingBadge(s: Sampling): SamplingBadge {
 }
 
 export function useDashboardStats({
-  clients, verifications, equipements, evenements, maintenances, todos,
+  clients, verifications, equipements, evenements, maintenances,
   uid, initiales, isGeneraliste,
 }: Params) {
   const [nowMs] = useState(() => Date.now())
@@ -98,7 +98,7 @@ export function useDashboardStats({
       verifiConformes: conformes,
       conformitePct:   total > 0 ? Math.round((conformes / total) * 100) : null,
     }
-  }, [verifications, equipements])
+  }, [verifications])
 
   const aCalibrrer = useMemo(() => {
     // Équipements couverts par au moins une vérification → on utilise prochainControle de la vérif
@@ -282,7 +282,7 @@ export function useDashboardStats({
       if (!b.time) return 1
       return a.time.localeCompare(b.time)
     })
-  }, [clients, evenements, todos, initiales, isGeneraliste, nowMs])
+  }, [clients, evenements, initiales, isGeneraliste, nowMs])
 
   const lendemainItems = useMemo((): JourItem[] => {
     const tomorrowISO = localISO(new Date(nowMs + 86_400_000))
@@ -359,7 +359,7 @@ export function useDashboardStats({
       if (!b.time) return 1
       return a.time.localeCompare(b.time)
     })
-  }, [clients, evenements, todos, initiales, isGeneraliste, nowMs])
+  }, [clients, evenements, initiales, isGeneraliste, nowMs])
 
   // ── État du parc ──────────────────────────────────────────
 
@@ -433,6 +433,7 @@ export function useDashboardStats({
   }, [evenements])
 
   const hasRainTomorrow = useMemo(() => {
+    // eslint-disable-next-line react-hooks/purity
     const tomorrowISO = localISO(new Date(Date.now() + 86_400_000))
     return evenements.some((ev: EvenementPersonnel) => ev.type === 'meteo' && ev.date === tomorrowISO)
   }, [evenements])

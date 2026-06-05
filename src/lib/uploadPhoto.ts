@@ -17,7 +17,7 @@ async function processImageFile(file: File): Promise<{ data: File | Blob; ext: s
         type: 'image/jpeg',
         quality: 0.85
       })
-      const blob = Array.isArray(conversionResult) ? conversionResult[0] : (conversionResult as any)
+      const blob = Array.isArray(conversionResult) ? conversionResult[0] : (conversionResult as Blob)
       return {
         data: blob,
         ext: 'jpg',

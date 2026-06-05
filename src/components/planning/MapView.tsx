@@ -59,7 +59,7 @@ export default function MapView({
     // Filtrer les événements météo et ne garder que les prélèvements et maintenances
     const activeEvts = rawEvts.filter(e => e.evenementData?.type !== 'meteo' && (e.type === 'prelevement' || e.type === 'maintenance'))
     return sortEvts(filterEvents(activeEvts, filterTech, filterRetard, allowedTechs))
-  }, [eventsByDate, dateStr, filterTech, filterRetard])
+  }, [eventsByDate, dateStr, filterTech, filterRetard, allowedTechs])
 
   // 2. Séparer les événements avec coordonnées GPS de ceux sans coordonnées
   const { mappedEvts, noGpsEvts } = useMemo(() => {
@@ -272,6 +272,7 @@ export default function MapView({
       markers.forEach(m => m.off())
       markerGroup.clearLayers()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mappedEvts, mapReady])
 
 

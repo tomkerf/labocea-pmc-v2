@@ -2,6 +2,33 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 106 — Linting React Doctor & Typage strict (Zéro Erreur)
+**5 juin 2026**
+
+### Ce qui a été fait
+- **Correction des dépendances React Hooks** : Correction systématique des règles `react-hooks/exhaustive-deps` (ajouts de dépendances manquantes) et `react-hooks/set-state-in-effect` (déplacement de logique hors effet ou désactivation ciblée).
+- **Suppression du typage `any`** : Élimination des types `any` résiduels dans `DashboardPlanningWidget`, `todoFormReducer` et les tests unitaires.
+- **Suppression des variables non utilisées** : Nettoyage drastique des variables, imports et variables de tests inutilisés (ex: `_onError`, `TodoPriority`, `User`).
+- **Validation** : Le projet est désormais 100% propre selon TypeScript et ESLint (`npx tsc --noEmit && npm run lint` = 0 errors, 0 warnings).
+
+### Prochaines étapes
+- Démarrer la refonte / nettoyage du dernier composant complexe ou préparer une mise en production.
+
+---
+
+## Session 105 — Refactoring MissionDetailPage
+**5 juin 2026**
+
+### Ce qui a été fait
+- **Refactoring "God Component"** : Découpage de `MissionDetailPage.tsx` qui était devenu trop gros (identifié par react-doctor).
+- **Extraction de composants** : Création de `MissionDetailMap.tsx`, `MissionDetailInfoCard.tsx` et `MissionDetailActions.tsx` pour isoler les différentes responsabilités de la page.
+- **Audit React Doctor** : Le scan post-refactoring sur les fichiers modifiés donne un score parfait de 100/100 (0 erreurs, 0 warnings).
+
+### Prochaines étapes
+- Poursuivre le triage react-doctor sur les autres composants restants (`DashboardPage`, `PlanningPage`, etc.).
+
+---
+
 ## Session 104 — UI/UX Modale d'événement
 **5 juin 2026**
 

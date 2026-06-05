@@ -1,16 +1,19 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, X } from 'lucide-react'
+
 import { motion, AnimatePresence } from 'framer-motion'
 
 import DonutChart from '@/components/dashboard/DonutChart'
-import { StatCard, SectionTitle, EmptyCard } from '@/components/dashboard/StatCard'
+import { StatCard, SectionTitle } from '@/components/dashboard/StatCard'
 import { RapportsWidget } from '@/components/dashboard/RapportsWidget'
 import { RetardWidget } from '@/components/dashboard/RetardWidget'
 import { PluieWidget } from '@/components/dashboard/PluieWidget'
 import { MaintenancesWidget } from '@/components/dashboard/MaintenancesWidget'
 import { MetrologieWidget } from '@/components/dashboard/MetrologieWidget'
 import { EquipeSuiviWidget } from '@/components/dashboard/EquipeSuiviWidget'
+import { WelcomeModal } from '@/components/dashboard/WelcomeModal'
+import { DashboardPlanningWidget } from '@/components/dashboard/DashboardPlanningWidget'
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
 import { EventDetailModal } from '@/components/EventDetailModal'
 import type { ModalEvent, TechOption } from '@/components/EventDetailModal'
 import { useAuthStore, selectPrenom, selectInitiales, selectUid, selectRole } from '@/stores/authStore'
@@ -29,7 +32,7 @@ import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import type { ModalEventRef } from '@/hooks/useDashboardStats'
-import { getGreeting, formatDate, localISO } from '@/lib/dashboardUtils'
+import { localISO } from '@/lib/dashboardUtils'
 import type { Sampling, Client, Plan } from '@/types'
 import { TodosWidget } from '@/components/dashboard/TodosWidget'
 import { useTodosListener } from '@/hooks/useTodos'
@@ -43,19 +46,6 @@ const containerVariants = {
     opacity: 1,
     transition: {
       staggerChildren: 0.05
-    }
-  }
-} as const
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 12 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 30
     }
   }
 } as const
@@ -74,6 +64,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (appUser && appUser.hasSeenAide !== true) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowWelcome(true)
     }
   }, [appUser])
@@ -150,59 +141,12 @@ export default function DashboardPage() {
       className="p-6 pb-10 max-w-4xl"
     >
 
-      {/* Salutation */}
-      <motion.div variants={itemVariants} className="mb-8">
-        <h1 className="text-2xl font-bold mb-1" style={{ color: COLORS.TEXT_PRIMARY, letterSpacing: '-0.5px' }}>
-          {getGreeting()} {prenom || 'Thomas'} 👋
-        </h1>
-        <p className="text-base capitalize" style={{ color: COLORS.TEXT_SECONDARY }}>
-          {formatDate()}
-        </p>
-      </motion.div>
-
-      {/* Switcher de rôle (uniquement pour les chargés de mission / admins) */}
-      {isGeneraliste && (
-        <motion.div variants={itemVariants} className="mb-6 flex">
-          <div className="flex gap-1 p-1 rounded-xl" style={{ background: COLORS.BG_TERTIARY }}>
-            <button
-              type="button"
-              onClick={() => setActiveTab('technicien')}
-              className="relative px-4 py-2 text-sm font-semibold rounded-lg z-10 transition-colors duration-200 cursor-pointer"
-              style={{
-                color: activeTab === 'technicien' ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
-              }}
-            >
-              {activeTab === 'technicien' && (
-                <motion.div
-                  layoutId="active-role-tab"
-                  className="absolute inset-0 rounded-lg -z-10"
-                  style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-card)' }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
-              Mon activité terrain
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('manager')}
-              className="relative px-4 py-2 text-sm font-semibold rounded-lg z-10 transition-colors duration-200 cursor-pointer"
-              style={{
-                color: activeTab === 'manager' ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
-              }}
-            >
-              {activeTab === 'manager' && (
-                <motion.div
-                  layoutId="active-role-tab"
-                  className="absolute inset-0 rounded-lg -z-10"
-                  style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-card)' }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
-              Suivi équipe (CM)
-            </button>
-          </div>
-        </motion.div>
-      )}
+      <DashboardHeader
+        prenom={prenom}
+        isGeneraliste={isGeneraliste}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
 
       <AnimatePresence mode="wait">
         {(!isGeneraliste || activeTab === 'technicien') ? (
@@ -251,107 +195,15 @@ export default function DashboardPage() {
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Planning */}
-              <div>
-                <div className="flex flex-col gap-2 mb-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <SectionTitle>{planningMode === 'today' ? 'Planning du jour' : 'Planning de demain'}</SectionTitle>
-                    <div className="relative flex gap-1 p-1 rounded-lg shrink-0" style={{ background: COLORS.BG_TERTIARY }}>
-                      <button type="button"
-                        onClick={() => setPlanningMode('today')}
-                        className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200 cursor-pointer"
-                        style={{
-                          color: planningMode === 'today' ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
-                        }}
-                      >
-                        {planningMode === 'today' && (
-                          <motion.div
-                            layoutId="active-dashboard-pill"
-                            className="absolute inset-0 rounded-md -z-10"
-                            style={{ background: 'var(--color-accent-light)' }}
-                            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                          />
-                        )}
-                        Aujourd'hui
-                      </button>
-                      <button type="button"
-                        onClick={() => setPlanningMode('tomorrow')}
-                        className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200 cursor-pointer"
-                        style={{
-                          color: planningMode === 'tomorrow' ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
-                        }}
-                      >
-                        {planningMode === 'tomorrow' && (
-                          <motion.div
-                            layoutId="active-dashboard-pill"
-                            className="absolute inset-0 rounded-md -z-10"
-                            style={{ background: 'var(--color-accent-light)' }}
-                            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                          />
-                        )}
-                        Demain
-                      </button>
-                    </div>
-                  </div>
-
-                </div>
-                {((planningMode === 'today' && hasRainToday) || (planningMode === 'tomorrow' && hasRainTomorrow)) && (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl mb-2 text-sm font-medium"
-                    style={{ background: 'rgba(0,113,227,0.07)', color: COLORS.ACCENT, border: '1px solid rgba(0,113,227,0.15)' }}>
-                    <span>🌧</span>
-                    <span>Temps de pluie prévu</span>
-                  </div>
-                )}
-                {activeItems.length === 0 ? (
-                  <EmptyCard>Aucune intervention ni événement{planningMode === 'today' ? " aujourd'hui" : " demain"}.</EmptyCard>
-                ) : (
-                  <motion.div
-                    layout
-                    className="rounded-xl overflow-hidden"
-                    style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}
-                  >
-                    <AnimatePresence mode="popLayout">
-                      {activeItems.slice(0, 8).map((item, idx) => (
-                        <motion.div
-                          key={'modalEvent' in item ? item.modalEvent?.id : `todo-${idx}` || `${planningMode}-${idx}`}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.18, ease: 'easeOut' }}
-                          onClick={() => item.kind === 'todo' ? navigate(item.link) : setEventDetail({ event: item.modalEvent as ModalEvent, dateStr: activeDateISO })}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer"
-                          style={{ borderBottom: idx < activeItems.slice(0, 8).length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                        >
-                          {item.time ? (
-                            <span className="text-xs font-semibold shrink-0 w-10 text-center px-1.5 py-1 rounded-lg"
-                              style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
-                              {item.time}
-                            </span>
-                          ) : (
-                            <span className="shrink-0 size-2 rounded-full mt-0.5" style={{ background: item.dot }} />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium leading-snug" style={{ color: COLORS.TEXT_PRIMARY }}>{item.title}</p>
-                            <p className="text-xs mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>{item.sub}</p>
-                          </div>
-                          {'cofrac' in item && item.cofrac && (
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0"
-                              style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
-                              COFRAC
-                            </span>
-                          )}
-                          {'meteo' in item && item.meteo === 'pluie' && (
-                            <span title="Prélèvement temps de pluie" className="shrink-0 text-base leading-none">🌧</span>
-                          )}
-                          <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
-                            style={{ background: item.badge.bg, color: item.badge.color }}>{item.badge.label}</span>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </motion.div>
-                )}
-              </div>
+              <DashboardPlanningWidget
+                planningMode={planningMode}
+                setPlanningMode={setPlanningMode}
+                hasRainToday={hasRainToday}
+                hasRainTomorrow={hasRainTomorrow}
+                activeItems={activeItems}
+                activeDateISO={activeDateISO}
+                setEventDetail={setEventDetail}
+              />
 
               {/* État du parc */}
               <div>
@@ -445,60 +297,7 @@ export default function DashboardPage() {
         />
       )}
 
-      <AnimatePresence>
-        {showWelcome && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl relative"
-              style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border)' }}
-            >
-              <button type="button"
-                onClick={() => dismissWelcome(false)}
-                aria-label="Fermer"
-                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/5 transition-colors"
-                style={{ color: COLORS.TEXT_SECONDARY }}
-              >
-                <X size={18} />
-              </button>
-
-              <div className="p-6 text-center flex flex-col items-center">
-                <div className="size-12 rounded-full flex items-center justify-center mb-4"
-                  style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
-                  <BookOpen size={24} />
-                </div>
-                
-                <h3 className="text-lg font-semibold mb-2" style={{ color: COLORS.TEXT_PRIMARY }}>
-                  Bienvenue sur PMC V2 ! 👋
-                </h3>
-                
-                <p className="text-sm mb-6 leading-relaxed" style={{ color: COLORS.TEXT_SECONDARY }}>
-                  L'application a fait peau neuve. Pour découvrir les nouveautés et le fonctionnement général, n'hésite pas à consulter le mode d'emploi.
-                </p>
-
-                <div className="flex flex-col gap-2 w-full">
-                  <button type="button"
-                    onClick={() => dismissWelcome(true)}
-                    className="w-full py-2.5 rounded-xl text-sm font-medium transition-transform active:scale-95"
-                    style={{ background: COLORS.ACCENT, color: 'white' }}
-                  >
-                    Lire le mode d'emploi
-                  </button>
-                  <button type="button"
-                    onClick={() => dismissWelcome(false)}
-                    className="w-full py-2 text-sm font-medium transition-colors"
-                    style={{ color: COLORS.TEXT_SECONDARY }}
-                  >
-                    Plus tard
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      <WelcomeModal show={showWelcome} onDismiss={dismissWelcome} />
     </motion.div>
   )
 }

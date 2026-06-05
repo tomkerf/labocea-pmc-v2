@@ -30,7 +30,7 @@ describe('useTodosListener', () => {
   it('correctly subscribes to the collection and updates the store on success', () => {
     let capturedOnNext: SnapCallback | null = null
 
-    vi.mocked(onSnapshot).mockImplementation((_q, onNext, _onError) => {
+    vi.mocked(onSnapshot).mockImplementation((_q, onNext) => {
       capturedOnNext = onNext as unknown as SnapCallback
       return mockUnsubscribe
     })

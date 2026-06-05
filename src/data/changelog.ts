@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '104'
+export const CHANGELOG_VERSION = '106'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,20 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '106',
+    date: '5 juin 2026',
+    items: [
+      { type: 'fix', label: 'Améliorations techniques et corrections de bugs invisibles (React Doctor, Typage strict)' },
+    ],
+  },
+  {
+    version: '105',
+    date: '5 juin 2026',
+    items: [
+      { type: 'feat', label: 'Améliorations techniques et de performance sous le capot (page mission)' },
+    ],
+  },
   {
     version: '104',
     date: '5 juin 2026',

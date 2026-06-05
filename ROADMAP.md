@@ -306,6 +306,8 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-04 | Bilan du mois ✅ | Création de la modale Bilan du mois (BilanMoisModal) affichant la liste des tâches (retard, effectuées, planifiées, etc) par mois. Ajout du bouton d'ouverture dans PlanningHeader à gauche des filtres de vue (Jour/Sem/Mois/An). Staging déployé. |
 | 2026-06-05 | Bugfixes isSamplingOverdue ✅ | Code review multi-angles (session Gemini). 6 bugs corrigés : propagation isAutomatique à 4 call sites manquants, parseInt NaN BilanMoisModal, RESET_FORM leakait deletingId, toast.error sur échec save TodosPage. |
 | 2026-06-05 | UI/UX Modale événement ✅ | Clarification du bouton principal (label + style primaire) et masquage du formulaire de retrait d'événement dans un accordéon. Staging déployé. |
+| 2026-06-05 | Refactoring ✅ | Découpage de MissionDetailPage.tsx en sous-composants dédiés. Validation React Doctor à 100/100. |
+| 2026-06-05 | Qualité / ESLint ✅ | Zéro erreur TypeScript et ESLint. Suppression des types `any`, variables non utilisées, et correction exhaustive des deps dans les React Hooks. |
 
 ---
 

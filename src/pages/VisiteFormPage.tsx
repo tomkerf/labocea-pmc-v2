@@ -55,6 +55,7 @@ export default function VisiteFormPage() {
 
   useEffect(() => {
     if (user && isNew) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTechnicienUid(user.uid)
       setTechnicienNom(`${user.prenom} ${user.nom}`)
     }

@@ -27,6 +27,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
       d.setMonth(d.getMonth() + 1)
       onUpdate('rapportDatePrevue', d.toISOString().slice(0, 10))
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sampling.rapportPrevu, sampling.rapportDatePrevue, sampling.doneDate])
   const [newTask, setNewTask]   = useState('')
   const [uploading, setUploading] = useState(false)

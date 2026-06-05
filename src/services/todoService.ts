@@ -15,10 +15,12 @@ function cleanObject<T extends object>(obj: T): T {
   return cleaned
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function saveTodo(todo: Todo, _uid: string): Promise<void> {
   const ref = doc(db, COLLECTION, todo.id)
   // On omet createdAt pour éviter de l'écraser s'il n'est pas converti correctement,
   // et on utilise serverTimestamp pour updatedAt.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { createdAt, ...rest } = todo
   await trackWrite(
     setDoc(

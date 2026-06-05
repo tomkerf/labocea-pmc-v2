@@ -137,13 +137,13 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p
-                          className="text-sm font-medium truncate cursor-pointer hover:text-[var(--color-accent)] transition-colors"
+                        <button type="button"
+                          className="text-sm font-medium truncate cursor-pointer hover:text-[var(--color-accent)] transition-colors text-left focus:outline-none focus-visible:ring-2"
                           style={{ color: COLORS.TEXT_PRIMARY }}
                           onClick={() => navigate('/todos')}
                         >
                           {todo.titre}
-                        </p>
+                        </button>
                         <span
                           className="text-[10px] font-medium px-1.5 py-0.2 rounded flex items-center gap-1"
                           style={{ background: colors.bg, color: colors.text }}
@@ -173,8 +173,8 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                         {todo.clientNom && (
                           <>
                             {todo.dueDate && <span>•</span>}
-                            <span
-                              className="hover:underline cursor-pointer font-medium"
+                            <button type="button"
+                              className="hover:underline cursor-pointer font-medium text-left focus:outline-none focus-visible:ring-2"
                               style={{ color: COLORS.ACCENT }}
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -182,14 +182,14 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                               }}
                             >
                               💼 {todo.clientNom}
-                            </span>
+                            </button>
                           </>
                         )}
                         {todo.equipementNom && (
                           <>
                             {(todo.dueDate || todo.clientNom) && <span>•</span>}
-                            <span
-                              className="hover:underline cursor-pointer font-medium"
+                            <button type="button"
+                              className="hover:underline cursor-pointer font-medium text-left focus:outline-none focus-visible:ring-2"
                               style={{ color: COLORS.ACCENT }}
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -197,7 +197,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                               }}
                             >
                               🔧 {todo.equipementNom}
-                            </span>
+                            </button>
                           </>
                         )}
                       </div>
@@ -209,8 +209,8 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
           </div>
 
           {/* Footer du widget pour aller voir tout */}
-          <div
-            className="px-4 py-2.5 text-center cursor-pointer hover:bg-neutral-100 transition-colors"
+          <button type="button"
+            className="w-full px-4 py-2.5 text-center cursor-pointer hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2"
             style={{
               borderTop: '1px solid var(--color-border-subtle)',
               background: COLORS.BG_TERTIARY,
@@ -220,7 +220,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
             <span className="text-xs font-semibold" style={{ color: COLORS.ACCENT }}>
               Voir toutes les tâches
             </span>
-          </div>
+          </button>
         </div>
       )}
     </div>

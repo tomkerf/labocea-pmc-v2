@@ -68,8 +68,8 @@ export function exportPlanningExcel(
     const heure = event.plannedTime ? `${event.plannedTime}` : '—'
     const technicien = event.technicien || '—'
     
-    let sujet = event.title
-    let precision = event.subtitle
+    const sujet = event.title
+    const precision = event.subtitle
 
     // Détails GPS / Analyses pour les prélèvements
     let gps = ''

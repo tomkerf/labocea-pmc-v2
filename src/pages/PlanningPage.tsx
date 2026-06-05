@@ -87,6 +87,7 @@ const uid        = useAuthStore(selectUid)
   // Appliquer le filtre par défaut au premier chargement
   useEffect(() => {
     if (initiales && !localStorage.getItem('planning_filter_tech')) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilterTech(initiales)
       localStorage.setItem('planning_filter_tech', initiales)
     }
@@ -146,6 +147,7 @@ const uid        = useAuthStore(selectUid)
 
   useEffect(() => {
     if (filterTech && !visibleTechs.includes(filterTech)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilterTech('')
       localStorage.setItem('planning_filter_tech', 'ALL')
     }

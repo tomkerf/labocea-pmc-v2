@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { COLORS } from '@/lib/constants'
@@ -18,14 +18,12 @@ interface RapportsWidgetProps {
 
 export function RapportsWidget({ rapports, onMarkEnvoye }: RapportsWidgetProps) {
   const [open, setOpen] = useState(false)
-  const [today, setToday] = useState<Date | null>(null)
-  const navigate = useNavigate()
-
-  useEffect(() => {
+  const [today] = useState<Date>(() => {
     const d = new Date()
     d.setHours(0, 0, 0, 0)
-    setToday(d)
-  }, [])
+    return d
+  })
+  const navigate = useNavigate()
 
   return (
     <div className="mb-6">

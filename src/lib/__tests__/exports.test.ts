@@ -89,7 +89,9 @@ describe('Exports Planning', () => {
         technicienUid: 'u1',
         technicienNom: 'Hubert Jehl',
         cout: null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         createdAt: { seconds: 0, nanoseconds: 0 } as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         updatedAt: { seconds: 0, nanoseconds: 0 } as any,
       }
     }
@@ -98,6 +100,7 @@ describe('Exports Planning', () => {
   const mockUsers = [
     { uid: 'u1', prenom: 'Hubert', nom: 'Jehl', initiales: 'HUJ', email: 'hubert.jehl@labocea.fr', role: 'technicien' },
     { uid: 'u2', prenom: 'Thomas', nom: 'Kerfendal', initiales: 'THK', email: 'tom@labocea.fr', role: 'admin' },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ] as any[]
 
   it('exportPlanningPdf s\'exécute sans erreur', () => {

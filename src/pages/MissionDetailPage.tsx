@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, MapPin, Clock, CheckCircle2, Navigation, ExternalLink, CalendarClock, X } from 'lucide-react'
+import { ChevronLeft, CheckCircle2, ExternalLink } from 'lucide-react'
+import { MissionDetailMap } from '@/components/client/MissionDetailMap'
+import { MissionDetailInfoCard } from '@/components/client/MissionDetailInfoCard'
+import { MissionDetailActions } from '@/components/client/MissionDetailActions'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useClientData } from '@/hooks/useClientData'
 import type { Sampling, SamplingStatus } from '@/types'
@@ -9,8 +12,7 @@ import type { SaisieRapideData } from '@/components/tournee/SaisieRapideModal'
 import { COLORS } from '@/lib/constants'
 
 
-const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-              'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
+
 
 const STATUS_CONFIG: Record<SamplingStatus, { label: string; bg: string; color: string }> = {
   planned:      { label: 'À faire',      bg: COLORS.BG_TERTIARY,   color: COLORS.TEXT_SECONDARY },
@@ -119,9 +121,6 @@ export default function MissionDetailPage() {
 
   const statusConfig = getEnCoursStatus(sampling) ?? STATUS_CONFIG[sampling.status]
   const hasGps = plan.lat && plan.lng && plan.lat !== '' && plan.lng !== ''
-  const mapsUrl = hasGps
-    ? `https://maps.google.com/?q=${plan.lat},${plan.lng}`
-    : `https://maps.google.com/?q=${encodeURIComponent(plan.siteNom || plan.nom || '')}`
 
   return (
     <div className="max-w-lg mx-auto pb-48 md:pb-32">
@@ -147,76 +146,23 @@ export default function MissionDetailPage() {
       </div>
 
       {/* Carte / GPS */}
-      <div className="mx-4 mb-4 rounded-2xl overflow-hidden relative"
-        style={{ height: 160, background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border-subtle)' }}>
-        {hasGps ? (
-          <iframe
-            title="map"
-            src={`https://maps.google.com/maps?q=${plan.lat},${plan.lng}&z=15&output=embed`}
-            className="size-full border-0"
-            loading="lazy"
-            sandbox="allow-scripts allow-same-origin"
-          />
-        ) : (
-          <div className="size-full flex flex-col items-center justify-center gap-2">
-            <MapPin size={28} style={{ color: 'var(--color-text-tertiary)' }} />
-            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-              Coordonnées GPS non renseignées
-            </p>
-          </div>
-        )}
-        {/* Bouton ouvrir Maps */}
-        <a href={mapsUrl} target="_blank" rel="noreferrer"
-          className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-          style={{ background: 'white', color: COLORS.ACCENT, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
-          <Navigation size={12} />
-          Ouvrir Maps
-        </a>
-      </div>
+      <MissionDetailMap
+        hasGps={hasGps}
+        lat={plan.lat}
+        lng={plan.lng}
+        siteNom={plan.siteNom}
+        nom={plan.nom}
+      />
 
       {/* Infos principales */}
-      <div className="mx-4 mb-4 rounded-2xl px-5 py-4"
-        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-        <div className="flex items-center gap-2 mb-3">
-          {sampling.plannedTime && (
-            <span className="flex items-center gap-1 text-sm font-semibold px-3 py-1 rounded-full"
-              style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
-              <Clock size={13} />
-              {sampling.plannedTime}
-            </span>
-          )}
-          <span className="text-sm font-semibold px-3 py-1 rounded-full"
-            style={{ background: statusConfig.bg, color: statusConfig.color }}>
-            {statusConfig.label}
-          </span>
-          {saving && (
-            <span className="text-xs ml-auto" style={{ color: 'var(--color-text-tertiary)' }}>
-              Sauvegarde…
-            </span>
-          )}
-        </div>
-
-        <h1 className="text-lg font-bold mb-1" style={{ color: COLORS.TEXT_PRIMARY }}>
-          {client.nom}
-        </h1>
-        <p className="text-sm mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
-          {plan.siteNom}{plan.nom ? ` · ${plan.nom}` : ''}
-        </p>
-        <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-          <span>{sampling.dateUndefined ? 'Date à définir' : `${MOIS[sampling.plannedMonth]}${sampling.plannedDay ? ` — j${sampling.plannedDay}` : ''}`}</span>
-          <span>·</span>
-          <span>{plan.frequence}</span>
-          <span>·</span>
-          <span>{plan.nature}</span>
-        </div>
-
-        {hasGps && (
-          <div className="flex items-center gap-1 mt-2 text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-            <MapPin size={11} />
-            <span>{plan.lat}, {plan.lng}{plan.gpsApprox ? ' (approx.)' : ''}</span>
-          </div>
-        )}
-      </div>
+      <MissionDetailInfoCard
+        client={client}
+        plan={plan}
+        sampling={sampling}
+        statusConfig={statusConfig}
+        saving={saving}
+        hasGps={hasGps}
+      />
 
       {/* Contraintes terrain */}
       {plan.contraintesParticulieres && (
@@ -247,111 +193,13 @@ export default function MissionDetailPage() {
       )}
 
       {sampling.status !== 'done' && (
-        <>
-          {/* Mobile : barre fixe en bas */}
-          <div
-            className="md:hidden fixed left-0 right-0 px-4 pt-3"
-            style={{
-              bottom: 'calc(65px + env(safe-area-inset-bottom))',
-              background: 'rgba(245,245,247,0.92)',
-              backdropFilter: 'blur(8px)',
-              borderTop: '1px solid var(--color-border-subtle)',
-              paddingBottom: '12px',
-            }}>
-            {isAutoJ1 ? (
-              <div className="flex flex-col gap-2">
-                <button type="button"
-                  onClick={() => setJ1Modal('reporte')}
-                  className="w-full py-4 rounded-2xl text-base font-semibold flex items-center justify-center gap-2"
-                  style={{ background: COLORS.ACCENT, color: 'white', boxShadow: '0 4px 16px rgba(0,113,227,0.35)' }}>
-                  <CalendarClock size={20} />
-                  Décaler la mission
-                </button>
-                <button type="button"
-                  onClick={() => setJ1Modal('non_effectue')}
-                  className="w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5"
-                  style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
-                  <X size={15} />
-                  Non effectué
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2">
-                <button type="button"
-                  onClick={handleTerminer}
-                  disabled={saving}
-                  className="w-full py-4 rounded-2xl text-base font-semibold flex items-center justify-center gap-2"
-                  style={{ background: saving ? COLORS.BORDER : COLORS.ACCENT, color: 'white', boxShadow: saving ? 'none' : '0 4px 16px rgba(0,113,227,0.35)' }}>
-                  <CheckCircle2 size={20} />
-                  {saving ? 'Enregistrement…' : 'Terminer la mission'}
-                </button>
-                <div className="flex gap-2">
-                  <button type="button"
-                    onClick={() => setJ1Modal('non_effectue')}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5"
-                    style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
-                    <X size={15} />
-                    Non effectué
-                  </button>
-                  <button type="button"
-                    onClick={() => setJ1Modal('reporte')}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5"
-                    style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}>
-                    <CalendarClock size={15} />
-                    Décaler
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Desktop : boutons inline en bas de la carte */}
-          <div className="hidden md:block mx-4 mb-6 mt-4">
-            {isAutoJ1 ? (
-              <div className="flex gap-3 justify-end">
-                <button type="button"
-                  onClick={() => setJ1Modal('non_effectue')}
-                  className="px-5 py-2.5 rounded-xl text-sm font-medium flex items-center gap-1.5"
-                  style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
-                  <X size={15} />
-                  Non effectué
-                </button>
-                <button type="button"
-                  onClick={() => setJ1Modal('reporte')}
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2"
-                  style={{ background: COLORS.ACCENT, color: 'white', boxShadow: '0 2px 8px rgba(0,113,227,0.3)' }}>
-                  <CalendarClock size={16} />
-                  Décaler la mission
-                </button>
-              </div>
-            ) : (
-              <div className="flex gap-3 justify-end">
-                <button type="button"
-                  onClick={() => setJ1Modal('non_effectue')}
-                  className="px-5 py-2.5 rounded-xl text-sm font-medium flex items-center gap-1.5"
-                  style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
-                  <X size={15} />
-                  Non effectué
-                </button>
-                <button type="button"
-                  onClick={() => setJ1Modal('reporte')}
-                  className="px-5 py-2.5 rounded-xl text-sm font-medium flex items-center gap-1.5"
-                  style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}>
-                  <CalendarClock size={15} />
-                  Décaler
-                </button>
-                <button type="button"
-                  onClick={handleTerminer}
-                  disabled={saving}
-                  className="px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2"
-                  style={{ background: saving ? COLORS.BORDER : COLORS.ACCENT, color: 'white', boxShadow: saving ? 'none' : '0 2px 8px rgba(0,113,227,0.3)' }}>
-                  <CheckCircle2 size={16} />
-                  {saving ? 'Enregistrement…' : 'Terminer la mission'}
-                </button>
-              </div>
-            )}
-          </div>
-        </>
+        <MissionDetailActions
+          isAutoJ1={isAutoJ1}
+          saving={saving}
+          onTerminer={handleTerminer}
+          onDecaler={() => setJ1Modal('reporte')}
+          onNonEffectue={() => setJ1Modal('non_effectue')}
+        />
       )}
 
       {sampling.status === 'done' && (

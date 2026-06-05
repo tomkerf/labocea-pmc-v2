@@ -64,6 +64,7 @@ function dismissChangelog() {
 
 function showChangelog() { setGlobalOpen(true) }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useChangelogState() {
   const [open, setOpen] = useState(_open)
 
