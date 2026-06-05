@@ -2,6 +2,31 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 103 — Code review Gemini + bugfixes isSamplingOverdue
+**5 juin 2026**
+
+### Ce qui a été fait
+- **Code review** : Audit qualité du code produit lors de la session 101 (Gemini 2.5 Pro). 7 angles de review (correctness, removed-behavior, cross-file, reuse, simplification, efficiency, altitude). 10 findings identifiés.
+- **Fix isSamplingOverdue — propagation manquante** : Le correctif `isAutomatique` introduit en session 102 (ligne 55 de `usePlanningData.ts`) n'avait pas été propagé à 4 autres call sites. Corrigé dans :
+  - `BilanMoisModal.tsx` — prélèvements Automatique marqués en retard 1 jour trop tôt
+  - `DayModal.tsx` — même bug dans la vue jour
+  - `usePlanningData.ts` lignes 254, 302, 303 — `totalOverdue` et tri du pool faux pour les plans Automatique
+- **Fix parseInt("") → NaN dans BilanMoisModal** : `parseInt(client.annee ?? "")` retournait NaN pour les clients avec `annee: ""`, silencieusement exclus du bilan. Corrigé avec un guard `isNaN`.
+- **Fix RESET_FORM leakait deletingId** : En ouvrant la modale d'ajout, `deletingId` restait actif sur une autre ligne (risque de suppression accidentelle). `RESET_FORM` le remet à null désormais.
+- **Fix save error swallowed dans TodosPage** : Les erreurs Firestore étaient absorbées silencieusement. Ajout de `toast.error(...)` dans le `catch`.
+- **Ajout `methode` dans `PoolItem`** : Nécessaire pour passer `isAutomatique` dans DayModal et le tri du pool.
+- **Déploiement staging** : Build et déploiement réussis (`e533a90`).
+
+### Cause racine des bugs
+Le correctif de session 102 créait une API à 3 arguments sur `isSamplingOverdue` mais n'avait cherché que le call site principal. Les 4 autres call sites (dans 3 fichiers différents) utilisaient encore la forme sans arguments.
+
+### Prochaines étapes
+- Refactoring `BilanMoisModal` pour utiliser `BaseModal` (deux patterns de modale coexistent)
+- Extraction `TodoRow` vers son propre fichier (`src/components/todos/TodoRow.tsx`)
+- Typage strict du reducer `SET_FIELD` (actuellement `value: any`)
+
+---
+
 ## Session 101 — Bilan du mois (UX Planning)
 **4 juin 2026**
 
