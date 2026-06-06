@@ -29,7 +29,6 @@ skills/
 .github/workflows/react-doctor.yml
 
 # Fichiers de gestion de projet interne
-TODO_REFACTORING.md
 skills-lock.json
 AGENTS.md
 public/logo.svg
