@@ -1,4 +1,4 @@
-import { X, MapPin, CalendarClock } from 'lucide-react'
+import { X, MapPin, CalendarClock, AlertTriangle } from 'lucide-react'
 import { COLORS } from '@/lib/constants'
 
 
@@ -67,6 +67,11 @@ export function TourneeItem({ item, onAction }: Props) {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {!hasGps && (
+            <span title="Coordonnées GPS manquantes" className="text-warning flex items-center">
+              <AlertTriangle size={18} style={{ color: COLORS.WARNING }} />
+            </span>
+          )}
           {item.meteo === 'pluie' && (
             <span title="Prélèvement temps de pluie" className="text-base leading-none">🌧</span>
           )}

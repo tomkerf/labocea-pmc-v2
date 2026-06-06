@@ -127,6 +127,18 @@ export function DashboardPlanningWidget({
           </AnimatePresence>
         </m.div>
       )}
+
+      {planningMode === 'today' && (
+        <button
+          type="button"
+          onClick={() => navigate('/tournee')}
+          className="w-full mt-3 py-3 rounded-xl text-sm font-semibold flex justify-center items-center gap-2 transition-transform active:scale-[0.98] cursor-pointer"
+          style={{ background: COLORS.ACCENT, color: '#FFFFFF', boxShadow: 'var(--shadow-card)' }}
+        >
+          <span className="text-base leading-none">🚙</span>
+          Mode Tournée du Jour
+        </button>
+      )}
     </div>
   )
 }

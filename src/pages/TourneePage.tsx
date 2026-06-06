@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Navigation } from 'lucide-react'
 
 import { useAuthStore, selectInitiales, selectUid, selectRole } from '@/stores/authStore'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -181,6 +181,47 @@ export default function TourneePage() {
     }
   }, [modal, uid, clients])
 
+  // --- Génération des itinéraires GPS ---
+  const routes = useMemo(() => {
+    // Filtre les points à faire et ayant des coordonnées valides
+    const validItems = tourneeItems.filter(i => {
+      const s = localStatuses.get(i.samplingId) ?? i.status
+      return s === 'todo' && i.lat && i.lng
+    })
+    
+    if (validItems.length === 0) return []
+
+    const chunks = []
+    // Google Maps autorise 9 waypoints + 1 destination = 10 points
+    const CHUNK_SIZE = 10
+    
+    for (let i = 0; i < validItems.length; i += CHUNK_SIZE) {
+      chunks.push(validItems.slice(i, i + CHUNK_SIZE))
+    }
+
+    return chunks.map((chunk, index) => {
+      const destinationItem = chunk[chunk.length - 1]
+      const waypointsItems = chunk.slice(0, -1)
+
+      const destination = `${destinationItem.lat},${destinationItem.lng}`
+      const waypoints = waypointsItems.map(item => `${item.lat},${item.lng}`).join('|')
+      
+      const baseUrl = 'https://www.google.com/maps/dir/?api=1&origin=My+Location&travelmode=driving'
+      const url = `${baseUrl}&destination=${destination}${waypoints ? `&waypoints=${encodeURIComponent(waypoints)}` : ''}`
+
+      const startIdx = index * CHUNK_SIZE + 1
+      const endIdx = startIdx + chunk.length - 1
+
+      return {
+        id: index,
+        label: chunks.length > 1 
+          ? `Itinéraire Maps (Points ${startIdx} à ${endIdx})` 
+          : 'Lancer l\'itinéraire complet (Maps)',
+        url
+      }
+    })
+  }, [tourneeItems, localStatuses])
+
   // Construire les items pour l'écran de fin
   const finItems: TourneeFinItem[] = tourneeItems.map(i => ({
     samplingId: i.samplingId,
@@ -227,6 +268,30 @@ export default function TourneePage() {
             style={{ width: `${(doneCount / Math.max(tourneeItems.length, 1)) * 100}%`, background: COLORS.ACCENT }} />
         </div>
       </div>
+
+      {/* Boutons Itinéraire */}
+      {routes.length > 0 ? (
+        <div className="mb-6 flex flex-col gap-2">
+          {routes.map(route => (
+            <a
+              key={route.id}
+              href={route.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+              style={{ background: COLORS.ACCENT, color: 'white', boxShadow: 'var(--shadow-card)' }}
+            >
+              <Navigation size={18} />
+              {route.label}
+            </a>
+          ))}
+        </div>
+      ) : tourneeItems.some(i => (localStatuses.get(i.samplingId) ?? i.status) === 'todo') ? (
+        <div className="mb-6 py-3 rounded-xl text-sm font-medium flex justify-center items-center gap-2" style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
+          <Navigation size={18} />
+          Itinéraire indisponible (GPS manquants)
+        </div>
+      ) : null}
 
       {/* Liste */}
       {tourneeItems.length === 0 ? (

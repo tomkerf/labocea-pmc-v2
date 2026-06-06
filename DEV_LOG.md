@@ -2,6 +2,45 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 114 — Guidage GPS Tournée (Google Maps Multi-destinations)
+**6 juin 2026**
+
+### Ce qui a été fait
+- **Génération d'itinéraire Google Maps** : Implémentation du calcul d'URL d'itinéraire dynamique dans `TourneePage.tsx` basé sur l'API universelle de Google Maps.
+- **Découpage intelligent** : Gestion de la limite des 10 points de passage de Google Maps via un découpage par tronçons (Chunking). Si la tournée comprend plus de 10 points valides, plusieurs boutons d'itinéraires séquentiels ("Points 1 à 10", "Points 11 à 20") sont générés.
+- **Exclusion et alertes GPS** : Les points sans coordonnées valides (`lat` ou `lng` manquants) sont automatiquement ignorés de l'itinéraire calculé. Ajout d'une alerte visuelle (⚠️) directement dans `TourneeItem` pour ces points afin de prévenir l'utilisateur sur le terrain.
+- **Hotfix Dashboard** : Correction du `DonutChart` de l'état du parc matériel. Séparation des segments de façon mutuellement exclusive pour éviter les doubles comptages (`aCalibrrer` vs `operationnel`) qui causaient un pourcentage global supérieur à 100% et un total erroné (ex: 61 affichés mais 63 dans la légende).
+- **Validation** : 0 erreur de lint et 0 erreur TypeScript. Le code respecte le standard de l'application.
+
+### Prochaines étapes
+- Déployer sur le staging pour test en situation réelle sur mobile.
+
+---
+
+## Session 113 — Note de conception : Guidage GPS Tournée (Google Maps Multi-destinations)
+**6 juin 2026**
+
+### Note de conception pour Claude
+Pour le développement de la fonctionnalité "Guidage GPS de la tournée" :
+
+- **Objectif** : Ajouter un bouton sur la page Tournée (`src/pages/TourneePage.tsx`) permettant d'ouvrir Google Maps (web ou application mobile native) pré-chargé avec l'itinéraire ordonné des points à visiter.
+- **Spécifications techniques** :
+  - **URL Google Maps** : Utiliser l'API d'URL universelle sans clé payante :
+    `https://www.google.com/maps/dir/?api=1&origin=My+Location&destination={DernierPointGPS}&waypoints={PointsIntermediairesGPS}&travelmode=driving`
+  - **origin=My+Location** : Utilise la position actuelle de l'utilisateur sur le terrain.
+  - **destination** : GPS du tout dernier point de la tournée (format `latitude,longitude`).
+  - **waypoints** : GPS des points intermédiaires triés par ordre de passage, séparés par `|` (URL-encoded `%7C`).
+  - **Limites** : Google Maps limite les itinéraires à 9 points intermédiaires (11 points au total). Si la tournée dépasse cette limite, générer plusieurs boutons d'itinéraires segmentés (ex: "Partie 1 (1-10)", "Partie 2 (10-20)").
+  - **Cas d'erreur** : Exclure silencieusement les plans n'ayant pas de coordonnées valides (`lat` et `lng` nulles ou vides), et afficher une alerte/badge d'avertissement ⚠️ à côté de ces points dans l'interface de la tournée.
+
+### Prochaines étapes (à réaliser par Claude)
+- [ ] Implémenter le calcul de l'URL d'itinéraire dans un helper ou directement dans `TourneePage`.
+- [ ] Ajouter le bouton d'action "Lancer l'itinéraire Google Maps" sur la page `/tournee`.
+- [ ] Gérer les cas limites (points sans GPS, tournées > 10 points avec découpage d'itinéraires).
+- [ ] Valider l'intégration et tester sur mobile.
+
+---
+
 ## Session 112 — Résolution des builds CI
 **6 juin 2026**
 

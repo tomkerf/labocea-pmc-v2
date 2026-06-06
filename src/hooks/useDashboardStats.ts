@@ -101,21 +101,17 @@ export function useDashboardStats({
   }, [verifications])
 
   const aCalibrrer = useMemo(() => {
-    // Équipements couverts par au moins une vérification → on utilise prochainControle de la vérif
-    const verifIds = new Set(verifications.map((v: Verification) => v.equipementId))
-    const verifNoms = new Set(verifications.map((v: Verification) => v.equipementNom))
-
-    const verifsProches = verifications.filter(
-      (v: Verification) => v.prochainControle && daysDiff(v.prochainControle) < 30
-    ).length
-
-    const equipsSansVerifProches = equipements.filter((e: Equipement) => {
-      if (!e.prochainEtalonnage) return false
-      if (verifIds.has(e.id) || verifNoms.has(e.nom)) return false
-      return daysDiff(e.prochainEtalonnage) < 30
-    }).length
-
-    return verifsProches + equipsSansVerifProches
+    let count = 0
+    equipements.forEach((e: Equipement) => {
+      const eqVerifs = verifications.filter((v: Verification) => v.equipementId === e.id || v.equipementNom === e.nom)
+      if (eqVerifs.length > 0) {
+        const latest = eqVerifs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+        if (latest.prochainControle && daysDiff(latest.prochainControle) < 30) count++
+      } else {
+        if (e.prochainEtalonnage && daysDiff(e.prochainEtalonnage) < 30) count++
+      }
+    })
+    return count
   }, [verifications, equipements])
 
   // ── Rapports à envoyer ────────────────────────────────────
@@ -370,6 +366,33 @@ export function useDashboardStats({
     prete:          equipements.filter((e: Equipement) => e.etat === 'prete').length,
   }), [equipements])
 
+  const parcDonut = useMemo(() => {
+    let en_service = 0
+    let a_calibrer = 0
+    let en_maintenance = 0
+    let hors_service = 0
+    let prete = 0
+
+    equipements.forEach((e: Equipement) => {
+      if (e.etat === 'en_maintenance') { en_maintenance++; return }
+      if (e.etat === 'hors_service') { hors_service++; return }
+      if (e.etat === 'prete') { prete++; return }
+
+      const eqVerifs = verifications.filter((v: Verification) => v.equipementId === e.id || v.equipementNom === e.nom)
+      let needsCalib = false
+      if (eqVerifs.length > 0) {
+        const latest = eqVerifs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+        if (latest.prochainControle && daysDiff(latest.prochainControle) < 30) needsCalib = true
+      } else {
+        if (e.prochainEtalonnage && daysDiff(e.prochainEtalonnage) < 30) needsCalib = true
+      }
+
+      if (needsCalib) a_calibrer++
+      else en_service++
+    })
+    return { en_service, a_calibrer, en_maintenance, hors_service, prete }
+  }, [equipements, verifications])
+
   // ── Alertes ───────────────────────────────────────────────
 
   const prelevementsEnRetard = useMemo((): RetardItem[] => {
@@ -450,6 +473,7 @@ export function useDashboardStats({
     hasRainToday,
     hasRainTomorrow,
     parcEtat,
+    parcDonut,
     prelevementsEnRetard,
     prelevementsPluie,
     maintenancesActives,

@@ -99,8 +99,9 @@ export default function DashboardPage() {
 
   const {
     missionsCeMois, verifiTotal, verifiConformes, conformitePct,
-    aCalibrrer, rapportsAFaireMoi, jourItems, lendemainItems, parcEtat,
+    aCalibrrer, rapportsAFaireMoi, jourItems, lendemainItems,
     hasRainToday, hasRainTomorrow,
+    parcDonut,
     prelevementsEnRetard, prelevementsPluie, maintenancesActives, metrologieAlertes,
     techOptions: rawTechOptions,
   } = useDashboardStats({ clients, verifications, equipements, evenements, maintenances, todos, uid, initiales, isGeneraliste })
@@ -212,11 +213,11 @@ export default function DashboardPage() {
                   <DonutChart
                     total={equipements.length}
                     segments={[
-                      { value: parcEtat.operationnel,   color: COLORS.SUCCESS, label: 'En service'     },
-                      { value: aCalibrrer,              color: COLORS.WARNING, label: 'À calibrer'     },
-                      { value: parcEtat.en_maintenance, color: COLORS.ACCENT,  label: 'En maintenance' },
-                      { value: parcEtat.hors_service,   color: COLORS.DANGER,  label: 'Hors service'   },
-                      { value: parcEtat.prete,          color: 'var(--color-neutral)', label: 'Prêté'          },
+                      { value: parcDonut.en_service,     color: COLORS.SUCCESS, label: 'En service'     },
+                      { value: parcDonut.a_calibrer,     color: COLORS.WARNING, label: 'À calibrer'     },
+                      { value: parcDonut.en_maintenance, color: COLORS.ACCENT,  label: 'En maintenance' },
+                      { value: parcDonut.hors_service,   color: COLORS.DANGER,  label: 'Hors service'   },
+                      { value: parcDonut.prete,          color: 'var(--color-neutral)', label: 'Prêté'          },
                     ]}
                   />
                 </div>

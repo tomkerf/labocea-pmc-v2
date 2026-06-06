@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '111'
+export const CHANGELOG_VERSION = '114'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,15 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '114',
+    date: '6 juin 2026',
+    items: [
+      { type: 'feat', label: 'Guidage GPS : Lancement de l\'itinéraire Google Maps depuis la vue Tournée (avec découpage dynamique)' },
+      { type: 'feat', label: 'Tournée : Alerte visuelle (⚠️) pour les points de prélèvement sans coordonnées GPS configurées' },
+      { type: 'fix', label: 'Dashboard : Correction du total et des segments mutuellement exclusifs sur le graphique du parc matériel' },
+    ],
+  },
   {
     version: '111',
     date: '6 juin 2026',
