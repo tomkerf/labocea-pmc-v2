@@ -2,6 +2,23 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 109 — Refactoring god components (suite)
+**6 juin 2026**
+
+### Ce qui a été fait
+
+- **`VisiteFormPage.tsx`** : 441L → 235L (-47%). Extraction de `PointCard`, `VisiteFormHeader`, `VisiteGeneralFields`, `VisiteFormActions` dans `src/components/visites/`.
+- **`ClientPlans.tsx`** : 395L → 188L (-52%). Extraction de `SortableSeparatorRow` et `SortablePlanRow` dans `src/components/client/`.
+- **`DayModal.tsx`** : 377L → 101L (-73%). Chaque onglet extrait en composant autonome avec son propre état : `DayModalEvtTab` et `DayModalPoolTab`.
+- **`PlanningPage.tsx`** : 448L → 422L. Extraction de `usePlanningFilters` (hook) pour encapsuler la logique filterTech/filterSite — persistance localStorage, validation tech/site, calcul `visibleTechs`/`allowedTechs`. Plus aucun `useEffect` inline dans la page.
+- 9 nouveaux fichiers créés (4 composants visites, 2 composants client, 2 onglets DayModal, 1 hook planning).
+- 0 erreur TypeScript/ESLint à chaque étape.
+
+### Prochaines étapes
+- Session test équipe sur staging avant déploiement production.
+
+---
+
 ## Session 107 — Refactoring god components (doublon + 4 pages)
 **5 juin 2026**
 
