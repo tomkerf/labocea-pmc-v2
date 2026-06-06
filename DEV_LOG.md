@@ -2,8 +2,28 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
-## Session 110 — Bugfix deploy + validation staging
+## Session 111 — Audit global et accessibilité
 **6 juin 2026**
+
+### Ce qui a été fait
+
+- **Audit automatisé de la base de code** :
+  - TypeScript compilation : 0 erreur (100% clean).
+  - ESLint linting : 0 erreur, 0 avertissement (100% clean).
+  - Tests unitaires : 145/145 PASS (100% clean).
+- **Correctifs de code** :
+  - **`useWeather.ts`** : Résolution du bug de condition de course asynchrone dans les tests unitaires. Initialisation dynamique de l'état avec `loading: true` au premier rendu si `fetchKey` est présent. 6/6 tests de météo passent au vert.
+  - **`index.css`** : Ajout du media query `@media (prefers-reduced-motion: reduce)` pour l'accessibilité visuelle (WCAG 2.3.3 compliance), désactivant les animations pour les personnes sensibles au mouvement. Résolution de l'unique erreur bloquante React Doctor.
+  - **`vitest.config.ts`** : Attribution du nom `'unit'` au projet de tests unitaires (permet de les exécuter via `npx vitest run --project=unit`) et ajout des dépendances Storybook à `optimizeDeps.include` pour éliminer le rechargement inattendu de Vite au démarrage.
+- **Rapport d'audit** : Création du fichier [audit_results.md](file:///Users/thomaskerfendal/.gemini/antigravity-cli/brain/00f22af1-3d43-4da7-a1a2-560f8104abab/audit_results.md) détaillant l'état de santé du projet.
+
+### Prochaines étapes
+- Attendre les retours de l'équipe Brest sur le staging pour le déploiement en production.
+- Résolution progressive des 251 avertissements mineurs restants de React Doctor.
+
+---
+
+## Session 110 — Bugfix deploy + validation staging
 
 ### Bugs corrigés
 
