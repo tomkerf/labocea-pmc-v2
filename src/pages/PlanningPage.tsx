@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useClientsListener } from '@/hooks/useClients'
 // saveClient, createEvenement, deleteEvenement → usePlanningActions
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -31,6 +31,7 @@ import { usePlanningCalendar } from '@/hooks/usePlanningCalendar'
 import { usePlanningDrag } from '@/hooks/usePlanningDrag'
 import { usePlanningActions } from '@/hooks/usePlanningActions'
 import { usePlanningNavigation } from '@/hooks/usePlanningNavigation'
+import { usePlanningFilters } from '@/hooks/usePlanningFilters'
 import DayModal          from '@/components/planning/DayModal'
 import CellContextMenu   from '@/components/planning/CellContextMenu'
 import GhostDetailModal  from '@/components/planning/GhostDetailModal'
@@ -83,15 +84,6 @@ const uid        = useAuthStore(selectUid)
     const saved = localStorage.getItem('planning_filter_tech')
     return saved === 'ALL' ? '' : (saved ?? '')
   })
-
-  // Appliquer le filtre par défaut au premier chargement
-  useEffect(() => {
-    if (initiales && !localStorage.getItem('planning_filter_tech')) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFilterTech(initiales)
-      localStorage.setItem('planning_filter_tech', initiales)
-    }
-  }, [initiales])
   const [filterSite, setFilterSite] = useState<string>(
     () => localStorage.getItem('planning_filter_site') ?? ''
   )
@@ -137,27 +129,9 @@ const uid        = useAuthStore(selectUid)
     clients, maintenances, equipements, evenements, todos, users, preleveurs, selectedDay,
   })
 
-  const visibleTechs = useMemo(() => {
-    if (!filterSite) return allTechs
-    return allTechs.filter(code => {
-      const prel = preleveurs.find(p => p.code === code)
-      return (prel?.site ?? '') === filterSite
-    })
-  }, [allTechs, filterSite, preleveurs])
-
-  useEffect(() => {
-    if (filterTech && !visibleTechs.includes(filterTech)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFilterTech('')
-      localStorage.setItem('planning_filter_tech', 'ALL')
-    }
-  }, [visibleTechs, filterTech, setFilterTech])
-
-  // Quand un site est filtré sans tech spécifique, restreindre aux techs du site
-  const allowedTechs = useMemo(() => {
-    if (filterTech || !filterSite) return []
-    return visibleTechs
-  }, [filterTech, filterSite, visibleTechs])
+  const { visibleTechs, allowedTechs } = usePlanningFilters({
+    initiales, allTechs, preleveurs, filterTech, setFilterTech, filterSite,
+  })
 
   // ── Calculs calendrier (filtrage, bilanBand, allDayItems, periodList) ──
   const {
