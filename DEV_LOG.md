@@ -2,6 +2,23 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 112 — Résolution des builds CI
+**6 juin 2026**
+
+### Ce qui a été fait
+
+- **Identification de la cause des échecs CI** : Les corrections de code des sessions 110 et 111 (notamment l'import de `Preleveur` corrigé dans `usePlanningFilters.ts`, les correctifs de tests dans `useWeather.ts` et le style d'accessibilité) étaient restées non stagées et non committées localement. Par conséquent, les builds déclenchés sur GitHub Actions échouaient systématiquement en raison d'imports cassés.
+- **Commit & Push des correctifs de code** : Indexation et commit des 9 fichiers modifiés localement, puis push sur `origin main`.
+- **Validation CI & Staging** :
+  - Le build GitHub Actions de la branche `main` passe désormais avec succès (100% vert).
+  - Déploiement de staging mis à jour et validé via `bash deploy-dev.sh`.
+
+### Prochaines étapes
+- Attendre les retours de l'équipe de Brest sur le staging.
+- Préparer le déploiement final en production.
+
+---
+
 ## Session 111 — Audit global et accessibilité
 **6 juin 2026**
 

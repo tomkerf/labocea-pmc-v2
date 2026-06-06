@@ -312,6 +312,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-06 | Refactoring god components (suite) ✅ | VisiteFormPage (441→235L), ClientPlans (395→188L), DayModal (377→101L), usePlanningFilters extrait. 9 nouveaux fichiers, 0 erreur TS/ESLint. |
 | 2026-06-06 | Bugfix deploy + validation staging ✅ | Fix import Preleveur cassé dans usePlanningFilters. Checklist staging complète validée (auth, auto-save, statuts, planning, mobile, dashboard, matériel, métrologie, maintenances). En attente retour équipe Brest avant prod. |
 | 2026-06-06 | Audit & Qualité ✅ | Audit global automatique (TypeScript et ESLint 100% clean), 145/145 tests unitaires verts (correction bug useWeather), résolution erreur a11y reduced-motion dans index.css, optimisation config vitest.config.ts pour Storybook, rédaction audit_results.md. |
+| 2026-06-06 | CI / Build ✅ | Résolution des builds CI sur GitHub Actions par commit et push des correctifs de code locaux (9 fichiers). Validation du déploiement staging. |
 
 ---
 
