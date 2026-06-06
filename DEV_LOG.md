@@ -2,6 +2,35 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 110 — Bugfix deploy + validation staging
+**6 juin 2026**
+
+### Bugs corrigés
+
+**Import `Preleveur` cassé dans `usePlanningFilters.ts`**
+- Cause racine : lors de l'extraction du hook en session 109, l'import `Preleveur` pointait vers `@/types` où le type n'existe pas — il est défini dans `@/stores/preleveursStore`.
+- Fix : `import type { Preleveur } from '@/stores/preleveursStore'`
+- Build passait à 0 erreur TypeScript après correction.
+
+### Validation staging
+
+Checklist complète testée sur `https://labocea-pmc-v2-dev.tomkerf.workers.dev` :
+- Auth + route guard (7 routes protégées vérifiées via Playwright) ✅
+- Auto-save fiche mission ✅
+- Changement statut prélèvement (persistance après rechargement) ✅
+- Planning navigation semaine ✅
+- Mobile 375px ✅
+- Dashboard (KPIs, planning du jour, donut chart, alertes) ✅
+- Matériel (liste, anneaux métrologie, auto-save fiche) ✅
+- Métrologie (tableau, filtres statut) ✅
+- Maintenances (liste, création) ✅
+
+### Prochaines étapes
+- Attendre retour de l'équipe Brest sur staging avant déploiement production.
+- Déployer en prod : `npx wrangler deploy`
+
+---
+
 ## Session 109 — Refactoring god components (suite)
 **6 juin 2026**
 

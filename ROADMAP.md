@@ -310,6 +310,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-05 | Qualité / ESLint ✅ | Zéro erreur TypeScript et ESLint. Suppression des types `any`, variables non utilisées, et correction exhaustive des deps dans les React Hooks. |
 | 2026-06-05 | Refactoring god components ✅ | Suppression doublon EventDetailModal. Découpage FicheDeVie (491→226L), DemandesPage (501→162L), ComptePage (480→97L), AsservissementPage (464→110L). 20 nouveaux composants extraits. 0 erreurs TS/ESLint. |
 | 2026-06-06 | Refactoring god components (suite) ✅ | VisiteFormPage (441→235L), ClientPlans (395→188L), DayModal (377→101L), usePlanningFilters extrait. 9 nouveaux fichiers, 0 erreur TS/ESLint. |
+| 2026-06-06 | Bugfix deploy + validation staging ✅ | Fix import Preleveur cassé dans usePlanningFilters. Checklist staging complète validée (auth, auto-save, statuts, planning, mobile, dashboard, matériel, métrologie, maintenances). En attente retour équipe Brest avant prod. |
 
 ---
 
