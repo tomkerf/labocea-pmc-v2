@@ -59,7 +59,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center"
+    <div role="presentation" className="fixed inset-0 z-[70] flex items-end md:items-center justify-center"
       style={{ background: 'rgba(0,0,0,0.3)' }}
       onClick={onClose}>
       <div className="w-full md:w-[400px] rounded-t-2xl md:rounded-2xl overflow-hidden"
@@ -90,7 +90,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
 
         <div className="px-5 py-4 space-y-3">
           <input
-            autoFocus
+
             aria-label="Titre de l'événement"
             placeholder={type === 'conge' ? 'Titre (optionnel)' : 'Titre de l\'événement'}
             value={titre}

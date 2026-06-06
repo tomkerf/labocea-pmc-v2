@@ -15,7 +15,7 @@ export default function CellContextMenu({ x, y, onClose, onPlanifier, onEvenemen
   const safeY = Math.min(y, window.innerHeight - 130)
 
   return (
-    <div className="fixed inset-0 z-[55]" onClick={onClose} onContextMenu={e => { e.preventDefault(); onClose() }}>
+    <div role="presentation" className="fixed inset-0 z-[55]" onClick={onClose} onContextMenu={e => { e.preventDefault(); onClose() }}>
       <div className="absolute rounded-xl overflow-hidden"
         style={{
           left: safeX, top: safeY,

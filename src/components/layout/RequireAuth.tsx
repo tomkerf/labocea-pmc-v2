@@ -69,7 +69,7 @@ function CompleteProfileModal() {
               onChange={(e) => setPrenom(e.target.value)}
               className="field-input w-full"
               placeholder="Thomas"
-              autoFocus
+
             />
           </div>
           <div>

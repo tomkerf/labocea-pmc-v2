@@ -44,9 +44,9 @@ export function MaintenancesWidget({ maintenances }: { maintenances: Maintenance
               const badgeLabel = enCours ? 'En cours' : enRetard ? 'En retard' : `Dans ${daysDiff(m.datePrevue)}j`
               const typeLabel  = m.type === 'preventive' ? 'Préventive' : m.type === 'corrective' ? 'Corrective' : 'Panne'
               return (
-                <div key={m.id}
-                  className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                  style={{ borderBottom: i < maintenances.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                <button key={m.id} type="button"
+                  className="flex items-center gap-3 px-4 py-3 cursor-pointer w-full text-left"
+                  style={{ borderBottom: i < maintenances.length - 1 ? '1px solid var(--color-border-subtle)' : 'none', background: 'transparent' }}
                   onClick={() => navigate(`/maintenances/${m.id}`)}
                   onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
@@ -62,7 +62,7 @@ export function MaintenancesWidget({ maintenances }: { maintenances: Maintenance
                     style={{ background: badgeBg, color: badgeColor }}>
                     {badgeLabel}
                   </span>
-                </div>
+                </button>
               )
             })}
           </div>

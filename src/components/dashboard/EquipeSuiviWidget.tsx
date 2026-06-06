@@ -205,9 +205,9 @@ export function EquipeSuiviWidget({ clients }: Props) {
               }} />
             </button>
             {openIncomplets && incomplets.map((item, i) => (
-              <div key={item.samplingId}
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                style={{ borderBottom: i < incomplets.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+              <button key={item.samplingId} type="button"
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer w-full text-left"
+                style={{ borderBottom: i < incomplets.length - 1 ? '1px solid var(--color-border-subtle)' : 'none', background: 'transparent' }}
                 onClick={() => navigate(`/missions/${item.clientId}/plan/${item.planId}`)}
                 onMouseEnter={e => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -225,7 +225,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
                   {item.champManquant}
                 </span>
                 <span style={{ color: 'var(--color-text-tertiary)', fontSize: 16 }}>›</span>
-              </div>
+              </button>
             ))}
           </div>
         )}
@@ -259,9 +259,9 @@ export function EquipeSuiviWidget({ clients }: Props) {
               const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
               const dateStr = item.plannedDay ? `prévu le ${item.plannedDay} ${months[item.plannedMonth]}` : `prévu en ${months[item.plannedMonth]}`
               return (
-                <div key={item.samplingId}
-                  className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                  style={{ borderBottom: i < enRetardList.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                <button key={item.samplingId} type="button"
+                  className="flex items-center gap-3 px-4 py-3 cursor-pointer w-full text-left"
+                  style={{ borderBottom: i < enRetardList.length - 1 ? '1px solid var(--color-border-subtle)' : 'none', background: 'transparent' }}
                   onClick={() => navigate(`/missions/${item.clientId}/plan/${item.planId}`)}
                   onMouseEnter={e => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -282,7 +282,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
                     En retard
                   </span>
                   <span style={{ color: 'var(--color-text-tertiary)', fontSize: 16 }}>›</span>
-                </div>
+                </button>
               )
             })}
           </div>
@@ -314,9 +314,9 @@ export function EquipeSuiviWidget({ clients }: Props) {
               }} />
             </button>
             {openRapports && rapportsDusList.map((item, i) => (
-              <div key={item.samplingId}
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                style={{ borderBottom: i < rapportsDusList.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+              <button key={item.samplingId} type="button"
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer w-full text-left"
+                style={{ borderBottom: i < rapportsDusList.length - 1 ? '1px solid var(--color-border-subtle)' : 'none', background: 'transparent' }}
                 onClick={() => navigate(`/missions/${item.clientId}/plan/${item.planId}`)}
                 onMouseEnter={e => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -334,7 +334,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
                   Rapport dû
                 </span>
                 <span style={{ color: 'var(--color-text-tertiary)', fontSize: 16 }}>›</span>
-              </div>
+              </button>
             ))}
           </div>
         )}

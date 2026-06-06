@@ -32,7 +32,7 @@ export default function GhostDetailModal({ event, onClose }: { event: PlanningEv
   const isRetrait = event.ghostAction === 'retiré'
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center"
+    <div role="presentation" className="fixed inset-0 z-[60] flex items-end md:items-center justify-center"
       style={{ background: 'rgba(0,0,0,0.4)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="w-full md:max-w-sm flex flex-col rounded-t-[20px] md:rounded-2xl"

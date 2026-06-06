@@ -102,9 +102,9 @@ export function EntryCard({
                 {entry.libelle || 'Code'}
               </p>
               <div className="flex items-center gap-2">
-                <div
+                <button type="button"
                   onClick={() => setRevealed(v => !v)}
-                  className="flex-1 px-3 py-2 rounded-lg text-sm font-semibold font-mono cursor-pointer select-none transition-all"
+                  className="flex-1 px-3 py-2 rounded-lg text-sm font-semibold font-mono cursor-pointer select-none transition-all text-left"
                   style={{
                     background: COLORS.BG_TERTIARY,
                     border: '1px solid var(--color-border)',
@@ -113,7 +113,7 @@ export function EntryCard({
                     userSelect: revealed ? 'text' : 'none',
                   }}>
                   {entry.code || '—'}
-                </div>
+                </button>
                 <button type="button"
                   onClick={() => setRevealed(v => !v)}
                   className="p-2 rounded-lg shrink-0"

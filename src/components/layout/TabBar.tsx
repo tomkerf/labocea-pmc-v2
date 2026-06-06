@@ -44,6 +44,7 @@ export default function TabBar() {
       {/* Overlay + action sheet */}
       {open && (
         <div
+          role="presentation"
           className="md:hidden fixed inset-0 z-40 flex flex-col justify-end"
           style={{ background: 'rgba(0,0,0,0.3)' }}
           onClick={() => setOpen(false)}

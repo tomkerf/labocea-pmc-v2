@@ -42,7 +42,7 @@ export default function DayModalEvtTab({ dateStr, uid, initiales, onClose }: Day
   return (
     <div className="px-4 py-4 space-y-3 flex-1 overflow-y-auto">
       <input
-        autoFocus
+
         aria-label="Titre de l'événement"
         placeholder={evtType === 'conge' ? 'Titre (optionnel)' : 'Titre de l\'événement'}
         value={evtTitre}

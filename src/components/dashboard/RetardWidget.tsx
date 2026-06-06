@@ -39,9 +39,9 @@ export function RetardWidget({ items }: { items: RetardItem[] }) {
           style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
           <div style={{ maxHeight: 280, overflowY: 'auto' }}>
             {items.map((r, i) => (
-              <div key={r.samplingId}
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                style={{ borderBottom: i < items.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+              <button key={r.samplingId} type="button"
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer w-full text-left"
+                style={{ borderBottom: i < items.length - 1 ? '1px solid var(--color-border-subtle)' : 'none', background: 'transparent' }}
                 onClick={() => navigate(`/missions/${r.clientId}/plan/${r.planId}`)}
                 onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
@@ -60,7 +60,7 @@ export function RetardWidget({ items }: { items: RetardItem[] }) {
                   style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
                   En retard
                 </span>
-              </div>
+              </button>
             ))}
           </div>
         </div>

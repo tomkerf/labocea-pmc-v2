@@ -46,9 +46,9 @@ export function MetrologieWidget({ equipements }: { equipements: Equipement[] })
               const badgeLabel = enRetard ? 'En retard' : diff === 0 ? "Aujourd'hui" : `Dans ${diff}j`
               
               return (
-                <div key={eq.id}
-                  className="flex items-center gap-3 px-4 py-3 cursor-pointer"
-                  style={{ borderBottom: i < equipements.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                <button key={eq.id} type="button"
+                  className="flex items-center gap-3 px-4 py-3 cursor-pointer w-full text-left"
+                  style={{ borderBottom: i < equipements.length - 1 ? '1px solid var(--color-border-subtle)' : 'none', background: 'transparent' }}
                   onClick={() => navigate(`/materiel/${eq.id}`)}
                   onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
@@ -64,7 +64,7 @@ export function MetrologieWidget({ equipements }: { equipements: Equipement[] })
                     style={{ background: badgeBg, color: badgeColor }}>
                     {badgeLabel}
                   </span>
-                </div>
+                </button>
               )
             })}
           </div>

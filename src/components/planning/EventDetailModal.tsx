@@ -57,7 +57,7 @@ export default function EventDetailModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center"
+    <div role="presentation" className="fixed inset-0 z-[60] flex items-end md:items-center justify-center"
       style={{ background: 'rgba(0,0,0,0.4)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="w-full md:max-w-sm flex flex-col rounded-t-[20px] md:rounded-2xl"
@@ -124,7 +124,7 @@ export default function EventDetailModal({
               <label htmlFor="pedm-move-date" className="block text-xs font-medium mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                 Nouvelle date
               </label>
-              <input id="pedm-move-date" type="date" value={moveDate} onChange={e => setMoveDate(e.target.value)} autoFocus
+              <input id="pedm-move-date" type="date" value={moveDate} onChange={e => setMoveDate(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
             </div>
@@ -160,7 +160,7 @@ export default function EventDetailModal({
                 id="pedm-tech"
                 value={techInitiales}
                 onChange={e => setTechInitiales(e.target.value)}
-                autoFocus
+
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}>
                 {techOptions.map(o => (
@@ -189,7 +189,7 @@ export default function EventDetailModal({
                 value={cancelReason} onChange={e => setCancelReason(e.target.value)}
                 placeholder="Ex : reporté à une date ultérieure, annulé par le client…"
                 rows={2}
-                autoFocus
+
                 className="w-full px-3 py-2 rounded-lg text-sm resize-none"
                 style={{ background: COLORS.BG_SECONDARY, border: '1px solid rgba(255,59,48,0.3)', color: COLORS.TEXT_PRIMARY }} />
             </div>

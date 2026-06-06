@@ -64,6 +64,7 @@ export default function PlanningMiniCalendar({
       {/* Backdrop overlay (ferme au clic extérieur) */}
       {showMiniCal && (
         <div
+          role="presentation"
           className="hidden md:block absolute inset-0 z-20"
           onClick={() => setShowMiniCal(false)}
         />

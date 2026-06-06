@@ -52,7 +52,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end md:items-center md:justify-center" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose}>
+      <div role="presentation" className="fixed inset-0 z-50 flex items-end md:items-center md:justify-center" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose}>
         <m.div
           initial={{ y: '100%' }}
           animate={{ y: 0 }}

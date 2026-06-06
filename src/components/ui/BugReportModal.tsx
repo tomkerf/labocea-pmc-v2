@@ -85,7 +85,7 @@ export default function BugReportModal({ isOpen, onClose }: Props) {
           Décris ce qui ne fonctionne pas. La page actuelle sera jointe automatiquement.
         </p>
         <textarea
-          autoFocus
+
           rows={4}
           value={description}
           onChange={e => setDescription(e.target.value)}

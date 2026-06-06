@@ -53,6 +53,7 @@ export function DemandeModal({ demande, users, onClose, onSave, onDelete, onConv
 
   return (
     <div
+      role="presentation"
       className="fixed inset-0 z-50 flex items-start justify-center p-5 overflow-y-auto"
       style={{ background: 'rgba(0,0,0,0.3)' }}
       onClick={onClose}

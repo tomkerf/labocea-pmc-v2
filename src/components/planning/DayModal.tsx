@@ -32,7 +32,7 @@ export default function DayModal({
   const totalPool = pool.length + overduePool.filter(x => !pool.some(p => p.sampling.id === x.sampling.id)).length
 
   return (
-    <div className="fixed inset-0 z-[55] flex items-end md:items-center justify-center"
+    <div role="presentation" className="fixed inset-0 z-[55] flex items-end md:items-center justify-center"
       style={{ background: 'rgba(0,0,0,0.35)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="w-full md:max-w-lg flex flex-col overflow-hidden rounded-t-[20px] md:rounded-2xl"

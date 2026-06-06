@@ -14,6 +14,7 @@ interface Props {
 export function PdfPreviewModal({ html, client, users, onClose }: Props) {
   return (
     <div
+      role="presentation"
       className="fixed inset-0 z-[80] flex flex-col"
       style={{ background: 'rgba(0,0,0,0.6)' }}
       onClick={onClose}

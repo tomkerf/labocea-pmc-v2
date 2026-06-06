@@ -71,7 +71,7 @@ export default function TodoFormModal({
               borderColor: 'var(--color-border-subtle)',
               color: COLORS.TEXT_PRIMARY,
             }}
-            autoFocus
+
           />
         </div>
 

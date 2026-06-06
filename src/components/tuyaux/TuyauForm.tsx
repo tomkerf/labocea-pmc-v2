@@ -82,7 +82,7 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+    <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
       onClick={onClose}>
       <div className="w-full max-w-xl rounded-xl overflow-hidden"
@@ -108,7 +108,7 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
                   placeholder="Q25TFE1"
                   aria-label="Référence labo"
                   className="field-input text-sm font-bold tracking-widest"
-                  autoFocus />
+                  />
               </div>
             </F>
             <F label="Matériau">

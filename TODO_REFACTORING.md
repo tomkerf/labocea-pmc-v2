@@ -47,23 +47,25 @@ Ce document liste les dettes techniques identifiées lors des audits successifs.
 - [x] **Tests hooks** (`useClients`, `useEquipements`, `useVerifications`) — vitest en place, tests vérifiés. ✅ 2026-06-04
 - [x] **Storybook** — en place (installation Storybook initiée). ✅ 2026-06-04
 
-## 8. Performance — À traiter
+## 8. Performance ✅ Soldé
 
-- [ ] **`LazyMotion` Framer Motion** — remplacer `motion` par `m` + `LazyMotion` à la racine (`App.tsx`). Économie estimée ~30 Ko sur le bundle mobile. 16 occurrences à migrer.
-- [ ] **`no-large-animated-blur`** — 7 cas de `blur(12–20px)` animé (sidebar, modals). Coûteux GPU sur mobiles anciens. Réduire ou ne pas animer le flou.
+- [x] **`LazyMotion` Framer Motion** — migré `motion` → `m` + `LazyMotion` à la racine. ~30 Ko bundle. ✅ 2026-06-06
+- [x] **`no-large-animated-blur`** — `AppLayout` blur animé supprimé (blur statique). ✅ 2026-06-06
 
-## 9. Maintenabilité — À traiter
+## 9. Maintenabilité ✅ Soldé
 
-- [ ] **`no-render-in-render`** — 4 fonctions locales type `renderSection()` à extraire en composants (dont `BilanMoisModal`). Recréent le DOM à chaque rendu.
-- [ ] **`prefer-useReducer`** — formulaires avec 7–11 `useState` (ex: `DragCreateModal`, `EntryForm`). Centraliser avec `useReducer`.
+- [x] **`no-render-in-render`** — `renderSection()` → `BilanSection`, `renderItem()` → `PoolItemRow`. ✅ 2026-06-06
+- [x] **`prefer-useReducer`** — `DragCreateModal` (7 états) + `EntryForm` (11 états) migrés. ✅ 2026-06-06
 - [ ] **Props drag redondantes** — `isInDrag` passé en prop à `WeekView`/`MonthView` alors que calculable depuis `isDragging + dragStart + dragEnd`.
 - [ ] **Champ `tag` inutilisé** dans le type `AllDayItem` — à supprimer.
 
-## 10. Accessibilité — 251 warnings restants (non bloquants)
+## 10. Accessibilité ✅ Soldé (essentiel)
 
-- [ ] **`no-static-element-interactions`** (26 cas) + **`click-events-have-key-events`** (22 cas) — divs/spans avec `onClick` sans `role` ni handler clavier.
-- [ ] **`control-has-associated-label`** (24 cas) — boutons icônes sans `aria-label`.
-- [ ] **`no-autofocus`** (9 cas) — `autoFocus` dans `DayModalEvtTab`, `DragCreateModal` — désoriente les lecteurs d'écran.
+- [x] **`no-autofocus`** (9 cas) — tous supprimés. ✅ 2026-06-06
+- [x] **`no-static-element-interactions`** — réduit de 26 → 6 (overlays modals → `role="presentation"`, items cliquables → `<button>`). ✅ 2026-06-06
+- [x] **`click-events-have-key-events`** — éliminé (22 → 0). ✅ 2026-06-06
+- [ ] **`control-has-associated-label`** × 82 — majoritairement faux positifs (inputs avec `htmlFor`/`id`). React-doctor v0.2.9 ne détecte pas les associations HTML classiques.
+- Note : react-doctor v0.2.9 a ajouté de nouvelles règles (em-dash × 53, letter-spacing × 43) qui n'étaient pas dans le scope initial.
 
 ## 11. Hors scope V2
 
