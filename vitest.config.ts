@@ -6,6 +6,13 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(file
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
+  optimizeDeps: {
+    include: [
+      'storybook/test',
+      '@storybook/react-dom-shim',
+      '@storybook/addon-docs'
+    ]
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
@@ -15,6 +22,7 @@ export default defineConfig({
     projects: [{
       extends: true,
       test: {
+        name: 'unit',
         environment: 'jsdom',
         globals: true,
         setupFiles: ['./src/lib/__tests__/setup.ts']

@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from 'react'
-import type { Preleveur } from '@/types'
+import type { Preleveur } from '@/stores/preleveursStore'
 
 interface UsePlanningFiltersParams {
   initiales: string

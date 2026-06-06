@@ -2,7 +2,7 @@ import type React from 'react'
 import BaseModal from '@/components/ui/BaseModal'
 import { COLORS } from '@/lib/constants'
 import type { FormState, FormAction } from './todoFormReducer'
-import type { Todo, User, Client, Equipement } from '@/types'
+import type { Todo, AppUser, Client, Equipement } from '@/types'
 
 interface TodoFormModalProps {
   showModal: boolean;
@@ -11,7 +11,7 @@ interface TodoFormModalProps {
   state: FormState;
   dispatch: React.Dispatch<FormAction>;
   handleSave: () => void;
-  users: User[];
+  users: AppUser[];
   clients: Client[];
   equipements: Equipement[];
 }

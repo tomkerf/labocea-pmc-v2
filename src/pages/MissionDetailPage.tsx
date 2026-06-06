@@ -120,7 +120,7 @@ export default function MissionDetailPage() {
   }
 
   const statusConfig = getEnCoursStatus(sampling) ?? STATUS_CONFIG[sampling.status]
-  const hasGps = plan.lat && plan.lng && plan.lat !== '' && plan.lng !== ''
+  const hasGps = !!(plan.lat && plan.lng && plan.lat !== '' && plan.lng !== '')
 
   return (
     <div className="max-w-lg mx-auto pb-48 md:pb-32">

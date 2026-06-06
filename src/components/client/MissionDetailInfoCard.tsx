@@ -1,6 +1,6 @@
 import { MapPin, Clock } from 'lucide-react'
 import { COLORS } from '@/lib/constants'
-import type { ClientV2, Plan, Sampling } from '@/types'
+import type { Client, Plan, Sampling } from '@/types'
 
 const MOIS = [
   'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -8,7 +8,7 @@ const MOIS = [
 ]
 
 interface Props {
-  client: ClientV2;
+  client: Client;
   plan: Plan;
   sampling: Sampling;
   statusConfig: { label: string; bg: string; color: string };

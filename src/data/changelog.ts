@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '106'
+export const CHANGELOG_VERSION = '111'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,15 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '111',
+    date: '6 juin 2026',
+    items: [
+      { type: 'fix', label: 'Correction du chargement météo dans les tests unitaires' },
+      { type: 'fix', label: 'Ajout du support reduced-motion pour l\'accessibilité visuelle (WCAG 2.3.3)' },
+      { type: 'fix', label: 'Stabilisation de la configuration de tests Vitest / Storybook' },
+    ],
+  },
   {
     version: '106',
     date: '5 juin 2026',

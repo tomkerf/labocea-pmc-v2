@@ -24,7 +24,9 @@ export function useWeather(
   const dateStr = date.toISOString().slice(0, 10)
   const fetchKey = lat !== null && lng !== null ? `${lat}_${lng}_${dateStr}` : ''
 
-  const [result, setResult] = useState<WeatherResult>(EMPTY)
+  const [result, setResult] = useState<WeatherResult>(() =>
+    fetchKey ? { ...EMPTY, loading: true } : EMPTY
+  )
   const [prevKey, setPrevKey] = useState(fetchKey)
 
   if (fetchKey !== prevKey) {

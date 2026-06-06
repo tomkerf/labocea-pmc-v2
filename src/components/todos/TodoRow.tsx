@@ -180,7 +180,6 @@ export default function TodoRow({
               initiales={assigneeInitiales} 
               color={assigneeColor} 
               size={24} 
-              className={isCompleted ? 'opacity-50 grayscale' : ''}
             />
           </div>
         )}
