@@ -122,10 +122,10 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // ── preleveurs-v1 (liste consolidée, lecture seule) ───────
+    // ── preleveurs-v1 (liste consolidée, éditable par admin) ──
     match /preleveurs-v1/{docId} {
       allow read: if isAuthenticated();
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
   }

@@ -9,6 +9,7 @@ import { AdminChargeEquipe } from '@/components/admin/AdminChargeEquipe'
 import { AdminCreateUserForm } from '@/components/admin/AdminCreateUserForm'
 import { AdminUsersList } from '@/components/admin/AdminUsersList'
 import { AdminBugsSection } from '@/components/admin/AdminBugsSection'
+import { AdminPreleveurs } from '@/components/admin/AdminPreleveurs'
 import { COLORS } from '@/lib/constants'
 
 
@@ -41,6 +42,7 @@ export default function AdminPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-8">
+        <AdminPreleveurs />
         <AdminChargeEquipe />
         <AdminCreateUserForm />
         <AdminUsersList users={users} />
