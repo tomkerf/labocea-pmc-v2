@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { X, ExternalLink, AlertCircle, AlertTriangle, CloudRain } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import type { Client, Plan, Sampling } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
@@ -45,7 +45,7 @@ export default function IssueListModal({ onClose, type, rows, year }: IssueListM
 
   return (
     <AnimatePresence>
-      <motion.div
+      <m.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -57,7 +57,7 @@ export default function IssueListModal({ onClose, type, rows, year }: IssueListM
         }}
         onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
       >
-        <motion.div
+        <m.div
           initial={{ scale: 0.95, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 15 }}
@@ -122,8 +122,8 @@ export default function IssueListModal({ onClose, type, rows, year }: IssueListM
               ))
             )}
           </div>
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </m.div>
     </AnimatePresence>
   )
 }

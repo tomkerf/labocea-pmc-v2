@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { BookOpen, X } from 'lucide-react'
 import { COLORS } from '@/lib/constants'
 
@@ -12,7 +12,7 @@ export function WelcomeModal({ show, onDismiss }: WelcomeModalProps) {
     <AnimatePresence>
       {show && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}>
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -59,7 +59,7 @@ export function WelcomeModal({ show, onDismiss }: WelcomeModalProps) {
                 </button>
               </div>
             </div>
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>

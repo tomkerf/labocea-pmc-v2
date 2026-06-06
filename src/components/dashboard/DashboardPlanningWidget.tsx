@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { SectionTitle, EmptyCard } from '@/components/dashboard/StatCard'
 import type { PlanningEvent } from '@/lib/planningUtils'
@@ -40,7 +40,7 @@ export function DashboardPlanningWidget({
               }}
             >
               {planningMode === 'today' && (
-                <motion.div
+                <m.div
                   layoutId="active-dashboard-pill"
                   className="absolute inset-0 rounded-md -z-10"
                   style={{ background: 'var(--color-accent-light)' }}
@@ -57,7 +57,7 @@ export function DashboardPlanningWidget({
               }}
             >
               {planningMode === 'tomorrow' && (
-                <motion.div
+                <m.div
                   layoutId="active-dashboard-pill"
                   className="absolute inset-0 rounded-md -z-10"
                   style={{ background: 'var(--color-accent-light)' }}
@@ -80,14 +80,14 @@ export function DashboardPlanningWidget({
       {activeItems.length === 0 ? (
         <EmptyCard>Aucune intervention ni événement{planningMode === 'today' ? " aujourd'hui" : " demain"}.</EmptyCard>
       ) : (
-        <motion.div
+        <m.div
           layout
           className="rounded-xl overflow-hidden"
           style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}
         >
           <AnimatePresence mode="popLayout">
             {activeItems.slice(0, 8).map((item, idx) => (
-              <motion.div
+              <m.div
                 key={'modalEvent' in item ? item.modalEvent?.id : `todo-${idx}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -122,10 +122,10 @@ export function DashboardPlanningWidget({
                 )}
                 <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
                   style={{ background: item.badge.bg, color: item.badge.color }}>{item.badge.label}</span>
-              </motion.div>
+              </m.div>
             ))}
           </AnimatePresence>
-        </motion.div>
+        </m.div>
       )}
     </div>
   )

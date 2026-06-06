@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronDown, Check } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import type { Todo } from '@/types'
 import { saveTodo } from '@/services/todoService'
 import { COLORS } from '@/lib/constants'
@@ -99,7 +99,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
               {visibleTodos.map((todo, i) => {
                 const colors = prioColors[todo.priorite]
                 return (
-                  <motion.div
+                  <m.div
                     key={todo.id}
                     initial={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
@@ -202,7 +202,7 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                         )}
                       </div>
                     </div>
-                  </motion.div>
+                  </m.div>
                 )
               })}
             </AnimatePresence>

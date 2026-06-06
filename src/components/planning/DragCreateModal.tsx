@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useReducer } from 'react'
 import { X } from 'lucide-react'
 import { MOIS_LONG } from '@/lib/planningUtils'
 
@@ -25,26 +25,36 @@ const TYPES: { value: TypeEvenement; label: string; emoji: string }[] = [
   { value: 'autre',   label: 'Autre',     emoji: '📌' },
 ]
 
-export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }: DragCreateModalProps) {
-  const [titre,  setTitre]  = useState('')
-  const [type,   setType]   = useState<TypeEvenement>(dateDebut !== dateFin ? 'conge' : 'autre')
-  const [debut,  setDebut]  = useState(dateDebut)
-  const [fin,    setFin]    = useState(dateFin)
-  const [heure,  setHeure]  = useState('')
-  const [notes,  setNotes]  = useState('')
-  const [saving, setSaving] = useState(false)
+type FormState = {
+  titre: string; type: TypeEvenement; debut: string; fin: string; heure: string; notes: string; saving: boolean
+}
+type FormAction =
+  | { field: 'titre' | 'debut' | 'fin' | 'heure' | 'notes'; value: string }
+  | { field: 'type'; value: TypeEvenement }
+  | { field: 'saving'; value: boolean }
 
+function formReducer(state: FormState, action: FormAction): FormState {
+  return { ...state, [action.field]: action.value }
+}
+
+export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }: DragCreateModalProps) {
+  const [form, dispatch] = useReducer(formReducer, {
+    titre: '', type: dateDebut !== dateFin ? 'conge' : 'autre',
+    debut: dateDebut, fin: dateFin, heure: '', notes: '', saving: false,
+  })
+  const { titre, type, debut, fin, heure, notes, saving } = form
   const isMultiDay = debut !== fin
+  const canSave = type === 'conge' || !!titre.trim()
 
   async function handleSave() {
     const effectiveTitre = titre.trim() || (type === 'conge' ? 'Congé/RTT' : '')
     if (!effectiveTitre) return
-    setSaving(true)
+    dispatch({ field: 'saving', value: true })
     try {
       await onSave(effectiveTitre, type, debut, isMultiDay ? fin : '', heure, notes)
       onClose()
     } finally {
-      setSaving(false)
+      dispatch({ field: 'saving', value: false })
     }
   }
 
@@ -84,7 +94,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
             aria-label="Titre de l'événement"
             placeholder={type === 'conge' ? 'Titre (optionnel)' : 'Titre de l\'événement'}
             value={titre}
-            onChange={e => setTitre(e.target.value)}
+            onChange={e => dispatch({ field: 'titre', value: e.target.value })}
             onKeyDown={e => e.key === 'Enter' && handleSave()}
             className="w-full px-3 py-2.5 rounded-xl text-sm"
             style={{
@@ -96,7 +106,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
 
           <div className="grid grid-cols-5 gap-1.5">
             {TYPES.map(t => (
-              <button type="button" key={t.value} onClick={() => setType(t.value)}
+              <button type="button" key={t.value} onClick={() => dispatch({ field: 'type', value: t.value })}
                 className="flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl text-[11px] font-medium"
                 style={{
                   background: type === t.value ? 'var(--color-accent-light)' : COLORS.BG_TERTIARY,
@@ -114,7 +124,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
               <label htmlFor="dcm-debut" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
                 Début
               </label>
-              <input id="dcm-debut" type="date" value={debut} onChange={e => setDebut(e.target.value)}
+              <input id="dcm-debut" type="date" value={debut} onChange={e => dispatch({ field: 'debut', value: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
             </div>
@@ -122,7 +132,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
               <label htmlFor="dcm-fin" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
                 Fin
               </label>
-              <input id="dcm-fin" type="date" value={fin} min={debut} onChange={e => setFin(e.target.value)}
+              <input id="dcm-fin" type="date" value={fin} min={debut} onChange={e => dispatch({ field: 'fin', value: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
             </div>
@@ -133,7 +143,7 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
               <label htmlFor="dcm-heure" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
                 Heure (optionnel)
               </label>
-              <input id="dcm-heure" type="time" value={heure} onChange={e => setHeure(e.target.value)}
+              <input id="dcm-heure" type="time" value={heure} onChange={e => dispatch({ field: 'heure', value: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
             </div>
@@ -143,24 +153,19 @@ export default function DragCreateModal({ dateDebut, dateFin, onClose, onSave }:
             <label htmlFor="dcm-notes" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
               Notes (optionnel)
             </label>
-            <textarea id="dcm-notes" rows={2} placeholder="Remarques…" value={notes} onChange={e => setNotes(e.target.value)}
+            <textarea id="dcm-notes" rows={2} placeholder="Remarques…" value={notes} onChange={e => dispatch({ field: 'notes', value: e.target.value })}
               className="w-full px-3 py-2 rounded-lg text-sm resize-none"
               style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
           </div>
 
-          {(() => {
-            const canSave = type === 'conge' ? true : !!titre.trim()
-            return (
-              <button type="button" onClick={handleSave} disabled={!canSave || saving}
-                className="w-full py-3 rounded-xl text-sm font-semibold"
-                style={{
-                  background: canSave ? COLORS.ACCENT : COLORS.BG_TERTIARY,
-                  color: canSave ? 'white' : 'var(--color-text-tertiary)',
-                }}>
-                {saving ? 'Enregistrement…' : 'Créer l\'événement'}
-              </button>
-            )
-          })()}
+          <button type="button" onClick={handleSave} disabled={!canSave || saving}
+            className="w-full py-3 rounded-xl text-sm font-semibold"
+            style={{
+              background: canSave ? COLORS.ACCENT : COLORS.BG_TERTIARY,
+              color: canSave ? 'white' : 'var(--color-text-tertiary)',
+            }}>
+            {saving ? 'Enregistrement…' : 'Créer l\'événement'}
+          </button>
         </div>
       </div>
     </div>

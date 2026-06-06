@@ -1,7 +1,7 @@
 import { useMemo, type Dispatch, type SetStateAction } from 'react'
 import { ChevronLeft, ChevronRight, Calendar, Map as MapIcon, X, Printer, FileSpreadsheet } from 'lucide-react'
 import { type ViewMode, getTechColor } from '@/lib/planningUtils'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import UserAvatar from '@/components/ui/UserAvatar'
 import { COLORS } from '@/lib/constants'
 
@@ -160,24 +160,24 @@ export default function PlanningHeader({
               
               <div className="relative flex p-0.5 rounded-lg shrink-0 w-full md:w-auto overflow-x-auto no-scrollbar"
                 style={{ border:'1px solid var(--color-border-subtle)', background:COLORS.BG_TERTIARY }}>
-                {(['jour','semaine','mois','annee'] as ViewMode[]).map(m => (
+                {(['jour','semaine','mois','annee'] as ViewMode[]).map(view => (
                 <button type="button"
-                  key={m}
-                  onClick={() => switchView(m)}
+                  key={view}
+                  onClick={() => switchView(view)}
                   className="relative px-3 py-1.5 text-xs font-medium capitalize z-10 transition-colors duration-200 flex-1 md:flex-none text-center"
                   style={{
-                    color: viewMode === m ? 'white' : COLORS.TEXT_SECONDARY
+                    color: viewMode === view ? 'white' : COLORS.TEXT_SECONDARY
                   }}
                 >
-                  {viewMode === m && (
-                    <motion.div
+                  {viewMode === view && (
+                    <m.div
                       layoutId="active-planning-view"
                       className="absolute inset-0 rounded-md -z-10"
                       style={{ background: COLORS.ACCENT }}
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
-                  {m}
+                  {view}
                 </button>
               ))}
             </div>
@@ -190,7 +190,7 @@ export default function PlanningHeader({
             {availableSites.length > 1 && (
               <div className="flex items-center gap-1.5 flex-wrap mr-3"
                 style={{ borderRight: '1px solid var(--color-border-subtle)', paddingRight: '12px' }}>
-                <motion.button
+                <m.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => { setFilterSite(''); localStorage.removeItem('planning_filter_site') }}
@@ -205,11 +205,11 @@ export default function PlanningHeader({
                   title="Tous les sites"
                 >
                   ✦
-                </motion.button>
+                </m.button>
                 {availableSites.map(site => {
                   const isActive = filterSite === site
                   return (
-                    <motion.button
+                    <m.button
                       key={site}
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
@@ -229,14 +229,14 @@ export default function PlanningHeader({
                       }}
                     >
                       {site}
-                    </motion.button>
+                    </m.button>
                   )
                 })}
               </div>
             )}
             {allTechs.length > 1 && (
               <div className="flex items-center gap-1.5 flex-wrap">
-                <motion.button
+                <m.button
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => { setFilterTech(''); localStorage.setItem('planning_filter_tech', 'ALL') }}
@@ -251,14 +251,14 @@ export default function PlanningHeader({
                   title="Tous les techniciens"
                 >
                   ✦
-                </motion.button>
+                </m.button>
                 {allTechs.map(t => {
                   const isActive = filterTech === t
                   const prel = preleveurs.find(p => p.code === t)
                   const tooltip = prel?.nom ? `${prel.nom} (${t})` : t
                   const tc = getTechColor(t)
                   return (
-                    <motion.button
+                    <m.button
                       key={t}
                       whileHover={{ scale: 1.08 }}
                       whileTap={{ scale: 0.95 }}
@@ -272,7 +272,7 @@ export default function PlanningHeader({
                       }}
                     >
                       <UserAvatar initiales={t} color={tc.color} size={28} />
-                    </motion.button>
+                    </m.button>
                   )
                 })}
               </div>

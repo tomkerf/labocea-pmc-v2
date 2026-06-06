@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { Check, Edit2, Trash2 } from 'lucide-react'
 import type { NavigateFunction } from 'react-router-dom'
 import type { Todo } from '@/types'
@@ -41,7 +41,7 @@ export default function TodoRow({
   const assigneeColor = assigneeInitiales ? getTechColor(assigneeInitiales).color : undefined
 
   return (
-    <motion.div
+    <m.div
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -184,6 +184,6 @@ export default function TodoRow({
           </div>
         )}
       </div>
-    </motion.div>
+    </m.div>
   )
 }

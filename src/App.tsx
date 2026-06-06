@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { LazyMotion, domAnimation } from 'framer-motion'
 import { useAuthInit } from '@/hooks/useAuth'
 import RequireAuth from '@/components/layout/RequireAuth'
 import RequireAdmin from '@/components/layout/RequireAdmin'
@@ -141,8 +142,10 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <LazyMotion features={domAnimation}>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </LazyMotion>
   )
 }

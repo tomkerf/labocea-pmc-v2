@@ -1,11 +1,69 @@
 import { useMemo } from 'react'
 import { X, ExternalLink, CloudRain, CheckCircle2, Circle, AlertTriangle, AlertCircle } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import type { Client, Plan, Sampling } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { MOIS_LONG } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
+
+type SamplingItem = { client: Client, plan: Plan, sampling: Sampling }
+
+interface BilanSectionProps {
+  title: string
+  list: SamplingItem[]
+  icon: React.ReactNode
+  color: string
+  bgColor: string
+  onClose: () => void
+}
+
+function BilanSection({ title, list, icon, color, bgColor, onClose }: BilanSectionProps) {
+  if (list.length === 0) return null
+  return (
+    <div className="mb-6 last:mb-0">
+      <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color }}>
+        {icon}
+        {title} <span className="text-xs font-normal opacity-70">({list.length})</span>
+      </h3>
+      <div className="flex flex-col gap-2">
+        {list.map((item) => (
+          <div key={item.sampling.id} className="flex flex-col gap-2 p-3 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] transition-colors group">
+            <div className="flex justify-between items-start gap-2">
+              <div>
+                <Link to={`/missions/${item.client.id}`} onClick={onClose} className="text-sm font-medium hover:underline text-[var(--color-text-primary)]">
+                  {item.client.nom}
+                </Link>
+                <div className="text-xs text-[var(--color-text-secondary)]">
+                  {item.plan.nom} • {item.plan.siteNom}
+                </div>
+              </div>
+              <div className="shrink-0 flex items-center gap-2">
+                <span className="text-xs font-medium px-2 py-1 rounded-md" style={{ background: bgColor, color }}>
+                  {item.plan.frequence}
+                </span>
+                {item.plan.meteo === 'pluie' && (
+                  <span title="Temps de pluie requis"><CloudRain size={14} className="text-blue-400" /></span>
+                )}
+                {item.plan.meteo === 'sec' && (
+                  <span title="Temps sec requis" className="text-sm leading-none">☀️</span>
+                )}
+                <Link to={`/missions/${item.client.id}/plan/${item.plan.id}`} onClick={onClose} className="text-[var(--color-text-tertiary)] hover:text-[var(--color-accent)] transition-colors" title="Voir le plan">
+                  <ExternalLink size={16} />
+                </Link>
+              </div>
+            </div>
+            {item.sampling.comment && (
+              <div className="text-xs italic text-[var(--color-text-secondary)] mt-1 border-l-2 border-[var(--color-border-subtle)] pl-2">
+                Motif : {item.sampling.comment}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 interface BilanMoisModalProps {
   onClose: () => void
@@ -50,62 +108,9 @@ export default function BilanMoisModal({ onClose, month, year, clients }: BilanM
 
   const total = planned.length + overdue.length + notDone.length + done.length
 
-  const renderSection = (
-    title: string, 
-    list: { client: Client, plan: Plan, sampling: Sampling }[], 
-    icon: React.ReactNode, 
-    color: string, 
-    bgColor: string
-  ) => {
-    if (list.length === 0) return null
-    return (
-      <div className="mb-6 last:mb-0">
-        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color }}>
-          {icon}
-          {title} <span className="text-xs font-normal opacity-70">({list.length})</span>
-        </h3>
-        <div className="flex flex-col gap-2">
-          {list.map((item) => (
-            <div key={item.sampling.id} className="flex flex-col gap-2 p-3 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] transition-colors group">
-              <div className="flex justify-between items-start gap-2">
-                <div>
-                  <Link to={`/missions/${item.client.id}`} onClick={onClose} className="text-sm font-medium hover:underline text-[var(--color-text-primary)]">
-                    {item.client.nom}
-                  </Link>
-                  <div className="text-xs text-[var(--color-text-secondary)]">
-                    {item.plan.nom} • {item.plan.siteNom}
-                  </div>
-                </div>
-                <div className="shrink-0 flex items-center gap-2">
-                  <span className="text-xs font-medium px-2 py-1 rounded-md" style={{ background: bgColor, color }}>
-                    {item.plan.frequence}
-                  </span>
-                  {item.plan.meteo === 'pluie' && (
-                    <span title="Temps de pluie requis"><CloudRain size={14} className="text-blue-400" /></span>
-                  )}
-                  {item.plan.meteo === 'sec' && (
-                    <span title="Temps sec requis" className="text-sm leading-none">☀️</span>
-                  )}
-                  <Link to={`/missions/${item.client.id}/plan/${item.plan.id}`} onClick={onClose} className="text-[var(--color-text-tertiary)] hover:text-[var(--color-accent)] transition-colors" title="Voir le plan">
-                    <ExternalLink size={16} />
-                  </Link>
-                </div>
-              </div>
-              {item.sampling.comment && (
-                <div className="text-xs italic text-[var(--color-text-secondary)] mt-1 border-l-2 border-[var(--color-border-subtle)] pl-2">
-                  Motif : {item.sampling.comment}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
   return (
     <AnimatePresence>
-      <motion.div
+      <m.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -117,7 +122,7 @@ export default function BilanMoisModal({ onClose, month, year, clients }: BilanM
         }}
         onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
       >
-        <motion.div
+        <m.div
           initial={{ scale: 0.95, opacity: 0, y: 15 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 15 }}
@@ -147,15 +152,15 @@ export default function BilanMoisModal({ onClose, month, year, clients }: BilanM
               </p>
             ) : (
               <>
-                {renderSection('En retard', overdue, <AlertTriangle size={15} />, COLORS.DANGER, 'var(--color-danger-light)')}
-                {renderSection('À faire', planned, <Circle size={15} />, COLORS.WARNING, 'var(--color-warning-light)')}
-                {renderSection('Non effectué', notDone, <AlertCircle size={15} />, 'var(--color-neutral)', 'var(--color-bg-tertiary)')}
-                {renderSection('Fait', done, <CheckCircle2 size={15} />, COLORS.SUCCESS, 'var(--color-success-light)')}
+                <BilanSection title="En retard" list={overdue} icon={<AlertTriangle size={15} />} color={COLORS.DANGER} bgColor="var(--color-danger-light)" onClose={onClose} />
+                <BilanSection title="À faire" list={planned} icon={<Circle size={15} />} color={COLORS.WARNING} bgColor="var(--color-warning-light)" onClose={onClose} />
+                <BilanSection title="Non effectué" list={notDone} icon={<AlertCircle size={15} />} color="var(--color-neutral)" bgColor="var(--color-bg-tertiary)" onClose={onClose} />
+                <BilanSection title="Fait" list={done} icon={<CheckCircle2 size={15} />} color={COLORS.SUCCESS} bgColor="var(--color-success-light)" onClose={onClose} />
               </>
             )}
           </div>
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </m.div>
     </AnimatePresence>
   )
 }

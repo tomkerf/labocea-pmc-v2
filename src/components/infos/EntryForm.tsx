@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useReducer } from 'react'
 import { X } from 'lucide-react'
 import type { Client, TerrainEntry, TerrainType } from '@/types'
 import { TYPE_CONFIG } from './entryConfig'
@@ -27,19 +27,35 @@ const inputStyle = {
   color: COLORS.TEXT_PRIMARY,
 }
 
+type FormState = {
+  type: TerrainType; clientId: string; nom: string; role: string
+  tel: string; tel2: string; email: string; libelle: string
+  code: string; contenu: string; notes: string
+}
+type FormAction = { field: keyof FormState; value: string }
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  return { ...state, [action.field]: action.value }
+}
+
 export function EntryForm({ entry, clients, defaultClientId, error, onSave, onClose }: FormProps) {
   const isEdit = !!entry?.id
-  const [type,     setType]     = useState<TerrainType>(entry?.type ?? 'contact')
-  const [clientId, setClientId] = useState(defaultClientId ?? clients[0]?.id ?? '')
-  const [nom,      setNom]      = useState(entry?.nom ?? '')
-  const [role,     setRole]     = useState(entry?.role ?? '')
-  const [tel,      setTel]      = useState(entry?.tel ?? '')
-  const [tel2,     setTel2]     = useState(entry?.tel2 ?? '')
-  const [email,    setEmail]    = useState(entry?.email ?? '')
-  const [libelle,  setLibelle]  = useState(entry?.libelle ?? '')
-  const [code,     setCode]     = useState(entry?.code ?? '')
-  const [contenu,  setContenu]  = useState(entry?.contenu ?? '')
-  const [notes,    setNotes]    = useState(entry?.notes ?? '')
+  const [form, dispatch] = useReducer(formReducer, {
+    type:     entry?.type     ?? 'contact',
+    clientId: defaultClientId ?? clients[0]?.id ?? '',
+    nom:      entry?.nom      ?? '',
+    role:     entry?.role     ?? '',
+    tel:      entry?.tel      ?? '',
+    tel2:     entry?.tel2     ?? '',
+    email:    entry?.email    ?? '',
+    libelle:  entry?.libelle  ?? '',
+    code:     entry?.code     ?? '',
+    contenu:  entry?.contenu  ?? '',
+    notes:    entry?.notes    ?? '',
+  })
+  const { type, clientId, nom, role, tel, tel2, email, libelle, code, contenu, notes } = form
+  const set = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+    dispatch({ field, value: e.target.value })
 
   function handleSave() {
     const specific =
@@ -100,7 +116,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
                 const cfg = TYPE_CONFIG[t]
                 const active = type === t
                 return (
-                  <button type="button" key={t} onClick={() => setType(t)}
+                  <button type="button" key={t} onClick={() => dispatch({ field: 'type', value: t })}
                     className="flex flex-col items-center gap-1 py-2.5 px-1 rounded-lg text-[10px] font-semibold transition-all"
                     style={{
                       background: active ? cfg.bg : COLORS.BG_TERTIARY,
@@ -119,7 +135,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           {!isEdit && (
             <div>
               <label htmlFor="entry-client" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Client</label>
-              <select id="entry-client" value={clientId} onChange={e => setClientId(e.target.value)}
+              <select id="entry-client" value={clientId} onChange={set('clientId')}
                 className={inputCls} style={inputStyle}>
                 {clients.map(c => (
                   <option key={c.id} value={c.id}>{c.nom}</option>
@@ -133,29 +149,29 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
             <>
               <div>
                 <label htmlFor="entry-nom" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Nom *</label>
-                <input id="entry-nom" value={nom} onChange={e => setNom(e.target.value)} placeholder="Prénom Nom"
+                <input id="entry-nom" value={nom} onChange={set('nom')} placeholder="Prénom Nom"
                   className={inputCls} style={inputStyle} />
               </div>
               <div>
                 <label htmlFor="entry-role" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Rôle / Poste</label>
-                <input id="entry-role" value={role} onChange={e => setRole(e.target.value)} placeholder="Responsable exploitation…"
+                <input id="entry-role" value={role} onChange={set('role')} placeholder="Responsable exploitation…"
                   className={inputCls} style={inputStyle} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label htmlFor="entry-tel" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Mobile</label>
-                  <input id="entry-tel" type="tel" value={tel} onChange={e => setTel(e.target.value)} placeholder="06 XX XX XX XX"
+                  <input id="entry-tel" type="tel" value={tel} onChange={set('tel')} placeholder="06 XX XX XX XX"
                     className={inputCls} style={inputStyle} />
                 </div>
                 <div>
                   <label htmlFor="entry-tel2" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Fixe</label>
-                  <input id="entry-tel2" type="tel" value={tel2} onChange={e => setTel2(e.target.value)} placeholder="02 XX XX XX XX"
+                  <input id="entry-tel2" type="tel" value={tel2} onChange={set('tel2')} placeholder="02 XX XX XX XX"
                     className={inputCls} style={inputStyle} />
                 </div>
               </div>
               <div>
                 <label htmlFor="entry-email" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Email</label>
-                <input id="entry-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="prenom.nom@client.fr"
+                <input id="entry-email" type="email" value={email} onChange={set('email')} placeholder="prenom.nom@client.fr"
                   className={inputCls} style={inputStyle} />
               </div>
             </>
@@ -166,12 +182,12 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
             <>
               <div>
                 <label htmlFor="entry-libelle-acces" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Libellé *</label>
-                <input id="entry-libelle-acces" value={libelle} onChange={e => setLibelle(e.target.value)} placeholder="Portail nord, Digicode…"
+                <input id="entry-libelle-acces" value={libelle} onChange={set('libelle')} placeholder="Portail nord, Digicode…"
                   className={inputCls} style={inputStyle} />
               </div>
               <div>
                 <label htmlFor="entry-code" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Code *</label>
-                <input id="entry-code" value={code} onChange={e => setCode(e.target.value)} placeholder="1234, A→B→C…"
+                <input id="entry-code" value={code} onChange={set('code')} placeholder="1234, A→B→C…"
                   className={`${inputCls} font-mono font-semibold tracking-widest`} style={inputStyle} />
               </div>
             </>
@@ -183,7 +199,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
               {type === 'site' && (
                 <div>
                   <label htmlFor="entry-libelle-site" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Titre</label>
-                  <input id="entry-libelle-site" value={libelle} onChange={e => setLibelle(e.target.value)} placeholder="Localisation, consigne…"
+                  <input id="entry-libelle-site" value={libelle} onChange={set('libelle')} placeholder="Localisation, consigne…"
                     className={inputCls} style={inputStyle} />
                 </div>
               )}
@@ -191,7 +207,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
                 <label htmlFor="entry-contenu" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                   {type === 'site' ? 'Description' : 'Note'}
                 </label>
-                <textarea id="entry-contenu" value={contenu} onChange={e => setContenu(e.target.value)} rows={4}
+                <textarea id="entry-contenu" value={contenu} onChange={set('contenu')} rows={4}
                   placeholder={type === 'site' ? 'Accès par la D5, contacter la garderie avant 8h…' : 'Information utile…'}
                   className={`${inputCls} resize-none`} style={inputStyle} />
               </div>
@@ -202,7 +218,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           {type !== 'note' && (
             <div>
               <label htmlFor="entry-notes" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Notes complémentaires</label>
-              <input id="entry-notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optionnel"
+              <input id="entry-notes" value={notes} onChange={set('notes')} placeholder="Optionnel"
                 className={inputCls} style={inputStyle} />
             </div>
           )}

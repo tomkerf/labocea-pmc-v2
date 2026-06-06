@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import { Menu } from 'lucide-react'
 import Sidebar from './Sidebar'
 import MobileDrawer from './MobileDrawer'
@@ -53,12 +53,14 @@ export default function AppLayout() {
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* TopBar */}
         <header
-          className="flex items-center px-4 h-14 shrink-0 transition-all duration-300 z-30"
+          className="flex items-center px-4 h-14 shrink-0 z-30"
           style={{
             background: scrolled ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.85)',
-            backdropFilter: scrolled ? 'blur(20px)' : 'blur(12px)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
             borderBottom: scrolled ? '1px solid var(--color-border)' : '1px solid var(--color-border-subtle)',
             boxShadow: scrolled ? '0 4px 16px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' : 'none',
+            transition: 'background 300ms, border-color 300ms, box-shadow 300ms',
           }}
         >
           {/* Titre app — mobile */}
@@ -86,7 +88,7 @@ export default function AppLayout() {
         {/* Pages avec transition — plus de padding-bottom pour tab bar */}
         <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
           <AnimatePresence mode="wait">
-            <motion.div
+            <m.div
               key={location.pathname}
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
@@ -97,7 +99,7 @@ export default function AppLayout() {
               <ErrorBoundary key={location.pathname}>
                 <Outlet />
               </ErrorBoundary>
-            </motion.div>
+            </m.div>
           </AnimatePresence>
         </div>
       </main>

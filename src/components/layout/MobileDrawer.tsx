@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 import {
   LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, BookOpen, ShieldAlert, X, FlaskConical, Pipette, HelpCircle, Gauge, Hammer, FileText,
@@ -52,7 +52,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
       {open && (
         <>
           {/* Overlay */}
-          <motion.div
+          <m.div
             className="md:hidden fixed inset-0 z-40"
             style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }}
             initial={{ opacity: 0 }}
@@ -63,7 +63,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
           />
 
           {/* Drawer */}
-          <motion.div
+          <m.div
             className="md:hidden fixed top-0 right-0 bottom-0 z-50 flex flex-col"
             style={{
               width: 280,
@@ -117,7 +117,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
                   {({ isActive }) => (
                     <>
                       {isActive && (
-                        <motion.div
+                        <m.div
                           layoutId="active-mobile-drawer-bg"
                           className="absolute inset-0 rounded-xl -z-10"
                           style={{ background: 'var(--color-accent-light)' }}
@@ -160,7 +160,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </m.div>
         </>
       )}
     </AnimatePresence>

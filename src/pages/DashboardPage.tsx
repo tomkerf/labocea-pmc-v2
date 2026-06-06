@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 
 import DonutChart from '@/components/dashboard/DonutChart'
 import { StatCard, SectionTitle } from '@/components/dashboard/StatCard'
@@ -133,7 +133,7 @@ export default function DashboardPage() {
   // ── Render ────────────────────────────────────────────────
 
   return (
-    <motion.div
+    <m.div
       variants={containerVariants}
       initial="hidden"
       animate="show"
@@ -149,7 +149,7 @@ export default function DashboardPage() {
 
       <AnimatePresence mode="wait">
         {(!isGeneraliste || activeTab === 'technicien') ? (
-          <motion.div
+          <m.div
             key="technicien"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -233,9 +233,9 @@ export default function DashboardPage() {
             <PluieWidget items={prelevementsPluie} />
             <MaintenancesWidget maintenances={maintenancesActives} />
             <MetrologieWidget equipements={metrologieAlertes} />
-          </motion.div>
+          </m.div>
         ) : (
-          <motion.div
+          <m.div
             key="manager"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -243,7 +243,7 @@ export default function DashboardPage() {
             transition={{ duration: 0.15 }}
           >
             <EquipeSuiviWidget clients={clients} />
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -297,6 +297,6 @@ export default function DashboardPage() {
       )}
 
       <WelcomeModal show={showWelcome} onDismiss={dismissWelcome} />
-    </motion.div>
+    </m.div>
   )
 }

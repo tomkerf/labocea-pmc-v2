@@ -1,6 +1,6 @@
 // src/components/tournee/SaisieRapideModal.tsx
 import { useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import type { NappeType } from '@/types'
 import { COLORS } from '@/lib/constants'
 
@@ -53,7 +53,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-end md:items-center md:justify-center" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose}>
-        <motion.div
+        <m.div
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
@@ -158,7 +158,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
               Valider
             </button>
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </AnimatePresence>
   )

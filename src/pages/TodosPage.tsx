@@ -1,7 +1,7 @@
 import { useState, useMemo, useReducer } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Search, ListTodo, ChevronRight, ChevronDown } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { useTodosListener } from '@/hooks/useTodos'
 import { useClientsListener } from '@/hooks/useClients'
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -236,7 +236,7 @@ export default function TodosPage() {
                   style={{ color: isActive ? COLORS.ACCENT : COLORS.TEXT_SECONDARY }}
                 >
                   {isActive && (
-                    <motion.div
+                    <m.div
                       layoutId="active-todo-tab"
                       className="absolute inset-0 rounded-md -z-10 shadow-sm"
                       style={{ background: COLORS.BG_SECONDARY }}

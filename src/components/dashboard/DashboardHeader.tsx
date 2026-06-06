@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { COLORS } from '@/lib/constants'
 import { getGreeting, formatDate } from '@/lib/dashboardUtils'
 
@@ -25,18 +25,18 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ prenom, isGeneraliste, activeTab, setActiveTab }: DashboardHeaderProps) {
   return (
     <>
-      <motion.div variants={itemVariants} className="mb-8">
+      <m.div variants={itemVariants} className="mb-8">
         <h1 className="text-2xl font-bold mb-1" style={{ color: COLORS.TEXT_PRIMARY, letterSpacing: '-0.5px' }}>
           {getGreeting()} {prenom || 'Thomas'} 👋
         </h1>
         <p className="text-base capitalize" style={{ color: COLORS.TEXT_SECONDARY }}>
           {formatDate()}
         </p>
-      </motion.div>
+      </m.div>
 
       {/* Switcher de rôle (uniquement pour les chargés de mission / admins) */}
       {isGeneraliste && (
-        <motion.div variants={itemVariants} className="mb-6 flex">
+        <m.div variants={itemVariants} className="mb-6 flex">
           <div className="flex gap-1 p-1 rounded-xl" style={{ background: COLORS.BG_TERTIARY }}>
             <button
               type="button"
@@ -47,7 +47,7 @@ export function DashboardHeader({ prenom, isGeneraliste, activeTab, setActiveTab
               }}
             >
               {activeTab === 'technicien' && (
-                <motion.div
+                <m.div
                   layoutId="active-role-tab"
                   className="absolute inset-0 rounded-lg -z-10"
                   style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-card)' }}
@@ -65,7 +65,7 @@ export function DashboardHeader({ prenom, isGeneraliste, activeTab, setActiveTab
               }}
             >
               {activeTab === 'manager' && (
-                <motion.div
+                <m.div
                   layoutId="active-role-tab"
                   className="absolute inset-0 rounded-lg -z-10"
                   style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-card)' }}
@@ -75,7 +75,7 @@ export function DashboardHeader({ prenom, isGeneraliste, activeTab, setActiveTab
               Suivi équipe (CM)
             </button>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </>
   )

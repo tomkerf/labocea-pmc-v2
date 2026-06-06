@@ -5,6 +5,145 @@ import { SAMPLING_LABEL, isVeilleJourFerie } from '@/lib/planningUtils'
 import type { PoolItem } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
 
+interface PoolItemRowProps {
+  item: PoolItem
+  isLast: boolean
+  poolValidId: string | null
+  poolDate: string
+  poolSaving: boolean
+  dateStr: string
+  holidays: Record<string, string>
+  setPoolValidId: (id: string | null) => void
+  setPoolDate: (d: string) => void
+  onValidate: (item: PoolItem) => void
+}
+
+function PoolItemRow({ item, isLast, poolValidId, poolDate, poolSaving, dateStr, holidays, setPoolValidId, setPoolDate, onValidate }: PoolItemRowProps) {
+  const overdue  = isSamplingOverdue(item.sampling, new Date().getFullYear(), item.methode === 'Automatique')
+  const cfgLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[item.sampling.status] ?? SAMPLING_LABEL.planned
+  const cfgColor = overdue ? COLORS.DANGER
+    : item.sampling.status === 'non_effectue' ? COLORS.WARNING
+    : item.sampling.status === 'done' ? COLORS.SUCCESS
+    : COLORS.TEXT_SECONDARY
+  const cfgBg = overdue ? 'var(--color-danger-light)'
+    : item.sampling.status === 'non_effectue' ? 'var(--color-warning-light)'
+    : item.sampling.status === 'done' ? 'var(--color-success-light)'
+    : COLORS.BG_TERTIARY
+  const cfg = { label: cfgLabel, color: cfgColor, bg: cfgBg }
+  const isValidating = poolValidId === item.sampling.id
+  const poolHoliday  = holidays[poolDate]
+
+  return (
+    <div style={{ borderBottom: !isLast ? '1px solid var(--color-border-subtle)' : 'none' }}>
+      <button type="button"
+        aria-label={isValidating ? 'Annuler la planification' : `Planifier : ${item.clientNom}`}
+        className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
+        onClick={() => isValidating
+          ? setPoolValidId(null)
+          : (setPoolValidId(item.sampling.id), setPoolDate(dateStr))
+        }>
+        <span className="size-2 rounded-full shrink-0 mt-0.5" style={{ background: cfg.color }} />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
+            {item.clientNom}
+          </p>
+          <p className="text-xs mt-0.5 truncate flex items-center gap-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+            <span className="truncate">{item.planNom}{item.siteNom ? ` · ${item.siteNom}` : ''}
+            {item.frequence && (
+              <span className="ml-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                — {item.frequence}
+              </span>
+            )}</span>
+            {item.cofrac && (
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0"
+                style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
+                COFRAC
+              </span>
+            )}
+          </p>
+          <div className="flex items-center gap-1.5 mt-1.5">
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+              style={{ background: cfg.bg, color: cfg.color }}>
+              {cfg.label}
+            </span>
+            {item.techInitiales && item.techInitiales !== '—' && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
+                {item.techInitiales}
+              </span>
+            )}
+            {item.sampling.plannedDay > 0 && (
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+                style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
+                prévu j{item.sampling.plannedDay}
+              </span>
+            )}
+            {item.meteo === 'pluie' && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                style={{ background: '#EFF6FF', color: '#3B82F6' }}
+                title="Prélèvement à réaliser par temps de pluie">
+                🌧 Pluie
+              </span>
+            )}
+            {item.analysesSousTraitees && isVeilleJourFerie(dateStr) && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}
+                title={`Analyses sous-traitées — veille de ${isVeilleJourFerie(dateStr)}`}>
+                ⚠️ Veille de férié
+              </span>
+            )}
+          </div>
+        </div>
+        <span className="shrink-0 size-7 flex items-center justify-center rounded-full transition-colors"
+          style={{
+            background: isValidating ? COLORS.BG_TERTIARY : 'var(--color-success-light)',
+            border: isValidating ? '1px solid var(--color-border)' : 'none',
+          }}>
+          {isValidating
+            ? <X size={13} style={{ color: COLORS.TEXT_SECONDARY }} />
+            : <Plus size={13} style={{ color: COLORS.SUCCESS }} />
+          }
+        </span>
+      </button>
+      {isValidating && (
+        <div className="px-4 py-3 flex flex-col gap-2"
+          style={{ background: COLORS.BG_TERTIARY, borderTop: '1px solid var(--color-border-subtle)' }}>
+          <div className="flex items-end gap-3">
+            <div className="flex-1">
+              <label htmlFor="dm-pool-date" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
+                Planifier le
+              </label>
+              <input id="dm-pool-date" type="date" value={poolDate} onChange={e => setPoolDate(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-sm"
+                style={{
+                  background: COLORS.BG_SECONDARY,
+                  border: `1px solid ${poolHoliday ? COLORS.DANGER : COLORS.BORDER}`,
+                  color: COLORS.TEXT_PRIMARY,
+                }} />
+            </div>
+            <button type="button" onClick={() => onValidate(item)} disabled={poolSaving || !poolDate || !!poolHoliday}
+              className="px-4 py-2 rounded-lg text-sm font-medium"
+              style={{
+                background: poolHoliday ? COLORS.BG_TERTIARY : COLORS.SUCCESS,
+                color: poolHoliday ? 'var(--color-text-tertiary)' : 'white',
+                opacity: poolSaving ? 0.6 : 1,
+                cursor: poolHoliday ? 'not-allowed' : 'pointer',
+              }}>
+              {poolSaving ? '…' : 'Confirmer'}
+            </button>
+          </div>
+          {poolHoliday && (
+            <p className="text-xs flex items-center gap-1.5" style={{ color: COLORS.DANGER }}>
+              <span>⛔</span>
+              <span>{poolHoliday} — planification impossible sur un jour férié.</span>
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface DayModalPoolTabProps {
   dateStr: string
   pool: PoolItem[]
@@ -49,134 +188,6 @@ export default function DayModalPoolTab({ dateStr, pool, overduePool, holidays, 
     { label: 'À planifier', items: aplanifier },
   ].filter(g => g.items.length > 0)
 
-  function renderItem(item: PoolItem, i: number, groupItems: PoolItem[]) {
-    const overdue  = isSamplingOverdue(item.sampling, new Date().getFullYear(), item.methode === 'Automatique')
-    const cfgLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[item.sampling.status] ?? SAMPLING_LABEL.planned
-    const cfgColor = overdue ? COLORS.DANGER
-      : item.sampling.status === 'non_effectue' ? COLORS.WARNING
-      : item.sampling.status === 'done' ? COLORS.SUCCESS
-      : COLORS.TEXT_SECONDARY
-    const cfgBg = overdue ? 'var(--color-danger-light)'
-      : item.sampling.status === 'non_effectue' ? 'var(--color-warning-light)'
-      : item.sampling.status === 'done' ? 'var(--color-success-light)'
-      : COLORS.BG_TERTIARY
-    const cfg = { label: cfgLabel, color: cfgColor, bg: cfgBg }
-    const isValidating = poolValidId === item.sampling.id
-
-    return (
-      <div key={item.sampling.id}
-        style={{ borderBottom: i < groupItems.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-        <button type="button"
-          aria-label={isValidating ? 'Annuler la planification' : `Planifier : ${item.clientNom}`}
-          className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
-          onClick={() => isValidating
-            ? setPoolValidId(null)
-            : (setPoolValidId(item.sampling.id), setPoolDate(dateStr))
-          }>
-          <span className="size-2 rounded-full shrink-0 mt-0.5" style={{ background: cfg.color }} />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
-              {item.clientNom}
-            </p>
-            <p className="text-xs mt-0.5 truncate flex items-center gap-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-              <span className="truncate">{item.planNom}{item.siteNom ? ` · ${item.siteNom}` : ''}
-              {item.frequence && (
-                <span className="ml-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                  — {item.frequence}
-                </span>
-              )}</span>
-              {item.cofrac && (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0"
-                  style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
-                  COFRAC
-                </span>
-              )}
-            </p>
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                style={{ background: cfg.bg, color: cfg.color }}>
-                {cfg.label}
-              </span>
-              {item.techInitiales && item.techInitiales !== '—' && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                  style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
-                  {item.techInitiales}
-                </span>
-              )}
-              {item.sampling.plannedDay > 0 && (
-                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full"
-                  style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
-                  prévu j{item.sampling.plannedDay}
-                </span>
-              )}
-              {item.meteo === 'pluie' && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                  style={{ background: '#EFF6FF', color: '#3B82F6' }}
-                  title="Prélèvement à réaliser par temps de pluie">
-                  🌧 Pluie
-                </span>
-              )}
-              {item.analysesSousTraitees && isVeilleJourFerie(dateStr) && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                  style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}
-                  title={`Analyses sous-traitées — veille de ${isVeilleJourFerie(dateStr)}`}>
-                  ⚠️ Veille de férié
-                </span>
-              )}
-            </div>
-          </div>
-          <span className="shrink-0 size-7 flex items-center justify-center rounded-full transition-colors"
-            style={{
-              background: isValidating ? COLORS.BG_TERTIARY : 'var(--color-success-light)',
-              border: isValidating ? '1px solid var(--color-border)' : 'none',
-            }}>
-            {isValidating
-              ? <X size={13} style={{ color: COLORS.TEXT_SECONDARY }} />
-              : <Plus size={13} style={{ color: COLORS.SUCCESS }} />
-            }
-          </span>
-        </button>
-        {isValidating && (() => {
-          const poolHoliday = holidays[poolDate]
-          return (
-            <div className="px-4 py-3 flex flex-col gap-2"
-              style={{ background: COLORS.BG_TERTIARY, borderTop: '1px solid var(--color-border-subtle)' }}>
-              <div className="flex items-end gap-3">
-                <div className="flex-1">
-                  <label htmlFor="dm-pool-date" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
-                    Planifier le
-                  </label>
-                  <input id="dm-pool-date" type="date" value={poolDate} onChange={e => setPoolDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg text-sm"
-                    style={{
-                      background: COLORS.BG_SECONDARY,
-                      border: `1px solid ${poolHoliday ? COLORS.DANGER : COLORS.BORDER}`,
-                      color: COLORS.TEXT_PRIMARY,
-                    }} />
-                </div>
-                <button type="button" onClick={() => handleValidatePool(item)} disabled={poolSaving || !poolDate || !!poolHoliday}
-                  className="px-4 py-2 rounded-lg text-sm font-medium"
-                  style={{
-                    background: poolHoliday ? COLORS.BG_TERTIARY : COLORS.SUCCESS,
-                    color: poolHoliday ? 'var(--color-text-tertiary)' : 'white',
-                    opacity: poolSaving ? 0.6 : 1,
-                    cursor: poolHoliday ? 'not-allowed' : 'pointer',
-                  }}>
-                  {poolSaving ? '…' : 'Confirmer'}
-                </button>
-              </div>
-              {poolHoliday && (
-                <p className="text-xs flex items-center gap-1.5" style={{ color: COLORS.DANGER }}>
-                  <span>⛔</span>
-                  <span>{poolHoliday} — planification impossible sur un jour férié.</span>
-                </p>
-              )}
-            </div>
-          )
-        })()}
-      </div>
-    )
-  }
 
   return (
     <div className="px-4 py-4">
@@ -208,7 +219,15 @@ export default function DayModalPoolTab({ dateStr, pool, overduePool, holidays, 
                       border: '1px solid var(--color-border-subtle)',
                       boxShadow: 'var(--shadow-card)',
                     }}>
-                    {group.items.map((item, i) => renderItem(item, i, group.items))}
+                    {group.items.map((item, i) => (
+                      <PoolItemRow key={item.sampling.id}
+                        item={item} isLast={i === group.items.length - 1}
+                        poolValidId={poolValidId} poolDate={poolDate} poolSaving={poolSaving}
+                        dateStr={dateStr} holidays={holidays}
+                        setPoolValidId={setPoolValidId} setPoolDate={setPoolDate}
+                        onValidate={handleValidatePool}
+                      />
+                    ))}
                   </div>
                   {group.items.length > 3 && (
                     <div style={{
