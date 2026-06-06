@@ -13,7 +13,22 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 - **Validation** : 0 erreur de lint et 0 erreur TypeScript. Le code respecte le standard de l'application.
 
 ### Prochaines étapes
-- Déployer sur le staging pour test en situation réelle sur mobile.
+- ✅ Déployé staging et validé — GPS fonctionne une fois les coordonnées renseignées dans les plans.
+
+---
+
+## Session 115 — Refactoring §8-9-10 (accessibilité, performance, maintenabilité)
+**6 juin 2026**
+
+### Ce qui a été fait
+- **§8 Performance** : Migration LazyMotion complète (16 fichiers, `motion` → `m`, ~30 Ko bundle). Suppression du blur animé dans `AppLayout` (scroll `blur(20px)` → statique `blur(12px)`).
+- **§9 Maintenabilité** : Extraction `renderSection()` → `BilanSection` (BilanMoisModal), `renderItem()` → `PoolItemRow` (DayModalPoolTab). Migration `useReducer` sur `DragCreateModal` (7 états) et `EntryForm` (11 états).
+- **§10 Accessibilité** : Suppression des 9 `autoFocus`. Overlays modals → `role="presentation"` (10 fichiers). Items cliquables widgets → `<button type="button">` (7 composants). `no-static-element-interactions` : 26 → 6 | `click-events-have-key-events` : 22 → 0.
+- **Fix AdminPreleveurs** : Page admin pour gérer la liste `preleveurs-v1/data` (correction du bug Brest disparu).
+- **TODO_REFACTORING.md** : §8, §9, §10 marqués soldés.
+
+### Note
+React-doctor v0.2.9 a ajouté de nouvelles règles (em-dash × 53, letter-spacing × 43) non présentes dans le scope §10. Score 60/100 (contre 100/100 avant la mise à jour du linter) — pas une régression du code.
 
 ---
 
