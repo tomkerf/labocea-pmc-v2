@@ -6,6 +6,7 @@ import {
   toISO, sameDay,
   parseHHMM, assignColumns, sortEvts, filterEvents, getISOWeek, groupByClient,
 } from '@/lib/planningUtils'
+import WeatherBadge from '@/components/planning/WeatherBadge'
 
 interface DayViewProps {
   selectedDate:      Date
@@ -42,6 +43,7 @@ export default function DayView({
   const weekNum = getISOWeek(selectedDate)
   const isRainyDay = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
 
+
   return (
     <div className="flex-1 overflow-hidden flex flex-col relative"
       onTouchStart={handleTouchStart}
@@ -58,11 +60,8 @@ export default function DayView({
             · {allEvts.length} intervention{allEvts.length > 1 ? 's' : ''}
           </span>
         )}
-        {showRain && isRainyDay && (
-          <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full"
-            style={{ background: 'rgba(0,113,227,0.1)', color: '#0071E3' }}>
-            🌧️ Temps de pluie prévu
-          </span>
+        {showRain && (
+          <WeatherBadge events={allEvts} date={selectedDate} className="ml-auto" />
         )}
       </div>
 

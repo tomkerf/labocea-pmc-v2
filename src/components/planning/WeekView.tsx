@@ -7,6 +7,7 @@ import {
   isMultiDay, sortEvts, filterEvents, groupByClient,
 } from '@/lib/planningUtils'
 import EventPill from '@/components/planning/EventPill'
+import WeatherBadge from '@/components/planning/WeatherBadge'
 import { COLORS } from '@/lib/constants'
 
 
@@ -102,6 +103,9 @@ export default function WeekView({
                   style={{ color: '#FF3B30' }}>
                   {holidayName}
                 </div>
+              )}
+              {showRain && (
+                <WeatherBadge events={eventsByDate[dateStr] || []} date={day} className="mx-auto mt-1" />
               )}
             </div>
           )

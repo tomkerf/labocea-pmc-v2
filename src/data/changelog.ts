@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '114'
+export const CHANGELOG_VERSION = '117'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,14 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '117',
+    date: '7 juin 2026',
+    items: [
+      { type: 'feat', label: 'Météo du planning augmentée de 3 à 14 jours' },
+      { type: 'feat', label: 'Ajout du condensé météo (ex: 8h-12h) sur les vues Semaine, Mois, et Jour du planning' },
+    ],
+  },
   {
     version: '114',
     date: '6 juin 2026',

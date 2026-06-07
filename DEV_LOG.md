@@ -2,6 +2,21 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 117 — UX Météo & Refactoring
+**7 juin 2026**
+
+### Ce qui a été fait
+- **Météo dans le planning** : Augmentation de l'horizon de prévision de 3 à 14 jours via l'API Open-Meteo pour mieux planifier la semaine.
+- **WeatherBadge** : Création et intégration du composant `WeatherBadge` dans la `WeekView` et la `MonthView` (mode compact). Ce badge condense l'information et évite d'appeler l'API météo à chaque cellule du tableau, ou de surcharger la page en information.
+- **Groupement des heures** : La logique de présentation des heures de pluie probables a été améliorée (ex: "6h, 8h-12h" au lieu de "6h, 8h, 9h, 10h, 11h, 12h"). 
+- **DayView** : Refactoring du composant de la vue Journelle pour éliminer le code météo dupliqué inline au profit du composant générique `WeatherBadge`.
+
+### Prochaines étapes
+- Refactoring `PlanningPage.tsx` (complexité `useState`).
+- En attente des retours métier pour finaliser le déploiement en production.
+
+---
+
 ## Session 116 — React Doctor + useReducer batch 1 & 2 + bugfixes carte
 **7 juin 2026**
 

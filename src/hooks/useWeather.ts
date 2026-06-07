@@ -41,7 +41,7 @@ export function useWeather(
       `https://api.open-meteo.com/v1/forecast` +
       `?latitude=${lat.toFixed(4)}&longitude=${lng.toFixed(4)}` +
       `&hourly=precipitation_probability,precipitation` +
-      `&timezone=Europe%2FParis&forecast_days=3`
+      `&timezone=Europe%2FParis&forecast_days=14`
 
     let cancelled = false
 

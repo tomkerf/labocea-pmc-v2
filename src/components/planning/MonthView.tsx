@@ -7,6 +7,7 @@ import {
   groupByClient, filterEvents,
 } from '@/lib/planningUtils'
 import EventPill from '@/components/planning/EventPill'
+import WeatherBadge from '@/components/planning/WeatherBadge'
 import { COLORS } from '@/lib/constants'
 
 
@@ -142,8 +143,13 @@ export default function MonthView({
                     </span>
                   )}
                 </span>
-                <Plus size={10} className="opacity-25 group-hover:opacity-70 transition-opacity"
-                  style={{ color: 'var(--color-text-tertiary)' }} />
+                <span className="flex items-center gap-1">
+                  {showRain && (
+                    <WeatherBadge events={eventsByDate[dateStr] || []} date={day} compact={true} className="!bg-transparent !p-0" />
+                  )}
+                  <Plus size={10} className="opacity-25 group-hover:opacity-70 transition-opacity"
+                    style={{ color: 'var(--color-text-tertiary)' }} />
+                </span>
               </div>
               {evts.slice(0,MAX).map(evt => <EventPill key={evt.id} event={evt} compact dateStr={dateStr} onExpand={() => goToDay(dateStr)} onSelect={e => handleSelectEvent(e, dateStr)} />)}
               {evts.length>MAX && (
