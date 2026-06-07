@@ -91,7 +91,9 @@ export function usePlanningCalendar({
           ? dayJ1s.filter(e => allowedTechs.includes(normTech(e.technicien)))
           : dayJ1s
 
-      filtered.forEach(j1 => {
+      const groupedJ1s = groupByClient(filtered)
+
+      groupedJ1s.forEach(j1 => {
         const j2DateStr = j1.dateFin!
         const j2Col     = wISOs.indexOf(j2DateStr)
         
@@ -99,6 +101,13 @@ export function usePlanningCalendar({
           ...j1,
           id: j1.id + '_j2_proxy',
           isJ2Continuation: true,
+          j1DateStr: dateStr,
+          subEvents: j1.subEvents?.map(sub => ({
+            ...sub,
+            id: sub.id + '_j2_proxy',
+            isJ2Continuation: true,
+            j1DateStr: dateStr
+          }))
         } : null
 
         pairs.push({ j1Col: colIdx, j2Col: j2 ? j2Col : -1, j1, j2 })

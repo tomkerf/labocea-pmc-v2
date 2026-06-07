@@ -144,15 +144,40 @@ export default function WeekView({
                       margin: '2px 4px',
                       background: `linear-gradient(90deg, ${group.techColor}12 0%, ${group.techColor}03 100%)`,
                     }}>
-                    {group.items.map(item => (
-                      <div key={item.event.id} style={{ flex: 1, minWidth: 0 }}>
-                        <EventPill
-                          event={item.event}
-                          dateStr={wISOs[item.colIdx]}
-                          onSelect={e => handleSelectEvent(e, wISOs[item.colIdx])}
-                        />
-                      </div>
-                    ))}
+                    {group.items.map(item => {
+                      const evt = item.event
+                      const isGrouped = (evt.count ?? 0) > 1
+                      const groupKey = evt.clientId ?? evt.id
+                      const dateForToggle = evt.j1DateStr ?? wISOs[item.colIdx]
+                      
+                      return (
+                        <div key={item.event.id} style={{ flex: 1, minWidth: 0 }}>
+                          {isGrouped && isGroupExpanded(dateForToggle, groupKey) ? (
+                            <div className="flex flex-col gap-0.5 w-full">
+                              {(evt.subEvents ?? []).map(sub => (
+                                <EventPill key={sub.id} event={sub} dateStr={wISOs[item.colIdx]} onSelect={e => handleSelectEvent(e, wISOs[item.colIdx])} />
+                              ))}
+                              <button type="button"
+                                onMouseDown={e => e.stopPropagation()}
+                                onClick={e => { e.stopPropagation(); toggleGroup(dateForToggle, groupKey) }}
+                                className="w-full text-center text-[9px] font-medium rounded py-[2px] mt-0.5 hover:brightness-95 transition-all"
+                                style={{ color: 'var(--color-text-tertiary)', background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border-subtle)' }}
+                              >
+                                ▲ replier
+                              </button>
+                            </div>
+                          ) : (
+                            <EventPill
+                              event={evt}
+                              dateStr={wISOs[item.colIdx]}
+                              expanded={false}
+                              onExpand={isGrouped ? () => toggleGroup(dateForToggle, groupKey) : undefined}
+                              onSelect={e => handleSelectEvent(e, wISOs[item.colIdx])}
+                            />
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                 ))}
               </div>

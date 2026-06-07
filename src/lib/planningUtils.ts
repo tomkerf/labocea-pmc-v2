@@ -22,6 +22,7 @@ export interface PlanningEvent {
   priority: number        // 0=retard, 1=non_effectue, 2=planifié, 3=réalisé, 4=fantôme
   technicien: string
   count?: number          // nb prélèvements regroupés (même client, même jour)
+  j1DateStr?: string      // Utilisé pour les J2 proxies pour lier à la même clé de toggleGroup
   plannedTime?: string
   clientId?: string
   planId?: string
