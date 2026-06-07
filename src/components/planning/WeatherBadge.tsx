@@ -80,8 +80,8 @@ export default function WeatherBadge({ events, fallbackEvents = EMPTY_EVENTS, da
       i++
     }
 
-    fullText = `${emoji} ${weather.tempMax !== undefined ? Math.round(weather.tempMax) + '° · ' : ''}${groups.join(', ')} (${weather.maxProba}%) · max ${weather.maxMm.toFixed(1)} mm`
-    tooltip = `Température max: ${weather.tempMax}°C. Pluie probable : ${groups.join(', ')} (${weather.maxProba}%) · max ${weather.maxMm.toFixed(1)} mm`
+    fullText = `${emoji} ${weather.tempMax !== undefined ? Math.round(weather.tempMax) + '° · ' : ''}${groups.join(', ')} (${weather.maxProba}%) · max\u00A0${weather.maxMm.toFixed(1)}\u00A0mm`
+    tooltip = `Température max: ${weather.tempMax}°C. Pluie probable : ${groups.join(', ')} (${weather.maxProba}%) · max\u00A0${weather.maxMm.toFixed(1)}\u00A0mm`
   } else {
     fullText = `${emoji} ${weather.tempMax !== undefined ? Math.round(weather.tempMax) + '°' : ''}`
     tooltip = `Pas de pluie prévue. Température max: ${weather.tempMax}°C, min: ${weather.tempMin}°C`
