@@ -1,21 +1,36 @@
-import { useState } from 'react'
+import { useState, useReducer } from 'react'
 import { Navigate } from 'react-router-dom'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { COLLECTIONS, COLORS } from '@/lib/constants'
 
+type ProfileFormState = {
+  prenom: string
+  nom: string
+  initiales: string
+}
+
+type ProfileFormAction = { type: 'field'; name: keyof ProfileFormState; value: string }
+
+function profileFormReducer(state: ProfileFormState, action: ProfileFormAction): ProfileFormState {
+  return { ...state, [action.name]: action.value }
+}
 
 /** Bloque l'accès à l'app tant que le profil n'est pas complété (initiales vides). */
 function CompleteProfileModal() {
   const appUser   = useAuthStore(selectAppUser)
   const setAppUser = useAuthStore((s) => s.setAppUser)
 
-  const [prenom,    setPrenom]    = useState(appUser?.prenom ?? '')
-  const [nom,       setNom]       = useState(appUser?.nom ?? '')
-  const [initiales, setInitiales] = useState(appUser?.initiales ?? '')
-  const [saving,    setSaving]    = useState(false)
-  const [error,     setError]     = useState('')
+  const [form, dispatch] = useReducer(profileFormReducer, {
+    prenom:    appUser?.prenom    ?? '',
+    nom:       appUser?.nom       ?? '',
+    initiales: appUser?.initiales ?? '',
+  })
+  const [saving, setSaving] = useState(false)
+  const [error,  setError]  = useState('')
+
+  const { prenom, nom, initiales } = form
 
   async function handleSave() {
     const init = initiales.trim().toUpperCase()
@@ -66,7 +81,7 @@ function CompleteProfileModal() {
             <input
               id="ra-prenom"
               value={prenom}
-              onChange={(e) => setPrenom(e.target.value)}
+              onChange={(e) => dispatch({ type: 'field', name: 'prenom', value: e.target.value })}
               className="field-input w-full"
               placeholder="Thomas"
 
@@ -79,7 +94,7 @@ function CompleteProfileModal() {
             <input
               id="ra-nom"
               value={nom}
-              onChange={(e) => setNom(e.target.value)}
+              onChange={(e) => dispatch({ type: 'field', name: 'nom', value: e.target.value })}
               className="field-input w-full"
               placeholder="Kerfendal"
             />
@@ -91,7 +106,7 @@ function CompleteProfileModal() {
             <input
               id="ra-initiales"
               value={initiales}
-              onChange={(e) => setInitiales(e.target.value.toUpperCase())}
+              onChange={(e) => dispatch({ type: 'field', name: 'initiales', value: e.target.value.toUpperCase() })}
               className="field-input w-full"
               placeholder="THK"
               maxLength={4}

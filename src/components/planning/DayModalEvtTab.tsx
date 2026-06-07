@@ -1,7 +1,34 @@
-import { useState } from 'react'
+import { useReducer, useState } from 'react'
 import { createEvenement } from '@/services/evenementService'
 import type { TypeEvenement } from '@/types'
 import { COLORS } from '@/lib/constants'
+
+interface EvtFormState {
+  evtTitre: string
+  evtType: TypeEvenement
+  evtHeure: string
+  evtNotes: string
+}
+
+const INITIAL_EVT_FORM: EvtFormState = {
+  evtTitre: '',
+  evtType: 'rappel',
+  evtHeure: '',
+  evtNotes: '',
+}
+
+type EvtFormAction =
+  | { type: 'field'; name: keyof EvtFormState; value: string | TypeEvenement }
+  | { type: 'reset' }
+
+function evtFormReducer(state: EvtFormState, action: EvtFormAction): EvtFormState {
+  switch (action.type) {
+    case 'field':
+      return { ...state, [action.name]: action.value }
+    case 'reset':
+      return INITIAL_EVT_FORM
+  }
+}
 
 const EVENEMENT_TYPES: { value: TypeEvenement; label: string; emoji: string }[] = [
   { value: 'rappel',  label: 'Rappel',    emoji: '🔔' },
@@ -19,10 +46,8 @@ interface DayModalEvtTabProps {
 }
 
 export default function DayModalEvtTab({ dateStr, uid, initiales, onClose }: DayModalEvtTabProps) {
-  const [evtTitre,  setEvtTitre]  = useState('')
-  const [evtType,   setEvtType]   = useState<TypeEvenement>('rappel')
-  const [evtHeure,  setEvtHeure]  = useState('')
-  const [evtNotes,  setEvtNotes]  = useState('')
+  const [form, dispatch] = useReducer(evtFormReducer, INITIAL_EVT_FORM)
+  const { evtTitre, evtType, evtHeure, evtNotes } = form
   const [evtSaving, setEvtSaving] = useState(false)
 
   async function handleCreateEvt() {
@@ -32,7 +57,7 @@ export default function DayModalEvtTab({ dateStr, uid, initiales, onClose }: Day
     setEvtSaving(true)
     try {
       await createEvenement(titre, dateStr, evtType, evtHeure, evtNotes, uid, initiales)
-      setEvtTitre(''); setEvtHeure(''); setEvtNotes('')
+      dispatch({ type: 'reset' })
       onClose()
     } finally { setEvtSaving(false) }
   }
@@ -46,7 +71,7 @@ export default function DayModalEvtTab({ dateStr, uid, initiales, onClose }: Day
         aria-label="Titre de l'événement"
         placeholder={evtType === 'conge' ? 'Titre (optionnel)' : 'Titre de l\'événement'}
         value={evtTitre}
-        onChange={e => setEvtTitre(e.target.value)}
+        onChange={e => dispatch({ type: 'field', name: 'evtTitre', value: e.target.value })}
         onKeyDown={e => e.key === 'Enter' && handleCreateEvt()}
         className="w-full px-3 py-2.5 rounded-xl text-sm"
         style={{
@@ -57,7 +82,7 @@ export default function DayModalEvtTab({ dateStr, uid, initiales, onClose }: Day
         }} />
       <div className="grid grid-cols-5 gap-1.5">
         {EVENEMENT_TYPES.map(t => (
-          <button type="button" key={t.value} onClick={() => setEvtType(t.value)}
+          <button type="button" key={t.value} onClick={() => dispatch({ type: 'field', name: 'evtType', value: t.value })}
             className="flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl text-[11px] font-medium"
             style={{
               background: evtType === t.value ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
@@ -69,11 +94,11 @@ export default function DayModalEvtTab({ dateStr, uid, initiales, onClose }: Day
           </button>
         ))}
       </div>
-      <input type="time" value={evtHeure} onChange={e => setEvtHeure(e.target.value)}
+      <input type="time" value={evtHeure} onChange={e => dispatch({ type: 'field', name: 'evtHeure', value: e.target.value })}
         aria-label="Heure de l'événement"
         className="w-full px-3 py-2 rounded-lg text-sm"
         style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
-      <textarea rows={2} aria-label="Notes de l'événement" placeholder="Notes (optionnel)" value={evtNotes} onChange={e => setEvtNotes(e.target.value)}
+      <textarea rows={2} aria-label="Notes de l'événement" placeholder="Notes (optionnel)" value={evtNotes} onChange={e => dispatch({ type: 'field', name: 'evtNotes', value: e.target.value })}
         className="w-full px-3 py-2 rounded-lg text-sm resize-none"
         style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
       <button type="button" onClick={handleCreateEvt} disabled={!canCreate || evtSaving}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useReducer } from 'react'
 import { Plus, Search, Package } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -51,6 +51,41 @@ function normalizeCategorie(cat: string): string {
   return CATEGORIE_ALIAS[cat] ?? cat
 }
 
+interface FiltersState {
+  search: string
+  filterCategorie: string
+  filterEtat: string
+  filterSite: string
+  filterTechnicien: string
+  filterMateriau: string
+  filterMarque: string
+}
+
+type FiltersAction =
+  | { type: 'setFilter'; name: keyof FiltersState; value: string }
+  | { type: 'reset' }
+
+const initialFilters: FiltersState = {
+  search: '',
+  filterCategorie: '',
+  filterEtat: '',
+  filterSite: '',
+  filterTechnicien: '',
+  filterMateriau: '',
+  filterMarque: '',
+}
+
+function filtersReducer(state: FiltersState, action: FiltersAction): FiltersState {
+  switch (action.type) {
+    case 'setFilter':
+      return { ...state, [action.name]: action.value }
+    case 'reset':
+      return initialFilters
+    default:
+      return state
+  }
+}
+
 export default function MaterielPage() {
   useEquipementsListener()
   useUsersListener()
@@ -58,13 +93,8 @@ export default function MaterielPage() {
   const uid = useAuthStore(selectUid)
   const { equipements, loading } = useEquipementsStore()
 
-  const [search, setSearch] = useState('')
-  const [filterCategorie, setFilterCategorie] = useState('')
-  const [filterEtat, setFilterEtat] = useState('')
-  const [filterSite, setFilterSite] = useState('')
-  const [filterTechnicien, setFilterTechnicien] = useState('')
-  const [filterMateriau, setFilterMateriau] = useState('')
-  const [filterMarque, setFilterMarque] = useState('')
+  const [filters, dispatch] = useReducer(filtersReducer, initialFilters)
+  const { search, filterCategorie, filterEtat, filterSite, filterTechnicien, filterMateriau, filterMarque } = filters
 
   const users = useUsersStore(s => s.users)
   const techniciens = users.filter(u => u.role !== 'charge_mission')
@@ -130,7 +160,7 @@ export default function MaterielPage() {
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => dispatch({ type: 'setFilter', name: 'search', value: e.target.value })}
             placeholder="Rechercher un équipement…"
             className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm"
             style={{
@@ -144,7 +174,11 @@ export default function MaterielPage() {
         <div className="flex gap-2">
           <select
             value={filterCategorie}
-            onChange={(e) => { setFilterCategorie(e.target.value); setFilterMateriau(''); setFilterMarque('') }}
+            onChange={(e) => {
+              dispatch({ type: 'setFilter', name: 'filterCategorie', value: e.target.value })
+              dispatch({ type: 'setFilter', name: 'filterMateriau', value: '' })
+              dispatch({ type: 'setFilter', name: 'filterMarque', value: '' })
+            }}
             className="flex-1 px-3 py-2 rounded-lg text-sm"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
@@ -152,7 +186,7 @@ export default function MaterielPage() {
           </select>
           <select
             value={filterEtat}
-            onChange={(e) => setFilterEtat(e.target.value)}
+            onChange={(e) => dispatch({ type: 'setFilter', name: 'filterEtat', value: e.target.value })}
             className="flex-1 px-3 py-2 rounded-lg text-sm"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
@@ -163,7 +197,7 @@ export default function MaterielPage() {
         <div className="flex gap-2">
           <select
             value={filterSite}
-            onChange={(e) => setFilterSite(e.target.value)}
+            onChange={(e) => dispatch({ type: 'setFilter', name: 'filterSite', value: e.target.value })}
             className="flex-1 px-3 py-2 rounded-lg text-sm"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
@@ -173,7 +207,7 @@ export default function MaterielPage() {
           </select>
           <select
             value={filterTechnicien}
-            onChange={(e) => setFilterTechnicien(e.target.value)}
+            onChange={(e) => dispatch({ type: 'setFilter', name: 'filterTechnicien', value: e.target.value })}
             className="flex-1 px-3 py-2 rounded-lg text-sm"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
@@ -188,7 +222,7 @@ export default function MaterielPage() {
           <div className="flex gap-2">
             <select
               value={filterMateriau}
-              onChange={(e) => setFilterMateriau(e.target.value)}
+              onChange={(e) => dispatch({ type: 'setFilter', name: 'filterMateriau', value: e.target.value })}
               className="flex-1 px-3 py-2 rounded-lg text-sm"
               style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
             >
@@ -198,7 +232,7 @@ export default function MaterielPage() {
             </select>
             <select
               value={filterMarque}
-              onChange={(e) => setFilterMarque(e.target.value)}
+              onChange={(e) => dispatch({ type: 'setFilter', name: 'filterMarque', value: e.target.value })}
               className="flex-1 px-3 py-2 rounded-lg text-sm"
               style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
             >

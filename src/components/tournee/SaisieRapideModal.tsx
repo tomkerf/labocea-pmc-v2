@@ -1,5 +1,5 @@
 // src/components/tournee/SaisieRapideModal.tsx
-import { useState } from 'react'
+import { useReducer, useState } from 'react'
 import { AnimatePresence, m } from 'framer-motion'
 import type { NappeType } from '@/types'
 import { COLORS } from '@/lib/constants'
@@ -26,14 +26,35 @@ interface Props {
 
 const todayISO = () => new Date().toISOString().slice(0, 10)
 
+interface FormState {
+  status: 'done' | 'non_effectue' | 'reporte'
+  doneDate: string
+  newPlannedDate: string
+  nappe: NappeType
+  commentaire: string
+  motif: string
+}
+
+type FormAction = { type: 'field'; name: keyof FormState; value: string | NappeType | 'done' | 'non_effectue' | 'reporte' }
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  if (action.type === 'field') {
+    return { ...state, [action.name]: action.value }
+  }
+  return state
+}
+
 export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, hideRealise, onConfirm, onClose }: Props) {
-  const [status, setStatus]           = useState<'done' | 'non_effectue' | 'reporte'>(initialStatus === 'done' && hideRealise ? 'non_effectue' : initialStatus)
-  const [doneDate, setDoneDate]       = useState(() => todayISO())
-  const [newPlannedDate, setNewPlannedDate] = useState(() => todayISO())
-  const [nappe, setNappe]             = useState<NappeType>('')
-  const [commentaire, setCommentaire] = useState('')
-  const [motif, setMotif]             = useState('')
-  const [error, setError]             = useState('')
+  const [form, dispatch] = useReducer(formReducer, undefined, (): FormState => ({
+    status:         initialStatus === 'done' && hideRealise ? 'non_effectue' : initialStatus,
+    doneDate:       todayISO(),
+    newPlannedDate: todayISO(),
+    nappe:          '',
+    commentaire:    '',
+    motif:          '',
+  }))
+  const { status, doneDate, newPlannedDate, nappe, commentaire, motif } = form
+  const [error, setError] = useState('')
 
   const isSouterraine = nature === 'Souterraine'
 
@@ -79,7 +100,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
               const isActive = status === s
               return (
                 <button type="button" key={s}
-                  onClick={() => setStatus(s)}
+                  onClick={() => dispatch({ type: 'field', name: 'status', value: s })}
                   className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
                   style={{
                     background: isActive ? activeColors[s].bg : COLORS.BG_TERTIARY,
@@ -95,7 +116,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
           {status === 'done' && (
             <label className="block mb-3">
               <span className="text-xs font-medium mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Date réalisée</span>
-              <input type="date" value={doneDate} onChange={e => setDoneDate(e.target.value)}
+              <input type="date" value={doneDate} onChange={e => dispatch({ type: 'field', name: 'doneDate', value: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ border: '1px solid var(--color-border)', background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }} />
             </label>
@@ -105,7 +126,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
           {status === 'reporte' && (
             <label className="block mb-3">
               <span className="text-xs font-medium mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Nouvelle date prévue *</span>
-              <input type="date" value={newPlannedDate} onChange={e => setNewPlannedDate(e.target.value)}
+              <input type="date" value={newPlannedDate} onChange={e => dispatch({ type: 'field', name: 'newPlannedDate', value: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ border: '1px solid var(--color-border)', background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }} />
             </label>
@@ -115,7 +136,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
           {isSouterraine && (
             <div className="block mb-3">
               <label htmlFor="nappe-select" className="text-xs font-medium mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Nappe</label>
-              <select id="nappe-select" aria-label="nappe" value={nappe} onChange={e => setNappe(e.target.value as NappeType)}
+              <select id="nappe-select" aria-label="nappe" value={nappe} onChange={e => dispatch({ type: 'field', name: 'nappe', value: e.target.value as NappeType })}
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ border: '1px solid var(--color-border)', background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }}>
                 <option value="">—</option>
@@ -129,7 +150,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
           {status === 'non_effectue' && (
             <label className="block mb-3">
               <span className="text-xs font-medium mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Motif *</span>
-              <input type="text" value={motif} onChange={e => setMotif(e.target.value)}
+              <input type="text" value={motif} onChange={e => dispatch({ type: 'field', name: 'motif', value: e.target.value })}
                 placeholder="Accès impossible, conditions météo..."
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ border: '1px solid var(--color-border)', background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }} />
@@ -139,7 +160,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
           {/* Commentaire */}
           <label className="block mb-4">
             <span className="text-xs font-medium mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Commentaire (optionnel)</span>
-            <textarea value={commentaire} onChange={e => setCommentaire(e.target.value)} rows={2}
+            <textarea value={commentaire} onChange={e => dispatch({ type: 'field', name: 'commentaire', value: e.target.value })} rows={2}
               className="w-full px-3 py-2 rounded-lg text-sm resize-none"
               style={{ border: '1px solid var(--color-border)', background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }} />
           </label>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useReducer } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
 import { COLORS } from '@/lib/constants'
@@ -8,15 +8,34 @@ import { AsservissementResultCard } from '@/components/asservissement/Asservisse
 import { AsservissementResultBar } from '@/components/asservissement/AsservissementResultBar'
 import { AsservissementRegle } from '@/components/asservissement/AsservissementRegle'
 
+interface CalcState {
+  v24h:    string
+  vFlacon: string
+  vUnit:   string
+  mode:    'auto' | 'manuel'
+  vEntre:  string
+}
+
+type CalcAction = { type: 'field'; name: keyof CalcState; value: string | 'auto' | 'manuel' }
+
+const initialCalcState: CalcState = {
+  v24h:    '100',
+  vFlacon: '10',
+  vUnit:   '70',
+  mode:    'auto',
+  vEntre:  '1.0',
+}
+
+function calcReducer(state: CalcState, action: CalcAction): CalcState {
+  return { ...state, [action.name]: action.value }
+}
+
 export default function AsservissementPage() {
   const navigate = useNavigate()
 
-  const [v24h,    setV24h]    = useState('100')
-  const [vFlacon, setVFlacon] = useState('10')
-  const [vUnit,   setVUnit]   = useState('70')
-  const [mode,    setMode]    = useState<'auto' | 'manuel'>('auto')
-  const [vEntre,  setVEntre]  = useState('1.0')
-  const [copied,  setCopied]  = useState(false)
+  const [calc, dispatch] = useReducer(calcReducer, initialCalcState)
+  const { v24h, vFlacon, vUnit, mode, vEntre } = calc
+  const [copied, setCopied] = useState(false)
 
   // Suppression spinners natifs sur les inputs numériques
   useEffect(() => {
@@ -67,7 +86,7 @@ export default function AsservissementPage() {
         <div className="flex gap-1.5 p-1.5 rounded-xl"
           style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
           {(['auto', 'manuel'] as const).map(m => (
-            <button type="button" key={m} onClick={() => setMode(m)}
+            <button type="button" key={m} onClick={() => dispatch({ type: 'field', name: 'mode', value: m })}
               className="flex-1 py-3 rounded-lg text-sm font-semibold transition-all"
               style={{ background: mode === m ? COLORS.ACCENT : 'transparent', color: mode === m ? 'white' : COLORS.TEXT_SECONDARY }}>
               {m === 'auto' ? '⚡ Automatique' : '✎ Manuel'}
@@ -77,25 +96,25 @@ export default function AsservissementPage() {
 
         {/* Rejet 24h */}
         <div className="rounded-xl p-4" style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-          <Stepper label="Rejet 24h" hint="Volume total rejeté" value={v24h} onChange={setV24h} unit="m³" step={10} min={1} max={99999} />
-          <Chips values={PRESETS_V24H} current={v24h} unit="m³" onSelect={setV24h} />
+          <Stepper label="Rejet 24h" hint="Volume total rejeté" value={v24h} onChange={v => dispatch({ type: 'field', name: 'v24h', value: v })} unit="m³" step={10} min={1} max={99999} />
+          <Chips values={PRESETS_V24H} current={v24h} unit="m³" onSelect={v => dispatch({ type: 'field', name: 'v24h', value: v })} />
         </div>
 
         {/* Flacon + Volume unitaire */}
         <div className="rounded-xl p-4 flex flex-col gap-4" style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
           <div>
-            <Stepper label="Capacité du flacon" value={vFlacon} onChange={setVFlacon} unit="L" step={1} min={1} max={200} />
-            <Chips values={PRESETS_FLACON} current={vFlacon} unit="L" onSelect={setVFlacon} />
+            <Stepper label="Capacité du flacon" value={vFlacon} onChange={v => dispatch({ type: 'field', name: 'vFlacon', value: v })} unit="L" step={1} min={1} max={200} />
+            <Chips values={PRESETS_FLACON} current={vFlacon} unit="L" onSelect={v => dispatch({ type: 'field', name: 'vFlacon', value: v })} />
           </div>
           <div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: 16 }}>
-            <Stepper label="Volume unitaire" hint="50–100 mL recommandés" value={vUnit} onChange={setVUnit} unit="mL" step={5} min={10} max={200} />
+            <Stepper label="Volume unitaire" hint="50–100 mL recommandés" value={vUnit} onChange={v => dispatch({ type: 'field', name: 'vUnit', value: v })} unit="mL" step={5} min={10} max={200} />
           </div>
         </div>
 
         {/* Volume entre prélèvements (mode manuel) */}
         {mode === 'manuel' && (
           <div className="rounded-xl p-4" style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
-            <Stepper label="Volume écoulé entre prélèvements" hint="Valeur à programmer" value={vEntre} onChange={setVEntre} unit="m³" step={0.1} min={0.01} max={100} />
+            <Stepper label="Volume écoulé entre prélèvements" hint="Valeur à programmer" value={vEntre} onChange={v => dispatch({ type: 'field', name: 'vEntre', value: v })} unit="m³" step={0.1} min={0.01} max={100} />
           </div>
         )}
 
