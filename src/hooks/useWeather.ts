@@ -84,7 +84,7 @@ export function useWeather(
       })
 
     return () => { cancelled = true }
-  }, [fetchKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchKey, lat, lng, dateStr])
 
   return result
 }

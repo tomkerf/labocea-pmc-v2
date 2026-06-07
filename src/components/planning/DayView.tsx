@@ -102,7 +102,7 @@ export default function DayView({
                       ? (isExpanded
                           ? <ChevronDown size={10} className="shrink-0" style={{ color: COLORS.TEXT_SECONDARY }} />
                           : <ChevronRight size={10} className="shrink-0" style={{ color: COLORS.TEXT_SECONDARY }} />)
-                      : <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: evt.statusColor }} />
+                      : <span className="size-[5px] rounded-full shrink-0" style={{ background: evt.statusColor }} />
                     }
                     <span className="text-[11px] font-medium flex-1 truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                       {evt.title}
@@ -134,7 +134,7 @@ export default function DayView({
                       onClick={() => handleSelectEvent(sub, dateStr)}
                       className="w-full flex items-center gap-1.5 pl-6 pr-2 py-0.5 text-left"
                       style={{ background: 'transparent' }}>
-                      <span className="w-[4px] h-[4px] rounded-full shrink-0" style={{ background: sub.statusColor }} />
+                      <span className="size-[4px] rounded-full shrink-0" style={{ background: sub.statusColor }} />
                       <span className="text-[10px] flex-1 truncate" style={{ color: COLORS.TEXT_PRIMARY }}>{sub.subtitle}</span>
                       {sub.frequence && (
                         <span className="text-[9px] shrink-0" style={{ color: 'var(--color-text-tertiary)' }}>{sub.frequence}</span>
@@ -206,7 +206,7 @@ export default function DayView({
                     border: `1.5px solid ${evt.statusColor}50`,
                   }}>
                   <div className="flex items-center gap-1">
-                    <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ background: evt.statusColor }} />
+                    <span className="size-[5px] rounded-full shrink-0" style={{ background: evt.statusColor }} />
                     <span className="text-[11px] font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                       {evt.title}
                     </span>

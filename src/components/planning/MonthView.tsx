@@ -80,6 +80,7 @@ export default function MonthView({
       </div>
       {/* Grille */}
       <div className="grid grid-cols-7 flex-1 overflow-hidden select-none"
+        role="presentation"
         style={{ gridAutoRows:'1fr' }}
         onMouseUp={handleDragMouseUp}
         onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
@@ -102,19 +103,17 @@ export default function MonthView({
           const MAX = 3
           return (
             <div key={dateStr}
-              className="p-1 flex flex-col gap-0.5 cursor-crosshair group"
+              role="presentation"
+              className={`p-1 flex flex-col gap-0.5 cursor-crosshair group relative min-h-[90px] select-none border-b border-border-subtle ${
+                (i % 7) < 6 ? 'border-r border-border-subtle' : ''
+              } ${
+                inDrag ? 'outline outline-2 outline-[rgba(0,113,227,0.3)] -outline-offset-1' : 'outline-none'
+              }`}
               onMouseDown={e => handleDragMouseDown(e, dateStr)}
               onMouseEnter={() => handleDragMouseEnter(dateStr)}
               onContextMenu={e => { e.preventDefault(); setCtxMenu({ dateStr, x: e.clientX, y: e.clientY }) }}
               style={{
-                position: 'relative',
-                borderRight:(i%7)<6?'1px solid var(--color-border-subtle)':'none',
-                borderBottom:'1px solid var(--color-border-subtle)',
                 background: inDrag ? 'rgba(0,113,227,0.1)' : isWeekend ? 'rgba(0,0,0,0.012)' : COLORS.BG_SECONDARY,
-                outline: inDrag ? '2px solid rgba(0,113,227,0.3)' : 'none',
-                outlineOffset: '-1px',
-                minHeight: 90,
-                userSelect: 'none',
               }}>
               {/* Overlay jour férié ou week-end */}
               {(holidayName || isWeekend) && !inDrag && <div className="holiday-overlay" />}
@@ -124,7 +123,7 @@ export default function MonthView({
               {showRain && isRainyDay && !inDrag && <div className="rain-overlay" />}
               <div className="flex items-center justify-between mb-0.5 px-0.5">
                 <span className="flex items-center gap-1">
-                  <span className="w-[22px] h-[22px] flex items-center justify-center rounded-full text-[11px] font-semibold"
+                  <span className="size-[22px] flex items-center justify-center rounded-full text-xs font-semibold select-none group-hover:brightness-95"
                     style={{
                       background: isToday ? '#FF3B30' : holidayName ? 'rgba(255,59,48,0.12)' : 'transparent',
                       color: isToday ? 'white' : holidayName ? '#FF3B30' : COLORS.TEXT_SECONDARY,

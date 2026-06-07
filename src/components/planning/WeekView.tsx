@@ -80,7 +80,7 @@ export default function WeekView({
           const isRainyDay  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
           const isWeekend   = day.getDay() === 0 || day.getDay() === 6
           return (
-            <div key={dateStr} className="py-2 px-2 text-center relative overflow-hidden"
+            <div key={dateStr} className="p-2 text-center relative overflow-hidden"
               style={{
                 borderRight: i<6?'1px solid var(--color-border-subtle)':'none',
                 background: holidayName ? 'rgba(255,59,48,0.04)' : isWeekend ? 'rgba(0,0,0,0.05)' : 'transparent',
@@ -128,21 +128,18 @@ export default function WeekView({
               )
             })}
           </div>
-          <span style={{ position: 'absolute', top: '50%', left: 6, transform: 'translateY(-50%)', fontSize: 8, fontWeight: 600, letterSpacing: '0.07em', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', pointerEvents: 'none', userSelect: 'none', zIndex: 2 }}>Bilans 24h</span>
+          <span className="absolute top-1/2 left-1.5 -translate-y-1/2 text-[12px] font-semibold tracking-wider uppercase pointer-events-none select-none z-10" style={{ color: 'var(--color-text-tertiary)' }}>Bilans 24h</span>
           {bilanBand.map((row, rowIdx) => {
             const wISOs = weekDays.map(toISO)
             return (
-              <div key={rowIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', padding: '0 2px', position: 'relative', zIndex: 1 }}>
+              <div key={`bilan-row-${wISOs.join('-')}-${rowIdx}`} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', padding: '0 2px', position: 'relative', zIndex: 1 }}>
                 {row.map((group, gIdx) => (
-                  <div key={gIdx}
-                    className="transition-all duration-200 hover:brightness-95"
+                  <div key={`bilan-group-${wISOs.join('-')}-${rowIdx}-${gIdx}`}
+                    className="transition-all duration-200 hover:brightness-95 flex items-center gap-0.5 rounded-[5px]"
                     style={{
                       gridColumn: `${group.colStart + 1} / ${group.colEnd + 2}`,
-                      display: 'flex',
-                      gap: 2,
                       border: `1px solid ${group.techColor}25`,
                       borderLeft: `3px solid ${group.techColor}`,
-                      borderRadius: '5px',
                       padding: '2px 4px 2px 2px',
                       margin: '2px 4px',
                       background: `linear-gradient(90deg, ${group.techColor}12 0%, ${group.techColor}03 100%)`,
@@ -202,6 +199,7 @@ export default function WeekView({
 
       {/* Colonnes événements */}
       <div className="grid grid-cols-7 flex-1 overflow-y-auto select-none"
+        role="presentation"
         onMouseUp={handleDragMouseUp}
         onMouseLeave={() => { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null) } }}>
         {weekDays.map((day,i) => {
@@ -214,6 +212,7 @@ export default function WeekView({
           const isWeekend  = day.getDay() === 0 || day.getDay() === 6
           return (
             <div key={dateStr}
+              role="presentation"
               className="p-1.5 flex flex-col gap-1 cursor-crosshair group"
               onMouseDown={e => handleDragMouseDown(e, dateStr)}
               onMouseEnter={() => handleDragMouseEnter(dateStr)}
