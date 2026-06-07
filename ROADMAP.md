@@ -324,3 +324,4 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 
 *Roadmap générée le 2026-04-18.*
 | 2026-06-07 | UX Météo Planning ✅ | Extension des prévisions à 14 jours, ajout et uniformisation du WeatherBadge (WeekView, MonthView, DayView) avec regroupement des heures de pluie. |
+| 2026-06-07 | Météo Fallback + UX ✅ | Météo robuste même sur les semaines vides. Ajout espaces insécables et restauration affichage de la température max sur vue pluie. |

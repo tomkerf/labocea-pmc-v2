@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '117'
+export const CHANGELOG_VERSION = '118'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,15 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '118',
+    date: '7 juin 2026',
+    items: [
+      { type: 'feat', label: 'La météo de votre zone d\'intervention s\'affiche désormais même sur les semaines creuses du planning' },
+      { type: 'feat', label: 'Ajout de la température maximale sur les pastilles des jours de pluie prévus' },
+      { type: 'fix', label: 'Amélioration visuelle du texte des prévisions pour éviter les césures' },
+    ],
+  },
   {
     version: '117',
     date: '7 juin 2026',

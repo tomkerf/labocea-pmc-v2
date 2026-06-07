@@ -2,6 +2,19 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 118 — Météo : Fallback global et UX
+**7 juin 2026**
+
+### Ce qui a été fait
+- **Météo ultra-robuste** : Ajout d'un fallback global dans `WeekView` et `MonthView`. Même sur une semaine sans aucune intervention, le centre géographique est calculé en se basant sur le pool complet d'interventions chargées, garantissant l'affichage d'une météo locale par défaut.
+- **Affichage température max** : Sur la vue pluie, la température maximale n'était plus affichée. C'est désormais le cas, ex: `🌧️ 18° · 6h, 8h-12h (85%) · max 2.5 mm`.
+- **UX et mise en page** : Ajout d'espaces insécables (`\u00A0`) pour garantir que `max 2.5 mm` ne se coupe pas inélégamment sur deux lignes.
+
+### Prochaines étapes
+- En attente des retours métier pour finaliser le déploiement en production.
+
+---
+
 ## Session 117 — UX Météo & Refactoring
 **7 juin 2026**
 
