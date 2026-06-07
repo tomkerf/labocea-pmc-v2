@@ -12,6 +12,9 @@ export interface WeatherResult {
   maxProba: number
   maxMm: number
   rainWindows: RainWindow[]
+  weatherCode?: number
+  tempMax?: number
+  tempMin?: number
 }
 
 const EMPTY: WeatherResult = { loading: false, error: false, maxProba: 0, maxMm: 0, rainWindows: [] }
@@ -41,6 +44,7 @@ export function useWeather(
       `https://api.open-meteo.com/v1/forecast` +
       `?latitude=${lat.toFixed(4)}&longitude=${lng.toFixed(4)}` +
       `&hourly=precipitation_probability,precipitation` +
+      `&daily=weather_code,temperature_2m_max,temperature_2m_min` +
       `&timezone=Europe%2FParis&forecast_days=14`
 
     let cancelled = false
@@ -50,24 +54,24 @@ export function useWeather(
         if (!r.ok) throw new Error('weather fetch failed')
         return r.json()
       })
-      .then((data: {
-        hourly: {
-          time: string[]
-          precipitation_probability: number[]
-          precipitation: number[]
-        }
-      }) => {
+      .then((data: any) => {
         if (cancelled) return
 
         const times = data.hourly.time
         const probas = data.hourly.precipitation_probability
         const mms = data.hourly.precipitation
 
+        const dailyTimes = data.daily?.time || []
+        const dailyIndex = dailyTimes.indexOf(dateStr)
+        const weatherCode = dailyIndex >= 0 ? data.daily.weather_code[dailyIndex] : undefined
+        const tempMax = dailyIndex >= 0 ? data.daily.temperature_2m_max[dailyIndex] : undefined
+        const tempMin = dailyIndex >= 0 ? data.daily.temperature_2m_min[dailyIndex] : undefined
+
         const windows: RainWindow[] = []
         let maxProba = 0
         let maxMm = 0
 
-        times.forEach((t, i) => {
+        times.forEach((t: string, i: number) => {
           if (!t.startsWith(dateStr)) return
           const hour = parseInt(t.slice(11, 13), 10)
           const proba = probas[i] ?? 0
@@ -77,7 +81,7 @@ export function useWeather(
           if (proba > 30) windows.push({ hour, proba, mm })
         })
 
-        setResult({ loading: false, error: false, maxProba, maxMm, rainWindows: windows })
+        setResult({ loading: false, error: false, maxProba, maxMm, rainWindows: windows, weatherCode, tempMax, tempMin })
       })
       .catch(() => {
         if (!cancelled) setResult({ loading: false, error: true, maxProba: 0, maxMm: 0, rainWindows: [] })
