@@ -446,7 +446,7 @@ export function useDashboardStats({
     [equipements])
 
   const techOptions = useMemo(() => {
-    const codes = new Set(clients.map((c: Client) => c.preleveur).filter(Boolean) as string[])
+    const codes = new Set(clients.flatMap((c: Client) => c.preleveur ? [c.preleveur] : []))
     return Array.from(codes).sort().map(code => ({ code, label: code }))
   }, [clients])
 

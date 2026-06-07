@@ -35,7 +35,7 @@ export default function ClientPage() {
   function handleSitesChange(raw: string) {
     setSitesInput(raw)
     if (!client) return
-    const parsed = raw.split(',').map((s) => s.trim()).filter(Boolean)
+    const parsed = raw.split(',').flatMap((s) => { const t = s.trim(); return t ? [t] : [] })
     triggerSave({ ...client, sites: parsed })
   }
 

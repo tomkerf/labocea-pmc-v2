@@ -44,7 +44,7 @@ export function Stepper({ label, hint, value, onChange, unit, step, min, max }: 
         <div className="flex-1 flex items-center justify-center gap-1 px-2">
           <input type="number" inputMode="decimal" value={value} onChange={e => onChange(e.target.value)}
             aria-label={label} className="asserv-inp text-center font-bold"
-            style={{ width: '100%', height: 52, border: 'none', background: 'transparent', fontSize: 22, color: COLORS.TEXT_PRIMARY, fontVariantNumeric: 'tabular-nums', outline: 'none' }} />
+            style={{ width: '100%', height: 52, border: 'none', background: 'transparent', fontSize: 22, color: COLORS.TEXT_PRIMARY, fontVariantNumeric: 'tabular-nums' }} />
           <span className="text-sm font-medium shrink-0" style={{ color: 'var(--color-text-tertiary)' }}>{unit}</span>
         </div>
         <button type="button"

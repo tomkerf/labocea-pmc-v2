@@ -45,7 +45,7 @@ export default function PlanningHeader({
   onExportPdf, onExportExcel, onBilanMois,
 }: PlanningHeaderProps) {
   const availableSites = useMemo(() => {
-    const sites = new Set(preleveurs.map(p => p.site).filter(Boolean) as string[])
+    const sites = new Set(preleveurs.flatMap(p => p.site ? [p.site] : []))
     return [...sites].toSorted()
   }, [preleveurs])
 

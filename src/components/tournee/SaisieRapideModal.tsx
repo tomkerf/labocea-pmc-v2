@@ -28,8 +28,8 @@ const todayISO = () => new Date().toISOString().slice(0, 10)
 
 export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, hideRealise, onConfirm, onClose }: Props) {
   const [status, setStatus]           = useState<'done' | 'non_effectue' | 'reporte'>(initialStatus === 'done' && hideRealise ? 'non_effectue' : initialStatus)
-  const [doneDate, setDoneDate]       = useState(todayISO())
-  const [newPlannedDate, setNewPlannedDate] = useState(todayISO())
+  const [doneDate, setDoneDate]       = useState(() => todayISO())
+  const [newPlannedDate, setNewPlannedDate] = useState(() => todayISO())
   const [nappe, setNappe]             = useState<NappeType>('')
   const [commentaire, setCommentaire] = useState('')
   const [motif, setMotif]             = useState('')

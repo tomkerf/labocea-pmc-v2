@@ -129,7 +129,6 @@ export default function InfosPage() {
               background: COLORS.BG_SECONDARY,
               border: '1px solid var(--color-border)',
               color: COLORS.TEXT_PRIMARY,
-              outline: 'none',
             }}
           />
           {search && (

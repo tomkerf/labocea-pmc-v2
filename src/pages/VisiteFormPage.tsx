@@ -38,7 +38,7 @@ export default function VisiteFormPage() {
   const linkedId = searchParams.get('id') ?? ''
   const linkedNom = searchParams.get('nom') ?? ''
 
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [technicienNom, setTechnicienNom] = useState('')
   const [technicienUid, setTechnicienUid] = useState('')
   const [notes, setNotes] = useState('')
@@ -46,7 +46,7 @@ export default function VisiteFormPage() {
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(!isNew)
   const [uploadingPointId, setUploadingPointId] = useState<string | null>(null)
-  const [createdAt, setCreatedAt] = useState<Timestamp>(Timestamp.now())
+  const [createdAt, setCreatedAt] = useState<Timestamp>(() => Timestamp.now())
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [linkedNomState, setLinkedNomState] = useState(linkedNom)
   const [linkedTypeState, setLinkedTypeState] = useState<'client' | 'demande'>(linkedType ?? 'client')

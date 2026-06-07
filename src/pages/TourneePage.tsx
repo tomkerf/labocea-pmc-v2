@@ -56,13 +56,13 @@ export default function TourneePage() {
   // Construire TourneeItemData depuis jourItems (sampling uniquement)
   const tourneeItems = useMemo((): TourneeItemData[] => {
     return jourItems
-      .flatMap(i => i.kind === 'sampling' ? [i] : [])
-      .map(i => {
+      .flatMap(i => {
+        if (i.kind !== 'sampling') return []
         const ev = i.modalEvent
         const client = clients.find((c: Client) => c.id === ev.clientId)
         const plan   = client?.plans.find((p: Plan) => p.id === ev.planId)
         const s      = plan?.samplings.find((sa: Sampling) => sa.id === ev.samplingId)
-        return {
+        return [{
           samplingId: ev.samplingId ?? '',
           clientId:   ev.clientId  ?? '',
           planId:     ev.planId    ?? '',
@@ -77,7 +77,7 @@ export default function TourneePage() {
           status:     (s?.status === 'done' ? 'done' : s?.status === 'non_effectue' ? 'non_effectue' : 'todo') as TourneeItemData['status'],
           motif:      s?.motif ?? '',
           isJ1Bilan24: i.isJ1Bilan24,
-        }
+        }]
       })
       .sort((a, b) => {
         if (a.time && b.time) return a.time.localeCompare(b.time)
