@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useReducer, useState, useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { doc, getDoc, Timestamp } from 'firebase/firestore'
@@ -13,6 +13,22 @@ import PointCard from '@/components/visites/PointCard'
 import VisiteFormHeader from '@/components/visites/VisiteFormHeader'
 import VisiteGeneralFields from '@/components/visites/VisiteGeneralFields'
 import VisiteFormActions from '@/components/visites/VisiteFormActions'
+
+type FormState = {
+  date: string
+  technicienNom: string
+  technicienUid: string
+  notes: string
+  points: PointVisite[]
+  createdAt: Timestamp
+  linkedNomState: string
+  linkedTypeState: 'client' | 'demande'
+  linkedIdState: string
+}
+
+function formReducer(state: FormState, update: Partial<FormState>): FormState {
+  return { ...state, ...update }
+}
 
 function newPoint(): PointVisite {
   return {
@@ -38,25 +54,27 @@ export default function VisiteFormPage() {
   const linkedId = searchParams.get('id') ?? ''
   const linkedNom = searchParams.get('nom') ?? ''
 
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
-  const [technicienNom, setTechnicienNom] = useState('')
-  const [technicienUid, setTechnicienUid] = useState('')
-  const [notes, setNotes] = useState('')
-  const [points, setPoints] = useState<PointVisite[]>([newPoint()])
+  const [form, dispatch] = useReducer(formReducer, {
+    date: new Date().toISOString().slice(0, 10),
+    technicienNom: '',
+    technicienUid: '',
+    notes: '',
+    points: [newPoint()],
+    createdAt: Timestamp.now(),
+    linkedNomState: linkedNom,
+    linkedTypeState: linkedType ?? 'client',
+    linkedIdState: linkedId,
+  })
+  const { date, technicienNom, technicienUid, notes, points, createdAt, linkedNomState, linkedTypeState, linkedIdState } = form
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(!isNew)
   const [uploadingPointId, setUploadingPointId] = useState<string | null>(null)
-  const [createdAt, setCreatedAt] = useState<Timestamp>(() => Timestamp.now())
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [linkedNomState, setLinkedNomState] = useState(linkedNom)
-  const [linkedTypeState, setLinkedTypeState] = useState<'client' | 'demande'>(linkedType ?? 'client')
-  const [linkedIdState, setLinkedIdState] = useState(linkedId)
 
   useEffect(() => {
     if (user && isNew) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTechnicienUid(user.uid)
-      setTechnicienNom(`${user.prenom} ${user.nom}`)
+      dispatch({ technicienUid: user.uid, technicienNom: `${user.prenom} ${user.nom}` })
     }
   }, [user, isNew])
 
@@ -65,35 +83,33 @@ export default function VisiteFormPage() {
     getDoc(doc(db, COLLECTIONS.VISITES, visiteId)).then((snap) => {
       if (!snap.exists()) { navigate(-1); return }
       const v = { id: snap.id, ...snap.data() } as VisitePreliminaire
-      setDate(v.date)
-      setTechnicienNom(v.technicienNom)
-      setTechnicienUid(v.technicienUid)
-      setNotes(v.notes)
-      setPoints(v.points.length > 0 ? v.points : [newPoint()])
-      setLinkedNomState(v.linkedTo.nom)
-      setLinkedTypeState(v.linkedTo.type)
-      setLinkedIdState(v.linkedTo.id)
-      setCreatedAt(v.createdAt)
+      dispatch({
+        date: v.date,
+        technicienNom: v.technicienNom,
+        technicienUid: v.technicienUid,
+        notes: v.notes,
+        points: v.points.length > 0 ? v.points : [newPoint()],
+        linkedNomState: v.linkedTo.nom,
+        linkedTypeState: v.linkedTo.type,
+        linkedIdState: v.linkedTo.id,
+        createdAt: v.createdAt,
+      })
       setLoading(false)
     })
   }, [visiteId, navigate])
 
   function updatePoint(pointId: string, field: keyof PointVisite, value: unknown) {
-    setPoints(ps => ps.map(p => p.id === pointId ? { ...p, [field]: value } : p))
+    dispatch({ points: points.map(p => p.id === pointId ? { ...p, [field]: value } : p) })
   }
 
   function movePoint(idx: number, dir: -1 | 1) {
-    setPoints(ps => {
-      const next = [...ps]
-      const tmp = next[idx]
-      next[idx] = next[idx + dir]
-      next[idx + dir] = tmp
-      return next
-    })
+    const next = [...points]
+    const tmp = next[idx]; next[idx] = next[idx + dir]; next[idx + dir] = tmp
+    dispatch({ points: next })
   }
 
   function removePoint(pointId: string) {
-    setPoints(ps => ps.filter(p => p.id !== pointId))
+    dispatch({ points: points.filter(p => p.id !== pointId) })
   }
 
   async function handlePhotoAdd(pointId: string, file: File) {
@@ -105,7 +121,7 @@ export default function VisiteFormPage() {
     setUploadingPointId(pointId)
     try {
       const url = await uploadVisitePhoto(file, id, pointId)
-      setPoints(ps => ps.map(p => p.id === pointId ? { ...p, photos: [...p.photos, url] } : p))
+      dispatch({ points: points.map(p => p.id === pointId ? { ...p, photos: [...p.photos, url] } : p) })
     } finally {
       setUploadingPointId(null)
     }
@@ -113,7 +129,7 @@ export default function VisiteFormPage() {
 
   async function handlePhotoDelete(pointId: string, url: string) {
     await deleteVisitePhoto(url)
-    setPoints(ps => ps.map(p => p.id === pointId ? { ...p, photos: p.photos.filter(u => u !== url) } : p))
+    dispatch({ points: points.map(p => p.id === pointId ? { ...p, photos: p.photos.filter(u => u !== url) } : p) })
   }
 
   async function handleSave(silent = false): Promise<string | null> {
@@ -189,9 +205,9 @@ export default function VisiteFormPage() {
         date={date}
         technicienNom={technicienNom}
         notes={notes}
-        onDateChange={setDate}
-        onTechnicienChange={setTechnicienNom}
-        onNotesChange={setNotes}
+        onDateChange={v => dispatch({ date: v })}
+        onTechnicienChange={v => dispatch({ technicienNom: v })}
+        onNotesChange={v => dispatch({ notes: v })}
       />
 
       <div className="space-y-4 mb-6">
@@ -212,7 +228,7 @@ export default function VisiteFormPage() {
       </div>
 
       <button type="button"
-        onClick={() => setPoints(ps => [...ps, newPoint()])}
+        onClick={() => dispatch({ points: [...points, newPoint()] })}
         className="flex items-center gap-2 w-full py-3 rounded-xl text-sm font-medium mb-6"
         style={{ border: '1.5px dashed var(--color-border)', color: COLORS.ACCENT, background: 'var(--color-accent-light)' }}
       >

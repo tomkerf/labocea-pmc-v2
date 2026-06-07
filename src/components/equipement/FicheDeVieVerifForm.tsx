@@ -1,7 +1,29 @@
-import { useState } from 'react'
+import { useReducer, useState } from 'react'
 import { Timestamp } from 'firebase/firestore'
 import type { Verification } from '@/types'
 import { COLORS } from '@/lib/constants'
+
+interface FormState {
+  verifDate:      string
+  verifType:      'etalonnage_interne' | 'verification_externe' | 'controle_terrain'
+  verifResultat:  'conforme' | 'non_conforme' | 'a_reprendre'
+  verifRemarques: string
+  verifProchain:  string
+}
+
+type FormAction = { type: 'field'; name: keyof FormState; value: string }
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  return { ...state, [action.name]: action.value }
+}
+
+const initialFormState: FormState = {
+  verifDate:      new Date().toISOString().slice(0, 10),
+  verifType:      'etalonnage_interne',
+  verifResultat:  'conforme',
+  verifRemarques: '',
+  verifProchain:  '',
+}
 
 interface FicheDeVieVerifFormProps {
   equipementId: string
@@ -13,12 +35,10 @@ interface FicheDeVieVerifFormProps {
 }
 
 export function FicheDeVieVerifForm({ equipementId, equipementNom, uid, initiales, onSave, onCancel }: FicheDeVieVerifFormProps) {
-  const [verifDate,      setVerifDate]      = useState(() => new Date().toISOString().slice(0, 10))
-  const [verifType,      setVerifType]      = useState<'etalonnage_interne'|'verification_externe'|'controle_terrain'>('etalonnage_interne')
-  const [verifResultat,  setVerifResultat]  = useState<'conforme'|'non_conforme'|'a_reprendre'>('conforme')
-  const [verifRemarques, setVerifRemarques] = useState('')
-  const [verifProchain,  setVerifProchain]  = useState('')
-  const [saving,         setSaving]         = useState(false)
+  const [form, dispatch] = useReducer(formReducer, initialFormState)
+  const [saving, setSaving] = useState(false)
+
+  const { verifDate, verifType, verifResultat, verifRemarques, verifProchain } = form
 
   async function handleSubmit() {
     if (!verifDate || saving) return
@@ -38,7 +58,9 @@ export function FicheDeVieVerifForm({ equipementId, equipementNom, uid, initiale
       createdAt: Timestamp.now(),
     }
     await onSave(verif)
-    setVerifRemarques(''); setVerifProchain(''); setSaving(false)
+    dispatch({ type: 'field', name: 'verifRemarques', value: '' })
+    dispatch({ type: 'field', name: 'verifProchain', value: '' })
+    setSaving(false)
     onCancel()
   }
 
@@ -49,7 +71,7 @@ export function FicheDeVieVerifForm({ equipementId, equipementNom, uid, initiale
       <div className="flex gap-3 mb-2 flex-wrap">
         <div>
           <label htmlFor="fdv-verif-type" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Type</label>
-          <select id="fdv-verif-type" value={verifType} onChange={e => setVerifType(e.target.value as typeof verifType)} className="field-input">
+          <select id="fdv-verif-type" value={verifType} onChange={e => dispatch({ type: 'field', name: 'verifType', value: e.target.value })} className="field-input">
             <option value="etalonnage_interne">Étalonnage interne</option>
             <option value="verification_externe">Vérification externe</option>
             <option value="controle_terrain">Contrôle terrain</option>
@@ -57,11 +79,11 @@ export function FicheDeVieVerifForm({ equipementId, equipementNom, uid, initiale
         </div>
         <div>
           <label htmlFor="fdv-verif-date" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Date</label>
-          <input id="fdv-verif-date" type="date" value={verifDate} onChange={e => setVerifDate(e.target.value)} className="field-input" />
+          <input id="fdv-verif-date" type="date" value={verifDate} onChange={e => dispatch({ type: 'field', name: 'verifDate', value: e.target.value })} className="field-input" />
         </div>
         <div>
           <label htmlFor="fdv-verif-resultat" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Résultat</label>
-          <select id="fdv-verif-resultat" value={verifResultat} onChange={e => setVerifResultat(e.target.value as typeof verifResultat)} className="field-input">
+          <select id="fdv-verif-resultat" value={verifResultat} onChange={e => dispatch({ type: 'field', name: 'verifResultat', value: e.target.value })} className="field-input">
             <option value="conforme">Conforme</option>
             <option value="non_conforme">Non conforme</option>
             <option value="a_reprendre">À reprendre</option>
@@ -69,12 +91,12 @@ export function FicheDeVieVerifForm({ equipementId, equipementNom, uid, initiale
         </div>
         <div>
           <label htmlFor="fdv-verif-prochain" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Prochain contrôle</label>
-          <input id="fdv-verif-prochain" type="date" value={verifProchain} onChange={e => setVerifProchain(e.target.value)} className="field-input" />
+          <input id="fdv-verif-prochain" type="date" value={verifProchain} onChange={e => dispatch({ type: 'field', name: 'verifProchain', value: e.target.value })} className="field-input" />
         </div>
       </div>
       <div className="mb-3">
         <label htmlFor="fdv-verif-remarques" className="text-xs mb-1 block" style={{ color: COLORS.TEXT_SECONDARY }}>Remarques (optionnel)</label>
-        <textarea id="fdv-verif-remarques" value={verifRemarques} onChange={e => setVerifRemarques(e.target.value)} rows={2}
+        <textarea id="fdv-verif-remarques" value={verifRemarques} onChange={e => dispatch({ type: 'field', name: 'verifRemarques', value: e.target.value })} rows={2}
           placeholder="Observations, dérives constatées…" className="field-input w-full resize-none" />
       </div>
       <div className="flex justify-end gap-2">

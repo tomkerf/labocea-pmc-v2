@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useReducer } from 'react'
 import { MATERIAUX } from '@/lib/tuyauxUtils'
 import type { Tuyau, MateriauTuyau } from '@/types'
 import { COLORS } from '@/lib/constants'
@@ -32,6 +32,25 @@ export function Tag({ children }: { children: React.ReactNode }) {
   )
 }
 
+interface FormState {
+  refLabo:      string
+  materiau:     MateriauTuyau
+  objet:        string
+  materiel:     string
+  dateCreation: string
+  marque:       string
+  numSerie:     string
+  type:         string
+  fournisseur:  string
+  notes:        string
+}
+
+type FormAction = { type: 'field'; name: keyof FormState; value: string | MateriauTuyau }
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  return { ...state, [action.name]: action.value }
+}
+
 const lbl = { color: COLORS.TEXT_SECONDARY } as const
 
 function F({ label, req, children }: { label: string; req?: boolean; children: React.ReactNode }) {
@@ -53,31 +72,37 @@ const wrap = {
 } as const
 
 export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProps) {
-  const [refLabo,      setRefLabo]      = useState(tuyau.refLabo      ?? '')
-  const [materiau,     setMateriau]     = useState<MateriauTuyau>(tuyau.materiau ?? 'TEFLON')
-  const [objet,        setObjet]        = useState(tuyau.objet        ?? '')
-  const [materiel,     setMateriel]     = useState(tuyau.materiel     ?? '')
-  const [dateCreation, setDateCreation] = useState(tuyau.dateCreation ?? '')
-  const [marque,       setMarque]       = useState(tuyau.marque       ?? '')
-  const [numSerie,     setNumSerie]     = useState(tuyau.numSerie     ?? '')
-  const [type,         setType]         = useState(tuyau.type         ?? '')
-  const [fournisseur,  setFournisseur]  = useState(tuyau.fournisseur  ?? 'SEFI Quimper')
-  const [notes,        setNotes]        = useState(tuyau.notes        ?? '')
+  const [state, dispatch] = useReducer(formReducer, {
+    refLabo:      tuyau.refLabo      ?? '',
+    materiau:     tuyau.materiau     ?? 'TEFLON',
+    objet:        tuyau.objet        ?? '',
+    materiel:     tuyau.materiel     ?? '',
+    dateCreation: tuyau.dateCreation ?? '',
+    marque:       tuyau.marque       ?? '',
+    numSerie:     tuyau.numSerie     ?? '',
+    type:         tuyau.type         ?? '',
+    fournisseur:  tuyau.fournisseur  ?? 'SEFI Quimper',
+    notes:        tuyau.notes        ?? '',
+  })
 
-  const canSave = refLabo.trim().length > 0
+  const set = (name: keyof FormState) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+      dispatch({ type: 'field', name, value: e.target.value })
+
+  const canSave = state.refLabo.trim().length > 0
 
   function handleSave() {
     if (!canSave) return
-    const ref = refLabo.trim().toUpperCase()
+    const ref = state.refLabo.trim().toUpperCase()
     const yr = parseInt('20' + ref.slice(1, 3))
     const annee = isNaN(yr) || yr < 2020 || yr > 2040 ? new Date().getFullYear() : yr
     onSave({
       id: tuyau.id ?? crypto.randomUUID(),
-      refLabo: ref, materiau, annee, objet: objet.trim(),
-      materiel: materiel.trim(), dateCreation,
-      marque: marque.trim(), numSerie: numSerie.trim(),
-      type: type.trim(), fournisseur: fournisseur.trim(),
-      notes: notes.trim(), createdBy: tuyau.createdBy ?? '',
+      refLabo: ref, materiau: state.materiau, annee, objet: state.objet.trim(),
+      materiel: state.materiel.trim(), dateCreation: state.dateCreation,
+      marque: state.marque.trim(), numSerie: state.numSerie.trim(),
+      type: state.type.trim(), fournisseur: state.fournisseur.trim(),
+      notes: state.notes.trim(), createdBy: tuyau.createdBy ?? '',
     })
   }
 
@@ -103,8 +128,9 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
         <div className="px-5 py-4 flex flex-col gap-3 overflow-y-auto">
           <div className="grid grid-cols-3 gap-3">
             <F label="Réf Labo" req>
-              <div style={{ ...wrap, borderColor: refLabo ? COLORS.BORDER : undefined }}>
-                <input value={refLabo} onChange={e => setRefLabo(e.target.value.toUpperCase())}
+              <div style={{ ...wrap, borderColor: state.refLabo ? COLORS.BORDER : undefined }}>
+                <input value={state.refLabo}
+                  onChange={e => dispatch({ type: 'field', name: 'refLabo', value: e.target.value.toUpperCase() })}
                   placeholder="Q25TFE1"
                   aria-label="Référence labo"
                   className="field-input text-sm font-bold tracking-widest"
@@ -113,7 +139,7 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
             </F>
             <F label="Matériau">
               <div style={wrap}>
-                <select value={materiau} onChange={e => setMateriau(e.target.value as MateriauTuyau)}
+                <select value={state.materiau} onChange={set('materiau')}
                   aria-label="Matériau"
                   className="field-input text-sm">
                   {MATERIAUX.map(m => <option key={m} value={m}>{m}</option>)}
@@ -122,7 +148,7 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
             </F>
             <F label="Objet">
               <div style={wrap}>
-                <input value={objet} onChange={e => setObjet(e.target.value)}
+                <input value={state.objet} onChange={set('objet')}
                   placeholder="RSDE DZ, SRA…" aria-label="Objet" className="field-input text-sm" />
               </div>
             </F>
@@ -131,13 +157,13 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
           <div className="grid grid-cols-2 gap-3">
             <F label="Code matériel">
               <div style={wrap}>
-                <input value={materiel} onChange={e => setMateriel(e.target.value)}
+                <input value={state.materiel} onChange={set('materiel')}
                   placeholder="PLV07 / FLC22" aria-label="Code matériel" className="field-input text-sm" />
               </div>
             </F>
             <F label="Date création">
               <div style={wrap}>
-                <input type="date" value={dateCreation} onChange={e => setDateCreation(e.target.value)}
+                <input type="date" value={state.dateCreation} onChange={set('dateCreation')}
                   aria-label="Date de création" className="field-input text-sm" />
               </div>
             </F>
@@ -146,19 +172,19 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
           <div className="grid grid-cols-3 gap-3">
             <F label="Marque">
               <div style={wrap}>
-                <input value={marque} onChange={e => setMarque(e.target.value)}
+                <input value={state.marque} onChange={set('marque')}
                   aria-label="Marque" className="field-input text-sm" />
               </div>
             </F>
             <F label="N° de série">
               <div style={wrap}>
-                <input value={numSerie} onChange={e => setNumSerie(e.target.value)}
+                <input value={state.numSerie} onChange={set('numSerie')}
                   aria-label="Numéro de série" className="field-input text-sm" />
               </div>
             </F>
             <F label="Type">
               <div style={wrap}>
-                <input value={type} onChange={e => setType(e.target.value)}
+                <input value={state.type} onChange={set('type')}
                   aria-label="Type de tuyau" className="field-input text-sm" />
               </div>
             </F>
@@ -166,14 +192,14 @@ export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProp
 
           <F label="Fournisseur">
             <div style={wrap}>
-              <input value={fournisseur} onChange={e => setFournisseur(e.target.value)}
+              <input value={state.fournisseur} onChange={set('fournisseur')}
                 placeholder="SEFI Quimper" aria-label="Fournisseur" className="field-input text-sm" />
             </div>
           </F>
 
           <F label="Notes">
             <div style={{ ...wrap, padding: '8px 11px' }}>
-              <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
+              <textarea value={state.notes} onChange={set('notes')} rows={2}
                 placeholder="Observations, lot de campagne…"
                 aria-label="Notes"
                 className="field-input text-sm resize-none" />

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useReducer, useState } from 'react'
 import { createUserWithEmailAndPassword, deleteUser } from 'firebase/auth'
 import { Check, Loader2, UserPlus, Mail, Lock, User, Hash } from 'lucide-react'
 import { authSecondary, dbSecondary } from '@/lib/firebase'
@@ -16,27 +16,38 @@ function randomColor() {
   return AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)]
 }
 
+type FormState = {
+  prenom:    string
+  nom:       string
+  initiales: string
+  email:     string
+  password:  string
+  role:      UserRole
+}
+
+type FormAction =
+  | { type: 'field'; name: keyof FormState; value: string | UserRole }
+  | { type: 'reset' }
+
+const INITIAL_FORM: FormState = {
+  prenom: '', nom: '', initiales: '', email: '', password: '', role: 'technicien',
+}
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case 'field': return { ...state, [action.name]: action.value }
+    case 'reset': return { ...INITIAL_FORM }
+  }
+}
+
 export function AdminCreateUserForm() {
-  const [prenom,    setPrenom]    = useState('')
-  const [nom,       setNom]       = useState('')
-  const [initiales, setInitiales] = useState('')
-  const [email,     setEmail]     = useState('')
-  const [password,  setPassword]  = useState('')
-  const [role,      setRole]      = useState<UserRole>('technicien')
-  const [loading,   setLoading]   = useState(false)
-  const [success,   setSuccess]   = useState(false)
-  const [error,     setError]     = useState<string | null>(null)
+  const [form,    dispatch] = useReducer(formReducer, INITIAL_FORM)
+  const { prenom, nom, initiales, email, password, role } = form
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error,   setError]   = useState<string | null>(null)
 
-  const handleNameChange = (newPrenom: string, newNom: string) => {
-    const auto = (newPrenom.charAt(0) + newNom.slice(0, 2)).toUpperCase()
-    setInitiales(auto)
-  }
-
-  const reset = () => {
-    setPrenom(''); setNom(''); setInitiales('')
-    setEmail(''); setPassword(''); setRole('technicien')
-    setError(null)
-  }
+  const reset = () => dispatch({ type: 'reset' })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -105,7 +116,11 @@ export function AdminCreateUserForm() {
             <div className="relative">
               <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
               <input id="acuf-prenom" type="text" value={prenom}
-                onChange={e => { setPrenom(e.target.value); handleNameChange(e.target.value, nom) }}
+                onChange={e => {
+                  const newPrenom = e.target.value
+                  dispatch({ type: 'field', name: 'prenom', value: newPrenom })
+                  dispatch({ type: 'field', name: 'initiales', value: (newPrenom.charAt(0) + nom.slice(0, 2)).toUpperCase() })
+                }}
                 placeholder="Thomas"
                 className="w-full pl-8 pr-3 py-2 text-sm rounded-lg"
                 style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}
@@ -117,7 +132,11 @@ export function AdminCreateUserForm() {
             <div className="relative">
               <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
               <input id="acuf-nom" type="text" value={nom}
-                onChange={e => { setNom(e.target.value); handleNameChange(prenom, e.target.value) }}
+                onChange={e => {
+                  const newNom = e.target.value
+                  dispatch({ type: 'field', name: 'nom', value: newNom })
+                  dispatch({ type: 'field', name: 'initiales', value: (prenom.charAt(0) + newNom.slice(0, 2)).toUpperCase() })
+                }}
                 placeholder="Kerfendal"
                 className="w-full pl-8 pr-3 py-2 text-sm rounded-lg"
                 style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}
@@ -132,7 +151,7 @@ export function AdminCreateUserForm() {
             <div className="relative">
               <Hash size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
               <input id="acuf-initiales" type="text" value={initiales}
-                onChange={e => setInitiales(e.target.value.toUpperCase().slice(0, 4))}
+                onChange={e => dispatch({ type: 'field', name: 'initiales', value: e.target.value.toUpperCase().slice(0, 4) })}
                 placeholder="THK" maxLength={4}
                 className="w-full pl-8 pr-3 py-2 text-sm rounded-lg font-mono"
                 style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}
@@ -141,7 +160,7 @@ export function AdminCreateUserForm() {
           </div>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="acuf-role" className="text-xs font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>Rôle</label>
-            <select id="acuf-role" value={role} onChange={e => setRole(e.target.value as UserRole)}
+            <select id="acuf-role" value={role} onChange={e => dispatch({ type: 'field', name: 'role', value: e.target.value as UserRole })}
               className="w-full px-3 py-2 text-sm rounded-lg"
               style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}>
               <option value="technicien">Technicien</option>
@@ -156,7 +175,7 @@ export function AdminCreateUserForm() {
           <div className="relative">
             <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
             <input id="acuf-email" type="email" value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={e => dispatch({ type: 'field', name: 'email', value: e.target.value })}
               placeholder="prenom.nom@labocea.fr"
               className="w-full pl-8 pr-3 py-2 text-sm rounded-lg"
               style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}
@@ -171,7 +190,7 @@ export function AdminCreateUserForm() {
           <div className="relative">
             <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
             <input id="acuf-password" type="password" value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={e => dispatch({ type: 'field', name: 'password', value: e.target.value })}
               placeholder="6 caractères minimum"
               className="w-full pl-8 pr-3 py-2 text-sm rounded-lg"
               style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}

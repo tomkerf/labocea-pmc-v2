@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useReducer } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, ExternalLink, Trash2, AlertTriangle, ChevronRight } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
@@ -16,19 +16,73 @@ export interface EventDetailModalProps {
   techOptions: TechOption[]
 }
 
+// ── State types ──────────────────────────────────────────────────────────────
+
+type ActivePanel = 'none' | 'moving' | 'changingTech' | 'canceling'
+
+interface ModalState {
+  // Panel visibility — mutually exclusive
+  activePanel: ActivePanel
+  // Form data
+  moveDate: string
+  moveReason: string
+  cancelReason: string
+  techInitiales: string
+}
+
+type ModalAction =
+  | { type: 'TOGGLE_PANEL'; panel: Exclude<ActivePanel, 'none'> }
+  | { type: 'SET_MOVE_DATE'; value: string }
+  | { type: 'SET_MOVE_REASON'; value: string }
+  | { type: 'SET_CANCEL_REASON'; value: string }
+  | { type: 'SET_TECH_INITIALES'; value: string }
+  | { type: 'RESET' }
+
+function modalReducer(state: ModalState, action: ModalAction): ModalState {
+  switch (action.type) {
+    case 'TOGGLE_PANEL':
+      return {
+        ...state,
+        activePanel: state.activePanel === action.panel ? 'none' : action.panel,
+      }
+    case 'SET_MOVE_DATE':      return { ...state, moveDate: action.value }
+    case 'SET_MOVE_REASON':    return { ...state, moveReason: action.value }
+    case 'SET_CANCEL_REASON':  return { ...state, cancelReason: action.value }
+    case 'SET_TECH_INITIALES': return { ...state, techInitiales: action.value }
+    case 'RESET':
+      return {
+        activePanel: 'none',
+        moveDate: '',
+        moveReason: '',
+        cancelReason: '',
+        techInitiales: '',
+      }
+    default:
+      return state
+  }
+}
+
+// ── Component ────────────────────────────────────────────────────────────────
+
 export default function EventDetailModal({
   event, dateStr, onClose, onCancel, onMove, onDelete, onChangeTech, techOptions,
 }: EventDetailModalProps) {
   const navigate = useNavigate()
   const connectedInitiales = useAuthStore(s => s.appUser?.initiales) ?? ''
-  const [isMoving,       setIsMoving]       = useState(false)
-  const [isChangingTech, setIsChangingTech] = useState(false)
-  const [isCanceling,    setIsCanceling]    = useState(false)
-  const [moveDate,       setMoveDate]       = useState(dateStr)
-  const [moveReason,     setMoveReason]     = useState('')
-  const [cancelReason,   setCancelReason]   = useState('')
-  const [techInitiales,  setTechInitiales]  = useState(event.technicien ?? '')
-  const [saving,         setSaving]         = useState(false)
+
+  const [state, dispatch] = useReducer(modalReducer, {
+    activePanel: 'none',
+    moveDate: dateStr,
+    moveReason: '',
+    cancelReason: '',
+    techInitiales: event.technicien ?? '',
+  })
+  const [saving, setSaving] = useState(false)
+
+  const { activePanel, moveDate, moveReason, cancelReason, techInitiales } = state
+  const isMoving       = activePanel === 'moving'
+  const isChangingTech = activePanel === 'changingTech'
+  const isCanceling    = activePanel === 'canceling'
 
   const isPrelev = event.type === 'prelevement'
   const isEvt    = event.type === 'evenement'
@@ -52,7 +106,7 @@ export default function EventDetailModal({
   async function handleChangeTech() {
     if (!techInitiales || saving) return
     setSaving(true)
-    try { await onChangeTech(event, techInitiales); setIsChangingTech(false) }
+    try { await onChangeTech(event, techInitiales); dispatch({ type: 'TOGGLE_PANEL', panel: 'changingTech' }) }
     finally { setSaving(false) }
   }
 
@@ -124,7 +178,7 @@ export default function EventDetailModal({
               <label htmlFor="pedm-move-date" className="block text-xs font-medium mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                 Nouvelle date
               </label>
-              <input id="pedm-move-date" type="date" value={moveDate} onChange={e => setMoveDate(e.target.value)}
+              <input id="pedm-move-date" type="date" value={moveDate} onChange={e => dispatch({ type: 'SET_MOVE_DATE', value: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }} />
             </div>
@@ -134,7 +188,7 @@ export default function EventDetailModal({
               </label>
               <textarea
                 id="pedm-move-reason"
-                value={moveReason} onChange={e => setMoveReason(e.target.value)}
+                value={moveReason} onChange={e => dispatch({ type: 'SET_MOVE_REASON', value: e.target.value })}
                 placeholder="Ex : météo défavorable, client indisponible…"
                 rows={2}
                 className="w-full px-3 py-2 rounded-lg text-sm resize-none"
@@ -159,7 +213,7 @@ export default function EventDetailModal({
               <select
                 id="pedm-tech"
                 value={techInitiales}
-                onChange={e => setTechInitiales(e.target.value)}
+                onChange={e => dispatch({ type: 'SET_TECH_INITIALES', value: e.target.value })}
 
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_PRIMARY }}>
@@ -186,7 +240,7 @@ export default function EventDetailModal({
               </label>
               <textarea
                 id="pedm-cancel-reason"
-                value={cancelReason} onChange={e => setCancelReason(e.target.value)}
+                value={cancelReason} onChange={e => dispatch({ type: 'SET_CANCEL_REASON', value: e.target.value })}
                 placeholder="Ex : reporté à une date ultérieure, annulé par le client…"
                 rows={2}
 
@@ -236,7 +290,7 @@ export default function EventDetailModal({
           )}
 
           {isPrelev && !event.isDone && (
-            <button type="button" onClick={() => { setIsMoving(v => !v); setIsChangingTech(false); setIsCanceling(false); }}
+            <button type="button" onClick={() => dispatch({ type: 'TOGGLE_PANEL', panel: 'moving' })}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
               style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY, border: '1px solid var(--color-border-subtle)' }}>
               <ChevronRight size={15} style={{ transform: isMoving ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
@@ -245,7 +299,7 @@ export default function EventDetailModal({
           )}
 
           {isPrelev && (
-            <button type="button" onClick={() => { setIsChangingTech(v => !v); setIsMoving(false); setIsCanceling(false); }}
+            <button type="button" onClick={() => dispatch({ type: 'TOGGLE_PANEL', panel: 'changingTech' })}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
               style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY, border: '1px solid var(--color-border-subtle)' }}>
               <ChevronRight size={15} style={{ transform: isChangingTech ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
@@ -254,7 +308,7 @@ export default function EventDetailModal({
           )}
 
           {isPrelev && !event.isDone && (
-            <button type="button" onClick={() => { setIsCanceling(v => !v); setIsMoving(false); setIsChangingTech(false); }}
+            <button type="button" onClick={() => dispatch({ type: 'TOGGLE_PANEL', panel: 'canceling' })}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
               style={{ background: COLORS.BG_TERTIARY, color: COLORS.DANGER, border: '1px solid var(--color-border-subtle)' }}>
               <ChevronRight size={15} style={{ transform: isCanceling ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
