@@ -69,7 +69,9 @@ export default function WeekView({
     : 0
 
   const weekEvents = useMemo(() => {
-    return weekDays.flatMap(d => eventsByDate[toISO(d)] || [])
+    const evts = weekDays.flatMap(d => eventsByDate[toISO(d)] || [])
+    if (evts.length > 0) return evts
+    return Object.values(eventsByDate).flat()
   }, [weekDays, eventsByDate])
 
   return (

@@ -65,7 +65,9 @@ export default function MonthView({
   }
 
   const monthEvents = useMemo(() => {
-    return monthGrid.flatMap(d => d ? (eventsByDate[toISO(d)] || []) : [])
+    const evts = monthGrid.flatMap(d => d ? (eventsByDate[toISO(d)] || []) : [])
+    if (evts.length > 0) return evts
+    return Object.values(eventsByDate).flat()
   }, [monthGrid, eventsByDate])
 
   return (
