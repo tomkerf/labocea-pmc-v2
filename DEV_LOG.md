@@ -2,6 +2,24 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 116 — React Doctor + useReducer batch 1 & 2 + bugfixes carte
+**7 juin 2026**
+
+### Ce qui a été fait
+- **React Doctor /doctor** : Score 70 → 63/100 (v0.2.9 nouvelles règles). Suppressions FP documentées dans `.react-doctor/false-positives.md`.
+- **Suppression dead code** : Module bilan 24h (~1000 lignes, 9 fichiers), `TabBar.tsx` — tous orphelins depuis avril.
+- **Unused exports** : `export` retiré de 5 symboles internes (`Skeleton`, `DEFAULT_AVATAR_COLOR`, `easterDate`, `MAT_COLORS`, `NATURES_NAPPE`). `createTuyau` et `NATURES_NAPPE` supprimés (vraiment dead).
+- **useReducer batch 1** (6 composants) : `TuyauForm`, `FicheDeVieVerifForm`, `AdminCreateUserForm`, `EventDetailModal`, `ChangePasswordSection`, `SaisieRapideModal`.
+- **useReducer batch 2** (5 composants) : `DayModalEvtTab`, `RequireAuth` (CompleteProfileModal), `AsservissementPage`, `MaterielPage` (7 filtres), `VisiteFormPage`.
+- **Bugfix carte planning** : Les événements fantômes (`isGhost`) n'avaient pas de lat/lng, apparaissaient dans "Sans GPS". Fix : exclusion des fantômes de `MapView` (`!e.isGhost`). Les fantômes restent visibles dans la vue jour mais pas sur la carte.
+- **Score final** : 63/100 (stable après batch 2).
+
+### Prochaines étapes
+- Continuer useReducer : `TodosPage` (8 états), `InfosPage`, `EquipementPage`, `ClientPage`, `DashboardPage` (5 états chacun), `PlanningPage` (17 états — complexe)
+- Production : en attente feedback équipe Brest sur staging
+
+---
+
 ## Session 114 — Guidage GPS Tournée (Google Maps Multi-destinations)
 **6 juin 2026**
 
