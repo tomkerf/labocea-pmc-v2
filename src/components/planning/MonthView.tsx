@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useMemo } from 'react'
 import { Plus } from 'lucide-react'
 import {
   type PlanningEvent,
@@ -63,6 +63,10 @@ export default function MonthView({
   function filteredForDay(dateStr: string): PlanningEvent[] {
     return groupByClient(filterEvents(eventsByDate[dateStr] ?? [], filterTech, filterRetard, allowedTechs).filter(e => e.evenementData?.type !== 'meteo'))
   }
+
+  const monthEvents = useMemo(() => {
+    return monthGrid.flatMap(d => d ? (eventsByDate[toISO(d)] || []) : [])
+  }, [monthGrid, eventsByDate])
 
   return (
     <div ref={containerRef} className="flex flex-col flex-1 overflow-hidden">
@@ -144,7 +148,7 @@ export default function MonthView({
                 </span>
                 <span className="flex items-center gap-1">
                   {showRain && (
-                    <WeatherBadge events={eventsByDate[dateStr] || []} date={day} compact={true} className="!bg-transparent !p-0" />
+                    <WeatherBadge events={eventsByDate[dateStr] || []} fallbackEvents={monthEvents} date={day} compact={true} className="!bg-transparent !p-0" />
                   )}
                   <Plus size={10} className="opacity-25 group-hover:opacity-70 transition-opacity"
                     style={{ color: 'var(--color-text-tertiary)' }} />

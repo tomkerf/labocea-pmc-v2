@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Plus } from 'lucide-react'
 import {
   type PlanningEvent, type BilanGroup, type AllDayItem,
@@ -68,6 +68,10 @@ export default function WeekView({
     ? Math.max(...allDayItems.map(s => s.row)) + 1
     : 0
 
+  const weekEvents = useMemo(() => {
+    return weekDays.flatMap(d => eventsByDate[toISO(d)] || [])
+  }, [weekDays, eventsByDate])
+
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       {/* En-têtes colonnes */}
@@ -105,7 +109,7 @@ export default function WeekView({
                 </div>
               )}
               {showRain && (
-                <WeatherBadge events={eventsByDate[dateStr] || []} date={day} className="mx-auto mt-1" />
+                <WeatherBadge events={eventsByDate[dateStr] || []} fallbackEvents={weekEvents} date={day} className="mx-auto mt-1" />
               )}
             </div>
           )

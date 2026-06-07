@@ -61,7 +61,7 @@ export default function DayView({
           </span>
         )}
         {showRain && (
-          <WeatherBadge events={allEvts} date={selectedDate} className="ml-auto" />
+          <WeatherBadge events={allEvts} fallbackEvents={Object.values(eventsByDate).flat()} date={selectedDate} className="ml-auto" />
         )}
       </div>
 

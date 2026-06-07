@@ -1,0 +1,475 @@
+react-doctor v0.2.9
+
+  
+
+  ⚠ react-doctor/control-has-associated-label      ×82
+      A control must be associated with a text label — add visible text, `aria-label`, or `aria-labelledby`.
+      → Every interactive control must have an accessible label.
+      src/components/compte/EditRow.tsx:16
+      src/components/layout/RequireAuth.tsx:81
+      src/components/layout/RequireAuth.tsx:94
+      src/components/layout/RequireAuth.tsx:106
+      src/components/planning/YearMatrixView.tsx:270
+      src/components/admin/AdminCreateUserForm.tsx:118
+      src/components/admin/AdminCreateUserForm.tsx:134
+      src/components/admin/AdminCreateUserForm.tsx:153
+      src/components/admin/AdminCreateUserForm.tsx:177
+      src/components/admin/AdminCreateUserForm.tsx:192
+      src/components/planning/DragCreateModal.tsx:127
+      src/components/planning/DragCreateModal.tsx:135
+      src/components/planning/DragCreateModal.tsx:146
+      src/components/planning/DragCreateModal.tsx:156
+      src/components/compte/CompteProfileSection.tsx:49
+      src/components/equipement/FicheDeVieNoteForm.tsx:35
+      src/components/equipement/FicheDeVieNoteForm.tsx:40
+      src/components/equipement/FicheDeVieNoteForm.tsx:45
+      src/components/plan/PlanConfigSection.tsx:58
+      src/components/plan/PlanConfigSection.tsx:65
+      src/components/plan/PlanConfigSection.tsx:83
+      src/components/plan/PlanConfigSection.tsx:92
+      src/components/plan/PlanConfigSection.tsx:102
+      src/components/plan/PlanConfigSection.tsx:125
+      src/components/plan/PlanConfigSection.tsx:139
+      src/components/plan/PlanConfigSection.tsx:201
+      src/components/equipement/FicheDeVieVerifForm.tsx:82
+      src/components/equipement/FicheDeVieVerifForm.tsx:94
+      src/components/equipement/FicheDeVieVerifForm.tsx:99
+      src/components/client/ClientInfoForm.tsx:123
+      src/components/compte/CompteCalendarSection.tsx:21
+      src/components/infos/EntryForm.tsx:152
+      src/components/infos/EntryForm.tsx:157
+      src/components/infos/EntryForm.tsx:163
+      src/components/infos/EntryForm.tsx:168
+      src/components/infos/EntryForm.tsx:174
+      src/components/infos/EntryForm.tsx:185
+      src/components/infos/EntryForm.tsx:190
+      src/components/infos/EntryForm.tsx:202
+      src/components/infos/EntryForm.tsx:210
+      src/components/infos/EntryForm.tsx:221
+      src/components/planning/EventDetailModal.tsx:181
+      src/components/planning/EventDetailModal.tsx:189
+      src/components/planning/EventDetailModal.tsx:241
+      src/components/plan/SamplingForm.tsx:99
+      src/components/plan/SamplingForm.tsx:124
+      src/components/plan/SamplingForm.tsx:140
+      src/components/plan/SamplingForm.tsx:188
+      src/components/plan/SamplingForm.tsx:200
+      src/components/plan/SamplingForm.tsx:264
+      src/components/plan/SamplingForm.tsx:321
+      src/components/compte/ChangePasswordSection.tsx:78
+      src/components/planning/DayModalPoolTab.tsx:116
+      src/pages/LoginPage.tsx:61
+      src/pages/LoginPage.tsx:79
+      src/pages/MaintenancePage.tsx:133
+      src/pages/MaintenancePage.tsx:136
+      src/pages/MaintenancePage.tsx:139
+      src/pages/MaintenancePage.tsx:174
+      src/pages/MaintenancePage.tsx:177
+      src/pages/InfosPage.tsx:123
+      src/components/visites/PointCard.tsx:104
+      src/components/visites/PointCard.tsx:110
+      src/components/visites/PointCard.tsx:146
+      src/components/todos/TodoFormModal.tsx:63
+      src/components/todos/TodoFormModal.tsx:81
+      src/components/todos/TodoFormModal.tsx:153
+      src/components/visites/VisiteGeneralFields.tsx:19
+      src/components/visites/VisiteGeneralFields.tsx:24
+      src/components/visites/VisiteGeneralFields.tsx:29
+      src/components/ui/BugReportModal.tsx:87
+      src/components/tournee/SaisieRapideModal.tsx:119
+      src/components/tournee/SaisieRapideModal.tsx:129
+      src/components/tournee/SaisieRapideModal.tsx:153
+      src/components/tournee/SaisieRapideModal.tsx:163
+      src/pages/MaterielPage.tsx:161
+      src/pages/VerificationPage.tsx:128
+      src/pages/VerificationPage.tsx:136
+      src/pages/VerificationPage.tsx:143
+      src/pages/VerificationPage.tsx:150
+      src/pages/MissionsPage.tsx:106
+      src/pages/RapportsPage.tsx:201
+
+  ⚠ react-doctor/design-no-em-dash-in-jsx-text     ×53
+      Em dash (—) in JSX text reads as model output — replace with comma, colon, semicolon, or parentheses
+      → Replace em dashes in JSX prose with commas, colons, semicolons, or parentheses so UI copy reads less like generated text.
+      src/components/demandes/DemandeModal.tsx:123
+      src/components/planning/PlanningHeader.tsx:293
+      src/components/planning/PlanningHeader.tsx:304
+      src/components/equipement/EquipementForm.tsx:113
+      src/components/equipement/EquipementForm.tsx:121
+      src/components/equipement/EquipementForm.tsx:143
+      src/components/equipement/EquipementForm.tsx:158
+      src/components/aide/MaterielSections.tsx:32
+      src/components/aide/MaterielSections.tsx:43
+      src/components/aide/MaterielSections.tsx:116
+      src/components/admin/AdminPreleveurs.tsx:84
+      src/components/client/ClientCard.tsx:106
+      src/components/aide/DashboardSections.tsx:26
+      src/components/aide/DashboardSections.tsx:30
+      src/components/aide/DashboardSections.tsx:34
+      src/components/aide/DashboardSections.tsx:43
+      src/components/aide/PlanningSections.tsx:104
+      src/components/aide/PlanningSections.tsx:106
+      src/components/aide/PlanningSections.tsx:116
+      src/components/aide/PlanningSections.tsx:123
+      src/components/aide/PlanningSections.tsx:152
+      src/components/aide/PlanningSections.tsx:160
+      src/components/aide/IntroSections.tsx:25
+      src/components/aide/IntroSections.tsx:41
+      src/components/aide/IntroSections.tsx:89
+      src/components/aide/IntroSections.tsx:93
+      src/components/aide/IntroSections.tsx:97
+      src/components/dashboard/MetrologieWidget.tsx:60
+      src/components/aide/MissionsSections.tsx:16
+      src/components/aide/MissionsSections.tsx:69
+      src/components/aide/MissionsSections.tsx:86
+      src/components/aide/MissionsSections.tsx:98
+      src/components/aide/MissionsSections.tsx:116
+      src/components/aide/MissionsSections.tsx:142
+      src/components/aide/MissionsSections.tsx:152
+      src/components/aide/MissionsSections.tsx:158
+      src/components/aide/MissionsSections.tsx:164
+      src/components/asservissement/AsservissementResultBar.tsx:33
+      src/components/plan/SamplingForm.tsx:82
+      src/components/plan/SamplingForm.tsx:83
+      src/components/plan/SamplingForm.tsx:153
+      src/components/plan/SamplingForm.tsx:168
+      src/components/planning/DayModalPoolTab.tsx:53
+      src/components/planning/DayModalPoolTab.tsx:138
+      src/pages/LoginPage.tsx:116
+      src/pages/MaintenancePage.tsx:110
+      src/components/tournee/TourneeFinEcran.tsx:48
+      src/pages/DemandesPage.tsx:120
+      src/pages/AidePage.tsx:83
+      src/pages/EquipementPage.tsx:117
+      src/pages/EquipementPage.tsx:159
+      src/components/tournee/SaisieRapideModal.tsx:142
+      src/pages/VerificationPage.tsx:110
+
+  ⚠ react-doctor/no-wide-letter-spacing            ×42
+      Letter spacing 0.06em on body text disrupts natural character groupings. Reserve wide tracking for short uppercase labels only
+      → Reserve wide tracking (letter-spacing > 0.05em) for short uppercase labels, navigation items, and buttons — not body text
+      src/components/demandes/DemandeModal.tsx:10
+      src/components/equipement/EquipementForm.tsx:44
+      src/components/aide/MaterielSections.tsx:61
+      src/components/aide/MaterielSections.tsx:94
+      src/components/dashboard/PluieWidget.tsx:28
+      src/components/aide/DashboardSections.tsx:17
+      src/components/dashboard/RetardWidget.tsx:25
+      src/components/aide/PlanningSections.tsx:17
+      src/components/aide/PlanningSections.tsx:38
+      src/components/aide/PlanningSections.tsx:74
+      src/components/aide/PlanningSections.tsx:97
+      src/components/aide/IntroSections.tsx:16
+      src/components/aide/IntroSections.tsx:35
+      src/components/aide/IntroSections.tsx:55
+      src/components/aide/IntroSections.tsx:84
+      src/components/dashboard/MetrologieWidget.tsx:22
+      src/components/aide/MissionsSections.tsx:16
+      src/components/aide/MissionsSections.tsx:50
+      src/components/aide/MissionsSections.tsx:69
+      src/components/aide/MissionsSections.tsx:98
+      src/components/aide/MissionsSections.tsx:116
+      src/components/aide/MissionsSections.tsx:137
+      src/components/dashboard/StatCard.tsx:39
+      src/components/dashboard/StatCard.tsx:49
+      src/components/plan/PlanConfigSection.tsx:53
+      src/components/client/ClientInfoForm.tsx:210
+      src/components/dashboard/RapportsWidget.tsx:35
+      src/components/dashboard/MaintenancesWidget.tsx:22
+      src/components/dashboard/TodosWidget.tsx:66
+      src/components/equipement/FicheDeVie.tsx:74
+      src/components/dashboard/EquipeSuiviWidget.tsx:158
+      src/pages/MaintenancePage.tsx:191
+      src/components/pointMesure/PointMesureContraintes.tsx:15
+      src/pages/DemandesPage.tsx:135
+      src/components/pointMesure/PointMesureVisites.tsx:27
+      src/pages/AidePage.tsx:54
+      src/components/pointMesure/PointMesureHistorique.tsx:13
+      src/components/pointMesure/PointMesurePhotos.tsx:17
+      src/components/pointMesure/PointMesurePhotos.tsx:44
+      src/pages/VerificationPage.tsx:168
+      src/pages/RapportsPage.tsx:121
+      src/pages/RapportsPage.tsx:250
+
+  ⚠ react-doctor/design-no-redundant-padding-axes  ×13
+      px-4 py-4 → use the shorthand p-4
+      → Collapse `px-N py-N` to `p-N` when both axes match. Keep them split only when one axis varies at a breakpoint (`py-2 md:py-3`)
+      src/components/planning/DayModalEvtTab.tsx:68
+      src/components/client/SortablePlanRow.tsx:42
+      src/components/planning/WeekView.tsx:83
+      src/components/layout/Sidebar.tsx:57
+      src/components/plan/SamplingRow.tsx:111
+      src/components/infos/EntryForm.tsx:108
+      src/components/planning/PeriodListView.tsx:24
+      src/components/planning/EventDetailModal.tsx:269
+      src/components/layout/MobileDrawer.tsx:104
+      src/components/planning/DayModalPoolTab.tsx:172
+      src/components/planning/DayModalPoolTab.tsx:193
+      src/components/planning/DayModalPoolTab.tsx:200
+      src/pages/InfosPage.tsx:174
+
+  ⚠ react-doctor/no-inline-exhaustive-style        ×8
+      11 inline style properties — extract to a CSS class, CSS module, or styled component for maintainability and reuse
+      → Move styles to a CSS class, CSS module, Tailwind utilities, or a styled component — inline objects with many properties hurt readability and create new references every render
+      src/components/planning/PlanningHeader.tsx:198
+      src/components/planning/PlanningHeader.tsx:223
+      src/components/planning/PlanningHeader.tsx:244
+      src/components/planning/MonthView.tsx:109
+      src/components/planning/WeekView.tsx:131
+      src/components/planning/WeekView.tsx:139
+      src/components/planning/DayModalPoolTab.tsx:233
+      src/components/ui/UserAvatar.tsx:16
+
+  ⚠ react-doctor/no-large-animated-blur            ×7
+      blur(12px) is expensive — cost escalates with radius and layer size, can exceed GPU memory on mobile
+      → Keep blur radius under 10px, or apply blur to a smaller element. Large blurs multiply GPU memory usage with layer size
+      src/components/layout/Sidebar.tsx:52
+      src/components/asservissement/AsservissementResultBar.tsx:13
+      src/components/planning/CellContextMenu.tsx:23
+      src/components/layout/AppLayout.tsx:59
+      src/components/layout/AppLayout.tsx:60
+      src/components/layout/MobileDrawer.tsx:71
+      src/pages/AsservissementPage.tsx:68
+
+  ⚠ react-doctor/no-event-handler                  ×7
+      Avoid using props and effects as an event handler. Instead, move the handler to the parent component.
+      → Move the side effect into the event handler that triggers it, instead of guarding on its state inside a useEffect. See https://react.dev/learn/you-might-not-need-an-effect#sharing-logic-between-event-handlers
+      src/components/plan/SamplingForm.tsx:25
+      src/hooks/usePushNotifications.ts:55
+      src/hooks/usePlanningFilters.ts:16
+      src/hooks/usePlanningFilters.ts:32
+      src/hooks/usePlanningFilters.ts:23
+      src/hooks/usePlanningFilters.ts:23
+      src/hooks/usePlanningFilters.ts:25
+
+  ⚠ react-doctor/no-tiny-text                      ×6
+      Font size 10px is too small — body text should be at least 12px for readability, 16px is ideal
+      → Use at least 12px for body content, 16px is ideal. Small text is hard to read, especially on high-DPI mobile screens
+      src/components/planning/PlanningHeader.tsx:203
+      src/components/planning/PlanningHeader.tsx:228
+      src/components/planning/PlanningHeader.tsx:249
+      src/components/planning/WeekView.tsx:131
+      src/components/client/SortableSeparatorRow.tsx:55
+      src/components/planning/MiniCalendarPanel.tsx:70
+
+  ⚠ react-doctor/no-static-element-interactions    ×6
+      Static HTML elements with event handlers require a role — add `role="…"` or use a semantic HTML element instead.
+      → Static HTML elements with event handlers require a role, or use a semantic HTML element instead.
+      src/components/planning/YearMatrixView.tsx:306
+      src/components/planning/YearMatrixView.tsx:326
+      src/components/planning/MonthView.tsx:82
+      src/components/planning/MonthView.tsx:104
+      src/components/planning/WeekView.tsx:204
+      src/components/planning/WeekView.tsx:216
+
+  ⚠ react-doctor/prefer-useReducer                 ×6
+      Component "InfosPage" has 5 useState calls — consider useReducer for related state
+      → Group related state: `const [state, dispatch] = useReducer(reducer, { field1, field2, ... })`
+      src/pages/InfosPage.tsx:22
+      src/pages/ClientPage.tsx:18
+      src/pages/DashboardPage.tsx:52
+      src/pages/EquipementPage.tsx:31
+      src/pages/TodosPage.tsx:36
+      src/pages/PlanningPage.tsx:52
+
+  ⚠ react-doctor/no-giant-component                ×5
+      Component "YearMatrixView" is 308 lines — consider breaking it into smaller focused components
+      → Extract logical sections into focused components: `<UserHeader />`, `<UserActions />`, etc.
+      src/components/planning/YearMatrixView.tsx:57
+      src/components/plan/SamplingForm.tsx:22
+      src/pages/TodosPage.tsx:36
+      src/pages/PlanningPage.tsx:52
+      src/pages/RapportsPage.tsx:18
+
+  ⚠ react-doctor/rendering-hydration-mismatch-time ×5
+      new Date() reachable from JSX renders differently on server vs client — wrap in useEffect+useState (client-only) or add suppressHydrationWarning to the parent if intentional
+      → Wrap dynamic time/random values in useEffect+useState (client-only) or add suppressHydrationWarning to the parent if intentional
+      src/components/admin/AdminChargeEquipe.tsx:138
+      src/pages/DashboardPage.tsx:267
+      src/pages/DashboardPage.tsx:268
+      src/pages/DashboardPage.tsx:284
+      src/pages/DashboardPage.tsx:285
+
+  ⚠ react-doctor/js-combine-iterations             ×4
+      .filter().map() iterates the array twice — combine into a single loop with .reduce() or for...of
+      → Combine `.map().filter()` (or similar chains) into a single pass with `.reduce()` or a `for...of` loop to avoid iterating the array twice
+      public/sw.js:25
+      src/hooks/usePlanActions.ts:147
+      src/lib/exportClientHtml.ts:60
+      src/components/tournee/SaisieRapideModal.tsx:93
+
+  ⚠ react-doctor/design-no-redundant-size-axes     ×4
+      w-[22px] h-[22px] → use the shorthand size-[22px] (Tailwind v3.4+)
+      → Collapse `w-N h-N` to `size-N` (Tailwind v3.4+) when both axes match
+      src/components/planning/MonthView.tsx:127
+      src/components/planning/DayView.tsx:105
+      src/components/planning/DayView.tsx:137
+      src/components/planning/DayView.tsx:209
+
+  ⚠ react-doctor/exhaustive-deps                   ×3
+      React Hook `useEffect` is missing dependency `handleSelectEvent, dateStr` — list it in the dependency array, or call the hook unconditionally.
+      → Don't blindly add missing dependencies. Read the hook callback first.
+      
+      Bad:
+      useEffect(() => {
+        setCount(count + 1);
+      }, [count]);
+      
+      Better:
+      useEffect(() => {
+        setCount((currentCount) => currentCount + 1);
+      }, []);
+      
+      If the missing value is recreated every render, move it inside the hook or stabilize it before adding it to deps.
+      src/components/planning/useMapMarkers.ts:118
+      src/components/plan/SamplingForm.tsx:31
+      src/hooks/useWeather.ts:87
+
+  ⚠ react-doctor/no-array-index-key                ×3
+      Array index in `key` doesn't uniquely identify the element — re-renders may use stale state.
+      → Use a stable, data-derived `key` instead of the array index.
+      src/components/planning/YearMatrixView.tsx:298
+      src/components/planning/WeekView.tsx:135
+      src/components/planning/WeekView.tsx:137
+
+  ⚠ react-doctor/prefer-tag-over-role              ×3
+      Prefer the semantic `<address>` element over `role="group"` on a generic tag.
+      → Replace `role` with the semantic HTML element when one exists.
+      src/components/infos/EntryForm.tsx:112
+      src/components/visites/PointCard.tsx:82
+      src/components/todos/TodoFormModal.tsx:97
+
+  ⚠ react-doctor/img-redundant-alt                 ×3
+      `alt` text contains redundant words like "image" / "photo" / "picture" — describe the content instead.
+      → Drop redundant words like 'image' / 'photo' from alt text — describe content.
+      src/components/plan/SamplingForm.tsx:289
+      src/components/visites/PointCard.tsx:123
+      src/components/pointMesure/PointMesurePhotos.tsx:50
+
+  ⚠ react-doctor/no-cascading-set-state            ×3
+      3 setState calls in a single useEffect — consider using useReducer or deriving state
+      → Combine into useReducer: `const [state, dispatch] = useReducer(reducer, initialState)`
+      src/hooks/useTodos.ts:12
+      src/hooks/useClientData.ts:42
+      src/hooks/useVisites.ts:21
+
+  ⚠ react-doctor/iframe-missing-sandbox            ×2
+      `<iframe sandbox>` cannot combine `allow-scripts` with `allow-same-origin` — the iframe could remove the sandbox.
+      → Add `sandbox=""` (or a curated value) to your iframe.
+      src/components/client/MissionDetailMap.tsx:26
+      src/components/pointMesure/PointMesureMap.tsx:20
+
+  ⚠ react-doctor/no-generic-handler-names          ×2
+      Non-descriptive handler name "handleClick" — name should describe what it does, not when it runs
+      → Rename to describe the action: e.g. `handleSubmit` → `saveUserProfile`, `handleClick` → `toggleSidebar`
+      src/components/planning/EventPill.tsx:50
+      src/components/planning/EventPill.tsx:114
+
+  ⚠ react-doctor/client-passive-event-listeners    ×2
+      "wheel" listener without { passive: true } — blocks scrolling performance. Only add { passive: true } if the handler does NOT call event.preventDefault() (passive listeners silently ignore preventDefault())
+      → Add `{ passive: true }` as the third argument: `addEventListener('scroll', handler, { passive: true })`. Only do this if the handler does NOT call `event.preventDefault()` — passive listeners silently ignore `preventDefault()`, which breaks features like pull-to-refresh suppression, custom gestures, and nested-scroll containment.
+      src/components/planning/MonthView.tsx:59
+      src/components/layout/AppLayout.tsx:38
+
+  ⚠ react-doctor/no-multi-comp                     ×2
+      Declare only one React component per file. Found extra component: SectionTitle.
+      → Move secondary components into their own files.
+      src/components/dashboard/StatCard.tsx:46
+      src/components/dashboard/StatCard.tsx:55
+
+  ⚠ react-doctor/rerender-memo-with-default-value  ×2
+      Default prop value [] creates a new array reference every render — extract to a module-level constant
+      → Move to module scope: `const EMPTY_ITEMS: Item[] = []` then use as the default value
+      src/components/plan/SamplingForm.tsx:22
+      src/components/tuyaux/TuyauForm.tsx:74
+
+  ⚠ react-doctor/no-pass-data-to-parent            ×2
+      Avoid passing data to parents in an effect. Instead, fetch the data in the parent and pass it down to the child as a prop.
+      → Fetch the data in the parent and pass it to the child as a prop (or return it from the hook), instead of pushing it back up via a prop callback inside a useEffect. See https://react.dev/learn/you-might-not-need-an-effect#passing-data-to-the-parent
+      src/components/plan/SamplingForm.tsx:28
+      src/hooks/usePlanningFilters.ts:32
+
+  ⚠ react-doctor/no-derived-state                  ×2
+      Avoid storing derived state. "isPushEnabled" is only set here, and thus could be computed directly during render.
+      → Compute derived state inline during render (or with useMemo if expensive) instead of mirroring it into useState via a useEffect. See https://react.dev/learn/you-might-not-need-an-effect#updating-state-based-on-props-or-state
+      src/hooks/usePushNotifications.ts:57
+      src/pages/PointMesureFichePage.tsx:31
+
+  ⚠ react-doctor/js-min-max-loop                   ×2
+      array.sort()[0] for min/max — use Math.min(...array) instead (O(n) vs O(n log n))
+      → Use `Math.min(...array)` / `Math.max(...array)` instead of sorting just to read the first or last element
+      src/hooks/useDashboardStats.ts:108
+      src/hooks/useDashboardStats.ts:384
+
+  ⚠ react-doctor/async-await-in-loop               ×2
+      await inside a do-while loop runs the calls sequentially — for independent operations, collect them and use `await Promise.all(items.map(...))` to run them concurrently
+      → Collect the items and use `await Promise.all(items.map(...))` to run independent operations concurrently
+      worker/index.js:353
+      worker/index.js:426
+
+  ⚠ react-doctor/design-no-vague-button-label
+      Vague button label "OK" — name the action ("Save changes", "Send invite", "Delete account") so screen readers and hesitant users know what happens
+      → Name the action: "Save changes" instead of "Continue", "Send invite" instead of "Submit", "Delete account" instead of "OK". The label IS the button's accessible name
+      src/components/planning/PlanningHeader.tsx:306
+
+  ⚠ react-doctor/no-derived-state-effect
+      State reset in useEffect — use a key prop to reset component state when props change
+      → For derived state, compute inline: `const x = fn(dep)`. For state resets on prop change, use a key prop: `<Component key={prop} />`. See https://react.dev/learn/you-might-not-need-an-effect
+      src/components/layout/AppLayout.tsx:27
+
+  ⚠ react-doctor/no-derived-useState
+      useState initialized from prop "dateStr" — if this value should stay in sync with the prop, derive it during render instead
+      → Remove useState and compute the value inline: `const value = transform(propName)`
+      src/components/planning/DayModalPoolTab.tsx:157
+
+  ⚠ react-doctor/no-chain-state-updates
+      Avoid chaining state changes. When possible, update all relevant state simultaneously.
+      → Update all related state simultaneously inside the event handler that originally fires, instead of reacting to one state update in a useEffect that writes another state. See https://react.dev/learn/you-might-not-need-an-effect#chains-of-computations
+      src/hooks/usePushNotifications.ts:57
+
+  ⚠ react-doctor/js-index-maps
+      array.findIndex() in a loop is O(n*m) — build a Map for O(1) lookups
+      → Build an index `Map` once outside the loop instead of `array.find(...)` inside it
+      src/hooks/usePlanningCalendar.ts:151
+
+  ⚠ react-doctor/no-fetch-in-effect
+      fetch() inside useEffect — use a data fetching library (react-query, SWR) or server component
+      → Use `useQuery()` from @tanstack/react-query, `useSWR()`, or fetch in a Server Component instead
+      src/hooks/useWeather.ts:37
+
+  ⚠ react-doctor/prefer-use-effect-event
+      "onClose" is read only inside `addEventListener` — wrap it with useEffectEvent and remove it from the dep array so the effect doesn't re-synchronize on every parent render
+      → Wrap the callback with `useEffectEvent(callback)` (React 19+) and call the resulting binding from inside the sub-handler. The Effect Event captures the latest props/state without being a reactive dep, so the effect doesn't re-subscribe on every parent render. See https://react.dev/reference/react/useEffectEvent
+      src/components/ui/BaseModal.tsx:36
+
+  ⚠ react-doctor/no-gray-on-colored-background
+      Gray text (text-neutral-400) on colored background (bg-red-50) looks washed out — use a darker shade of the background color or white
+      → Use a darker shade of the background color for text, or white/near-white for contrast. Gray text on colored backgrounds looks washed out
+      src/components/todos/TodoRow.tsx:167
+
+  ⚠ react-doctor/js-flatmap-filter
+      .map().filter(Boolean) iterates twice — use .flatMap() to transform and filter in a single pass
+      → Use `.flatMap(item => condition ? [value] : [])` — transforms and filters in a single pass instead of creating an intermediate array
+      worker/index.js:253
+
+  ⚠ deslop/unused-file
+      Unused file — not reachable from any entry point
+      → Delete the file if it is truly unreachable, or import it from an entry point.
+      public/firebase-messaging-sw.js
+
+  ⚠ deslop/unused-dev-dependency
+      Unused devDependency: `react-doctor`
+      → Remove the dependency from package.json if it is genuinely unused.
+      package.json
+
+  ┌─────┐  62 / 100 Needs work · pmc-v2
+  │ • • │  ███████████████████████████████░░░░░░░░░░░░░░░░░░░
+  │  ─  │  React Doctor (https://react.doctor)
+  └─────┘
+
+  292 issues
+  Full diagnostics written to /var/folders/t9/k64z59ss0c91q72690bmfgth0000gn/T/react-doctor-2e372c1e-6d71-44df-9a3d-7b25e9dedc96
+
+  → Share: https://www.react.doctor/share?p=pmc-v2&s=62&w=292&f=98
+
+

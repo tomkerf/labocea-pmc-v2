@@ -4,24 +4,38 @@ import { type PlanningEvent } from '@/lib/planningUtils'
 
 interface WeatherBadgeProps {
   events: PlanningEvent[]
+  fallbackEvents?: PlanningEvent[]
   date: Date
   className?: string
   compact?: boolean
 }
 
-export default function WeatherBadge({ events, date, className = '', compact = false }: WeatherBadgeProps) {
+const EMPTY_EVENTS: PlanningEvent[] = []
+
+export default function WeatherBadge({ events, fallbackEvents = EMPTY_EVENTS, date, className = '', compact = false }: WeatherBadgeProps) {
   const centroid = useMemo(() => {
-    const active = events.filter(e => !e.isGhost && (e.type === 'prelevement' || e.type === 'maintenance'))
-    const mapped = active.filter(e => {
+    let active = events.filter(e => !e.isGhost && (e.type === 'prelevement' || e.type === 'maintenance'))
+    let mapped = active.filter(e => {
       const lat = parseFloat(e.lat || '')
       const lng = parseFloat(e.lng || '')
       return !isNaN(lat) && !isNaN(lng)
     })
+    
+    // Fallback aux événements de la période si aucun événement géolocalisé ce jour-là
+    if (mapped.length === 0 && fallbackEvents.length > 0) {
+      active = fallbackEvents.filter(e => !e.isGhost && (e.type === 'prelevement' || e.type === 'maintenance'))
+      mapped = active.filter(e => {
+        const lat = parseFloat(e.lat || '')
+        const lng = parseFloat(e.lng || '')
+        return !isNaN(lat) && !isNaN(lng)
+      })
+    }
+
     if (mapped.length === 0) return null
     const sumLat = mapped.reduce((acc, e) => acc + parseFloat(e.lat || '0'), 0)
     const sumLng = mapped.reduce((acc, e) => acc + parseFloat(e.lng || '0'), 0)
     return { lat: sumLat / mapped.length, lng: sumLng / mapped.length }
-  }, [events])
+  }, [events, fallbackEvents])
 
   const weather = useWeather(centroid?.lat ?? null, centroid?.lng ?? null, date)
 
