@@ -145,7 +145,7 @@ export function getTechColor(initiales: string): { color: string; bg: string } {
 
 // ── Jours fériés français ────────────────────────────────────────
 
-export function easterDate(year: number): Date {
+function easterDate(year: number): Date {
   const a = year % 19, b = Math.floor(year / 100), c = year % 100
   const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25)
   const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30

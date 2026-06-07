@@ -31,25 +31,6 @@ export async function saveTuyau(tuyau: Tuyau, uid: string): Promise<void> {
   await setDoc(ref, { ...tuyau, updatedAt: serverTimestamp(), createdBy: uid }, { merge: true })
 }
 
-export async function createTuyau(uid: string): Promise<string> {
-  const ref = await addDoc(collection(db, COLLECTIONS.TUYAUX), {
-    refLabo: '',
-    materiau: 'TEFLON',
-    annee: new Date().getFullYear(),
-    objet: '',
-    materiel: '',
-    dateCreation: new Date().toISOString().split('T')[0],
-    marque: '',
-    numSerie: '',
-    type: '',
-    fournisseur: 'SEFI Quimper',
-    notes: '',
-    createdBy: uid,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  })
-  return ref.id
-}
 
 export async function deleteTuyau(id: string): Promise<void> {
   await deleteDoc(doc(db, COLLECTIONS.TUYAUX, id))

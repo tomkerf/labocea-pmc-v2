@@ -15,7 +15,7 @@ export const AVATAR_COLORS = [
   { id: 'slate',  value: '#3A6073', label: 'Ardoise', accentLight: '#E6EDF1' },
 ]
 
-export const DEFAULT_AVATAR_COLOR = AVATAR_COLORS[0].value
+const DEFAULT_AVATAR_COLOR = AVATAR_COLORS[0].value
 
 export function getAvatarColor(color?: string): string {
   return color ?? DEFAULT_AVATAR_COLOR

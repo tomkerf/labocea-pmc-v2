@@ -2,7 +2,7 @@ import type { Tuyau, MateriauTuyau } from '@/types'
 
 export const MATERIAUX: MateriauTuyau[] = ['VINYL (tricoclair)', 'TEFLON', 'SILICONE']
 
-export const MAT_COLORS: Record<string, { bg: string; border: string; text: string }> = {
+const MAT_COLORS: Record<string, { bg: string; border: string; text: string }> = {
   'VINYL (tricoclair)': { bg: 'rgba(244,114,182,0.08)', border: 'rgba(244,114,182,0.25)', text: '#be185d' },
   'TEFLON':            { bg: 'rgba(249,115,22,0.08)',  border: 'rgba(249,115,22,0.25)',  text: '#c2410c' },
   'SILICONE':          { bg: 'rgba(14,165,233,0.08)',  border: 'rgba(14,165,233,0.25)',  text: '#0369a1' },

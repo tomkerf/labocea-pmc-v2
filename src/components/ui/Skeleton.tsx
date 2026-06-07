@@ -7,7 +7,7 @@ interface SkeletonProps {
   rounded?: string
 }
 
-export function Skeleton({ className = '', height = 'h-4', width = 'w-full', rounded = 'rounded-md' }: SkeletonProps) {
+function Skeleton({ className = '', height = 'h-4', width = 'w-full', rounded = 'rounded-md' }: SkeletonProps) {
   return (
     <div
       className={`animate-pulse ${height} ${width} ${rounded} ${className}`}
@@ -16,7 +16,7 @@ export function Skeleton({ className = '', height = 'h-4', width = 'w-full', rou
   )
 }
 
-export function SkeletonCard() {
+function SkeletonCard() {
   return (
     <div className="rounded-xl p-4 flex flex-col gap-3"
       style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
@@ -30,7 +30,7 @@ export function SkeletonCard() {
   )
 }
 
-export function SkeletonRow() {
+function SkeletonRow() {
   return (
     <div className="flex items-center gap-4 px-5 py-3.5"
       style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>

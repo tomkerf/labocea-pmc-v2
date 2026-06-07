@@ -1,6 +1,4 @@
-import type { Sampling, NatureEauType } from '@/types'
-
-export const NATURES_NAPPE: NatureEauType[] = ['Souterraine']
+import type { Sampling } from '@/types'
 
 /** Retourne true si le prélèvement est en retard :
  *  - statut 'overdue' (marqué manuellement), OU
