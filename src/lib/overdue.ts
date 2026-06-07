@@ -1,4 +1,4 @@
-import type { Sampling } from '@/types'
+import type { Sampling, NatureEauType } from '@/types'
 
 /** Retourne true si le prélèvement est en retard :
  *  - statut 'overdue' (marqué manuellement), OU

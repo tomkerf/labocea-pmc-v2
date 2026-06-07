@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import {
-  collection, onSnapshot, doc, setDoc, addDoc, deleteDoc,
+  collection, onSnapshot, doc, setDoc, deleteDoc,
   query, orderBy, serverTimestamp,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
