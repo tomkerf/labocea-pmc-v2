@@ -29,7 +29,7 @@ export default function MapView({
   // Filtrage et séparation GPS / sans-GPS
   const allEvents = useMemo(() => {
     const raw = eventsByDate[dateStr] ?? []
-    const active = raw.filter(e => e.evenementData?.type !== 'meteo' && (e.type === 'prelevement' || e.type === 'maintenance'))
+    const active = raw.filter(e => !e.isGhost && e.evenementData?.type !== 'meteo' && (e.type === 'prelevement' || e.type === 'maintenance'))
     return sortEvts(filterEvents(active, filterTech, filterRetard, allowedTechs))
   }, [eventsByDate, dateStr, filterTech, filterRetard, allowedTechs])
 

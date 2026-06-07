@@ -117,7 +117,6 @@ export function usePlanningData({
               isDone: false, priority: 4,
               technicien: s.assignedTo || client.preleveur || '—',
               clientId: client.id, planId: plan.id, samplingId: s.id,
-              lat: plan.lat || '', lng: plan.lng || '',
               isGhost: true, ghostAction,
               ghostNewDate: h.to || undefined,
               ghostReason: h.reason, ghostBy: h.by, ghostAt: h.at,
