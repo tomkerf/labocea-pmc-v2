@@ -1,4 +1,4 @@
-import { useState, useMemo, useReducer } from 'react'
+import { useMemo, useReducer } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Search, ListTodo, ChevronRight, ChevronDown } from 'lucide-react'
 import { m, AnimatePresence } from 'framer-motion'
@@ -33,6 +33,66 @@ import TodoRow from '@/components/todos/TodoRow'
 import TodoFormModal from '@/components/todos/TodoFormModal'
 import { formReducer, initialFormState } from '@/components/todos/todoFormReducer'
 
+// ── Page-level reducer ──────────────────────────────────────────────────────
+
+type PageState = {
+  search: string
+  filterTab: 'toutes' | 'mes_taches' | 'equipe'
+  filterPriority: string
+  showModal: boolean
+  editingTodo: Todo | null
+  showCompleted: boolean
+  showInProgress: boolean
+  showTodo: boolean
+}
+
+type PageAction =
+  | { type: 'SET_SEARCH'; payload: string }
+  | { type: 'SET_FILTER_TAB'; payload: 'toutes' | 'mes_taches' | 'equipe' }
+  | { type: 'SET_FILTER_PRIORITY'; payload: string }
+  | { type: 'OPEN_ADD_MODAL' }
+  | { type: 'OPEN_EDIT_MODAL'; payload: Todo }
+  | { type: 'CLOSE_MODAL' }
+  | { type: 'TOGGLE_SHOW_COMPLETED' }
+  | { type: 'TOGGLE_SHOW_IN_PROGRESS' }
+  | { type: 'TOGGLE_SHOW_TODO' }
+
+const initialPageState: PageState = {
+  search: '',
+  filterTab: 'toutes',
+  filterPriority: '',
+  showModal: false,
+  editingTodo: null,
+  showCompleted: false,
+  showInProgress: true,
+  showTodo: true,
+}
+
+function pageReducer(state: PageState, action: PageAction): PageState {
+  switch (action.type) {
+    case 'SET_SEARCH':
+      return { ...state, search: action.payload }
+    case 'SET_FILTER_TAB':
+      return { ...state, filterTab: action.payload }
+    case 'SET_FILTER_PRIORITY':
+      return { ...state, filterPriority: action.payload }
+    case 'OPEN_ADD_MODAL':
+      return { ...state, showModal: true, editingTodo: null }
+    case 'OPEN_EDIT_MODAL':
+      return { ...state, showModal: true, editingTodo: action.payload }
+    case 'CLOSE_MODAL':
+      return { ...state, showModal: false }
+    case 'TOGGLE_SHOW_COMPLETED':
+      return { ...state, showCompleted: !state.showCompleted }
+    case 'TOGGLE_SHOW_IN_PROGRESS':
+      return { ...state, showInProgress: !state.showInProgress }
+    case 'TOGGLE_SHOW_TODO':
+      return { ...state, showTodo: !state.showTodo }
+    default:
+      return state
+  }
+}
+
 export default function TodosPage() {
   // ── Listeners ──
   useTodosListener()
@@ -50,25 +110,17 @@ export default function TodosPage() {
   const { equipements } = useEquipementsStore()
   const users = useUsersStore((s) => s.users)
 
-  // ── States ──
-  const [search, setSearch] = useState('')
-  const [filterTab, setFilterTab] = useState<'toutes' | 'mes_taches' | 'equipe'>('toutes')
-  const [filterPriority, setFilterPriority] = useState<string>('')
-  const [showModal, setShowModal] = useState(false)
-  const [editingTodo, setEditingTodo] = useState<Todo | null>(null)
-  
-  // Section folding states
-  const [showCompleted, setShowCompleted] = useState(false)
-  const [showInProgress, setShowInProgress] = useState(true)
-  const [showTodo, setShowTodo] = useState(true)
+  // ── Page state ──
+  const [pageState, pageDispatch] = useReducer(pageReducer, initialPageState)
+  const { search, filterTab, filterPriority, showModal, editingTodo, showCompleted, showInProgress, showTodo } = pageState
 
-  // Form states
+  // ── Form state ──
   const [state, dispatch] = useReducer(formReducer, initialFormState)
 
   // ── Filtres et Tris ──
   const filteredTodos = useMemo(() => {
     return todos.filter((todo) => {
-      const q = search.toLowerCase()
+      const q = pageState.search.toLowerCase()
       const matchSearch =
         !q ||
         todo.titre.toLowerCase().includes(q) ||
@@ -77,15 +129,15 @@ export default function TodosPage() {
         todo.equipementNom?.toLowerCase().includes(q)
 
       const matchTab =
-        filterTab === 'toutes' ||
-        (filterTab === 'mes_taches' && todo.assignedTo === uid) ||
-        (filterTab === 'equipe' && (todo.assignedTo === 'equipe' || !todo.assignedTo))
+        pageState.filterTab === 'toutes' ||
+        (pageState.filterTab === 'mes_taches' && todo.assignedTo === uid) ||
+        (pageState.filterTab === 'equipe' && (todo.assignedTo === 'equipe' || !todo.assignedTo))
 
-      const matchPriority = !filterPriority || todo.priorite === filterPriority
+      const matchPriority = !pageState.filterPriority || todo.priorite === pageState.filterPriority
 
       return matchSearch && matchTab && matchPriority
     })
-  }, [todos, search, filterTab, filterPriority, uid])
+  }, [todos, pageState.search, pageState.filterTab, pageState.filterPriority, uid])
 
   // Séparation par statut
   const listTodo = useMemo(() => filteredTodos.filter((t) => t.statut === 'a_faire'), [filteredTodos])
@@ -106,15 +158,13 @@ export default function TodosPage() {
 
   // ── Actions ──
   function openAddModal() {
-    setEditingTodo(null)
+    pageDispatch({ type: 'OPEN_ADD_MODAL' })
     dispatch({ type: 'RESET_FORM' })
-    setShowModal(true)
   }
 
   function openEditModal(todo: Todo) {
-    setEditingTodo(todo)
+    pageDispatch({ type: 'OPEN_EDIT_MODAL', payload: todo })
     dispatch({ type: 'LOAD_TODO', payload: todo })
-    setShowModal(true)
   }
 
   async function handleSave() {
@@ -146,7 +196,7 @@ export default function TodosPage() {
       } else {
         await createTodo(uid, partial)
       }
-      setShowModal(false)
+      pageDispatch({ type: 'CLOSE_MODAL' })
     } catch (e) {
       console.error(e)
       toast.error('Erreur lors de la sauvegarde. Vérifie ta connexion.')
@@ -204,7 +254,7 @@ export default function TodosPage() {
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => pageDispatch({ type: 'SET_SEARCH', payload: e.target.value })}
             aria-label="Rechercher une tâche"
             placeholder="Rechercher une tâche par titre, client, matériel..."
             className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm"
@@ -231,7 +281,7 @@ export default function TodosPage() {
               return (
                 <button type="button"
                   key={tab.id}
-                  onClick={() => setFilterTab(tab.id)}
+                  onClick={() => pageDispatch({ type: 'SET_FILTER_TAB', payload: tab.id })}
                   className="relative z-10 px-3.5 py-1.5 rounded-md transition-colors cursor-pointer focus:outline-none"
                   style={{ color: isActive ? COLORS.ACCENT : COLORS.TEXT_SECONDARY }}
                 >
@@ -252,7 +302,7 @@ export default function TodosPage() {
           {/* Filtre Priorité */}
           <select
             value={filterPriority}
-            onChange={(e) => setFilterPriority(e.target.value)}
+            onChange={(e) => pageDispatch({ type: 'SET_FILTER_PRIORITY', payload: e.target.value })}
             aria-label="Filtrer par priorité"
             className="px-3 py-1.5 rounded-lg text-xs border"
             style={{
@@ -298,7 +348,7 @@ export default function TodosPage() {
           {/* SECTION : À FAIRE */}
           <div>
             <button type="button"
-              onClick={() => setShowTodo((s) => !s)}
+              onClick={() => pageDispatch({ type: 'TOGGLE_SHOW_TODO' })}
               className="flex items-center gap-2 w-full text-left font-semibold text-xs uppercase mb-3 focus:outline-none"
               style={{ color: COLORS.TEXT_SECONDARY, letterSpacing: '0.04em' }}
             >
@@ -336,7 +386,7 @@ export default function TodosPage() {
           {/* SECTION : EN COURS */}
           <div>
             <button type="button"
-              onClick={() => setShowInProgress((s) => !s)}
+              onClick={() => pageDispatch({ type: 'TOGGLE_SHOW_IN_PROGRESS' })}
               className="flex items-center gap-2 w-full text-left font-semibold text-xs uppercase mb-3 focus:outline-none"
               style={{ color: COLORS.TEXT_SECONDARY, letterSpacing: '0.04em' }}
             >
@@ -374,7 +424,7 @@ export default function TodosPage() {
           {/* SECTION : TERMINÉES */}
           <div>
             <button type="button"
-              onClick={() => setShowCompleted((s) => !s)}
+              onClick={() => pageDispatch({ type: 'TOGGLE_SHOW_COMPLETED' })}
               className="flex items-center gap-2 w-full text-left font-semibold text-xs uppercase mb-3 focus:outline-none"
               style={{ color: COLORS.TEXT_SECONDARY, letterSpacing: '0.04em' }}
             >
@@ -414,7 +464,7 @@ export default function TodosPage() {
       {/* MODAL : AJOUT / ÉDITION (Apple Style Zoom) */}
       <TodoFormModal
         showModal={showModal}
-        setShowModal={setShowModal}
+        setShowModal={() => pageDispatch({ type: 'CLOSE_MODAL' })}
         editingTodo={editingTodo}
         state={state}
         dispatch={dispatch}

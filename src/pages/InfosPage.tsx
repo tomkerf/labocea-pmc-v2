@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, type ElementType } from 'react'
+import { useReducer, useMemo, useCallback, type ElementType } from 'react'
 import { Search, X, Plus, ChevronDown, ChevronRight } from 'lucide-react'
 import { useClientsListener } from '@/hooks/useClients'
 import { saveClient } from '@/services/clientService'
@@ -10,6 +10,53 @@ import { TYPE_CONFIG } from '@/components/infos/entryConfig'
 import { EntryForm } from '@/components/infos/EntryForm'
 import { COLORS } from '@/lib/constants'
 
+
+// ── Reducer ──────────────────────────────────────────────────────────────────
+
+type State = {
+  search: string
+  filter: TerrainType | 'all'
+  expanded: Record<string, boolean>
+  modal: null | 'new' | { entry: TerrainEntry; clientId: string }
+  saveErr: string | null
+}
+
+type Action =
+  | { type: 'SET_SEARCH';   payload: string }
+  | { type: 'SET_FILTER';   payload: TerrainType | 'all' }
+  | { type: 'TOGGLE_EXPANDED'; payload: string }
+  | { type: 'SET_MODAL';    payload: State['modal'] }
+  | { type: 'SET_SAVE_ERR'; payload: string | null }
+
+const initialState: State = {
+  search:   '',
+  filter:   'all',
+  expanded: {},
+  modal:    null,
+  saveErr:  null,
+}
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'SET_SEARCH':
+      return { ...state, search: action.payload }
+    case 'SET_FILTER':
+      return { ...state, filter: action.payload }
+    case 'TOGGLE_EXPANDED':
+      return {
+        ...state,
+        expanded: { ...state.expanded, [action.payload]: !state.expanded[action.payload] },
+      }
+    case 'SET_MODAL':
+      return { ...state, modal: action.payload }
+    case 'SET_SAVE_ERR':
+      return { ...state, saveErr: action.payload }
+    default:
+      return state
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const TABS: { key: TerrainType | 'all'; label: string; Icon?: ElementType }[] = [
   { key: 'all',     label: 'Tout'     },
@@ -24,11 +71,8 @@ export default function InfosPage() {
   const uid       = useAuthStore(selectUid)
   const { clients } = useMissionsStore()
 
-  const [search,   setSearch]   = useState('')
-  const [filter,   setFilter]   = useState<TerrainType | 'all'>('all')
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
-  const [modal,    setModal]    = useState<null | 'new' | { entry: TerrainEntry; clientId: string }>(null)
-  const [saveErr,  setSaveErr]  = useState<string | null>(null)
+  const [state, dispatch] = useReducer(reducer, initialState)
+  const { search, filter, expanded, modal, saveErr } = state
 
   // Toutes les entrées terrain, enrichies du client
   const allEntries = useMemo(() => {
@@ -71,13 +115,13 @@ export default function InfosPage() {
   const forceOpen = !!q || groups.length === 1
 
   function toggleGroup(clientId: string) {
-    setExpanded(prev => ({ ...prev, [clientId]: !prev[clientId] }))
+    dispatch({ type: 'TOGGLE_EXPANDED', payload: clientId })
   }
 
   const handleSave = useCallback(async (clientId: string, entry: TerrainEntry) => {
     const client = clients.find((c: Client) => c.id === clientId)
     if (!client || !uid) return
-    setSaveErr(null)
+    dispatch({ type: 'SET_SAVE_ERR', payload: null })
     try {
       const terrain = client.terrain ?? []
       const exists  = terrain.find(t => t.id === entry.id)
@@ -85,9 +129,9 @@ export default function InfosPage() {
         ? terrain.map(t => t.id === entry.id ? entry : t)
         : [...terrain, entry]
       await saveClient({ ...client, terrain: updated }, uid)
-      setModal(null)
+      dispatch({ type: 'SET_MODAL', payload: null })
     } catch (err) {
-      setSaveErr(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde.')
+      dispatch({ type: 'SET_SAVE_ERR', payload: err instanceof Error ? err.message : 'Erreur lors de la sauvegarde.' })
     }
   }, [clients, uid])
 
@@ -108,7 +152,7 @@ export default function InfosPage() {
           <h1 className="text-lg font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Infos terrain
           </h1>
-          <button type="button" onClick={() => setModal('new')}
+          <button type="button" onClick={() => dispatch({ type: 'SET_MODAL', payload: 'new' })}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium"
             style={{ background: COLORS.ACCENT, color: 'white' }}>
             <Plus size={15} strokeWidth={2} />
@@ -122,7 +166,8 @@ export default function InfosPage() {
             style={{ color: 'var(--color-text-tertiary)' }} />
           <input
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => dispatch({ type: 'SET_SEARCH', payload: e.target.value })}
+            aria-label="Rechercher un client, contact, code"
             placeholder="Rechercher un client, contact, code…"
             className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl"
             style={{
@@ -132,7 +177,7 @@ export default function InfosPage() {
             }}
           />
           {search && (
-            <button type="button" onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2"
+            <button type="button" onClick={() => dispatch({ type: 'SET_SEARCH', payload: '' })} className="absolute right-3 top-1/2 -translate-y-1/2"
               style={{ color: 'var(--color-text-tertiary)' }}>
               <X size={14} />
             </button>
@@ -146,7 +191,7 @@ export default function InfosPage() {
             const cfg    = tab.key !== 'all' ? TYPE_CONFIG[tab.key] : null
             const n      = counts[tab.key] ?? 0
             return (
-              <button type="button" key={tab.key} onClick={() => setFilter(tab.key)}
+              <button type="button" key={tab.key} onClick={() => dispatch({ type: 'SET_FILTER', payload: tab.key })}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium shrink-0 transition-all"
                 style={{
                   background: active ? (cfg?.bg ?? 'var(--color-accent-light)') : COLORS.BG_SECONDARY,
@@ -235,13 +280,13 @@ export default function InfosPage() {
                       </div>
                       <EntryCard
                         entry={entry}
-                        onEdit={() => setModal({ entry, clientId: g.clientId })}
+                        onEdit={() => dispatch({ type: 'SET_MODAL', payload: { entry, clientId: g.clientId } })}
                         onDelete={() => handleDelete(g.clientId, entry.id)}
                       />
                     </div>
                   ))}
                   <button type="button"
-                    onClick={() => setModal('new')}
+                    onClick={() => dispatch({ type: 'SET_MODAL', payload: 'new' })}
                     className="flex items-center justify-center gap-1.5 w-full py-2 rounded-lg text-xs font-medium mt-1"
                     style={{
                       border: '1px dashed var(--color-border)',
@@ -266,7 +311,7 @@ export default function InfosPage() {
           defaultClientId={modal === 'new' ? undefined : modal.clientId}
           error={saveErr}
           onSave={handleSave}
-          onClose={() => { setModal(null); setSaveErr(null) }}
+          onClose={() => { dispatch({ type: 'SET_MODAL', payload: null }); dispatch({ type: 'SET_SAVE_ERR', payload: null }) }}
         />
       )}
     </div>

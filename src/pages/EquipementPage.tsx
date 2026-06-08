@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useReducer, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Trash2, AlertTriangle } from 'lucide-react'
 import { doc, onSnapshot, deleteDoc } from 'firebase/firestore'
@@ -20,6 +20,37 @@ import { COLLECTIONS, COLORS } from '@/lib/constants'
 
 const DEBOUNCE = 800
 
+// --- useReducer ---
+
+type State = {
+  equipement: Equipement | null
+  loading: boolean
+  saving: boolean
+  confirmDelete: boolean
+}
+
+type Action =
+  | { type: 'SET_EQUIPEMENT'; payload: Equipement | null }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_SAVING'; payload: boolean }
+  | { type: 'SET_CONFIRM_DELETE'; payload: boolean }
+
+const initialState: State = {
+  equipement: null,
+  loading: true,
+  saving: false,
+  confirmDelete: false,
+}
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'SET_EQUIPEMENT':    return { ...state, equipement: action.payload }
+    case 'SET_LOADING':       return { ...state, loading: action.payload }
+    case 'SET_SAVING':        return { ...state, saving: action.payload }
+    case 'SET_CONFIRM_DELETE': return { ...state, confirmDelete: action.payload }
+  }
+}
+
 function calcMetroPercent(prochainEtalonnage: string): number | null {
   if (!prochainEtalonnage) return null
   const now = Date.now()
@@ -40,31 +71,29 @@ export default function EquipementPage() {
   const verifications = useMetrologieStore((s) => s.verifications)
   const maintenances  = useMaintenancesStore((s) => s.maintenances)
 
-  const [equipement, setEquipement] = useState<Equipement | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [state, dispatch] = useReducer(reducer, initialState)
+  const { equipement, loading, saving, confirmDelete } = state
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (!equipementId) return
     const ref = doc(db, COLLECTIONS.EQUIPEMENTS, equipementId)
     const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists()) setEquipement({ id: snap.id, ...snap.data() } as Equipement)
-      else setEquipement(null)
-      setLoading(false)
+      if (snap.exists()) dispatch({ type: 'SET_EQUIPEMENT', payload: { id: snap.id, ...snap.data() } as Equipement })
+      else dispatch({ type: 'SET_EQUIPEMENT', payload: null })
+      dispatch({ type: 'SET_LOADING', payload: false })
     })
     return () => unsub()
   }, [equipementId])
 
   function triggerSave(updated: Equipement) {
-    setEquipement(updated)
+    dispatch({ type: 'SET_EQUIPEMENT', payload: updated })
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(async () => {
       if (!uid) return
-      setSaving(true)
+      dispatch({ type: 'SET_SAVING', payload: true })
       try { await saveEquipement(updated, uid) }
-      finally { setSaving(false) }
+      finally { dispatch({ type: 'SET_SAVING', payload: false }) }
     }, DEBOUNCE)
   }
 
@@ -130,19 +159,19 @@ export default function EquipementPage() {
           {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
           {confirmDelete ? (
             <div className="flex items-center gap-1.5">
-              <button type="button" onClick={() => { setConfirmDelete(false); handleDelete() }}
+              <button type="button" onClick={() => { dispatch({ type: 'SET_CONFIRM_DELETE', payload: false }); handleDelete() }}
                 className="text-sm px-3 py-1.5 rounded-lg font-medium"
                 style={{ background: COLORS.DANGER, color: 'white' }}>
                 Supprimer
               </button>
-              <button type="button" onClick={() => setConfirmDelete(false)}
+              <button type="button" onClick={() => dispatch({ type: 'SET_CONFIRM_DELETE', payload: false })}
                 className="text-sm px-2 py-1.5 rounded-lg"
                 style={{ color: COLORS.TEXT_SECONDARY }}>
                 Annuler
               </button>
             </div>
           ) : (
-            <button type="button" onClick={() => setConfirmDelete(true)} className="p-2 rounded-lg transition-colors"
+            <button type="button" onClick={() => dispatch({ type: 'SET_CONFIRM_DELETE', payload: true })} className="p-2 rounded-lg transition-colors"
               style={{ color: COLORS.DANGER, background: 'var(--color-danger-light)' }} title="Supprimer">
               <Trash2 size={16} />
             </button>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useReducer } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { arrayMove } from '@dnd-kit/sortable'
 import type { DragEndEvent } from '@dnd-kit/core'
@@ -14,6 +14,52 @@ import { PdfPreviewModal } from '@/components/client/PdfPreviewModal'
 import type { Plan } from '@/types'
 import { COLORS } from '@/lib/constants'
 
+// ─── Reducer ────────────────────────────────────────────────────────────────
+
+type State = {
+  confirmDelete: boolean
+  pdfPreview: string | null
+  confirmDeletePlanId: string | null
+  sitesInput: string
+  plansLocked: boolean
+}
+
+type Action =
+  | { type: 'SET_CONFIRM_DELETE'; payload: boolean }
+  | { type: 'SET_PDF_PREVIEW'; payload: string | null }
+  | { type: 'SET_CONFIRM_DELETE_PLAN_ID'; payload: string | null }
+  | { type: 'SET_SITES_INPUT'; payload: string }
+  | { type: 'SET_PLANS_LOCKED'; payload: boolean }
+  | { type: 'TOGGLE_PLANS_LOCKED' }
+
+const initialState: State = {
+  confirmDelete: false,
+  pdfPreview: null,
+  confirmDeletePlanId: null,
+  sitesInput: '',
+  plansLocked: true,
+}
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'SET_CONFIRM_DELETE':
+      return { ...state, confirmDelete: action.payload }
+    case 'SET_PDF_PREVIEW':
+      return { ...state, pdfPreview: action.payload }
+    case 'SET_CONFIRM_DELETE_PLAN_ID':
+      return { ...state, confirmDeletePlanId: action.payload }
+    case 'SET_SITES_INPUT':
+      return { ...state, sitesInput: action.payload }
+    case 'SET_PLANS_LOCKED':
+      return { ...state, plansLocked: action.payload }
+    case 'TOGGLE_PLANS_LOCKED':
+      return { ...state, plansLocked: !state.plansLocked }
+    default:
+      return state
+  }
+}
+
+// ─── Component ──────────────────────────────────────────────────────────────
 
 export default function ClientPage() {
   const { clientId } = useParams<{ clientId: string }>()
@@ -26,14 +72,11 @@ export default function ClientPage() {
     triggerSave, update, handleReload, handleDeleteClient, dismissRemoteChanged,
   } = useClientData(clientId)
 
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const [pdfPreview, setPdfPreview] = useState<string | null>(null)
-  const [confirmDeletePlanId, setConfirmDeletePlanId] = useState<string | null>(null)
-  const [sitesInput, setSitesInput] = useState('')
-  const [plansLocked, setPlansLocked] = useState(true)
+  const [state, dispatch] = useReducer(reducer, initialState)
+  const { confirmDelete, pdfPreview, confirmDeletePlanId, sitesInput, plansLocked } = state
 
   function handleSitesChange(raw: string) {
-    setSitesInput(raw)
+    dispatch({ type: 'SET_SITES_INPUT', payload: raw })
     if (!client) return
     const parsed = raw.split(',').flatMap((s) => { const t = s.trim(); return t ? [t] : [] })
     triggerSave({ ...client, sites: parsed })
@@ -80,7 +123,7 @@ export default function ClientPage() {
   function confirmDeletePlan() {
     if (!client || !confirmDeletePlanId) return
     triggerSave({ ...client, plans: client.plans.filter((p) => p.id !== confirmDeletePlanId) })
-    setConfirmDeletePlanId(null)
+    dispatch({ type: 'SET_CONFIRM_DELETE_PLAN_ID', payload: null })
   }
 
   if (loading) {
@@ -104,9 +147,9 @@ export default function ClientPage() {
         onBack={() => navigate('/missions')}
         onReload={handleReload}
         onDismissRemoteChanged={dismissRemoteChanged}
-        onSetConfirmDelete={setConfirmDelete}
+        onSetConfirmDelete={(v) => dispatch({ type: 'SET_CONFIRM_DELETE', payload: v })}
         onDelete={handleDeleteClient}
-        onPdfPreview={setPdfPreview}
+        onPdfPreview={(v) => dispatch({ type: 'SET_PDF_PREVIEW', payload: v })}
       />
 
       <ClientInfoForm
@@ -122,14 +165,14 @@ export default function ClientPage() {
         clientYear={Number(client.annee) || undefined}
         plansLocked={plansLocked}
         confirmDeletePlanId={confirmDeletePlanId}
-        onToggleLock={() => setPlansLocked(l => !l)}
+        onToggleLock={() => dispatch({ type: 'TOGGLE_PLANS_LOCKED' })}
         onAddPlan={addPlan}
         onAddSeparator={addSeparator}
         onReorder={handleReorder}
         onOpen={(planId) => navigate(`/missions/${client.id}/plan/${planId}`)}
-        onRequestDelete={setConfirmDeletePlanId}
+        onRequestDelete={(v) => dispatch({ type: 'SET_CONFIRM_DELETE_PLAN_ID', payload: v })}
         onConfirmDelete={confirmDeletePlan}
-        onCancelDelete={() => setConfirmDeletePlanId(null)}
+        onCancelDelete={() => dispatch({ type: 'SET_CONFIRM_DELETE_PLAN_ID', payload: null })}
         onSeparatorLabel={handleSeparatorLabel}
       />
 
@@ -143,7 +186,7 @@ export default function ClientPage() {
           html={pdfPreview}
           client={client}
           users={users}
-          onClose={() => setPdfPreview(null)}
+          onClose={() => dispatch({ type: 'SET_PDF_PREVIEW', payload: null })}
         />
       )}
     </div>

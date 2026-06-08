@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useReducer } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { m, AnimatePresence } from 'framer-motion'
@@ -39,6 +39,37 @@ import { useTodosStore } from '@/stores/todosStore'
 import { COLORS } from '@/lib/constants'
 
 
+// ── useReducer ────────────────────────────────────────────────
+
+type State = {
+  showWelcome: boolean
+  activeTab: 'technicien' | 'manager'
+  eventDetail: { event: PlanningEvent; dateStr: string } | null
+  planningMode: 'today' | 'tomorrow'
+}
+
+type Action =
+  | { type: 'SET_SHOW_WELCOME'; payload: boolean }
+  | { type: 'SET_ACTIVE_TAB'; payload: 'technicien' | 'manager' }
+  | { type: 'SET_EVENT_DETAIL'; payload: { event: PlanningEvent; dateStr: string } | null }
+  | { type: 'SET_PLANNING_MODE'; payload: 'today' | 'tomorrow' }
+
+const initialState: State = {
+  showWelcome: false,
+  activeTab: 'technicien',
+  eventDetail: null,
+  planningMode: 'today',
+}
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'SET_SHOW_WELCOME':   return { ...state, showWelcome: action.payload }
+    case 'SET_ACTIVE_TAB':     return { ...state, activeTab: action.payload }
+    case 'SET_EVENT_DETAIL':   return { ...state, eventDetail: action.payload }
+    case 'SET_PLANNING_MODE':  return { ...state, planningMode: action.payload }
+  }
+}
+
 const containerVariants = {
   hidden: { opacity: 0 },
   show: {
@@ -58,18 +89,17 @@ export default function DashboardPage() {
   const role      = useAuthStore(selectRole)
   const isGeneraliste = role === 'charge_mission' || role === 'admin'
 
-  const [showWelcome, setShowWelcome] = useState(false)
-  const [activeTab, setActiveTab] = useState<'technicien' | 'manager'>('technicien')
+  const [state, dispatch] = useReducer(reducer, initialState)
+  const { showWelcome, activeTab, eventDetail, planningMode } = state
 
   useEffect(() => {
     if (appUser && appUser.hasSeenAide !== true) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowWelcome(true)
+      dispatch({ type: 'SET_SHOW_WELCOME', payload: true })
     }
   }, [appUser])
 
   async function dismissWelcome(navigateAide: boolean) {
-    setShowWelcome(false)
+    dispatch({ type: 'SET_SHOW_WELCOME', payload: false })
     if (uid) {
       await updateUserProfile(uid, { hasSeenAide: true })
       // Update local state optimisticly so it doesn't blink
@@ -94,8 +124,6 @@ export default function DashboardPage() {
   const { maintenances }  = useMaintenancesStore()
   const todos             = useTodosStore(s => s.todos)
 
-  const [eventDetail, setEventDetail] = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
-  const [planningMode, setPlanningMode] = useState<'today' | 'tomorrow'>('today')
 
   const {
     missionsCeMois, verifiTotal, verifiConformes, conformitePct,
@@ -145,7 +173,7 @@ export default function DashboardPage() {
         prenom={prenom}
         isGeneraliste={isGeneraliste}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => dispatch({ type: 'SET_ACTIVE_TAB', payload: tab })}
       />
 
       <AnimatePresence mode="wait">
@@ -197,12 +225,12 @@ export default function DashboardPage() {
               {/* Planning */}
               <DashboardPlanningWidget
                 planningMode={planningMode}
-                setPlanningMode={setPlanningMode}
+                setPlanningMode={(mode) => dispatch({ type: 'SET_PLANNING_MODE', payload: mode })}
                 hasRainToday={hasRainToday}
                 hasRainTomorrow={hasRainTomorrow}
                 activeItems={activeItems}
                 activeDateISO={activeDateISO}
-                setEventDetail={setEventDetail}
+                setEventDetail={(detail) => dispatch({ type: 'SET_EVENT_DETAIL', payload: detail })}
               />
 
               {/* État du parc */}
@@ -252,7 +280,7 @@ export default function DashboardPage() {
         <EventDetailModal
           event={eventDetail?.event || null}
           dateStr={eventDetail?.dateStr || ''}
-          onClose={() => setEventDetail(null)}
+          onClose={() => dispatch({ type: 'SET_EVENT_DETAIL', payload: null })}
           techOptions={techOptions}
           onCancel={async (ev, reason) => {
             if (!uid || !ev.clientId || !ev.planId || !ev.samplingId) return
