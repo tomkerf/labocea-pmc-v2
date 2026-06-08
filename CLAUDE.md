@@ -1,7 +1,74 @@
-# CLAUDE.md — Labocea PMC V2
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 > Document de référence pour le développement de la V2 de l'application Labocea PMC.
-> À lire intégralement avant toute action de développement.
+
+---
+
+## Commandes
+
+```bash
+npm run dev          # serveur de développement local (Vite)
+npm run build        # TypeScript + build Vite → dist/
+npm run lint         # ESLint
+npm run test         # Vitest (unit tests, run once)
+npm run test:watch   # Vitest en mode watch
+npm run doctor       # react-doctor (score qualité React)
+npm run storybook    # Storybook sur :6006
+
+bash deploy-dev.sh   # build + déploiement staging
+bash deploy-prod.sh  # build + déploiement production (demande confirmation)
+```
+
+Pour lancer un seul fichier de test :
+```bash
+npx vitest run src/lib/__tests__/overdue.test.ts
+```
+
+Deux projets Vitest distincts : `unit` (jsdom) et `storybook` (Playwright/Chromium headless). `npm run test` lance uniquement `unit`.
+
+## Variables d'environnement
+
+Copier `.env.example` → `.env.local` et renseigner les 6 clés `VITE_FIREBASE_*` (apiKey, authDomain, projectId, storageBucket, messagingSenderId, appId).
+
+## Architecture
+
+**Alias `@/`** → `src/` (configuré dans `vite.config.ts` et `vitest.config.ts`).
+
+### Flux de données
+
+```
+Firestore (onSnapshot) → hook useXxx → store Zustand → composants
+```
+
+- **Hooks** (`src/hooks/`) : abonnements `onSnapshot` et lectures ponctuelles. Ils écrivent dans le store correspondant via ses setters.
+- **Stores** (`src/stores/`) : état en mémoire. Un store par domaine (`useMissionsStore`, `useAuthStore`, `useEquipementsStore`…). Les stores n'accèdent jamais à Firestore directement.
+- **Services** (`src/services/`) : toutes les **écritures** Firestore passent par les services, jamais depuis les hooks ni les composants. Chaque écriture est wrappée dans `trackWrite()` (`src/lib/trackWrite.ts`) pour compter les écritures en attente dans `useSyncStore`.
+- **Pages** (`src/pages/`) : toutes chargées en lazy via `React.lazy()`. Chaque page a un sous-répertoire éponyme dans `src/components/` pour ses composants locaux.
+
+### Constantes importantes
+
+`src/lib/constants.ts` contient :
+- `COLLECTIONS` — noms de toutes les collections Firestore (toujours utiliser ce const, jamais une string en dur)
+- `COLORS` — références aux tokens CSS (`var(--color-*)`)
+- `Z_INDEX` — niveaux d'empilement standardisés
+
+### Auth
+
+`useAuthInit()` s'abonne à `onAuthStateChanged`. Il peuple deux objets distincts dans `useAuthStore` : `firebaseUser` (Firebase Auth) et `appUser` (profil Firestore enrichi avec rôle/initiales). Utiliser les **sélecteurs nommés** exportés depuis `authStore.ts` (`selectUid`, `selectRole`, etc.) plutôt que les lambdas inline.
+
+Les routes protégées sont wrappées dans `<RequireAuth>` ; les routes admin dans `<RequireAdmin>` (vérifie `appUser.role === 'admin'`).
+
+### Firebase secondaire
+
+`authSecondary` / `dbSecondary` (dans `src/lib/firebase.ts`) : instance Firebase séparée utilisée uniquement pour créer des comptes utilisateurs depuis l'interface admin, afin de ne pas déconnecter l'admin en cours de session.
+
+### Offline / sync
+
+Firestore est initialisé avec `persistentLocalCache` + `persistentMultipleTabManager` (IndexedDB). `useSyncStore` expose `pendingWrites` et `isOnline` ; `getSyncStatus()` dérive le statut affiché dans l'UI (`synced` / `syncing` / `offline`).
+
+---
 
 ## 0. État du projet et Dette Technique
 
