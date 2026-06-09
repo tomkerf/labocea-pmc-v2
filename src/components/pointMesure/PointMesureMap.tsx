@@ -17,7 +17,7 @@ export function PointMesureMap({ plan }: { plan: Plan }) {
           src={`https://maps.google.com/maps?q=${plan.lat},${plan.lng}&z=15&output=embed`}
           className="size-full border-0"
           loading="lazy"
-          sandbox="allow-scripts allow-same-origin"
+          sandbox="allow-scripts allow-popups"
         />
       ) : (
         <div className="size-full flex flex-col items-center justify-center gap-2">

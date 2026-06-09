@@ -23,7 +23,7 @@ export function MissionDetailMap({ hasGps, lat, lng, siteNom, nom }: Props) {
           src={`https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`}
           className="size-full border-0"
           loading="lazy"
-          sandbox="allow-scripts allow-same-origin"
+          sandbox="allow-scripts allow-popups"
         />
       ) : (
         <div className="size-full flex flex-col items-center justify-center gap-2">

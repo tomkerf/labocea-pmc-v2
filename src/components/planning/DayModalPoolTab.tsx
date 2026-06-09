@@ -1,4 +1,13 @@
 import { useState } from 'react'
+
+const FADE_OVERLAY_STYLE: React.CSSProperties = {
+  position: 'absolute',
+  bottom: 1, left: 1, right: 1,
+  height: 48,
+  background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.95))',
+  borderRadius: '0 0 11px 11px',
+  pointerEvents: 'none',
+}
 import { ChevronDown, Plus, X } from 'lucide-react'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { SAMPLING_LABEL, isVeilleJourFerie } from '@/lib/planningUtils'
@@ -230,14 +239,7 @@ export default function DayModalPoolTab({ dateStr, pool, overduePool, holidays, 
                     ))}
                   </div>
                   {group.items.length > 3 && (
-                    <div style={{
-                      position: 'absolute',
-                      bottom: 1, left: 1, right: 1,
-                      height: 48,
-                      background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.95))',
-                      borderRadius: '0 0 11px 11px',
-                      pointerEvents: 'none',
-                    }} />
+                    <div style={FADE_OVERLAY_STYLE} />
                   )}
                 </div>
               )}

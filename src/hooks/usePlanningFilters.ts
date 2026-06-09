@@ -1,24 +1,14 @@
-import { useMemo, useEffect } from 'react'
+import { useMemo } from 'react'
 import type { Preleveur } from '@/stores/preleveursStore'
 
 interface UsePlanningFiltersParams {
-  initiales: string
-  allTechs: string[]
-  preleveurs: Preleveur[]
-  filterTech: string
-  setFilterTech: (v: string) => void
-  filterSite: string
+  allTechs:    string[]
+  preleveurs:  Preleveur[]
+  filterTech:  string
+  filterSite:  string
 }
 
-export function usePlanningFilters({ initiales, allTechs, preleveurs, filterTech, setFilterTech, filterSite }: UsePlanningFiltersParams) {
-  // Appliquer le filtre par défaut au premier chargement
-  useEffect(() => {
-    if (initiales && !localStorage.getItem('planning_filter_tech')) {
-      setFilterTech(initiales)
-      localStorage.setItem('planning_filter_tech', initiales)
-    }
-  }, [initiales, setFilterTech])
-
+export function usePlanningFilters({ allTechs, preleveurs, filterTech, filterSite }: UsePlanningFiltersParams) {
   const visibleTechs = useMemo(() => {
     if (!filterSite) return allTechs
     return allTechs.filter(code => {
@@ -27,19 +17,13 @@ export function usePlanningFilters({ initiales, allTechs, preleveurs, filterTech
     })
   }, [allTechs, filterSite, preleveurs])
 
-  // Réinitialiser filterTech si le tech sélectionné n'est plus visible (changement de site)
-  useEffect(() => {
-    if (filterTech && !visibleTechs.includes(filterTech)) {
-      setFilterTech('')
-      localStorage.setItem('planning_filter_tech', 'ALL')
-    }
-  }, [visibleTechs, filterTech, setFilterTech])
+  // Dérivé : si le tech sélectionné n'est plus visible (changement de site), on retourne ''
+  const activeFilterTech = visibleTechs.includes(filterTech) ? filterTech : ''
 
-  // Quand un site est filtré sans tech spécifique, restreindre aux techs du site
   const allowedTechs = useMemo(() => {
-    if (filterTech || !filterSite) return []
+    if (activeFilterTech || !filterSite) return []
     return visibleTechs
-  }, [filterTech, filterSite, visibleTechs])
+  }, [activeFilterTech, filterSite, visibleTechs])
 
-  return { visibleTechs, allowedTechs }
+  return { visibleTechs, allowedTechs, activeFilterTech }
 }

@@ -17,14 +17,16 @@ export default function AppLayout() {
   const { pathname } = useLocation()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const prevPathnameRef = useRef(pathname)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const changelog = useChangelogState()
   useNetworkStatus()
 
-
-  // Fermer le drawer à chaque changement de route
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setDrawerOpen(false) }, [pathname])
+  // Fermer le drawer à chaque changement de route (render-phase, pas d'effet)
+  if (prevPathnameRef.current !== pathname) {
+    prevPathnameRef.current = pathname
+    setDrawerOpen(false)
+  }
 
 
 

@@ -10,6 +10,8 @@ interface TuyauFormProps {
   onClose: () => void
 }
 
+const EMPTY_TUYAU: Partial<Tuyau> = {}
+
 export function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-center gap-2">
@@ -71,7 +73,7 @@ const wrap = {
   padding: '8px 11px',
 } as const
 
-export default function TuyauForm({ tuyau = {}, onSave, onClose }: TuyauFormProps) {
+export default function TuyauForm({ tuyau = EMPTY_TUYAU, onSave, onClose }: TuyauFormProps) {
   const [state, dispatch] = useReducer(formReducer, {
     refLabo:      tuyau.refLabo      ?? '',
     materiau:     tuyau.materiau     ?? 'TEFLON',

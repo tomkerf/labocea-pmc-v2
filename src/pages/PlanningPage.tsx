@@ -178,7 +178,10 @@ const uid        = useAuthStore(selectUid)
 
   const [filterTech,  setFilterTech]  = useState(() => {
     const saved = localStorage.getItem('planning_filter_tech')
-    return saved === 'ALL' ? '' : (saved ?? '')
+    if (saved && saved !== 'ALL') return saved
+    const ini = useAuthStore.getState().appUser?.initiales ?? ''
+    if (ini) localStorage.setItem('planning_filter_tech', ini)
+    return ini
   })
   const [filterSite, setFilterSite] = useState<string>(
     () => localStorage.getItem('planning_filter_site') ?? ''
@@ -215,8 +218,8 @@ const uid        = useAuthStore(selectUid)
     clients, maintenances, equipements, evenements, todos, users, preleveurs, selectedDay,
   })
 
-  const { visibleTechs, allowedTechs } = usePlanningFilters({
-    initiales, allTechs, preleveurs, filterTech, setFilterTech, filterSite,
+  const { visibleTechs, allowedTechs, activeFilterTech } = usePlanningFilters({
+    allTechs, preleveurs, filterTech, filterSite,
   })
 
   // ── Calculs calendrier (filtrage, bilanBand, allDayItems, periodList) ──
@@ -225,7 +228,7 @@ const uid        = useAuthStore(selectUid)
   } = usePlanningCalendar({
     eventsByDate, evenements, clients,
     viewMode, weekDays, monthStart, weekStart, selectedDate,
-    filterTech, allowedTechs, filterRetard,
+    filterTech: activeFilterTech, allowedTechs, filterRetard,
     handleSelectEvent,
   })
 
@@ -260,13 +263,13 @@ const uid        = useAuthStore(selectUid)
 
   const handleExportPdf = () => {
     import('@/lib/exportPlanningPdf').then(({ exportPlanningPdf }) => {
-      exportPlanningPdf(activePeriodEvents, periodLabel, filterTech, users)
+      exportPlanningPdf(activePeriodEvents, periodLabel, activeFilterTech, users)
     })
   }
 
   const handleExportExcel = () => {
     import('@/lib/exportPlanningExcel').then(({ exportPlanningExcel }) => {
-      exportPlanningExcel(activePeriodEvents, periodLabel, filterTech)
+      exportPlanningExcel(activePeriodEvents, periodLabel, activeFilterTech)
     })
   }
 
@@ -290,7 +293,7 @@ const uid        = useAuthStore(selectUid)
         periodLabel={periodLabel} viewMode={viewMode}
         prev={prev} next={next} goToday={goToday} switchView={switchView}
         showMiniCal={showMiniCal} setShowMiniCal={setShowMiniCal}
-        allTechs={visibleTechs} filterTech={filterTech} setFilterTech={setFilterTech}
+        allTechs={visibleTechs} filterTech={activeFilterTech} setFilterTech={setFilterTech}
         filterSite={filterSite} setFilterSite={setFilterSite}
         showRain={showRain} setShowRain={setShowRain} preleveurs={preleveurs}
         monthPoolCount={monthPoolCount} showDragHint={showDragHint} setShowDragHint={setShowDragHint}
@@ -321,7 +324,7 @@ const uid        = useAuthStore(selectUid)
           selectedDate={selectedDate}
           today={today}
           eventsByDate={eventsByDate}
-          filterTech={filterTech}
+          filterTech={activeFilterTech}
           allowedTechs={allowedTechs}
           filterRetard={filterRetard}
           showRain={showRain}
@@ -338,7 +341,7 @@ const uid        = useAuthStore(selectUid)
           selectedDate={selectedDate}
           today={today}
           eventsByDate={eventsByDate}
-          filterTech={filterTech}
+          filterTech={activeFilterTech}
           allowedTechs={allowedTechs}
           filterRetard={filterRetard}
           preleveurs={preleveurs}
@@ -351,7 +354,7 @@ const uid        = useAuthStore(selectUid)
         <YearMatrixView
           clients={clients}
           year={selectedDate.getFullYear()}
-          filterTech={filterTech}
+          filterTech={activeFilterTech}
           filterSite={filterSite}
           preleveurs={preleveurs}
         />
@@ -368,7 +371,7 @@ const uid        = useAuthStore(selectUid)
             eventsByDate={eventsByDate}
             bilanBand={bilanBand}
             allDayItems={allDayItems}
-            filterTech={filterTech}
+            filterTech={activeFilterTech}
             allowedTechs={allowedTechs}
             filterRetard={filterRetard}
             showRain={showRain}
@@ -392,7 +395,7 @@ const uid        = useAuthStore(selectUid)
             today={today}
             holidays={holidays}
             eventsByDate={eventsByDate}
-            filterTech={filterTech}
+            filterTech={activeFilterTech}
             allowedTechs={allowedTechs}
             filterRetard={filterRetard}
             showRain={showRain}
