@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useReducer } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
@@ -11,6 +11,24 @@ import { COLLECTIONS } from '@/lib/constants'
 
 
 const DEBOUNCE = 800
+
+type SyncState = { client: Client | null; loading: boolean; remoteChanged: { byName: string } | null }
+type SyncAction =
+  | { type: 'LOADED'; client: Client | null }
+  | { type: 'REMOTE_CHANGED'; client: Client; byName: string }
+  | { type: 'RELOAD'; client: Client | null }
+  | { type: 'DISMISS_REMOTE' }
+  | { type: 'SET_CLIENT'; client: Client }
+
+function syncReducer(state: SyncState, action: SyncAction): SyncState {
+  switch (action.type) {
+    case 'LOADED':          return { client: action.client, loading: false, remoteChanged: null }
+    case 'REMOTE_CHANGED':  return { ...state, loading: false, remoteChanged: { byName: action.byName } }
+    case 'RELOAD':          return { client: action.client, loading: false, remoteChanged: null }
+    case 'DISMISS_REMOTE':  return { ...state, remoteChanged: null }
+    case 'SET_CLIENT':      return { ...state, client: action.client }
+  }
+}
 
 export interface UseClientDataReturn {
   client: Client | null
@@ -28,10 +46,8 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
   const navigate = useNavigate()
   const uid = useAuthStore(selectUid)
 
-  const [client, setClient] = useState<Client | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [{ client, loading, remoteChanged }, dispatch] = useReducer(syncReducer, { client: null, loading: true, remoteChanged: null })
   const [saving, setSaving] = useState(false)
-  const [remoteChanged, setRemoteChanged] = useState<{ byName: string } | null>(null)
 
   const remoteDataRef = useRef<Client | null>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -43,26 +59,27 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
     if (!clientId) return
     const ref = doc(db, COLLECTIONS.CLIENTS, clientId)
     const unsub = onSnapshot(ref, (snap) => {
-      if (!snap.exists()) { setLoading(false); return }
+      if (!snap.exists()) { dispatch({ type: 'LOADED', client: null }); return }
       const data = { id: snap.id, ...snap.data() } as Client
       if (isDirty.current) {
         const remoteUid = (snap.data().updatedBy ?? '') as string
         if (remoteUid && remoteUid !== uid) {
           remoteDataRef.current = data
           const remoteUser = useUsersStore.getState().users.find(u => u.uid === remoteUid)
-          setRemoteChanged({ byName: remoteUser?.prenom ?? 'un autre utilisateur' })
+          dispatch({ type: 'REMOTE_CHANGED', client: data, byName: remoteUser?.prenom ?? 'un autre utilisateur' })
+        } else {
+          dispatch({ type: 'LOADED', client: data })
         }
       } else {
-        setClient(data)
+        dispatch({ type: 'LOADED', client: data })
       }
-      setLoading(false)
     })
     return () => unsub()
   }, [clientId, uid])
 
   function triggerSave(updated: Client) {
     isDirty.current = true
-    setClient(updated)
+    dispatch({ type: 'SET_CLIENT', client: updated })
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(async () => {
       if (!uid || isDeleted.current) {
@@ -95,15 +112,13 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
   function handleReload() {
     if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null }
     isDirty.current = false
-    if (remoteDataRef.current) {
-      setClient(remoteDataRef.current)
-      remoteDataRef.current = null
-    }
-    setRemoteChanged(null)
+    const reloadedClient = remoteDataRef.current ?? client
+    remoteDataRef.current = null
+    dispatch({ type: 'RELOAD', client: reloadedClient })
   }
 
   function dismissRemoteChanged() {
-    setRemoteChanged(null)
+    dispatch({ type: 'DISMISS_REMOTE' })
   }
 
   async function handleDeleteClient() {

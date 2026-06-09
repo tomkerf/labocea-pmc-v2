@@ -52,7 +52,7 @@ export default function SortableSeparatorRow({
             className="bg-transparent border-none outline-none text-center"
             style={{
               color: 'var(--color-text-tertiary)',
-              fontSize: '11px',
+              fontSize: '12px',
               fontWeight: 500,
               minWidth: '40px',
               width: `${Math.max(60, (plan.nom.length || 4) * 7 + 24)}px`,

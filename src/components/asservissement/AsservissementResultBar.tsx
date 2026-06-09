@@ -10,7 +10,7 @@ export function AsservissementResultBar({ res, hasError, copied, onCopy }: {
 }) {
   return (
     <div className="fixed bottom-0 left-0 right-0 px-4 pt-3"
-      style={{ background: 'rgba(255,255,255,0.96)', backdropFilter: 'blur(16px)', borderTop: '1px solid var(--color-border-subtle)', boxShadow: '0 -4px 20px rgba(0,0,0,0.08)', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
+      style={{ background: 'rgba(255,255,255,0.96)', backdropFilter: 'blur(9px)', borderTop: '1px solid var(--color-border-subtle)', boxShadow: '0 -4px 20px rgba(0,0,0,0.08)', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
       {res && !hasError ? (
         <div className="flex items-center gap-3">
           <div className="flex-1 min-w-0">

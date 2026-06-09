@@ -67,7 +67,7 @@ function MonthGrid({ offset, baseMonth, viewMode, monthStart, weekStart, selecte
               className="flex items-center justify-center rounded-full mx-auto"
               style={{
                 width: 22, height: 22,
-                fontSize: 11,
+                fontSize: 12,
                 background: isToday ? COLORS.ACCENT : highlighted ? 'var(--color-accent-light)' : 'transparent',
                 color: isToday ? 'white' : highlighted ? COLORS.ACCENT : COLORS.TEXT_PRIMARY,
                 fontWeight: isToday || highlighted ? 600 : 400,

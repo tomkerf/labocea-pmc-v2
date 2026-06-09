@@ -68,7 +68,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
             style={{
               width: 280,
               background: 'rgba(255,255,255,0.97)',
-              backdropFilter: 'blur(16px)',
+              backdropFilter: 'blur(9px)',
               borderLeft: '1px solid var(--color-border-subtle)',
               boxShadow: '-4px 0 32px rgba(0,0,0,0.12)',
               paddingBottom: 'env(safe-area-inset-bottom, 0px)',

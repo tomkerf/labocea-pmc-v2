@@ -22,9 +22,7 @@ self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
-        keys
-          .filter(k => k !== CACHE_ASSETS && k !== CACHE_NAV)
-          .map(k => caches.delete(k))
+        keys.flatMap(k => k !== CACHE_ASSETS && k !== CACHE_NAV ? [caches.delete(k)] : [])
       ))
       .then(() => self.clients.claim())
   )

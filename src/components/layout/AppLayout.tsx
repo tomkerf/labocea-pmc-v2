@@ -58,8 +58,8 @@ export default function AppLayout() {
           className="flex items-center px-4 h-14 shrink-0 z-30"
           style={{
             background: scrolled ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.85)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
+            backdropFilter: 'blur(9px)',
+            WebkitBackdropFilter: 'blur(9px)',
             borderBottom: scrolled ? '1px solid var(--color-border)' : '1px solid var(--color-border-subtle)',
             boxShadow: scrolled ? '0 4px 16px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)' : 'none',
             transition: 'background 300ms, border-color 300ms, box-shadow 300ms',

@@ -20,7 +20,7 @@ export default function CellContextMenu({ x, y, onClose, onPlanifier, onEvenemen
         style={{
           left: safeX, top: safeY,
           background: 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(20px)',
+          backdropFilter: 'blur(9px)',
           boxShadow: '0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08)',
           border: '1px solid var(--color-border-subtle)',
           minWidth: 210,

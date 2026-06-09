@@ -250,7 +250,7 @@ export default {
         }
         const userDoc = await userRes.json()
         const pushTokensField = userDoc.fields?.pushTokens?.arrayValue?.values ?? []
-        const tokens = pushTokensField.map(v => v.stringValue).filter(Boolean)
+        const tokens = pushTokensField.flatMap(v => v.stringValue ? [v.stringValue] : [])
 
         if (tokens.length === 0) {
           return new Response(JSON.stringify({ success: true, sent: 0, reason: 'no_tokens' }), {
