@@ -105,7 +105,7 @@ export function useDashboardStats({
     equipements.forEach((e: Equipement) => {
       const eqVerifs = verifications.filter((v: Verification) => v.equipementId === e.id || v.equipementNom === e.nom)
       if (eqVerifs.length > 0) {
-        const latest = eqVerifs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+        const latest = eqVerifs.reduce((best, v) => new Date(v.date).getTime() > new Date(best.date).getTime() ? v : best)
         if (latest.prochainControle && daysDiff(latest.prochainControle) < 30) count++
       } else {
         if (e.prochainEtalonnage && daysDiff(e.prochainEtalonnage) < 30) count++
@@ -381,7 +381,7 @@ export function useDashboardStats({
       const eqVerifs = verifications.filter((v: Verification) => v.equipementId === e.id || v.equipementNom === e.nom)
       let needsCalib = false
       if (eqVerifs.length > 0) {
-        const latest = eqVerifs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+        const latest = eqVerifs.reduce((best, v) => new Date(v.date).getTime() > new Date(best.date).getTime() ? v : best)
         if (latest.prochainControle && daysDiff(latest.prochainControle) < 30) needsCalib = true
       } else {
         if (e.prochainEtalonnage && daysDiff(e.prochainEtalonnage) < 30) needsCalib = true

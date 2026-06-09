@@ -15,6 +15,7 @@ export function EditRow({ label, value, placeholder, onChange, hint }: {
         </label>
         <input
           type="text"
+          aria-label={label}
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}

@@ -48,6 +48,7 @@ export function CompteProfileSection({ appUser, onUpdate }: {
           {AVATAR_COLORS.map(c => (
             <button type="button" key={c.value}
               onClick={() => onUpdate('avatarColor', c.value)}
+              aria-label={c.label}
               className="size-6 rounded-full transition-transform"
               style={{
                 background: c.value,

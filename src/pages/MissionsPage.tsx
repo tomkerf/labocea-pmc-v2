@@ -105,6 +105,7 @@ export default function MissionsPage() {
             style={{ color: 'var(--color-text-tertiary)' }} />
           <input
             type="text"
+            aria-label="Rechercher un client"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher un client, segment, préleveur…"

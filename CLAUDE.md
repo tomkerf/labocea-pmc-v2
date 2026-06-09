@@ -19,6 +19,14 @@ bash deploy-dev.sh   # build + déploiement staging
 bash deploy-prod.sh  # build + déploiement production (demande confirmation)
 ```
 
+### Slash Commands (Claude Code)
+*   `/plan` : Planification d'implémentation étape par étape avec validation de l'utilisateur.
+*   `/code-review` : Revue locale de sécurité, qualité, et conformité.
+*   `/learn` : Extraction et capitalisation des apprentissages de la session dans la mémoire globale.
+
+**Automatisation IA** : L'assistant doit appliquer d'office les workflows de `/plan` (avant tout dev complexe), `/code-review` (avant de commiter ou déployer) et `/learn` (en fin de tâche pour enrichir la mémoire) sans attendre que l'utilisateur le demande.
+
+
 Lancer un seul fichier de test :
 ```bash
 npx vitest run src/lib/__tests__/overdue.test.ts

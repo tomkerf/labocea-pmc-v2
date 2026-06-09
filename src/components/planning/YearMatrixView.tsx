@@ -303,39 +303,37 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                                       const priority = (s: Sampling) => isSamplingOverdue(s, planYear) ? 3 : s.status === 'planned' ? 2 : s.status === 'done' ? 1 : 0
                                       const sorted = [...pair].filter(Boolean).sort((a, b) => priority(b!) - priority(a!))
                                       return sorted.slice(0, 2).map((ps, pi) => ps && (
-                                        <div
+                                        <button
+                                          type="button"
                                           key={ps.id}
-                                          role={isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? 'button' : undefined}
-                                          tabIndex={isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? 0 : undefined}
                                           onClick={() => { if (isSamplingOverdue(ps, planYear)) setIssueModalType('overdue'); else if (ps.status === 'non_effectue') setIssueModalType('non_effectue') }}
-                                          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { if (isSamplingOverdue(ps, planYear)) setIssueModalType('overdue'); else if (ps.status === 'non_effectue') setIssueModalType('non_effectue') }}}
                                           className={`${dotSize} rounded-full flex items-center justify-center transition-transform hover:scale-110 border-2 border-[var(--color-bg-secondary)] ${isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
                                           style={{ backgroundColor: getStatusColor(ps, planYear), marginLeft: pi === 1 ? -5 : 0, zIndex: pi === 0 ? 2 : 1 }}
                                           title={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps, planYear)}${ps.doneDate ? ` le ${ps.doneDate}` : ''}${isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? ' — cliquer pour voir la liste' : ''}`}
+                                          aria-label={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps, planYear)}`}
                                         >
                                           <span className={`${iconSize} font-bold text-white leading-none`}>
                                             {getStatusIcon(ps, planYear)}
                                           </span>
-                                        </div>
+                                        </button>
                                       ))
                                     })()}
                                   </div>
                                 )
                               ) : (
                                 s && (
-                                  <div
-                                    role={isSamplingOverdue(s, planYear) || s.status === 'non_effectue' ? 'button' : undefined}
-                                    tabIndex={isSamplingOverdue(s, planYear) || s.status === 'non_effectue' ? 0 : undefined}
+                                  <button
+                                    type="button"
                                     onClick={() => { if (isSamplingOverdue(s, planYear)) setIssueModalType('overdue'); else if (s.status === 'non_effectue') setIssueModalType('non_effectue') }}
-                                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { if (isSamplingOverdue(s, planYear)) setIssueModalType('overdue'); else if (s.status === 'non_effectue') setIssueModalType('non_effectue') }}}
                                     className={`mx-auto ${dotSize} rounded-full flex items-center justify-center transition-transform hover:scale-110 ${isSamplingOverdue(s, planYear) || s.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
                                     style={{ backgroundColor: getStatusColor(s, planYear) }}
                                     title={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s, planYear)}${s.doneDate ? ` le ${s.doneDate}` : ''}${isSamplingOverdue(s, planYear) || s.status === 'non_effectue' ? ' — cliquer pour voir la liste' : ''}`}
+                                    aria-label={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s, planYear)}`}
                                   >
                                     <span className={`${iconSize} font-bold text-white leading-none`}>
                                       {getStatusIcon(s, planYear)}
                                     </span>
-                                  </div>
+                                  </button>
                                 )
                               )}
                             </td>

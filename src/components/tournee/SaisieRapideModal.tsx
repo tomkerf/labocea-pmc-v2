@@ -90,7 +90,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
 
           {/* Statut */}
           <div className="flex gap-2 mb-4">
-            {(['done', 'non_effectue', 'reporte'] as const).filter(s => !(s === 'done' && hideRealise)).map(s => {
+            {(['done', 'non_effectue', 'reporte'] as const).flatMap(s => (s === 'done' && hideRealise) ? [] : [s]).map(s => {
               const labels = { done: 'Réalisé', non_effectue: 'Non effectué', reporte: 'Reporter' }
               const activeColors = {
                 done:         { bg: 'var(--color-success-light)',  text: COLORS.SUCCESS },

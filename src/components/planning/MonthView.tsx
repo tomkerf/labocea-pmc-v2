@@ -56,7 +56,7 @@ export default function MonthView({
       setTimeout(() => { wheelCooldown.current = false }, 600)
       if (e.deltaY > 0) next(); else prev()
     }
-    el.addEventListener('wheel', onWheel, { passive: false })
+    el.addEventListener('wheel', onWheel, { passive: true })
     return () => el.removeEventListener('wheel', onWheel)
   }, [prev, next])
 

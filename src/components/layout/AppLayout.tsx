@@ -35,7 +35,7 @@ export default function AppLayout() {
     const handleScroll = () => {
       setScrolled(container.scrollTop > 5)
     }
-    container.addEventListener('scroll', handleScroll)
+    container.addEventListener('scroll', handleScroll, { passive: true })
     // Réinitialiser au changement de route
     setScrolled(false)
     return () => container.removeEventListener('scroll', handleScroll)

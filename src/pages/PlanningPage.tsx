@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useReducer } from 'react'
 import { useClientsListener } from '@/hooks/useClients'
 // saveClient, createEvenement, deleteEvenement → usePlanningActions
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -47,6 +47,69 @@ import MapView            from '@/components/planning/MapView'
 import YearMatrixView     from '@/components/planning/YearMatrixView'
 import BilanMoisModal     from '@/components/planning/BilanMoisModal'
 
+// ── UI State ────────────────────────────────────────────────
+
+type UIState = {
+  showDragHint: boolean
+  showRain: boolean
+  showMiniCal: boolean
+  showBilanMois: boolean
+  selectedDay: string | null
+  dayModalInitialTab: 'pool' | 'evt'
+  ctxMenu: { dateStr: string; x: number; y: number } | null
+  eventDetail: { event: PlanningEvent; dateStr: string } | null
+  ghostDetail: { event: PlanningEvent; dateStr: string } | null
+  dragModal: { dateDebut: string; dateFin: string } | null
+}
+
+type UIAction =
+  | { type: 'SET_SHOW_DRAG_HINT'; value: boolean }
+  | { type: 'SET_SHOW_RAIN'; value: boolean }
+  | { type: 'SET_SHOW_MINI_CAL'; value: boolean }
+  | { type: 'SET_SHOW_BILAN_MOIS'; value: boolean }
+  | { type: 'SET_SELECTED_DAY'; value: string | null }
+  | { type: 'SET_DAY_MODAL_TAB'; value: 'pool' | 'evt' }
+  | { type: 'SET_CTX_MENU'; value: { dateStr: string; x: number; y: number } | null }
+  | { type: 'SET_EVENT_DETAIL'; value: { event: PlanningEvent; dateStr: string } | null }
+  | { type: 'SET_GHOST_DETAIL'; value: { event: PlanningEvent; dateStr: string } | null }
+  | { type: 'SET_DRAG_MODAL'; value: { dateDebut: string; dateFin: string } | null }
+
+type NavState = {
+  viewMode: ViewMode
+  weekStart: Date
+  monthStart: Date
+  selectedDate: Date
+}
+type NavAction =
+  | { type: 'SET_VIEW_MODE'; value: ViewMode }
+  | { type: 'SET_WEEK_START'; value: Date }
+  | { type: 'SET_MONTH_START'; value: Date }
+  | { type: 'SET_SELECTED_DATE'; value: Date }
+
+function navReducer(state: NavState, action: NavAction): NavState {
+  switch (action.type) {
+    case 'SET_VIEW_MODE':     return { ...state, viewMode: action.value }
+    case 'SET_WEEK_START':    return { ...state, weekStart: action.value }
+    case 'SET_MONTH_START':   return { ...state, monthStart: action.value }
+    case 'SET_SELECTED_DATE': return { ...state, selectedDate: action.value }
+  }
+}
+
+function uiReducer(state: UIState, action: UIAction): UIState {
+  switch (action.type) {
+    case 'SET_SHOW_DRAG_HINT':  return { ...state, showDragHint: action.value }
+    case 'SET_SHOW_RAIN':       return { ...state, showRain: action.value }
+    case 'SET_SHOW_MINI_CAL':   return { ...state, showMiniCal: action.value }
+    case 'SET_SHOW_BILAN_MOIS': return { ...state, showBilanMois: action.value }
+    case 'SET_SELECTED_DAY':    return { ...state, selectedDay: action.value }
+    case 'SET_DAY_MODAL_TAB':   return { ...state, dayModalInitialTab: action.value }
+    case 'SET_CTX_MENU':        return { ...state, ctxMenu: action.value }
+    case 'SET_EVENT_DETAIL':    return { ...state, eventDetail: action.value }
+    case 'SET_GHOST_DETAIL':    return { ...state, ghostDetail: action.value }
+    case 'SET_DRAG_MODAL':      return { ...state, dragModal: action.value }
+  }
+}
+
 // ── Composant principal ─────────────────────────────────────
 
 export default function PlanningPage() {
@@ -74,12 +137,45 @@ const uid        = useAuthStore(selectUid)
     ...getFrenchHolidays(todayYear + 1),
   }), [todayYear])
 
-  const [showDragHint, setShowDragHint] = useState(() => !localStorage.getItem('planning_drag_hint_seen'))
+  const [ui, dispatch] = useReducer(uiReducer, undefined, () => ({
+    showDragHint:      !localStorage.getItem('planning_drag_hint_seen'),
+    showRain:          localStorage.getItem('planning_show_rain') !== 'false',
+    showMiniCal:       false,
+    showBilanMois:     false,
+    selectedDay:       null,
+    dayModalInitialTab: 'pool' as const,
+    ctxMenu:           null,
+    eventDetail:       null,
+    ghostDetail:       null,
+    dragModal:         null,
+  }))
 
-  const [viewMode,    setViewMode]    = useState<ViewMode>('semaine')
-  const [weekStart,   setWeekStart]   = useState(() => startOfWeek(today))
-  const [monthStart,  setMonthStart]  = useState(() => startOfMonth(today))
-  const [selectedDate,setSelectedDate]= useState(today)
+  const { showDragHint, showRain, showMiniCal, showBilanMois,
+          selectedDay, dayModalInitialTab, ctxMenu, eventDetail, ghostDetail, dragModal } = ui
+
+  const setShowDragHint  = (value: boolean) => dispatch({ type: 'SET_SHOW_DRAG_HINT', value })
+  const setShowRain      = (value: boolean) => dispatch({ type: 'SET_SHOW_RAIN', value })
+  const setShowMiniCal   = (value: boolean) => dispatch({ type: 'SET_SHOW_MINI_CAL', value })
+  const setShowBilanMois = (value: boolean) => dispatch({ type: 'SET_SHOW_BILAN_MOIS', value })
+  const setSelectedDay   = (value: string | null) => dispatch({ type: 'SET_SELECTED_DAY', value })
+  const setDayModalInitialTab = (value: 'pool' | 'evt') => dispatch({ type: 'SET_DAY_MODAL_TAB', value })
+  const setCtxMenu       = (value: { dateStr: string; x: number; y: number } | null) => dispatch({ type: 'SET_CTX_MENU', value })
+  const setEventDetail   = (value: { event: PlanningEvent; dateStr: string } | null) => dispatch({ type: 'SET_EVENT_DETAIL', value })
+  const setGhostDetail   = (value: { event: PlanningEvent; dateStr: string } | null) => dispatch({ type: 'SET_GHOST_DETAIL', value })
+  const setDragModal     = (value: { dateDebut: string; dateFin: string } | null) => dispatch({ type: 'SET_DRAG_MODAL', value })
+
+  const [nav, dispatchNav] = useReducer(navReducer, {
+    viewMode: 'semaine' as ViewMode,
+    weekStart: startOfWeek(today),
+    monthStart: startOfMonth(today),
+    selectedDate: today,
+  })
+  const { viewMode, weekStart, monthStart, selectedDate } = nav
+  const setViewMode    = (value: ViewMode) => dispatchNav({ type: 'SET_VIEW_MODE', value })
+  const setWeekStart   = (value: Date) => dispatchNav({ type: 'SET_WEEK_START', value })
+  const setMonthStart  = (value: Date) => dispatchNav({ type: 'SET_MONTH_START', value })
+  const setSelectedDate = (value: Date) => dispatchNav({ type: 'SET_SELECTED_DATE', value })
+
   const [filterTech,  setFilterTech]  = useState(() => {
     const saved = localStorage.getItem('planning_filter_tech')
     return saved === 'ALL' ? '' : (saved ?? '')
@@ -87,15 +183,7 @@ const uid        = useAuthStore(selectUid)
   const [filterSite, setFilterSite] = useState<string>(
     () => localStorage.getItem('planning_filter_site') ?? ''
   )
-  const [filterRetard] = useState(false)
-  const [selectedDay,         setSelectedDay]         = useState<string|null>(null)
-  const [dayModalInitialTab,  setDayModalInitialTab]  = useState<'pool'|'evt'>('pool')
-  const [showRain,            setShowRain]            = useState(() => localStorage.getItem('planning_show_rain') !== 'false')
-  const [ctxMenu,             setCtxMenu]             = useState<{ dateStr: string; x: number; y: number } | null>(null)
-  const [eventDetail,   setEventDetail]   = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
-  const [ghostDetail,   setGhostDetail]   = useState<{ event: PlanningEvent; dateStr: string } | null>(null)
-  const [showMiniCal,   setShowMiniCal]   = useState(false)
-  const [showBilanMois, setShowBilanMois] = useState(false)
+  const filterRetard = false
 
   function handleSelectEvent(event: PlanningEvent, dateStr: string) {
     if (event.isGhost) setGhostDetail({ event, dateStr })
@@ -112,14 +200,12 @@ const uid        = useAuthStore(selectUid)
   })
 
   // ── Drag-to-create + swipe ──────────────────────────────
-  const [dragModal, setDragModal] = useState<{ dateDebut: string; dateFin: string } | null>(null)
-
   const {
     handleTouchStart, handleTouchEnd,
     isDragging,
     setIsDragging, setDragStart, setDragEnd,
     isInDrag, handleDragMouseDown, handleDragMouseEnter, handleDragMouseUp,
-  } = usePlanningDrag({ setSelectedDate, goToDay, setDragModal })
+  } = usePlanningDrag({ selectedDate, setSelectedDate, goToDay, setDragModal })
 
   const weekDays  = useMemo(() => Array.from({length:7},(_,i) => addDays(weekStart,i)), [weekStart])
   const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])

@@ -3,6 +3,13 @@ import L from 'leaflet'
 import { type PlanningEvent, getTechColor } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
 
+function createCustomMarker(event: PlanningEvent, index: number): L.DivIcon {
+  const tc = getTechColor(event.technicien)
+  const colorHex = event.isDone ? '#34C759' : (tc.color.startsWith('var') ? '#0071E3' : tc.color)
+  const html = `<div style="width:28px;height:28px;background-color:${colorHex};border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${index + 1}</div>`
+  return L.divIcon({ html, className: 'custom-leaflet-marker', iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -16] })
+}
+
 export function useMapMarkers(
   mappedEvts: PlanningEvent[],
   handleSelectEvent: (event: PlanningEvent, dateStr: string) => void,
@@ -13,13 +20,6 @@ export function useMapMarkers(
   const mapRef = useRef<L.Map | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const markerGroupRef = useRef<L.FeatureGroup | null>(null)
-
-  function createCustomMarker(event: PlanningEvent, index: number): L.DivIcon {
-    const tc = getTechColor(event.technicien)
-    const colorHex = event.isDone ? '#34C759' : (tc.color.startsWith('var') ? '#0071E3' : tc.color)
-    const html = `<div style="width:28px;height:28px;background-color:${colorHex};border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${index + 1}</div>`
-    return L.divIcon({ html, className: 'custom-leaflet-marker', iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -16] })
-  }
 
   // Initialisation de la carte
   useEffect(() => {

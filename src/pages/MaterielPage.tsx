@@ -159,6 +159,7 @@ export default function MaterielPage() {
         <div className="relative">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--color-text-tertiary)' }} />
           <input
+            aria-label="Rechercher un équipement"
             value={search}
             onChange={(e) => dispatch({ type: 'setFilter', name: 'search', value: e.target.value })}
             placeholder="Rechercher un équipement…"

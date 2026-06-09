@@ -200,6 +200,7 @@ export default function RapportsPage() {
                             <div className="flex items-center gap-2 flex-wrap shrink-0">
                               <input
                                 type="date"
+                                aria-label="Date prévue du rapport"
                                 defaultValue={r.rapportDatePrevue}
                                 onBlur={(e) => { if (e.target.value !== r.rapportDatePrevue) updateDatePrevue(r.clientId, r.planId, r.samplingId, e.target.value) }}
                                 className="rounded-md px-2 py-1 text-xs"

@@ -1,21 +1,32 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useReducer } from 'react'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { VisitePreliminaire } from '@/types'
 import { COLLECTIONS } from '@/lib/constants'
 
+type State = { visites: VisitePreliminaire[]; loading: boolean; prevLinkedId: string }
+type Action =
+  | { type: 'LOADED'; visites: VisitePreliminaire[] }
+  | { type: 'ERROR' }
+  | { type: 'RESET'; linkedId: string }
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'LOADED': return { ...state, visites: action.visites, loading: false }
+    case 'ERROR': return { ...state, visites: [], loading: false }
+    case 'RESET': return { visites: [], loading: false, prevLinkedId: action.linkedId }
+  }
+}
 
 export function useVisites(linkedId: string) {
-  const [visites, setVisites] = useState<VisitePreliminaire[]>([])
-  const [loading, setLoading] = useState(!!linkedId)
-  const [prevLinkedId, setPrevLinkedId] = useState(linkedId)
+  const [state, dispatch] = useReducer(reducer, {
+    visites: [],
+    loading: !!linkedId,
+    prevLinkedId: linkedId,
+  })
 
-  if (linkedId !== prevLinkedId) {
-    setPrevLinkedId(linkedId)
-    if (!linkedId) {
-      setVisites([])
-      setLoading(false)
-    }
+  if (linkedId !== state.prevLinkedId) {
+    dispatch({ type: 'RESET', linkedId })
   }
 
   useEffect(() => {
@@ -27,14 +38,12 @@ export function useVisites(linkedId: string) {
     const unsub = onSnapshot(q, (snap) => {
       const data = snap.docs.map((d) => ({ id: d.id, ...d.data() } as VisitePreliminaire))
       data.sort((a, b) => b.date.localeCompare(a.date))
-      setVisites(data)
-      setLoading(false)
+      dispatch({ type: 'LOADED', visites: data })
     }, () => {
-      setVisites([])
-      setLoading(false)
+      dispatch({ type: 'ERROR' })
     })
     return () => unsub()
   }, [linkedId])
 
-  return { visites, loading }
+  return { visites: state.visites, loading: state.loading }
 }

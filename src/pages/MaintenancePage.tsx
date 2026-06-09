@@ -120,23 +120,23 @@ export default function MaintenancePage() {
       {/* Intervention */}
       <Section title="Intervention">
         <Field label="Type">
-          <select value={maintenance.type} onChange={(e) => update('type', e.target.value as TypeMaintenance)} className="field-input">
+          <select aria-label="Type d'intervention" value={maintenance.type} onChange={(e) => update('type', e.target.value as TypeMaintenance)} className="field-input">
             {TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </Field>
         <Field label="Statut">
-          <select value={maintenance.statut} onChange={(e) => update('statut', e.target.value as StatutMaintenance)} className="field-input">
+          <select aria-label="Statut de la maintenance" value={maintenance.statut} onChange={(e) => update('statut', e.target.value as StatutMaintenance)} className="field-input">
             {STATUTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
         </Field>
         <Field label="Date prévue">
-          <input type="date" value={maintenance.datePrevue} onChange={(e) => update('datePrevue', e.target.value)} className="field-input" />
+          <input aria-label="Date prévue" type="date" value={maintenance.datePrevue} onChange={(e) => update('datePrevue', e.target.value)} className="field-input" />
         </Field>
         <Field label="Date réalisée">
-          <input type="date" value={maintenance.dateRealisee ?? ''} onChange={(e) => update('dateRealisee', e.target.value || null)} className="field-input" />
+          <input aria-label="Date réalisée" type="date" value={maintenance.dateRealisee ?? ''} onChange={(e) => update('dateRealisee', e.target.value || null)} className="field-input" />
         </Field>
         <Field label="Durée (heures)" last>
-          <input type="number" min="0" step="0.5"
+          <input aria-label="Durée en heures" type="number" min="0" step="0.5"
             value={maintenance.dureeHeures ?? ''}
             onChange={(e) => update('dureeHeures', e.target.value ? parseFloat(e.target.value) : null)}
             className="field-input" placeholder="Ex : 2.5" />
@@ -171,10 +171,10 @@ export default function MaintenancePage() {
       {/* Coût + Technicien */}
       <Section title="Informations complémentaires">
         <Field label="Technicien responsable">
-          <input value={maintenance.technicienNom} onChange={(e) => update('technicienNom', e.target.value)} className="field-input" placeholder="Nom du technicien" />
+          <input aria-label="Technicien responsable" value={maintenance.technicienNom} onChange={(e) => update('technicienNom', e.target.value)} className="field-input" placeholder="Nom du technicien" />
         </Field>
         <Field label="Coût (€)" last>
-          <input type="number" min="0" step="1"
+          <input aria-label="Coût en euros" type="number" min="0" step="1"
             value={maintenance.cout ?? ''}
             onChange={(e) => update('cout', e.target.value ? parseFloat(e.target.value) : null)}
             className="field-input" placeholder="—" />
@@ -199,10 +199,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Field({ label, children, last }: { label: string; children: React.ReactNode; last?: boolean }) {
   return (
-    <div className="flex items-center gap-4 px-5 py-3"
+    <label className="flex items-center gap-4 px-5 py-3"
       style={{ borderBottom: last ? 'none' : '1px solid var(--color-border-subtle)' }}>
-      <label className="text-sm shrink-0" style={{ color: COLORS.TEXT_SECONDARY, minWidth: '180px' }}>{label}</label>
+      <span className="text-sm shrink-0" style={{ color: COLORS.TEXT_SECONDARY, minWidth: '180px' }}>{label}</span>
       <div className="flex-1">{children}</div>
-    </div>
+    </label>
   )
 }

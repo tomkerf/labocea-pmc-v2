@@ -1,20 +1,19 @@
-import type { Dispatch, SetStateAction } from 'react'
 import {
   type ViewMode,
   addDays, addMonths, startOfWeek, startOfMonth,
 } from '@/lib/planningUtils'
 
 interface UsePlanningNavigationProps {
-  viewMode:       ViewMode
-  setViewMode:    Dispatch<SetStateAction<ViewMode>>
-  today:          Date
-  selectedDate:   Date
-  setSelectedDate: Dispatch<SetStateAction<Date>>
-  weekStart:      Date
-  setWeekStart:   Dispatch<SetStateAction<Date>>
-  monthStart:     Date
-  setMonthStart:  Dispatch<SetStateAction<Date>>
-  setSelectedDay: Dispatch<SetStateAction<string | null>>
+  viewMode:        ViewMode
+  setViewMode:     (v: ViewMode) => void
+  today:           Date
+  selectedDate:    Date
+  setSelectedDate: (v: Date) => void
+  weekStart:       Date
+  setWeekStart:    (v: Date) => void
+  monthStart:      Date
+  setMonthStart:   (v: Date) => void
+  setSelectedDay:  (v: string | null) => void
 }
 
 export function usePlanningNavigation({

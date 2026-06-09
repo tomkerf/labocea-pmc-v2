@@ -1,14 +1,14 @@
 import { useState, useCallback, useRef } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
 import { addDays } from '@/lib/planningUtils'
 
 interface UsePlanningDragProps {
-  setSelectedDate: Dispatch<SetStateAction<Date>>
+  selectedDate:    Date
+  setSelectedDate: (v: Date) => void
   goToDay: (dateStr: string) => void
   setDragModal: (v: { dateDebut: string; dateFin: string } | null) => void
 }
 
-export function usePlanningDrag({ setSelectedDate, goToDay, setDragModal }: UsePlanningDragProps) {
+export function usePlanningDrag({ selectedDate, setSelectedDate, goToDay, setDragModal }: UsePlanningDragProps) {
   // ── Swipe vue Jour (mobile) ─────────────────────────────
   const swipeStartX = useRef<number | null>(null)
   const swipeStartY = useRef<number | null>(null)
@@ -23,12 +23,12 @@ export function usePlanningDrag({ setSelectedDate, goToDay, setDragModal }: UseP
     const dx = e.changedTouches[0].clientX - swipeStartX.current
     const dy = e.changedTouches[0].clientY - swipeStartY.current
     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
-      if (dx < 0) setSelectedDate(d => addDays(d, 1))
-      else        setSelectedDate(d => addDays(d, -1))
+      if (dx < 0) setSelectedDate(addDays(selectedDate, 1))
+      else        setSelectedDate(addDays(selectedDate, -1))
     }
     swipeStartX.current = null
     swipeStartY.current = null
-  }, [setSelectedDate])
+  }, [selectedDate, setSelectedDate])
 
   // ── Drag-to-create ──────────────────────────────────────
   const [dragStart,  setDragStart]  = useState<string | null>(null)

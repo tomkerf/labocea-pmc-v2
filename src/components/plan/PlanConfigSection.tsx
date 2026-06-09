@@ -55,32 +55,33 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
       </h2>
       <div className="rounded-xl overflow-hidden" style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         <PlanField label="Nom du point">
-          <input value={plan.nom} onChange={(e) => onUpdate('nom', e.target.value)} className="field-input"
+          <input aria-label="Nom du point de mesure" value={plan.nom} onChange={(e) => onUpdate('nom', e.target.value)} className="field-input"
             style={!plan.nom.trim() ? { borderColor: COLORS.DANGER } : undefined} />
           {!plan.nom.trim() && (
             <p className="text-xs mt-1" style={{ color: COLORS.DANGER }}>Le nom du point est obligatoire.</p>
           )}
         </PlanField>
         <PlanField label="Site">
-          <input value={plan.siteNom} onChange={(e) => onUpdate('siteNom', e.target.value)} className="field-input" placeholder="Nom du site" />
+          <input aria-label="Nom du site" value={plan.siteNom} onChange={(e) => onUpdate('siteNom', e.target.value)} className="field-input" placeholder="Nom du site" />
         </PlanField>
         <PlanField label="Fréquence">
-          <select value={plan.frequence} onChange={(e) => onUpdate('frequence', e.target.value as FrequenceType)} className="field-input">
+          <select aria-label="Fréquence" value={plan.frequence} onChange={(e) => onUpdate('frequence', e.target.value as FrequenceType)} className="field-input">
             {FREQUENCES.map((f) => <option key={f}>{f}</option>)}
           </select>
         </PlanField>
         <PlanField label="Nature de l'eau">
-          <select value={plan.nature} onChange={(e) => onUpdate('nature', e.target.value as NatureEauType)} className="field-input">
+          <select aria-label="Nature de l'eau" value={plan.nature} onChange={(e) => onUpdate('nature', e.target.value as NatureEauType)} className="field-input">
             {NATURES.map((n) => <option key={n}>{n}</option>)}
           </select>
         </PlanField>
         <PlanField label="Méthode">
-          <select value={plan.methode} onChange={(e) => onUpdate('methode', e.target.value as MethodeType)} className="field-input">
+          <select aria-label="Méthode de prélèvement" value={plan.methode} onChange={(e) => onUpdate('methode', e.target.value as MethodeType)} className="field-input">
             {METHODES.map((m) => <option key={m}>{m}</option>)}
           </select>
         </PlanField>
         <PlanField label="Latitude">
           <input
+            aria-label="Latitude GPS"
             value={plan.lat}
             onChange={(e) => onUpdate('lat', e.target.value)}
             className="field-input"
@@ -90,6 +91,7 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
         </PlanField>
         <PlanField label="Longitude">
           <input
+            aria-label="Longitude GPS"
             value={plan.lng}
             onChange={(e) => onUpdate('lng', e.target.value)}
             className="field-input"

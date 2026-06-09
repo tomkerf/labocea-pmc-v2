@@ -1,4 +1,4 @@
-import { useMemo, type Dispatch, type SetStateAction } from 'react'
+import { useMemo } from 'react'
 import { ChevronLeft, ChevronRight, Calendar, Map as MapIcon, X, Printer, FileSpreadsheet } from 'lucide-react'
 import { type ViewMode, getTechColor } from '@/lib/planningUtils'
 import { m } from 'framer-motion'
@@ -16,20 +16,20 @@ interface PlanningHeaderProps {
   goToday:        () => void
   switchView:     (m: ViewMode) => void
   showMiniCal:    boolean
-  setShowMiniCal: Dispatch<SetStateAction<boolean>>
+  setShowMiniCal: (v: boolean) => void
   // Filtres
   allTechs:       string[]
   filterTech:     string
-  setFilterTech:  Dispatch<SetStateAction<string>>
+  setFilterTech:  (v: string) => void
   filterSite:     string
-  setFilterSite:  Dispatch<SetStateAction<string>>
+  setFilterSite:  (v: string) => void
   showRain:       boolean
-  setShowRain:    Dispatch<SetStateAction<boolean>>
+  setShowRain:    (v: boolean) => void
   preleveurs:     Preleveur[]
   // Bandeaux
   monthPoolCount: number
   showDragHint:   boolean
-  setShowDragHint: Dispatch<SetStateAction<boolean>>
+  setShowDragHint: (v: boolean) => void
   // Exports
   onExportPdf:    () => void
   onExportExcel:  () => void
@@ -83,7 +83,7 @@ export default function PlanningHeader({
                 style={{ background:COLORS.BG_TERTIARY, color:COLORS.TEXT_SECONDARY, border:'1px solid var(--color-border-subtle)' }}>
                 Aujourd'hui
               </button>
-              <button type="button" onClick={() => setShowMiniCal(v => !v)}
+              <button type="button" onClick={() => setShowMiniCal(!showMiniCal)}
                 className="hidden md:flex items-center justify-center size-7 rounded-lg"
                 style={{
                   background: showMiniCal ? 'var(--color-accent-light)' : COLORS.BG_TERTIARY,

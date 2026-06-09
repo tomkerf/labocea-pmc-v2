@@ -120,27 +120,27 @@ export default function VerificationPage() {
       {/* Vérification */}
       <Section title="Vérification">
         <Field label="Type">
-          <select value={verification.type} onChange={(e) => update('type', e.target.value as TypeVerification)} className="field-input">
+          <select aria-label="Type de vérification" value={verification.type} onChange={(e) => update('type', e.target.value as TypeVerification)} className="field-input">
             {TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </Field>
         <Field label="Date de vérification">
-          <input type="date" value={verification.date} onChange={(e) => update('date', e.target.value)} className="field-input" />
+          <input aria-label="Date de vérification" type="date" value={verification.date} onChange={(e) => update('date', e.target.value)} className="field-input" />
         </Field>
         <Field label="Résultat">
-          <select value={verification.resultat} onChange={(e) => update('resultat', e.target.value as ResultatVerification)} className="field-input">
+          <select aria-label="Résultat de la vérification" value={verification.resultat} onChange={(e) => update('resultat', e.target.value as ResultatVerification)} className="field-input">
             {RESULTATS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
           </select>
         </Field>
         <Field label="Prochain contrôle" last>
-          <input type="date" value={verification.prochainControle} onChange={(e) => update('prochainControle', e.target.value)} className="field-input" />
+          <input aria-label="Prochain contrôle" type="date" value={verification.prochainControle} onChange={(e) => update('prochainControle', e.target.value)} className="field-input" />
         </Field>
       </Section>
 
       {/* Technicien */}
       <Section title="Technicien">
         <Field label="Nom" last>
-          <input value={verification.technicienNom} onChange={(e) => update('technicienNom', e.target.value)} className="field-input" placeholder="Nom du technicien" />
+          <input aria-label="Nom du technicien" value={verification.technicienNom} onChange={(e) => update('technicienNom', e.target.value)} className="field-input" placeholder="Nom du technicien" />
         </Field>
       </Section>
 
@@ -148,6 +148,7 @@ export default function VerificationPage() {
       <Section title="Remarques">
         <div className="px-5 py-3">
           <textarea
+            aria-label="Remarques et observations"
             value={verification.remarques}
             onChange={(e) => update('remarques', e.target.value)}
             rows={3}
@@ -176,10 +177,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Field({ label, children, last }: { label: string; children: React.ReactNode; last?: boolean }) {
   return (
-    <div className="flex items-center gap-4 px-5 py-3"
+    <label className="flex items-center gap-4 px-5 py-3"
       style={{ borderBottom: last ? 'none' : '1px solid var(--color-border-subtle)' }}>
-      <label className="text-sm shrink-0" style={{ color: COLORS.TEXT_SECONDARY, minWidth: '180px' }}>{label}</label>
+      <span className="text-sm shrink-0" style={{ color: COLORS.TEXT_SECONDARY, minWidth: '180px' }}>{label}</span>
       <div className="flex-1">{children}</div>
-    </div>
+    </label>
   )
 }

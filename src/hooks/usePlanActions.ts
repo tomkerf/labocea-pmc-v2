@@ -144,7 +144,10 @@ export function usePlanActions({
     if (!client || !plan) return
     const updated = {
       ...plan,
-      samplings: plan.samplings.filter((s) => s.id !== samplingId).map((s, i) => ({ ...s, num: i + 1 })),
+      samplings: plan.samplings.reduce<typeof plan.samplings>((acc, s) => {
+        if (s.id !== samplingId) acc.push({ ...s, num: acc.length + 1 })
+        return acc
+      }, []),
     }
     triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updated : p) })
     if (selectedSampling === samplingId) setSelectedSampling(null)

@@ -43,20 +43,5 @@ export function StatCard({ value, label, sub, accent, warning, danger, onClick }
   )
 }
 
-export function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="text-xs font-semibold uppercase mb-3"
-      style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>
-      {children}
-    </h2>
-  )
-}
-
-export function EmptyCard({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="rounded-xl px-5 py-8 text-center"
-      style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
-      <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{children}</p>
-    </div>
-  )
-}
+export { SectionTitle } from './SectionTitle'
+export { EmptyCard } from './EmptyCard'

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { m, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
@@ -15,6 +15,16 @@ interface BaseModalProps {
   hideCloseButton?: boolean
 }
 
+const MAX_WIDTH_CLASSES: Record<string, string> = {
+  'sm': 'sm:max-w-sm',
+  'md': 'sm:max-w-md',
+  'lg': 'sm:max-w-lg',
+  'xl': 'sm:max-w-xl',
+  '2xl': 'sm:max-w-2xl',
+  '3xl': 'sm:max-w-3xl',
+  '4xl': 'sm:max-w-4xl',
+}
+
 export default function BaseModal({ 
   isOpen, 
   onClose, 
@@ -25,27 +35,19 @@ export default function BaseModal({
   maxWidth = 'md',
   hideCloseButton = false
 }: BaseModalProps) {
-  
-  // Close on Escape key
+
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) onClose()
+      if (e.key === 'Escape' && isOpen) onCloseRef.current()
     }
     window.addEventListener('keydown', handleEsc)
     return () => window.removeEventListener('keydown', handleEsc)
-  }, [isOpen, onClose])
+  }, [isOpen])
 
-  const maxWidthClasses = {
-    'sm': 'sm:max-w-sm',
-    'md': 'sm:max-w-md',
-    'lg': 'sm:max-w-lg',
-    'xl': 'sm:max-w-xl',
-    '2xl': 'sm:max-w-2xl',
-    '3xl': 'sm:max-w-3xl',
-    '4xl': 'sm:max-w-4xl',
-  }
-
-  const mwClass = maxWidthClasses[maxWidth] || 'sm:max-w-md'
+  const mwClass = MAX_WIDTH_CLASSES[maxWidth] || 'sm:max-w-md'
 
   return (
     <AnimatePresence>

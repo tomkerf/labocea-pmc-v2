@@ -8,6 +8,7 @@ import { COLORS } from '@/lib/constants'
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
+const EMPTY_USERS: AppUser[] = []
 
 // ── SamplingForm ──────────────────────────────────────────────
 
@@ -19,7 +20,7 @@ interface SamplingFormProps {
   planId: string
 }
 
-export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId }: SamplingFormProps) {
+export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId, planId }: SamplingFormProps) {
   // Auto-remplir rapportDatePrevue = doneDate + 1 mois pour les prélèvements existants
   useEffect(() => {
     if (sampling.rapportPrevu && !sampling.rapportDatePrevue && sampling.doneDate) {
@@ -286,7 +287,7 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
                 <a href={url} target="_blank" rel="noreferrer" className="block size-full">
                   <img
                     src={url}
-                    alt={`Photo ${i + 1}`}
+                    alt={`Prélèvement ${i + 1}`}
                     className="size-full object-cover cursor-zoom-in"
                     loading="lazy"
                   />
@@ -336,12 +337,12 @@ export function SamplingForm({ sampling, onUpdate, users = [], clientId, planId 
 
 export function PlanField({ label, children, last }: { label: string; children: React.ReactNode; last?: boolean }) {
   return (
-    <div className="flex items-center gap-4 px-5 py-3"
+    <label className="flex items-center gap-4 px-5 py-3"
       style={{ borderBottom: last ? 'none' : '1px solid var(--color-border-subtle)' }}>
       <span className="text-sm shrink-0" style={{ color: COLORS.TEXT_SECONDARY, minWidth: '160px' }}>
         {label}
       </span>
       <div className="flex-1">{children}</div>
-    </div>
+    </label>
   )
 }

@@ -120,7 +120,7 @@ export default function PointCard({ point, idx, total, uploading, onChange, onMo
               <div key={url} className="relative rounded-lg overflow-hidden shrink-0"
                 style={{ width: 96, height: 96, border: '1px solid var(--color-border)' }}>
                 <a href={url} target="_blank" rel="noreferrer" className="block size-full">
-                  <img src={url} alt="photo" className="size-full object-cover cursor-zoom-in" loading="lazy" />
+                  <img src={url} alt="Vue du point de visite" className="size-full object-cover cursor-zoom-in" loading="lazy" />
                 </a>
                 <button type="button" onClick={() => onPhotoDelete(url)}
                   aria-label="Supprimer cette photo"

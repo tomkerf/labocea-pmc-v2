@@ -19,6 +19,7 @@ export function CompteCalendarSection({ feedUrl, copied, onCopy }: {
         </p>
         <div className="flex items-center gap-2">
           <input readOnly value={feedUrl}
+            aria-label="URL de synchronisation agenda"
             className="flex-1 text-xs px-3 py-2 rounded-lg truncate"
             style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_SECONDARY }} />
           <button type="button" onClick={onCopy}
