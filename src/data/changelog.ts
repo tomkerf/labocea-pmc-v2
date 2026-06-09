@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '118'
+export const CHANGELOG_VERSION = '119'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,15 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '119',
+    date: '9 juin 2026',
+    items: [
+      { type: 'feat', label: 'Garde-fou : Le matériel déjà réservé sur un autre prélèvement le même jour est désormais grisé et non cliquable' },
+      { type: 'feat', label: 'Assignation plus rapide : La liste des équipements à assigner pour un Bilan 24h ne propose plus que les débitmètres, préleveurs automatiques et flacons' },
+      { type: 'feat', label: 'Clarté : Le matériel assigné à un prélèvement est désormais visible directement sur le planning, la modale et la fiche mission' },
+    ],
+  },
   {
     version: '118',
     date: '7 juin 2026',

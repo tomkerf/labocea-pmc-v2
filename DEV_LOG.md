@@ -2,6 +2,23 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 119 — UX Matériel & Planning (Conflits d'équipements)
+**9 juin 2026**
+
+### Ce qui a été fait
+- **Garde-fou d'assignation matériel** : Lors de la sélection de matériel pour une tournée, les équipements déjà réservés par une autre mission ce même jour apparaissent désormais en grisé avec la mention "Déjà assigné ce jour".
+- **Filtrage intelligent** : Pour les bilans 24h, le panneau d'assignation de matériel a été restreint pour n'afficher que les catégories pertinentes (débitmètres, préleveurs automatiques et flacons), afin d'épurer la liste pour les techniciens.
+- **Masquage contextuel** : Le panneau "Assigner du matériel" n'apparaît désormais que pour les méthodes de prélèvement "Composite" ou "Automatique" (Bilans 24h). L'option est masquée pour la méthode "Ponctuel".
+- **Visibilité améliorée** :
+  - **Fiche Mission** : La liste des équipements assignés est désormais visible en lecture seule directement sur la fiche du prélèvement (`SamplingForm`).
+  - **Modale d'événement** : La liste des équipements retenus est résumée directement sur le bouton "Assigner du matériel" dans la modale du planning, évitant un clic supplémentaire.
+  - **Calendrier** : Les équipements assignés s'affichent discrètement sous le nom du prélèvement directement sur les pastilles colorées du calendrier (`EventPill`).
+
+### Prochaines étapes
+- En attente des retours de l'équipe terrain sur ces nouvelles sécurités d'assignation de matériel.
+
+---
+
 ## Session 118 — Météo : Fallback global et UX
 **7 juin 2026**
 

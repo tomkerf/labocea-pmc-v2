@@ -325,3 +325,4 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 *Roadmap générée le 2026-04-18.*
 | 2026-06-07 | UX Météo Planning ✅ | Extension des prévisions à 14 jours, ajout et uniformisation du WeatherBadge (WeekView, MonthView, DayView) avec regroupement des heures de pluie. |
 | 2026-06-07 | Météo Fallback + UX ✅ | Météo robuste même sur les semaines vides. Ajout espaces insécables et restauration affichage de la température max sur vue pluie. |
+| 2026-06-09 | UX Matériel & Planning ✅ | Garde-fou d'assignation de matériel (grise les équipements déjà pris le même jour). Filtrage intelligent pour les bilans 24h (débitmètres, préleveurs, flacons uniquement). Affichage du matériel assigné dans le calendrier, la modale et la fiche mission. |

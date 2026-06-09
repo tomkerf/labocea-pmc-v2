@@ -4,21 +4,25 @@ import { X, ExternalLink, Trash2, AlertTriangle, ChevronRight } from 'lucide-rea
 import { useAuthStore } from '@/stores/authStore'
 import type { PlanningEvent, TechOption } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
+import { useEquipementsStore } from '@/stores/equipementsStore'
+import { calcStatut } from '@/hooks/useMetrologieRows'
 
 export interface EventDetailModalProps {
   event: PlanningEvent
   dateStr: string
+  assignedEqIdsForDate?: string[]
   onClose: () => void
   onCancel: (event: PlanningEvent, reason: string) => Promise<void>
   onMove: (event: PlanningEvent, newDate: string, reason: string) => Promise<void>
   onDelete: (event: PlanningEvent) => void
   onChangeTech: (event: PlanningEvent, initiales: string) => Promise<void>
+  onChangeEquipements: (event: PlanningEvent, eqIds: string[]) => Promise<void>
   techOptions: TechOption[]
 }
 
 // ── State types ──────────────────────────────────────────────────────────────
 
-type ActivePanel = 'none' | 'moving' | 'changingTech' | 'canceling'
+type ActivePanel = 'none' | 'moving' | 'changingTech' | 'canceling' | 'changingEquipements'
 
 interface ModalState {
   // Panel visibility — mutually exclusive
@@ -28,6 +32,7 @@ interface ModalState {
   moveReason: string
   cancelReason: string
   techInitiales: string
+  equipementsAssignes: string[]
 }
 
 type ModalAction =
@@ -36,6 +41,7 @@ type ModalAction =
   | { type: 'SET_MOVE_REASON'; value: string }
   | { type: 'SET_CANCEL_REASON'; value: string }
   | { type: 'SET_TECH_INITIALES'; value: string }
+  | { type: 'TOGGLE_EQUIPEMENT'; id: string }
   | { type: 'RESET' }
 
 function modalReducer(state: ModalState, action: ModalAction): ModalState {
@@ -49,6 +55,14 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
     case 'SET_MOVE_REASON':    return { ...state, moveReason: action.value }
     case 'SET_CANCEL_REASON':  return { ...state, cancelReason: action.value }
     case 'SET_TECH_INITIALES': return { ...state, techInitiales: action.value }
+    case 'TOGGLE_EQUIPEMENT': {
+      const prev = state.equipementsAssignes
+      if (prev.includes(action.id)) {
+        return { ...state, equipementsAssignes: prev.filter(x => x !== action.id) }
+      } else {
+        return { ...state, equipementsAssignes: [...prev, action.id] }
+      }
+    }
     case 'RESET':
       return {
         activePanel: 'none',
@@ -56,6 +70,7 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
         moveReason: '',
         cancelReason: '',
         techInitiales: '',
+        equipementsAssignes: [],
       }
     default:
       return state
@@ -64,8 +79,8 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export default function EventDetailModal({
-  event, dateStr, onClose, onCancel, onMove, onDelete, onChangeTech, techOptions,
+export default function EventDetailModal({ 
+  event, dateStr, assignedEqIdsForDate = [], onClose, onCancel, onMove, onDelete, onChangeTech, onChangeEquipements, techOptions 
 }: EventDetailModalProps) {
   const navigate = useNavigate()
   const connectedInitiales = useAuthStore(s => s.appUser?.initiales) ?? ''
@@ -76,16 +91,20 @@ export default function EventDetailModal({
     moveReason: '',
     cancelReason: '',
     techInitiales: event.technicien ?? '',
+    equipementsAssignes: event.equipementsAssignes ?? [],
   })
   const [saving, setSaving] = useState(false)
+  const { equipements } = useEquipementsStore()
 
-  const { activePanel, moveDate, moveReason, cancelReason, techInitiales } = state
+  const { activePanel, moveDate, moveReason, cancelReason, techInitiales, equipementsAssignes } = state
   const isMoving       = activePanel === 'moving'
   const isChangingTech = activePanel === 'changingTech'
   const isCanceling    = activePanel === 'canceling'
+  const isChangingEq   = activePanel === 'changingEquipements'
 
   const isPrelev = event.type === 'prelevement'
   const isEvt    = event.type === 'evenement'
+  const isBilan24h = event.methode === 'Composite' || event.methode === 'Automatique'
 
   const dateLabel = new Date(dateStr + 'T12:00:00')
     .toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
@@ -107,6 +126,13 @@ export default function EventDetailModal({
     if (!techInitiales || saving) return
     setSaving(true)
     try { await onChangeTech(event, techInitiales); dispatch({ type: 'TOGGLE_PANEL', panel: 'changingTech' }) }
+    finally { setSaving(false) }
+  }
+
+  async function handleSaveEquipements() {
+    if (saving) return
+    setSaving(true)
+    try { await onChangeEquipements(event, equipementsAssignes); dispatch({ type: 'TOGGLE_PANEL', panel: 'changingEquipements' }) }
     finally { setSaving(false) }
   }
 
@@ -230,6 +256,68 @@ export default function EventDetailModal({
           </div>
         )}
 
+        {/* Panneau assigner matériel (limité aux Bilans 24h) */}
+        {isBilan24h && isChangingEq && (
+          <div className="px-5 py-3.5 flex flex-col gap-3"
+            style={{ background: COLORS.BG_TERTIARY, borderBottom: '1px solid var(--color-border-subtle)' }}>
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: COLORS.TEXT_SECONDARY }}>
+                Matériel utilisé pour la tournée
+              </label>
+              <div className="flex flex-col gap-2 max-h-[40vh] overflow-y-auto pr-2">
+                {equipements.filter(e => e.etat !== 'hors_service' && ['preleveur', 'debitmetre', 'flacon'].includes(e.categorie)).map(eq => {
+                  const isChecked = equipementsAssignes.includes(eq.id)
+                  const isTaken = !isChecked && assignedEqIdsForDate.includes(eq.id)
+                  const eqStatut = calcStatut(eq.prochainEtalonnage)
+                  const metrologieEnRetard = eqStatut.key === 'late'
+                  const enMaintenance = eq.etat === 'en_maintenance'
+                  const prete = eq.etat === 'prete'
+
+                  const hasWarning = metrologieEnRetard || enMaintenance || prete
+                  const isDisabled = isTaken || hasWarning
+                  
+                  return (
+                    <div key={eq.id} className="flex items-start gap-2 p-2 rounded-lg" style={{ background: COLORS.BG_SECONDARY, border: `1px solid ${hasWarning ? 'rgba(255,59,48,0.3)' : 'var(--color-border-subtle)'}`, opacity: isDisabled && !isChecked ? 0.6 : 1 }}>
+                      <input 
+                        type="checkbox" 
+                        id={`pedm-eq-${eq.id}`}
+                        checked={isChecked}
+                        disabled={isDisabled && !isChecked}
+                        onChange={() => dispatch({ type: 'TOGGLE_EQUIPEMENT', id: eq.id })}
+                        className="mt-1"
+                      />
+                      <label htmlFor={`pedm-eq-${eq.id}`} className="flex-1 flex flex-col cursor-pointer text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>
+                        <span className="font-medium">{eq.nom}</span>
+                        <span className="text-xs" style={{ color: COLORS.TEXT_SECONDARY }}>{eq.marque} - {eq.numSerie}</span>
+                        {hasWarning && (
+                          <div className="flex items-center gap-1 mt-1 text-[11px] font-medium" style={{ color: COLORS.DANGER }}>
+                            <AlertTriangle size={12} />
+                            {metrologieEnRetard ? 'Métrologie expirée' : enMaintenance ? 'En maintenance' : 'Prêté'}
+                          </div>
+                        )}
+                        {isTaken && !hasWarning && (
+                          <div className="flex items-center gap-1 mt-1 text-[11px] font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>
+                            <AlertTriangle size={12} />
+                            Déjà assigné ce jour
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  )
+                })}
+                {equipements.filter(e => e.etat !== 'hors_service' && ['preleveur', 'debitmetre', 'flacon'].includes(e.categorie)).length === 0 && (
+                  <p className="text-sm italic" style={{ color: 'var(--color-text-tertiary)' }}>Aucun équipement disponible.</p>
+                )}
+              </div>
+            </div>
+            <button type="button" onClick={handleSaveEquipements} disabled={saving}
+              className="px-4 py-2 rounded-lg text-sm font-medium self-end"
+              style={{ background: COLORS.ACCENT, color: 'white', opacity: saving ? 0.5 : 1 }}>
+              {saving ? '…' : 'Enregistrer le matériel'}
+            </button>
+          </div>
+        )}
+
         {/* Panneau retirer du calendrier */}
         {isCanceling && (
           <div className="px-5 py-3.5 flex flex-col gap-2.5"
@@ -304,6 +392,22 @@ export default function EventDetailModal({
               style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY, border: '1px solid var(--color-border-subtle)' }}>
               <ChevronRight size={15} style={{ transform: isChangingTech ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
               Changer le technicien
+            </button>
+          )}
+
+          {isPrelev && isBilan24h && (
+            <button type="button" onClick={() => dispatch({ type: 'TOGGLE_PANEL', panel: 'changingEquipements' })}
+              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
+              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY, border: '1px solid var(--color-border-subtle)' }}>
+              <ChevronRight size={15} style={{ transform: isChangingEq ? 'rotate(90deg)' : 'none', transition: 'transform 150ms', flexShrink: 0 }} />
+              <div className="flex-1 overflow-hidden">
+                <div>Assigner du matériel</div>
+                {equipementsAssignes.length > 0 && (
+                  <div className="text-xs font-normal truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+                    {equipements.filter(eq => equipementsAssignes.includes(eq.id)).map(eq => eq.nom).join(', ')}
+                  </div>
+                )}
+              </div>
             </button>
           )}
 

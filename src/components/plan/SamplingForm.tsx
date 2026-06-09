@@ -4,6 +4,7 @@ import { uploadSamplingPhoto, deleteSamplingPhoto } from '@/lib/uploadPhoto'
 import { toast } from '@/stores/toastStore'
 import type { AppUser, Sampling, SamplingStatus, NappeType, ChecklistItem } from '@/types'
 import { COLORS } from '@/lib/constants'
+import { useEquipementsStore } from '@/stores/equipementsStore'
 
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -32,6 +33,9 @@ export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId
   }, [sampling.rapportPrevu, sampling.rapportDatePrevue, sampling.doneDate])
   const [newTask, setNewTask]   = useState('')
   const [uploading, setUploading] = useState(false)
+  const equipements = useEquipementsStore(s => s.equipements)
+  const assignedEqs = sampling.equipementsAssignes ?? []
+  const assignedEqDetails = equipements.filter(eq => assignedEqs.includes(eq.id))
 
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -203,6 +207,24 @@ export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId
           placeholder="Remarques…"
           className="field-input w-full" />
       </div>
+
+      {assignedEqDetails.length > 0 && (
+        <div className="sm:col-span-2">
+          <p className="block text-xs font-medium mb-2" style={{ color: COLORS.TEXT_SECONDARY }}>
+            Matériel assigné pour la tournée
+          </p>
+          <div className="flex flex-col gap-2">
+            {assignedEqDetails.map(eq => (
+              <div key={eq.id} className="flex items-center gap-2 p-2 rounded-lg" style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border-subtle)' }}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate" style={{ color: COLORS.TEXT_PRIMARY }}>{eq.nom}</p>
+                  <p className="text-xs truncate" style={{ color: COLORS.TEXT_SECONDARY }}>{eq.marque} - {eq.numSerie}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Checklist */}
       <div className="sm:col-span-2">

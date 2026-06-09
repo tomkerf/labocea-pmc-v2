@@ -6,7 +6,7 @@
  */
 
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, FileText, Bell, Wrench, CheckSquare, CalendarDays, Droplet } from 'lucide-react'
+import { CheckCircle2, FileText, Bell, Wrench, CheckSquare, CalendarDays, Droplet, Backpack } from 'lucide-react'
 import { getTechColor, isVeilleJourFerie, type PlanningEvent } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
 
@@ -138,6 +138,11 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
         }
         {event.meteo === 'pluie' && (
           <span className="shrink-0 text-[10px]" title="Prélèvement par temps de pluie">🌧</span>
+        )}
+        {(event.equipementsAssignes?.length ?? 0) > 0 && (
+          <span className="shrink-0 flex items-center" title={`${event.equipementsAssignes?.length} équipement(s) assigné(s)`}>
+            <Backpack size={10} style={{ color: dotColor }} />
+          </span>
         )}
         {veilleFerrieNom && (
           <span className="shrink-0 text-[10px]" title={`Analyses sous-traitées — veille de ${veilleFerrieNom}`}>⚠️</span>

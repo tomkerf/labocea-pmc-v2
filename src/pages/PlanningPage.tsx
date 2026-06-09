@@ -276,7 +276,7 @@ const uid        = useAuthStore(selectUid)
   // ── Actions Firestore ──────────────────────────────────
   const {
     handleCancelSampling, handleMoveEvent, handleDeleteEvent,
-    toggleRainDay, handleChangeTechnicien, handleSaveEvenement, handleValidatePool,
+    toggleRainDay, handleChangeTechnicien, handleChangeEquipements, handleSaveEvenement, handleValidatePool,
   } = usePlanningActions({ uid, initiales, clients, evenements, holidays })
 
   // ── Label période ───────────────────────────────────────
@@ -465,19 +465,30 @@ const uid        = useAuthStore(selectUid)
       )}
 
       {/* ── EventDetailModal ── */}
-      {eventDetail && (
-        <EventDetailModal
-          key={eventDetail.event.id}
-          event={eventDetail.event}
-          dateStr={eventDetail.dateStr}
-          onClose={() => setEventDetail(null)}
-          onCancel={handleCancelSampling}
-          onMove={handleMoveEvent}
-          onDelete={handleDeleteEvent}
-          onChangeTech={handleChangeTechnicien}
-          techOptions={techOptions}
-        />
-      )}
+      {eventDetail && (() => {
+        const dateStr = eventDetail.dateStr
+        // Calculate equipments already assigned to other events on this same day
+        const otherEvents = eventsByDate[dateStr] || []
+        const assignedEqIdsForDate = otherEvents
+          .filter(e => e.id !== eventDetail.event.id && e.type === 'prelevement' && e.equipementsAssignes)
+          .flatMap(e => e.equipementsAssignes || [])
+
+        return (
+          <EventDetailModal
+            key={eventDetail.event.id}
+            event={eventDetail.event}
+            dateStr={dateStr}
+            assignedEqIdsForDate={assignedEqIdsForDate}
+            onClose={() => setEventDetail(null)}
+            onCancel={handleCancelSampling}
+            onMove={handleMoveEvent}
+            onDelete={handleDeleteEvent}
+            onChangeTech={handleChangeTechnicien}
+            onChangeEquipements={handleChangeEquipements}
+            techOptions={techOptions}
+          />
+        )
+      })()}
 
       {/* ── GhostDetailModal ── */}
       {ghostDetail && (
