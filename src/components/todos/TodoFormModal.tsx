@@ -94,8 +94,8 @@ export default function TodoFormModal({
         </div>
 
         {/* Priorité (Segmented Control) */}
-        <div role="group" aria-labelledby="todo-priority-label">
-          <p id="todo-priority-label" className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Priorité</p>
+        <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
+          <legend className="block text-[11px] font-semibold uppercase mb-1 text-gray-500">Priorité</legend>
           <div
             className="flex p-0.5 rounded-lg text-xs font-semibold"
             style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border-subtle)' }}
@@ -122,7 +122,7 @@ export default function TodoFormModal({
               )
             })}
           </div>
-        </div>
+        </fieldset>
 
         {/* Assignation */}
         <div>

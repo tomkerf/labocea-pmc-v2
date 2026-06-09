@@ -157,7 +157,8 @@ export function usePlanningCalendar({
       const tc = getTechColor(ev.createdByInitiales || '')
       const startClamped = ev.date < weekStartISO ? weekStartISO : ev.date
       const endClamped   = ev.dateFin! > weekEndISO ? weekEndISO : ev.dateFin!
-      const colStart = weekDayISOs.findIndex(d => d >= startClamped)
+      let colStart = -1
+      for (let i = 0; i < weekDayISOs.length; i++) { if (weekDayISOs[i] >= startClamped) { colStart = i; break } }
       let colEnd = -1
       for (let i = 4; i >= 0; i--) { if (weekDayISOs[i] <= endClamped) { colEnd = i; break } }
       if (colStart === -1 || colEnd === -1 || colStart > colEnd) continue

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useReducer } from 'react'
+import { useState, useMemo, useEffect, useReducer, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { m, AnimatePresence } from 'framer-motion'
@@ -159,6 +159,41 @@ export default function DashboardPage() {
     }, uid)
   }
 
+  const handleCancelEvent = useCallback(async (ev: PlanningEvent, reason: string) => {
+    if (!uid || !ev.clientId || !ev.planId || !ev.samplingId) return
+    const client = clients.find((c: Client) => c.id === ev.clientId)
+    if (!client) return
+    await saveClient({
+      ...client,
+      plans: client.plans.map((plan: Plan) => plan.id !== ev.planId ? plan : {
+        ...plan,
+        samplings: plan.samplings.map((s: Sampling) => {
+          if (s.id !== ev.samplingId) return s
+          const fromDate = `${new Date().getFullYear()}-${String(s.plannedMonth + 1).padStart(2, '0')}-${String(s.plannedDay).padStart(2, '0')}`
+          return { ...s, plannedDay: 0, motif: reason, reportHistory: [...(s.reportHistory ?? []), { from: fromDate, to: '', by: uid, reason, at: new Date().toISOString() }] }
+        }),
+      }),
+    }, uid)
+  }, [uid, clients])
+
+  const handleMoveEvent = useCallback(async (ev: PlanningEvent, newDate: string, reason: string) => {
+    if (!uid || !ev.clientId || !ev.planId || !ev.samplingId) return
+    const client = clients.find((c: Client) => c.id === ev.clientId)
+    if (!client) return
+    const d = new Date(newDate + 'T12:00:00')
+    await saveClient({
+      ...client,
+      plans: client.plans.map((plan: Plan) => plan.id !== ev.planId ? plan : {
+        ...plan,
+        samplings: plan.samplings.map((s: Sampling) => {
+          if (s.id !== ev.samplingId) return s
+          const fromDate = `${new Date().getFullYear()}-${String(s.plannedMonth + 1).padStart(2, '0')}-${String(s.plannedDay).padStart(2, '0')}`
+          return { ...s, plannedDay: d.getDate(), plannedMonth: d.getMonth(), reportHistory: [...(s.reportHistory ?? []), { from: fromDate, to: newDate, by: uid, reason, at: new Date().toISOString() }] }
+        }),
+      }),
+    }, uid)
+  }, [uid, clients])
+
   // ── Render ────────────────────────────────────────────────
 
   return (
@@ -282,39 +317,8 @@ export default function DashboardPage() {
           dateStr={eventDetail?.dateStr || ''}
           onClose={() => dispatch({ type: 'SET_EVENT_DETAIL', payload: null })}
           techOptions={techOptions}
-          onCancel={async (ev, reason) => {
-            if (!uid || !ev.clientId || !ev.planId || !ev.samplingId) return
-            const client = clients.find((c: Client) => c.id === ev.clientId)
-            if (!client) return
-            await saveClient({
-              ...client,
-              plans: client.plans.map((plan: Plan) => plan.id !== ev.planId ? plan : {
-                ...plan,
-                samplings: plan.samplings.map((s: Sampling) => {
-                  if (s.id !== ev.samplingId) return s
-                  const fromDate = `${new Date().getFullYear()}-${String(s.plannedMonth + 1).padStart(2, '0')}-${String(s.plannedDay).padStart(2, '0')}`
-                  return { ...s, plannedDay: 0, motif: reason, reportHistory: [...(s.reportHistory ?? []), { from: fromDate, to: '', by: uid, reason, at: new Date().toISOString() }] }
-                }),
-              }),
-            }, uid)
-          }}
-          onMove={async (ev, newDate, reason) => {
-            if (!uid || !ev.clientId || !ev.planId || !ev.samplingId) return
-            const client = clients.find((c: Client) => c.id === ev.clientId)
-            if (!client) return
-            const d = new Date(newDate + 'T12:00:00')
-            await saveClient({
-              ...client,
-              plans: client.plans.map((plan: Plan) => plan.id !== ev.planId ? plan : {
-                ...plan,
-                samplings: plan.samplings.map((s: Sampling) => {
-                  if (s.id !== ev.samplingId) return s
-                  const fromDate = `${new Date().getFullYear()}-${String(s.plannedMonth + 1).padStart(2, '0')}-${String(s.plannedDay).padStart(2, '0')}`
-                  return { ...s, plannedDay: d.getDate(), plannedMonth: d.getMonth(), reportHistory: [...(s.reportHistory ?? []), { from: fromDate, to: newDate, by: uid, reason, at: new Date().toISOString() }] }
-                }),
-              }),
-            }, uid)
-          }}
+          onCancel={handleCancelEvent}
+          onMove={handleMoveEvent}
           onDelete={(ev) => { if (ev.evenementData) deleteEvenement(ev.evenementData.id) }}
           onChangeTech={async (ev, initiales_) => {
             if (!uid || !ev.clientId) return

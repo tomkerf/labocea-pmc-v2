@@ -79,8 +79,8 @@ export default function PointCard({ point, idx, total, uploading, onChange, onMo
       </div>
 
       {/* Faisabilité */}
-      <div className="mb-3" role="group" aria-labelledby={`pc-faisabilite-label-${point.id}`}>
-        <p id={`pc-faisabilite-label-${point.id}`} className="block text-xs font-medium mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Faisabilité</p>
+      <fieldset className="mb-3" style={{ border: 'none', padding: 0, margin: 0 }}>
+        <legend className="block text-xs font-medium mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Faisabilité</legend>
         <div className="flex gap-2">
           {FAISABILITE.map(f => (
             <button type="button"
@@ -97,17 +97,17 @@ export default function PointCard({ point, idx, total, uploading, onChange, onMo
             </button>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       <div className="mb-3">
         <label htmlFor={`pc-securite-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Sécurité</label>
-        <input id={`pc-securite-${point.id}`} value={point.securite} onChange={e => onChange('securite', e.target.value)}
+        <input id={`pc-securite-${point.id}`} aria-label="Sécurité" value={point.securite} onChange={e => onChange('securite', e.target.value)}
           className="field-input w-full" placeholder="EPI requis, risques, accès…" />
       </div>
 
       <div className="mb-3">
         <label htmlFor={`pc-notes-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Notes</label>
-        <input id={`pc-notes-${point.id}`} value={point.notes} onChange={e => onChange('notes', e.target.value)}
+        <input id={`pc-notes-${point.id}`} aria-label="Notes" value={point.notes} onChange={e => onChange('notes', e.target.value)}
           className="field-input w-full" placeholder="Remarques spécifiques…" />
       </div>
 

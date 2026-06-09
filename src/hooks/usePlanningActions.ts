@@ -4,6 +4,10 @@ import { toISO } from '@/lib/planningUtils'
 import type { Client, Sampling, TypeEvenement } from '@/types'
 import type { PlanningEvent, PoolItem } from '@/lib/planningUtils'
 
+function handleDeleteEvent(event: PlanningEvent) {
+  if (event.evenementData) deleteEvenement(event.evenementData.id)
+}
+
 interface UsePlanningActionsProps {
   uid: string | null
   initiales: string
@@ -51,10 +55,6 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
         })
       })
     }, uid)
-  }
-
-  function handleDeleteEvent(event: PlanningEvent) {
-    if (event.evenementData) deleteEvenement(event.evenementData.id)
   }
 
   async function toggleRainDay(dateStr: string) {

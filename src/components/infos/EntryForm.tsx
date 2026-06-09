@@ -109,8 +109,8 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
 
           {/* Type */}
-          <div role="group" aria-labelledby="entry-type-label">
-            <p id="entry-type-label" className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Type</p>
+          <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
+            <legend className="text-xs font-medium block mb-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>Type</legend>
             <div className="grid grid-cols-4 gap-1.5">
               {(Object.keys(TYPE_CONFIG) as TerrainType[]).map(t => {
                 const cfg = TYPE_CONFIG[t]
@@ -129,7 +129,7 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
                 )
               })}
             </div>
-          </div>
+          </fieldset>
 
           {/* Client */}
           {!isEdit && (

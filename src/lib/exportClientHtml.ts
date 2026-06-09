@@ -57,9 +57,9 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
   })
 
   // ── Sections plans ──
-  const planSections = client.plans
-    .flatMap(plan => plan.samplings.length > 0 ? [plan] : [])
-    .map(plan => {
+  const planSections = client.plans.flatMap(plan => {
+    if (plan.samplings.length === 0) return []
+    return [(() => {
       const sorted = plan.samplings.toSorted((a, b) => {
         if (a.plannedMonth !== b.plannedMonth) return a.plannedMonth - b.plannedMonth
         return (a.plannedDay ?? 0) - (b.plannedDay ?? 0)
@@ -139,7 +139,8 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
             <tbody>${rows}</tbody>
           </table>
         </div>`
-    }).join('')
+    })()])
+  }).join('')
 
   const noPlans = client.plans.every(p => p.samplings.length === 0)
     ? `<p style="color:#8e8e93;font-style:italic;margin-top:24px">Aucun prélèvement enregistré pour ce client.</p>`

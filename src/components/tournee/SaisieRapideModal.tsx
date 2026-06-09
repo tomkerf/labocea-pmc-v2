@@ -5,6 +5,13 @@ import type { NappeType } from '@/types'
 import { COLORS } from '@/lib/constants'
 
 
+const STATUS_LABELS = { done: 'Réalisé', non_effectue: 'Non effectué', reporte: 'Reporter' } as const
+const STATUS_COLORS = {
+  done:         { bg: 'var(--color-success-light)', text: COLORS.SUCCESS },
+  non_effectue: { bg: 'var(--color-warning-light)', text: COLORS.WARNING },
+  reporte:      { bg: 'var(--color-accent-light)',  text: COLORS.ACCENT  },
+} as const
+
 export interface SaisieRapideData {
   status: 'done' | 'non_effectue' | 'reporte'
   doneDate: string
@@ -90,25 +97,20 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
 
           {/* Statut */}
           <div className="flex gap-2 mb-4">
-            {(['done', 'non_effectue', 'reporte'] as const).flatMap(s => (s === 'done' && hideRealise) ? [] : [s]).map(s => {
-              const labels = { done: 'Réalisé', non_effectue: 'Non effectué', reporte: 'Reporter' }
-              const activeColors = {
-                done:         { bg: 'var(--color-success-light)',  text: COLORS.SUCCESS },
-                non_effectue: { bg: 'var(--color-warning-light)',  text: COLORS.WARNING },
-                reporte:      { bg: 'var(--color-accent-light)',   text: COLORS.ACCENT  },
-              }
+            {(['done', 'non_effectue', 'reporte'] as const).flatMap(s => {
+              if (s === 'done' && hideRealise) return []
               const isActive = status === s
-              return (
+              return [(
                 <button type="button" key={s}
                   onClick={() => dispatch({ type: 'field', name: 'status', value: s })}
                   className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
                   style={{
-                    background: isActive ? activeColors[s].bg : COLORS.BG_TERTIARY,
-                    color:      isActive ? activeColors[s].text : COLORS.TEXT_SECONDARY,
+                    background: isActive ? STATUS_COLORS[s].bg : COLORS.BG_TERTIARY,
+                    color:      isActive ? STATUS_COLORS[s].text : COLORS.TEXT_SECONDARY,
                   }}>
-                  {labels[s]}
+                  {STATUS_LABELS[s]}
                 </button>
-              )
+              )]
             })}
           </div>
 

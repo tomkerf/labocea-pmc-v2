@@ -5,6 +5,17 @@ import { m } from 'framer-motion'
 import UserAvatar from '@/components/ui/UserAvatar'
 import { COLORS } from '@/lib/constants'
 
+const FILTER_CIRCLE_BTN: React.CSSProperties = {
+  width: 28, height: 28, borderRadius: '50%',
+  fontSize: 10, fontWeight: 600,
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+}
+const FILTER_PILL_BTN: React.CSSProperties = {
+  height: 28, padding: '0 10px', borderRadius: 14,
+  fontSize: 11, fontWeight: 600,
+  display: 'flex', alignItems: 'center',
+}
+
 type Preleveur = { code: string; nom?: string; site?: string }
 
 interface PlanningHeaderProps {
@@ -196,11 +207,10 @@ export default function PlanningHeader({
                   onClick={() => { setFilterSite(''); localStorage.removeItem('planning_filter_site') }}
                   className="cursor-pointer"
                   style={{
-                    width: 28, height: 28, borderRadius: '50%',
+                    ...FILTER_CIRCLE_BTN,
                     background: !filterSite ? COLORS.TEXT_PRIMARY : COLORS.BG_SECONDARY,
                     color: !filterSite ? 'white' : COLORS.TEXT_SECONDARY,
                     border: `1px solid ${!filterSite ? 'transparent' : 'var(--color-border-subtle)'}`,
-                    fontSize: 10, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}
                   title="Tous les sites"
                 >
@@ -221,11 +231,10 @@ export default function PlanningHeader({
                       }}
                       className="cursor-pointer"
                       style={{
-                        height: 28, padding: '0 10px', borderRadius: 14,
+                        ...FILTER_PILL_BTN,
                         background: isActive ? COLORS.ACCENT : COLORS.BG_SECONDARY,
                         color: isActive ? 'white' : COLORS.TEXT_SECONDARY,
                         border: `1px solid ${isActive ? 'transparent' : 'var(--color-border-subtle)'}`,
-                        fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center',
                       }}
                     >
                       {site}
@@ -242,11 +251,11 @@ export default function PlanningHeader({
                   onClick={() => { setFilterTech(''); localStorage.setItem('planning_filter_tech', 'ALL') }}
                   className="cursor-pointer"
                   style={{
-                    width: 28, height: 28, borderRadius: '50%',
+                    ...FILTER_CIRCLE_BTN,
+                    fontWeight: 700,
                     background: !filterTech ? COLORS.ACCENT : COLORS.BG_SECONDARY,
                     color: !filterTech ? 'white' : COLORS.TEXT_SECONDARY,
                     border: `1px solid ${!filterTech ? 'transparent' : 'var(--color-border-subtle)'}`,
-                    fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}
                   title="Tous les techniciens"
                 >
