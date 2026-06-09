@@ -59,8 +59,7 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
   // ── Sections plans ──
   const planSections = client.plans.flatMap(plan => {
     if (plan.samplings.length === 0) return []
-    return [(() => {
-      const sorted = plan.samplings.toSorted((a, b) => {
+    const sorted = plan.samplings.toSorted((a, b) => {
         if (a.plannedMonth !== b.plannedMonth) return a.plannedMonth - b.plannedMonth
         return (a.plannedDay ?? 0) - (b.plannedDay ?? 0)
       })
@@ -111,7 +110,7 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
       const planNonEf = sorted.filter(s => s.status === 'non_effectue').length
       const meta = [plan.siteNom, plan.frequence, plan.nature, plan.methode].filter(Boolean).join(' · ')
 
-      return `
+      const html = `
         <div class="plan-section">
           <div class="plan-header">
             <div>
@@ -139,7 +138,7 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
             <tbody>${rows}</tbody>
           </table>
         </div>`
-    })()])
+    return [html]
   }).join('')
 
   const noPlans = client.plans.every(p => p.samplings.length === 0)
