@@ -79,8 +79,10 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
+const EMPTY_ITEMS: string[] = []
+
 export default function EventDetailModal({ 
-  event, dateStr, assignedEqIdsForDate = [], onClose, onCancel, onMove, onDelete, onChangeTech, onChangeEquipements, techOptions 
+  event, dateStr, assignedEqIdsForDate = EMPTY_ITEMS, onClose, onCancel, onMove, onDelete, onChangeTech, onChangeEquipements, techOptions 
 }: EventDetailModalProps) {
   const navigate = useNavigate()
   const connectedInitiales = useAuthStore(s => s.appUser?.initiales) ?? ''
@@ -261,11 +263,12 @@ export default function EventDetailModal({
           <div className="px-5 py-3.5 flex flex-col gap-3"
             style={{ background: COLORS.BG_TERTIARY, borderBottom: '1px solid var(--color-border-subtle)' }}>
             <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: COLORS.TEXT_SECONDARY }}>
+              <div className="block text-xs font-medium mb-2" style={{ color: COLORS.TEXT_SECONDARY }}>
                 Matériel utilisé pour la tournée
-              </label>
+              </div>
               <div className="flex flex-col gap-2 max-h-[40vh] overflow-y-auto pr-2">
-                {equipements.filter(e => e.etat !== 'hors_service' && ['preleveur', 'debitmetre', 'flacon'].includes(e.categorie)).map(eq => {
+                {equipements.flatMap(eq => {
+                  if (eq.etat === 'hors_service' || !['preleveur', 'debitmetre', 'flacon'].includes(eq.categorie)) return []
                   const isChecked = equipementsAssignes.includes(eq.id)
                   const isTaken = !isChecked && assignedEqIdsForDate.includes(eq.id)
                   const eqStatut = calcStatut(eq.prochainEtalonnage)
@@ -281,6 +284,7 @@ export default function EventDetailModal({
                       <input 
                         type="checkbox" 
                         id={`pedm-eq-${eq.id}`}
+                        aria-label={eq.nom}
                         checked={isChecked}
                         disabled={isDisabled && !isChecked}
                         onChange={() => dispatch({ type: 'TOGGLE_EQUIPEMENT', id: eq.id })}
@@ -404,7 +408,7 @@ export default function EventDetailModal({
                 <div>Assigner du matériel</div>
                 {equipementsAssignes.length > 0 && (
                   <div className="text-xs font-normal truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-                    {equipements.filter(eq => equipementsAssignes.includes(eq.id)).map(eq => eq.nom).join(', ')}
+                    {equipements.flatMap(eq => equipementsAssignes.includes(eq.id) ? eq.nom : []).join(', ')}
                   </div>
                 )}
               </div>

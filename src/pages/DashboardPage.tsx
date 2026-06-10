@@ -326,6 +326,18 @@ export default function DashboardPage() {
             if (!client) return
             await saveClient({ ...client, preleveur: initiales_ }, uid)
           }}
+          onChangeEquipements={async (ev, eqIds) => {
+            if (!uid || !ev.clientId || !ev.planId || !ev.samplingId) return
+            const client = clients.find((c: Client) => c.id === ev.clientId)
+            if (!client) return
+            await saveClient({
+              ...client,
+              plans: client.plans.map(p => p.id !== ev.planId ? p : {
+                ...p,
+                samplings: p.samplings.map(s => s.id !== ev.samplingId ? s : { ...s, equipementsAssignes: eqIds })
+              })
+            }, uid)
+          }}
         />
       )}
 

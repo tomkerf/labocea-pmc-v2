@@ -96,6 +96,22 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
       }).catch(err => console.error('[Notification] Failed to load notificationService:', err))
     }
   }
+  
+  async function handleChangeEquipements(event: PlanningEvent, equipementIds: string[]) {
+    if (!uid || !event.clientId || !event.planId || !event.samplingId) return
+    const client = clients.find((c: Client) => c.id === event.clientId)
+    if (!client) return
+
+    await saveClient({
+      ...client,
+      plans: client.plans.map(plan => plan.id !== event.planId ? plan : {
+        ...plan,
+        samplings: plan.samplings.map((s: Sampling) =>
+          s.id !== event.samplingId ? s : { ...s, equipementsAssignes: equipementIds }
+        ),
+      }),
+    }, uid)
+  }
 
   async function handleSaveEvenement(
     titre: string, type: TypeEvenement,
@@ -131,6 +147,7 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
     handleDeleteEvent,
     toggleRainDay,
     handleChangeTechnicien,
+    handleChangeEquipements,
     handleSaveEvenement,
     handleValidatePool,
   }

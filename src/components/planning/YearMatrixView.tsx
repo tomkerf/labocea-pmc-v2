@@ -267,7 +267,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                         </div>
                       </td>
                       {Array(12).fill(null).map((_, i) => (
-                        <td key={i} aria-hidden="true" className="border-r border-[var(--color-border-subtle)]" />
+                        <td key={i} className="border-r border-[var(--color-border-subtle)]" />
                       ))}
                     </tr>,
 

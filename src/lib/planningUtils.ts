@@ -27,7 +27,9 @@ export interface PlanningEvent {
   clientId?: string
   planId?: string
   samplingId?: string
+  equipementsAssignes?: string[]
   frequence?: string
+  methode?: string
   meteo?: string
   analysesSousTraitees?: boolean
   cofrac?: boolean

@@ -89,6 +89,8 @@ export interface Sampling {
   /** Technicien assigné à CE prélèvement spécifiquement (initiales).
    *  Si absent, on utilise client.preleveur comme valeur par défaut. */
   assignedTo?: string
+  /** Liste des IDs des équipements assignés à ce prélèvement */
+  equipementsAssignes?: string[]
 }
 
 export interface Plan {

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, BarChart2, Clock } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { COLORS } from '@/lib/constants'
@@ -42,6 +42,11 @@ export function AdminChargeEquipe() {
     const fmt = (d: Date) => `${d.getDate()}/${d.getMonth() + 1}`
     return { start: s, end: e, label: `${fmt(s)} – ${fmt(e)}/${e.getFullYear()}` }
   }, [viewMode, refDate])
+
+  const handleViewModeChange = useCallback((v: 'semaine' | 'mois') => {
+    setViewMode(v)
+    setRefDate(new Date())
+  }, [])
 
   const navigate_ = (dir: -1 | 1) => {
     const d = new Date(refDate)
@@ -135,7 +140,7 @@ export function AdminChargeEquipe() {
           <div className="flex gap-1 p-1 rounded-lg" style={{ background: COLORS.BG_TERTIARY }}>
             {(['semaine', 'mois'] as const).map(v => (
               <button type="button" key={v}
-                onClick={() => { setViewMode(v); setRefDate(new Date()) }}
+                onClick={() => handleViewModeChange(v)}
                 className="px-3 py-1 rounded-md text-xs font-medium transition-colors"
                 style={{
                   background: viewMode === v ? COLORS.BG_SECONDARY : 'transparent',

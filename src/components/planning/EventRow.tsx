@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CheckCircle2, ChevronRight, ChevronDown } from 'lucide-react'
+import { CheckCircle2, ChevronRight, ChevronDown, Backpack } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { type PlanningEvent, getTechColor } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
@@ -67,6 +67,12 @@ export default function EventRow({ event, isLast, onSelect }: EventRowProps) {
                 🌧 Pluie
               </span>
             )}
+            {(event.equipementsAssignes?.length ?? 0) > 0 && !isGrouped && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium flex items-center gap-1"
+                style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
+                <Backpack size={10} /> {(event.equipementsAssignes?.length ?? 0)}
+              </span>
+            )}
           </div>
         </div>
 
@@ -122,6 +128,12 @@ export default function EventRow({ event, isLast, onSelect }: EventRowProps) {
                         <span className="text-[9px] px-1 rounded shrink-0 font-medium"
                           style={{ background: COLORS.BG_SECONDARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
                           {sub.technicien}
+                        </span>
+                      )}
+                      {(sub.equipementsAssignes?.length ?? 0) > 0 && (
+                        <span className="text-[9px] px-1 rounded shrink-0 font-medium flex items-center gap-0.5"
+                          style={{ background: COLORS.BG_SECONDARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
+                          <Backpack size={9} />
                         </span>
                       )}
                     </div>

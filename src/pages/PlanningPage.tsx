@@ -469,9 +469,9 @@ const uid        = useAuthStore(selectUid)
         const dateStr = eventDetail.dateStr
         // Calculate equipments already assigned to other events on this same day
         const otherEvents = eventsByDate[dateStr] || []
-        const assignedEqIdsForDate = otherEvents
-          .filter(e => e.id !== eventDetail.event.id && e.type === 'prelevement' && e.equipementsAssignes)
-          .flatMap(e => e.equipementsAssignes || [])
+        const assignedEqIdsForDate = otherEvents.flatMap(e => 
+          (e.id !== eventDetail.event.id && e.type === 'prelevement' && e.equipementsAssignes) ? e.equipementsAssignes : []
+        )
 
         return (
           <EventDetailModal
