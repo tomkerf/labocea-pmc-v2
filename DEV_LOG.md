@@ -2,6 +2,24 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 120 — Bugfix CI TypeScript + Qualité React (react-doctor 72/100)
+**10 juin 2026**
+
+### Ce qui a été fait
+- **Bugfix CI** : Le dernier commit (session 119) avait cassé le déploiement GitHub Actions. Cause : les propriétés `equipementsAssignes` et `methode` étaient utilisées dans les composants mais absentes de l'interface `PlanningEvent` dans `planningUtils.ts`. Le build Vite local passait (pas de check TS strict) mais le CI échouait sur `tsc -b`. Correction : ajout des propriétés manquantes + commit des 10 fichiers non-stagés.
+- **Accessibilité YearMatrixView** : Ajout `aria-label={MOIS_LONG[i]}` sur les 12 cellules de mois vides dans la ligne header client, et `aria-label` dynamique sur la `<tr>` cliquable. Résolution du warning react-doctor "Control missing accessible label".
+- **Score react-doctor** : 71 → **72/100**, 22 → 21 issues.
+- **Revue de code Gemini (session 119)** : Code globalement propre et sécurisé. Un problème corrigé : suppression du pattern IIFE `{eventDetail && (() => { ... })()}` dans PlanningPage.tsx — calcul de `assignedEqIdsForDate` déplacé avant le `return`.
+
+### Cause racine du bug CI
+`tsc -b` (utilisé par le script CI) est strict alors que le build local `vite build` ne fait pas le typecheck. Les fichiers non-stagés contenaient les définitions TypeScript manquantes, ce qui masquait l'erreur localement.
+
+### Prochaines étapes
+- En attente des retours équipe terrain sur la feature assignation matériel (session 119).
+- Les 21 issues react-doctor restantes sont intentionnelles ou faux positifs.
+
+---
+
 ## Session 119 — UX Matériel & Planning (Conflits d'équipements)
 **9 juin 2026**
 
