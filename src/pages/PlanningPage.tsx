@@ -284,6 +284,13 @@ const uid        = useAuthStore(selectUid)
   const periodLabel = getPeriodLabel(viewMode, selectedDate, weekStart, monthStart)
 
 
+  // ── Conflits matériel pour le modal ouvert ──────────────
+  const assignedEqIdsForDate = eventDetail
+    ? (eventsByDate[eventDetail.dateStr] || [])
+        .filter(e => e.id !== eventDetail.event.id && e.type === 'prelevement' && e.equipementsAssignes)
+        .flatMap(e => e.equipementsAssignes || [])
+    : []
+
   // ── Render ──────────────────────────────────────────────
 
   return (
@@ -465,30 +472,21 @@ const uid        = useAuthStore(selectUid)
       )}
 
       {/* ── EventDetailModal ── */}
-      {eventDetail && (() => {
-        const dateStr = eventDetail.dateStr
-        // Calculate equipments already assigned to other events on this same day
-        const otherEvents = eventsByDate[dateStr] || []
-        const assignedEqIdsForDate = otherEvents.flatMap(e => 
-          (e.id !== eventDetail.event.id && e.type === 'prelevement' && e.equipementsAssignes) ? e.equipementsAssignes : []
-        )
-
-        return (
-          <EventDetailModal
-            key={eventDetail.event.id}
-            event={eventDetail.event}
-            dateStr={dateStr}
-            assignedEqIdsForDate={assignedEqIdsForDate}
-            onClose={() => setEventDetail(null)}
-            onCancel={handleCancelSampling}
-            onMove={handleMoveEvent}
-            onDelete={handleDeleteEvent}
-            onChangeTech={handleChangeTechnicien}
-            onChangeEquipements={handleChangeEquipements}
-            techOptions={techOptions}
-          />
-        )
-      })()}
+      {eventDetail && (
+        <EventDetailModal
+          key={eventDetail.event.id}
+          event={eventDetail.event}
+          dateStr={eventDetail.dateStr}
+          assignedEqIdsForDate={assignedEqIdsForDate}
+          onClose={() => setEventDetail(null)}
+          onCancel={handleCancelSampling}
+          onMove={handleMoveEvent}
+          onDelete={handleDeleteEvent}
+          onChangeTech={handleChangeTechnicien}
+          onChangeEquipements={handleChangeEquipements}
+          techOptions={techOptions}
+        />
+      )}
 
       {/* ── GhostDetailModal ── */}
       {ghostDetail && (
