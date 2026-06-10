@@ -236,6 +236,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                       key={`header-${client.id}`}
                       className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)] hover:bg-[#e8e8ec] transition-colors cursor-pointer"
                       onClick={() => toggleClient(client.id)}
+                      aria-label={`${client.nom} — ${isCollapsed ? 'développer' : 'réduire'}`}
                     >
                       <td className="px-3 py-2 sticky left-0 z-20 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)]" style={{ backgroundColor: COLORS.BG_TERTIARY }}>
                         <div className="flex items-center gap-2">
@@ -267,7 +268,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                         </div>
                       </td>
                       {Array(12).fill(null).map((_, i) => (
-                        <td key={i} className="border-r border-[var(--color-border-subtle)]" />
+                        <td key={i} className="border-r border-[var(--color-border-subtle)]" aria-label={MOIS_LONG[i]} />
                       ))}
                     </tr>,
 
