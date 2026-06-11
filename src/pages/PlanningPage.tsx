@@ -46,10 +46,7 @@ import PlanningMiniCalendar from '@/components/planning/PlanningMiniCalendar'
 import MapView            from '@/components/planning/MapView'
 import YearMatrixView     from '@/components/planning/YearMatrixView'
 import BilanMoisModal     from '@/components/planning/BilanMoisModal'
-import {
-  type UIState, type UIAction, uiReducer,
-  type NavState, type NavAction, navReducer,
-} from '@/pages/planning/planningPageReducers'
+import { uiReducer, navReducer } from '@/pages/planning/planningPageReducers'
 
 // ── Composant principal ─────────────────────────────────────
 
