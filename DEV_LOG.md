@@ -2,6 +2,26 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 121 — Refactoring : découpage composants géants (react-doctor 72→73/100)
+**11 juin 2026**
+
+### Ce qui a été fait
+- **Faux positifs react-doctor documentés** : 11 warnings sur 22 identifiés comme faux positifs (FP) et ajoutés à `.react-doctor/false-positives.md` — `no-fetch-in-effect`, `no-gray-on-colored-background`, `no-derived-useState` (DayModalPoolTab), `exhaustive-deps` ×2, etc.
+- **MapMobileCarousel** : Correction du vrai positif `html-no-nested-interactive` — remplacement du `<button>` extérieur par un ghost button positionné en absolu (`absolute inset-0`) avec wrapper `pointer-events-none`, actions internes en `pointer-events-auto`.
+- **Découpage RapportsPage** (337L → ~180L) : extraction de `RapportClientGroup`, `RapportRow`, `RapportEnvoyeRow`.
+- **Découpage YearMatrixView** (364L → ~230L) : extraction de `YearMatrixPlanRow` et `yearMatrixUtils.ts` (3 helpers + types `RowData`/`GroupData`).
+- **Découpage SamplingForm** (370L → ~220L) : extraction de `SamplingPhotosSection` et `SamplingChecklistSection`.
+- **Découpage EventDetailModal** (440L → ~170L) : extraction du reducer+types vers `eventDetailModalReducer.ts`, et des 4 panneaux (`EventDetailMovePanel`, `EventDetailTechPanel`, `EventDetailEquipPanel`, `EventDetailCancelPanel`).
+- **Score react-doctor** : 72 → **73/100**, 22 → 17 issues (−5 `no-giant-component`).
+
+### Ce qui reste (react-doctor)
+- `no-giant-component` : **TodosPage** et **PlanningPage** — plus complexes, couplés à beaucoup de state/logique.
+- `deslop/unused-file` : `public/firebase-messaging-sw.js` — à vérifier si utilisé par les push notifications.
+- 10 warnings Bugs, 3 Performance : tous documentés comme FP dans `.react-doctor/false-positives.md`.
+- `no-gray-on-colored-background` : `TodoRow.tsx:167` — vrai positif mineur, couleur texte à ajuster.
+
+---
+
 ## Session 120 — Bugfix CI TypeScript + Qualité React (react-doctor 72/100)
 **10 juin 2026**
 
