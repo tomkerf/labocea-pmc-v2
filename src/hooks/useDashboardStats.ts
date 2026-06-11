@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { calcStatut } from '@/hooks/useMetrologieRows'
 import { isThisMonth, localISO, isToday, daysDiff } from '@/lib/dashboardUtils'
@@ -78,7 +78,15 @@ export function useDashboardStats({
   clients, verifications, equipements, evenements, maintenances,
   uid, initiales, isGeneraliste,
 }: Params) {
-  const [nowMs] = useState(() => Date.now())
+  const [todayStr, setTodayStr] = useState(() => new Date().toISOString().slice(0, 10))
+  useEffect(() => {
+    const now = new Date()
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+    const msToMidnight = midnight.getTime() - now.getTime()
+    const t = setTimeout(() => setTodayStr(new Date().toISOString().slice(0, 10)), msToMidnight)
+    return () => clearTimeout(t)
+  }, [todayStr])
+  const nowMs = new Date(todayStr + 'T12:00:00').getTime()
 
   // ── KPIs ──────────────────────────────────────────────────
 

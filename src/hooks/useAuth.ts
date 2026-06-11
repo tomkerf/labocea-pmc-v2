@@ -19,8 +19,6 @@ export function useAuthInit() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setFirebaseUser(user)
-
       if (user) {
         try {
           // Charger le profil Firestore
@@ -53,6 +51,8 @@ export function useAuthInit() {
           // On laisse l'utilisateur connecté Firebase mais sans profil enrichi
           // → l'app restera fonctionnelle, profil sera rechargé au prochain onAuthStateChanged
         }
+        // firebaseUser et appUser sont maintenant cohérents avant que loading passe à false
+        setFirebaseUser(user)
       } else {
         reset()
       }
