@@ -2,6 +2,16 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 122 — UX Dashboard : Signalisation des prélèvements "temps de pluie" en retard
+**11 juin 2026**
+
+### Ce qui a été fait
+- **Alerte Temps de Pluie en retard** : Ajout d'un badge rouge/orange (`var(--color-danger-light)` / `COLORS.DANGER`) sur l'en-tête du widget `PluieWidget` (🌧 Temps de pluie) sur le tableau de bord lorsqu'au moins un prélèvement par temps de pluie est en retard (Option 1 validée par l'utilisateur).
+- **Mise à jour des nouveautés** : Changelog mis à jour en version `120` pour notifier les utilisateurs du nouveau badge d'alerte.
+
+### Prochaines étapes
+- Reprendre le refactoring des composants géants restants (`TodosPage` et `PlanningPage`).
+
 ## Session 121 — Refactoring : découpage composants géants (react-doctor 72→73/100)
 **11 juin 2026**
 

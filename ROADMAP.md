@@ -328,3 +328,5 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-09 | UX Matériel & Planning ✅ | Garde-fou d'assignation de matériel (grise les équipements déjà pris le même jour). Filtrage intelligent pour les bilans 24h (débitmètres, préleveurs, flacons uniquement). Affichage du matériel assigné dans le calendrier, la modale et la fiche mission. |
 | 2026-06-10 | Qualité & CI ✅ | Bugfix CI TypeScript (PlanningEvent manquait equipementsAssignes + methode). Accessibilité YearMatrixView (aria-label cellules mois). Revue code Gemini session 119 (IIFE JSX supprimé). Score react-doctor 71→72/100. |
 | 2026-06-11 | Refactoring composants ✅ | Découpage de 4 composants géants : RapportsPage, YearMatrixView, SamplingForm, EventDetailModal → 10 nouveaux fichiers extraits. Score react-doctor 72→73/100 (−5 no-giant-component). Reste : TodosPage + PlanningPage. |
+| 2026-06-11 | UX Dashboard ✅ | Ajout d'un badge d'alerte orange/rouge "en retard" sur le widget "Temps de pluie" si au moins un prélèvement pluie est en retard. |
+

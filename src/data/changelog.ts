@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '119'
+export const CHANGELOG_VERSION = '120'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '120',
+    date: '11 juin 2026',
+    items: [
+      { type: 'feat', label: 'Dashboard : Ajout d\'un badge d\'alerte orange/rouge sur le widget "Temps de pluie" si des prélèvements sont en retard' },
+    ],
+  },
   {
     version: '119',
     date: '9 juin 2026',

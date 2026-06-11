@@ -18,6 +18,8 @@ export function PluieWidget({ items }: { items: PluieItem[] }) {
 
   if (items.length === 0) return null
 
+  const overdueCount = items.filter(i => i.overdue).length
+
   return (
     <div className="mb-6">
       <button type="button"
@@ -32,6 +34,12 @@ export function PluieWidget({ items }: { items: PluieItem[] }) {
           style={{ background: '#EFF6FF', color: '#3B82F6' }}>
           {items.length}
         </span>
+        {overdueCount > 0 && (
+          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+            style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
+            {overdueCount} en retard
+          </span>
+        )}
         <ChevronDown size={14} strokeWidth={2} style={{
           color: 'var(--color-text-tertiary)', marginLeft: 'auto',
           transform: open ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.2s ease',
