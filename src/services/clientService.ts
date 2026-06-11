@@ -4,9 +4,10 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { trackWrite } from '@/lib/trackWrite'
+import { COLLECTIONS } from '@/lib/constants'
 import type { Client } from '@/types'
 
-const COLLECTION = 'clients-v2'
+const COLLECTION = COLLECTIONS.CLIENTS
 
 export async function saveClient(client: Client, uid: string): Promise<void> {
   const ref = doc(db, COLLECTION, client.id)

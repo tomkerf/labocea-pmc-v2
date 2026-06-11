@@ -15,7 +15,7 @@ export interface NewUserData {
 }
 
 export async function createUserDocument(uid: string, data: NewUserData, dbInstance: Firestore = db): Promise<void> {
-  await trackWrite(setDoc(doc(dbInstance, 'users', uid), {
+  await trackWrite(setDoc(doc(dbInstance, COLLECTIONS.USERS, uid), {
     ...data,
     createdAt:   Timestamp.now(),
     lastLoginAt: Timestamp.now(),

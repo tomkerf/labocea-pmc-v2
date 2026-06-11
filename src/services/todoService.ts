@@ -1,9 +1,10 @@
 import { collection, doc, setDoc, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { trackWrite } from '@/lib/trackWrite'
+import { COLLECTIONS } from '@/lib/constants'
 import type { Todo } from '@/types'
 
-const COLLECTION = 'todos'
+const COLLECTION = COLLECTIONS.TODOS
 
 function cleanObject<T extends object>(obj: T): T {
   const cleaned = { ...obj }

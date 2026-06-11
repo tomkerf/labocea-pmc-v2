@@ -4,9 +4,10 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { trackWrite } from '@/lib/trackWrite'
+import { COLLECTIONS } from '@/lib/constants'
 import type { VisitePreliminaire } from '@/types'
 
-const COLLECTION = 'visites'
+const COLLECTION = COLLECTIONS.VISITES
 
 export async function createVisite(
   visite: Omit<VisitePreliminaire, 'id' | 'createdAt' | 'updatedAt'>,

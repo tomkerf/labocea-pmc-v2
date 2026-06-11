@@ -1,6 +1,17 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 import { storage } from '@/lib/firebase'
 
+const MAX_SIZE_BYTES = 20 * 1024 * 1024 // 20 MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif']
+
+function validateImageFile(file: File): void {
+  if (file.size > MAX_SIZE_BYTES) throw new Error(`Fichier trop volumineux (max 20 Mo, reçu ${(file.size / 1024 / 1024).toFixed(1)} Mo)`)
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+  const isAllowedExt = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif'].includes(ext)
+  const isAllowedType = !file.type || ALLOWED_TYPES.includes(file.type)
+  if (!isAllowedExt && !isAllowedType) throw new Error(`Format non supporté : ${file.type || ext}`)
+}
+
 /**
  * Assure que le fichier est bien au format standard (convertit le HEIC/HEIF en JPEG
  * à la volée via un import dynamique de heic-to pour ne pas alourdir le bundle initial).
@@ -56,6 +67,7 @@ export async function uploadSamplingPhoto(
   planId: string,
   samplingId: string,
 ): Promise<string> {
+  validateImageFile(file)
   const { data, ext, contentType } = await processImageFile(file)
   const path = `samplings/${clientId}/${planId}/${samplingId}/${Date.now()}.${ext}`
   const storageRef = ref(storage, path)
@@ -87,6 +99,7 @@ export async function uploadVisitePhoto(
   visiteId: string,
   pointId: string,
 ): Promise<string> {
+  validateImageFile(file)
   const { data, ext, contentType } = await processImageFile(file)
   const path = `visites/${visiteId}/${pointId}/${Date.now()}.${ext}`
   const storageRef = ref(storage, path)
@@ -117,6 +130,7 @@ export async function uploadPlanPhoto(
   clientId: string,
   planId: string,
 ): Promise<string> {
+  validateImageFile(file)
   const { data, ext, contentType } = await processImageFile(file)
   const path = `plans/${clientId}/${planId}/${Date.now()}.${ext}`
   const storageRef = ref(storage, path)

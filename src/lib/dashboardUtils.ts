@@ -28,5 +28,6 @@ export function isToday(dateStr: string): boolean {
 }
 
 export function daysDiff(dateStr: string): number {
-  return Math.round((new Date(dateStr).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+  const d = dateStr.length === 10 ? new Date(dateStr + 'T12:00:00') : new Date(dateStr)
+  return Math.round((d.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
 }
