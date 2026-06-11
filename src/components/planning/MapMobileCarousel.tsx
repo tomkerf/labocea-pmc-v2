@@ -25,17 +25,22 @@ export default function MapMobileCarousel({
             const isSelected = selectedEventId === evt.id
             const color = evt.isDone ? COLORS.SUCCESS : tc.color
             return (
-              <button
+              <div
                 key={evt.id}
-                type="button"
-                onClick={() => handleCenterOnMarker(evt)}
-                className="w-[280px] p-3 shrink-0 rounded-xl border text-left cursor-pointer transition-all snap-center shadow-lg"
+                className="relative w-[280px] p-3 shrink-0 rounded-xl border text-left transition-all snap-center shadow-lg"
                 style={{
                   background: isSelected ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
                   borderColor: isSelected ? COLORS.ACCENT : 'var(--color-border-subtle)',
                 }}
               >
-                <div className="flex items-start gap-2.5">
+                {/* Bouton fantôme qui couvre la carte — centrer sur le marqueur */}
+                <button
+                  type="button"
+                  aria-label={`Centrer sur ${evt.subtitle}`}
+                  onClick={() => handleCenterOnMarker(evt)}
+                  className="absolute inset-0 rounded-xl"
+                />
+                <div className="relative pointer-events-none flex items-start gap-2.5">
                   <div
                     className="size-5 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-white mt-0.5"
                     style={{ background: color }}
@@ -60,13 +65,12 @@ export default function MapMobileCarousel({
                       <span className="px-2 py-0.5 rounded-full" style={{ background: evt.isDone ? 'var(--color-success-light)' : tc.bg, color }}>
                         {evt.isDone ? 'Fait' : evt.technicien}
                       </span>
-                      <div className="flex gap-2">
+                      <div className="relative pointer-events-auto flex gap-2">
                         <a
                           href={`https://www.google.com/maps/dir/?api=1&destination=${evt.lat},${evt.lng}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-accent flex items-center gap-0.5"
-                          onClick={e => e.stopPropagation()}
                         >
                           🚗 GPS
                         </a>
@@ -74,7 +78,7 @@ export default function MapMobileCarousel({
                         <button
                           type="button"
                           className="text-gray-600 text-left"
-                          onClick={e => { e.stopPropagation(); handleSelectEvent(evt, dateStr) }}
+                          onClick={() => handleSelectEvent(evt, dateStr)}
                         >
                           Fiche ➔
                         </button>
@@ -82,7 +86,7 @@ export default function MapMobileCarousel({
                     </div>
                   </div>
                 </div>
-              </button>
+              </div>
             )
           })}
         </div>
