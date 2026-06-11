@@ -23,7 +23,7 @@ export async function saveVisite(visite: VisitePreliminaire): Promise<void> {
   await trackWrite(setDoc(doc(db, COLLECTION, visite.id), {
     ...visite,
     updatedAt: serverTimestamp(),
-  }))
+  }, { merge: true }))
 }
 
 export async function deleteVisite(visiteId: string): Promise<void> {

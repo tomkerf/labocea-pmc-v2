@@ -14,27 +14,27 @@ export type GroupData = {
   plans: RowData[]
 }
 
-export function getStatusColor(s: Sampling | null, planYear: number): string {
+export function getStatusColor(s: Sampling | null, planYear: number, isAutomatique?: boolean): string {
   if (!s) return 'transparent'
   if (s.status === 'done') return COLORS.SUCCESS
   if (s.status === 'non_effectue') return 'var(--color-neutral)'
-  if (isSamplingOverdue(s, planYear)) return COLORS.DANGER
+  if (isSamplingOverdue(s, planYear, isAutomatique)) return COLORS.DANGER
   if (s.status === 'planned') return COLORS.WARNING
   return COLORS.BORDER
 }
 
-export function getStatusLabel(s: Sampling | null, planYear: number): string {
+export function getStatusLabel(s: Sampling | null, planYear: number, isAutomatique?: boolean): string {
   if (!s) return ''
   if (s.status === 'done') return 'Fait'
   if (s.status === 'non_effectue') return 'Non fait'
-  if (isSamplingOverdue(s, planYear)) return 'En retard'
+  if (isSamplingOverdue(s, planYear, isAutomatique)) return 'En retard'
   if (s.status === 'planned') return 'Planifié'
   return ''
 }
 
-export function getStatusIcon(s: Sampling, planYear: number): string {
+export function getStatusIcon(s: Sampling, planYear: number, isAutomatique?: boolean): string {
   if (s.status === 'done') return '✓'
   if (s.status === 'non_effectue') return '✕'
-  if (isSamplingOverdue(s, planYear)) return '!'
+  if (isSamplingOverdue(s, planYear, isAutomatique)) return '!'
   return ''
 }

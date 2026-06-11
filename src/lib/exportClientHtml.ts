@@ -7,6 +7,10 @@ import type { Client, AppUser } from '@/types'
 
 const MOIS_COURT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 
+function escapeHtml(s: unknown): string {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
 function fmtDate(iso: string): string {
   if (!iso) return '—'
   try {
@@ -42,7 +46,7 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
   function resolveUser(uid: string): string {
     if (!uid) return '—'
     const u = users.find(u => u.uid === uid)
-    return u ? `${u.prenom} ${u.nom}` : uid
+    return u ? escapeHtml(`${u.prenom} ${u.nom}`) : escapeHtml(uid)
   }
 
   // ── KPIs globaux client ──
@@ -68,9 +72,9 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
         const color     = STATUS_COLOR[s.status] ?? '#8e8e93'
         const label     = STATUS_LABEL[s.status] ?? s.status
         const dateLabel = s.doneDate ? fmtDateLong(s.doneDate) : '—'
-        const techLabel = s.doneBy ? resolveUser(s.doneBy) : (s.assignedTo || '—')
+        const techLabel = s.doneBy ? resolveUser(s.doneBy) : escapeHtml(s.assignedTo || '—')
         const nappeLabel = s.nappe === 'haute' ? 'Haute' : s.nappe === 'basse' ? 'Basse' : '—'
-        const motifLabel = s.motif?.trim() || '—'
+        const motifLabel = escapeHtml(s.motif?.trim() || '—')
         const rapportLabel = s.rapportPrevu
           ? (s.rapportDate ? `✓ ${fmtDate(s.rapportDate)}` : 'Prévu')
           : '—'
@@ -87,7 +91,7 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
           return `<tr class="history-row">
             <td style="text-align:center;color:#b0a080">↳</td>
             <td colspan="2" style="color:#8a7040;font-style:italic">${action} — ${detail}</td>
-            <td colspan="2" style="color:#8a7040;font-style:italic">${h.reason || '—'}</td>
+            <td colspan="2" style="color:#8a7040;font-style:italic">${escapeHtml(h.reason || '—')}</td>
             <td style="color:#b0a080;font-style:italic">${h.by ? resolveUser(h.by) : '—'}</td>
             <td colspan="2"></td>
           </tr>`
@@ -114,8 +118,8 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
         <div class="plan-section">
           <div class="plan-header">
             <div>
-              <span class="plan-title">${plan.nom || 'Point sans nom'}</span>
-              ${meta ? `<span class="plan-meta">${meta}</span>` : ''}
+              <span class="plan-title">${escapeHtml(plan.nom || 'Point sans nom')}</span>
+              ${meta ? `<span class="plan-meta">${escapeHtml(meta)}</span>` : ''}
             </div>
             <div class="plan-stats">
               <span style="color:#34c759">${planDone} réalisé${planDone > 1 ? 's' : ''}</span>
@@ -239,21 +243,21 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
   </head><body>
 
     <div class="client-header">
-      <h1 class="client-name">${client.nom || 'Client sans nom'}</h1>
-      <p class="client-meta">${[client.segment, client.annee, client.preleveur ? `Préleveur : ${client.preleveur}` : ''].filter(Boolean).join('  ·  ')}</p>
+      <h1 class="client-name">${escapeHtml(client.nom || 'Client sans nom')}</h1>
+      <p class="client-meta">${escapeHtml([client.segment, client.annee, client.preleveur ? `Préleveur : ${client.preleveur}` : ''].filter(Boolean).join('  ·  '))}</p>
       <p class="export-date">Historique extrait le ${exportDate} à ${exportTime} — Labocea PMC</p>
     </div>
 
     <dl class="info-grid">
-      <div><dt>Interlocuteur</dt><dd>${[client.interlocuteur, client.fonction].filter(Boolean).join(' — ') || '—'}</dd></div>
-      <div><dt>Téléphone</dt><dd>${client.telephone || client.mobile || '—'}</dd></div>
-      <div><dt>Email</dt><dd>${client.email || '—'}</dd></div>
-      <div><dt>N° Devis</dt><dd>${client.numDevis || '—'}</dd></div>
-      <div><dt>N° Convention</dt><dd>${client.numConvention || '—'}</dd></div>
-      <div><dt>Durée contrat</dt><dd>${client.dureeContrat || '—'}</dd></div>
-      <div><dt>Montant total</dt><dd>${client.montantTotal ? client.montantTotal.toLocaleString('fr-FR') + ' €' : '—'}</dd></div>
-      <div><dt>Mission</dt><dd>${client.mission || '—'}</dd></div>
-      <div><dt>Période</dt><dd>${client.periodeIntervention || '—'}</dd></div>
+      <div><dt>Interlocuteur</dt><dd>${escapeHtml([client.interlocuteur, client.fonction].filter(Boolean).join(' — ') || '—')}</dd></div>
+      <div><dt>Téléphone</dt><dd>${escapeHtml(client.telephone || client.mobile || '—')}</dd></div>
+      <div><dt>Email</dt><dd>${escapeHtml(client.email || '—')}</dd></div>
+      <div><dt>N° Devis</dt><dd>${escapeHtml(client.numDevis || '—')}</dd></div>
+      <div><dt>N° Convention</dt><dd>${escapeHtml(client.numConvention || '—')}</dd></div>
+      <div><dt>Durée contrat</dt><dd>${escapeHtml(client.dureeContrat || '—')}</dd></div>
+      <div><dt>Montant total</dt><dd>${client.montantTotal ? escapeHtml(client.montantTotal.toLocaleString('fr-FR')) + ' €' : '—'}</dd></div>
+      <div><dt>Mission</dt><dd>${escapeHtml(client.mission || '—')}</dd></div>
+      <div><dt>Période</dt><dd>${escapeHtml(client.periodeIntervention || '—')}</dd></div>
     </dl>
 
     <div class="kpis">

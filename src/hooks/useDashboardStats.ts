@@ -401,7 +401,7 @@ export function useDashboardStats({
       const clientYear = Number(client.annee) || undefined
       client.plans.forEach((plan: Plan) =>
         plan.samplings.forEach((s: Sampling) => {
-          if (isSamplingOverdue(s, clientYear) && plan.meteo !== 'pluie')
+          if (isSamplingOverdue(s, clientYear, plan.methode === 'Automatique') && plan.meteo !== 'pluie')
             result.push({ clientNom: client.nom, siteNom: plan.siteNom, planNom: plan.nom, clientId: client.id, planId: plan.id, samplingId: s.id, meteo: plan.meteo || '' })
         })
       )
@@ -418,7 +418,7 @@ export function useDashboardStats({
         if (plan.meteo !== 'pluie') return
         plan.samplings.forEach((s: Sampling) => {
           if (s.status === 'done' || s.status === 'non_effectue') return
-          result.push({ clientNom: client.nom, siteNom: plan.siteNom, planNom: plan.nom, clientId: client.id, planId: plan.id, samplingId: s.id, plannedMonth: s.plannedMonth, plannedDay: s.plannedDay, overdue: isSamplingOverdue(s, clientYear) })
+          result.push({ clientNom: client.nom, siteNom: plan.siteNom, planNom: plan.nom, clientId: client.id, planId: plan.id, samplingId: s.id, plannedMonth: s.plannedMonth, plannedDay: s.plannedDay, overdue: isSamplingOverdue(s, clientYear, plan.methode === 'Automatique') })
         })
       })
     })

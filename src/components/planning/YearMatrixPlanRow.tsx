@@ -32,26 +32,27 @@ export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal }: Y
         const pair = row.pairsByMonth[mIdx]
         const dotSize = 'size-3.5'
         const iconSize = 'text-[7px]'
+        const isAuto = row.plan.methode === 'Automatique'
         return (
           <td key={mIdx} className="px-1 py-0.5 text-center border-r border-[var(--color-border-subtle)] relative">
             {isBimensuel ? (
               pair.length > 0 && (
                 <div className="flex items-center justify-center" style={{ width: 24 }}>
                   {(() => {
-                    const priority = (ps: Sampling) => isSamplingOverdue(ps, planYear) ? 3 : ps.status === 'planned' ? 2 : ps.status === 'done' ? 1 : 0
+                    const priority = (ps: Sampling) => isSamplingOverdue(ps, planYear, isAuto) ? 3 : ps.status === 'planned' ? 2 : ps.status === 'done' ? 1 : 0
                     const sorted = [...pair].filter(Boolean).sort((a, b) => priority(b!) - priority(a!))
                     return sorted.slice(0, 2).map((ps, pi) => ps && (
                       <button
                         type="button"
                         key={ps.id}
-                        onClick={() => { if (isSamplingOverdue(ps, planYear)) onOpenIssueModal('overdue'); else if (ps.status === 'non_effectue') onOpenIssueModal('non_effectue') }}
-                        className={`${dotSize} rounded-full flex items-center justify-center transition-transform hover:scale-110 border-2 border-[var(--color-bg-secondary)] ${isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
-                        style={{ backgroundColor: getStatusColor(ps, planYear), marginLeft: pi === 1 ? -5 : 0, zIndex: pi === 0 ? 2 : 1 }}
-                        title={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps, planYear)}${ps.doneDate ? ` le ${ps.doneDate}` : ''}${isSamplingOverdue(ps, planYear) || ps.status === 'non_effectue' ? ' — cliquer pour voir la liste' : ''}`}
-                        aria-label={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps, planYear)}`}
+                        onClick={() => { if (isSamplingOverdue(ps, planYear, isAuto)) onOpenIssueModal('overdue'); else if (ps.status === 'non_effectue') onOpenIssueModal('non_effectue') }}
+                        className={`${dotSize} rounded-full flex items-center justify-center transition-transform hover:scale-110 border-2 border-[var(--color-bg-secondary)] ${isSamplingOverdue(ps, planYear, isAuto) || ps.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
+                        style={{ backgroundColor: getStatusColor(ps, planYear, isAuto), marginLeft: pi === 1 ? -5 : 0, zIndex: pi === 0 ? 2 : 1 }}
+                        title={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps, planYear, isAuto)}${ps.doneDate ? ` le ${ps.doneDate}` : ''}${isSamplingOverdue(ps, planYear, isAuto) || ps.status === 'non_effectue' ? ' — cliquer pour voir la liste' : ''}`}
+                        aria-label={`${MOIS_LONG[mIdx]} #${pi + 1} - ${getStatusLabel(ps, planYear, isAuto)}`}
                       >
                         <span className={`${iconSize} font-bold text-white leading-none`}>
-                          {getStatusIcon(ps, planYear)}
+                          {getStatusIcon(ps, planYear, isAuto)}
                         </span>
                       </button>
                     ))
@@ -62,14 +63,14 @@ export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal }: Y
               s && (
                 <button
                   type="button"
-                  onClick={() => { if (isSamplingOverdue(s, planYear)) onOpenIssueModal('overdue'); else if (s.status === 'non_effectue') onOpenIssueModal('non_effectue') }}
-                  className={`mx-auto ${dotSize} rounded-full flex items-center justify-center transition-transform hover:scale-110 ${isSamplingOverdue(s, planYear) || s.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
-                  style={{ backgroundColor: getStatusColor(s, planYear) }}
-                  title={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s, planYear)}${s.doneDate ? ` le ${s.doneDate}` : ''}${isSamplingOverdue(s, planYear) || s.status === 'non_effectue' ? ' — cliquer pour voir la liste' : ''}`}
-                  aria-label={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s, planYear)}`}
+                  onClick={() => { if (isSamplingOverdue(s, planYear, isAuto)) onOpenIssueModal('overdue'); else if (s.status === 'non_effectue') onOpenIssueModal('non_effectue') }}
+                  className={`mx-auto ${dotSize} rounded-full flex items-center justify-center transition-transform hover:scale-110 ${isSamplingOverdue(s, planYear, isAuto) || s.status === 'non_effectue' ? 'cursor-pointer ring-1 ring-offset-1 ring-white/50 hover:ring-2 hover:ring-white/70' : 'cursor-help'}`}
+                  style={{ backgroundColor: getStatusColor(s, planYear, isAuto) }}
+                  title={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s, planYear, isAuto)}${s.doneDate ? ` le ${s.doneDate}` : ''}${isSamplingOverdue(s, planYear, isAuto) || s.status === 'non_effectue' ? ' — cliquer pour voir la liste' : ''}`}
+                  aria-label={`${MOIS_LONG[mIdx]} - ${getStatusLabel(s, planYear, isAuto)}`}
                 >
                   <span className={`${iconSize} font-bold text-white leading-none`}>
-                    {getStatusIcon(s, planYear)}
+                    {getStatusIcon(s, planYear, isAuto)}
                   </span>
                 </button>
               )

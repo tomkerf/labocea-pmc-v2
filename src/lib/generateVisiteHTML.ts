@@ -1,5 +1,9 @@
 import type { VisitePreliminaire, FaisabiliteVisite } from '@/types'
 
+function escapeHtml(s: unknown): string {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
 function faisabiliteLabel(f: FaisabiliteVisite): string {
   return f === 'ok' ? '✓ OK' : f === 'difficile' ? '⚠ Difficile' : '✗ Impossible'
 }
@@ -12,13 +16,13 @@ export function generateVisiteHTML(visite: VisitePreliminaire): string {
   const pointsHTML = visite.points
     .map((p, i) => `
     <div class="point">
-      <h3>Point ${i + 1} — ${p.nom}</h3>
+      <h3>Point ${i + 1} — ${escapeHtml(p.nom)}</h3>
       <table>
-        <tr><td class="label">Type d'eau</td><td>${p.typeEau}</td></tr>
-        <tr><td class="label">Méthode</td><td>${p.methode}</td></tr>
+        <tr><td class="label">Type d'eau</td><td>${escapeHtml(p.typeEau)}</td></tr>
+        <tr><td class="label">Méthode</td><td>${escapeHtml(p.methode)}</td></tr>
         <tr><td class="label">Faisabilité</td><td style="color:${faisabiliteColor(p.faisabilite)};font-weight:600">${faisabiliteLabel(p.faisabilite)}</td></tr>
-        ${p.securite ? `<tr><td class="label">Sécurité</td><td>${p.securite}</td></tr>` : ''}
-        ${p.notes ? `<tr><td class="label">Notes</td><td>${p.notes}</td></tr>` : ''}
+        ${p.securite ? `<tr><td class="label">Sécurité</td><td>${escapeHtml(p.securite)}</td></tr>` : ''}
+        ${p.notes ? `<tr><td class="label">Notes</td><td>${escapeHtml(p.notes)}</td></tr>` : ''}
       </table>
       ${
         p.photos.length > 0
@@ -43,7 +47,7 @@ export function generateVisiteHTML(visite: VisitePreliminaire): string {
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Visite préliminaire — ${visite.linkedTo.nom}</title>
+  <title>Visite préliminaire — ${escapeHtml(visite.linkedTo.nom)}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; font-size: 13px; color: #1D1D1F; padding: 40px; max-width: 800px; margin: 0 auto; }
@@ -68,7 +72,7 @@ export function generateVisiteHTML(visite: VisitePreliminaire): string {
 <body>
   <h1>Rapport de visite préliminaire</h1>
   <p class="meta">
-    ${visite.linkedTo.nom} &nbsp;·&nbsp; ${dateFormatted} &nbsp;·&nbsp; ${visite.technicienNom}
+    ${escapeHtml(visite.linkedTo.nom)} &nbsp;·&nbsp; ${dateFormatted} &nbsp;·&nbsp; ${escapeHtml(visite.technicienNom)}
   </p>
   ${pointsHTML}
   ${
@@ -76,7 +80,7 @@ export function generateVisiteHTML(visite: VisitePreliminaire): string {
       ? `
     <div class="notes-section">
       <h2>Notes générales</h2>
-      <p>${visite.notes}</p>
+      <p>${escapeHtml(visite.notes)}</p>
     </div>
   `
       : ''

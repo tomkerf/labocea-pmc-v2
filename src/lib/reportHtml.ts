@@ -3,6 +3,10 @@ import type { AppUser, Client, Plan } from '@/types'
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
 
+function escapeHtml(s: unknown): string {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
 function fmtDate(iso: string): string {
   if (!iso) return '—'
   try {
@@ -21,7 +25,7 @@ export function buildReportHtml(
   withPrintScript = false,
 ): string {
   const year = new Date().getFullYear()
-  const title = `Suivi des prélèvements ${year} — ${plan.nom} — ${client.nom}`
+  const title = escapeHtml(`Suivi des prélèvements ${year} — ${plan.nom} — ${client.nom}`)
 
   const statusLabels: Record<string, string> = {
     planned: 'Planifié', done: 'Réalisé',
@@ -30,11 +34,11 @@ export function buildReportHtml(
 
   const rows = plan.samplings.map((s) => {
     const techUser = users.find((u) => u.uid === s.doneBy)
-    const techLabel = techUser ? `${techUser.prenom} ${techUser.nom}` : (s.doneBy ? s.doneBy : '—')
+    const techLabel = escapeHtml(techUser ? `${techUser.prenom} ${techUser.nom}` : (s.doneBy ? s.doneBy : '—'))
     const dateLabel = s.doneDate ? fmtDate(s.doneDate) : '—'
     const statusLabel = statusLabels[s.status] ?? s.status
     const lastHistory = s.reportHistory?.length ? s.reportHistory[s.reportHistory.length - 1] : null
-    const motifLabel = lastHistory?.reason || s.motif?.trim() || '—'
+    const motifLabel = escapeHtml(lastHistory?.reason || s.motif?.trim() || '—')
 
     const statusColor: Record<string, string> = {
       done: '#34c759', overdue: '#ff3b30', non_effectue: '#ff9f0a', planned: '#8e8e93',
@@ -54,7 +58,7 @@ export function buildReportHtml(
   const historyRows = plan.samplings.flatMap((s) =>
     (s.reportHistory ?? []).map((h) => {
       const byUser = users.find((u) => u.uid === h.by)
-      const byLabel = byUser ? `${byUser.prenom} ${byUser.nom}` : (h.by || '—')
+      const byLabel = escapeHtml(byUser ? `${byUser.prenom} ${byUser.nom}` : (h.by || '—'))
       const action = h.to ? 'Report' : 'Retrait'
       const detail = h.to
         ? `${fmtDate(h.from)} → ${fmtDate(h.to)}`
@@ -66,7 +70,7 @@ export function buildReportHtml(
         <td style="color:#6e6e73;text-align:center">${s.num}</td>
         <td style="font-weight:500">${action}</td>
         <td>${detail}</td>
-        <td style="color:#6e6e73">${h.reason || '—'}</td>
+        <td style="color:#6e6e73">${escapeHtml(h.reason || '—')}</td>
         <td>${byLabel}</td>
         <td style="color:#6e6e73">${atLabel}</td>
       </tr>`
@@ -114,9 +118,9 @@ export function buildReportHtml(
     </style></head><body>
     <h1>${title}</h1>
     <p class="meta">
-      Client : ${client.nom} &nbsp;·&nbsp; Point : ${plan.nom}
-      ${plan.siteNom ? ` &nbsp;·&nbsp; Site : ${plan.siteNom}` : ''}
-      &nbsp;·&nbsp; Fréquence : ${plan.frequence} &nbsp;·&nbsp; Méthode : ${plan.methode}
+      Client : ${escapeHtml(client.nom)} &nbsp;·&nbsp; Point : ${escapeHtml(plan.nom)}
+      ${plan.siteNom ? ` &nbsp;·&nbsp; Site : ${escapeHtml(plan.siteNom)}` : ''}
+      &nbsp;·&nbsp; Fréquence : ${escapeHtml(plan.frequence)} &nbsp;·&nbsp; Méthode : ${escapeHtml(plan.methode)}
     </p>
     <p class="meta">Exporté le ${exportDate} à ${exportTime} — Labocea PMC</p>
     <div class="stats">
