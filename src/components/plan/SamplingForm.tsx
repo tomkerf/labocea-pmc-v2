@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, Camera, X, Loader2, HelpCircle } from 'lucide-react'
+import { HelpCircle } from 'lucide-react'
 import { uploadSamplingPhoto, deleteSamplingPhoto } from '@/lib/uploadPhoto'
 import { toast } from '@/stores/toastStore'
 import type { AppUser, Sampling, SamplingStatus, NappeType, ChecklistItem } from '@/types'
 import { COLORS } from '@/lib/constants'
 import { useEquipementsStore } from '@/stores/equipementsStore'
+import SamplingPhotosSection from './SamplingPhotosSection'
+import SamplingChecklistSection from './SamplingChecklistSection'
 
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -226,57 +228,14 @@ export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId
         </div>
       )}
 
-      {/* Checklist */}
-      <div className="sm:col-span-2">
-        <p className="block text-xs font-medium mb-2" style={{ color: COLORS.TEXT_SECONDARY }}>
-          Checklist terrain
-        </p>
-        {checklist.length > 0 && (
-          <div className="rounded-lg overflow-hidden mb-2"
-            style={{ border: '1px solid var(--color-border-subtle)' }}>
-            {checklist.map((item, i) => (
-              <div key={item.id}
-                className="flex items-center gap-3 px-3 py-2"
-                style={{ borderBottom: i < checklist.length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}>
-                <input type="checkbox" aria-label={`Tâche : ${item.label}`} checked={item.done}
-                  onChange={() => toggleTask(item.id)}
-                  className="cursor-pointer" />
-                <span className="flex-1 text-sm"
-                  style={{
-                    color: item.done ? 'var(--color-text-tertiary)' : COLORS.TEXT_PRIMARY,
-                    textDecoration: item.done ? 'line-through' : 'none',
-                  }}>
-                  {item.label}
-                </span>
-                <button type="button" onClick={() => deleteTask(item.id)}
-                  aria-label="Supprimer la tâche"
-                  className="shrink-0 flex items-center justify-center rounded"
-                  style={{ color: 'var(--color-text-tertiary)', minWidth: 44, minHeight: 44 }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.DANGER)}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
-                  <Trash2 size={15} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="flex gap-2">
-          <input
-            aria-label="Nouvelle tâche"
-            value={newTask}
-            onChange={(e) => setNewTask(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addTask()}
-            placeholder="Ajouter une tâche…"
-            className="field-input flex-1 text-sm"
-          />
-          <button type="button" onClick={addTask}
-            aria-label="Ajouter la tâche"
-            className="px-3 py-1.5 rounded-lg text-sm font-medium"
-            style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
-            <Plus size={15} />
-          </button>
-        </div>
-      </div>
+      <SamplingChecklistSection
+        checklist={checklist}
+        newTask={newTask}
+        onNewTaskChange={setNewTask}
+        onAddTask={addTask}
+        onToggleTask={toggleTask}
+        onDeleteTask={deleteTask}
+      />
 
       {/* Motif — visible uniquement si le prélèvement n'a pas été réalisé */}
       {(sampling.status === 'non_effectue' || sampling.status === 'overdue') && (
@@ -294,63 +253,12 @@ export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId
         </div>
       )}
 
-      {/* Photos terrain */}
-      <div className="sm:col-span-2">
-        <p className="block text-xs font-medium mb-2" style={{ color: COLORS.TEXT_SECONDARY }}>
-          Photos terrain
-        </p>
-
-        {(sampling.photos ?? []).length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-3">
-            {(sampling.photos ?? []).map((url, i) => (
-              <div key={url}
-                className="relative rounded-lg overflow-hidden shrink-0"
-                style={{ width: 96, height: 96, border: '1px solid var(--color-border)' }}>
-                <a href={url} target="_blank" rel="noreferrer" className="block size-full">
-                  <img
-                    src={url}
-                    alt={`Prélèvement ${i + 1}`}
-                    className="size-full object-cover cursor-zoom-in"
-                    loading="lazy"
-                  />
-                </a>
-                <button type="button"
-                  onClick={() => handlePhotoDelete(url)}
-                  aria-label="Supprimer cette photo"
-                  className="absolute top-1 right-1 size-5 rounded-full flex items-center justify-center bg-black/60 text-white hover:bg-black/80 transition-colors"
-                  title="Supprimer cette photo"
-                >
-                  <X size={10} strokeWidth={3} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <label
-          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer"
-          style={{
-            background: COLORS.BG_TERTIARY,
-            border: '1px solid var(--color-border)',
-            color: uploading ? 'var(--color-text-tertiary)' : COLORS.TEXT_SECONDARY,
-            opacity: uploading ? 0.6 : 1,
-            pointerEvents: uploading ? 'none' : 'auto',
-          }}
-        >
-          {uploading
-            ? <Loader2 size={14} className="animate-spin" />
-            : <Camera size={14} />}
-          {uploading ? 'Envoi en cours…' : 'Ajouter une photo'}
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
-            capture="environment"
-            className="hidden"
-            onChange={handlePhotoChange}
-            disabled={uploading}
-          />
-        </label>
-      </div>
+      <SamplingPhotosSection
+        photos={sampling.photos ?? []}
+        uploading={uploading}
+        onPhotoChange={handlePhotoChange}
+        onPhotoDelete={handlePhotoDelete}
+      />
     </div>
   )
 }
