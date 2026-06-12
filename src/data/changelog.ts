@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '120'
+export const CHANGELOG_VERSION = '121'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,15 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '121',
+    date: '12 juin 2026',
+    items: [
+      { type: 'feat', label: 'Planning : Refonte visuelle des pastilles de mission pour une meilleure lisibilité (design épuré)' },
+      { type: 'feat', label: 'Planning : Réorganisation des boutons de vue en deux groupes (Calendrier / Analytique)' },
+      { type: 'feat', label: 'Plan de charge : La capacité maximale théorique s\'adapte désormais dynamiquement au filtre par site' },
+    ],
+  },
   {
     version: '120',
     date: '11 juin 2026',

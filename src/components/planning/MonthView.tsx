@@ -118,8 +118,8 @@ export default function MonthView({
           return (
             <div key={dateStr}
               role="presentation"
-              className={`p-1 flex flex-col gap-0.5 cursor-crosshair group relative min-h-[90px] select-none border-b border-border-subtle ${
-                (i % 7) < 6 ? 'border-r border-border-subtle' : ''
+              className={`p-1 flex flex-col gap-0.5 cursor-crosshair group relative min-h-[90px] select-none border-b border-[var(--color-border-subtle)] ${
+                (i % 7) < 6 ? 'border-r border-[var(--color-border-subtle)]' : ''
               } ${
                 inDrag ? 'outline outline-2 outline-[rgba(0,113,227,0.3)] -outline-offset-1' : 'outline-none'
               }`}

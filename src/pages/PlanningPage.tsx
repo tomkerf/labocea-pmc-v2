@@ -143,7 +143,7 @@ export default function PlanningPage() {
   })
 
   const {
-    monthPoolCount, bilanBand, allDayItems, periodList, filteredForDayFlat,
+    bilanBand, allDayItems, periodList, filteredForDayFlat,
   } = usePlanningCalendar({
     eventsByDate, evenements, clients,
     viewMode, weekDays, monthStart, weekStart, selectedDate,
@@ -181,9 +181,10 @@ export default function PlanningPage() {
         allTechs={visibleTechs} filterTech={activeFilterTech} setFilterTech={setFilterTech}
         filterSite={filterSite} setFilterSite={setFilterSite}
         showRain={showRain} setShowRain={setShowRain} preleveurs={preleveurs}
-        monthPoolCount={monthPoolCount} showDragHint={showDragHint} setShowDragHint={setShowDragHint}
+        showDragHint={showDragHint} setShowDragHint={setShowDragHint}
         onExportPdf={handleExportPdf} onExportExcel={handleExportExcel}
         onBilanMois={() => setShowBilanMois(true)}
+        showBilanMois={showBilanMois}
       />
 
       <PlanningMiniCalendar

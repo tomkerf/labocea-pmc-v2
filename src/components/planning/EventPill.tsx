@@ -49,7 +49,7 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
       <button type="button"
         onClick={handleClick}
         onMouseDown={e => e.stopPropagation()}
-        className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
+        className="w-full text-left px-1.5 py-[3px] rounded-[3px] leading-snug focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-1 hover:opacity-80 transition-opacity"
         style={{ cursor: 'pointer', border: '1px dashed var(--color-border)', background: COLORS.BG_TERTIARY }}
         title={`${event.title} — ${event.ghostAction}${event.ghostReason ? ' · ' + event.ghostReason : ''}`}
       >
@@ -88,7 +88,7 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
   if (isConge) {
     return (
       <div
-        className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
+        className="w-full text-left px-1.5 py-[3px] rounded-[3px] leading-snug"
         style={{ background: COLORS.BG_TERTIARY, cursor: 'default', opacity: 0.85 }}
         title={event.title}
       >
@@ -113,10 +113,10 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
     <button type="button"
       onClick={handleClick}
       onMouseDown={e => e.stopPropagation()}
-      className="w-full text-left px-1.5 py-[3px] rounded-[5px] leading-snug"
+      className="w-full text-left px-1.5 py-[3px] rounded-[3px] leading-snug focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-1 transition-opacity hover:opacity-90"
       style={{
-        background: COLORS.BG_SECONDARY,
-        border: `1px solid ${techColor}30`,
+        background: `${dotColor}1A`,
+        borderLeft: `3px solid ${dotColor}`,
         cursor: isGrouped ? 'zoom-in' : event.type === 'evenement' ? 'default' : 'pointer',
       }}
       title={

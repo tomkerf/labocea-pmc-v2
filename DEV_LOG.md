@@ -2,6 +2,21 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 123 — UX/UI Planning : Cartouches et Matrice de Charge
+**12 juin 2026**
+
+### Ce qui a été fait
+- **Header Planning** : Séparation des vues en deux cartouches distincts (Calendaires / Analytiques). L'état actif du Bilan est mieux géré. Suppression du bandeau bleu "à planifier".
+- **Design Pastilles (EventPill)** : Refonte visuelle style Apple Calendar. Fonds pastels très légers avec bordure gauche pleine pour améliorer la lisibilité de la grille mensuelle. Ajout d'états de focus clavier.
+- **Matrice de Charge** : L'histogramme est arrondi et les cellules de la matrice de chaleur sont plus aérées (`rounded-md`).
+- **Calcul de capacité** : Le filtre par site met dynamiquement à jour la ligne de capacité maximale théorique (basée sur 35 prélèvements/tech). Ajout d'une infobulle instantanée personnalisée au survol.
+- **Bugfixes** : Correction des bordures trop foncées sur la vue mois.
+
+### Prochaines étapes
+- Poursuivre le découpage des God Components si besoin.
+
+---
+
 ## Session 122 — UX Dashboard : Signalisation des prélèvements "temps de pluie" en retard
 **11 juin 2026**
 

@@ -38,13 +38,13 @@ interface PlanningHeaderProps {
   setShowRain:    (v: boolean) => void
   preleveurs:     Preleveur[]
   // Bandeaux
-  monthPoolCount: number
   showDragHint:   boolean
   setShowDragHint: (v: boolean) => void
   // Exports
   onExportPdf:    () => void
   onExportExcel:  () => void
   onBilanMois:    () => void
+  showBilanMois?: boolean
 }
 
 export default function PlanningHeader({
@@ -52,8 +52,8 @@ export default function PlanningHeader({
   showMiniCal, setShowMiniCal,
   allTechs, filterTech, setFilterTech, filterSite, setFilterSite,
   showRain, setShowRain, preleveurs,
-  monthPoolCount, showDragHint, setShowDragHint,
-  onExportPdf, onExportExcel, onBilanMois,
+  showDragHint, setShowDragHint,
+  onExportPdf, onExportExcel, onBilanMois, showBilanMois
 }: PlanningHeaderProps) {
   const availableSites = useMemo(() => {
     const sites = new Set(preleveurs.flatMap(p => p.site ? [p.site] : []))
@@ -161,15 +161,9 @@ export default function PlanningHeader({
             </div>
 
             <div className="flex items-center gap-2">
-              <button type="button" onClick={onBilanMois}
-                className="hidden md:flex px-2.5 py-1.5 text-xs font-medium rounded-lg items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                style={{ background:COLORS.ACCENT, color:'white', border:'1px solid transparent' }}
-                title="Afficher le bilan du mois en cours">
-                <Calendar size={13} style={{ color: 'white' }} />
-                Bilan
-              </button>
               
-              <div className="relative flex p-0.5 rounded-lg shrink-0 w-full md:w-auto overflow-x-auto no-scrollbar"
+              {/* Cartouche 1: Vues Calendaires */}
+              <div className="relative flex p-0.5 rounded-[var(--radius-md)] shrink-0 w-full md:w-auto overflow-x-auto no-scrollbar"
                 style={{ border:'1px solid var(--color-border-subtle)', background:COLORS.BG_TERTIARY }}>
                 {(['jour','semaine','mois','annee'] as ViewMode[]).map(view => (
                 <button type="button"
@@ -183,7 +177,7 @@ export default function PlanningHeader({
                   {viewMode === view && (
                     <m.div
                       layoutId="active-planning-view"
-                      className="absolute inset-0 rounded-md -z-10"
+                      className="absolute inset-0 rounded-[var(--radius-sm)] -z-10"
                       style={{ background: COLORS.ACCENT }}
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
@@ -191,10 +185,50 @@ export default function PlanningHeader({
                   {view}
                 </button>
               ))}
+              </div>
+
+              {/* Cartouche 2: Analytique (Bilan / Charge) */}
+              <div className="relative hidden md:flex p-0.5 rounded-[var(--radius-md)] shrink-0 overflow-x-auto no-scrollbar"
+                style={{ border:'1px solid var(--color-border-subtle)', background:COLORS.BG_TERTIARY }}>
+                
+                <button type="button"
+                  onClick={onBilanMois}
+                  className="relative px-3 py-1.5 text-xs font-medium capitalize z-10 transition-colors duration-200 flex items-center gap-1.5 text-center"
+                  style={{ color: showBilanMois ? 'white' : COLORS.TEXT_SECONDARY }}
+                  onMouseEnter={e => { if (!showBilanMois) e.currentTarget.style.color = COLORS.TEXT_PRIMARY }}
+                  onMouseLeave={e => { if (!showBilanMois) e.currentTarget.style.color = COLORS.TEXT_SECONDARY }}
+                >
+                  {showBilanMois && (
+                    <m.div
+                      layoutId="active-planning-view-analytic"
+                      className="absolute inset-0 rounded-[var(--radius-sm)] -z-10"
+                      style={{ background: COLORS.ACCENT }}
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <Calendar size={13} />
+                  Bilan
+                </button>
+
+                <button type="button"
+                  onClick={() => switchView('charge')}
+                  className="relative px-3 py-1.5 text-xs font-medium capitalize z-10 transition-colors duration-200 text-center"
+                  style={{ color: viewMode === 'charge' ? 'white' : COLORS.TEXT_SECONDARY }}
+                >
+                  {viewMode === 'charge' && !showBilanMois && (
+                    <m.div
+                      layoutId="active-planning-view-analytic"
+                      className="absolute inset-0 rounded-[var(--radius-sm)] -z-10"
+                      style={{ background: COLORS.ACCENT }}
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  Charge
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
       {/* Ligne 2 : filtres technicien + pluie */}
         <div className="flex items-center gap-2 px-4 md:px-6 pb-3 flex-wrap">
@@ -288,22 +322,6 @@ export default function PlanningHeader({
             )}
         </div>
       </div>
-
-      {/* Bandeau "à planifier" */}
-      {viewMode !== 'jour' && viewMode !== 'carte' && monthPoolCount > 0 && (
-        <div className="flex items-center gap-2 px-4 md:px-6 py-2 shrink-0"
-          style={{ background: 'var(--color-accent-light)', borderBottom: '1px solid var(--color-border-subtle)' }}>
-          <span className="size-1.5 rounded-full shrink-0" style={{ background: COLORS.ACCENT }} />
-          <p className="text-xs" style={{ color: COLORS.ACCENT }}>
-            <span className="font-semibold">
-              {monthPoolCount} prélèvement{monthPoolCount > 1 ? 's' : ''} à planifier ce mois
-            </span>
-            <span className="hidden md:inline font-normal" style={{ opacity: 0.75 }}>
-              {' '}— clic droit sur un jour pour les assigner
-            </span>
-          </p>
-        </div>
-      )}
 
       {/* Hint premier drag */}
       {showDragHint && viewMode !== 'jour' && viewMode !== 'carte' && (
