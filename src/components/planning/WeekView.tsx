@@ -23,6 +23,8 @@ interface WeekViewProps {
   filterRetard:         boolean
   showRain:             boolean
   isDragging:           boolean
+  dragStart:            string | null
+  dragEnd:              string | null
   handleDragMouseDown:  (e: React.MouseEvent, dateStr: string) => void
   handleDragMouseEnter: (dateStr: string) => void
   handleDragMouseUp:    (e: React.MouseEvent) => void
@@ -32,17 +34,23 @@ interface WeekViewProps {
   handleSelectEvent:    (event: PlanningEvent, dateStr: string) => void
   goToDay:              (dateStr: string) => void
   setCtxMenu:           (v: { dateStr: string; x: number; y: number } | null) => void
-  isInDrag:             (dateStr: string) => boolean
 }
 
 export default function WeekView({
   weekDays, today, holidays, eventsByDate,
   bilanBand, allDayItems,
   filterTech, allowedTechs, filterRetard, showRain,
-  isDragging, handleDragMouseDown, handleDragMouseEnter, handleDragMouseUp,
+  isDragging, dragStart, dragEnd,
+  handleDragMouseDown, handleDragMouseEnter, handleDragMouseUp,
   setIsDragging, setDragStart, setDragEnd,
-  handleSelectEvent, goToDay, setCtxMenu, isInDrag,
+  handleSelectEvent, goToDay, setCtxMenu,
 }: WeekViewProps) {
+
+  function inDragRange(dateStr: string) {
+    if (!isDragging || !dragStart || !dragEnd) return false
+    const [mn, mx] = dragStart <= dragEnd ? [dragStart, dragEnd] : [dragEnd, dragStart]
+    return dateStr >= mn && dateStr <= mx
+  }
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
 
@@ -236,7 +244,7 @@ export default function WeekView({
         {weekDays.map((day,i) => {
           const dateStr  = toISO(day)
           const evts     = groupByClient(filteredForDayFlat(dateStr).filter(e => !isMultiDay(e)))
-          const inDrag   = isInDrag(dateStr)
+          const inDrag   = inDragRange(dateStr)
           const isHoliday = !!holidays[dateStr]
           const hasConge  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'conge') ?? false
           const isRainyDay = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false

@@ -56,8 +56,8 @@ Ce document liste les dettes techniques identifiées lors des audits successifs.
 
 - [x] **`no-render-in-render`** — `renderSection()` → `BilanSection`, `renderItem()` → `PoolItemRow`. ✅ 2026-06-06
 - [x] **`prefer-useReducer`** — `DragCreateModal` (7 états) + `EntryForm` (11 états) migrés. ✅ 2026-06-06
-- [ ] **Props drag redondantes** — `isInDrag` passé en prop à `WeekView`/`MonthView` alors que calculable depuis `isDragging + dragStart + dragEnd`.
-- [ ] **Champ `tag` inutilisé** dans le type `AllDayItem` — à supprimer.
+- [x] **Props drag redondantes** — `isInDrag` remplacé par `dragStart`/`dragEnd` dans WeekView et MonthView, calcul local `inDragRange`. ✅ 2026-06-12
+- [x] **Champ `tag`** — inexistant dans `AllDayItem` (dette fantôme). ✅ 2026-06-12
 
 ## 10. Accessibilité ✅ Soldé (essentiel)
 

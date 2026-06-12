@@ -21,6 +21,8 @@ interface MonthViewProps {
   filterRetard:         boolean
   showRain:             boolean
   isDragging:           boolean
+  dragStart:            string | null
+  dragEnd:              string | null
   handleDragMouseDown:  (e: React.MouseEvent, dateStr: string) => void
   handleDragMouseEnter: (dateStr: string) => void
   handleDragMouseUp:    (e: React.MouseEvent) => void
@@ -30,7 +32,6 @@ interface MonthViewProps {
   handleSelectEvent:    (event: PlanningEvent, dateStr: string) => void
   goToDay:              (dateStr: string) => void
   setCtxMenu:           (v: { dateStr: string; x: number; y: number } | null) => void
-  isInDrag:             (dateStr: string) => boolean
   prev:                 () => void
   next:                 () => void
 }
@@ -38,10 +39,17 @@ interface MonthViewProps {
 export default function MonthView({
   monthGrid, today, holidays, eventsByDate,
   filterTech, allowedTechs, filterRetard, showRain,
-  isDragging, handleDragMouseDown, handleDragMouseEnter, handleDragMouseUp,
+  isDragging, dragStart, dragEnd,
+  handleDragMouseDown, handleDragMouseEnter, handleDragMouseUp,
   setIsDragging, setDragStart, setDragEnd,
-  handleSelectEvent, goToDay, setCtxMenu, isInDrag, prev, next,
+  handleSelectEvent, goToDay, setCtxMenu, prev, next,
 }: MonthViewProps) {
+
+  function inDragRange(dateStr: string) {
+    if (!isDragging || !dragStart || !dragEnd) return false
+    const [mn, mx] = dragStart <= dragEnd ? [dragStart, dragEnd] : [dragEnd, dragStart]
+    return dateStr >= mn && dateStr <= mx
+  }
 
   const containerRef = useRef<HTMLDivElement>(null)
   const wheelCooldown = useRef(false)
@@ -101,7 +109,7 @@ export default function MonthView({
           const dateStr = toISO(day)
           const evts = filteredForDay(dateStr)
           const isToday = sameDay(day,today)
-          const inDrag = isInDrag(dateStr)
+          const inDrag = inDragRange(dateStr)
           const holidayName = holidays[dateStr]
           const isWeekend   = day.getDay() === 0 || day.getDay() === 6
           const hasCongeM   = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'conge') ?? false

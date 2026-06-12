@@ -143,9 +143,9 @@ const uid        = useAuthStore(selectUid)
   // ── Drag-to-create + swipe ──────────────────────────────
   const {
     handleTouchStart, handleTouchEnd,
-    isDragging,
+    isDragging, dragStart, dragEnd,
     setIsDragging, setDragStart, setDragEnd,
-    isInDrag, handleDragMouseDown, handleDragMouseEnter, handleDragMouseUp,
+    handleDragMouseDown, handleDragMouseEnter, handleDragMouseUp,
   } = usePlanningDrag({ selectedDate, setSelectedDate, goToDay, setDragModal })
 
   const weekDays  = useMemo(() => Array.from({length:7},(_,i) => addDays(weekStart,i)), [weekStart])
@@ -321,6 +321,8 @@ const uid        = useAuthStore(selectUid)
             filterRetard={filterRetard}
             showRain={showRain}
             isDragging={isDragging}
+            dragStart={dragStart}
+            dragEnd={dragEnd}
             handleDragMouseDown={handleDragMouseDown}
             handleDragMouseEnter={handleDragMouseEnter}
             handleDragMouseUp={handleDragMouseUp}
@@ -330,7 +332,6 @@ const uid        = useAuthStore(selectUid)
             handleSelectEvent={handleSelectEvent}
             goToDay={goToDay}
             setCtxMenu={setCtxMenu}
-            isInDrag={isInDrag}
           />
         )}
 
@@ -345,6 +346,8 @@ const uid        = useAuthStore(selectUid)
             filterRetard={filterRetard}
             showRain={showRain}
             isDragging={isDragging}
+            dragStart={dragStart}
+            dragEnd={dragEnd}
             handleDragMouseDown={handleDragMouseDown}
             handleDragMouseEnter={handleDragMouseEnter}
             handleDragMouseUp={handleDragMouseUp}
@@ -354,7 +357,6 @@ const uid        = useAuthStore(selectUid)
             handleSelectEvent={handleSelectEvent}
             goToDay={goToDay}
             setCtxMenu={setCtxMenu}
-            isInDrag={isInDrag}
             prev={prev}
             next={next}
           />
