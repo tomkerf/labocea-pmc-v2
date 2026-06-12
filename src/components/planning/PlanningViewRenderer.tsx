@@ -4,6 +4,7 @@ import MonthView         from '@/components/planning/MonthView'
 import MapView           from '@/components/planning/MapView'
 import YearMatrixView    from '@/components/planning/YearMatrixView'
 import PeriodListView    from '@/components/planning/PeriodListView'
+import WorkloadMatrixView from '@/components/planning/WorkloadMatrixView'
 import {
   type PlanningEvent, type ViewMode,
   type BilanGroup, type AllDayItem,
@@ -99,6 +100,16 @@ export default function PlanningViewRenderer({
 
       {viewMode === 'annee' && (
         <YearMatrixView
+          clients={clients}
+          year={selectedDate.getFullYear()}
+          filterTech={filterTech}
+          filterSite={filterSite}
+          preleveurs={preleveurs}
+        />
+      )}
+
+      {viewMode === 'charge' && (
+        <WorkloadMatrixView
           clients={clients}
           year={selectedDate.getFullYear()}
           filterTech={filterTech}

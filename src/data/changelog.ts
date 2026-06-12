@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '121'
+export const CHANGELOG_VERSION = '122'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,14 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '122',
+    date: '12 juin 2026',
+    items: [
+      { type: 'fix', label: 'Planning : Rétablissement de la météo pour les semaines avec interventions non géolocalisées' },
+      { type: 'feat', label: 'Planning : Extension des prévisions météo jusqu\'à 16 jours (maximum de l\'API)' },
+    ],
+  },
   {
     version: '121',
     date: '12 juin 2026',

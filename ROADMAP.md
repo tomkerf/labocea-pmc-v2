@@ -330,4 +330,5 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-11 | Refactoring composants ✅ | Découpage de 4 composants géants : RapportsPage, YearMatrixView, SamplingForm, EventDetailModal → 10 nouveaux fichiers extraits. Score react-doctor 72→73/100 (−5 no-giant-component). Reste : TodosPage + PlanningPage. |
 | 2026-06-11 | UX Dashboard ✅ | Ajout d'un badge d'alerte orange/rouge "en retard" sur le widget "Temps de pluie" si au moins un prélèvement pluie est en retard. |
 | 2026-06-12 | UX/UI Planning ✅ | Refonte design pastilles (Apple-style), cartouches Vues/Analytiques, matrice de charge améliorée (calcul dynamique + UI), infobulle d'explication. |
+| 2026-06-12 | Bugfix Météo ✅ | Rétablissement de la météo pour les semaines sans interventions géolocalisées et extension des prévisions à 16 jours. |
 

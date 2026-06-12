@@ -66,7 +66,7 @@ export interface PoolItem {
   methode: string
 }
 
-export type ViewMode = 'jour' | 'semaine' | 'mois' | 'carte' | 'annee'
+export type ViewMode = 'jour' | 'semaine' | 'mois' | 'carte' | 'annee' | 'charge'
 
 export type TimedEvent = PlanningEvent & {
   startMin: number

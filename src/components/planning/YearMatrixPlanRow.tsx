@@ -7,12 +7,13 @@ interface YearMatrixPlanRowProps {
   row: RowData
   planYear: number
   onOpenIssueModal: (type: 'overdue' | 'non_effectue') => void
+  isFirstInSite?: boolean
 }
 
-export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal }: YearMatrixPlanRowProps) {
+export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal, isFirstInSite }: YearMatrixPlanRowProps) {
   return (
     <tr
-      className="border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors group h-7"
+      className={`border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors group h-7${isFirstInSite ? ' border-t border-t-[var(--color-border)]' : ''}`}
     >
       <td className="px-4 py-0.5 text-sm sticky left-0 z-20 bg-[var(--color-bg-secondary)] group-hover:bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] transition-colors shadow-[1px_0_0_var(--color-border-subtle)] pl-9">
         <div className="text-[10px] text-[var(--color-text-secondary)] flex items-center gap-1.5">

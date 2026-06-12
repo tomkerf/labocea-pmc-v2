@@ -2,6 +2,17 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 124 — Bugfix Planning : Météo manquante et Extension prévisions
+**12 juin 2026**
+
+### Ce qui a été fait
+- **Rétablissement de la météo** : Correction du bug de disparition de la météo sur les semaines contenant uniquement des interventions non géolocalisées. Ajout d'un fallback automatique vers le centre géographique de la Bretagne (`{ lat: 48.20, lng: -2.90 }`) dans `WeatherBadge` si aucun prélèvement/maintenance géolocalisé n'est présent dans la période.
+- **Extension des prévisions météo** : Augmentation du paramètre `forecast_days` de `14` à `16` jours (la limite standard de l'API Open-Meteo) pour couvrir la fin de la deuxième semaine sur le planning.
+- **Mise à jour du changelog** : Incrémentation en version `122` avec descriptif des correctifs de la météo.
+
+### Prochaines étapes
+- Poursuivre le refactoring de la dette technique.
+
 ## Session 123 — UX/UI Planning : Cartouches et Matrice de Charge
 **12 juin 2026**
 

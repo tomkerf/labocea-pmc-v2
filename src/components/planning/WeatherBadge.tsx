@@ -48,7 +48,10 @@ export default function WeatherBadge({ events, fallbackEvents = EMPTY_EVENTS, da
       })
     }
 
-    if (mapped.length === 0) return null
+    if (mapped.length === 0) {
+      // Fallback global par défaut (centre de la Bretagne) si aucune géolocalisation n'est disponible
+      return { lat: 48.20, lng: -2.90 }
+    }
     const sumLat = mapped.reduce((acc, e) => acc + parseFloat(e.lat || '0'), 0)
     const sumLng = mapped.reduce((acc, e) => acc + parseFloat(e.lng || '0'), 0)
     return { lat: sumLat / mapped.length, lng: sumLng / mapped.length }

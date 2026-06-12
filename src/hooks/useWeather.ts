@@ -45,7 +45,7 @@ export function useWeather(
       `?latitude=${lat.toFixed(4)}&longitude=${lng.toFixed(4)}` +
       `&hourly=precipitation_probability,precipitation` +
       `&daily=weather_code,temperature_2m_max,temperature_2m_min` +
-      `&timezone=Europe%2FParis&forecast_days=14`
+      `&timezone=Europe%2FParis&forecast_days=16`
 
     let cancelled = false
 
