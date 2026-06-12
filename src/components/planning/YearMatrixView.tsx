@@ -176,14 +176,14 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                   </td>
                 </tr>
               ) : (
-                groupedRows.map(({ client, plans }) => {
+                groupedRows.map(({ client, plans }, groupIdx) => {
                   const isCollapsed = collapsedClients.has(client.id)
                   const summary = getGroupSummary(plans)
                   const planYear = parseInt(client.annee ?? String(year))
 
                   return [
                     <tr key={`header-${client.id}`}
-                      className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)] hover:bg-[#e8e8ec] transition-colors cursor-pointer"
+                      className={`border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)] hover:bg-[#e8e8ec] transition-colors cursor-pointer${groupIdx > 0 ? ' border-t-2 border-t-[var(--color-border)]' : ''}`}
                       onClick={() => toggleClient(client.id)}
                       aria-label={`${client.nom} — ${isCollapsed ? 'développer' : 'réduire'}`}>
                       <td className="px-3 py-2 sticky left-0 z-20 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)]" style={{ backgroundColor: COLORS.BG_TERTIARY }}>
