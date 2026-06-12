@@ -64,7 +64,7 @@ Ce document liste les dettes techniques identifiées lors des audits successifs.
 - [x] **`no-autofocus`** (9 cas) — tous supprimés. ✅ 2026-06-06
 - [x] **`no-static-element-interactions`** — réduit de 26 → 6 (overlays modals → `role="presentation"`, items cliquables → `<button>`). ✅ 2026-06-06
 - [x] **`click-events-have-key-events`** — éliminé (22 → 0). ✅ 2026-06-06
-- [ ] **`control-has-associated-label`** × 82 — majoritairement faux positifs (inputs avec `htmlFor`/`id`). React-doctor v0.2.9 ne détecte pas les associations HTML classiques.
+- [x] **`control-has-associated-label`** — disparu avec react-doctor v0.5.1 (détection HTML classique corrigée). `no-gray-on-colored-background` × 2 : `TodoRow.tsx:167` corrigé (neutral-400→500), `SamplingForm.tsx:32` FP de pointage. ✅ 2026-06-12
 - Note : react-doctor v0.2.9 a ajouté de nouvelles règles (em-dash × 53, letter-spacing × 43) qui n'étaient pas dans le scope initial.
 
 ## 11. Hors scope V2

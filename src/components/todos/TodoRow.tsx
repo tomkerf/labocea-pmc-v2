@@ -167,7 +167,7 @@ export default function TodoRow({
             <button type="button"
               onClick={() => setDeletingId(todo.id)}
               aria-label="Supprimer la tâche"
-              className="p-1.5 rounded-md hover:bg-red-50 transition-colors text-neutral-400 hover:text-red-500 focus:outline-none"
+              className="p-1.5 rounded-md hover:bg-red-50 transition-colors text-neutral-500 hover:text-red-500 focus:outline-none"
             >
               <Trash2 size={13} strokeWidth={2.5} />
             </button>
