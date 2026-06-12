@@ -1,6 +1,5 @@
 import { useState, useMemo, useReducer } from 'react'
 import { useClientsListener } from '@/hooks/useClients'
-// saveClient, createEvenement, deleteEvenement → usePlanningActions
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
@@ -17,14 +16,10 @@ import { useTodosStore } from '@/stores/todosStore'
 import { useTodosListener } from '@/hooks/useTodos'
 import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
 import {
-  // Types
   type PlanningEvent, type ViewMode,
-  // Fonctions pure
   getFrenchHolidays,
   startOfWeek, startOfMonth, addDays,
-  buildMonthGrid,
-  getPeriodLabel,
-  toISO,
+  buildMonthGrid, getPeriodLabel,
 } from '@/lib/planningUtils'
 import { usePlanningData } from '@/hooks/usePlanningData'
 import { usePlanningCalendar } from '@/hooks/usePlanningCalendar'
@@ -32,23 +27,12 @@ import { usePlanningDrag } from '@/hooks/usePlanningDrag'
 import { usePlanningActions } from '@/hooks/usePlanningActions'
 import { usePlanningNavigation } from '@/hooks/usePlanningNavigation'
 import { usePlanningFilters } from '@/hooks/usePlanningFilters'
-import DayModal          from '@/components/planning/DayModal'
-import CellContextMenu   from '@/components/planning/CellContextMenu'
-import GhostDetailModal  from '@/components/planning/GhostDetailModal'
-import EventDetailModal  from '@/components/planning/EventDetailModal'
-import DragCreateModal   from '@/components/planning/DragCreateModal'
-import PlanningHeader     from '@/components/planning/PlanningHeader'
-import DayView            from '@/components/planning/DayView'
-import WeekView           from '@/components/planning/WeekView'
-import MonthView          from '@/components/planning/MonthView'
-import PeriodListView     from '@/components/planning/PeriodListView'
+import { usePlanningExports } from '@/hooks/usePlanningExports'
+import PlanningHeader       from '@/components/planning/PlanningHeader'
 import PlanningMiniCalendar from '@/components/planning/PlanningMiniCalendar'
-import MapView            from '@/components/planning/MapView'
-import YearMatrixView     from '@/components/planning/YearMatrixView'
-import BilanMoisModal     from '@/components/planning/BilanMoisModal'
+import PlanningViewRenderer from '@/components/planning/PlanningViewRenderer'
+import PlanningModals       from '@/components/planning/PlanningModals'
 import { uiReducer, navReducer } from '@/pages/planning/planningPageReducers'
-
-// ── Composant principal ─────────────────────────────────────
 
 export default function PlanningPage() {
   useClientsListener(); useEquipementsListener()
@@ -56,7 +40,7 @@ export default function PlanningPage() {
   useEvenementsListener(); useUsersListener()
   usePreleveursListener(); useTodosListener()
 
-const uid        = useAuthStore(selectUid)
+  const uid        = useAuthStore(selectUid)
   const initiales  = useAuthStore(selectInitiales)
   const { clients }       = useMissionsStore()
   const { equipements }   = useEquipementsStore()
@@ -67,14 +51,13 @@ const uid        = useAuthStore(selectUid)
   const { todos }         = useTodosStore()
 
   const today = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d }, [])
-
-  // Jours fériés — recalculés chaque année (couvre l'année courante + suivante)
   const todayYear = today.getFullYear()
   const holidays = useMemo(() => ({
     ...getFrenchHolidays(todayYear),
     ...getFrenchHolidays(todayYear + 1),
   }), [todayYear])
 
+  // ── UI state ─────────────────────────────────────────────
   const [ui, dispatch] = useReducer(uiReducer, undefined, () => ({
     showDragHint:      !localStorage.getItem('planning_drag_hint_seen'),
     showRain:          localStorage.getItem('planning_show_rain') !== 'false',
@@ -91,17 +74,18 @@ const uid        = useAuthStore(selectUid)
   const { showDragHint, showRain, showMiniCal, showBilanMois,
           selectedDay, dayModalInitialTab, ctxMenu, eventDetail, ghostDetail, dragModal } = ui
 
-  const setShowDragHint  = (value: boolean) => dispatch({ type: 'SET_SHOW_DRAG_HINT', value })
-  const setShowRain      = (value: boolean) => dispatch({ type: 'SET_SHOW_RAIN', value })
-  const setShowMiniCal   = (value: boolean) => dispatch({ type: 'SET_SHOW_MINI_CAL', value })
-  const setShowBilanMois = (value: boolean) => dispatch({ type: 'SET_SHOW_BILAN_MOIS', value })
-  const setSelectedDay   = (value: string | null) => dispatch({ type: 'SET_SELECTED_DAY', value })
+  const setShowDragHint       = (value: boolean) => dispatch({ type: 'SET_SHOW_DRAG_HINT', value })
+  const setShowRain           = (value: boolean) => dispatch({ type: 'SET_SHOW_RAIN', value })
+  const setShowMiniCal        = (value: boolean) => dispatch({ type: 'SET_SHOW_MINI_CAL', value })
+  const setShowBilanMois      = (value: boolean) => dispatch({ type: 'SET_SHOW_BILAN_MOIS', value })
+  const setSelectedDay        = (value: string | null) => dispatch({ type: 'SET_SELECTED_DAY', value })
   const setDayModalInitialTab = (value: 'pool' | 'evt') => dispatch({ type: 'SET_DAY_MODAL_TAB', value })
-  const setCtxMenu       = (value: { dateStr: string; x: number; y: number } | null) => dispatch({ type: 'SET_CTX_MENU', value })
-  const setEventDetail   = (value: { event: PlanningEvent; dateStr: string } | null) => dispatch({ type: 'SET_EVENT_DETAIL', value })
-  const setGhostDetail   = (value: { event: PlanningEvent; dateStr: string } | null) => dispatch({ type: 'SET_GHOST_DETAIL', value })
-  const setDragModal     = (value: { dateDebut: string; dateFin: string } | null) => dispatch({ type: 'SET_DRAG_MODAL', value })
+  const setCtxMenu  = (value: { dateStr: string; x: number; y: number } | null) => dispatch({ type: 'SET_CTX_MENU', value })
+  const setEventDetail = (value: { event: PlanningEvent; dateStr: string } | null) => dispatch({ type: 'SET_EVENT_DETAIL', value })
+  const setGhostDetail = (value: { event: PlanningEvent; dateStr: string } | null) => dispatch({ type: 'SET_GHOST_DETAIL', value })
+  const setDragModal   = (value: { dateDebut: string; dateFin: string } | null) => dispatch({ type: 'SET_DRAG_MODAL', value })
 
+  // ── Nav state ─────────────────────────────────────────────
   const [nav, dispatchNav] = useReducer(navReducer, {
     viewMode: 'semaine' as ViewMode,
     weekStart: startOfWeek(today),
@@ -109,12 +93,12 @@ const uid        = useAuthStore(selectUid)
     selectedDate: today,
   })
   const { viewMode, weekStart, monthStart, selectedDate } = nav
-  const setViewMode    = (value: ViewMode) => dispatchNav({ type: 'SET_VIEW_MODE', value })
-  const setWeekStart   = (value: Date) => dispatchNav({ type: 'SET_WEEK_START', value })
-  const setMonthStart  = (value: Date) => dispatchNav({ type: 'SET_MONTH_START', value })
+  const setViewMode     = (value: ViewMode) => dispatchNav({ type: 'SET_VIEW_MODE', value })
+  const setWeekStart    = (value: Date) => dispatchNav({ type: 'SET_WEEK_START', value })
+  const setMonthStart   = (value: Date) => dispatchNav({ type: 'SET_MONTH_START', value })
   const setSelectedDate = (value: Date) => dispatchNav({ type: 'SET_SELECTED_DATE', value })
 
-  const [filterTech,  setFilterTech]  = useState(() => {
+  const [filterTech, setFilterTech] = useState(() => {
     const saved = localStorage.getItem('planning_filter_tech')
     if (saved && saved !== 'ALL') return saved
     const ini = useAuthStore.getState().appUser?.initiales ?? ''
@@ -131,7 +115,7 @@ const uid        = useAuthStore(selectUid)
     else setEventDetail({ event, dateStr })
   }
 
-  // ── Navigation ──────────────────────────────────────────
+  // ── Hooks ──────────────────────────────────────────────────
   const { prev, next, goToday, goToDay, switchView } = usePlanningNavigation({
     viewMode, setViewMode, today,
     selectedDate, setSelectedDate,
@@ -140,7 +124,6 @@ const uid        = useAuthStore(selectUid)
     setSelectedDay,
   })
 
-  // ── Drag-to-create + swipe ──────────────────────────────
   const {
     handleTouchStart, handleTouchEnd,
     isDragging, dragStart, dragEnd,
@@ -151,7 +134,6 @@ const uid        = useAuthStore(selectUid)
   const weekDays  = useMemo(() => Array.from({length:7},(_,i) => addDays(weekStart,i)), [weekStart])
   const monthGrid = useMemo(() => buildMonthGrid(monthStart), [monthStart])
 
-  // ── Calculs dérivés des données Firestore ───────────────
   const { eventsByDate, allTechs, techOptions, poolSamplings, overduePool } = usePlanningData({
     clients, maintenances, equipements, evenements, todos, users, preleveurs, selectedDay,
   })
@@ -160,7 +142,6 @@ const uid        = useAuthStore(selectUid)
     allTechs, preleveurs, filterTech, filterSite,
   })
 
-  // ── Calculs calendrier (filtrage, bilanBand, allDayItems, periodList) ──
   const {
     monthPoolCount, bilanBand, allDayItems, periodList, filteredForDayFlat,
   } = usePlanningCalendar({
@@ -170,67 +151,26 @@ const uid        = useAuthStore(selectUid)
     handleSelectEvent,
   })
 
-  // ── Événements de la période active (pour exports) ──────────
-  const activePeriodEvents = useMemo(() => {
-    const dates: string[] = []
-    if (viewMode === 'jour' || viewMode === 'carte') {
-      dates.push(toISO(selectedDate))
-    } else if (viewMode === 'semaine') {
-      weekDays.forEach(d => dates.push(toISO(d)))
-    } else if (viewMode === 'mois') {
-      monthGrid.forEach(d => {
-        if (d) {
-          dates.push(toISO(d))
-        }
-      })
-    }
-
-    const list: PlanningEvent[] = []
-    const seen = new Set<string>()
-    dates.forEach(dateStr => {
-      const dayEvts = filteredForDayFlat(dateStr)
-      dayEvts.forEach(e => {
-        if (!seen.has(e.id)) {
-          seen.add(e.id)
-          list.push(e)
-        }
-      })
-    })
-    return list
-  }, [viewMode, selectedDate, weekDays, monthGrid, filteredForDayFlat])
-
-  const handleExportPdf = () => {
-    import('@/lib/exportPlanningPdf').then(({ exportPlanningPdf }) => {
-      exportPlanningPdf(activePeriodEvents, periodLabel, activeFilterTech, users)
-    })
-  }
-
-  const handleExportExcel = () => {
-    import('@/lib/exportPlanningExcel').then(({ exportPlanningExcel }) => {
-      exportPlanningExcel(activePeriodEvents, periodLabel, activeFilterTech)
-    })
-  }
-
-  // ── Actions Firestore ──────────────────────────────────
   const {
     handleCancelSampling, handleMoveEvent, handleDeleteEvent,
-    toggleRainDay, handleChangeTechnicien, handleChangeEquipements, handleSaveEvenement, handleValidatePool,
+    toggleRainDay, handleChangeTechnicien, handleChangeEquipements,
+    handleSaveEvenement, handleValidatePool,
   } = usePlanningActions({ uid, initiales, clients, evenements, holidays })
-
-  // ── Label période ───────────────────────────────────────
 
   const periodLabel = getPeriodLabel(viewMode, selectedDate, weekStart, monthStart)
 
+  const { handleExportPdf, handleExportExcel } = usePlanningExports({
+    viewMode, selectedDate, weekDays, monthGrid,
+    filteredForDayFlat, periodLabel, activeFilterTech, users,
+  })
 
-  // ── Conflits matériel pour le modal ouvert ──────────────
   const assignedEqIdsForDate = eventDetail
     ? (eventsByDate[eventDetail.dateStr] || [])
         .filter(e => e.id !== eventDetail.event.id && e.type === 'prelevement' && e.equipementsAssignes)
         .flatMap(e => e.equipementsAssignes || [])
     : []
 
-  // ── Render ──────────────────────────────────────────────
-
+  // ── Render ─────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-full relative">
 
@@ -246,215 +186,47 @@ const uid        = useAuthStore(selectUid)
         onBilanMois={() => setShowBilanMois(true)}
       />
 
-      {/* ── Panneau mini-calendrier overlay (desktop) ── */}
       <PlanningMiniCalendar
-        showMiniCal={showMiniCal}
-        setShowMiniCal={setShowMiniCal}
+        showMiniCal={showMiniCal} setShowMiniCal={setShowMiniCal}
         viewMode={viewMode}
-        monthStart={monthStart}
-        weekStart={weekStart}
-        selectedDate={selectedDate}
-        today={today}
-        setWeekStart={setWeekStart}
-        setMonthStart={setMonthStart}
-        setSelectedDate={setSelectedDate}
-        setViewMode={setViewMode}
-        setSelectedDay={setSelectedDay}
+        monthStart={monthStart} weekStart={weekStart} selectedDate={selectedDate} today={today}
+        setWeekStart={setWeekStart} setMonthStart={setMonthStart}
+        setSelectedDate={setSelectedDate} setViewMode={setViewMode} setSelectedDay={setSelectedDay}
       />
 
+      <PlanningViewRenderer
+        viewMode={viewMode} selectedDate={selectedDate} today={today}
+        eventsByDate={eventsByDate} filterTech={activeFilterTech} allowedTechs={allowedTechs}
+        filterRetard={filterRetard} showRain={showRain} handleSelectEvent={handleSelectEvent}
+        handleTouchStart={handleTouchStart} handleTouchEnd={handleTouchEnd} setSelectedDay={setSelectedDay}
+        preleveurs={preleveurs} filterSite={filterSite} clients={clients}
+        weekDays={weekDays} monthGrid={monthGrid} holidays={holidays}
+        bilanBand={bilanBand} allDayItems={allDayItems}
+        isDragging={isDragging} dragStart={dragStart} dragEnd={dragEnd}
+        handleDragMouseDown={handleDragMouseDown} handleDragMouseEnter={handleDragMouseEnter}
+        handleDragMouseUp={handleDragMouseUp} setIsDragging={setIsDragging}
+        setDragStart={setDragStart} setDragEnd={setDragEnd}
+        goToDay={goToDay} setCtxMenu={setCtxMenu} prev={prev} next={next}
+        periodList={periodList} goToday={goToday}
+      />
 
-      {/* ── VUE JOUR (toutes tailles) ── */}
-      {viewMode === 'jour' && (
-        <DayView
-          selectedDate={selectedDate}
-          today={today}
-          eventsByDate={eventsByDate}
-          filterTech={activeFilterTech}
-          allowedTechs={allowedTechs}
-          filterRetard={filterRetard}
-          showRain={showRain}
-          handleTouchStart={handleTouchStart}
-          handleTouchEnd={handleTouchEnd}
-          handleSelectEvent={handleSelectEvent}
-          setSelectedDay={setSelectedDay}
-        />
-      )}
-
-      {/* ── VUE CARTE (toutes tailles) ── */}
-      {viewMode === 'carte' && (
-        <MapView
-          selectedDate={selectedDate}
-          today={today}
-          eventsByDate={eventsByDate}
-          filterTech={activeFilterTech}
-          allowedTechs={allowedTechs}
-          filterRetard={filterRetard}
-          preleveurs={preleveurs}
-          handleSelectEvent={handleSelectEvent}
-        />
-      )}
-
-      {/* ── VUE ANNÉE (toutes tailles) ── */}
-      {viewMode === 'annee' && (
-        <YearMatrixView
-          clients={clients}
-          year={selectedDate.getFullYear()}
-          filterTech={activeFilterTech}
-          filterSite={filterSite}
-          preleveurs={preleveurs}
-        />
-      )}
-
-      {/* ── DESKTOP : vue calendrier grille ── */}
-      <div className={(viewMode === 'semaine' || viewMode === 'mois') ? 'hidden md:flex flex-col flex-1 overflow-hidden' : 'hidden'}>
-
-        {viewMode==='semaine' && (
-          <WeekView
-            weekDays={weekDays}
-            today={today}
-            holidays={holidays}
-            eventsByDate={eventsByDate}
-            bilanBand={bilanBand}
-            allDayItems={allDayItems}
-            filterTech={activeFilterTech}
-            allowedTechs={allowedTechs}
-            filterRetard={filterRetard}
-            showRain={showRain}
-            isDragging={isDragging}
-            dragStart={dragStart}
-            dragEnd={dragEnd}
-            handleDragMouseDown={handleDragMouseDown}
-            handleDragMouseEnter={handleDragMouseEnter}
-            handleDragMouseUp={handleDragMouseUp}
-            setIsDragging={setIsDragging}
-            setDragStart={setDragStart}
-            setDragEnd={setDragEnd}
-            handleSelectEvent={handleSelectEvent}
-            goToDay={goToDay}
-            setCtxMenu={setCtxMenu}
-          />
-        )}
-
-        {viewMode==='mois' && (
-          <MonthView
-            monthGrid={monthGrid}
-            today={today}
-            holidays={holidays}
-            eventsByDate={eventsByDate}
-            filterTech={activeFilterTech}
-            allowedTechs={allowedTechs}
-            filterRetard={filterRetard}
-            showRain={showRain}
-            isDragging={isDragging}
-            dragStart={dragStart}
-            dragEnd={dragEnd}
-            handleDragMouseDown={handleDragMouseDown}
-            handleDragMouseEnter={handleDragMouseEnter}
-            handleDragMouseUp={handleDragMouseUp}
-            setIsDragging={setIsDragging}
-            setDragStart={setDragStart}
-            setDragEnd={setDragEnd}
-            handleSelectEvent={handleSelectEvent}
-            goToDay={goToDay}
-            setCtxMenu={setCtxMenu}
-            prev={prev}
-            next={next}
-          />
-        )}
-      </div>
-
-      {/* ── MOBILE : scroll vertical liste ── */}
-      <div className={(viewMode === 'semaine' || viewMode === 'mois') ? 'md:hidden flex-1 overflow-y-auto' : 'hidden'}>
-        <PeriodListView
-          periodList={periodList}
-          today={today}
-          filterRetard={filterRetard}
-          goToday={goToday}
-          goToDay={goToDay}
-          handleSelectEvent={handleSelectEvent}
-        />
-      </div>
-
-      {/* ── DayModal ── */}
-      {selectedDay && (
-        <DayModal
-          key={selectedDay + dayModalInitialTab}
-          dateStr={selectedDay}
-          onClose={() => setSelectedDay(null)}
-          pool={poolSamplings}
-          overduePool={overduePool}
-          uid={uid}
-          initiales={initiales}
-          onValidatePool={handleValidatePool}
-          initialTab={dayModalInitialTab}
-          holidays={holidays}
-        />
-      )}
-
-      {/* ── CellContextMenu ── */}
-      {ctxMenu && (
-        <CellContextMenu
-          x={ctxMenu.x}
-          y={ctxMenu.y}
-          onClose={() => setCtxMenu(null)}
-          holidayName={holidays[ctxMenu.dateStr]}
-          hasRain={evenements.some(e => e.type === 'meteo' && e.date === ctxMenu.dateStr)}
-          onToggleRain={() => toggleRainDay(ctxMenu.dateStr)}
-          onPlanifier={() => {
-            setDayModalInitialTab('pool')
-            setSelectedDay(ctxMenu.dateStr)
-          }}
-          onEvenement={() => {
-            setDayModalInitialTab('evt')
-            setSelectedDay(ctxMenu.dateStr)
-          }}
-        />
-      )}
-
-      {/* ── EventDetailModal ── */}
-      {eventDetail && (
-        <EventDetailModal
-          key={eventDetail.event.id}
-          event={eventDetail.event}
-          dateStr={eventDetail.dateStr}
-          assignedEqIdsForDate={assignedEqIdsForDate}
-          onClose={() => setEventDetail(null)}
-          onCancel={handleCancelSampling}
-          onMove={handleMoveEvent}
-          onDelete={handleDeleteEvent}
-          onChangeTech={handleChangeTechnicien}
-          onChangeEquipements={handleChangeEquipements}
-          techOptions={techOptions}
-        />
-      )}
-
-      {/* ── GhostDetailModal ── */}
-      {ghostDetail && (
-        <GhostDetailModal
-          event={ghostDetail.event}
-          onClose={() => setGhostDetail(null)}
-        />
-      )}
-
-      {/* ── DragCreateModal ── */}
-      {dragModal && (
-        <DragCreateModal
-          dateDebut={dragModal.dateDebut}
-          dateFin={dragModal.dateFin}
-          onClose={() => setDragModal(null)}
-          onSave={handleSaveEvenement}
-        />
-      )}
-
-      {/* ── BilanMoisModal ── */}
-      {showBilanMois && (
-        <BilanMoisModal
-          onClose={() => setShowBilanMois(false)}
-          month={selectedDate.getMonth()}
-          year={selectedDate.getFullYear()}
-          clients={clients}
-        />
-      )}
+      <PlanningModals
+        selectedDay={selectedDay} dayModalInitialTab={dayModalInitialTab}
+        poolSamplings={poolSamplings} overduePool={overduePool}
+        uid={uid} initiales={initiales} holidays={holidays}
+        handleValidatePool={handleValidatePool} setSelectedDay={setSelectedDay}
+        ctxMenu={ctxMenu} evenements={evenements} toggleRainDay={toggleRainDay}
+        setDayModalInitialTab={setDayModalInitialTab} setCtxMenu={setCtxMenu}
+        eventDetail={eventDetail} assignedEqIdsForDate={assignedEqIdsForDate}
+        techOptions={techOptions} handleCancelSampling={handleCancelSampling}
+        handleMoveEvent={handleMoveEvent} handleDeleteEvent={handleDeleteEvent}
+        handleChangeTechnicien={handleChangeTechnicien}
+        handleChangeEquipements={handleChangeEquipements} setEventDetail={setEventDetail}
+        ghostDetail={ghostDetail} setGhostDetail={setGhostDetail}
+        dragModal={dragModal} handleSaveEvenement={handleSaveEvenement} setDragModal={setDragModal}
+        showBilanMois={showBilanMois} selectedDate={selectedDate}
+        clients={clients} setShowBilanMois={setShowBilanMois}
+      />
     </div>
   )
 }
