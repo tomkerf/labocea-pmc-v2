@@ -136,7 +136,10 @@ export function DashboardPlanningWidget({
           style={{ background: COLORS.ACCENT, color: '#FFFFFF', boxShadow: 'var(--shadow-card)' }}
         >
           <span className="text-base leading-none">🚙</span>
-          Mode Tournée du Jour
+          <span className="flex flex-col items-start">
+            <span>Mode Tournée du Jour</span>
+            <span className="text-xs font-normal opacity-80">Prélèvements du jour à effectuer</span>
+          </span>
         </button>
       )}
     </div>
