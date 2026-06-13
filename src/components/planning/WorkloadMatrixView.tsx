@@ -15,6 +15,18 @@ interface WorkloadMatrixViewProps {
 const THRESHOLD_WARNING = 25
 const THRESHOLD_DANGER = 40
 
+function getHeatmapColor(value: number) {
+  if (value === 0) return 'transparent'
+  if (value >= THRESHOLD_DANGER) return 'var(--color-danger-light)'
+  if (value >= THRESHOLD_WARNING) return 'var(--color-warning-light)'
+  return 'var(--color-bg-secondary)'
+}
+
+function getHeatmapTextColor(value: number) {
+  if (value === 0) return 'var(--color-text-tertiary)'
+  return 'var(--color-text-primary)'
+}
+
 export default function WorkloadMatrixView({ clients, year, filterTech, filterSite, preleveurs }: WorkloadMatrixViewProps) {
   
   // 1. Agréger les données par technicien et par mois
@@ -101,19 +113,6 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
   // Capacité théorique (exemple: 35 prélèvements * nb de techs)
   const nbActiveTechs = techStats.filter(t => t.code !== 'NON_ASSIGNE').length
   const maxCapacityPerMonth = nbActiveTechs * 35 
-
-  // Fonction pour définir la couleur de la cellule de Heatmap
-  const getHeatmapColor = (value: number) => {
-    if (value === 0) return 'transparent'
-    if (value >= THRESHOLD_DANGER) return 'var(--color-danger-light)'
-    if (value >= THRESHOLD_WARNING) return 'var(--color-warning-light)'
-    return 'var(--color-bg-secondary)' // Normal
-  }
-  
-  const getHeatmapTextColor = (value: number) => {
-    if (value === 0) return 'var(--color-text-tertiary)'
-    return 'var(--color-text-primary)' // Toujours noir/foncé pour un bon contraste sur les fonds pastels
-  }
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[var(--color-bg-primary)] p-4 md:p-6 overflow-y-auto">
@@ -260,7 +259,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
                   const isUnassigned = tech.code === 'NON_ASSIGNE'
                   
                   return (
-                    <tr key={tech.code} className="border-b border-[var(--color-border-subtle)] hover:bg-[#f9f9fa] transition-colors">
+                    <tr key={tech.code} className="border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors">
                       <td className="px-5 py-3 border-r border-[var(--color-border-subtle)]">
                         <div className="flex items-center gap-2">
                           <span className={`font-medium text-sm ${isUnassigned ? 'text-[var(--color-warning)] italic' : 'text-[var(--color-text-primary)]'}`}>
