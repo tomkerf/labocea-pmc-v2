@@ -27,7 +27,7 @@ export default function SortablePlanRow({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: plan.id })
 
-  const overdueCount = (plan.samplings ?? []).filter((s) => isSamplingOverdue(s, clientYear)).length
+  const overdueCount = (plan.samplings ?? []).filter((s) => isSamplingOverdue(s, clientYear, plan.methode === 'Automatique')).length
 
   return (
     <div

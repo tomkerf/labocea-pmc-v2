@@ -104,7 +104,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
               })
             }
           }
-          if (isSamplingOverdue(s, year)) {
+          if (isSamplingOverdue(s, year, plan.methode === 'Automatique')) {
             enRetard++
             enRetardListItems.push({
               samplingId: s.id,

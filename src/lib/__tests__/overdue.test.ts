@@ -108,6 +108,32 @@ describe('isSamplingOverdue', () => {
     })
   })
 
+  describe('Paramètre isAutomatique (Bilan 24h)', () => {
+    it('ne marque pas en retard le jour J1 avant minuit pour un plan Automatique', () => {
+      vi.setSystemTime(new Date(2026, 5, 10, 23, 59, 0)) // 10 juin 23:59
+      const s = makeSampling({ plannedMonth: 5, plannedDay: 10 }) // plannedDay = J1
+      expect(isSamplingOverdue(s, 2026, true)).toBe(false)
+    })
+
+    it('marque en retard après la fin de J2 pour un plan Automatique', () => {
+      vi.setSystemTime(new Date(2026, 5, 11, 23, 59, 59, 999)) // 11 juin 23:59:59 (fin J2)
+      const s = makeSampling({ plannedMonth: 5, plannedDay: 10 })
+      expect(isSamplingOverdue(s, 2026, true)).toBe(false)
+    })
+
+    it('marque en retard après le début de J3 pour un plan Automatique', () => {
+      vi.setSystemTime(new Date(2026, 5, 12, 0, 0, 1)) // 12 juin 00:00:01 (J3)
+      const s = makeSampling({ plannedMonth: 5, plannedDay: 10 })
+      expect(isSamplingOverdue(s, 2026, true)).toBe(true)
+    })
+
+    it('marque en retard le jour J1 après minuit sans isAutomatique (comportement standard)', () => {
+      vi.setSystemTime(new Date(2026, 5, 11, 0, 0, 1)) // 11 juin 00:00:01
+      const s = makeSampling({ plannedMonth: 5, plannedDay: 10 })
+      expect(isSamplingOverdue(s, 2026, false)).toBe(true)
+    })
+  })
+
   describe('Paramètre year', () => {
     it('utilise l\'année courante si year est omis', () => {
       // Simule le 20 juin 2026 — un prélèvement planifié en mars (sans year) doit être en retard

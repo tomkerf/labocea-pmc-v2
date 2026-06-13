@@ -96,7 +96,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
       plan.samplings.forEach(s => {
         if (s.status === 'done') { c.done++; return }
         if (s.status === 'non_effectue') { c.non_effectue++; return }
-        if (isSamplingOverdue(s, planYear)) { c.overdue++; return }
+        if (isSamplingOverdue(s, planYear, plan.methode === 'Automatique')) { c.overdue++; return }
         if (s.status === 'planned') c.planned++
       })
     })
@@ -110,7 +110,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
       plan.samplings.forEach(s => {
         if (s.status === 'done') { c.done++; return }
         if (s.status === 'non_effectue') { c.non_effectue++; return }
-        if (isSamplingOverdue(s, planYear)) { c.overdue++; return }
+        if (isSamplingOverdue(s, planYear, plan.methode === 'Automatique')) { c.overdue++; return }
         if (s.status === 'planned') c.planned++
       })
     })

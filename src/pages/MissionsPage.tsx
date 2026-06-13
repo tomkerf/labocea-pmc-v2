@@ -14,7 +14,7 @@ import { COLORS } from '@/lib/constants'
 
 function hasOverdue(client: Client): boolean {
   const year = Number(client.annee) || undefined
-  return client.plans.some((p) => p.samplings.some((s) => isSamplingOverdue(s, year)))
+  return client.plans.some((p) => p.samplings.some((s) => isSamplingOverdue(s, year, p.methode === 'Automatique')))
 }
 
 export default function MissionsPage() {

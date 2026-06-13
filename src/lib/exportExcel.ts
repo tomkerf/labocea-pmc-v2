@@ -34,8 +34,8 @@ function formatPlanned(s: Sampling): string {
   return ''
 }
 
-function resolveStatus(s: Sampling, clientYear: string): SamplingStatus {
-  if (s.status === 'planned' && isSamplingOverdue(s, parseInt(clientYear, 10))) return 'overdue'
+function resolveStatus(s: Sampling, clientYear: string, isAutomatique?: boolean): SamplingStatus {
+  if (s.status === 'planned' && isSamplingOverdue(s, parseInt(clientYear, 10), isAutomatique)) return 'overdue'
   return s.status
 }
 
@@ -60,8 +60,8 @@ function buildRecap(client: Client): XLSX.WorkSheet {
     (p.samplings ?? []).map(s => ({ s, p }))
   )
   const done = allSamplings.filter(({ s }) => s.status === 'done').length
-  const planned = allSamplings.filter(({ s }) => resolveStatus(s, client.annee) === 'planned').length
-  const overdue = allSamplings.filter(({ s }) => resolveStatus(s, client.annee) === 'overdue').length
+  const planned = allSamplings.filter(({ s, p }) => resolveStatus(s, client.annee, p.methode === 'Automatique') === 'planned').length
+  const overdue = allSamplings.filter(({ s, p }) => resolveStatus(s, client.annee, p.methode === 'Automatique') === 'overdue').length
   const nonEff = allSamplings.filter(({ s }) => s.status === 'non_effectue').length
   const total = allSamplings.length
   const tauxReal = total > 0 ? Math.round((done / total) * 100) : 0
