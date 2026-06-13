@@ -29,6 +29,8 @@ import { usePlanningNavigation } from '@/hooks/usePlanningNavigation'
 import { usePlanningFilters } from '@/hooks/usePlanningFilters'
 import { usePlanningExports } from '@/hooks/usePlanningExports'
 import PlanningHeader       from '@/components/planning/PlanningHeader'
+import PlanningFilterBar    from '@/components/planning/PlanningFilterBar'
+import PlanningDragHint     from '@/components/planning/PlanningDragHint'
 import PlanningMiniCalendar from '@/components/planning/PlanningMiniCalendar'
 import PlanningViewRenderer from '@/components/planning/PlanningViewRenderer'
 import PlanningModals       from '@/components/planning/PlanningModals'
@@ -178,13 +180,17 @@ export default function PlanningPage() {
         periodLabel={periodLabel} viewMode={viewMode}
         prev={prev} next={next} goToday={goToday} switchView={switchView}
         showMiniCal={showMiniCal} setShowMiniCal={setShowMiniCal}
-        allTechs={visibleTechs} filterTech={activeFilterTech} setFilterTech={setFilterTech}
-        filterSite={filterSite} setFilterSite={setFilterSite}
-        showRain={showRain} setShowRain={setShowRain} preleveurs={preleveurs}
-        showDragHint={showDragHint} setShowDragHint={setShowDragHint}
+        showRain={showRain} setShowRain={setShowRain}
         onExportPdf={handleExportPdf} onExportExcel={handleExportExcel}
         onBilanMois={() => setShowBilanMois(true)}
         showBilanMois={showBilanMois}
+      />
+      <PlanningFilterBar
+        allTechs={visibleTechs} filterTech={activeFilterTech} setFilterTech={setFilterTech}
+        filterSite={filterSite} setFilterSite={setFilterSite} preleveurs={preleveurs}
+      />
+      <PlanningDragHint
+        showDragHint={showDragHint} setShowDragHint={setShowDragHint} viewMode={viewMode}
       />
 
       <PlanningMiniCalendar
