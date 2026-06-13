@@ -1,5 +1,5 @@
 import { useState, useReducer } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
@@ -137,6 +137,7 @@ function CompleteProfileModal() {
 export default function RequireAuth({ children }: { children: React.ReactNode }) {
   const { initialized, firebaseUser } = useAuthStore()
   const appUser = useAuthStore(selectAppUser)
+  const location = useLocation()
 
   // Attendre que Firebase Auth soit initialisé
   if (!initialized) {
@@ -149,7 +150,7 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
   }
 
   if (!firebaseUser) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />
   }
 
   const profileIncomplete = !appUser?.initiales?.trim()

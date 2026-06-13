@@ -239,7 +239,8 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
             </div>
           </div>
           
-          <div className="overflow-x-auto">
+          <div className="relative">
+            <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse" style={{ minWidth: 800 }}>
               <thead>
                 <tr className="bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] text-[11px] uppercase tracking-wider border-b border-[var(--color-border-subtle)]">
@@ -289,6 +290,10 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
                 })}
               </tbody>
             </table>
+            </div>
+            {/* Indicateur scroll horizontal */}
+            <div className="absolute inset-y-0 right-0 w-10 pointer-events-none rounded-br-xl"
+              style={{ background: 'linear-gradient(to right, transparent, var(--color-bg-secondary))' }} />
           </div>
         </div>
 

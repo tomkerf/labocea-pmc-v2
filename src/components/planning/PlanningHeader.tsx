@@ -28,7 +28,7 @@ export default function PlanningHeader({
 }: PlanningHeaderProps) {
   return (
     <div className="flex flex-col shrink-0"
-      style={{ borderBottom:'1px solid var(--color-border-subtle)', background:COLORS.BG_SECONDARY }}>
+      style={{ background:COLORS.BG_SECONDARY }}>
 
       {/* Ligne 1 : navigation période + toggle vue */}
       <div className="flex flex-col md:flex-row md:items-center justify-between px-4 md:px-6 pt-3 md:pt-4 pb-3 gap-3 md:gap-0">

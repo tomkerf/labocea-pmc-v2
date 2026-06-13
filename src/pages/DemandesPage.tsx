@@ -117,7 +117,10 @@ export default function DemandesPage() {
                 <div className="flex-1 overflow-y-auto rounded-b-xl p-2 flex flex-col gap-2"
                   style={{ borderLeft: '1px solid var(--color-border-subtle)', borderRight: '1px solid var(--color-border-subtle)', borderBottom: '1px solid var(--color-border-subtle)', background: COLORS.BG_PRIMARY, minHeight: 120 }}>
                   {col.items.length === 0 ? (
-                    <p className="text-xs text-center py-6" style={{ color: 'var(--color-text-tertiary)' }}>—</p>
+                    <div className="flex flex-col items-center py-8 gap-1.5">
+                      <span className="text-lg">📭</span>
+                      <p className="text-xs text-center" style={{ color: 'var(--color-text-tertiary)' }}>Aucune demande</p>
+                    </div>
                   ) : (
                     col.items.map(d => (
                       <DemandeCard key={d.id} dem={d} onClick={() => setModal(d)} />

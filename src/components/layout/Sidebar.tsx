@@ -55,20 +55,22 @@ export default function Sidebar() {
     >
       {/* Logo + titre app */}
       <div className="px-4 py-4 flex items-center gap-3" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-        <img src="/logo.png" alt="Labocea" className="size-10 object-contain shrink-0" />
+        <img src="/logo.png" alt="Labocea" className="size-8 object-contain shrink-0" />
         <div className="flex items-baseline gap-1.5">
           <span className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Labocea PMC
           </span>
-          <span className="text-xs px-1.5 py-0.5 rounded font-medium"
-            style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
-            V2
-          </span>
+          {import.meta.env.DEV && (
+            <span className="text-xs px-1.5 py-0.5 rounded font-medium"
+              style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+              DEV
+            </span>
+          )}
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5">
+      <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-4 flex flex-col gap-0.5">
         {[...navItems, ...(role === 'admin' ? [{ to: '/admin', icon: ShieldAlert, label: 'Admin', end: false, badge: false, isAccount: false }] : [])].map(({ to, icon: Icon, label, end, badge, isAccount }) => (
           <NavLink
             key={to}
@@ -114,7 +116,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Sync badge + Bouton signalement bug */}
-      <div className="px-3 pb-4 flex flex-col gap-1">
+      <div className="shrink-0 px-3 pb-4 flex flex-col gap-1">
         <div className="flex items-center gap-2 px-3 py-1.5">
           <SyncBadge />
         </div>
