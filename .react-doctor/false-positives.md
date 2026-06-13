@@ -1,0 +1,105 @@
+# React Doctor — Faux positifs connus
+
+## react-doctor/only-export-components
+
+- `src/components/infos/EntryCard.tsx` — `TYPE_CONFIG` est co-localisé intentionnellement avec les composants `Badge`/`EntryCard` car ils sont étroitement couplés (config de rendu par type).
+- `src/components/ui/UserAvatar.tsx` — `AVATAR_COLORS`, `DEFAULT_AVATAR_COLOR`, `getAvatarColor` sont co-localisés intentionnellement (palette utilisée par AppLayout pour les tokens CSS d'accent).
+
+## react-doctor/no-mutable-in-deps
+
+- `src/components/layout/AppLayout.tsx` — `location.pathname` en deps vient de `useLocation()` (React Router), pas de `window.location`. C'est réactif et correct en deps.
+
+## react-doctor/effect-needs-cleanup
+
+- `src/components/planning/MapView.tsx:153` — `marker.on()` sont des listeners Leaflet. Le cleanup du premier `useEffect` appelle `mapRef.current.remove()` qui détruit la carte et tous ses layers/listeners. Pas de fuite mémoire.
+
+## dist_old/
+
+- Tous les diagnostics dans `dist_old/` sont des artefacts de build archivés — ignorer.
+
+## react-doctor/rendering-hydration-mismatch-time
+
+- Toutes les occurrences dans `src/` — L'app est une SPA Vite + React déployée sur Cloudflare Workers comme bundle statique. Il n'y a pas de rendu serveur React (pas de SSR, pas d'hydration). Les `new Date()` et `Date.now()` dans le JSX ne causent aucune divergence hydration. FP systématique sur cette stack.
+
+## react-doctor/no-large-animated-blur
+
+- `src/components/layout/MobileDrawer.tsx`, `TabBar.tsx`, `AppLayout.tsx`, `Sidebar.tsx`, `pages/AsservissementPage.tsx` — Les `backdropFilter: 'blur(Npx)'` sont des effets de verre dépoli (glassmorphism Apple-style), appliqués sur des éléments de navigation fixes (sidebar, drawer, tab bar). Ce sont des styles statiques (non animés) sur des panneaux de petite surface — pas des filtres GPU coûteux sur viewport. Intentionnel, design system validé.
+- `src/components/planning/CellContextMenu.tsx` — `backdrop-filter: blur(20px)` sur un petit menu contextuel. Intentionnel.
+- `src/components/asservissement/AsservissementResultBar.tsx` — barre de résultat, surface réduite. Intentionnel.
+
+## react-doctor/js-combine-iterations (faux positifs)
+
+- `src/hooks/usePlanActions.ts` — `.filter().map()` sur `plan.samplings` avec index pour renumérotation. N < 20 dans tous les cas réels. Deux passes négligeables ; combiner nécessiterait un compteur externe qui nuit à la lisibilité.
+- `src/components/tournee/SaisieRapideModal.tsx:72` — `.filter().map()` sur un tableau de 3 littéraux statiques. N trivial.
+- `src/lib/exportClientHtml.ts:60` — `.flatMap().map()` avec transformation complexe (tri + génération HTML). La lisibilité prime, N < nombre de plans d'un client.
+
+## react-doctor/js-combine-iterations (faux positifs — suite)
+
+- `src/pages/PlanningPage.tsx:289` — `.filter().flatMap()` sur `eventsByDate[eventDetail.dateStr]` (N = nombre d'événements du jour, < 20 en pratique). Lisibilité prime sur l'optimisation marginale.
+
+## react-doctor/js-flatmap-filter (faux positifs)
+
+- `worker/index.js` — fichier Cloudflare Worker côté serveur, hors scope React Doctor.
+
+## react-doctor/async-await-in-loop (faux positifs)
+
+- `worker/index.js:353` et `worker/index.js:426` — fichier Cloudflare Worker côté serveur (do-while de traitement de requêtes), hors scope React Doctor.
+
+## deslop/unused-file (faux positifs)
+
+- `public/firebase-messaging-sw.js` — Service worker Firebase chargé dynamiquement par `firebase/messaging` via `navigator.serviceWorker.register()`, pas par import statique. deslop ne trace pas les enregistrements de service workers.
+
+## react-doctor/no-derived-state (faux positifs)
+
+- `src/hooks/usePushNotifications.ts:57` — `isPushEnabled` nécessite une vérification asynchrone du token Firebase + lecture Firestore. Ne peut pas être dérivé synchroniquement depuis d'autres états. FP confirmé (comportement async obligatoire).
+- `src/pages/PointMesureFichePage.tsx:31` — valeur copiée dans l'état de façon intentionnelle avec eslint-disable existant. Sync effect délibéré pour initialiser le champ éditable depuis les données Firestore.
+
+## react-doctor/no-chain-state-updates (faux positifs)
+
+- `src/hooks/usePushNotifications.ts:57` — mises à jour d'état dans un callback async Firebase/Firestore. Le chaînage est inévitable après une opération asynchrone ; pas de render synchrone supplémentaire dans ce contexte.
+
+## react-doctor/no-event-handler (faux positifs)
+
+- `src/hooks/usePushNotifications.ts:55` — pattern async obligatoire : `checkIfTokenSynced` est une fonction async qui lit Firestore pour synchroniser l'état `isPushEnabled`. Impossible de le transformer en gestionnaire d'événement direct.
+
+## react-doctor/exhaustive-deps (faux positifs)
+
+- `src/components/plan/SamplingForm.tsx:33` — `eslint-disable` intentionnel sur cet effet qui auto-remplit `rapportDatePrevue`. Inclure `onUpdate` dans les deps provoquerait une boucle infinie (onUpdate est recréé à chaque render parent).
+- `src/components/planning/useMapMarkers.ts:118` — `eslint-disable` intentionnel sur l'effet qui gère les markers Leaflet. Les dépendances omises (`handleSelectEvent`, `dateStr`) sont des fonctions/valeurs stables dont le changement ne doit pas recréer tous les markers (performance Leaflet).
+
+## react-doctor/no-fetch-in-effect (faux positifs)
+
+- `src/hooks/useWeather.ts:40` — SPA Vite sans SSR ni hydration. Le `fetch` dans l'effet utilise un flag `cancelled` pour éviter les race conditions et les mises à jour sur composant démonté. Pas de double-fire en production (StrictMode désactivé en prod). Pattern intentionnel et sûr sur cette stack.
+
+## react-doctor/no-gray-on-colored-background (faux positifs)
+
+- `src/components/plan/SamplingForm.tsx:32` — Pointage de ligne erroné par react-doctor : la ligne 32 est dans un `useEffect` sans aucune classe couleur. Aucun `bg-red` ni `text-neutral` dans ce fichier. FP de l'outil.
+
+## react-doctor/no-derived-useState (faux positifs)
+
+- `src/components/planning/DayModalPoolTab.tsx:166` — `poolDate` est initialisé depuis `dateStr` mais est intentionnellement éditable par l'utilisateur (champ date dans PoolItemRow). La correction canonique (prop `key` depuis le parent) nécessiterait de modifier le composant parent DayModal. Accepté comme dette mineure — le seul risque réel est une valeur stale si `dateStr` change sans que le modal se ferme et rouvre, ce qui ne se produit pas dans l'UX actuelle.
+
+## react-doctor/no-array-index-as-key (faux positifs)
+
+- `src/components/planning/WorkloadMatrixView.tsx:207` — Les 12 mois de l'année sont un tableau statique et ordonné, jamais réordonné ni filtré. Aucun risque de désynchronisation React avec un index stable.
+
+## react-doctor/no-event-handler (faux positifs — suite)
+
+- `src/components/plan/SamplingForm.tsx:29` — Auto-remplissage de `rapportDatePrevue` depuis `doneDate` + 1 mois. Pas de gestionnaire d'événement approprié : la logique se déclenche en réaction à 3 props simultanées, pas à une action utilisateur unique. `eslint-disable` intentionnel (ligne 34).
+
+## react-doctor/no-pass-data-to-parent (faux positifs)
+
+- `src/components/plan/SamplingForm.tsx:32` — `onUpdate('rapportDatePrevue', ...)` dans un effet d'auto-remplissage. La logique appartient au composant enfant qui connaît `doneDate`, `rapportPrevu` et `rapportDatePrevue`. La remonter au parent disperserait la logique métier du formulaire.
+
+## react-doctor/no-gray-on-colored-background (faux positifs — suite)
+
+- `src/components/todos/TodoRow.tsx:167` — Bouton suppression avec `hover:bg-red-50 hover:text-red-500 text-neutral-500`. Les classes `hover:bg-red-50` et `hover:text-red-500` s'appliquent simultanément via la même pseudo-classe CSS `:hover` : on ne voit jamais `text-neutral-500` sur fond rouge. FP dû à l'analyse statique sans évaluation des états CSS combinés.
+
+## react-doctor/js-combine-iterations (faux positifs — suite)
+
+- `src/components/planning/WorkloadMatrixView.tsx:84` — `.filter().map().sort()` dans un `useMemo` avec dépendances stables. Recalcul uniquement sur changement de données. Performance négligeable (N = nb de techniciens, < 20).
+- `src/pages/PlanningPage.tsx:168` — `.filter().flatMap()` sur les événements d'un seul jour (N < 20 en pratique). Lisibilité prime.
+
+## react-doctor/no-many-boolean-props (déféré — refactor architectural)
+
+- `src/components/planning/PlanningHeader.tsx:50` — 4 props booléennes (`showMiniCal`, `showRain`, `showDragHint`, `showBilanMois`). Vrai positif mais le découpage en sous-composants est un refactor architectural majeur (PlanningHeader est déjà optimisé et < 250L). À adresser si score target passe à 80+.

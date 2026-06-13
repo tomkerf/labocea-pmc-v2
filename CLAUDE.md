@@ -87,7 +87,7 @@ L'application est fonctionnellement complète (phases 1-7 done). En attente des 
 
 **À consulter avant de coder :** [TODO_REFACTORING.md](./TODO_REFACTORING.md)
 
-Score react-doctor actuel : **63/100** (objectif : 70+). Principaux gains restants : `useReducer` sur `PlanningPage` (17 états), `TodosPage`, `InfosPage`, `EquipementPage`, `ClientPage`, `DashboardPage`.
+Score react-doctor actuel : **72/100** (objectif : 70+ ✅). Les 18 warnings restants sont documentés comme faux positifs dans `.react-doctor/false-positives.md`. Prochain seuil : 80+ nécessite le découpage de `PlanningHeader` (4 props booléennes).
 
 ---
 
