@@ -1,4 +1,5 @@
-import { ChevronLeft, ChevronRight, Calendar, Map as MapIcon, X, Printer, FileSpreadsheet } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { ChevronLeft, ChevronRight, Calendar, Map as MapIcon, X, Printer, FileSpreadsheet, MoreHorizontal } from 'lucide-react'
 import { type ViewMode } from '@/lib/planningUtils'
 import { m } from 'framer-motion'
 import { COLORS } from '@/lib/constants'
@@ -26,6 +27,20 @@ export default function PlanningHeader({
   showRain, setShowRain,
   onExportPdf, onExportExcel, onBilanMois, showBilanMois
 }: PlanningHeaderProps) {
+  const [showExportMenu, setShowExportMenu] = useState(false)
+  const exportMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!showExportMenu) return
+    function handleClick(e: MouseEvent) {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [showExportMenu])
+
   return (
     <div className="flex flex-col shrink-0"
       style={{ background:COLORS.BG_SECONDARY }}>
@@ -105,23 +120,44 @@ export default function PlanningHeader({
 
         {/* Toggle de vue et exports */}
         <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
-          <div className="flex gap-1">
+
+          {/* Menu exports ⋯ */}
+          <div className="relative hidden md:block" ref={exportMenuRef}>
             <button type="button"
-              onClick={onExportPdf}
-              className="hidden md:flex px-2.5 py-1.5 text-xs font-medium rounded-lg items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] cursor-pointer"
-              title="Exporter la feuille de route PDF"
-            >
-              <Printer size={13} style={{ color: COLORS.TEXT_SECONDARY }} />
-              <span>Feuille de route</span>
+              onClick={() => setShowExportMenu(v => !v)}
+              className="flex items-center justify-center size-7 rounded-lg transition-colors"
+              title="Exports"
+              style={{
+                background: showExportMenu ? 'var(--color-accent-light)' : COLORS.BG_TERTIARY,
+                color: showExportMenu ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
+                border: '1px solid var(--color-border-subtle)',
+              }}>
+              <MoreHorizontal size={14} />
             </button>
-            <button type="button"
-              onClick={onExportExcel}
-              className="hidden md:flex px-2.5 py-1.5 text-xs font-medium rounded-lg items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] cursor-pointer"
-              title="Exporter au format Excel"
-            >
-              <FileSpreadsheet size={13} style={{ color: COLORS.SUCCESS }} />
-              <span className="hidden md:inline">Excel</span>
-            </button>
+            {showExportMenu && (
+              <div className="absolute right-0 top-full mt-1.5 z-50 flex flex-col gap-0.5 p-1 rounded-xl min-w-[180px]"
+                style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-elevated)' }}>
+                <button type="button" onClick={() => { onExportPdf(); setShowExportMenu(false) }}
+                  className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors hover:bg-[var(--color-bg-tertiary)]"
+                  style={{ color: COLORS.TEXT_PRIMARY }}>
+                  <Printer size={13} style={{ color: COLORS.TEXT_SECONDARY }} />
+                  Feuille de route PDF
+                </button>
+                <button type="button" onClick={() => { onExportExcel(); setShowExportMenu(false) }}
+                  className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors hover:bg-[var(--color-bg-tertiary)]"
+                  style={{ color: COLORS.TEXT_PRIMARY }}>
+                  <FileSpreadsheet size={13} style={{ color: COLORS.SUCCESS }} />
+                  Exporter Excel
+                </button>
+                <div style={{ borderTop: '1px solid var(--color-border-subtle)', margin: '2px 8px' }} />
+                <button type="button" onClick={() => { onBilanMois(); setShowExportMenu(false) }}
+                  className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors hover:bg-[var(--color-bg-tertiary)]"
+                  style={{ color: showBilanMois ? COLORS.ACCENT : COLORS.TEXT_PRIMARY }}>
+                  <Calendar size={13} style={{ color: showBilanMois ? COLORS.ACCENT : COLORS.TEXT_SECONDARY }} />
+                  Bilan du mois{showBilanMois ? ' ✓' : ''}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -129,7 +165,7 @@ export default function PlanningHeader({
             {/* Cartouche 1: Vues Calendaires */}
             <div className="relative flex p-0.5 rounded-[var(--radius-md)] shrink-0 w-full md:w-auto overflow-x-auto no-scrollbar"
               style={{ border:'1px solid var(--color-border-subtle)', background:COLORS.BG_TERTIARY }}>
-              {(['jour','semaine','mois','annee'] as ViewMode[]).map(view => (
+              {(['jour','semaine','mois','annee','charge'] as ViewMode[]).map(view => (
               <button type="button"
                 key={view}
                 onClick={() => switchView(view)}
@@ -151,45 +187,6 @@ export default function PlanningHeader({
             ))}
             </div>
 
-            {/* Cartouche 2: Analytique (Bilan / Charge) */}
-            <div className="relative hidden md:flex p-0.5 rounded-[var(--radius-md)] shrink-0 overflow-x-auto no-scrollbar"
-              style={{ border:'1px solid var(--color-border-subtle)', background:COLORS.BG_TERTIARY }}>
-
-              <button type="button"
-                onClick={onBilanMois}
-                className="relative px-3 py-1.5 text-xs font-medium capitalize z-10 transition-colors duration-200 flex items-center gap-1.5 text-center"
-                style={{ color: showBilanMois ? 'white' : COLORS.TEXT_SECONDARY }}
-                onMouseEnter={e => { if (!showBilanMois) e.currentTarget.style.color = COLORS.TEXT_PRIMARY }}
-                onMouseLeave={e => { if (!showBilanMois) e.currentTarget.style.color = COLORS.TEXT_SECONDARY }}
-              >
-                {showBilanMois && (
-                  <m.div
-                    layoutId="active-planning-view-analytic"
-                    className="absolute inset-0 rounded-[var(--radius-sm)] -z-10"
-                    style={{ background: COLORS.ACCENT }}
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-                <Calendar size={13} />
-                Bilan
-              </button>
-
-              <button type="button"
-                onClick={() => switchView('charge')}
-                className="relative px-3 py-1.5 text-xs font-medium capitalize z-10 transition-colors duration-200 text-center"
-                style={{ color: viewMode === 'charge' ? 'white' : COLORS.TEXT_SECONDARY }}
-              >
-                {viewMode === 'charge' && !showBilanMois && (
-                  <m.div
-                    layoutId="active-planning-view-analytic"
-                    className="absolute inset-0 rounded-[var(--radius-sm)] -z-10"
-                    style={{ background: COLORS.ACCENT }}
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-                Charge
-              </button>
-            </div>
           </div>
         </div>
       </div>
