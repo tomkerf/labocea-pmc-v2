@@ -331,4 +331,6 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-11 | UX Dashboard ✅ | Ajout d'un badge d'alerte orange/rouge "en retard" sur le widget "Temps de pluie" si au moins un prélèvement pluie est en retard. |
 | 2026-06-12 | UX/UI Planning ✅ | Refonte design pastilles (Apple-style), cartouches Vues/Analytiques, matrice de charge améliorée (calcul dynamique + UI), infobulle d'explication. |
 | 2026-06-12 | Bugfix Météo ✅ | Rétablissement de la météo pour les semaines sans interventions géolocalisées et extension des prévisions à 16 jours. |
+| 2026-06-13 | Bugfix Planning ✅ | Correction du bug qui grisait les colonnes de congé pour toute l'équipe (limité désormais au seul technicien concerné). |
+
 

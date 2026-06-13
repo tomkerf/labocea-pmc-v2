@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '122'
+export const CHANGELOG_VERSION = '123'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '123',
+    date: '13 juin 2026',
+    items: [
+      { type: 'fix', label: 'Planning : La colonne d\'un jour de congé se grise uniquement pour le technicien concerné' },
+    ],
+  },
   {
     version: '122',
     date: '12 juin 2026',

@@ -246,7 +246,11 @@ export default function WeekView({
           const evts     = groupByClient(filteredForDayFlat(dateStr).filter(e => !isMultiDay(e)))
           const inDrag   = inDragRange(dateStr)
           const isHoliday = !!holidays[dateStr]
-          const hasConge  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'conge') ?? false
+          const hasConge  = eventsByDate[dateStr]?.some(e => 
+            e.evenementData?.type === 'conge' && 
+            filterTech && 
+            e.technicien.toLowerCase() === filterTech.toLowerCase()
+          ) ?? false
           const isRainyDay = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
           const isWeekend  = day.getDay() === 0 || day.getDay() === 6
           return (

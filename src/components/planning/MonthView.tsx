@@ -112,7 +112,11 @@ export default function MonthView({
           const inDrag = inDragRange(dateStr)
           const holidayName = holidays[dateStr]
           const isWeekend   = day.getDay() === 0 || day.getDay() === 6
-          const hasCongeM   = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'conge') ?? false
+          const hasCongeM   = eventsByDate[dateStr]?.some(e => 
+            e.evenementData?.type === 'conge' && 
+            filterTech && 
+            e.technicien.toLowerCase() === filterTech.toLowerCase()
+          ) ?? false
           const isRainyDay  = eventsByDate[dateStr]?.some(e => e.evenementData?.type === 'meteo') ?? false
           const MAX = 3
           return (

@@ -2,6 +2,16 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 125 — Bugfix Planning : Grisage des jours de congé
+**13 juin 2026**
+
+### Ce qui a été fait
+- **Scoping du grisage des congés** : Correction du bug qui grisait la colonne d'un jour entier pour tout le monde dès qu'au moins un congé y était défini. Le grisage `.conge-overlay` est désormais restreint au technicien concerné en vérifiant la correspondance avec `filterTech` dans `WeekView.tsx` et `MonthView.tsx`. Si \"Tous\" les techniciens sont affichés, le jour n'est plus grisé pour préserver la lisibilité du planning de l'équipe active.
+- **Mise à jour du changelog** : Version incrémentée à `123` avec descriptif du correctif de planning.
+
+### Prochaines étapes
+- Poursuivre le refactoring de la dette technique.
+
 ## Session 124 — Bugfix Planning : Météo manquante et Extension prévisions
 **12 juin 2026**
 
