@@ -2,6 +2,33 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 128 — Audit UI/UX : suite et fin des fixes
+**14 juin 2026**
+
+### Ce qui a été fait
+
+- **Tâche #34 (extraction vues planning)** : Constatée déjà terminée (DayView, WeekView, MonthView existent dans `src/components/planning/`). PlanningPage fait 239 lignes.
+- **Fix 3 — Tooltips + hover DayView** (`af88a84`) : Ajout d'attributs `title` sur les trois types de boutons d'événements (groupe toute-la-journée, sous-événements dépliés, événements horodatés) + `hover:opacity-90 / hover:brightness-95` pour l'affordance visuelle.
+- **Hover ClientCard** (`dc8544c`) : Bug `onMouseLeave` qui remettait `'transparent'` au lieu de `COLORS.BG_SECONDARY` — carte devenait invisible après le survol.
+- **Navigation parity desktop/mobile** (`656296e`) : Ajout de l'entrée "Asservissement" (`/outils/asservissement`, icône `FlaskConical`) dans la Sidebar desktop — manquait alors qu'elle était présente dans MobileDrawer.
+- **Toolbar planning overflow ~953px** (`74e0c51`) : `flex-wrap` sur le header + réduction `min-w` du label période (md:140px → lg:180px) — plus de troncature du sélecteur de vues à largeur intermédiaire.
+- **Empty state MissionsPage** (`73f7633`) : Upgrade vers le pattern riche (icône `ClipboardList` + titre + sous-titre + bouton CTA) quand la liste est vide sans filtre actif, cohérent avec MaterielPage / MetrologiePage / MaintenancesPage.
+- **Déploiements staging** : 2 déploiements via `deploy-dev.sh` pour validation visuelle.
+
+### Commits de la session
+- `af88a84` — fix(planning): ajouter tooltips et hover states sur les événements DayView
+- `dc8544c` — fix(ux): corriger le hover state de ClientCard
+- `656296e` — fix(nav): ajouter Asservissement dans la sidebar desktop
+- `74e0c51` — fix(planning): corriger overflow toolbar à ~953px
+- `73f7633` — fix(ux): améliorer l'empty state de MissionsPage
+
+### Prochaines étapes
+- Retours équipe Brest avant déploiement production.
+- Sécurité : Firebase storage.rules trop permissif (lecture large) + XSS `dangerouslySetInnerHTML` dans 3 fichiers.
+- TourneeItem : `badgeColor` pour la pill de statut utilise encore `COLORS.SUCCESS/WARNING` (non mis à jour lors du pass WCAG).
+
+---
+
 ## Session 127 — Bugfix Planning : Jours des Bilans 24h
 **14 juin 2026**
 
