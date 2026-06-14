@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '123'
+export const CHANGELOG_VERSION = '124'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '124',
+    date: '14 juin 2026',
+    items: [
+      { type: 'fix', label: 'Planning : Les Bilans 24h ne sont plus décalés d\'un jour en arrière si la date réalisée est utilisée comme brouillon' },
+    ],
+  },
   {
     version: '123',
     date: '13 juin 2026',

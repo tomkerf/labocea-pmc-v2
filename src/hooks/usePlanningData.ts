@@ -53,17 +53,19 @@ export function usePlanningData({
         plan.samplings.forEach((s: Sampling) => {
           if (!s.plannedDay && !s.doneDate) return
           const overdue = isSamplingOverdue(s, year, isAuto)
-          const dateStrRaw = s.status === 'done' && s.doneDate
+          const isSamplingDone = s.status === 'done'
+          const dateFromDone = (isSamplingDone && s.doneDate) || (!s.plannedDay && s.doneDate)
+          const dateStrRaw = dateFromDone
             ? s.doneDate
             : s.plannedDay
               ? toISO(new Date(year, s.plannedMonth, s.plannedDay))
-              : s.doneDate
+              : ''
 
           // Si c'est un Bilan 24h (Automatique) et que la date provient de doneDate,
-          // doneDate représente J2 (la relève). Donc J1 doit être la veille.
-          let dateStr = dateStrRaw
-          if (isAuto && dateStrRaw === s.doneDate && s.doneDate) {
-            const d = new Date(s.doneDate + 'T12:00:00')
+          // et que l'intervention est VALIDÉE (done), doneDate représente J2 (la relève). Donc J1 doit être la veille.
+          let dateStr = dateStrRaw || ''
+          if (isAuto && dateFromDone && dateStrRaw && isSamplingDone) {
+            const d = new Date(dateStrRaw + 'T12:00:00')
             d.setDate(d.getDate() - 1)
             dateStr = toISO(d)
           }

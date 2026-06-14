@@ -334,5 +334,6 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-13 | Bugfix Planning ✅ | Correction du bug qui grisait les colonnes de congé pour toute l'équipe (limité désormais au seul technicien concerné). |
 | 2026-06-13 | Refactoring Planning ✅ | Extraction PlanningFilterBar + PlanningDragHint depuis PlanningHeader. Suppression border-bottom. Logo sidebar réduit (size-8). |
 | 2026-06-13 | Audit UI/UX + 8 fixes ✅ | Audit terrain complet. Badge DEV, footer sidebar visible, empty state kanban, scroll indicator matrice, routing post-login, sous-titre bouton Tournée, toolbar planning allégée (menu ⋯ exports). |
+| 2026-06-14 | Bugfix Planning ✅ | Correction décalage J2/J1 sur Bilans 24h avec saisie Date réalisée. |
 
 

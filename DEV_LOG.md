@@ -2,6 +2,17 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 127 — Bugfix Planning : Jours des Bilans 24h
+**14 juin 2026**
+
+### Ce qui a été fait
+- **Scoping du décalage J2/J1** : Correction du bug qui décalait les Bilans 24h d'un jour en arrière si l'utilisateur saisissait une "Date réalisée" alors que le statut était toujours "Planifié". Le décalage inverse ne s'applique désormais que si le statut est explicitement `done`.
+- **Mise à jour du changelog** : Version incrémentée à `124`.
+
+### Prochaines étapes
+- S'assurer que le champ `Jour prévu` est bien renseigné dans les fiches missions par les chargés de missions.
+- Reprendre le refactoring UI/UX (Tooltips planning, Fiche mission tab/accordion).
+
 ## Session 126 — Audit UI/UX terrain + 8 fixes
 **13 juin 2026**
 
