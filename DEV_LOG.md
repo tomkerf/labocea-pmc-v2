@@ -2,6 +2,57 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 126 — Audit UI/UX terrain + 8 fixes
+**13 juin 2026**
+
+### Contexte
+Audit UI/UX complet réalisé par un utilisateur externe sur le staging. Retour structuré couvrant 10 points (cohérence visuelle, navigation, planning, accessibilité, routing). Session dédiée à l'implémentation des fixes prioritaires.
+
+### Correctifs appliqués
+
+**Badge V2 → badge DEV (Sidebar)**
+- Le badge "V2" permanent manquait de contexte pour les utilisateurs.
+- Remplacé par un badge "DEV" orange, visible uniquement en `import.meta.env.DEV` (dev local). Invisible en staging et prod.
+
+**Sidebar footer toujours visible**
+- Sur les petits écrans, les boutons "Nouveautés" et "Signaler un problème" disparaissaient sous la nav.
+- Fix : `overflow-y-auto` + `min-h-0` sur `<nav>`, `shrink-0` sur le footer.
+
+**Kanban Demandes — empty state**
+- Les colonnes vides affichaient un simple "—", laissant penser que la page était incomplète.
+- Remplacé par une icône 📭 + texte "Aucune demande".
+
+**Matrice de charge — indicateur scroll horizontal**
+- Le tableau déborde horizontalement sans aucun indicateur visuel.
+- Ajout d'un gradient blanc-transparent sur le bord droit (`pointer-events-none`, `absolute`).
+
+**Routing — redirection post-login vers l'URL d'origine**
+- Accéder à `/planning` sans être connecté redirige vers `/login`, puis après connexion vers `/` au lieu de `/planning`.
+- Fix : `RequireAuth` passe `state={{ from: location.pathname }}` au `Navigate`, `LoginPage` lit `location.state?.from` et redirige vers cette URL (défaut `/`).
+
+**Bouton "Mode Tournée du Jour" — sous-titre explicatif**
+- Libellé opaque pour un nouvel utilisateur.
+- Ajout d'un sous-titre `"Prélèvements du jour à effectuer"` sous le titre.
+
+**Toolbar Planning — menu ⋯ pour les exports**
+- La toolbar contenait trop d'éléments sur une ligne (~1000px) : nav temporelle, filtres, exports PDF/Excel, carte, pluie, vues, analytique. Bouton "jour" tronqué.
+- Exports PDF, Excel et Bilan du mois regroupés dans un dropdown `⋯` avec click-outside.
+- Vue "Charge" intégrée dans le sélecteur de vue (jour/semaine/mois/annee/charge).
+- Cartouche Bilan/Charge supprimé de la toolbar principale.
+
+### Divers
+- Restauration du `package-lock.json` committé après un `npm install` partiel avorté qui avait cassé `iobuffer` (erreur `UNRESOLVED_IMPORT ./text`). Cause : le fichier a été modifié hors session sans commit.
+
+### Commits
+- `c7d78da` — fix(ux): 6 améliorations UI suite à l'audit terrain
+- `d76ea74` — fix(ux): ajouter sous-titre explicatif au bouton Mode Tournée du Jour
+- `94971f2` — fix(ux): réorganiser toolbar planning — exports dans menu ⋯, charge dans sélecteur de vue
+
+### Prochaines étapes
+- Fix 3 : Tooltips sur les événements du calendrier (bloqué sur tâche #34 — extraction vues calendrier)
+- Fix 7 : Fiche mission trop longue (tabs ou accordion — refactor majeur)
+- Retours équipe Brest avant déploiement en production
+
 ## Session 125 — Bugfix Planning : Grisage des jours de congé
 **13 juin 2026**
 

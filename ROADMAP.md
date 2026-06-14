@@ -332,5 +332,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-12 | UX/UI Planning ✅ | Refonte design pastilles (Apple-style), cartouches Vues/Analytiques, matrice de charge améliorée (calcul dynamique + UI), infobulle d'explication. |
 | 2026-06-12 | Bugfix Météo ✅ | Rétablissement de la météo pour les semaines sans interventions géolocalisées et extension des prévisions à 16 jours. |
 | 2026-06-13 | Bugfix Planning ✅ | Correction du bug qui grisait les colonnes de congé pour toute l'équipe (limité désormais au seul technicien concerné). |
+| 2026-06-13 | Refactoring Planning ✅ | Extraction PlanningFilterBar + PlanningDragHint depuis PlanningHeader. Suppression border-bottom. Logo sidebar réduit (size-8). |
+| 2026-06-13 | Audit UI/UX + 8 fixes ✅ | Audit terrain complet. Badge DEV, footer sidebar visible, empty state kanban, scroll indicator matrice, routing post-login, sous-titre bouton Tournée, toolbar planning allégée (menu ⋯ exports). |
 
 
