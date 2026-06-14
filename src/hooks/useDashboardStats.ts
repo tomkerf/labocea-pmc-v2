@@ -459,15 +459,14 @@ export function useDashboardStats({
   }, [clients])
 
   const hasRainToday = useMemo(() => {
-    const todayISO = localISO(new Date())
+    const todayISO = localISO(new Date(nowMs))
     return evenements.some((ev: EvenementPersonnel) => ev.type === 'meteo' && ev.date === todayISO)
-  }, [evenements])
+  }, [evenements, nowMs])
 
   const hasRainTomorrow = useMemo(() => {
-    // eslint-disable-next-line react-hooks/purity
-    const tomorrowISO = localISO(new Date(Date.now() + 86_400_000))
+    const tomorrowISO = localISO(new Date(nowMs + 86_400_000))
     return evenements.some((ev: EvenementPersonnel) => ev.type === 'meteo' && ev.date === tomorrowISO)
-  }, [evenements])
+  }, [evenements, nowMs])
 
   return {
     missionsCeMois,
