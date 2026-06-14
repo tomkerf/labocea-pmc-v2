@@ -124,7 +124,7 @@ export default function TodosPage() {
 
   return (
     <div className="p-6 pb-12 max-w-2xl">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Tâches</h1>
           <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
@@ -132,7 +132,7 @@ export default function TodosPage() {
           </p>
         </div>
         <button type="button" onClick={openAddModal}
-          className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-transform active:scale-95 cursor-pointer"
+          className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-transform active:scale-95 cursor-pointer w-full sm:w-auto"
           style={{ background: COLORS.ACCENT, color: 'white' }}
         >
           <Plus size={16} />

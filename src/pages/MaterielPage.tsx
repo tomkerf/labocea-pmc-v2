@@ -136,7 +136,7 @@ export default function MaterielPage() {
   return (
     <div className="p-6 max-w-2xl">
       {/* En-tête */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Matériel</h1>
           <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
@@ -146,7 +146,7 @@ export default function MaterielPage() {
         <button type="button"
           onClick={handleCreate}
           disabled={creating}
-          className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-opacity"
+          className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-opacity w-full sm:w-auto"
           style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
         >
           <Plus size={16} />
