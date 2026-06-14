@@ -96,7 +96,10 @@ export default function DayView({
                         handleSelectEvent(evt, dateStr)
                       }
                     }}
-                    className="w-full flex items-center gap-1.5 px-2 py-1 rounded-[5px] text-left"
+                    title={isGrouped
+                      ? `${evt.title} — ${evt.count} prélèvements (cliquer pour détails)`
+                      : `${evt.title} — ${evt.subtitle}${evt.technicien && evt.technicien !== '—' ? ' (' + evt.technicien + ')' : ''} · ${evt.statusLabel}`}
+                    className="w-full flex items-center gap-1.5 px-2 py-1 rounded-[5px] text-left hover:opacity-90 transition-opacity"
                     style={{ background: evt.statusBg }}>
                     {isGrouped
                       ? (isExpanded
@@ -132,7 +135,8 @@ export default function DayView({
                   {isExpanded && subEvts.map(sub => (
                     <button type="button" key={sub.id}
                       onClick={() => handleSelectEvent(sub, dateStr)}
-                      className="w-full flex items-center gap-1.5 pl-6 pr-2 py-0.5 text-left"
+                      title={`${sub.title} · ${sub.subtitle}${sub.technicien && sub.technicien !== '—' ? ' (' + sub.technicien + ')' : ''} · ${sub.statusLabel}`}
+                      className="w-full flex items-center gap-1.5 pl-6 pr-2 py-0.5 text-left hover:opacity-80 transition-opacity"
                       style={{ background: 'transparent' }}>
                       <span className="size-[4px] rounded-full shrink-0" style={{ background: sub.statusColor }} />
                       <span className="text-[10px] flex-1 truncate" style={{ color: COLORS.TEXT_PRIMARY }}>{sub.subtitle}</span>
@@ -197,7 +201,8 @@ export default function DayView({
               return (
                 <button type="button" key={evt.id}
                   onClick={() => handleSelectEvent(evt, dateStr)}
-                  className="absolute text-left rounded-lg px-2 py-1 overflow-hidden"
+                  title={`${evt.title}${evt.plannedTime ? ' · ' + evt.plannedTime : ''} — ${evt.subtitle}${evt.technicien && evt.technicien !== '—' ? ' (' + evt.technicien + ')' : ''} · ${evt.statusLabel}`}
+                  className="absolute text-left rounded-lg px-2 py-1 overflow-hidden hover:brightness-95 transition-[filter]"
                   style={{
                     top: top + 1, height: height - 2,
                     left: `calc(${evt.col * W * 100}% + 2px)`,
