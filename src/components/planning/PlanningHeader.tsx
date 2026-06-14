@@ -46,7 +46,7 @@ export default function PlanningHeader({
       style={{ background:COLORS.BG_SECONDARY }}>
 
       {/* Ligne 1 : navigation période + toggle vue */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between px-4 md:px-6 pt-3 md:pt-4 pb-3 gap-3 md:gap-0">
+      <div className="flex flex-col md:flex-row md:flex-wrap md:items-center justify-between px-4 md:px-5 pt-3 md:pt-4 pb-3 gap-2">
 
         <div className="flex items-center justify-between md:justify-start gap-2 w-full md:w-auto">
           {/* Nav Période */}
@@ -56,7 +56,7 @@ export default function PlanningHeader({
               onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
               <ChevronLeft size={18} />
             </button>
-            <span className="text-sm font-semibold min-w-[100px] md:min-w-[180px] text-center" style={{ color:COLORS.TEXT_PRIMARY }}>
+            <span className="text-sm font-semibold min-w-[100px] md:min-w-[140px] lg:min-w-[180px] text-center" style={{ color:COLORS.TEXT_PRIMARY }}>
               {periodLabel}
             </span>
             <button type="button" onClick={next} className="p-1 md:p-1.5 rounded-lg" style={{ color:COLORS.TEXT_SECONDARY }}
