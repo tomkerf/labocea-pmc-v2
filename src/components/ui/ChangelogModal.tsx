@@ -15,7 +15,7 @@ function Badge({ type }: { type: 'feat' | 'fix' }) {
     </span>
   ) : (
     <span className="shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-      style={{ background: 'var(--color-success-light)', color: COLORS.SUCCESS }}>
+      style={{ background: 'var(--color-success-light)', color: 'var(--color-success-text)' }}>
       Corrigé
     </span>
   )

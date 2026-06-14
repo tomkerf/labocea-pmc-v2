@@ -55,10 +55,10 @@ const CATEGORIE_ICONS: Record<string, LucideIcon> = {
 }
 
 const ETAT_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
-  operationnel:    { label: 'Opérationnel',    bg: 'var(--color-success-light)', color: COLORS.SUCCESS },
-  en_maintenance:  { label: 'En maintenance',  bg: 'var(--color-warning-light)', color: COLORS.WARNING },
-  hors_service:    { label: 'Hors service',    bg: 'var(--color-danger-light)',  color: COLORS.DANGER  },
-  prete:           { label: 'Prêté',           bg: COLORS.BG_TERTIARY,   color: COLORS.TEXT_SECONDARY },
+  operationnel:    { label: 'Opérationnel',    bg: 'var(--color-success-light)', color: 'var(--color-success-text)' },
+  en_maintenance:  { label: 'En maintenance',  bg: 'var(--color-warning-light)', color: 'var(--color-warning-text)' },
+  hors_service:    { label: 'Hors service',    bg: 'var(--color-danger-light)',  color: 'var(--color-danger-text)'  },
+  prete:           { label: 'Prêté',           bg: COLORS.BG_TERTIARY,           color: COLORS.TEXT_SECONDARY       },
 }
 
 function calcMetroTooltip(prochainEtalonnage: string): string {

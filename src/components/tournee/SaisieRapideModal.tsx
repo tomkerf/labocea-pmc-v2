@@ -7,9 +7,9 @@ import { COLORS } from '@/lib/constants'
 
 const STATUS_LABELS = { done: 'Réalisé', non_effectue: 'Non effectué', reporte: 'Reporter' } as const
 const STATUS_COLORS = {
-  done:         { bg: 'var(--color-success-light)', text: COLORS.SUCCESS },
-  non_effectue: { bg: 'var(--color-warning-light)', text: COLORS.WARNING },
-  reporte:      { bg: 'var(--color-accent-light)',  text: COLORS.ACCENT  },
+  done:         { bg: 'var(--color-success-light)', text: 'var(--color-success-text)' },
+  non_effectue: { bg: 'var(--color-warning-light)', text: 'var(--color-warning-text)' },
+  reporte:      { bg: 'var(--color-accent-light)',  text: COLORS.ACCENT               },
 } as const
 
 export interface SaisieRapideData {

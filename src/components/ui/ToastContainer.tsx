@@ -10,9 +10,9 @@ const ICONS: Record<Toast['type'], string> = {
 }
 
 const TOAST_COLORS: Record<Toast['type'], { bg: string; color: string; border: string }> = {
-  success: { bg: 'var(--color-success-light)', color: COLORS.SUCCESS, border: COLORS.SUCCESS },
-  error:   { bg: 'var(--color-danger-light)',  color: COLORS.DANGER,  border: COLORS.DANGER  },
-  info:    { bg: 'var(--color-accent-light)',  color: COLORS.ACCENT,  border: COLORS.ACCENT  },
+  success: { bg: 'var(--color-success-light)', color: 'var(--color-success-text)', border: 'var(--color-success-text)' },
+  error:   { bg: 'var(--color-danger-light)',  color: 'var(--color-danger-text)',  border: 'var(--color-danger-text)'  },
+  info:    { bg: 'var(--color-accent-light)',  color: COLORS.ACCENT,               border: COLORS.ACCENT               },
 }
 
 export default function ToastContainer() {

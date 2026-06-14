@@ -24,10 +24,13 @@
   /* Statuts */
   --color-success:       #34C759;
   --color-success-light: #EAF8EE;
+  --color-success-text:  #1A6E31;  /* texte sur fond success-light — WCAG AA */
   --color-warning:       #FF9F0A;
   --color-warning-light: #FFF4E3;
+  --color-warning-text:  #854D0E;  /* texte sur fond warning-light — WCAG AA */
   --color-danger:        #FF3B30;
   --color-danger-light:  #FFEEED;
+  --color-danger-text:   #B91C1C;  /* texte sur fond danger-light — WCAG AA */
   --color-neutral:       #8E8E93;
 
   /* Bordures */

@@ -88,14 +88,14 @@ export function TourneeItem({ item, onAction }: Props) {
               aria-label="Réalisé"
               onClick={() => onAction(item.samplingId, 'done')}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all"
-              style={{ background: 'var(--color-success-light)', color: COLORS.SUCCESS }}>
+              style={{ background: 'var(--color-success-light)', color: 'var(--color-success-text)' }}>
               Réalisé
             </button>
             <button type="button"
               aria-label="Non effectué"
               onClick={() => onAction(item.samplingId, 'non_effectue')}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all"
-              style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
+              style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning-text)' }}>
               <X size={15} />
               Non effectué
             </button>
@@ -134,7 +134,7 @@ export function TourneeItem({ item, onAction }: Props) {
             aria-label="Non effectué"
             onClick={() => onAction(item.samplingId, 'non_effectue')}
             className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-medium"
-            style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
+            style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning-text)' }}>
             <X size={14} />
             Non effectué
           </button>
