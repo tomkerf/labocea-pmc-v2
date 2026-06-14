@@ -13,7 +13,7 @@ export function formatDate(): string {
 
 export function isThisMonth(dateStr: string): boolean {
   if (!dateStr) return false
-  const d = new Date(dateStr)
+  const d = dateStr.length === 10 ? new Date(dateStr + 'T12:00:00') : new Date(dateStr)
   const now = new Date()
   return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
 }
