@@ -16,7 +16,16 @@ import { COLORS } from '@/lib/constants'
 
 // ─── Reducer ────────────────────────────────────────────────────────────────
 
+type Tab = 'infos' | 'plans' | 'visites'
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'infos',   label: 'Informations' },
+  { id: 'plans',   label: 'Points de prélèvement' },
+  { id: 'visites', label: 'Visites' },
+]
+
 type State = {
+  activeTab: Tab
   confirmDelete: boolean
   pdfPreview: string | null
   confirmDeletePlanId: string | null
@@ -25,6 +34,7 @@ type State = {
 }
 
 type Action =
+  | { type: 'SET_ACTIVE_TAB'; payload: Tab }
   | { type: 'SET_CONFIRM_DELETE'; payload: boolean }
   | { type: 'SET_PDF_PREVIEW'; payload: string | null }
   | { type: 'SET_CONFIRM_DELETE_PLAN_ID'; payload: string | null }
@@ -33,6 +43,7 @@ type Action =
   | { type: 'TOGGLE_PLANS_LOCKED' }
 
 const initialState: State = {
+  activeTab: 'infos',
   confirmDelete: false,
   pdfPreview: null,
   confirmDeletePlanId: null,
@@ -42,6 +53,8 @@ const initialState: State = {
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
+    case 'SET_ACTIVE_TAB':
+      return { ...state, activeTab: action.payload }
     case 'SET_CONFIRM_DELETE':
       return { ...state, confirmDelete: action.payload }
     case 'SET_PDF_PREVIEW':
@@ -73,7 +86,7 @@ export default function ClientPage() {
   } = useClientData(clientId)
 
   const [state, dispatch] = useReducer(reducer, initialState)
-  const { confirmDelete, pdfPreview, confirmDeletePlanId, sitesInput, plansLocked } = state
+  const { activeTab, confirmDelete, pdfPreview, confirmDeletePlanId, sitesInput, plansLocked } = state
 
   function handleSitesChange(raw: string) {
     dispatch({ type: 'SET_SITES_INPUT', payload: raw })
@@ -137,49 +150,78 @@ export default function ClientPage() {
   if (!client) return <div className="p-6 text-sm" style={{ color: COLORS.DANGER }}>Client introuvable.</div>
 
   return (
-    <div className="p-4 sm:p-6 max-w-2xl pb-10">
-      <ClientHeader
-        client={client}
-        saving={saving}
-        remoteChanged={remoteChanged}
-        confirmDelete={confirmDelete}
-        users={users}
-        onBack={() => navigate('/missions')}
-        onReload={handleReload}
-        onDismissRemoteChanged={dismissRemoteChanged}
-        onSetConfirmDelete={(v) => dispatch({ type: 'SET_CONFIRM_DELETE', payload: v })}
-        onDelete={handleDeleteClient}
-        onPdfPreview={(v) => dispatch({ type: 'SET_PDF_PREVIEW', payload: v })}
-      />
+    <div className="max-w-2xl pb-10">
+      <div className="px-4 sm:px-6 pt-4 sm:pt-6">
+        <ClientHeader
+          client={client}
+          saving={saving}
+          remoteChanged={remoteChanged}
+          confirmDelete={confirmDelete}
+          users={users}
+          onBack={() => navigate('/missions')}
+          onReload={handleReload}
+          onDismissRemoteChanged={dismissRemoteChanged}
+          onSetConfirmDelete={(v) => dispatch({ type: 'SET_CONFIRM_DELETE', payload: v })}
+          onDelete={handleDeleteClient}
+          onPdfPreview={(v) => dispatch({ type: 'SET_PDF_PREVIEW', payload: v })}
+        />
+      </div>
 
-      <ClientInfoForm
-        client={client}
-        sitesInput={sitesInput}
-        update={update}
-        onSitesChange={handleSitesChange}
-      />
+      {/* Tab bar */}
+      <div className="flex gap-1.5 px-4 sm:px-6 pb-4 overflow-x-auto">
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => dispatch({ type: 'SET_ACTIVE_TAB', payload: tab.id })}
+            className="shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+            style={{
+              background: activeTab === tab.id ? COLORS.ACCENT : COLORS.BG_TERTIARY,
+              color: activeTab === tab.id ? 'white' : COLORS.TEXT_SECONDARY,
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-      <ClientPlans
-        plans={client.plans}
-        clientId={client.id}
-        clientYear={Number(client.annee) || undefined}
-        plansLocked={plansLocked}
-        confirmDeletePlanId={confirmDeletePlanId}
-        onToggleLock={() => dispatch({ type: 'TOGGLE_PLANS_LOCKED' })}
-        onAddPlan={addPlan}
-        onAddSeparator={addSeparator}
-        onReorder={handleReorder}
-        onOpen={(planId) => navigate(`/missions/${client.id}/plan/${planId}`)}
-        onRequestDelete={(v) => dispatch({ type: 'SET_CONFIRM_DELETE_PLAN_ID', payload: v })}
-        onConfirmDelete={confirmDeletePlan}
-        onCancelDelete={() => dispatch({ type: 'SET_CONFIRM_DELETE_PLAN_ID', payload: null })}
-        onSeparatorLabel={handleSeparatorLabel}
-      />
+      {/* Tab content */}
+      <div className="px-4 sm:px-6">
+        {activeTab === 'infos' && (
+          <ClientInfoForm
+            client={client}
+            sitesInput={sitesInput}
+            update={update}
+            onSitesChange={handleSitesChange}
+          />
+        )}
 
-      <ClientVisites
-        clientId={client.id}
-        clientNom={client.nom}
-      />
+        {activeTab === 'plans' && (
+          <ClientPlans
+            plans={client.plans}
+            clientId={client.id}
+            clientYear={Number(client.annee) || undefined}
+            plansLocked={plansLocked}
+            confirmDeletePlanId={confirmDeletePlanId}
+            onToggleLock={() => dispatch({ type: 'TOGGLE_PLANS_LOCKED' })}
+            onAddPlan={addPlan}
+            onAddSeparator={addSeparator}
+            onReorder={handleReorder}
+            onOpen={(planId) => navigate(`/missions/${client.id}/plan/${planId}`)}
+            onRequestDelete={(v) => dispatch({ type: 'SET_CONFIRM_DELETE_PLAN_ID', payload: v })}
+            onConfirmDelete={confirmDeletePlan}
+            onCancelDelete={() => dispatch({ type: 'SET_CONFIRM_DELETE_PLAN_ID', payload: null })}
+            onSeparatorLabel={handleSeparatorLabel}
+          />
+        )}
+
+        {activeTab === 'visites' && (
+          <ClientVisites
+            clientId={client.id}
+            clientNom={client.nom}
+          />
+        )}
+      </div>
 
       {pdfPreview && (
         <PdfPreviewModal
