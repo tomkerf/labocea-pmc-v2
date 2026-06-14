@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, AlertTriangle } from 'lucide-react'
+import { Plus, Search, AlertTriangle, ClipboardList } from 'lucide-react'
 import { useClientsListener } from '@/hooks/useClients'
 import { createClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -138,11 +138,32 @@ export default function MissionsPage() {
       {loading ? (
         <SkeletonList count={5} variant="card" />
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
-            {onlyRetard ? 'Aucun client en retard.' : search ? 'Aucun résultat pour cette recherche.' : 'Aucun client — crée le premier.'}
-          </p>
-        </div>
+        onlyRetard || search ? (
+          <div className="text-center py-16">
+            <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+              {onlyRetard ? 'Aucun client en retard.' : 'Aucun résultat pour cette recherche.'}
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <div className="size-16 rounded-2xl flex items-center justify-center"
+              style={{ background: 'var(--color-accent-light)' }}>
+              <ClipboardList size={28} strokeWidth={1.5} style={{ color: COLORS.ACCENT }} />
+            </div>
+            <div className="text-center">
+              <p className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Aucun client</p>
+              <p className="text-sm mt-1" style={{ color: COLORS.TEXT_SECONDARY }}>
+                Commencez par ajouter votre premier client.
+              </p>
+            </div>
+            <button type="button" onClick={handleNewClient} disabled={creating}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
+              style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.7 : 1 }}>
+              <Plus size={15} />
+              Nouveau client
+            </button>
+          </div>
+        )
       ) : (
         <div className="flex flex-col gap-3">
           {filtered.map((client) => (
