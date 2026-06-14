@@ -57,7 +57,7 @@ export default function ClientCard({ client }: Props) {
         boxShadow: 'var(--shadow-card)',
       }}
       onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
-      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+      onMouseLeave={(e) => (e.currentTarget.style.background = COLORS.BG_SECONDARY)}
     >
       {/* Initiale */}
       <div className="size-9 rounded-full flex items-center justify-center text-sm font-semibold shrink-0"
