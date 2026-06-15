@@ -1,5 +1,13 @@
 # React Doctor — Faux positifs connus
 
+## Sécurité — storage.rules (lecture large)
+
+- `storage.rules` — `allow read: if request.auth != null` sur tous les chemins (`samplings/`, `visites/`, `plans/`). Intentionnel : toute l'équipe (techniciens + chargés de mission + admins) doit pouvoir consulter les photos de tous les clients. Un lookup Firestore dans les règles Storage serait complexe sans apport de sécurité réel (tous les utilisateurs authentifiés sont des employés Labocea). Politique validée pour cette stack interne.
+
+## Sécurité — dangerouslySetInnerHTML
+
+- Signalé en session 128 par react-doctor. Introuvable dans `src/` au 2026-06-15 — faux positif de l'outil ou déjà corrigé dans un commit antérieur. Aucune occurrence de `dangerouslySetInnerHTML` ni d'`innerHTML` dynamique dans le code source.
+
 ## react-doctor/only-export-components
 
 - `src/components/infos/EntryCard.tsx` — `TYPE_CONFIG` est co-localisé intentionnellement avec les composants `Badge`/`EntryCard` car ils sont étroitement couplés (config de rendu par type).

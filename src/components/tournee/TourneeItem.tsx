@@ -40,7 +40,7 @@ export function TourneeItem({ item, onAction }: Props) {
 
   const badgeLabel = isDone ? 'Réalisé' : isNonFait ? 'Non effectué' : isReporte ? 'Reporté' : 'À faire'
   const badgeBg    = isDone ? 'var(--color-success-light)' : isNonFait ? 'var(--color-warning-light)' : isReporte ? 'var(--color-accent-light)' : COLORS.BG_TERTIARY
-  const badgeColor = isDone ? COLORS.SUCCESS : isNonFait ? COLORS.WARNING : isReporte ? COLORS.ACCENT : COLORS.TEXT_SECONDARY
+  const badgeColor = isDone ? 'var(--color-success-text)' : isNonFait ? 'var(--color-warning-text)' : isReporte ? COLORS.ACCENT : COLORS.TEXT_SECONDARY
 
   const hasGps = item.lat !== '' && item.lng !== ''
   const mapsUrl = `https://maps.apple.com/?q=${item.lat},${item.lng}`
