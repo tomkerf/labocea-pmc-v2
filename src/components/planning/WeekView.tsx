@@ -142,8 +142,7 @@ export default function WeekView({
               )
             })}
           </div>
-          <span className="absolute top-1/2 left-1.5 -translate-y-1/2 text-[12px] font-semibold tracking-wider uppercase pointer-events-none select-none z-10" style={{ color: 'var(--color-text-tertiary)' }}>Bilans 24h</span>
-          {bilanBand.map((row, rowIdx) => {
+{bilanBand.map((row, rowIdx) => {
             const wISOs = weekDays.map(toISO)
             return (
               <div key={`bilan-row-${wISOs.join('-')}-${rowIdx}`} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', padding: '0 2px', position: 'relative', zIndex: 1 }}>
