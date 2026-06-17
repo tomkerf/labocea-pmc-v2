@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import BaseModal from '@/components/ui/BaseModal'
 import { COLORS } from '@/lib/constants'
 
@@ -11,10 +11,6 @@ interface StatusChangeModalProps {
 
 export function StatusChangeModal({ isOpen, onClose, onConfirm, newLabel }: StatusChangeModalProps) {
   const [reason, setReason] = useState('')
-
-  useEffect(() => {
-    if (isOpen) setReason('')
-  }, [isOpen])
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

@@ -244,6 +244,7 @@ export default function EquipementPage() {
       <EquipementForm equipement={equipement} update={update} />
 
       <StatusChangeModal
+        key={pendingEtat ?? 'closed'}
         isOpen={pendingEtat !== null}
         onClose={() => setPendingEtat(null)}
         onConfirm={handleConfirmStateChange}
