@@ -212,13 +212,15 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
         </div>
       </div>
       
-      <StatusChangeModal
-        key={pendingEtat ?? 'closed'}
-        isOpen={pendingEtat !== null}
-        onClose={() => setPendingEtat(null)}
-        onConfirm={handleConfirmStateChange}
-        newLabel={pendingEtat ? (ETAT_CONFIG[pendingEtat]?.label || pendingEtat) : ''}
-      />
+      <div onClick={(e) => e.stopPropagation()}>
+        <StatusChangeModal
+          key={pendingEtat ?? 'closed'}
+          isOpen={pendingEtat !== null}
+          onClose={() => setPendingEtat(null)}
+          onConfirm={handleConfirmStateChange}
+          newLabel={pendingEtat ? (ETAT_CONFIG[pendingEtat]?.label || pendingEtat) : ''}
+        />
+      </div>
     </button>
   )
 }
