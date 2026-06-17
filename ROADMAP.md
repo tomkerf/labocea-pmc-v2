@@ -336,5 +336,6 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-13 | Audit UI/UX + 8 fixes ✅ | Audit terrain complet. Badge DEV, footer sidebar visible, empty state kanban, scroll indicator matrice, routing post-login, sous-titre bouton Tournée, toolbar planning allégée (menu ⋯ exports). |
 | 2026-06-14 | Bugfix Planning ✅ | Correction décalage J2/J1 sur Bilans 24h avec saisie Date réalisée. |
 | 2026-06-14 | Audit UI/UX — suite et fin ✅ | Tooltips + hover DayView, bug hover ClientCard, Asservissement sidebar desktop, overflow toolbar ~953px, empty state MissionsPage. Audit UI/UX externe entièrement soldé. |
+| 2026-06-17 | Export inventaire matériel ✅ | Bouton "Exporter" dans MaterielPage → PDF HTML avec filtres actifs, dates métrologie en rouge si dépassées, format A4 paysage. Fix XSS (esc helper). |
 
 

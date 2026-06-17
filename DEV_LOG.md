@@ -2,6 +2,26 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 129 — Export inventaire PDF + fixes StatusChangeModal
+**17 juin 2026**
+
+### Features ajoutées
+
+**Export inventaire parc matériel (PDF)**
+- Nouveau fichier `src/components/materiel/inventaireExport.ts` — fonction pure `exportInventairePDF()`, même patron que `ficheDeVieExport.ts` (HTML Blob + `window.open`, aucune lib externe)
+- Colonnes : Nom, Marque/Modèle, N° série, Catégorie, État, Site, Technicien, Localisation, Prochain étalonnage
+- L'export respecte les filtres actifs (site, catégorie, état, technicien, recherche) et les mentionne dans l'en-tête du document
+- Dates d'étalonnage dépassées affichées en rouge avec ⚠ dans le PDF
+- Format impression A4 paysage (`@media print`)
+- Bouton "Exporter" (icône `FileDown`) ajouté dans l'en-tête de MaterielPage, désactivé si liste filtrée vide
+- Fix sécurité XSS : tous les champs libres et fallbacks d'enums passent par `esc()` avant interpolation HTML
+
+### Prochaines étapes
+- Test terrain par les utilisateurs Brest/Quimper
+- Déploiement production si retours positifs
+
+---
+
 ## Session 128 — Audit UI/UX : suite et fin des fixes
 **14 juin 2026**
 
