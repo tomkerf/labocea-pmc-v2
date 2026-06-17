@@ -37,6 +37,14 @@ export interface InventaireFiltersInfo {
   search?: string
 }
 
+const esc = (s: string) =>
+  String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+
 export function exportInventairePDF(
   equipements: Equipement[],
   filtersInfo: InventaireFiltersInfo = {}
@@ -55,10 +63,10 @@ export function exportInventairePDF(
 
   const activeFilters = [
     filtersInfo.site && `Site : ${filtersInfo.site === 'quimper' ? 'Quimper' : 'Brest'}`,
-    filtersInfo.categorie && `Catégorie : ${CATEGORIE_LABELS[filtersInfo.categorie] ?? filtersInfo.categorie}`,
-    filtersInfo.etat && `État : ${ETAT_LABELS[filtersInfo.etat] ?? filtersInfo.etat}`,
-    filtersInfo.technicien && `Technicien : ${filtersInfo.technicien}`,
-    filtersInfo.search && `Recherche : « ${filtersInfo.search} »`,
+    filtersInfo.categorie && `Catégorie : ${esc(CATEGORIE_LABELS[filtersInfo.categorie] ?? filtersInfo.categorie)}`,
+    filtersInfo.etat && `État : ${esc(ETAT_LABELS[filtersInfo.etat] ?? filtersInfo.etat)}`,
+    filtersInfo.technicien && `Technicien : ${esc(filtersInfo.technicien)}`,
+    filtersInfo.search && `Recherche : « ${esc(filtersInfo.search)} »`,
   ].filter(Boolean).join(' · ')
 
   const rows = equipements.map((e) => {
@@ -68,14 +76,14 @@ export function exportInventairePDF(
       : '—'
 
     return `<tr>
-      <td>${e.nom || '—'}</td>
-      <td>${[e.marque, e.modele].filter(Boolean).join(' ') || '—'}</td>
-      <td>${e.numSerie || '—'}</td>
-      <td>${CATEGORIE_LABELS[e.categorie] ?? e.categorie}</td>
-      <td>${ETAT_LABELS[e.etat] ?? e.etat}</td>
+      <td>${esc(e.nom || '—')}</td>
+      <td>${esc([e.marque, e.modele].filter(Boolean).join(' ') || '—')}</td>
+      <td>${esc(e.numSerie || '—')}</td>
+      <td>${esc(CATEGORIE_LABELS[e.categorie] ?? e.categorie)}</td>
+      <td>${esc(ETAT_LABELS[e.etat] ?? e.etat)}</td>
       <td>${e.site === 'quimper' ? 'Quimper' : e.site === 'brest' ? 'Brest' : '—'}</td>
-      <td>${e.technicien || '—'}</td>
-      <td>${LOCALISATION_LABELS[e.localisation] ?? e.localisation}</td>
+      <td>${esc(e.technicien || '—')}</td>
+      <td>${esc(LOCALISATION_LABELS[e.localisation] ?? e.localisation)}</td>
       <td>${dateCell}</td>
     </tr>`
   }).join('')
