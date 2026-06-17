@@ -1,5 +1,5 @@
 import { useState, useReducer } from 'react'
-import { Plus, Search, Package } from 'lucide-react'
+import { Plus, Search, Package, FileDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useUsersListener } from '@/hooks/useUsers'
@@ -8,6 +8,7 @@ import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
 import EquipementCard from '@/components/materiel/EquipementCard'
+import { exportInventairePDF } from '@/components/materiel/inventaireExport'
 import { SkeletonList } from '@/components/ui/Skeleton'
 import type { Equipement } from '@/types'
 import { COLORS } from '@/lib/constants'
@@ -122,6 +123,16 @@ export default function MaterielPage() {
     return matchSearch && matchCategorie && matchEtat && matchSite && matchTechnicien && matchMateriau && matchMarque
   })
 
+  function handleExport() {
+    exportInventairePDF(filtered, {
+      categorie: filterCategorie || undefined,
+      etat: filterEtat || undefined,
+      site: filterSite || undefined,
+      technicien: filterTechnicien || undefined,
+      search: search || undefined,
+    })
+  }
+
   async function handleCreate() {
     if (!uid || creating) return
     setCreating(true)
@@ -143,15 +154,33 @@ export default function MaterielPage() {
             {equipements.length} équipement{equipements.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <button type="button"
-          onClick={handleCreate}
-          disabled={creating}
-          className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-opacity w-full sm:w-auto"
-          style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
-        >
-          <Plus size={16} />
-          Ajouter un équipement
-        </button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={filtered.length === 0}
+            className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-opacity flex-1 sm:flex-none"
+            style={{
+              background: COLORS.BG_SECONDARY,
+              border: '1px solid var(--color-border-subtle)',
+              color: filtered.length === 0 ? 'var(--color-text-tertiary)' : COLORS.TEXT_PRIMARY,
+              opacity: filtered.length === 0 ? 0.5 : 1,
+            }}
+            title="Exporter l'inventaire filtré en PDF"
+          >
+            <FileDown size={16} />
+            Exporter
+          </button>
+          <button type="button"
+            onClick={handleCreate}
+            disabled={creating}
+            className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-opacity flex-1 sm:flex-none"
+            style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
+          >
+            <Plus size={16} />
+            Ajouter
+          </button>
+        </div>
       </div>
 
       {/* Filtres */}
