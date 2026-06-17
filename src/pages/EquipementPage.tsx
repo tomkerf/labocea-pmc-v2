@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Trash2, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, Trash2, AlertTriangle, ChevronDown } from 'lucide-react'
 import { doc, onSnapshot, deleteDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveEquipement } from '@/services/equipementService'
@@ -12,6 +12,8 @@ import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
 import CircleProgress from '@/components/materiel/CircleProgress'
+import { ETAT_CONFIG } from '@/components/materiel/EquipementCard'
+import { StatusChangeModal } from '@/components/materiel/StatusChangeModal'
 import { EquipementForm } from '@/components/equipement/EquipementForm'
 import { FicheDeVie } from '@/components/equipement/FicheDeVie'
 import type { Equipement } from '@/types'
@@ -74,6 +76,7 @@ export default function EquipementPage() {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { equipement, loading, saving, confirmDelete } = state
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [pendingEtat, setPendingEtat] = useState<string | null>(null)
 
   useEffect(() => {
     if (!equipementId) return
@@ -99,7 +102,34 @@ export default function EquipementPage() {
 
   function update(field: keyof Equipement, value: unknown) {
     if (!equipement) return
+    
+    if (field === 'etat' && value !== equipement.etat) {
+      setPendingEtat(value as string)
+      return
+    }
+
     triggerSave({ ...equipement, [field]: value })
+  }
+
+  function handleConfirmStateChange(reason: string) {
+    if (!equipement || !pendingEtat) return
+    
+    const newLabel = ETAT_CONFIG[pendingEtat]?.label || pendingEtat
+    const note = {
+      id: crypto.randomUUID(),
+      date: new Date().toISOString().split('T')[0],
+      titre: `Statut : ${newLabel}`,
+      notes: reason.trim() || `L'état de l'équipement a été modifié vers ${newLabel}.`,
+      auteur: initiales || 'Système'
+    }
+    
+    triggerSave({ 
+      ...equipement, 
+      etat: pendingEtat as any,
+      ficheDeVieNotes: [...(equipement.ficheDeVieNotes || []), note]
+    })
+    
+    setPendingEtat(null)
   }
 
   async function handleDelete() {
@@ -122,6 +152,7 @@ export default function EquipementPage() {
   )
 
   const metroPercent = calcMetroPercent(equipement.prochainEtalonnage)
+  const etatCfg = ETAT_CONFIG[equipement.etat] ?? ETAT_CONFIG.operationnel
   const isMetroOverdue = equipement.prochainEtalonnage
     ? new Date(equipement.prochainEtalonnage).getTime() < nowMs
     : false
@@ -147,9 +178,29 @@ export default function EquipementPage() {
             </div>
           )}
           <div>
-            <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
-              {equipement.nom || 'Nouvel équipement'}
-            </h1>
+            <div className="flex items-center flex-wrap gap-3">
+              <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
+                {equipement.nom || 'Nouvel équipement'}
+              </h1>
+              <div className="relative group cursor-pointer" title="Modifier l'état">
+                <span className="text-xs px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1 transition-opacity group-hover:opacity-80"
+                  style={{ background: etatCfg.bg, color: etatCfg.color }}>
+                  {etatCfg.label}
+                  <ChevronDown size={14} strokeWidth={2.5} />
+                </span>
+                <select
+                  value={equipement.etat}
+                  onChange={(e) => update('etat', e.target.value)}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  aria-label="Modifier l'état"
+                >
+                  <option value="operationnel">Opérationnel</option>
+                  <option value="en_maintenance">En maintenance</option>
+                  <option value="hors_service">Hors service</option>
+                  <option value="prete">Prêté</option>
+                </select>
+              </div>
+            </div>
             <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
               {[equipement.marque, equipement.modele].filter(Boolean).join(' ') || '—'}
             </p>
@@ -191,6 +242,13 @@ export default function EquipementPage() {
       )}
 
       <EquipementForm equipement={equipement} update={update} />
+
+      <StatusChangeModal
+        isOpen={pendingEtat !== null}
+        onClose={() => setPendingEtat(null)}
+        onConfirm={handleConfirmStateChange}
+        newLabel={pendingEtat ? (ETAT_CONFIG[pendingEtat]?.label || pendingEtat) : ''}
+      />
 
       <FicheDeVie
         equipement={equipement}

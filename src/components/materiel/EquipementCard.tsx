@@ -1,13 +1,17 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Container, Activity, SlidersHorizontal, Snowflake, HardDrive,
   Thermometer, Ruler, FlaskConical, Droplets, ArrowDownToLine,
-  Gauge, Timer, Package, Cylinder,
+  Gauge, Timer, Package, Cylinder, ChevronDown,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import CircleProgress from './CircleProgress'
-import type { Equipement } from '@/types'
+import type { Equipement, EtatType } from '@/types'
 import { COLORS } from '@/lib/constants'
+import { saveEquipement } from '@/services/equipementService'
+import { StatusChangeModal } from './StatusChangeModal'
+import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
 
 
 const CATEGORIE_LABELS: Record<string, string> = {
@@ -54,7 +58,7 @@ const CATEGORIE_ICONS: Record<string, LucideIcon> = {
   autre:          Package,
 }
 
-const ETAT_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
+export const ETAT_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
   operationnel:    { label: 'Opérationnel',    bg: 'var(--color-success-light)', color: 'var(--color-success-text)' },
   en_maintenance:  { label: 'En maintenance',  bg: 'var(--color-warning-light)', color: 'var(--color-warning-text)' },
   hors_service:    { label: 'Hors service',    bg: 'var(--color-danger-light)',  color: 'var(--color-danger-text)'  },
@@ -91,8 +95,32 @@ interface EquipementCardProps {
 
 export default function EquipementCard({ equipement }: EquipementCardProps) {
   const navigate = useNavigate()
+  const uid = useAuthStore(selectUid)
+  const initiales = useAuthStore(selectInitiales)
+  const [pendingEtat, setPendingEtat] = useState<string | null>(null)
   const etatCfg = ETAT_CONFIG[equipement.etat] ?? ETAT_CONFIG.operationnel
   const metroPercent = calcMetroPercent(equipement.prochainEtalonnage)
+
+  async function handleConfirmStateChange(reason: string) {
+    if (!uid || !pendingEtat) return
+    
+    const newLabel = ETAT_CONFIG[pendingEtat]?.label || pendingEtat
+    const note = {
+      id: crypto.randomUUID(),
+      date: new Date().toISOString().split('T')[0],
+      titre: `Statut : ${newLabel}`,
+      notes: reason.trim() || `L'état de l'équipement a été modifié vers ${newLabel}.`,
+      auteur: initiales || 'Système'
+    }
+    
+    await saveEquipement({ 
+      ...equipement, 
+      etat: pendingEtat as EtatType,
+      ficheDeVieNotes: [...(equipement.ficheDeVieNotes || []), note]
+    }, uid)
+    
+    setPendingEtat(null)
+  }
 
   const Icon = CATEGORIE_ICONS[equipement.categorie] ?? Package
   const iconSize = 16
@@ -162,11 +190,34 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
             À étalonner
           </span>
         )}
-        <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-          style={{ background: etatCfg.bg, color: etatCfg.color }}>
-          {etatCfg.label}
-        </span>
+        <div className="relative group" onClick={(e) => e.stopPropagation()} title="Modifier l'état">
+          <span className="text-xs px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1 transition-opacity group-hover:opacity-80"
+            style={{ background: etatCfg.bg, color: etatCfg.color }}>
+            {etatCfg.label}
+            <ChevronDown size={12} strokeWidth={2.5} />
+          </span>
+          <select
+            value={equipement.etat}
+            onChange={(e) => {
+              if (e.target.value !== equipement.etat) setPendingEtat(e.target.value)
+            }}
+            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+            aria-label="Modifier l'état"
+          >
+            <option value="operationnel">Opérationnel</option>
+            <option value="en_maintenance">En maintenance</option>
+            <option value="hors_service">Hors service</option>
+            <option value="prete">Prêté</option>
+          </select>
+        </div>
       </div>
+      
+      <StatusChangeModal
+        isOpen={pendingEtat !== null}
+        onClose={() => setPendingEtat(null)}
+        onConfirm={handleConfirmStateChange}
+        newLabel={pendingEtat ? (ETAT_CONFIG[pendingEtat]?.label || pendingEtat) : ''}
+      />
     </button>
   )
 }
