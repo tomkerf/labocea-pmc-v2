@@ -1,8 +1,9 @@
 # React Doctor — Faux positifs connus
 
-## Sécurité — storage.rules (lecture large)
+## Sécurité — storage.rules (lecture et suppression larges)
 
-- `storage.rules` — `allow read: if request.auth != null` sur tous les chemins (`samplings/`, `visites/`, `plans/`). Intentionnel : toute l'équipe (techniciens + chargés de mission + admins) doit pouvoir consulter les photos de tous les clients. Un lookup Firestore dans les règles Storage serait complexe sans apport de sécurité réel (tous les utilisateurs authentifiés sont des employés Labocea). Politique validée pour cette stack interne.
+- `storage.rules` — `allow read: if request.auth != null` sur tous les chemins (`samplings/`, `visites/`, `plans/`). Intentionnel : toute l'équipe doit pouvoir consulter les photos de tous les clients. Politique validée pour cette stack interne.
+- `storage.rules` — `allow delete: if request.auth != null` sur les mêmes chemins. Intentionnel : les techniciens suppriment leurs propres photos depuis SamplingForm, VisiteFormPage et PlanConfigSection. Restreindre à admin casserait l'UX. Un lookup Firestore pour vérifier le rôle ajouterait de la latence sans apport de sécurité réel (tous les utilisateurs authentifiés sont des employés Labocea).
 
 ## Sécurité — dangerouslySetInnerHTML
 

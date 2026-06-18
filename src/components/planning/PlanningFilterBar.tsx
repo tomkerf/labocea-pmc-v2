@@ -26,18 +26,18 @@ interface PlanningFilterBarProps {
   preleveurs:    Preleveur[]
 }
 
+const LEGEND_ITEM: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '4px' }
+
 function PlanningLegend() {
-  const itemStyle = { display: 'flex', alignItems: 'center', gap: '4px' }
-  const iconSize = 11
   return (
     <div className="flex items-center gap-3 md:gap-4 text-[10px] font-semibold tracking-wider flex-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
-      <div style={itemStyle} title="Prélèvement à faire"><Droplet size={iconSize} /> À FAIRE</div>
-      <div style={itemStyle} title="Réalisé / Validé"><CheckCircle2 size={iconSize} /> FAIT</div>
-      <div style={itemStyle} title="Événement divers ou personnel"><CalendarDays size={iconSize} /> ÉVÉNEMENT</div>
-      <div style={itemStyle} title="Rapport à rédiger"><FileText size={iconSize} /> RAPPORT</div>
-      <div style={itemStyle} title="Maintenance matériel"><Wrench size={iconSize} /> MAINT.</div>
-      <div style={itemStyle} title="Vérification métrologique"><Bell size={iconSize} /> MÉTRO.</div>
-      <div style={itemStyle} title="Tâche à faire"><CheckSquare size={iconSize} /> TÂCHE</div>
+      <div style={LEGEND_ITEM} title="Prélèvement à faire"><Droplet size={11} /> À FAIRE</div>
+      <div style={LEGEND_ITEM} title="Réalisé / Validé"><CheckCircle2 size={11} /> FAIT</div>
+      <div style={LEGEND_ITEM} title="Événement divers ou personnel"><CalendarDays size={11} /> ÉVÉNEMENT</div>
+      <div style={LEGEND_ITEM} title="Rapport à rédiger"><FileText size={11} /> RAPPORT</div>
+      <div style={LEGEND_ITEM} title="Maintenance matériel"><Wrench size={11} /> MAINT.</div>
+      <div style={LEGEND_ITEM} title="Vérification métrologique"><Bell size={11} /> MÉTRO.</div>
+      <div style={LEGEND_ITEM} title="Tâche à faire"><CheckSquare size={11} /> TÂCHE</div>
     </div>
   )
 }

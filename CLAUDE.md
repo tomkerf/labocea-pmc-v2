@@ -87,7 +87,7 @@ L'application est fonctionnellement complète (phases 1-7 done). En attente des 
 
 **À consulter avant de coder :** [TODO_REFACTORING.md](./TODO_REFACTORING.md)
 
-Score react-doctor actuel : **72/100** (objectif : 70+ ✅). Les 18 warnings restants sont documentés comme faux positifs dans `.react-doctor/false-positives.md`. Prochain seuil : 80+ nécessite le découpage de `PlanningHeader` (4 props booléennes).
+Score react-doctor actuel : **44/100** (changement d'algorithme de scoring react-doctor post-session 121 — les 28 warnings restants sont documentés comme faux positifs dans `.react-doctor/false-positives.md`). Prochain seuil : réduction des warnings réels.
 
 ---
 
