@@ -5,12 +5,13 @@ type SnapCallback = (snapshot: { docs: Array<{ id: string; data: () => Record<st
 type ErrorCallback = (error: Error) => void
 import { useVerificationsListener } from '../useVerifications'
 import { useMetrologieStore } from '@/stores/metrologieStore'
-import { onSnapshot, collection, query, orderBy } from 'firebase/firestore'
+import { onSnapshot, collection, query, orderBy, limit } from 'firebase/firestore'
 
 vi.mock('firebase/firestore', () => ({
   collection: vi.fn(),
   query: vi.fn(),
   orderBy: vi.fn(),
+  limit: vi.fn(),
   onSnapshot: vi.fn()
 }))
 
@@ -40,6 +41,7 @@ describe('useVerificationsListener', () => {
     // Check that we queried correctly
     expect(collection).toHaveBeenCalledWith(expect.anything(), 'verifications')
     expect(orderBy).toHaveBeenCalledWith('date', 'desc')
+    expect(limit).toHaveBeenCalledWith(200)
     expect(query).toHaveBeenCalled()
     expect(onSnapshot).toHaveBeenCalled()
 

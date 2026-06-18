@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '124'
+export const CHANGELOG_VERSION = '125'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '125',
+    date: '18 juin 2026',
+    items: [
+      { type: 'feat', label: 'Matériel : Ajout d\'un bouton d\'export PDF direct de la fiche de vie sur chaque équipement depuis la liste' },
+    ],
+  },
   {
     version: '124',
     date: '14 juin 2026',

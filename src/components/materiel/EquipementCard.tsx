@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   Container, Activity, SlidersHorizontal, Snowflake, HardDrive,
   Thermometer, Ruler, FlaskConical, Droplets, ArrowDownToLine,
-  Gauge, Timer, Package, Cylinder, ChevronDown,
+  Gauge, Timer, Package, Cylinder, ChevronDown, FileText,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import CircleProgress from './CircleProgress'
@@ -13,6 +13,10 @@ import { saveEquipement } from '@/services/equipementService'
 import { StatusChangeModal } from './StatusChangeModal'
 import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
 import { useToastStore } from '@/stores/toastStore'
+import { useMetrologieStore } from '@/stores/metrologieStore'
+import { useMaintenancesStore } from '@/stores/maintenancesStore'
+import { exportFicheDeViePDF } from '@/components/equipement/ficheDeVieExport'
+import type { TimelineEntry } from '@/components/equipement/ficheDeVieExport'
 
 
 const CATEGORIE_LABELS: Record<string, string> = {
@@ -103,6 +107,18 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
   const etatCfg = ETAT_CONFIG[equipement.etat] ?? ETAT_CONFIG.operationnel
   const metroPercent = calcMetroPercent(equipement.prochainEtalonnage)
 
+  const verifications = useMetrologieStore((s) => s.verifications).filter((v) => v.equipementId === equipement.id)
+  const maintenances  = useMaintenancesStore((s) => s.maintenances).filter((m) => m.equipementId === equipement.id)
+
+  const entries: TimelineEntry[] = [
+    ...(equipement.dateAcquisition
+      ? [{ kind: 'acquisition' as const, date: equipement.dateAcquisition }]
+      : []),
+    ...verifications.map((v) => ({ kind: 'verification' as const, date: v.date, data: v })),
+    ...maintenances.flatMap((m) => (m.dateRealisee || m.datePrevue) ? [{ kind: 'maintenance' as const, date: (m.dateRealisee || m.datePrevue) as string, data: m }] : []),
+    ...(equipement.ficheDeVieNotes ?? []).map((n) => ({ kind: 'note' as const, date: n.date, data: n })),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
   async function handleConfirmStateChange(reason: string) {
     if (!uid || !pendingEtat) return
     
@@ -138,9 +154,8 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
   const categoryIcon = <Icon size={iconSize} strokeWidth={1.8} color={iconColor} />
 
   return (
-    <button type="button"
-      onClick={() => navigate(`/materiel/${equipement.id}`)}
-      className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
+    <div
+      className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors relative group"
       style={{
         background: COLORS.BG_SECONDARY,
         border: '1px solid var(--color-border-subtle)',
@@ -149,71 +164,97 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
       onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
       onMouseLeave={(e) => (e.currentTarget.style.background = COLORS.BG_SECONDARY)}
     >
-      {/* Anneau métrologie avec icône au centre */}
-      <div className="relative group shrink-0">
-        {metroPercent !== null && (
-          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 whitespace-nowrap px-2 py-1 rounded text-xs z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-100"
-            style={{ background: COLORS.TEXT_PRIMARY, color: 'white' }}>
-            {calcMetroTooltip(equipement.prochainEtalonnage)}
-          </div>
-        )}
-        {metroPercent !== null ? (
-          <CircleProgress percent={metroPercent} size={44} icon={categoryIcon} />
-        ) : (
-          <div className="size-11 rounded-full flex items-center justify-center"
-            style={{ background: COLORS.BG_TERTIARY, border: '2px solid var(--color-border)' }}>
-            <Icon size={iconSize} strokeWidth={1.8} color="var(--color-text-tertiary)" />
-          </div>
-        )}
+      {/* Ghost button for the whole card click to navigate */}
+      <button
+        type="button"
+        onClick={() => navigate(`/materiel/${equipement.id}`)}
+        className="absolute inset-0 w-full h-full cursor-pointer rounded-xl bg-transparent border-none outline-none"
+        aria-label={`Détails de ${equipement.nom}`}
+      />
+
+      {/* Main content with pointer-events-none */}
+      <div className="flex-1 flex items-center gap-4 min-w-0 pointer-events-none">
+        {/* Anneau métrologie avec icône au centre */}
+        <div className="relative group shrink-0 pointer-events-auto">
+          {metroPercent !== null && (
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 whitespace-nowrap px-2 py-1 rounded text-xs z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-100"
+              style={{ background: COLORS.TEXT_PRIMARY, color: 'white' }}>
+              {calcMetroTooltip(equipement.prochainEtalonnage)}
+            </div>
+          )}
+          {metroPercent !== null ? (
+            <CircleProgress percent={metroPercent} size={44} icon={categoryIcon} />
+          ) : (
+            <div className="size-11 rounded-full flex items-center justify-center"
+              style={{ background: COLORS.BG_TERTIARY, border: '2px solid var(--color-border)' }}>
+              <Icon size={iconSize} strokeWidth={1.8} color="var(--color-text-tertiary)" />
+            </div>
+          )}
+        </div>
+
+        {/* Infos */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
+            {equipement.nom || 'Sans nom'}
+          </p>
+          <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+            {[equipement.marque, equipement.modele].filter(Boolean).join(' ') || '—'}
+          </p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+            {[
+              CATEGORIE_LABELS[equipement.categorie] ?? equipement.categorie,
+              equipement.numSerie,
+              equipement.volume,
+              equipement.poids,
+              equipement.materiau ? equipement.materiau.charAt(0).toUpperCase() + equipement.materiau.slice(1) : '',
+              equipement.diametre ? `Ø ${equipement.diametre} mm` : '',
+            ].filter(Boolean).join(' · ')}
+          </p>
+        </div>
       </div>
 
-      {/* Infos */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
-          {equipement.nom || 'Sans nom'}
-        </p>
-        <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-          {[equipement.marque, equipement.modele].filter(Boolean).join(' ') || '—'}
-        </p>
-        <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-          {[
-            CATEGORIE_LABELS[equipement.categorie] ?? equipement.categorie,
-            equipement.numSerie,
-            equipement.volume,
-            equipement.poids,
-            equipement.materiau ? equipement.materiau.charAt(0).toUpperCase() + equipement.materiau.slice(1) : '',
-            equipement.diametre ? `Ø ${equipement.diametre} mm` : '',
-          ].filter(Boolean).join(' · ')}
-        </p>
-      </div>
+      {/* Badges & Actions */}
+      <div className="flex items-center gap-3 shrink-0 relative z-10 pointer-events-auto">
+        {/* Bouton Exporter Fiche de Vie PDF */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            exportFicheDeViePDF(equipement, entries)
+          }}
+          className="p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors text-neutral-500 hover:text-neutral-700"
+          title="Exporter la fiche de vie (PDF)"
+        >
+          <FileText size={16} />
+        </button>
 
-      {/* Badges */}
-      <div className="flex flex-col items-end gap-1 shrink-0">
-        {metroPercent === 0 && (
-          <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-            style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
-            À étalonner
-          </span>
-        )}
-        <div className="relative group" onClick={(e) => e.stopPropagation()} title="Modifier l'état">
-          <span className="text-xs px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1 transition-opacity group-hover:opacity-80"
-            style={{ background: etatCfg.bg, color: etatCfg.color }}>
-            {etatCfg.label}
-            <ChevronDown size={12} strokeWidth={2.5} />
-          </span>
-          <select
-            value={equipement.etat}
-            onChange={(e) => {
-              if (e.target.value !== equipement.etat) setPendingEtat(e.target.value)
-            }}
-            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-            aria-label="Modifier l'état"
-          >
-            <option value="operationnel">Opérationnel</option>
-            <option value="en_maintenance">En maintenance</option>
-            <option value="hors_service">Hors service</option>
-            <option value="prete">Prêté</option>
-          </select>
+        <div className="flex flex-col items-end gap-1">
+          {metroPercent === 0 && (
+            <span className="text-xs px-2.5 py-1 rounded-full font-medium"
+              style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
+              À étalonner
+            </span>
+          )}
+          <div className="relative group" onClick={(e) => e.stopPropagation()} title="Modifier l'état">
+            <span className="text-xs px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1 transition-opacity group-hover:opacity-80"
+              style={{ background: etatCfg.bg, color: etatCfg.color }}>
+              {etatCfg.label}
+              <ChevronDown size={12} strokeWidth={2.5} />
+            </span>
+            <select
+              value={equipement.etat}
+              onChange={(e) => {
+                if (e.target.value !== equipement.etat) setPendingEtat(e.target.value)
+              }}
+              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              aria-label="Modifier l'état"
+            >
+              <option value="operationnel">Opérationnel</option>
+              <option value="en_maintenance">En maintenance</option>
+              <option value="hors_service">Hors service</option>
+              <option value="prete">Prêté</option>
+            </select>
+          </div>
         </div>
       </div>
       
@@ -226,6 +267,6 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
           newLabel={pendingEtat ? (ETAT_CONFIG[pendingEtat]?.label || pendingEtat) : ''}
         />
       </div>
-    </button>
+    </div>
   )
 }

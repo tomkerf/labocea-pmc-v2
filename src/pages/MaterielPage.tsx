@@ -3,6 +3,8 @@ import { Plus, Search, Package, FileDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useUsersListener } from '@/hooks/useUsers'
+import { useVerificationsListener } from '@/hooks/useVerifications'
+import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { createEquipement } from '@/services/equipementService'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
@@ -90,6 +92,8 @@ function filtersReducer(state: FiltersState, action: FiltersAction): FiltersStat
 export default function MaterielPage() {
   useEquipementsListener()
   useUsersListener()
+  useVerificationsListener()
+  useMaintenancesListener()
   const navigate = useNavigate()
   const uid = useAuthStore(selectUid)
   const { equipements, loading } = useEquipementsStore()

@@ -339,5 +339,6 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-17 | Export inventaire matériel ✅ | Bouton "Exporter" dans MaterielPage → PDF HTML avec filtres actifs, dates métrologie en rouge si dépassées, format A4 paysage. Fix XSS (esc helper). |
 | 2026-06-18 | Premortem prod + fix data loss ✅ | Premortem déploiement prod. Fix : equipementService → runTransaction, EquipementCard + EquipementPage → try/catch + toast. 4 blocages prod notés (rôles, DSIN, perf, monitoring). |
 | 2026-06-18 | Sécurité + perf listeners ✅ | Audit firestore.rules (solides) + storage.rules (delete documenté intentionnel). limit(200) sur useVerifications + useMaintenances. Légende planning + doc aide export PDF. |
+| 2026-06-18 | Fiche de vie direct PDF ✅ | Bouton d'export PDF direct de la fiche de vie sur chaque équipement depuis la liste de matériel. Mocks de tests limit() fixés. |
 
 

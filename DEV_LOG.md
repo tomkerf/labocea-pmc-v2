@@ -2,6 +2,28 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 132 — Export direct fiches de vie matériel
+**18 juin 2026**
+
+### Ce qui a été fait
+
+**Export direct de la Fiche de Vie (PDF) depuis la liste**
+- [EquipementCard.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/materiel/EquipementCard.tsx) : Ajout d'un bouton d'action directe (icône `FileText`) pour générer et télécharger la fiche de vie en PDF d'un équipement directement depuis la liste sans devoir ouvrir sa fiche détaillée.
+- [EquipementCard.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/materiel/EquipementCard.tsx) : Modification de l'élément racine `<button>` en `<div>` avec un bouton fantôme absolu `absolute inset-0` pour gérer le clic de navigation principale sans imbriquer de boutons (a11y).
+- [MaterielPage.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/pages/MaterielPage.tsx) : Ajout des écouteurs Firestore `useVerificationsListener()` et `useMaintenancesListener()` pour pré-charger les verifications et maintenances associées aux équipements en arrière-plan.
+
+**Qualité & Tests (CI)**
+- [useVerifications.test.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/hooks/__tests__/useVerifications.test.ts) : Mise à jour du mock `firebase/firestore` pour inclure la fonction `limit` (requise suite à l'optimisation de la session 131) et ajout d'assertions associées.
+- Validation de la compilation TypeScript (`npx tsc -b`) et des tests unitaires (`vitest` 149/149 PASS).
+- Incrémentation du changelog de l'application en version `125` dans [changelog.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/data/changelog.ts).
+
+### Prochaines étapes
+1. 🟡 **Monitoring** — intégration Sentry (ou équivalent) avant prod
+2. 🔴 **Accord DSIN** — validation écrite avant toute date de lancement (hors scope code)
+3. Test terrain équipe Brest/Quimper sur staging
+
+---
+
 ## Session 131 — Audit sécurité + perf listeners + UX planning
 **18 juin 2026**
 
