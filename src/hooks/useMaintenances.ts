@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore'
+import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import type { Maintenance } from '@/types'
@@ -10,7 +10,7 @@ export function useMaintenancesListener() {
   const { setMaintenances, setError } = useMaintenancesStore()
 
   useEffect(() => {
-    const q = query(collection(db, COLLECTIONS.MAINTENANCES), orderBy('datePrevue', 'desc'))
+    const q = query(collection(db, COLLECTIONS.MAINTENANCES), orderBy('datePrevue', 'desc'), limit(200))
     const unsub = onSnapshot(
       q,
       (snap) => {
