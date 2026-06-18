@@ -18,6 +18,7 @@ import { EquipementForm } from '@/components/equipement/EquipementForm'
 import { FicheDeVie } from '@/components/equipement/FicheDeVie'
 import type { Equipement } from '@/types'
 import { COLLECTIONS, COLORS } from '@/lib/constants'
+import { useToastStore } from '@/stores/toastStore'
 
 
 const DEBOUNCE = 800
@@ -66,6 +67,7 @@ export default function EquipementPage() {
   const navigate = useNavigate()
   const uid       = useAuthStore(selectUid)
   const initiales = useAuthStore(selectInitiales)
+  const { add: addToast } = useToastStore()
 
   useVerificationsListener()
   useMaintenancesListener()
@@ -96,6 +98,7 @@ export default function EquipementPage() {
       if (!uid) return
       dispatch({ type: 'SET_SAVING', payload: true })
       try { await saveEquipement(updated, uid) }
+      catch { addToast('error', 'Erreur lors de la sauvegarde') }
       finally { dispatch({ type: 'SET_SAVING', payload: false }) }
     }, DEBOUNCE)
   }

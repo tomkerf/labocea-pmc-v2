@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, doc, addDoc, serverTimestamp, runTransaction } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { trackWrite } from '@/lib/trackWrite'
 import type { Equipement } from '@/types'
@@ -7,7 +7,11 @@ import { COLLECTIONS } from '@/lib/constants'
 
 export async function saveEquipement(equipement: Equipement, uid: string): Promise<void> {
   const ref = doc(db, COLLECTIONS.EQUIPEMENTS, equipement.id)
-  await trackWrite(setDoc(ref, { ...equipement, updatedAt: serverTimestamp(), updatedBy: uid }, { merge: true }))
+  await trackWrite(runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref)
+    if (!snap.exists()) throw new Error('L\'équipement a été supprimé — modifications perdues.')
+    tx.set(ref, { ...equipement, updatedAt: serverTimestamp(), updatedBy: uid }, { merge: true })
+  }))
 }
 
 export async function createEquipement(uid: string): Promise<string> {

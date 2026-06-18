@@ -12,6 +12,7 @@ import { COLORS } from '@/lib/constants'
 import { saveEquipement } from '@/services/equipementService'
 import { StatusChangeModal } from './StatusChangeModal'
 import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
+import { useToastStore } from '@/stores/toastStore'
 
 
 const CATEGORIE_LABELS: Record<string, string> = {
@@ -97,6 +98,7 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
   const navigate = useNavigate()
   const uid = useAuthStore(selectUid)
   const initiales = useAuthStore(selectInitiales)
+  const { add: addToast } = useToastStore()
   const [pendingEtat, setPendingEtat] = useState<string | null>(null)
   const etatCfg = ETAT_CONFIG[equipement.etat] ?? ETAT_CONFIG.operationnel
   const metroPercent = calcMetroPercent(equipement.prochainEtalonnage)
@@ -113,13 +115,16 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
       auteur: initiales || 'Système'
     }
     
-    await saveEquipement({ 
-      ...equipement, 
-      etat: pendingEtat as EtatType,
-      ficheDeVieNotes: [...(equipement.ficheDeVieNotes || []), note]
-    }, uid)
-    
-    setPendingEtat(null)
+    try {
+      await saveEquipement({
+        ...equipement,
+        etat: pendingEtat as EtatType,
+        ficheDeVieNotes: [...(equipement.ficheDeVieNotes || []), note]
+      }, uid)
+      setPendingEtat(null)
+    } catch {
+      addToast('error', 'Erreur lors du changement de statut')
+    }
   }
 
   const Icon = CATEGORIE_ICONS[equipement.categorie] ?? Package
