@@ -2,6 +2,30 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 130 — Premortem prod + fix data loss équipements
+**18 juin 2026**
+
+### Analyse
+Exercice premortem sur le déploiement production PMC V2. Scénario : "l'app est un échec 6 mois après la prod". Causes identifiées : microbugs accumulatifs, pertes de données, lenteur, UX inadaptée, désaccord DSIN, rôles Firestore non protégés, double-écritures, bus factor, absence de monitoring.
+
+### Bugfixes (commit 5ec133d)
+
+**Protection des écritures équipement contre les pertes de données**
+- `equipementService.ts` : migration `setDoc` → `runTransaction` avec vérification d'existence (même pattern que `clientService`). Deux users sur le même équipement en simultané ne peuvent plus s'écraser sans warning.
+- `EquipementCard.tsx` : `handleConfirmStateChange` enveloppé en try/catch + toast erreur. La modal de changement de statut ne se ferme plus si le write Firestore échoue.
+- `EquipementPage.tsx` : `catch` + toast ajouté dans `triggerSave`. L'auto-save debounced n'est plus silencieux en cas d'erreur.
+
+### Cause racine
+`clientService` utilisait déjà `runTransaction` depuis une session antérieure, mais `equipementService` avait été laissé en `setDoc` sans transaction. Les deux callers (`EquipementCard`, `EquipementPage`) n'avaient pas de gestion d'erreur visible pour l'utilisateur.
+
+### Prochaines étapes (premortem — blocages restants)
+1. 🔴 **Rôles Firestore** — audit + durcissement des Security Rules avant prod
+2. 🔴 **Accord DSIN** — obtenir validation écrite avant toute date de lancement
+3. 🟡 **Lenteur listeners** — `limit(200)` sur verifications et maintenances
+4. 🟡 **Monitoring** — Sentry ou équivalent avant prod
+
+---
+
 ## Session 129 — Export inventaire PDF + fixes StatusChangeModal
 **17 juin 2026**
 
