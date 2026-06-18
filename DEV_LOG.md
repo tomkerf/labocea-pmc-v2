@@ -2,6 +2,36 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 131 — Audit sécurité + perf listeners + UX planning
+**18 juin 2026**
+
+### Ce qui a été fait
+
+**Audit sécurité règles Firebase**
+- `firestore.rules` : confirmées solides (audit juin 11 toujours valide — privilege escalation protégée, no catch-all, toutes collections couvertes).
+- `storage.rules` : le `allow delete: if request.auth != null` est intentionnel — les techniciens suppriment leurs propres photos depuis SamplingForm, VisiteFormPage et PlanConfigSection. Restreindre à admin casserait l'UX. Documenté dans `.react-doctor/false-positives.md`.
+
+**Perf listeners (commit fe8d071)**
+- `useVerificationsListener` et `useMaintenancesListener` : ajout de `limit(200)` sur les deux `onSnapshot`. Réduit le volume Firestore lu au démarrage. Bloqueur 🟡 premortem soldé.
+
+**UX planning — légende événements (commit 7c80089)**
+- `PlanningFilterBar` : ajout du composant `PlanningLegend` — icônes + labels À FAIRE / FAIT / ÉVÉNEMENT / RAPPORT / MAINT. / MÉTRO. / TÂCHE, affiché à droite des filtres en layout `flex-col / xl:flex-row`.
+- `MaterielSections` (Aide) : ajout Step 6 pour l'export inventaire PDF + renumérotation des steps Maintenances (4/5/6 → 1/2/3).
+
+**Fix react-doctor (commit 9c1fe07)**
+- `LEGEND_ITEM` sorti hors du composant `PlanningLegend` (constante module-level) — évite la recréation à chaque render.
+- Score react-doctor passé à 44/100 : changement d'algorithme de scoring de l'outil (pas une régression du code — confirmé en testant sur le commit précédent). CLAUDE.md mis à jour.
+
+### Cause racine
+Le score react-doctor avait chuté de 72 à 44 entre sessions — investigation montre que c'est un changement d'algo de l'outil, pas une régression du code. Tous les warnings existants restent des faux positifs documentés.
+
+### Prochaines étapes
+1. 🟡 **Monitoring** — intégration Sentry (ou équivalent) avant prod
+2. 🔴 **Accord DSIN** — validation écrite avant toute date de lancement (hors scope code)
+3. Test terrain équipe Brest/Quimper sur staging
+
+---
+
 ## Session 130 — Premortem prod + fix data loss équipements
 **18 juin 2026**
 
