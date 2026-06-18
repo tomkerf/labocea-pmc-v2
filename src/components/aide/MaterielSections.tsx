@@ -36,6 +36,10 @@ export function MaterielSection() {
           Pour <strong>supprimer un équipement</strong>, ouvre sa fiche et utilise le bouton Supprimer en bas de page.
           Une confirmation est demandée. L'historique des vérifications et maintenances associées est également supprimé.
         </Step>
+        <Step num={6}>
+          Pour <strong>exporter l'inventaire en PDF</strong>, utilise le bouton <strong>Exporter</strong> en haut de la liste.
+          L'export respecte les filtres actifs et met en évidence les dates d'étalonnage dépassées.
+        </Step>
       </div>
 
       <Tip>
@@ -95,15 +99,15 @@ export function MetrologieSection() {
             Maintenances
           </p>
           <div className="flex flex-col gap-3">
-            <Step num={4}>
+            <Step num={1}>
               La page <strong>Maintenances</strong> liste les interventions planifiées et correctives sur les équipements.
               Filtre par équipement, type (préventive / corrective) ou statut.
             </Step>
-            <Step num={5}>
+            <Step num={2}>
               Pour créer une maintenance : clique sur <strong>+ Nouvelle intervention</strong>.
               Renseigne l'équipement, le type, la date prévue, la description et le technicien responsable.
             </Step>
-            <Step num={6}>
+            <Step num={3}>
               Quand une maintenance est en cours, l'état de l'équipement passe automatiquement à{' '}
               <strong>En maintenance</strong>. Il repasse à <strong>Opérationnel</strong> à la clôture.
             </Step>
