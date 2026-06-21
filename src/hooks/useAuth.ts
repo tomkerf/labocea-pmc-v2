@@ -3,6 +3,7 @@ import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebas
 import { doc, getDoc, setDoc, serverTimestamp, FieldValue } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import { useAuthStore } from '@/stores/authStore'
+import { setSentryUser, clearSentryUser } from '@/lib/sentry'
 import type { AppUser } from '@/types'
 import type { Timestamp } from 'firebase/firestore'
 import { COLLECTIONS } from '@/lib/constants'
@@ -53,7 +54,10 @@ export function useAuthInit() {
         }
         // firebaseUser et appUser sont maintenant cohérents avant que loading passe à false
         setFirebaseUser(user)
+        const appUser = useAuthStore.getState().appUser
+        if (appUser) setSentryUser(user.uid, appUser.role)
       } else {
+        clearSentryUser()
         reset()
       }
 
