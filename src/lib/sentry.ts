@@ -7,6 +7,7 @@ export function initSentry() {
   Sentry.init({
     dsn,
     environment: import.meta.env.MODE,
+    release: `pmc-v2@${import.meta.env.VITE_APP_VERSION ?? 'unknown'}`,
     tracesSampleRate: 0.1,
     sendDefaultPii: false,
   })
