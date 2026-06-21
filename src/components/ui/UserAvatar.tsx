@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { AVATAR_COLORS } from './avatarColors'
+import { getTechColor } from '@/lib/planningUtils'
 
 interface UserAvatarProps {
   initiales?: string
@@ -17,29 +18,79 @@ function hexLuminance(hex: string): number {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b
 }
 
+function getDynamicGradient(hex: string): string {
+  if (!hex || !hex.startsWith('#') || hex.length !== 7) {
+    return 'linear-gradient(135deg, #8E8E93, #5E5E62)'
+  }
+  
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  
+  const clamp = (val: number) => Math.min(255, Math.max(0, val))
+  const lighten = (val: number) => clamp(Math.round(val + (255 - val) * 0.35))
+  
+  const startHex = `#${lighten(r).toString(16).padStart(2, '0')}${lighten(g).toString(16).padStart(2, '0')}${lighten(b).toString(16).padStart(2, '0')}`
+  return `linear-gradient(135deg, ${startHex}, ${hex})`
+}
+
 export default function UserAvatar({ initiales, color, size = 40, fontSize }: UserAvatarProps) {
-  const bg = useMemo(() => {
-    if (!color) {
-      return '#4B5563' // Tailwind Gray-600 fallback
-    }
-    
-    // Look up in predefined colors
+  const baseColor = useMemo(() => {
+    if (!color) return '#4B5563'
     const normalizedColor = color.toLowerCase()
+    
+    // 1. Look up in predefined colors
     const match = AVATAR_COLORS.find(
       c => c.value.toLowerCase() === normalizedColor || 
            c.accentLight.toLowerCase() === normalizedColor ||
            c.text?.toLowerCase() === normalizedColor ||
            c.id.toLowerCase() === normalizedColor
     )
+    if (match) return match.value
     
-    return match ? match.value : color
-  }, [color])
+    // 2. Look up in static tech colors
+    if (initiales) {
+      const tech = getTechColor(initiales)
+      if (tech.color.toLowerCase() === normalizedColor || tech.bg.toLowerCase() === normalizedColor) {
+        return tech.color
+      }
+    }
+    return color
+  }, [color, initiales])
+
+  const bg = useMemo(() => {
+    if (!color) {
+      return 'linear-gradient(135deg, #8E8E93, #5E5E62)'
+    }
+    
+    const normalizedColor = color.toLowerCase()
+    
+    // 1. Look up in predefined colors
+    const match = AVATAR_COLORS.find(
+      c => c.value.toLowerCase() === normalizedColor || 
+           c.accentLight.toLowerCase() === normalizedColor ||
+           c.text?.toLowerCase() === normalizedColor ||
+           c.id.toLowerCase() === normalizedColor
+    )
+    if (match && match.gradient) return match.gradient
+    
+    // 2. Look up in static tech colors
+    if (initiales) {
+      const tech = getTechColor(initiales)
+      if (tech.gradient && (tech.color.toLowerCase() === normalizedColor || tech.bg.toLowerCase() === normalizedColor)) {
+        return tech.gradient
+      }
+    }
+    
+    // 3. Dynamic fallback for arbitrary hex
+    return getDynamicGradient(color)
+  }, [color, initiales])
 
   const textColor = useMemo(() => {
-    // Curated vibrant palette is designed for white text
-    // Custom colors fallback to dynamic luminance contrast
-    return hexLuminance(bg) > 0.45 ? '#1C1C1E' : 'white'
-  }, [bg])
+    // Curated vibrant gradients are designed for white text
+    // Custom colors fallback to dynamic luminance contrast of the base color
+    return hexLuminance(baseColor) > 0.45 ? '#1C1C1E' : 'white'
+  }, [baseColor])
 
   // Handle font size dynamically to prevent overflow of multi-letter initials
   const fs = useMemo(() => {

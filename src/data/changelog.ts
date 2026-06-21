@@ -11,7 +11,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: '126',
     date: '21 juin 2026',
     items: [
-      { type: 'fix', label: 'Avatars & Couleurs : Thème pastel harmonisé avec contraste élevé (conforme WCAG AA) et ajustement automatique de la taille du texte pour les initiales longues (ex: POGR).' },
+      { type: 'fix', label: 'Avatars & Couleurs : Dégradés linéaires vibrants Apple-style (plus joyeux, texte blanc contrasté) et ajustement automatique de la taille du texte pour les initiales de plus de 2 lettres.' },
     ],
   },
   {
