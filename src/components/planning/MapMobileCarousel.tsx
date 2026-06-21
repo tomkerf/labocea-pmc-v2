@@ -62,7 +62,7 @@ export default function MapMobileCarousel({
                       {evt.subtitle}
                     </h4>
                     <div className="flex items-center justify-between mt-2 text-[10px] font-semibold">
-                      <span className="px-2 py-0.5 rounded-full" style={{ background: evt.isDone ? 'var(--color-success-light)' : tc.bg, color }}>
+                      <span className="px-2 py-0.5 rounded-full" style={{ background: evt.isDone ? 'var(--color-success-light)' : tc.bg, color: evt.isDone ? COLORS.SUCCESS : (tc.text || tc.color) }}>
                         {evt.isDone ? 'Fait' : evt.technicien}
                       </span>
                       <div className="relative pointer-events-auto flex gap-2">
