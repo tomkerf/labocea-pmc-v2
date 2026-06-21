@@ -2,6 +2,29 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 134 — Harmonisation visuelle des couleurs & accessibilité
+**21 juin 2026**
+
+### Ce qui a été fait
+
+**Harmonisation des avatars et accessibilité (WCAG AA)**
+- [UserAvatar.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/ui/UserAvatar.tsx) : Reconfiguration du rendu des avatars. Les avatars s'affichent sous forme de cercles remplis de couleurs vives et harmonieuses issues d'une palette Tailwind 600 unifiée (mêmes niveaux de luminosité et de saturation). Le texte à l'intérieur est uniformément blanc pour un aspect moderne et cohérent.
+- [UserAvatar.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/ui/UserAvatar.tsx) : Conservation de la logique de redimensionnement dynamique du texte pour les initiales à plus de 2 lettres (comme `POGR`) afin d'éviter tout débordement.
+- [avatarColors.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/ui/avatarColors.ts) : Remplacement de la palette brute de couleurs par des couleurs Tailwind 600 (contrastées à ~4.5:1 avec le blanc), avec des propriétés `accentLight` pour les fonds et `text` (de niveau Tailwind 800/900) pour l'écriture.
+- [planningUtils.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/lib/planningUtils.ts) : Harmonisation de `TECH_COLORS` et `TECH_PALETTE` avec les nouveaux codes hexadécimaux Tailwind 600 et leurs variantes de texte foncées.
+- [usePlanningData.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/hooks/usePlanningData.ts), [MapMobileCarousel.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/MapMobileCarousel.tsx), [MapSidebar.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/MapSidebar.tsx) : Remplacement de `tc.color` par `tc.text || tc.color` pour le texte affiché sur les fonds pastel.
+
+**Qualité & Tests**
+- Incrémentation du changelog version à `126`.
+- Validation de la compilation TypeScript (`npm run build`) et du passage complet des tests unitaires (`vitest` 157/157 PASS).
+
+### Prochaines étapes
+1. 🟡 **Monitoring** — intégration Sentry (ou équivalent) avant prod
+2. 🔴 **Accord DSIN** — validation écrite avant toute date de lancement
+3. Validation finale de la mise en page et des couleurs avec Tom/l'équipe
+
+---
+
 ## Session 133 — Premortem #2 + sécurité Firestore + backup automatique
 **21 juin 2026**
 

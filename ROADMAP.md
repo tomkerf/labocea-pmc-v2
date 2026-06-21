@@ -341,5 +341,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-18 | Sécurité + perf listeners ✅ | Audit firestore.rules (solides) + storage.rules (delete documenté intentionnel). limit(200) sur useVerifications + useMaintenances. Légende planning + doc aide export PDF. |
 | 2026-06-18 | Fiche de vie direct PDF ✅ | Bouton d'export PDF direct de la fiche de vie sur chaque équipement depuis la liste de matériel. Mocks de tests limit() fixés. |
 | 2026-06-21 | Premortem #2 + sécurité + backup ✅ | Premortem actualisé (6 blocages). Firestore rules : immutableOn() protège createdBy/annee/equipementId. Backup automatique hebdomadaire via Cloud Scheduler → gs://labocea-pmc-backups. |
+| 2026-06-21 | Harmonie & Accessibilité ✅ | Refonte UserAvatar (couleurs vives et harmonieuses Tailwind-600, texte blanc, responsive font-size pour initiales longues), harmonisation des TECH_COLORS/TECH_PALETTE et contrastes de texte. |
+
 
 

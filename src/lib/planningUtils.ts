@@ -110,32 +110,32 @@ import { COLORS } from '@/lib/constants'
 // ── Couleurs par technicien ──────────────────────────────────────
 // Règle : ne pas utiliser les couleurs de statut du planning
 //   danger #FF3B30, success #34C759, warning #FF9F0A, accent #0071E3, neutral #8E8E93
-const TECH_COLORS: Record<string, { color: string; bg: string }> = {
-  'THK': { color: '#0071E3', bg: '#E8F1FB' },  // Thomas Kerfendal - bleu accent
-  'ROD': { color: '#00C7BE', bg: '#E0F7F6' },  // Romain Duvail - teal
-  'FBA': { color: '#AF52DE', bg: '#F5EEFF' },  // Fabien Barloy - violet
-  'DBE': { color: '#FF2D55', bg: '#FFEEF2' },  // Delphine Benard - rose
-  'LDU': { color: '#5856D6', bg: '#EEEEFF' },  // Ludovic Dugue - indigo
-  'POGR': { color: '#FF6B6B', bg: '#FFF0F0' }, // Pierre Olivier Groulard - saumon
-  'HJE': { color: '#32ADE6', bg: '#E5F5FD' },  // Hubert Jehl - bleu ciel
-  'EMO': { color: '#F3526E', bg: '#FDF0F3' },  // Emmanuelle Moreau Haug - magenta
-  'CTA': { color: '#5A738E', bg: '#EFF3F6' },  // Cindy Tabard - bleu ardoise
+const TECH_COLORS: Record<string, { color: string; bg: string; text: string }> = {
+  'THK': { color: '#2563EB', bg: '#EFF6FF', text: '#1E40AF' },  // Thomas Kerfendal - bleu accent
+  'ROD': { color: '#0D9488', bg: '#F0FDFA', text: '#115E59' },  // Romain Duvail - teal
+  'FBA': { color: '#9333EA', bg: '#FAF5FF', text: '#6B21A8' },  // Fabien Barloy - violet
+  'DBE': { color: '#DB2777', bg: '#FDF2F8', text: '#9D174D' },  // Delphine Benard - rose
+  'LDU': { color: '#4F46E5', bg: '#EEF2FF', text: '#3730A3' },  // Ludovic Dugue - indigo
+  'POGR': { color: '#E11D48', bg: '#FFF1F2', text: '#9F1239' }, // Pierre Olivier Groulard - saumon
+  'HJE': { color: '#0284C7', bg: '#F0F9FF', text: '#075985' },  // Hubert Jehl - bleu ciel
+  'EMO': { color: '#DC2626', bg: '#FEF2F2', text: '#991B1B' },  // Emmanuelle Moreau Haug - magenta
+  'CTA': { color: '#475569', bg: '#F1F5F9', text: '#334155' },  // Cindy Tabard - bleu ardoise
 }
 const TECH_PALETTE = [
-  { color: '#AF52DE', bg: '#F5EEFF' },  // violet
-  { color: '#5856D6', bg: '#EEEEFF' },  // indigo
-  { color: '#FF2D55', bg: '#FFEEF2' },  // rose (distinct du rouge danger)
-  { color: '#32ADE6', bg: '#E5F5FD' },  // bleu ciel
-  { color: '#FF6B6B', bg: '#FFF0F0' },  // saumon
+  { color: '#9333EA', bg: '#FAF5FF', text: '#6B21A8' },  // violet
+  { color: '#4F46E5', bg: '#EEF2FF', text: '#3730A3' },  // indigo
+  { color: '#DB2777', bg: '#FDF2F8', text: '#9D174D' },  // rose
+  { color: '#0284C7', bg: '#F0F9FF', text: '#075985' },  // bleu ciel
+  { color: '#E11D48', bg: '#FFF1F2', text: '#9F1239' },  // saumon
 ]
 
-export function getTechColor(initiales: string): { color: string; bg: string } {
+export function getTechColor(initiales: string): { color: string; bg: string; text?: string } {
   // 1. Chercher dans les utilisateurs de la base
   const user = useUsersStore.getState().users.find(u => u.initiales === initiales)
   if (user?.avatarColor) {
     const match = AVATAR_COLORS.find(c => c.value === user.avatarColor)
     if (match) {
-      return { color: match.value, bg: match.accentLight }
+      return { color: match.value, bg: match.accentLight, text: match.text }
     }
   }
 

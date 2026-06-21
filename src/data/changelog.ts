@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '125'
+export const CHANGELOG_VERSION = '126'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '126',
+    date: '21 juin 2026',
+    items: [
+      { type: 'fix', label: 'Avatars & Couleurs : Thème pastel harmonisé avec contraste élevé (conforme WCAG AA) et ajustement automatique de la taille du texte pour les initiales longues (ex: POGR).' },
+    ],
+  },
   {
     version: '125',
     date: '18 juin 2026',
