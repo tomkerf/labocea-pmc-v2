@@ -2,6 +2,35 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 133 — Premortem #2 + sécurité Firestore + backup automatique
+**21 juin 2026**
+
+### Ce qui a été fait
+
+**Premortem actualisé**
+- Analyse fraîche "pourquoi PMC V2 sera un échec dans 6 mois" — les 3 blocages techniques de juin (rôles, listeners, Sentry) étant résolus, les vraies menaces identifiées sont : perte de données, adoption Brest, bus factor.
+- Mémoire persistante `project_premortem_prod.md` mise à jour avec les 6 blocages restants classés par priorité.
+
+**Fix Firestore rules — champs immuables (commit 6df9921)**
+- Ajout de la fonction helper `immutableOn(fields)` dans `firestore.rules`.
+- Protection des champs immuables sur tous les `allow update` : `createdBy` sur toutes les collections, `annee` sur `clients-v2`, `equipementId` sur `verifications` et `maintenances`.
+- Déployé sur Firebase prod (`firebase deploy --only firestore:rules`).
+
+**Backup Firestore automatique (commit 6df9921)**
+- Script `backup-firestore.sh` : export `gcloud firestore export` vers `gs://labocea-pmc-backups` avec rotation automatique (12 derniers exports gardés).
+- Bucket GCS `labocea-pmc-backups` créé en `europe-west1`, accès public bloqué.
+- Service account `firestore-backup-sa` avec droits minimaux (export Firestore + écriture GCS uniquement).
+- Job **Cloud Scheduler** `firestore-monthly-backup` configuré : tous les lundis à 9h (Europe/Paris). Prochain export : lundi 22 juin 2026.
+- Premier export manuel réalisé ce soir avec succès.
+
+### Prochaines étapes
+1. 🔴 **Accord DSIN** — validation écrite avant toute date de lancement (hors scope code)
+2. 🔴 **Plan d'adoption Brest** — date de bascule ferme + référent Brest + créneau formation 1h
+3. 🟡 **Quota Firebase** — vérifier plan Spark vs Blaze + alerte budget
+4. 🟡 **Run book** — doc minimale (secrets, redéploiement) pour réduire le bus factor
+
+---
+
 ## Session 132 — Export direct fiches de vie matériel
 **18 juin 2026**
 
