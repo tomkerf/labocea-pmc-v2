@@ -2,17 +2,17 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
-## Session 134 — Harmonisation visuelle des couleurs & style Skittles 3D
+## Session 134 — Harmonisation visuelle des couleurs & accessibilité
 **21 juin 2026**
 
 ### Ce qui a été fait
 
-**Avatars Skittles 3D & Couleurs Ultra-Vibrantes**
-- [UserAvatar.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/ui/UserAvatar.tsx) : Implémentation du rendu 3D brillant style "Skittles" pour tous les avatars d'utilisateurs. Utilisation d'un double gradient radial combinant un spot de réflexion lumineuse blanche (`radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 35%)`) et un volume 3D, associé à une bordure fine d'ancrage et des ombres internes (`inset` top/bottom) et externes. Le texte utilise des graisses épaisses (`font-weight: 800`) et des ombres portées pour accentuer l'effet "lettre imprimée sur bonbon".
-- [UserAvatar.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/ui/UserAvatar.tsx) : Ajustement dynamique de la taille de police pour les initiales plus longues (comme `POGR`) pour éviter les overflows.
-- [avatarColors.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/ui/avatarColors.ts) : Reconfiguration complète des 14 couleurs prédéfinies vers des teintes de bonbon extrêmement vives, saturées et gaies (style Apple & Skittles) tout en adaptant leurs correspondances de fonds clairs et textes contrastés.
-- [planningUtils.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/lib/planningUtils.ts) : Remplacement des couleurs "tristes/fades" des techniciens par des codes hexadécimaux ultra-vibrants (jaune citron pour CTA, vert lime pour ROD, etc.) pour dynamiser la grille de planification sans collision de statut.
-- [usePlanningData.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/hooks/usePlanningData.ts), [MapMobileCarousel.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/MapMobileCarousel.tsx), [MapSidebar.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/MapSidebar.tsx) : Utilisation de `tc.text || tc.color` sur les fonds pastels de la grille pour conserver un contraste optimal (WCAG AA).
+**Harmonisation des avatars et accessibilité (WCAG AA)**
+- [UserAvatar.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/ui/UserAvatar.tsx) : Reconfiguration du rendu des avatars. Les avatars s'affichent sous forme de cercles remplis de dégradés de couleurs vives et harmonieuses Apple-style (dégradé linéaire à 135 degrés entre une couleur de départ lumineuse et une base plus foncée). Le texte est uniformément blanc avec un contraste idéal.
+- [UserAvatar.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/ui/UserAvatar.tsx) : Conservation de la logique de redimensionnement dynamique du texte pour les initiales à plus de 2 lettres (comme `POGR`) afin d'éviter tout débordement.
+- [avatarColors.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/ui/avatarColors.ts) : Ajout de la propriété `gradient` pour chaque couleur de la palette Apple system, avec des propriétés `accentLight` pour les fonds et `text` (sombre) pour les écritures.
+- [planningUtils.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/lib/planningUtils.ts) : Alignement de `TECH_COLORS` et `TECH_PALETTE` avec les nouveaux codes hexadécimaux et leurs dégradés linéaires Apple.
+- [usePlanningData.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/hooks/usePlanningData.ts), [MapMobileCarousel.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/MapMobileCarousel.tsx), [MapSidebar.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/MapSidebar.tsx) : Remplacement de `tc.color` par `tc.text || tc.color` pour le texte affiché sur les fonds pastel.
 
 **Qualité & Tests**
 - Incrémentation du changelog version à `126`.

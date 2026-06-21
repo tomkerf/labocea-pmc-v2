@@ -75,7 +75,7 @@ export function usePlanningData({
           const tc          = getTechColor(technicien)
           const isDone      = s.status === 'done'
           const statusBg    = isDone ? 'var(--color-success-light)' : overdue ? 'var(--color-danger-light)' : tc.bg
-          const statusColor = isDone ? COLORS.SUCCESS       : overdue ? COLORS.DANGER       : (tc.text || tc.color)
+          const statusColor = isDone ? COLORS.SUCCESS       : overdue ? COLORS.DANGER       : tc.color
           const common = {
             type: 'prelevement' as const,
             statusLabel, statusBg, statusColor, priority,

@@ -129,7 +129,7 @@ export default function MapSidebar({
                             {evt.subtitle}
                           </h4>
                           <div className="flex items-center justify-between mt-2.5 text-[11px] font-medium">
-                            <span className="px-2 py-0.5 rounded-full" style={{ background: evt.isDone ? 'var(--color-success-light)' : tc.bg, color: evt.isDone ? COLORS.SUCCESS : (tc.text || tc.color) }}>
+                            <span className="px-2 py-0.5 rounded-full" style={{ background: evt.isDone ? 'var(--color-success-light)' : tc.bg, color }}>
                               {evt.isDone ? 'Terminé' : evt.technicien}
                             </span>
                             {evt.frequence && (

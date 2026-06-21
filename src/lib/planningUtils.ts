@@ -111,22 +111,22 @@ import { COLORS } from '@/lib/constants'
 // Règle : ne pas utiliser les couleurs de statut du planning
 //   danger #FF3B30, success #34C759, warning #FF9F0A, accent #0071E3, neutral #8E8E93
 const TECH_COLORS: Record<string, { color: string; bg: string; text: string; gradient: string }> = {
-  'THK': { color: '#007AFF', bg: '#E6F0FA', text: '#004B9B', gradient: 'linear-gradient(135deg, #0088FF, #0055DD)' },  // Thomas Kerfendal - bleu royal
-  'ROD': { color: '#12B200', bg: '#E6F7E5', text: '#0B6E00', gradient: 'linear-gradient(135deg, #32D74B, #12B200)' },  // Romain Duvail - vert lime
-  'FBA': { color: '#9C3CDD', bg: '#F5E6FF', text: '#6B21A8', gradient: 'linear-gradient(135deg, #C084FC, #8A2BE2)' },  // Fabien Barloy - violet raisin
-  'DBE': { color: '#FF2D55', bg: '#FFEBEF', text: '#9D174D', gradient: 'linear-gradient(135deg, #FF5E8A, #D4143D)' },  // Delphine Benard - rose/framboise
+  'THK': { color: '#0071E3', bg: '#EFF6FF', text: '#1E40AF', gradient: 'linear-gradient(135deg, #0088FF, #0055DD)' },  // Thomas Kerfendal - bleu accent (sombre pour contraste)
+  'ROD': { color: '#1A8297', bg: '#F0FDFA', text: '#115E59', gradient: 'linear-gradient(135deg, #00D2C4, #009F96)' },  // Romain Duvail - teal
+  'FBA': { color: '#9C3CDD', bg: '#FAF5FF', text: '#6B21A8', gradient: 'linear-gradient(135deg, #C084FC, #8A2BE2)' },  // Fabien Barloy - violet
+  'DBE': { color: '#FF2D55', bg: '#FDF2F8', text: '#9D174D', gradient: 'linear-gradient(135deg, #FF5E8A, #D4143D)' },  // Delphine Benard - rose
   'LDU': { color: '#5856D6', bg: '#EEF2FF', text: '#3730A3', gradient: 'linear-gradient(135deg, #818CF8, #4F46E5)' },  // Ludovic Dugue - indigo
-  'POGR': { color: '#FF5722', bg: '#FFEFEA', text: '#A72800', gradient: 'linear-gradient(135deg, #FF7E67, #E04E39)' }, // Pierre Olivier Groulard - corail/mangue
-  'HJE': { color: '#0A9CD9', bg: '#E6F5FC', text: '#006791', gradient: 'linear-gradient(135deg, #32ADE6, #0A9CD9)' },  // Hubert Jehl - bleu ciel
-  'EMO': { color: '#FF007F', bg: '#FFE6F2', text: '#B30059', gradient: 'linear-gradient(135deg, #FF45A4, #CC0066)' },  // Emmanuelle Moreau Haug - rose bonbon
-  'CTA': { color: '#FFB300', bg: '#FFF8E1', text: '#806000', gradient: 'linear-gradient(135deg, #FFD54F, #FFB300)' },  // Cindy Tabard - jaune citron
+  'POGR': { color: '#E05A47', bg: '#FFF1F2', text: '#9F1239', gradient: 'linear-gradient(135deg, #FF7E67, #E05A47)' }, // Pierre Olivier Groulard - saumon/corail
+  'HJE': { color: '#0B7DB1', bg: '#F0F9FF', text: '#075985', gradient: 'linear-gradient(135deg, #32ADE6, #0B7DB1)' },  // Hubert Jehl - bleu ciel
+  'EMO': { color: '#FF2D55', bg: '#FDF2F8', text: '#9D174D', gradient: 'linear-gradient(135deg, #FF5E8A, #D4143D)' },  // Emmanuelle Moreau Haug - magenta
+  'CTA': { color: '#3A6073', bg: '#F1F5F9', text: '#334155', gradient: 'linear-gradient(135deg, #5A738E, #2D4B5B)' },  // Cindy Tabard - bleu ardoise
 }
 const TECH_PALETTE = [
-  { color: '#9C3CDD', bg: '#F5E6FF', text: '#6B21A8', gradient: 'linear-gradient(135deg, #C084FC, #8A2BE2)' },  // violet
+  { color: '#9C3CDD', bg: '#FAF5FF', text: '#6B21A8', gradient: 'linear-gradient(135deg, #C084FC, #8A2BE2)' },  // violet
   { color: '#5856D6', bg: '#EEF2FF', text: '#3730A3', gradient: 'linear-gradient(135deg, #818CF8, #4F46E5)' },  // indigo
-  { color: '#FF2D55', bg: '#FFEBEF', text: '#9D174D', gradient: 'linear-gradient(135deg, #FF5E8A, #D4143D)' },  // rose
-  { color: '#0A9CD9', bg: '#E6F5FC', text: '#006791', gradient: 'linear-gradient(135deg, #32ADE6, #0A9CD9)' },  // bleu ciel
-  { color: '#FF5722', bg: '#FFEFEA', text: '#A72800', gradient: 'linear-gradient(135deg, #FF7E67, #E04E39)' },  // corail
+  { color: '#FF2D55', bg: '#FDF2F8', text: '#9D174D', gradient: 'linear-gradient(135deg, #FF5E8A, #D4143D)' },  // rose
+  { color: '#0B7DB1', bg: '#F0F9FF', text: '#075985', gradient: 'linear-gradient(135deg, #32ADE6, #0B7DB1)' },  // bleu ciel
+  { color: '#E05A47', bg: '#FFF1F2', text: '#9F1239', gradient: 'linear-gradient(135deg, #FF7E67, #E05A47)' },  // saumon
 ]
 
 export function getTechColor(initiales: string): { color: string; bg: string; text?: string; gradient?: string } {
