@@ -13,6 +13,11 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    // Vérifie qu'aucun des champs listés n'est modifié sur un update
+    function immutableOn(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
     function hasRequiredClientFields() {
       return request.resource.data.keys().hasAll(['nom', 'annee']) &&
         request.resource.data.nom is string &&
@@ -27,7 +32,7 @@ service cloud.firestore {
     match /clients-v2/{clientId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && hasRequiredClientFields();
-      allow update: if isAuthenticated();
+      allow update: if isAuthenticated() && immutableOn(['createdBy', 'annee']);
       allow delete: if isAdmin();
     }
 
@@ -51,39 +56,45 @@ service cloud.firestore {
     // ── equipements ───────────────────────────────────────────
     // Suppression : admin uniquement.
     match /equipements/{equipementId} {
-      allow read, create, update: if isAuthenticated();
+      allow read, create: if isAuthenticated();
+      allow update: if isAuthenticated() && immutableOn(['createdBy']);
       allow delete: if isAdmin();
     }
 
     // ── verifications ─────────────────────────────────────────
     // Suppression : admin uniquement.
     match /verifications/{verificationId} {
-      allow read, create, update: if isAuthenticated();
+      allow read, create: if isAuthenticated();
+      allow update: if isAuthenticated() && immutableOn(['createdBy', 'equipementId']);
       allow delete: if isAdmin();
     }
 
     // ── maintenances ──────────────────────────────────────────
     // Suppression : admin uniquement.
     match /maintenances/{maintenanceId} {
-      allow read, create, update: if isAuthenticated();
+      allow read, create: if isAuthenticated();
+      allow update: if isAuthenticated() && immutableOn(['createdBy', 'equipementId']);
       allow delete: if isAdmin();
     }
 
     // ── evenements ────────────────────────────────────────────
     match /evenements/{evenementId} {
-      allow read, create, update: if isAuthenticated();
+      allow read, create: if isAuthenticated();
+      allow update: if isAuthenticated() && immutableOn(['createdBy']);
       allow delete: if isAdmin();
     }
 
     // ── demandes ──────────────────────────────────────────────
     match /demandes/{demandeId} {
-      allow read, create, update: if isAuthenticated();
+      allow read, create: if isAuthenticated();
+      allow update: if isAuthenticated() && immutableOn(['createdBy']);
       allow delete: if isAdmin();
     }
 
     // ── tuyaux ────────────────────────────────────────────────
     match /tuyaux/{tuyauId} {
-      allow read, create, update: if isAuthenticated();
+      allow read, create: if isAuthenticated();
+      allow update: if isAuthenticated() && immutableOn(['createdBy']);
       allow delete: if isAdmin();
     }
 
