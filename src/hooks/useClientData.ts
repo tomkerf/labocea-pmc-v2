@@ -67,9 +67,9 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
           remoteDataRef.current = data
           const remoteUser = useUsersStore.getState().users.find(u => u.uid === remoteUid)
           dispatch({ type: 'REMOTE_CHANGED', client: data, byName: remoteUser?.prenom ?? 'un autre utilisateur' })
-        } else {
-          dispatch({ type: 'LOADED', client: data })
         }
+        // Si c'est notre propre mise à jour qui nous revient en écho (remoteUid === uid),
+        // on l'ignore silencieusement pour ne pas écraser les frappes en cours.
       } else {
         dispatch({ type: 'LOADED', client: data })
       }

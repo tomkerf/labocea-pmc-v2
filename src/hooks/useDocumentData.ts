@@ -39,23 +39,41 @@ export function useDocumentData<T extends { id: string }>(
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isDirty = useRef(false)
 
   useEffect(() => {
     if (!docId) return
     const ref = doc(db, collection, docId)
     const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists()) setData({ id: snap.id, ...snap.data() } as T)
-      else setData(null)
+      if (snap.exists()) {
+        const newData = { id: snap.id, ...snap.data() } as T
+        if (isDirty.current) {
+          const remoteUid = (snap.data().updatedBy ?? '') as string
+          if (remoteUid && remoteUid !== uid) {
+            setData(newData) // Un autre utilisateur a modifié, on écrase (pourrait être amélioré avec un conflit)
+          }
+          // Si c'est nous (remoteUid === uid), on ignore pour ne pas écraser les frappes en cours
+        } else {
+          setData(newData)
+        }
+      } else {
+        setData(null)
+      }
       setLoading(false)
     })
     return () => unsub()
-  }, [collection, docId])
+  }, [collection, docId, uid])
 
   function triggerSave(updated: T) {
+    isDirty.current = true
     setData(updated)
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(async () => {
-      if (!uid) return
+      if (!uid) {
+        saveTimer.current = null
+        return
+      }
+      saveTimer.current = null
       setSaving(true)
       try {
         await saveFn(updated, uid)
@@ -64,6 +82,9 @@ export function useDocumentData<T extends { id: string }>(
         toast.error('Échec de la sauvegarde. Vérifie ta connexion.')
       } finally {
         setSaving(false)
+        if (!saveTimer.current) {
+          isDirty.current = false
+        }
       }
     }, DEBOUNCE)
   }

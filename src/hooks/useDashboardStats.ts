@@ -264,7 +264,7 @@ export function useDashboardStats({
 
     for (const ev of evenements as EvenementPersonnel[]) {
       const keep = (() => {
-        if (!isGeneraliste && initiales && ev.createdByInitiales && ev.createdByInitiales !== initiales) return false
+        if (initiales && ev.createdByInitiales && ev.createdByInitiales !== initiales) return false
         if (ev.dateFin && ev.dateFin > ev.date) return ev.date <= todayISO && ev.dateFin >= todayISO
         return ev.date === todayISO
       })()
@@ -341,7 +341,7 @@ export function useDashboardStats({
 
     for (const ev of evenements as EvenementPersonnel[]) {
       const keep = (() => {
-        if (!isGeneraliste && initiales && ev.createdByInitiales && ev.createdByInitiales !== initiales) return false
+        if (initiales && ev.createdByInitiales && ev.createdByInitiales !== initiales) return false
         if (ev.dateFin && ev.dateFin > ev.date) return ev.date <= tomorrowISO && ev.dateFin >= tomorrowISO
         return ev.date === tomorrowISO
       })()

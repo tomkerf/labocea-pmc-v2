@@ -1,19 +1,29 @@
+import { useState } from 'react'
 import UserAvatar from '@/components/ui/UserAvatar'
 import type { AppUser, UserRole } from '@/types'
+import { updateUserProfile } from '@/services/userService'
 import { COLORS } from '@/lib/constants'
-
-
-const ROLE_LABELS: Record<UserRole, string> = {
-  technicien:      'Technicien',
-  charge_mission:  'Chargé de mission',
-  admin:           'Admin',
-}
+import { toast } from '@/stores/toastStore'
 
 interface Props {
   users: AppUser[]
 }
 
 export function AdminUsersList({ users }: Props) {
+  const [updating, setUpdating] = useState<string | null>(null)
+
+  const handleRoleChange = async (uid: string, newRole: UserRole) => {
+    setUpdating(uid)
+    try {
+      await updateUserProfile(uid, { role: newRole })
+      toast.success('Rôle mis à jour')
+    } catch {
+      toast.error('Erreur lors de la mise à jour')
+    } finally {
+      setUpdating(null)
+    }
+  }
+
   return (
     <section>
       <h2 className="text-sm font-semibold mb-3"
@@ -41,13 +51,24 @@ export function AdminUsersList({ users }: Props) {
               </p>
               <p className="text-xs mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>{u.email}</p>
             </div>
-            <span className="text-xs px-2.5 py-1 rounded-full font-medium"
+            
+            <select
+              disabled={updating === u.uid}
+              value={u.role}
+              onChange={(e) => handleRoleChange(u.uid, e.target.value as UserRole)}
+              className="text-xs px-2.5 py-1.5 rounded-lg font-medium cursor-pointer transition-colors"
               style={{
                 background: u.role === 'admin' ? 'var(--color-accent-light)' : COLORS.BG_TERTIARY,
                 color: u.role === 'admin' ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
-              }}>
-              {ROLE_LABELS[u.role]}
-            </span>
+                border: '1px solid transparent',
+                outline: 'none',
+                opacity: updating === u.uid ? 0.6 : 1
+              }}
+            >
+              <option value="technicien">Technicien</option>
+              <option value="charge_mission">Chargé de mission</option>
+              <option value="admin">Admin</option>
+            </select>
           </div>
         ))}
       </div>

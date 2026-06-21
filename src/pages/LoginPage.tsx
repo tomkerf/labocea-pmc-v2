@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { login } from '@/hooks/useAuth'
 import { COLORS } from '@/lib/constants'
-
+import { useAuthStore } from '@/stores/authStore'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -13,6 +13,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const firebaseUser = useAuthStore(s => s.firebaseUser)
+
+  useEffect(() => {
+    if (firebaseUser) {
+      navigate(from, { replace: true })
+    }
+  }, [firebaseUser, navigate, from])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -21,10 +28,9 @@ export default function LoginPage() {
 
     try {
       await login(email, password)
-      navigate(from, { replace: true })
+      // La navigation se fera via le useEffect une fois que onAuthStateChanged aura mis à jour le store
     } catch {
       setError('Email ou mot de passe incorrect.')
-    } finally {
       setLoading(false)
     }
   }
