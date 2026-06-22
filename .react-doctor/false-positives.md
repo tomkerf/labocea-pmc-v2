@@ -13,6 +13,7 @@
 
 - `src/components/infos/EntryCard.tsx` — `TYPE_CONFIG` est co-localisé intentionnellement avec les composants `Badge`/`EntryCard` car ils sont étroitement couplés (config de rendu par type).
 - `src/components/ui/UserAvatar.tsx` — `AVATAR_COLORS`, `DEFAULT_AVATAR_COLOR`, `getAvatarColor` sont co-localisés intentionnellement (palette utilisée par AppLayout pour les tokens CSS d'accent).
+- `src/components/materiel/EquipementCard.tsx` — `ETAT_CONFIG` co-localisé intentionnellement ; consommé par `StatusChangeModal` et `ficheDeVieExport` qui en ont besoin pour les libellés d'état.
 
 ## react-doctor/no-mutable-in-deps
 

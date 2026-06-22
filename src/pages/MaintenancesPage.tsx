@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useReducer } from 'react'
 import { Plus, Wrench, Zap, Hammer, AlignJustify, LayoutList } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
@@ -41,6 +41,13 @@ const TYPES_FILTER = [
 
 const STATUT_ORDER: Record<string, number> = { en_cours: 0, planifiee: 1, realisee: 2, abandonnee: 3 }
 
+type Filters = { statut: string; type: string; appareil: string }
+type FilterAction = { name: keyof Filters; value: string }
+function filtersReducer(state: Filters, action: FilterAction): Filters {
+  return { ...state, [action.name]: action.value }
+}
+const INITIAL_FILTERS: Filters = { statut: '', type: '', appareil: '' }
+
 export default function MaintenancesPage() {
   useMaintenancesListener()
   const navigate = useNavigate()
@@ -48,17 +55,12 @@ export default function MaintenancesPage() {
   const prenom = useAuthStore(selectPrenom)
   const initiales = useAuthStore(selectInitiales)
   const { maintenances, loading } = useMaintenancesStore()
-  const [filterStatut, setFilterStatut] = useState('')
-  const [filterType, setFilterType] = useState('')
-  const [filterAppareil, setFilterAppareil] = useState('')
+  const [filters, dispatchFilter] = useReducer(filtersReducer, INITIAL_FILTERS)
+  const { statut: filterStatut, type: filterType, appareil: filterAppareil } = filters
   const [creating, setCreating] = useState(false)
   const [compact, setCompact] = useState(false)
 
-  function clearFilters() {
-    setFilterStatut('')
-    setFilterType('')
-    setFilterAppareil('')
-  }
+  function clearFilters() { dispatchFilter({ name: 'statut', value: '' }); dispatchFilter({ name: 'type', value: '' }); dispatchFilter({ name: 'appareil', value: '' }) }
 
   const technicienNom = [prenom, initiales].filter(Boolean).join(' ')
 
@@ -138,7 +140,7 @@ export default function MaintenancesPage() {
         <div className="flex gap-2 flex-wrap">
           {STATUTS_FILTER.map((f) => (
             <button type="button" key={f.value}
-              onClick={() => setFilterStatut(f.value)}
+              onClick={() => dispatchFilter({ name: 'statut', value: f.value })}
               className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
               style={{
                 background: filterStatut === f.value ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
@@ -155,7 +157,7 @@ export default function MaintenancesPage() {
         <div className="flex gap-2">
           <select
             value={filterAppareil}
-            onChange={(e) => setFilterAppareil(e.target.value)}
+            onChange={(e) => dispatchFilter({ name: 'appareil', value: e.target.value })}
             className="flex-1 px-3 py-2 rounded-lg text-sm"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
@@ -164,7 +166,7 @@ export default function MaintenancesPage() {
           </select>
           <select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
+            onChange={(e) => dispatchFilter({ name: 'type', value: e.target.value })}
             className="flex-1 px-3 py-2 rounded-lg text-sm"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
