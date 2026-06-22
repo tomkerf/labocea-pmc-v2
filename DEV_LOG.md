@@ -12,6 +12,7 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 - [UserAvatar.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/ui/UserAvatar.tsx) : Conservation de la logique de redimensionnement dynamique du texte pour les initiales à plus de 2 lettres (comme `POGR`) afin d'éviter tout débordement.
 - [avatarColors.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/ui/avatarColors.ts) : Ajout de la propriété `gradient` pour chaque couleur de la palette Apple system, avec des propriétés `accentLight` pour les fonds et `text` (sombre) pour les écritures.
 - [planningUtils.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/lib/planningUtils.ts) : Alignement de `TECH_COLORS` et `TECH_PALETTE` avec les nouveaux codes hexadécimaux et leurs dégradés linéaires Apple.
+- [planningUtils.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/lib/planningUtils.ts) : Ajustement de la couleur de Romain Duvail (ROD) vers un vert vif et chaleureux (#30D158).
 - [usePlanningData.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/hooks/usePlanningData.ts), [MapMobileCarousel.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/MapMobileCarousel.tsx), [MapSidebar.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/MapSidebar.tsx) : Remplacement de `tc.color` par `tc.text || tc.color` pour le texte affiché sur les fonds pastel.
 
 **Qualité & Tests**

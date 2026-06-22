@@ -9,19 +9,27 @@ interface State { error: Error | null }
  * Remplace l'écran blanc par un message d'erreur lisible.
  * Encapsuler les routes protégées pour intercepter les crashes de rendu.
  */
+const CHUNK_LOAD_ERRORS = [
+  'Failed to fetch dynamically imported module',
+  'Importing a module script failed',
+]
+
+const isChunkError = (msg: string) => CHUNK_LOAD_ERRORS.some(s => msg.includes(s))
+
 export default class ErrorBoundary extends Component<Props, State> {
   state: State = { error: null }
 
   static getDerivedStateFromError(error: Error): State {
-    console.error('[ErrorBoundary]', error.message, error)
-    if (
-      error.message.includes('Failed to fetch dynamically imported module') ||
-      error.message.includes('Importing a module script failed')
-    ) {
-      window.location.reload()
-      return { error: null }
-    }
+    if (isChunkError(error.message)) return { error: null }
     return { error }
+  }
+
+  componentDidCatch(error: Error) {
+    if (isChunkError(error.message)) {
+      window.location.reload()
+      return
+    }
+    console.error('[ErrorBoundary]', error.message, error)
   }
 
   render() {

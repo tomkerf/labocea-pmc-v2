@@ -10,6 +10,10 @@ export function initSentry() {
     release: `pmc-v2@${import.meta.env.VITE_APP_VERSION ?? 'unknown'}`,
     tracesSampleRate: 0.1,
     sendDefaultPii: false,
+    ignoreErrors: [
+      'Failed to fetch dynamically imported module',
+      'Importing a module script failed',
+    ],
   })
 }
 
