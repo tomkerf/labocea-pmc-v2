@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Plus, Wrench, Zap, Hammer } from 'lucide-react'
+import { Plus, Wrench, Zap, Hammer, AlignJustify, LayoutList } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { createMaintenance } from '@/services/maintenanceService'
@@ -52,6 +52,13 @@ export default function MaintenancesPage() {
   const [filterType, setFilterType] = useState('')
   const [filterAppareil, setFilterAppareil] = useState('')
   const [creating, setCreating] = useState(false)
+  const [compact, setCompact] = useState(false)
+
+  function clearFilters() {
+    setFilterStatut('')
+    setFilterType('')
+    setFilterAppareil('')
+  }
 
   const technicienNom = [prenom, initiales].filter(Boolean).join(' ')
 
@@ -94,19 +101,35 @@ export default function MaintenancesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Maintenances</h1>
-          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-            {maintenances.length} intervention{maintenances.length !== 1 ? 's' : ''}
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_PRIMARY }}>
+            {filtered.length !== maintenances.length
+              ? `${filtered.length} / ${maintenances.length} intervention${maintenances.length !== 1 ? 's' : ''}`
+              : `${maintenances.length} intervention${maintenances.length !== 1 ? 's' : ''}`}
           </p>
         </div>
-        <button type="button"
-          onClick={handleCreate}
-          disabled={creating}
-          className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg w-full sm:w-auto"
-          style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
-        >
-          <Plus size={16} />
-          Nouvelle intervention
-        </button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <button type="button"
+            onClick={() => setCompact((c) => !c)}
+            className="flex items-center justify-center p-2 rounded-lg transition-colors"
+            title={compact ? 'Vue développée' : 'Vue compacte'}
+            style={{
+              background: compact ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
+              border: '1px solid var(--color-border-subtle)',
+              color: compact ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
+            }}
+          >
+            {compact ? <LayoutList size={16} /> : <AlignJustify size={16} />}
+          </button>
+          <button type="button"
+            onClick={handleCreate}
+            disabled={creating}
+            className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg flex-1 sm:flex-none"
+            style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
+          >
+            <Plus size={16} />
+            Nouvelle intervention
+          </button>
+        </div>
       </div>
 
       {/* Filtres */}
@@ -126,22 +149,6 @@ export default function MaintenancesPage() {
               {f.label}
             </button>
           ))}
-        </div>
-
-        {/* Légende types */}
-        <div className="flex gap-4 flex-wrap">
-          {Object.entries(TYPE_CONFIG).map(([key, cfg]) => {
-            const Icon = cfg.icon
-            return (
-              <div key={key} className="flex items-center gap-1.5">
-                <div className="size-6 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: cfg.bg }}>
-                  <Icon size={12} strokeWidth={2} color={cfg.color} />
-                </div>
-                <span className="text-xs" style={{ color: COLORS.TEXT_SECONDARY }}>{cfg.label}</span>
-              </div>
-            )
-          })}
         </div>
 
         {/* Selects */}
@@ -192,8 +199,13 @@ export default function MaintenancesPage() {
           </button>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Aucune intervention pour ces filtres.</p>
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <p className="text-sm" style={{ color: COLORS.TEXT_SECONDARY }}>Aucune intervention pour ces filtres.</p>
+          <button type="button" onClick={clearFilters}
+            className="text-sm font-medium px-4 py-1.5 rounded-lg transition-colors"
+            style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
+            Effacer les filtres
+          </button>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
@@ -211,7 +223,7 @@ export default function MaintenancesPage() {
               <button type="button"
                 key={m.id}
                 onClick={() => navigate(`/maintenances/${m.id}`)}
-                className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
+                className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors ${compact ? 'py-2' : 'py-4'}`}
                 style={{
                   background: COLORS.BG_SECONDARY,
                   border: '1px solid var(--color-border-subtle)',
@@ -221,24 +233,34 @@ export default function MaintenancesPage() {
                 onMouseLeave={(e) => (e.currentTarget.style.background = COLORS.BG_SECONDARY)}
               >
                 {/* Icône type */}
-                <div className="size-11 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: typeCfg.bg }}>
-                  <TypeIcon size={18} strokeWidth={1.8} color={typeCfg.color} />
-                </div>
+                {!compact && (
+                  <div className="size-11 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: typeCfg.bg }}>
+                    <TypeIcon size={18} strokeWidth={1.8} color={typeCfg.color} />
+                  </div>
+                )}
+                {compact && (
+                  <div className="size-6 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: typeCfg.bg }}>
+                    <TypeIcon size={11} strokeWidth={2} color={typeCfg.color} />
+                  </div>
+                )}
 
                 {/* Infos */}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                     {m.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }}>Équipement non défini</span>}
                   </p>
-                  {m.description && (
+                  {!compact && m.description && (
                     <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
                       {m.description}
                     </p>
                   )}
-                  <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                    {[typeCfg.label, date].filter(Boolean).join(' · ')}
-                  </p>
+                  {!compact && (
+                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                      {[typeCfg.label, date].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
                 </div>
 
                 {/* Badge statut */}

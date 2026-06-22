@@ -13,6 +13,7 @@ import { saveClient } from '@/services/clientService'
 import type { Client, Plan, Sampling } from '@/types'
 import type { RapportItem } from '@/hooks/useDashboardStats'
 import { COLORS } from '@/lib/constants'
+import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import RapportClientGroup from '@/components/rapports/RapportClientGroup'
 import RapportRow from '@/components/rapports/RapportRow'
 import RapportEnvoyeRow from '@/components/rapports/RapportEnvoyeRow'
@@ -105,19 +106,14 @@ export default function RapportsPage() {
           <FileText size={22} strokeWidth={1.5} style={{ color: COLORS.ACCENT }} />
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Rapports</h1>
         </div>
-        <div className="flex items-center gap-1 rounded-lg p-1"
-          style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border-subtle)' }}>
-          <button type="button" onClick={() => setTouteEquipe(false)}
-            className="px-3 py-1 rounded-md text-sm font-medium transition-colors"
-            style={{ background: !touteEquipe ? COLORS.BG_SECONDARY : 'transparent', color: !touteEquipe ? COLORS.TEXT_PRIMARY : COLORS.TEXT_SECONDARY, boxShadow: !touteEquipe ? 'var(--shadow-card)' : 'none' }}>
-            Mes rapports
-          </button>
-          <button type="button" onClick={() => setTouteEquipe(true)}
-            className="px-3 py-1 rounded-md text-sm font-medium transition-colors"
-            style={{ background: touteEquipe ? COLORS.BG_SECONDARY : 'transparent', color: touteEquipe ? COLORS.TEXT_PRIMARY : COLORS.TEXT_SECONDARY, boxShadow: touteEquipe ? 'var(--shadow-card)' : 'none' }}>
-            Toute l'équipe
-          </button>
-        </div>
+        <SegmentedControl
+          options={[
+            { value: 'moi', label: 'Mes rapports' },
+            { value: 'equipe', label: "Toute l'équipe" },
+          ]}
+          value={touteEquipe ? 'equipe' : 'moi'}
+          onChange={(v) => setTouteEquipe(v === 'equipe')}
+        />
       </div>
 
       {/* Section À rédiger */}

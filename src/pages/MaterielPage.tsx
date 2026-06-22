@@ -1,5 +1,5 @@
 import { useState, useReducer } from 'react'
-import { Plus, Search, Package, FileDown } from 'lucide-react'
+import { Plus, Search, Package, FileDown, AlignJustify, LayoutList } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useUsersListener } from '@/hooks/useUsers'
@@ -105,6 +105,7 @@ export default function MaterielPage() {
   const techniciens = users.filter(u => u.role !== 'charge_mission')
 
   const [creating, setCreating] = useState(false)
+  const [compact, setCompact] = useState(false)
 
   const isFlacon = filterCategorie === 'flacon'
 
@@ -154,13 +155,25 @@ export default function MaterielPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Matériel</h1>
-          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_PRIMARY }}>
             {filtered.length !== equipements.length
               ? `${filtered.length} / ${equipements.length} équipements`
               : `${equipements.length} équipement${equipements.length !== 1 ? 's' : ''}`}
           </p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
+          <button type="button"
+            onClick={() => setCompact((c) => !c)}
+            className="flex items-center justify-center p-2 rounded-lg transition-colors"
+            title={compact ? 'Vue développée' : 'Vue compacte'}
+            style={{
+              background: compact ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
+              border: '1px solid var(--color-border-subtle)',
+              color: compact ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
+            }}
+          >
+            {compact ? <LayoutList size={16} /> : <AlignJustify size={16} />}
+          </button>
           <button
             type="button"
             onClick={handleExport}
@@ -319,13 +332,27 @@ export default function MaterielPage() {
           </button>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Aucun résultat pour ces filtres.</p>
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <p className="text-sm" style={{ color: COLORS.TEXT_SECONDARY }}>Aucun résultat pour ces filtres.</p>
+          <button type="button"
+            onClick={() => {
+              dispatch({ type: 'setFilter', name: 'search', value: '' })
+              dispatch({ type: 'setFilter', name: 'filterCategorie', value: '' })
+              dispatch({ type: 'setFilter', name: 'filterEtat', value: '' })
+              dispatch({ type: 'setFilter', name: 'filterSite', value: '' })
+              dispatch({ type: 'setFilter', name: 'filterTechnicien', value: '' })
+              dispatch({ type: 'setFilter', name: 'filterMateriau', value: '' })
+              dispatch({ type: 'setFilter', name: 'filterMarque', value: '' })
+            }}
+            className="text-sm font-medium px-4 py-1.5 rounded-lg"
+            style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
+            Effacer les filtres
+          </button>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
           {filtered.map((e: Equipement) => (
-            <EquipementCard key={e.id} equipement={e} />
+            <EquipementCard key={e.id} equipement={e} compact={compact} />
           ))}
           <button type="button"
             onClick={handleCreate}

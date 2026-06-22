@@ -96,9 +96,10 @@ function getMetroColor(percent: number): string {
 
 interface EquipementCardProps {
   equipement: Equipement
+  compact?: boolean
 }
 
-export default function EquipementCard({ equipement }: EquipementCardProps) {
+export default function EquipementCard({ equipement, compact = false }: EquipementCardProps) {
   const navigate = useNavigate()
   const uid = useAuthStore(selectUid)
   const initiales = useAuthStore(selectInitiales)
@@ -151,11 +152,9 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
     ? getMetroColor(metroPercent)
     : 'var(--color-text-tertiary)'
 
-  const categoryIcon = <Icon size={iconSize} strokeWidth={1.8} color={iconColor} />
-
   return (
     <div
-      className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors relative group"
+      className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors relative group ${compact ? 'py-2' : 'py-4'}`}
       style={{
         background: COLORS.BG_SECONDARY,
         border: '1px solid var(--color-border-subtle)',
@@ -183,11 +182,11 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
             </div>
           )}
           {metroPercent !== null ? (
-            <CircleProgress percent={metroPercent} size={44} icon={categoryIcon} />
+            <CircleProgress percent={metroPercent} size={compact ? 28 : 44} icon={<Icon size={compact ? 10 : iconSize} strokeWidth={1.8} color={iconColor} />} />
           ) : (
-            <div className="size-11 rounded-full flex items-center justify-center"
+            <div className={`${compact ? 'size-7' : 'size-11'} rounded-full flex items-center justify-center`}
               style={{ background: COLORS.BG_TERTIARY, border: '2px solid var(--color-border)' }}>
-              <Icon size={iconSize} strokeWidth={1.8} color="var(--color-text-tertiary)" />
+              <Icon size={compact ? 10 : iconSize} strokeWidth={1.8} color="var(--color-text-tertiary)" />
             </div>
           )}
         </div>
@@ -197,19 +196,23 @@ export default function EquipementCard({ equipement }: EquipementCardProps) {
           <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
             {equipement.nom || 'Sans nom'}
           </p>
-          <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-            {[equipement.marque, equipement.modele].filter(Boolean).join(' ') || '—'}
-          </p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-            {[
-              CATEGORIE_LABELS[equipement.categorie] ?? equipement.categorie,
-              equipement.numSerie,
-              equipement.volume,
-              equipement.poids,
-              equipement.materiau ? equipement.materiau.charAt(0).toUpperCase() + equipement.materiau.slice(1) : '',
-              equipement.diametre ? `Ø ${equipement.diametre} mm` : '',
-            ].filter(Boolean).join(' · ')}
-          </p>
+          {!compact && (
+            <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+              {[equipement.marque, equipement.modele].filter(Boolean).join(' ') || '—'}
+            </p>
+          )}
+          {!compact && (
+            <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+              {[
+                CATEGORIE_LABELS[equipement.categorie] ?? equipement.categorie,
+                equipement.numSerie,
+                equipement.volume,
+                equipement.poids,
+                equipement.materiau ? equipement.materiau.charAt(0).toUpperCase() + equipement.materiau.slice(1) : '',
+                equipement.diametre ? `Ø ${equipement.diametre} mm` : '',
+              ].filter(Boolean).join(' · ')}
+            </p>
+          )}
         </div>
       </div>
 

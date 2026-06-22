@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Gauge, Ruler } from 'lucide-react'
+import { Plus, Gauge, Ruler, AlignJustify, LayoutList } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMetrologieStore } from '@/stores/metrologieStore'
@@ -52,6 +52,7 @@ export default function MerologiePage() {
   const { verifications, loading: loadingVerif } = useMetrologieStore()
   const { equipements, loading: loadingEq } = useEquipementsStore()
   const [filterStatut, setFilterStatut] = useState('')
+  const [compact, setCompact] = useState(false)
 
   const loading = loadingVerif || loadingEq
 
@@ -67,8 +68,10 @@ export default function MerologiePage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Métrologie</h1>
-          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-            {allRows.length} instrument{allRows.length !== 1 ? 's' : ''} suivis
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_PRIMARY }}>
+            {filtered.length !== allRows.length
+              ? `${filtered.length} / ${allRows.length} instrument${allRows.length !== 1 ? 's' : ''}`
+              : `${allRows.length} instrument${allRows.length !== 1 ? 's' : ''} suivis`}
             {lateCount > 0 && (
               <span className="ml-2 text-xs px-2 py-0.5 rounded-full font-medium"
                 style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
@@ -77,16 +80,29 @@ export default function MerologiePage() {
             )}
           </p>
         </div>
-        <button type="button"
-          onClick={handleCreate}
-          
-          className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg w-full sm:w-auto"
-          style={{ background: COLORS.ACCENT, color: 'white', }}
-        >
-          <Plus size={16} />
-          <span className="hidden sm:inline">Saisir une vérification</span>
-          <span className="sm:hidden">Saisir</span>
-        </button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <button type="button"
+            onClick={() => setCompact((c) => !c)}
+            className="flex items-center justify-center p-2 rounded-lg transition-colors"
+            title={compact ? 'Vue développée' : 'Vue compacte'}
+            style={{
+              background: compact ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
+              border: '1px solid var(--color-border-subtle)',
+              color: compact ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
+            }}
+          >
+            {compact ? <LayoutList size={16} /> : <AlignJustify size={16} />}
+          </button>
+          <button type="button"
+            onClick={handleCreate}
+            className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg flex-1 sm:flex-none"
+            style={{ background: COLORS.ACCENT, color: 'white' }}
+          >
+            <Plus size={16} />
+            <span className="hidden sm:inline">Saisir une vérification</span>
+            <span className="sm:hidden">Saisir</span>
+          </button>
+        </div>
       </div>
 
       {/* Filtres */}
@@ -135,8 +151,13 @@ export default function MerologiePage() {
           </button>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Aucun résultat pour ce filtre.</p>
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <p className="text-sm" style={{ color: COLORS.TEXT_SECONDARY }}>Aucun résultat pour ce filtre.</p>
+          <button type="button" onClick={() => setFilterStatut('')}
+            className="text-sm font-medium px-4 py-1.5 rounded-lg"
+            style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
+            Effacer le filtre
+          </button>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
@@ -151,7 +172,7 @@ export default function MerologiePage() {
               return (
                 <button type="button" key={v.id}
                   onClick={() => navigate(`/metrologie/${v.id}`)}
-                  className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
+                  className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors ${compact ? 'py-2' : 'py-4'}`}
                   style={{
                     background: COLORS.BG_SECONDARY,
                     border: '1px solid var(--color-border-subtle)',
@@ -163,8 +184,8 @@ export default function MerologiePage() {
                   <div className="shrink-0">
                     <CircleProgress
                       percent={percent}
-                      size={44}
-                      icon={<Gauge size={16} strokeWidth={1.8} color={iconColor} />}
+                      size={compact ? 28 : 44}
+                      icon={<Gauge size={compact ? 10 : 16} strokeWidth={1.8} color={iconColor} />}
                     />
                   </div>
 
@@ -172,15 +193,19 @@ export default function MerologiePage() {
                     <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                       {v.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }}>Équipement non défini</span>}
                     </p>
-                    <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-                      {TYPE_LABELS[v.type] ?? v.type}
-                    </p>
-                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                      {[
-                        v.date ? `Réalisé le ${new Date(v.date).toLocaleDateString('fr-FR')}` : null,
-                        v.prochainControle ? `Prochain : ${new Date(v.prochainControle).toLocaleDateString('fr-FR')}` : null,
-                      ].filter(Boolean).join(' · ')}
-                    </p>
+                    {!compact && (
+                      <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+                        {TYPE_LABELS[v.type] ?? v.type}
+                      </p>
+                    )}
+                    {!compact && (
+                      <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                        {[
+                          v.date ? `Réalisé le ${new Date(v.date).toLocaleDateString('fr-FR')}` : null,
+                          v.prochainControle ? `Prochain : ${new Date(v.prochainControle).toLocaleDateString('fr-FR')}` : null,
+                        ].filter(Boolean).join(' · ')}
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex flex-col items-end gap-1 shrink-0">
@@ -188,7 +213,7 @@ export default function MerologiePage() {
                       style={{ background: statut.bg, color: statut.color }}>
                       {statut.label}
                     </span>
-                    {resultatCfg && (
+                    {!compact && resultatCfg && (
                       <span className="text-xs px-2 py-0.5 rounded-full"
                         style={{ background: resultatCfg.bg, color: resultatCfg.color }}>
                         {resultatCfg.label}
@@ -207,7 +232,7 @@ export default function MerologiePage() {
             return (
               <button type="button" key={eq.id}
                 onClick={() => navigate(`/materiel/${eq.id}`)}
-                className="w-full text-left rounded-xl px-5 py-4 flex items-center gap-4 transition-colors"
+                className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors ${compact ? 'py-2' : 'py-4'}`}
                 style={{
                   background: COLORS.BG_SECONDARY,
                   border: '1px solid var(--color-border-subtle)',
@@ -219,8 +244,8 @@ export default function MerologiePage() {
                 <div className="shrink-0">
                   <CircleProgress
                     percent={percent}
-                    size={44}
-                    icon={<Gauge size={16} strokeWidth={1.8} color={iconColor} />}
+                    size={compact ? 28 : 44}
+                    icon={<Gauge size={compact ? 10 : 16} strokeWidth={1.8} color={iconColor} />}
                   />
                 </div>
 
@@ -228,14 +253,18 @@ export default function MerologiePage() {
                   <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                     {eq.nom || <span style={{ color: 'var(--color-text-tertiary)' }}>Sans nom</span>}
                   </p>
-                  <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-                    {[eq.marque, eq.modele].filter(Boolean).join(' ') || '—'}
-                  </p>
-                  <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                    {eq.prochainEtalonnage
-                      ? `Prochain : ${new Date(eq.prochainEtalonnage).toLocaleDateString('fr-FR')}`
-                      : 'Aucune vérification enregistrée'}
-                  </p>
+                  {!compact && (
+                    <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+                      {[eq.marque, eq.modele].filter(Boolean).join(' ') || '—'}
+                    </p>
+                  )}
+                  {!compact && (
+                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+                      {eq.prochainEtalonnage
+                        ? `Prochain : ${new Date(eq.prochainEtalonnage).toLocaleDateString('fr-FR')}`
+                        : 'Aucune vérification enregistrée'}
+                    </p>
+                  )}
                 </div>
 
                 <div className="shrink-0">
