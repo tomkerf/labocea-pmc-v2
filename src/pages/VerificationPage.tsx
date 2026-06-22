@@ -1,11 +1,13 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Trash2 } from 'lucide-react'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import { saveVerification } from '@/services/verificationService'
+import { saveVerification, createVerification } from '@/services/verificationService'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useDocumentData } from '@/hooks/useDocumentData'
+import { useAuthStore, selectUid, selectPrenom, selectInitiales } from '@/stores/authStore'
 import type { Verification, TypeVerification, ResultatVerification } from '@/types'
 import { COLLECTIONS, COLORS } from '@/lib/constants'
 
@@ -22,8 +24,105 @@ const RESULTATS: { value: ResultatVerification; label: string }[] = [
   { value: 'a_reprendre',  label: 'À reprendre' },
 ]
 
+function NewVerificationForm() {
+  const navigate = useNavigate()
+  useEquipementsListener()
+  const { equipements } = useEquipementsStore()
+  const uid = useAuthStore(selectUid)
+  const prenom = useAuthStore(selectPrenom)
+  const initiales = useAuthStore(selectInitiales)
+  const technicienNom = [prenom, initiales].filter(Boolean).join(' ')
+  const today = new Date().toISOString().split('T')[0]
+
+  const [form, setForm] = useState({
+    equipementId: '', equipementNom: '',
+    type: 'etalonnage_interne' as TypeVerification,
+    date: today, resultat: 'conforme' as ResultatVerification,
+    remarques: '', prochainControle: '',
+  })
+  const [saving, setSaving] = useState(false)
+
+  function updateField(field: string, value: string) {
+    if (field === 'equipementId') {
+      const eq = equipements.find((e) => e.id === value)
+      setForm((f) => ({ ...f, equipementId: value, equipementNom: eq?.nom ?? '' }))
+    } else {
+      setForm((f) => ({ ...f, [field]: value }))
+    }
+  }
+
+  async function handleCreate() {
+    if (!uid || saving) return
+    setSaving(true)
+    try {
+      const id = await createVerification(uid, technicienNom, form)
+      navigate(`/metrologie/${id}`, { replace: true })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="p-6 max-w-2xl">
+      <button type="button" onClick={() => navigate('/metrologie')}
+        className="flex items-center gap-1 text-sm mb-6" style={{ color: COLORS.ACCENT }}>
+        <ChevronLeft size={16} /> Métrologie
+      </button>
+      <h1 className="text-xl font-semibold mb-6" style={{ color: COLORS.TEXT_PRIMARY }}>Nouvelle vérification</h1>
+      <Section title="Équipement">
+        <Field label="Équipement contrôlé" last>
+          <select value={form.equipementId} onChange={(e) => updateField('equipementId', e.target.value)} className="field-input">
+            <option value="">— Sélectionner —</option>
+            {equipements.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.nom}{e.modele && e.modele !== e.nom ? ` ${e.modele}` : ''}{e.diametre ? ` Ø${e.diametre}` : ''}{e.volume ? ` ${e.volume}` : ''}{e.numSerie ? ` (${e.numSerie})` : ''}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </Section>
+      <Section title="Vérification">
+        <Field label="Type">
+          <select aria-label="Type de vérification" value={form.type} onChange={(e) => updateField('type', e.target.value)} className="field-input">
+            {TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+          </select>
+        </Field>
+        <Field label="Date de vérification">
+          <input aria-label="Date de vérification" type="date" value={form.date} onChange={(e) => updateField('date', e.target.value)} className="field-input" />
+        </Field>
+        <Field label="Résultat">
+          <select aria-label="Résultat" value={form.resultat} onChange={(e) => updateField('resultat', e.target.value)} className="field-input">
+            {RESULTATS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+          </select>
+        </Field>
+        <Field label="Prochain contrôle" last>
+          <input aria-label="Prochain contrôle" type="date" value={form.prochainControle} onChange={(e) => updateField('prochainControle', e.target.value)} className="field-input" />
+        </Field>
+      </Section>
+      <Section title="Technicien">
+        <Field label="Nom" last>
+          <input aria-label="Nom du technicien" value={technicienNom} readOnly className="field-input opacity-60" />
+        </Field>
+      </Section>
+      <Section title="Remarques">
+        <div className="px-5 py-3">
+          <textarea aria-label="Remarques" value={form.remarques} onChange={(e) => updateField('remarques', e.target.value)}
+            rows={3} placeholder="Observations, écarts constatés, actions correctives…"
+            className="w-full text-sm resize-none bg-transparent outline-none" style={{ color: COLORS.TEXT_PRIMARY }} />
+        </div>
+      </Section>
+      <button type="button" onClick={handleCreate} disabled={saving}
+        className="w-full py-3 rounded-xl text-sm font-semibold mt-2 transition-opacity"
+        style={{ background: COLORS.ACCENT, color: 'white', opacity: saving ? 0.6 : 1 }}>
+        {saving ? 'Création…' : 'Créer la vérification'}
+      </button>
+    </div>
+  )
+}
+
 export default function VerificationPage() {
   const { verificationId } = useParams<{ verificationId: string }>()
+  if (verificationId === 'nouveau') return <NewVerificationForm />
   const navigate = useNavigate()
 
   useEquipementsListener()

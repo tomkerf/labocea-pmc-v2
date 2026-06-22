@@ -62,7 +62,11 @@ export default function TodosPage() {
   }
 
   async function handleSave() {
-    if (!state.titre.trim() || !uid || state.saving) return
+    if (!uid || state.saving) return
+    if (!state.titre.trim()) {
+      toast.error('Le titre de la tâche est obligatoire.')
+      return
+    }
     dispatch({ type: 'SET_FIELD', field: 'saving', value: true })
     try {
       const selectedUser       = state.assignedTo === 'equipe' ? null : users.find((u) => u.uid === state.assignedTo)

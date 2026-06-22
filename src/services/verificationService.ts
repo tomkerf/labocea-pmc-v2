@@ -10,7 +10,11 @@ export async function saveVerification(verification: Verification, uid: string):
   await trackWrite(setDoc(ref, { ...verification, updatedAt: serverTimestamp(), updatedBy: uid }, { merge: true }))
 }
 
-export async function createVerification(uid: string, technicienNom: string): Promise<string> {
+export async function createVerification(
+  uid: string,
+  technicienNom: string,
+  initial?: Partial<Omit<Verification, 'id' | 'createdAt'>>
+): Promise<string> {
   const today = new Date().toISOString().split('T')[0]
   const ref = await trackWrite(addDoc(collection(db, COLLECTIONS.VERIFICATIONS), {
     equipementId: '',
@@ -23,6 +27,7 @@ export async function createVerification(uid: string, technicienNom: string): Pr
     technicienUid: uid,
     technicienNom,
     documentUrl: '',
+    ...initial,
     createdAt: serverTimestamp(),
   }))
   return ref.id

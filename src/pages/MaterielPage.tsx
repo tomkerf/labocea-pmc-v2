@@ -155,7 +155,9 @@ export default function MaterielPage() {
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Matériel</h1>
           <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-            {equipements.length} équipement{equipements.length !== 1 ? 's' : ''}
+            {filtered.length !== equipements.length
+              ? `${filtered.length} / ${equipements.length} équipements`
+              : `${equipements.length} équipement${equipements.length !== 1 ? 's' : ''}`}
           </p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">

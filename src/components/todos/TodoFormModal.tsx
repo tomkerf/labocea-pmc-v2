@@ -43,12 +43,12 @@ export default function TodoFormModal({
           </button>
           <button type="button"
             onClick={handleSave}
-            disabled={!state.titre.trim() || state.saving}
+            disabled={state.saving}
             className="px-5 py-2 text-xs font-semibold rounded-lg cursor-pointer focus:outline-none transition-opacity"
             style={{
               background: COLORS.ACCENT,
               color: 'white',
-              opacity: !state.titre.trim() || state.saving ? 0.6 : 1,
+              opacity: state.saving ? 0.6 : 1,
             }}
           >
             {state.saving ? 'Enregistrement...' : 'Enregistrer'}

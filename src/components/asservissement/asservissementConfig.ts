@@ -30,14 +30,14 @@ export function calcResult(v24h: string, vFlacon: string, vUnit: string, mode: s
 
   if (mode === 'manuel') {
     if (isNaN(Ve) || Ve <= 0) return null
-    nbP = V24 / Ve; vEP = Ve; freq = nbP / 24; periode = 60 / freq; vTot = (Vu * nbP) / 1000
+    nbP = Math.floor(V24 / Ve); vEP = Ve; freq = nbP / 24; periode = 60 / freq; vTot = (Vu * nbP) / 1000
     if (vTot > Vfl) warns.push({ type: 'error', txt: `Volume total (${vTot.toFixed(1)}L) dépasse la capacité du flacon (${Vfl}L).` })
   } else {
-    nbP = (10 * 1000) / Vu
+    nbP = Math.floor((10 * 1000) / Vu)
     if (nbP / 24 < 4) nbP = 4 * 24
     if (nbP / 24 > 6) nbP = 6 * 24
     vTot = (Vu * nbP) / 1000
-    if (vTot > Vfl) { nbP = (Vfl * 1000) / Vu; vTot = (Vu * nbP) / 1000 }
+    if (vTot > Vfl) { nbP = Math.floor((Vfl * 1000) / Vu); vTot = (Vu * nbP) / 1000 }
     freq = nbP / 24; periode = 60 / freq; vEP = V24 / nbP
   }
 

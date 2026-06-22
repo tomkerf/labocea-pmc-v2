@@ -2,11 +2,9 @@ import { useState } from 'react'
 import { Plus, Gauge, Ruler } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useVerificationsListener } from '@/hooks/useVerifications'
-import { createVerification } from '@/services/verificationService'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useEquipementsStore } from '@/stores/equipementsStore'
-import { useAuthStore, selectUid, selectPrenom, selectInitiales } from '@/stores/authStore'
 import { useMetrologieRows, calcStatut } from '@/hooks/useMetrologieRows'
 import CircleProgress from '@/components/materiel/CircleProgress'
 import type { Verification } from '@/types'
@@ -51,28 +49,16 @@ export default function MerologiePage() {
   useVerificationsListener()
   useEquipementsListener()
   const navigate = useNavigate()
-  const uid = useAuthStore(selectUid)
-  const prenom = useAuthStore(selectPrenom)
-  const initiales = useAuthStore(selectInitiales)
   const { verifications, loading: loadingVerif } = useMetrologieStore()
   const { equipements, loading: loadingEq } = useEquipementsStore()
   const [filterStatut, setFilterStatut] = useState('')
-  const [creating, setCreating] = useState(false)
 
   const loading = loadingVerif || loadingEq
-  const technicienNom = [prenom, initiales].filter(Boolean).join(' ')
 
   const { allRows, filtered, lateCount } = useMetrologieRows({ verifications, equipements, filterStatut })
 
-  async function handleCreate() {
-    if (!uid || creating) return
-    setCreating(true)
-    try {
-      const id = await createVerification(uid, technicienNom)
-      navigate(`/metrologie/${id}`)
-    } finally {
-      setCreating(false)
-    }
+  function handleCreate() {
+    navigate('/metrologie/nouveau')
   }
 
   return (
@@ -93,9 +79,9 @@ export default function MerologiePage() {
         </div>
         <button type="button"
           onClick={handleCreate}
-          disabled={creating}
+          
           className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg w-full sm:w-auto"
-          style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
+          style={{ background: COLORS.ACCENT, color: 'white', }}
         >
           <Plus size={16} />
           <span className="hidden sm:inline">Saisir une vérification</span>
@@ -140,9 +126,9 @@ export default function MerologiePage() {
           </div>
           <button type="button"
             onClick={handleCreate}
-            disabled={creating}
+            
             className="flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-lg transition-opacity"
-            style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
+            style={{ background: COLORS.ACCENT, color: 'white', }}
           >
             <Plus size={16} />
             Saisir une vérification
@@ -263,7 +249,7 @@ export default function MerologiePage() {
           })}
           <button type="button"
             onClick={handleCreate}
-            disabled={creating}
+            
             className="w-full flex items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-medium transition-colors"
             style={{
               border: '1.5px dashed var(--color-border)',
