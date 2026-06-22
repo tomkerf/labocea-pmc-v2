@@ -1,4 +1,5 @@
-import { X, MapPin, CalendarClock, AlertTriangle } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { X, MapPin, CalendarClock, AlertTriangle, Eye } from 'lucide-react'
 import { COLORS } from '@/lib/constants'
 
 
@@ -51,7 +52,7 @@ export function TourneeItem({ item, onAction }: Props) {
       {/* En-tête */}
       <div className="flex items-start gap-3 px-4 pt-4 pb-2">
         {item.time ? (
-          <span className="text-xs font-semibold shrink-0 w-12 text-center px-1.5 py-1 rounded-lg"
+          <span className="text-xs font-semibold shrink-0 w-12 text-center px-1.5 py-1 rounded-lg animate-pulse"
             style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
             {item.time}
           </span>
@@ -59,12 +60,18 @@ export function TourneeItem({ item, onAction }: Props) {
           <span className="shrink-0 size-2 rounded-full mt-1.5" style={{ background: COLORS.ACCENT }} />
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-base font-semibold leading-snug" style={{ color: COLORS.TEXT_PRIMARY }}>
-            {item.clientNom}
-          </p>
-          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-            {item.siteNom} · {item.planNom}
-          </p>
+          <Link
+            to={`/missions/${item.clientId}/plan/${item.planId}/fiche`}
+            title="Ouvrir la fiche du point"
+            className="hover:underline block group"
+          >
+            <p className="text-base font-semibold leading-snug group-hover:text-accent transition-colors" style={{ color: COLORS.TEXT_PRIMARY }}>
+              {item.clientNom}
+            </p>
+            <p className="text-sm mt-0.5 group-hover:text-accent transition-colors" style={{ color: COLORS.TEXT_SECONDARY }}>
+              {item.siteNom} · {item.planNom}
+            </p>
+          </Link>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {!hasGps && (
@@ -102,17 +109,26 @@ export function TourneeItem({ item, onAction }: Props) {
             <button type="button"
               aria-label="Décaler"
               onClick={() => onAction(item.samplingId, 'reporter')}
-              className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium"
+              className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
               style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}>
               <CalendarClock size={15} />
             </button>
+            <Link
+              to={`/missions/${item.clientId}/plan/${item.planId}/fiche`}
+              aria-label="Mémoire du point"
+              title="Consulter la fiche du point (consignes, historique, photos)"
+              className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+              style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT, border: '1px solid var(--color-border-subtle)' }}
+            >
+              <Eye size={15} />
+            </Link>
             {hasGps && (
               <a
                 href={mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GPS"
-                className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium"
+                className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
                 style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
                 <MapPin size={15} />
               </a>
@@ -122,18 +138,29 @@ export function TourneeItem({ item, onAction }: Props) {
       )}
       {!isTerminal && item.isJ1Bilan24 && (
         <div className="px-4 pb-4 pt-1 flex flex-col gap-1.5">
-          <button type="button"
-            aria-label="Décaler"
-            onClick={() => onAction(item.samplingId, 'reporter')}
-            className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold"
-            style={{ background: COLORS.ACCENT, color: 'white' }}>
-            <CalendarClock size={15} />
-            Décaler la mission
-          </button>
+          <div className="flex gap-2">
+            <button type="button"
+              aria-label="Décaler"
+              onClick={() => onAction(item.samplingId, 'reporter')}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+              style={{ background: COLORS.ACCENT, color: 'white' }}>
+              <CalendarClock size={15} />
+              Décaler la mission
+            </button>
+            <Link
+              to={`/missions/${item.clientId}/plan/${item.planId}/fiche`}
+              aria-label="Mémoire du point"
+              title="Consulter la fiche du point (consignes, historique, photos)"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+              style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT, border: '1px solid var(--color-border-subtle)' }}
+            >
+              <Eye size={15} />
+            </Link>
+          </div>
           <button type="button"
             aria-label="Non effectué"
             onClick={() => onAction(item.samplingId, 'non_effectue')}
-            className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-medium"
+            className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-medium transition-colors"
             style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning-text)' }}>
             <X size={14} />
             Non effectué

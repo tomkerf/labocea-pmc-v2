@@ -244,7 +244,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
             <table className="w-full text-left border-collapse" style={{ minWidth: 800 }}>
               <thead>
                 <tr className="bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] text-[11px] uppercase tracking-wider border-b border-[var(--color-border-subtle)]">
-                  <th className="px-5 py-3 font-semibold border-r border-[var(--color-border-subtle)] w-48">Technicien</th>
+                  <th className="px-5 py-3 font-semibold sticky left-0 z-40 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)] w-48">Technicien</th>
                   <th className="px-2 py-3 font-semibold text-center border-r border-[var(--color-border-subtle)] w-16">Total</th>
                   {MOIS_LONG.map(m => (
                     <th key={m} className="px-2 py-3 font-semibold text-center border-r border-[var(--color-border-subtle)] flex-1 min-w-[50px]">
@@ -261,7 +261,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
                   
                   return (
                     <tr key={tech.code} className="border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors">
-                      <td className="px-5 py-3 border-r border-[var(--color-border-subtle)]">
+                      <td className="px-5 py-3 sticky left-0 z-20 bg-[var(--color-bg-secondary)] group-hover:bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] transition-colors shadow-[1px_0_0_var(--color-border-subtle)]">
                         <div className="flex items-center gap-2">
                           <span className={`font-medium text-sm ${isUnassigned ? 'text-[var(--color-warning)] italic' : 'text-[var(--color-text-primary)]'}`}>
                             {name}

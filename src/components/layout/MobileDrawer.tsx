@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { NavLink } from 'react-router-dom'
 import { m, AnimatePresence } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
@@ -10,20 +10,18 @@ import UserAvatar from '@/components/ui/UserAvatar'
 import { COLORS } from '@/lib/constants'
 
 
-const NAV_ITEMS = [
-  { to: '/',           icon: LayoutDashboard, label: 'Tableau de bord', end: true },
-  { to: '/missions',   icon: ClipboardList,   label: 'Missions'                   },
-  { to: '/planning',   icon: CalendarDays,    label: 'Planning'                   },
-  { to: '/todos',      icon: ListTodo,        label: 'Tâches'                     },
-  { to: '/infos',      icon: BookOpen,        label: 'Infos terrain'              },
-  { to: '/rapports',              icon: FileText,     label: 'Rapports'           },
-  { to: '/materiel',   icon: Wrench,          label: 'Matériel'                   },
-  { to: '/metrologie',            icon: Gauge,        label: 'Métrologie'         },
-  { to: '/maintenances',          icon: Hammer,       label: 'Maintenances'       },
-  { to: '/outils/asservissement', icon: FlaskConical, label: 'Asservissement'     },
-  { to: '/outils/tuyaux',        icon: Pipette,      label: 'Tuyaux'             },
-  { to: '/aide',                 icon: HelpCircle,   label: 'Mode d\'emploi'     },
-]
+interface NavItem {
+  to: string
+  icon: LucideIcon | null
+  label: string
+  end?: boolean
+  isAccount?: boolean
+}
+
+interface NavSection {
+  title: string
+  items: NavItem[]
+}
 
 interface Props {
   open: boolean
@@ -41,11 +39,42 @@ export default function MobileDrawer({ open, onClose }: Props) {
     return () => { document.body.style.overflow = '' }
   }, [open])
 
-  const allItems = [
-    ...NAV_ITEMS,
-    ...(role === 'admin' ? [{ to: '/admin', icon: ShieldAlert, label: 'Administration', end: false, badge: false }] : []),
-    { to: '/compte', icon: null, label: 'Mon compte', end: false, badge: false, isAccount: true },
-  ]
+  const sections = useMemo((): NavSection[] => [
+    {
+      title: 'Activité & Planning',
+      items: [
+        { to: '/',             icon: LayoutDashboard, label: 'Tableau de bord', end: true },
+        { to: '/planning',     icon: CalendarDays,    label: 'Planning'               },
+        { to: '/missions',     icon: ClipboardList,   label: 'Missions'               },
+        { to: '/todos',        icon: ListTodo,        label: 'Tâches'                 },
+      ]
+    },
+    {
+      title: 'Matériel & Suivi',
+      items: [
+        { to: '/materiel',     icon: Wrench,          label: 'Matériel'               },
+        { to: '/metrologie',   icon: Gauge,           label: 'Métrologie'             },
+        { to: '/maintenances', icon: Hammer,          label: 'Maintenances'           },
+        { to: '/rapports',     icon: FileText,        label: 'Rapports'               },
+      ]
+    },
+    {
+      title: 'Outils & Support',
+      items: [
+        { to: '/outils/asservissement', icon: FlaskConical, label: 'Asservissement'   },
+        { to: '/outils/tuyaux',        icon: Pipette,      label: 'Tuyaux'             },
+        { to: '/infos',                icon: BookOpen,        label: 'Infos terrain'       },
+        { to: '/aide',                 icon: HelpCircle,  label: 'Mode d\'emploi'       },
+      ]
+    },
+    {
+      title: 'Mon Espace',
+      items: [
+        { to: '/compte',             icon: null,            label: 'Mon compte',    isAccount: true },
+        ...(role === 'admin' ? [{ to: '/admin', icon: ShieldAlert, label: 'Administration' }] : []),
+      ]
+    }
+  ], [role])
 
   return (
     <AnimatePresence>
@@ -101,43 +130,51 @@ export default function MobileDrawer({ open, onClose }: Props) {
               </div>
             </div>
 
-            <nav className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-0.5">
-              {allItems.map(({ to, icon: Icon, label, end, isAccount }: { to: string; icon: LucideIcon | null; label: string; end?: boolean; isAccount?: boolean }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  end={end}
-                  onClick={onClose}
-                  className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
-                  style={({ isActive }) => ({
-                    color: isActive ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
-                    fontWeight: isActive ? 500 : 400,
-                  })}
-                >
-                  {({ isActive }) => (
-                    <>
-                      {isActive && (
-                        <m.div
-                          layoutId="active-mobile-drawer-bg"
-                          className="absolute inset-0 rounded-xl -z-10"
-                          style={{ background: 'var(--color-accent-light)' }}
-                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                        />
+            <nav className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-4">
+              {sections.map((section) => (
+                <div key={section.title} className="flex flex-col gap-0.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider px-3 mb-1.5 block select-none"
+                    style={{ color: 'var(--color-text-secondary)', opacity: 0.8 }}>
+                    {section.title}
+                  </span>
+                  {section.items.map(({ to, icon: Icon, label, end, isAccount }) => (
+                    <NavLink
+                      key={to}
+                      to={to}
+                      end={end}
+                      onClick={onClose}
+                      className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
+                      style={({ isActive }) => ({
+                        color: isActive ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
+                        fontWeight: isActive ? 500 : 400,
+                      })}
+                    >
+                      {({ isActive }) => (
+                        <>
+                          {isActive && (
+                            <m.div
+                              layoutId="active-mobile-drawer-bg"
+                              className="absolute inset-0 rounded-xl -z-10"
+                              style={{ background: 'var(--color-accent-light)' }}
+                              transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                            />
+                          )}
+                          {isAccount ? (
+                            <UserAvatar
+                              initiales={appUser?.initiales}
+                              color={appUser?.avatarColor}
+                              size={20}
+                              fontSize={8}
+                            />
+                          ) : Icon ? (
+                            <Icon size={18} strokeWidth={1.8} />
+                          ) : null}
+                          <span className="flex-1 z-10 truncate">{label}</span>
+                        </>
                       )}
-                      {isAccount ? (
-                        <UserAvatar
-                          initiales={appUser?.initiales}
-                          color={appUser?.avatarColor}
-                          size={20}
-                          fontSize={8}
-                        />
-                      ) : Icon ? (
-                        <Icon size={18} strokeWidth={1.8} />
-                      ) : null}
-                      <span className="flex-1 z-10">{label}</span>
-                    </>
-                  )}
-                </NavLink>
+                    </NavLink>
+                  ))}
+                </div>
               ))}
             </nav>
 

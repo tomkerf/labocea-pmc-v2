@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '126'
+export const CHANGELOG_VERSION = '127'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,15 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '127',
+    date: '22 juin 2026',
+    items: [
+      { type: 'feat', label: 'Navigation : Organisation des menus en sections thématiques (Activité, Matériel, Outils, Espace) inspirée du style Apple.' },
+      { type: 'feat', label: 'Tournée : Accès direct aux détails et consignes du point de mesure (Mémoire du point) depuis la liste des sites à visiter.' },
+      { type: 'feat', label: 'Planning : La colonne des techniciens reste fixe lors du défilement horizontal dans la matrice de charge.' },
+    ],
+  },
   {
     version: '126',
     date: '21 juin 2026',

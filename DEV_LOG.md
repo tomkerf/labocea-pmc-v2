@@ -2,6 +2,36 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 135 — Audit UX & Améliorations Apple-style (Navigation, Tournée & Matrice)
+**22 juin 2026**
+
+### Ce qui a été fait
+
+**Restructuration de la navigation (Sidebar & MobileDrawer)**
+- [Sidebar.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/layout/Sidebar.tsx) : Organisation des éléments de menu en sections thématiques distinctes ("Activité & Planning", "Matériel & Suivi", "Outils & Support", "Mon Espace") avec en-têtes en majuscules grisées pour une hiérarchie claire à la Apple.
+- [MobileDrawer.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/layout/MobileDrawer.tsx) : Alignement structurel de la navigation mobile avec la même hiérarchie thématique en sections.
+
+**Accès direct aux Fiches de Points de Mesure (Tournée terrain)**
+- [TourneeItem.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/tournee/TourneeItem.tsx) :
+  - Les titres des points de mesure sont désormais des liens router (`Link`) cliquables, redirigeant vers la fiche du point (`/missions/:clientId/plan/:planId/fiche`).
+  - Ajout d'un bouton de raccourci "œil" (`Eye` icon) dans l'action bar pour permettre aux techniciens d'ouvrir directement la mémoire du point (consignes, photos, historique des visites) d'un clic depuis la tournée en cours.
+- [TourneeItem.test.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/tournee/__tests__/TourneeItem.test.tsx) : Correction des tests unitaires en enveloppant le rendu du composant dans un `<MemoryRouter>` pour supporter l'usage de `<Link>`.
+
+**Colonne collante dans la Matrice de charge**
+- [WorkloadMatrixView.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/WorkloadMatrixView.tsx) : Ajout d'une colonne sticky left-0 pour la colonne "Technicien" avec une ombre fine et une couleur de fond fixe pour assurer sa visibilité permanente lors du scroll horizontal.
+
+**Qualité, changelog & tests**
+- Compilation TypeScript réussie (`npx tsc -b`).
+- Validation complète des tests unitaires (`npx vitest run` : 157/157 PASS).
+- Incrémentation du changelog de l'application en version `127` dans [changelog.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/data/changelog.ts).
+
+### Prochaines étapes
+1. Recueillir les retours de l'équipe sur ces améliorations UX.
+2. 🟡 **Monitoring** — intégration Sentry (ou équivalent) avant prod
+3. 🔴 **Accord DSIN** — validation écrite avant toute date de lancement
+
+---
+
 ## Session 134 — Harmonisation visuelle des couleurs & accessibilité
 **21 juin 2026**
 
