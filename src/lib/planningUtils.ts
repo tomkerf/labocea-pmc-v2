@@ -112,7 +112,7 @@ import { COLORS } from '@/lib/constants'
 //   danger #FF3B30, success #34C759, warning #FF9F0A, accent #0071E3, neutral #8E8E93
 const TECH_COLORS: Record<string, { color: string; bg: string; text: string; gradient: string }> = {
   'THK': { color: '#0071E3', bg: '#EFF6FF', text: '#1E40AF', gradient: 'linear-gradient(135deg, #0088FF, #0055DD)' },  // Thomas Kerfendal - bleu accent (sombre pour contraste)
-  'ROD': { color: '#30D158', bg: '#EAF8EE', text: '#1A8035', gradient: 'linear-gradient(135deg, #34C759, #30D158)' },  // Romain Duvail - vert vif et chaleureux
+  'ROD': { color: '#1A8297', bg: '#F0FDFA', text: '#115E59', gradient: 'linear-gradient(135deg, #00D2C4, #009F96)' },  // Romain Duvail - teal
   'FBA': { color: '#9C3CDD', bg: '#FAF5FF', text: '#6B21A8', gradient: 'linear-gradient(135deg, #C084FC, #8A2BE2)' },  // Fabien Barloy - violet
   'DBE': { color: '#FF2D55', bg: '#FDF2F8', text: '#9D174D', gradient: 'linear-gradient(135deg, #FF5E8A, #D4143D)' },  // Delphine Benard - rose
   'LDU': { color: '#5856D6', bg: '#EEF2FF', text: '#3730A3', gradient: 'linear-gradient(135deg, #818CF8, #4F46E5)' },  // Ludovic Dugue - indigo
