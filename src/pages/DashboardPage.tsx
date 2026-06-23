@@ -221,38 +221,46 @@ export default function DashboardPage() {
             transition={{ duration: 0.15 }}
             className="space-y-6"
           >
-            {/* KPIs */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <StatCard
-                value={missionsCeMois}
-                label="Missions ce mois"
-                sub="prélèvements réalisés"
-                accent
-                onClick={() => navigate('/missions')}
-              />
-              <StatCard
-                value={rapportsAFaireMoi.length}
-                label="Rapports à rédiger"
-                sub={rapportsAFaireMoi.length > 0 ? `${rapportsAFaireMoi.filter(r => r.enRetard).length} en retard` : 'Tout est à jour'}
-                danger={rapportsAFaireMoi.some(r => r.enRetard)}
-                warning={rapportsAFaireMoi.length > 0 && !rapportsAFaireMoi.some(r => r.enRetard)}
-                onClick={() => navigate('/rapports')}
-              />
-              <StatCard
-                value={conformitePct !== null ? `${conformitePct}%` : '—'}
-                label="Conformité métrologie"
-                sub={verifiTotal > 0 ? `${verifiConformes}/${verifiTotal} à jour` : 'Aucun instrument suivi'}
-                warning={conformitePct !== null && conformitePct < 80}
-                accent={conformitePct !== null && conformitePct >= 80}
-                onClick={() => navigate('/metrologie')}
-              />
-              <StatCard
-                value={aCalibrrer}
-                label="À calibrer (30j)"
-                sub={aCalibrrer > 0 ? 'Étalonnages à prévoir' : 'Aucune échéance proche'}
-                warning={aCalibrrer > 0}
-                onClick={() => navigate('/metrologie')}
-              />
+            {/* KPIs — grille sur desktop, scroll horizontal sur mobile */}
+            <div className="-mx-6 px-6 md:mx-0 md:px-0 flex overflow-x-auto gap-3 pb-1 md:grid md:grid-cols-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="min-w-[140px] md:min-w-0 flex-shrink-0 md:flex-shrink">
+                <StatCard
+                  value={missionsCeMois}
+                  label="Missions ce mois"
+                  sub="prélèvements réalisés"
+                  accent
+                  onClick={() => navigate('/missions')}
+                />
+              </div>
+              <div className="min-w-[140px] md:min-w-0 flex-shrink-0 md:flex-shrink">
+                <StatCard
+                  value={rapportsAFaireMoi.length}
+                  label="Rapports à rédiger"
+                  sub={rapportsAFaireMoi.length > 0 ? `${rapportsAFaireMoi.filter(r => r.enRetard).length} en retard` : 'Tout est à jour'}
+                  danger={rapportsAFaireMoi.some(r => r.enRetard)}
+                  warning={rapportsAFaireMoi.length > 0 && !rapportsAFaireMoi.some(r => r.enRetard)}
+                  onClick={() => navigate('/rapports')}
+                />
+              </div>
+              <div className="min-w-[140px] md:min-w-0 flex-shrink-0 md:flex-shrink">
+                <StatCard
+                  value={conformitePct !== null ? `${conformitePct}%` : '—'}
+                  label="Conformité métrologie"
+                  sub={verifiTotal > 0 ? `${verifiConformes}/${verifiTotal} à jour` : 'Aucun instrument suivi'}
+                  warning={conformitePct !== null && conformitePct < 80}
+                  accent={conformitePct !== null && conformitePct >= 80}
+                  onClick={() => navigate('/metrologie')}
+                />
+              </div>
+              <div className="min-w-[140px] md:min-w-0 flex-shrink-0 md:flex-shrink">
+                <StatCard
+                  value={aCalibrrer}
+                  label="À calibrer (30j)"
+                  sub={aCalibrrer > 0 ? 'Étalonnages à prévoir' : 'Aucune échéance proche'}
+                  warning={aCalibrrer > 0}
+                  onClick={() => navigate('/metrologie')}
+                />
+              </div>
             </div>
 
             {/* Grid */}

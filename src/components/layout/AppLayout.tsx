@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { AnimatePresence, m } from 'framer-motion'
-import { Menu } from 'lucide-react'
 import Sidebar from './Sidebar'
-import MobileDrawer from './MobileDrawer'
+import BottomTabBar from './BottomTabBar'
 import ErrorBoundary from './ErrorBoundary'
 import ToastContainer from '@/components/ui/ToastContainer'
 import ChangelogModal, { useChangelogState } from '@/components/ui/ChangelogModal'
-
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import SyncBadge from '@/components/ui/SyncBadge'
 import { COLORS } from '@/lib/constants'
@@ -15,30 +13,16 @@ import { COLORS } from '@/lib/constants'
 
 export default function AppLayout() {
   const { pathname } = useLocation()
-  const [drawerOpen, setDrawerOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const prevPathnameRef = useRef(pathname)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const changelog = useChangelogState()
   useNetworkStatus()
 
-  // Fermer le drawer à chaque changement de route (render-phase, pas d'effet)
-  if (prevPathnameRef.current !== pathname) {
-    prevPathnameRef.current = pathname
-    setDrawerOpen(false)
-  }
-
-
-
-  // Écouteur de scroll dynamique pour la barre supérieure mobile
   useEffect(() => {
     const container = scrollContainerRef.current
     if (!container) return
-    const handleScroll = () => {
-      setScrolled(container.scrollTop > 5)
-    }
+    const handleScroll = () => setScrolled(container.scrollTop > 5)
     container.addEventListener('scroll', handleScroll, { passive: true })
-    // Réinitialiser au changement de route
     setScrolled(false)
     return () => container.removeEventListener('scroll', handleScroll)
   }, [pathname])
@@ -48,12 +32,9 @@ export default function AppLayout() {
       {/* Sidebar desktop */}
       <Sidebar />
 
-      {/* Drawer burger — mobile uniquement */}
-      <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
-
       {/* Contenu principal */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        {/* TopBar */}
+        {/* TopBar — desktop uniquement (mobile utilise BottomTabBar) */}
         <header
           className="flex items-center px-4 h-14 shrink-0 z-30"
           style={{
@@ -65,46 +46,33 @@ export default function AppLayout() {
             transition: 'background 300ms, border-color 300ms, box-shadow 300ms',
           }}
         >
-          {/* Titre app — mobile */}
-          <div className="md:hidden flex items-center gap-2 flex-1">
-            <img src="/logo.png" alt="Labocea" className="size-8 object-contain" />
-            <span className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
-              Labocea PMC
-            </span>
-          </div>
-
-          {/* Sync badge + Burger — mobile */}
-          <div className="md:hidden flex items-center gap-2">
+          {/* Sync badge — visible sur mobile uniquement (desktop l'a dans la sidebar) */}
+          <div className="md:hidden flex items-center ml-auto">
             <SyncBadge />
-            <button type="button"
-              className="p-2 rounded-xl"
-              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}
-              onClick={() => setDrawerOpen(true)}
-              aria-label="Menu"
-            >
-              <Menu size={18} strokeWidth={2} />
-            </button>
           </div>
         </header>
 
-        {/* Pages avec transition — plus de padding-bottom pour tab bar */}
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
+        {/* Pages avec transition */}
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pb-[74px] md:pb-0">
           <AnimatePresence mode="wait">
             <m.div
-              key={location.pathname}
+              key={pathname}
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
               className="h-full"
             >
-              <ErrorBoundary key={location.pathname}>
+              <ErrorBoundary key={pathname}>
                 <Outlet />
               </ErrorBoundary>
             </m.div>
           </AnimatePresence>
         </div>
       </main>
+
+      {/* Tab bar mobile */}
+      <BottomTabBar />
 
       {/* Toasts */}
       <ToastContainer />

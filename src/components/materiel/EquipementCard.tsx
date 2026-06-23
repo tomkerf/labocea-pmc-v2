@@ -193,18 +193,19 @@ export default function EquipementCard({ equipement, compact = false }: Equipeme
 
         {/* Infos */}
         <div className="flex-1 min-w-0">
+          {/* Ligne principale : marque + modèle + catégorie (ou code si pas de marque/modèle) */}
           <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
-            {equipement.nom || 'Sans nom'}
+            {[equipement.marque, equipement.modele, CATEGORIE_LABELS[equipement.categorie] ?? equipement.categorie].filter(Boolean).join(' · ') || equipement.nom || 'Sans nom'}
           </p>
-          {!compact && (
+          {/* Ligne secondaire : code équipement */}
+          {!compact && equipement.nom && (
             <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-              {[equipement.marque, equipement.modele].filter(Boolean).join(' ') || '—'}
+              {equipement.nom}
             </p>
           )}
           {!compact && (
             <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
               {[
-                CATEGORIE_LABELS[equipement.categorie] ?? equipement.categorie,
                 equipement.numSerie,
                 equipement.volume,
                 equipement.poids,
