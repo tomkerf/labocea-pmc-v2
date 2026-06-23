@@ -2,6 +2,41 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 136 — Refonte Mobile iOS (Métrologie & Maintenances)
+**23 juin 2026**
+
+### Ce qui a été fait
+
+**Écran Métrologie**
+- [MetrologiePage.tsx](file:///Users/thomaskerfendal/Documents/dev/app-pmc-v2/src/pages/MetrologiePage.tsx) : Ajout du bouton de retour mobile `‹ Plus`.
+- Configuration de puces de filtres interactives style iOS (fond et contour colorés assortis à la sélection).
+- Mise en forme monospace (`font-mono`) des noms/codes des équipements.
+- Intégration de pastilles de statut avec un point coloré de 6px au lieu de badges pleins (cohérence visuelle WCAG/iOS).
+
+**Écran Maintenances**
+- [MaintenancesPage.tsx](file:///Users/thomaskerfendal/Documents/dev/app-pmc-v2/src/pages/MaintenancesPage.tsx) : Ajout du bouton de retour mobile `‹ Plus`.
+- Ajout de puces de filtres statut-spécifiques colorées (vert pour réalisé, jaune pour en cours, etc.).
+- Uniformisation du bouton "Nouvelle intervention" avec le dégradé bleu Apple-style (`linear-gradient`) et ombre portée colorée.
+- Mise en forme monospace des codes équipements et conversion des statuts en pastilles avec points 6px.
+
+**Correctifs de type et de compilation**
+- [DashboardHeader.tsx](file:///Users/thomaskerfendal/Documents/dev/app-pmc-v2/src/components/dashboard/DashboardHeader.tsx) : Correction de l'import de `UserAvatar` (conversion d'un named import en default import).
+- [PeriodListView.tsx](file:///Users/thomaskerfendal/Documents/dev/app-pmc-v2/src/components/planning/PeriodListView.tsx), [RapportRow.tsx](file:///Users/thomaskerfendal/Documents/dev/app-pmc-v2/src/components/rapports/RapportRow.tsx), [TodoFilters.tsx](file:///Users/thomaskerfendal/Documents/dev/app-pmc-v2/src/components/todos/TodoFilters.tsx), [MissionsPage.tsx](file:///Users/thomaskerfendal/Documents/dev/app-pmc-v2/src/pages/MissionsPage.tsx) : Suppression de variables déclarées non utilisées (`JOURS_LONG`, `delaiBg`, `filterPriority`, `AlertTriangle`).
+- [PlanningHeader.tsx](file:///Users/thomaskerfendal/Documents/dev/app-pmc-v2/src/components/planning/PlanningHeader.tsx) : Suppression de l'entrée `'liste'` qui n'appartient pas au type strict `ViewMode`.
+- Typages stricts ajoutés pour `activeColor` sur les puces de filtres interactives.
+
+**Qualité, changelog & tests**
+- Incrémentation du changelog version à `128`.
+- Validation TypeScript réussie (`npm run build`).
+- Passage complet de la suite de tests unitaires (`npm run test` : 157/157 PASS).
+
+### Prochaines étapes
+1. Déploiement staging et tests physiques sur appareils mobiles.
+2. 🟡 **Monitoring** — intégration Sentry (ou équivalent) avant prod.
+3. 🔴 **Accord DSIN** — validation écrite avant toute date de lancement.
+
+---
+
 ## Session 135 — Audit UX & Améliorations Apple-style (Navigation, Tournée & Matrice)
 **22 juin 2026**
 
