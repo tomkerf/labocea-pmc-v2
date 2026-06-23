@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '129'
+export const CHANGELOG_VERSION = '130'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '130',
+    date: '23 juin 2026',
+    items: [
+      { type: 'fix', label: 'Matériel : Mise en valeur du modèle de l\'appareil et de son type sur la ligne principale, et affichage de la marque en retrait entre parenthèses.' },
+    ],
+  },
   {
     version: '129',
     date: '23 juin 2026',

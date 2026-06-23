@@ -133,7 +133,11 @@ export function DashboardPlanningWidget({
           type="button"
           onClick={() => navigate('/tournee')}
           className="w-full mt-3 py-3 rounded-xl text-sm font-semibold flex justify-center items-center gap-2 transition-transform active:scale-[0.98] cursor-pointer"
-          style={{ background: COLORS.ACCENT, color: '#FFFFFF', boxShadow: 'var(--shadow-card)' }}
+          style={{
+            background: 'linear-gradient(135deg, #2B7BFF 0%, #1768F5 100%)',
+            color: '#FFFFFF',
+            boxShadow: '0 4px 14px rgba(23, 104, 245, 0.4)',
+          }}
         >
           <span className="text-base leading-none">🚙</span>
           <span className="flex flex-col items-start">

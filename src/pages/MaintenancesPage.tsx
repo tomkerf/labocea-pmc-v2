@@ -1,6 +1,6 @@
 import { useState, useMemo, useReducer } from 'react'
-import { Plus, Wrench, Zap, Hammer, AlignJustify, LayoutList } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Plus, Wrench, Zap, Hammer, AlignJustify, LayoutList, ChevronLeft } from 'lucide-react'
+import { useNavigate, Link } from 'react-router-dom'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { createMaintenance } from '@/services/maintenanceService'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
@@ -99,11 +99,19 @@ export default function MaintenancesPage() {
 
   return (
     <div className="p-6 max-w-2xl">
+      {/* Bouton retour mobile */}
+      <div className="md:hidden mb-4">
+        <Link to="/plus" className="inline-flex items-center gap-1 font-semibold text-sm transition-opacity active:opacity-80" style={{ color: COLORS.ACCENT }}>
+          <ChevronLeft size={16} />
+          Plus
+        </Link>
+      </div>
+
       {/* En-tête */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Maintenances</h1>
-          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_PRIMARY }}>
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
             {filtered.length !== maintenances.length
               ? `${filtered.length} / ${maintenances.length} intervention${maintenances.length !== 1 ? 's' : ''}`
               : `${maintenances.length} intervention${maintenances.length !== 1 ? 's' : ''}`}
@@ -112,7 +120,7 @@ export default function MaintenancesPage() {
         <div className="flex gap-2 w-full sm:w-auto">
           <button type="button"
             onClick={() => setCompact((c) => !c)}
-            className="flex items-center justify-center p-2 rounded-lg transition-colors"
+            className="flex items-center justify-center p-2 rounded-lg transition-colors cursor-pointer"
             title={compact ? 'Vue développée' : 'Vue compacte'}
             style={{
               background: compact ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
@@ -125,8 +133,13 @@ export default function MaintenancesPage() {
           <button type="button"
             onClick={handleCreate}
             disabled={creating}
-            className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg flex-1 sm:flex-none"
-            style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
+            className="flex items-center justify-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-lg flex-1 sm:flex-none cursor-pointer transition-transform active:scale-[0.98]"
+            style={{
+              background: 'linear-gradient(135deg, #2B7BFF 0%, #1768F5 100%)',
+              color: 'white',
+              boxShadow: '0 4px 14px rgba(23, 104, 245, 0.4)',
+              opacity: creating ? 0.6 : 1,
+            }}
           >
             <Plus size={16} />
             Nouvelle intervention
@@ -138,19 +151,45 @@ export default function MaintenancesPage() {
       <div className="flex flex-col gap-3 mb-5">
         {/* Pills statut */}
         <div className="flex gap-2 flex-wrap">
-          {STATUTS_FILTER.map((f) => (
-            <button type="button" key={f.value}
-              onClick={() => dispatchFilter({ name: 'statut', value: f.value })}
-              className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-              style={{
-                background: filterStatut === f.value ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
-                color: filterStatut === f.value ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
-                border: '1px solid var(--color-border-subtle)',
-              }}
-            >
-              {f.label}
-            </button>
-          ))}
+          {STATUTS_FILTER.map((f) => {
+            const isActive = filterStatut === f.value
+            let activeBg = 'var(--color-accent-light)'
+            let activeColor: string = COLORS.ACCENT
+            let activeBorder = '1px solid rgba(23, 104, 245, 0.2)'
+
+            if (f.value === 'planifiee') {
+              activeBg = 'var(--color-bg-tertiary)'
+              activeColor = COLORS.TEXT_PRIMARY
+              activeBorder = '1px solid var(--color-border-subtle)'
+            } else if (f.value === 'en_cours') {
+              activeBg = 'var(--color-warning-light)'
+              activeColor = COLORS.WARNING
+              activeBorder = '1px solid rgba(217, 119, 6, 0.2)'
+            } else if (f.value === 'realisee') {
+              activeBg = 'var(--color-success-light)'
+              activeColor = COLORS.SUCCESS
+              activeBorder = '1px solid rgba(31, 157, 77, 0.2)'
+            } else if (f.value === 'abandonnee') {
+              activeBg = 'var(--color-danger-light)'
+              activeColor = COLORS.DANGER
+              activeBorder = '1px solid rgba(229, 62, 62, 0.2)'
+            }
+
+            return (
+              <button type="button" key={f.value}
+                onClick={() => dispatchFilter({ name: 'statut', value: f.value })}
+                className="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer active:scale-95"
+                style={{
+                  background: isActive ? activeBg : COLORS.BG_SECONDARY,
+                  color: isActive ? activeColor : COLORS.TEXT_SECONDARY,
+                  border: isActive ? activeBorder : '1px solid var(--color-border-subtle)',
+                  boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.02)' : 'none',
+                }}
+              >
+                {f.label}
+              </button>
+            )
+          })}
         </div>
 
         {/* Selects */}
@@ -225,7 +264,7 @@ export default function MaintenancesPage() {
               <button type="button"
                 key={m.id}
                 onClick={() => navigate(`/maintenances/${m.id}`)}
-                className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors ${compact ? 'py-2' : 'py-4'}`}
+                className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-4'}`}
                 style={{
                   background: COLORS.BG_SECONDARY,
                   border: '1px solid var(--color-border-subtle)',
@@ -250,8 +289,8 @@ export default function MaintenancesPage() {
 
                 {/* Infos */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
-                    {m.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }}>Équipement non défini</span>}
+                  <p className="text-sm font-semibold truncate font-mono" style={{ color: COLORS.TEXT_PRIMARY }}>
+                    {m.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }} className="font-sans">Équipement non défini</span>}
                   </p>
                   {!compact && m.description && (
                     <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
@@ -267,8 +306,9 @@ export default function MaintenancesPage() {
 
                 {/* Badge statut */}
                 <div className="shrink-0">
-                  <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-                    style={{ background: statutCfg.bg, color: statutCfg.color }}>
+                  <span className="text-xs px-2.5 py-1 rounded-full font-semibold border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] inline-flex items-center gap-1.5"
+                    style={{ color: statutCfg.color }}>
+                    <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: statutCfg.color }} />
                     {statutCfg.label}
                   </span>
                 </div>

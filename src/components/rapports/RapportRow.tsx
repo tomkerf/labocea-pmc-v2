@@ -26,10 +26,6 @@ export default function RapportRow({ r, isLast, todayStr, touteEquipe, resolveNo
     : joursAvant < 0 ? COLORS.DANGER
     : joursAvant <= 7 ? COLORS.WARNING
     : COLORS.SUCCESS
-  const delaiBg = joursAvant === null ? COLORS.BG_TERTIARY
-    : joursAvant < 0 ? 'var(--color-danger-light)'
-    : joursAvant <= 7 ? 'var(--color-warning-light)'
-    : 'var(--color-success-light)'
   const delaiLabel = joursAvant === null ? '—'
     : joursAvant < 0 ? `${Math.abs(joursAvant)}j de retard`
     : joursAvant === 0 ? "Aujourd'hui"
@@ -56,11 +52,12 @@ export default function RapportRow({ r, isLast, todayStr, touteEquipe, resolveNo
           aria-label="Date prévue du rapport"
           defaultValue={r.rapportDatePrevue}
           onBlur={(e) => { if (e.target.value !== r.rapportDatePrevue) onUpdateDate(r.clientId, r.planId, r.samplingId, e.target.value) }}
-          className="rounded-md px-2 py-1 text-xs"
+          className="rounded-md px-2 py-1 text-xs font-mono"
           style={{ border: '1px solid var(--color-border)', background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }}
         />
-        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-          style={{ background: delaiBg, color: delaiColor }}>
+        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] inline-flex items-center gap-1.5 font-mono"
+          style={{ color: delaiColor }}>
+          <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: delaiColor }} />
           {delaiLabel}
         </span>
         <button type="button"

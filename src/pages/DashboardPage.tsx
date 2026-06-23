@@ -209,6 +209,8 @@ export default function DashboardPage() {
         isGeneraliste={isGeneraliste}
         activeTab={activeTab}
         setActiveTab={(tab) => dispatch({ type: 'SET_ACTIVE_TAB', payload: tab })}
+        avatarColor={appUser?.avatarColor}
+        initiales={appUser?.initiales}
       />
 
       <AnimatePresence mode="wait">

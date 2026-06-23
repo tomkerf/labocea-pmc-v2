@@ -110,14 +110,14 @@ export default function MaterielPage() {
 
   const isFlacon = filterCategorie === 'flacon'
 
-  const activeChips = [
+  const activeChips = ([
     filterCategorie && { key: 'filterCategorie' as const, label: CATEGORIES.find(c => c.value === filterCategorie)?.label ?? filterCategorie },
     filterEtat      && { key: 'filterEtat'      as const, label: ETATS.find(e => e.value === filterEtat)?.label ?? filterEtat                 },
     filterSite      && { key: 'filterSite'      as const, label: filterSite === 'quimper' ? 'Quimper' : 'Brest'                              },
     filterTechnicien && { key: 'filterTechnicien' as const, label: techniciens.find(t => t.initiales === filterTechnicien)?.prenom ?? filterTechnicien },
     filterMateriau  && { key: 'filterMateriau'  as const, label: filterMateriau === 'plastique' ? 'Plastique' : 'Verre'                      },
     filterMarque    && { key: 'filterMarque'    as const, label: filterMarque                                                                 },
-  ].filter((c): c is { key: keyof FiltersState; label: string } => Boolean(c))
+  ].filter(Boolean) as { key: keyof FiltersState; label: string }[])
 
   const marquesFlacon = Array.from(
     new Set(
@@ -184,18 +184,10 @@ export default function MaterielPage() {
           >
             {compact ? <LayoutList size={16} /> : <AlignJustify size={16} />}
           </button>
-          <button
-            type="button"
+          <button type="button"
             onClick={handleExport}
-            disabled={filtered.length === 0}
-            className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-opacity flex-1 sm:flex-none"
-            style={{
-              background: COLORS.BG_SECONDARY,
-              border: '1px solid var(--color-border-subtle)',
-              color: filtered.length === 0 ? 'var(--color-text-tertiary)' : COLORS.TEXT_PRIMARY,
-              opacity: filtered.length === 0 ? 0.5 : 1,
-            }}
-            title="Exporter l'inventaire filtré en PDF"
+            className="flex items-center justify-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-lg border transition-all active:scale-[0.98] flex-1 sm:flex-none cursor-pointer"
+            style={{ background: COLORS.BG_SECONDARY, borderColor: 'var(--color-border)', color: COLORS.TEXT_PRIMARY }}
           >
             <FileDown size={16} />
             Exporter
@@ -203,8 +195,13 @@ export default function MaterielPage() {
           <button type="button"
             onClick={handleCreate}
             disabled={creating}
-            className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-opacity flex-1 sm:flex-none"
-            style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.6 : 1 }}
+            className="flex items-center justify-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-lg transition-all active:scale-[0.98] flex-1 sm:flex-none cursor-pointer"
+            style={{
+              background: 'linear-gradient(135deg, #2B7BFF 0%, #1768F5 100%)',
+              color: 'white',
+              boxShadow: '0 4px 14px rgba(23, 104, 245, 0.4)',
+              opacity: creating ? 0.6 : 1
+            }}
           >
             <Plus size={16} />
             Ajouter

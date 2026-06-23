@@ -1,7 +1,7 @@
 import { Plus } from 'lucide-react'
 import {
   type PlanningEvent,
-  JOURS_LONG, MOIS_LONG, sameDay,
+  MOIS_LONG, sameDay,
 } from '@/lib/planningUtils'
 import EventRow from '@/components/planning/EventRow'
 import { COLORS } from '@/lib/constants'
@@ -36,17 +36,19 @@ export default function PeriodListView({
         periodList.map(({date, dateStr, events}) => {
           const isToday = sameDay(date,today)
           const dayIdx = (date.getDay()+6)%7
+          const JOURS_SHORT = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam', 'dim']
+          const shortMonth = MOIS_LONG[date.getMonth()].slice(0, 4).toLowerCase().replace('.', '')
+          
           return (
             <div key={dateStr}>
               <div className="flex items-center gap-2 mb-1.5 px-1">
-                <span className="text-xs font-semibold capitalize"
-                  style={{ color:isToday?'#FF3B30':COLORS.TEXT_SECONDARY }}>
-                  {JOURS_LONG[dayIdx]} {date.getDate()} {MOIS_LONG[date.getMonth()]}
-                </span>
-                {isToday && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                    style={{ background:'rgba(255,59,48,0.1)', color:'#FF3B30' }}>
-                    Aujourd'hui
+                {isToday ? (
+                  <span className="text-sm font-semibold" style={{ color: 'var(--color-danger)' }}>
+                    {date.getDate()} {JOURS_SHORT[dayIdx]} · Aujourd'hui
+                  </span>
+                ) : (
+                  <span className="text-sm font-semibold" style={{ color: COLORS.TEXT_SECONDARY }}>
+                    {date.getDate()} {JOURS_SHORT[dayIdx]} {shortMonth}
                   </span>
                 )}
                 <button type="button" onClick={() => goToDay(dateStr)}

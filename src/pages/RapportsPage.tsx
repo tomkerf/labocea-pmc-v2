@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
-import { FileText } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { FileText, ChevronLeft } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectUid, selectAppUser } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
@@ -99,6 +100,13 @@ export default function RapportsPage() {
 
   return (
     <div className="px-4 py-6 pb-10 sm:px-6 max-w-4xl">
+      {/* Bouton retour mobile */}
+      <div className="md:hidden mb-4">
+        <Link to="/plus" className="inline-flex items-center gap-1 font-semibold text-sm transition-opacity active:opacity-80" style={{ color: COLORS.ACCENT }}>
+          <ChevronLeft size={16} />
+          Plus
+        </Link>
+      </div>
 
       {/* En-tête */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -109,7 +117,7 @@ export default function RapportsPage() {
         <SegmentedControl
           options={[
             { value: 'moi', label: 'Mes rapports' },
-            { value: 'equipe', label: "Toute l'équipe" },
+            { value: 'equipe', label: "Équipe" },
           ]}
           value={touteEquipe ? 'equipe' : 'moi'}
           onChange={(v) => setTouteEquipe(v === 'equipe')}

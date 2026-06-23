@@ -7,45 +7,46 @@
 
 :root {
   /* Fonds */
-  --color-bg-primary:    #F5F5F7;
+  --color-bg-primary:    #F2F2F7; /* Groupé iOS background */
   --color-bg-secondary:  #FFFFFF;
   --color-bg-tertiary:   #F0F0F2;
 
   /* Texte */
-  --color-text-primary:  #1D1D1F;
-  --color-text-secondary:#6E6E73;
+  --color-text-primary:  #1C1C1E; /* iOS text primary */
+  --color-text-secondary:#8E8E93; /* iOS text secondary */
   --color-text-tertiary: #AEAEB2;
 
   /* Accents */
-  --color-accent:        #0071E3;
-  --color-accent-hover:  #0077ED;
-  --color-accent-light:  #E8F1FB;
+  --color-accent:        #1768F5; /* iOS Blue */
+  --color-accent-hover:  #2B7BFF;
+  --color-accent-light:  rgba(23, 104, 245, 0.1);
 
   /* Statuts */
-  --color-success:       #1DB954;
-  --color-success-light: #C8F0D3;
-  --color-success-text:  #1A6E31;  /* texte sur fond success-light — WCAG AA */
-  --color-warning:       #FF9F0A;
-  --color-warning-light: #FFF4E3;
-  --color-warning-text:  #854D0E;  /* texte sur fond warning-light — WCAG AA */
-  --color-danger:        #FF3B30;
-  --color-danger-light:  #FFEEED;
-  --color-danger-text:   #B91C1C;  /* texte sur fond danger-light — WCAG AA */
+  --color-success:       #1F9D4D; /* Green (OK) */
+  --color-success-light: rgba(31, 157, 77, 0.1);
+  --color-success-text:  #1F9D4D;
+  --color-warning:       #D97706; /* Amber */
+  --color-warning-light: rgba(217, 119, 6, 0.1);
+  --color-warning-text:  #D97706;
+  --color-danger:        #E53E3E; /* Red */
+  --color-danger-light:  rgba(229, 62, 62, 0.1);
+  --color-danger-text:   #E53E3E;
   --color-neutral:       #8E8E93;
+  --color-meeting:       #7C3AED; /* Violet */
 
   /* Bordures */
-  --color-border:        #D2D2D7;
-  --color-border-subtle: #E5E5EA;
+  --color-border:        rgba(60, 60, 67, 0.12); /* Separator iOS */
+  --color-border-subtle: rgba(60, 60, 67, 0.07);
 
   /* Ombres */
-  --shadow-card:  0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-card:  0 0.5px 1.5px rgba(0,0,0,.04), 0 10px 26px -14px rgba(0,0,0,.16);
   --shadow-modal: 0 20px 60px rgba(0,0,0,0.15);
 
   /* Rayons */
   --radius-sm:   6px;
-  --radius-md:   10px;
-  --radius-lg:   14px;
-  --radius-xl:   20px;
+  --radius-md:   18px; /* Rayon 18px pour les cartes */
+  --radius-lg:   18px;
+  --radius-xl:   18px;
   --radius-full: 9999px;
 }
 

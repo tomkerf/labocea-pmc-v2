@@ -10,7 +10,7 @@ interface TodoFiltersProps {
   dispatch: React.Dispatch<PageAction>
 }
 
-export default function TodoFilters({ search, filterTab, filterPriority, dispatch }: TodoFiltersProps) {
+export default function TodoFilters({ search, filterTab, dispatch }: TodoFiltersProps) {
   return (
     <div className="flex flex-col gap-3 mb-6">
       <div className="relative">
@@ -29,29 +29,30 @@ export default function TodoFilters({ search, filterTab, filterPriority, dispatc
         />
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center">
         <div
-          className="relative flex p-0.5 rounded-lg text-xs font-medium"
+          className="relative flex p-0.5 rounded-lg text-xs font-semibold w-full"
           style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border-subtle)' }}
         >
           {([
             { id: 'toutes', label: 'Toutes' },
             { id: 'mes_taches', label: 'Miennes' },
             { id: 'equipe', label: 'Équipe' },
+            { id: 'priorite', label: 'Priorité' },
           ] as const).map((tab) => {
             const isActive = filterTab === tab.id
             return (
               <button type="button"
                 key={tab.id}
                 onClick={() => dispatch({ type: 'SET_FILTER_TAB', payload: tab.id })}
-                className="relative z-10 px-3.5 py-1.5 rounded-md transition-colors cursor-pointer focus:outline-none"
-                style={{ color: isActive ? COLORS.ACCENT : COLORS.TEXT_SECONDARY }}
+                className="relative z-10 py-1.5 rounded-md transition-colors cursor-pointer focus:outline-none flex-1 text-center font-bold"
+                style={{ color: isActive ? COLORS.TEXT_PRIMARY : COLORS.TEXT_SECONDARY }}
               >
                 {isActive && (
                   <m.div
                     layoutId="active-todo-tab"
                     className="absolute inset-0 rounded-md -z-10 shadow-sm"
-                    style={{ background: COLORS.BG_SECONDARY }}
+                    style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-card)' }}
                     transition={{ type: 'spring', stiffness: 350, damping: 28 }}
                   />
                 )}
@@ -60,23 +61,6 @@ export default function TodoFilters({ search, filterTab, filterPriority, dispatc
             )
           })}
         </div>
-
-        <select
-          value={filterPriority}
-          onChange={(e) => dispatch({ type: 'SET_FILTER_PRIORITY', payload: e.target.value })}
-          aria-label="Filtrer par priorité"
-          className="px-3 py-1.5 rounded-lg text-xs border"
-          style={{
-            background: COLORS.BG_SECONDARY,
-            borderColor: 'var(--color-border-subtle)',
-            color: COLORS.TEXT_PRIMARY,
-          }}
-        >
-          <option value="">Toutes priorités</option>
-          <option value="haute">🔴 Haute</option>
-          <option value="moyenne">🟡 Moyenne</option>
-          <option value="basse">🔵 Basse</option>
-        </select>
       </div>
     </div>
   )

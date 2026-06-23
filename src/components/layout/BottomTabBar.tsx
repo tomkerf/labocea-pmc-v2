@@ -41,10 +41,10 @@ export default function BottomTabBar() {
     <nav
       className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex"
       style={{
-        height: 74,
-        background: 'rgba(255,255,255,0.94)',
-        backdropFilter: 'blur(9px)',
-        WebkitBackdropFilter: 'blur(9px)',
+        height: 80,
+        background: 'rgba(248,248,250,0.82)',
+        backdropFilter: 'blur(24px) saturate(1.6)',
+        WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
         borderTop: '1px solid var(--color-border-subtle)',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}

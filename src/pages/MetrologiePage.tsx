@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Plus, Gauge, Ruler, AlignJustify, LayoutList } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Plus, Gauge, Ruler, AlignJustify, LayoutList, ChevronLeft } from 'lucide-react'
+import { useNavigate, Link } from 'react-router-dom'
 import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -64,17 +64,26 @@ export default function MerologiePage() {
 
   return (
     <div className="p-6 max-w-2xl">
+      {/* Bouton retour mobile */}
+      <div className="md:hidden mb-4">
+        <Link to="/plus" className="inline-flex items-center gap-1 font-semibold text-sm transition-opacity active:opacity-80" style={{ color: COLORS.ACCENT }}>
+          <ChevronLeft size={16} />
+          Plus
+        </Link>
+      </div>
+
       {/* En-tête */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Métrologie</h1>
-          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_PRIMARY }}>
+          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
             {filtered.length !== allRows.length
               ? `${filtered.length} / ${allRows.length} instrument${allRows.length !== 1 ? 's' : ''}`
               : `${allRows.length} instrument${allRows.length !== 1 ? 's' : ''} suivis`}
             {lateCount > 0 && (
-              <span className="ml-2 text-xs px-2 py-0.5 rounded-full font-medium"
-                style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
+              <span className="ml-2 text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] inline-flex items-center gap-1"
+                style={{ color: COLORS.DANGER }}>
+                <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: 'var(--color-danger)' }} />
                 {lateCount} en retard
               </span>
             )}
@@ -83,7 +92,7 @@ export default function MerologiePage() {
         <div className="flex gap-2 w-full sm:w-auto">
           <button type="button"
             onClick={() => setCompact((c) => !c)}
-            className="flex items-center justify-center p-2 rounded-lg transition-colors"
+            className="flex items-center justify-center p-2 rounded-lg transition-colors cursor-pointer"
             title={compact ? 'Vue développée' : 'Vue compacte'}
             style={{
               background: compact ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
@@ -95,8 +104,12 @@ export default function MerologiePage() {
           </button>
           <button type="button"
             onClick={handleCreate}
-            className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg flex-1 sm:flex-none"
-            style={{ background: COLORS.ACCENT, color: 'white' }}
+            className="flex items-center justify-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-lg flex-1 sm:flex-none cursor-pointer transition-transform active:scale-[0.98]"
+            style={{
+              background: 'linear-gradient(135deg, #2B7BFF 0%, #1768F5 100%)',
+              color: 'white',
+              boxShadow: '0 4px 14px rgba(23, 104, 245, 0.4)',
+            }}
           >
             <Plus size={16} />
             <span className="hidden sm:inline">Saisir une vérification</span>
@@ -107,19 +120,41 @@ export default function MerologiePage() {
 
       {/* Filtres */}
       <div className="flex gap-2 mb-5 flex-wrap">
-        {FILTERS.map((f) => (
-          <button type="button" key={f.value}
-            onClick={() => setFilterStatut(f.value)}
-            className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-            style={{
-              background: filterStatut === f.value ? 'var(--color-accent-light)' : COLORS.BG_SECONDARY,
-              color: filterStatut === f.value ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
-              border: '1px solid var(--color-border-subtle)',
-            }}
-          >
-            {f.label}
-          </button>
-        ))}
+        {FILTERS.map((f) => {
+          const isActive = filterStatut === f.value
+          let activeBg = 'var(--color-accent-light)'
+          let activeColor: string = COLORS.ACCENT
+          let activeBorder = '1px solid rgba(23, 104, 245, 0.2)'
+
+          if (f.value === 'ok') {
+            activeBg = 'var(--color-success-light)'
+            activeColor = COLORS.SUCCESS
+            activeBorder = '1px solid rgba(31, 157, 77, 0.2)'
+          } else if (f.value === 'soon') {
+            activeBg = 'var(--color-warning-light)'
+            activeColor = COLORS.WARNING
+            activeBorder = '1px solid rgba(217, 119, 6, 0.2)'
+          } else if (f.value === 'late') {
+            activeBg = 'var(--color-danger-light)'
+            activeColor = COLORS.DANGER
+            activeBorder = '1px solid rgba(229, 62, 62, 0.2)'
+          }
+
+          return (
+            <button type="button" key={f.value}
+              onClick={() => setFilterStatut(f.value)}
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer active:scale-95"
+              style={{
+                background: isActive ? activeBg : COLORS.BG_SECONDARY,
+                color: isActive ? activeColor : COLORS.TEXT_SECONDARY,
+                border: isActive ? activeBorder : '1px solid var(--color-border-subtle)',
+                boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.02)' : 'none',
+              }}
+            >
+              {f.label}
+            </button>
+          )
+        })}
       </div>
 
       {/* Liste */}
@@ -172,7 +207,7 @@ export default function MerologiePage() {
               return (
                 <button type="button" key={v.id}
                   onClick={() => navigate(`/metrologie/${v.id}`)}
-                  className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors ${compact ? 'py-2' : 'py-4'}`}
+                  className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-4'}`}
                   style={{
                     background: COLORS.BG_SECONDARY,
                     border: '1px solid var(--color-border-subtle)',
@@ -190,8 +225,8 @@ export default function MerologiePage() {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
-                      {v.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }}>Équipement non défini</span>}
+                    <p className="text-sm font-semibold truncate font-mono" style={{ color: COLORS.TEXT_PRIMARY }}>
+                      {v.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }} className="font-sans">Équipement non défini</span>}
                     </p>
                     {!compact && (
                       <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
@@ -209,13 +244,15 @@ export default function MerologiePage() {
                   </div>
 
                   <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-                      style={{ background: statut.bg, color: statut.color }}>
+                    <span className="text-xs px-2.5 py-1 rounded-full font-semibold border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] inline-flex items-center gap-1.5"
+                      style={{ color: statut.color }}>
+                      <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: statut.color }} />
                       {statut.label}
                     </span>
                     {!compact && resultatCfg && (
-                      <span className="text-xs px-2 py-0.5 rounded-full"
-                        style={{ background: resultatCfg.bg, color: resultatCfg.color }}>
+                      <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] inline-flex items-center gap-1.5"
+                        style={{ color: resultatCfg.color }}>
+                        <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: resultatCfg.color }} />
                         {resultatCfg.label}
                       </span>
                     )}
@@ -232,7 +269,7 @@ export default function MerologiePage() {
             return (
               <button type="button" key={eq.id}
                 onClick={() => navigate(`/materiel/${eq.id}`)}
-                className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors ${compact ? 'py-2' : 'py-4'}`}
+                className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-4'}`}
                 style={{
                   background: COLORS.BG_SECONDARY,
                   border: '1px solid var(--color-border-subtle)',
@@ -250,8 +287,8 @@ export default function MerologiePage() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
-                    {eq.nom || <span style={{ color: 'var(--color-text-tertiary)' }}>Sans nom</span>}
+                  <p className="text-sm font-semibold truncate font-mono" style={{ color: COLORS.TEXT_PRIMARY }}>
+                    {eq.nom || <span style={{ color: 'var(--color-text-tertiary)' }} className="font-sans">Sans nom</span>}
                   </p>
                   {!compact && (
                     <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
@@ -268,8 +305,9 @@ export default function MerologiePage() {
                 </div>
 
                 <div className="shrink-0">
-                  <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-                    style={{ background: statut.bg, color: statut.color }}>
+                  <span className="text-xs px-2.5 py-1 rounded-full font-semibold border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] inline-flex items-center gap-1.5"
+                    style={{ color: statut.color }}>
+                    <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: statut.color }} />
                     {statut.label}
                   </span>
                 </div>

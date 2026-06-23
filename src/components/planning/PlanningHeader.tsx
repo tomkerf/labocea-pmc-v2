@@ -163,28 +163,39 @@ export default function PlanningHeader({
           <div className="flex items-center gap-2">
 
             {/* Cartouche 1: Vues Calendaires */}
-            <div className="relative flex p-0.5 rounded-[var(--radius-md)] shrink-0 w-full md:w-auto overflow-x-auto no-scrollbar"
+            <div className="relative flex p-0.5 rounded-lg shrink-0 w-full md:w-auto overflow-x-auto no-scrollbar"
               style={{ border:'1px solid var(--color-border-subtle)', background:COLORS.BG_TERTIARY }}>
-              {(['jour','semaine','mois','annee','charge'] as ViewMode[]).map(view => (
-              <button type="button"
-                key={view}
-                onClick={() => switchView(view)}
-                className="relative px-3 py-1.5 text-xs font-medium capitalize z-10 transition-colors duration-200 flex-1 md:flex-none text-center"
-                style={{
-                  color: viewMode === view ? 'white' : COLORS.TEXT_SECONDARY
-                }}
-              >
-                {viewMode === view && (
-                  <m.div
-                    layoutId="active-planning-view"
-                    className="absolute inset-0 rounded-[var(--radius-sm)] -z-10"
-                    style={{ background: COLORS.ACCENT }}
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-                {view}
-              </button>
-            ))}
+              {(['jour', 'semaine', 'mois', 'charge'] as ViewMode[]).concat(window.innerWidth >= 768 ? ['annee'] : []).map(view => {
+                const labelMap: Record<ViewMode, string> = {
+                  jour: 'Jour',
+                  semaine: 'Semaine',
+                  mois: 'Mois',
+                  charge: 'Charge',
+                  annee: 'Année',
+                  carte: 'Carte'
+                }
+                const active = viewMode === view
+                return (
+                  <button type="button"
+                    key={view}
+                    onClick={() => switchView(view)}
+                    className="relative px-3.5 py-1.5 text-xs font-semibold rounded-md z-10 transition-colors duration-200 flex-1 md:flex-none text-center cursor-pointer"
+                    style={{
+                      color: active ? COLORS.TEXT_PRIMARY : COLORS.TEXT_SECONDARY
+                    }}
+                  >
+                    {active && (
+                      <m.div
+                        layoutId="active-planning-view"
+                        className="absolute inset-0 rounded-md -z-10"
+                        style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-card)' }}
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    {labelMap[view]}
+                  </button>
+                )
+              })}
             </div>
 
           </div>

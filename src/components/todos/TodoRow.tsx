@@ -76,18 +76,27 @@ export default function TodoRow({
             {todo.titre}
           </p>
           <span
-            className="text-[9px] font-bold px-1.5 py-0.2 rounded shrink-0 uppercase tracking-wide mt-0.5 flex items-center gap-1"
-            style={{ background: colors.bg, color: colors.text }}
+            className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1.5 border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] mt-0.5"
+            style={{ color: todo.priorite === 'basse' ? COLORS.TEXT_SECONDARY : COLORS.TEXT_PRIMARY }}
           >
-            <span className="text-[11px]">{colors.icon}</span>
-            {colors.label}
+            <span className="size-1.5 rounded-full shrink-0" 
+              style={{ 
+                backgroundColor: todo.priorite === 'haute' 
+                  ? 'var(--color-danger)' 
+                  : todo.priorite === 'moyenne' 
+                  ? 'var(--color-warning)' 
+                  : 'var(--color-neutral)' 
+              }} 
+            />
+            {colors.label.toUpperCase()}
           </span>
           {todo.statut === 'en_cours' && (
             <span
-              className="text-[9px] font-semibold px-1.5 py-0.2 rounded shrink-0 uppercase tracking-wide mt-0.5"
-              style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}
+              className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1.5 border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] mt-0.5"
+              style={{ color: COLORS.WARNING }}
             >
-              En cours
+              <span className="size-1.5 rounded-full bg-current shrink-0" />
+              EN COURS
             </span>
           )}
         </div>

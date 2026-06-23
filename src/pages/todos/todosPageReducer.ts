@@ -15,7 +15,7 @@ export function sortTasks(tasks: Todo[]) {
 
 export type PageState = {
   search: string
-  filterTab: 'toutes' | 'mes_taches' | 'equipe'
+  filterTab: 'toutes' | 'mes_taches' | 'equipe' | 'priorite'
   filterPriority: string
   showModal: boolean
   editingTodo: Todo | null
@@ -26,7 +26,7 @@ export type PageState = {
 
 export type PageAction =
   | { type: 'SET_SEARCH'; payload: string }
-  | { type: 'SET_FILTER_TAB'; payload: 'toutes' | 'mes_taches' | 'equipe' }
+  | { type: 'SET_FILTER_TAB'; payload: 'toutes' | 'mes_taches' | 'equipe' | 'priorite' }
   | { type: 'SET_FILTER_PRIORITY'; payload: string }
   | { type: 'OPEN_ADD_MODAL' }
   | { type: 'OPEN_EDIT_MODAL'; payload: Todo }

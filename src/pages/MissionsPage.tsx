@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, AlertTriangle, ClipboardList } from 'lucide-react'
+import { Plus, Search, ClipboardList } from 'lucide-react'
 import { useClientsListener } from '@/hooks/useClients'
 import { createClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -90,8 +90,13 @@ export default function MissionsPage() {
         <button type="button"
           onClick={handleNewClient}
           disabled={creating}
-          className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium w-full sm:w-auto"
-          style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.7 : 1 }}
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold w-full sm:w-auto transition-transform active:scale-[0.98] cursor-pointer"
+          style={{
+            background: 'linear-gradient(135deg, #2B7BFF 0%, #1768F5 100%)',
+            color: 'white',
+            boxShadow: '0 4px 14px rgba(23, 104, 245, 0.4)',
+            opacity: creating ? 0.7 : 1,
+          }}
         >
           <Plus size={16} />
           Nouveau client
@@ -121,14 +126,15 @@ export default function MissionsPage() {
         {overdueCount > 0 && (
           <button type="button"
             onClick={() => setOnlyRetard((v) => !v)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium shrink-0 transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold shrink-0 transition-all cursor-pointer select-none active:scale-95"
             style={{
-              background: onlyRetard ? COLORS.DANGER : 'var(--color-danger-light)',
-              color: onlyRetard ? 'white' : COLORS.DANGER,
-              border: '1px solid var(--color-danger)',
+              background: onlyRetard ? 'var(--color-danger)' : 'var(--color-danger-light)',
+              color: onlyRetard ? 'white' : 'var(--color-danger)',
+              border: '1px solid transparent',
+              boxShadow: onlyRetard ? '0 2px 6px rgba(229, 62, 62, 0.2)' : 'none',
             }}
           >
-            <AlertTriangle size={14} />
+            <span className="size-1.5 rounded-full bg-current shrink-0" />
             {overdueCount} en retard
           </button>
         )}

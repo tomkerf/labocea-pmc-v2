@@ -1,5 +1,6 @@
 import { useMemo, useReducer } from 'react'
-import { Plus, ListTodo } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Plus, ListTodo, ChevronLeft } from 'lucide-react'
 import { useTodosListener } from '@/hooks/useTodos'
 import { useClientsListener } from '@/hooks/useClients'
 import { useEquipementsListener } from '@/hooks/useEquipements'
@@ -40,7 +41,11 @@ export default function TodosPage() {
   const filteredTodos = useMemo(() => todos.filter((todo) => {
     const q = search.toLowerCase()
     const matchSearch = !q || todo.titre.toLowerCase().includes(q) || todo.description?.toLowerCase().includes(q) || todo.clientNom?.toLowerCase().includes(q) || todo.equipementNom?.toLowerCase().includes(q)
-    const matchTab = filterTab === 'toutes' || (filterTab === 'mes_taches' && todo.assignedTo === uid) || (filterTab === 'equipe' && (todo.assignedTo === 'equipe' || !todo.assignedTo))
+    const matchTab =
+      filterTab === 'toutes' ||
+      (filterTab === 'mes_taches' && todo.assignedTo === uid) ||
+      (filterTab === 'equipe' && (todo.assignedTo === 'equipe' || !todo.assignedTo)) ||
+      (filterTab === 'priorite' && (todo.priorite === 'haute' || todo.priorite === 'moyenne'))
     const matchPriority = !filterPriority || todo.priorite === filterPriority
     return matchSearch && matchTab && matchPriority
   }), [todos, search, filterTab, filterPriority, uid])
@@ -128,6 +133,14 @@ export default function TodosPage() {
 
   return (
     <div className="p-6 pb-12 max-w-2xl">
+      {/* Bouton retour mobile */}
+      <div className="md:hidden mb-4">
+        <Link to="/plus" className="inline-flex items-center gap-1 font-semibold text-sm transition-opacity active:opacity-80" style={{ color: COLORS.ACCENT }}>
+          <ChevronLeft size={16} />
+          Plus
+        </Link>
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Tâches</h1>

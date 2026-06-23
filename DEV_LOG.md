@@ -2,6 +2,28 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 138 — Mise en valeur du modèle et du type du matériel
+**23 juin 2026**
+
+### Ce qui a été fait
+
+**Écran Matériel**
+- [EquipementCard.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/materiel/EquipementCard.tsx) : Modification de la ligne principale du titre de la carte. Affichage du modèle (`equipement.modele`) et de la catégorie (`CATEGORIE_LABELS[equipement.categorie]`) en gras et couleur principale (`font-semibold COLORS.TEXT_PRIMARY`), tandis que la marque (`equipement.marque`) est placée en retrait, avec une police normale, de taille réduite, et de couleur grise, entre parenthèses : `(HACH)`.
+- Mise à jour du changelog en version `130` dans [changelog.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/data/changelog.ts).
+
+**Qualité & Tests**
+- Compilation TypeScript réussie (`npx tsc -b` : 0 erreur).
+- Passage complet de la suite de tests unitaires (`npm run test` : 157/157 PASS).
+- Déploiement réussi sur l'environnement de staging.
+
+### Prochaines étapes
+1. Déploiement staging et tests physiques sur appareils mobiles.
+2. 🟡 **Monitoring** — intégration Sentry (ou équivalent) avant prod.
+3. 🔴 **Accord DSIN** — validation écrite avant toute date de lancement.
+
+---
+
+
 ## Session 137 — Affichage du nom complet des équipements
 **23 juin 2026**
 

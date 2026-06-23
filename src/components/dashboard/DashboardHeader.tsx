@@ -1,6 +1,7 @@
 import { m } from 'framer-motion'
 import { COLORS } from '@/lib/constants'
 import { getGreeting, formatDate } from '@/lib/dashboardUtils'
+import UserAvatar from '@/components/ui/UserAvatar'
 
 const itemVariants = {
   hidden: { opacity: 0, y: 12 },
@@ -20,24 +21,33 @@ interface DashboardHeaderProps {
   isGeneraliste: boolean;
   activeTab: 'technicien' | 'manager';
   setActiveTab: (tab: 'technicien' | 'manager') => void;
+  avatarColor?: string;
+  initiales?: string;
 }
 
-export function DashboardHeader({ prenom, isGeneraliste, activeTab, setActiveTab }: DashboardHeaderProps) {
+export function DashboardHeader({ prenom, isGeneraliste, activeTab, setActiveTab, avatarColor, initiales }: DashboardHeaderProps) {
   return (
     <>
-      <m.div variants={itemVariants} className="mb-8">
-        <h1 className="text-2xl font-bold mb-1" style={{ color: COLORS.TEXT_PRIMARY, letterSpacing: '-0.5px' }}>
-          {getGreeting()} {prenom || 'Thomas'} 👋
-        </h1>
-        <p className="text-base capitalize" style={{ color: COLORS.TEXT_SECONDARY }}>
-          {formatDate()}
-        </p>
+      <m.div variants={itemVariants} className="mb-8 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: COLORS.TEXT_SECONDARY, letterSpacing: '0.5px' }}>
+            {formatDate()}
+          </p>
+          <h1 className="text-2xl font-bold" style={{ color: COLORS.TEXT_PRIMARY, letterSpacing: '-0.5px' }}>
+            {getGreeting()}, {prenom || 'Thomas'} 👋
+          </h1>
+        </div>
+        {initiales && (
+          <div className="shrink-0">
+            <UserAvatar initiales={initiales} color={avatarColor} size={44} />
+          </div>
+        )}
       </m.div>
 
       {/* Switcher de rôle (uniquement pour les chargés de mission / admins) */}
       {isGeneraliste && (
         <m.div variants={itemVariants} className="mb-6 flex">
-          <div className="flex gap-1 p-1 rounded-xl" style={{ background: COLORS.BG_TERTIARY }}>
+          <div className="flex gap-1 p-1 rounded-xl" style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border-subtle)' }}>
             <button
               type="button"
               onClick={() => setActiveTab('technicien')}
@@ -54,7 +64,7 @@ export function DashboardHeader({ prenom, isGeneraliste, activeTab, setActiveTab
                   transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 />
               )}
-              Mon activité terrain
+              Mon activité
             </button>
             <button
               type="button"
@@ -72,7 +82,7 @@ export function DashboardHeader({ prenom, isGeneraliste, activeTab, setActiveTab
                   transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 />
               )}
-              Suivi équipe (CM)
+              Suivi équipe
             </button>
           </div>
         </m.div>
