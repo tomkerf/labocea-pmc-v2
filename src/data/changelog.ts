@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '127'
+export const CHANGELOG_VERSION = '129'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,21 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '129',
+    date: '23 juin 2026',
+    items: [
+      { type: 'fix', label: 'Matériel : Affichage du nom complet de l\'appareil (marque, modèle, catégorie) et du code d\'équipement sans troncature arbitraire dans la liste.' },
+    ],
+  },
+  {
+    version: '128',
+    date: '23 juin 2026',
+    items: [
+      { type: 'feat', label: 'Mobile : Refonte mobile iOS haute-fidélité des écrans Métrologie et Maintenances (boutons retour, filtres type pilules glissantes, et badges status dots 6px).' },
+      { type: 'fix', label: 'Stabilité : Résolution d\'imports et typages stricts sur le dashboard, le planning et les filtres de tâches.' },
+    ],
+  },
   {
     version: '127',
     date: '22 juin 2026',

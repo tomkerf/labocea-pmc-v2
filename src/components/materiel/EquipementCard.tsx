@@ -172,7 +172,7 @@ export default function EquipementCard({ equipement, compact = false }: Equipeme
       />
 
       {/* Main content with pointer-events-none */}
-      <div className="flex-1 flex items-center gap-4 min-w-0 pointer-events-none">
+      <div className="grow flex items-center gap-4 min-w-0 pointer-events-none">
         {/* Anneau métrologie avec icône au centre */}
         <div className="relative group shrink-0 pointer-events-auto">
           {metroPercent !== null && (
@@ -194,12 +194,12 @@ export default function EquipementCard({ equipement, compact = false }: Equipeme
         {/* Infos */}
         <div className="flex-1 min-w-0">
           {/* Ligne principale : marque + modèle + catégorie (ou code si pas de marque/modèle) */}
-          <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
+          <p className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             {[equipement.marque, equipement.modele, CATEGORIE_LABELS[equipement.categorie] ?? equipement.categorie].filter(Boolean).join(' · ') || equipement.nom || 'Sans nom'}
           </p>
           {/* Ligne secondaire : code équipement */}
           {!compact && equipement.nom && (
-            <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+            <p className="text-xs mt-0.5 font-mono" style={{ color: COLORS.TEXT_SECONDARY }}>
               {equipement.nom}
             </p>
           )}
@@ -234,16 +234,18 @@ export default function EquipementCard({ equipement, compact = false }: Equipeme
 
         <div className="flex flex-col items-end gap-1">
           {metroPercent === 0 && (
-            <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-              style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
-              À étalonner
+            <span className="text-xs px-2.5 py-1 rounded-full font-semibold border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] inline-flex items-center gap-1.5"
+              style={{ color: COLORS.DANGER }}>
+              <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: 'var(--color-danger)' }} />
+              À calibrer
             </span>
           )}
           <div className="relative group" onClick={(e) => e.stopPropagation()} title="Modifier l'état">
-            <span className="text-xs px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1 transition-opacity group-hover:opacity-80"
-              style={{ background: etatCfg.bg, color: etatCfg.color }}>
+            <span className="text-xs px-2.5 py-1 rounded-full font-semibold inline-flex items-center gap-1.5 transition-all group-hover:bg-[var(--color-bg-tertiary)] border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)]"
+              style={{ color: COLORS.TEXT_PRIMARY }}>
+              <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: equipement.etat === 'operationnel' ? 'var(--color-success)' : equipement.etat === 'en_maintenance' ? 'var(--color-warning)' : equipement.etat === 'hors_service' ? 'var(--color-danger)' : 'var(--color-neutral)' }} />
               {etatCfg.label}
-              <ChevronDown size={12} strokeWidth={2.5} />
+              <ChevronDown size={12} strokeWidth={2.5} style={{ color: COLORS.TEXT_SECONDARY }} />
             </span>
             <select
               value={equipement.etat}

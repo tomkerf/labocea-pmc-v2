@@ -344,6 +344,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-21 | Harmonie & Accessibilité ✅ | Refonte UserAvatar (couleurs vives et harmonieuses Tailwind-600, texte blanc, responsive font-size pour initiales longues), harmonisation des TECH_COLORS/TECH_PALETTE et contrastes de texte. |
 | 2026-06-22 | Audit UX ✅ | Restructuration de la navigation (sections Sidebar/Drawer), raccourcis Fiche Point dans la tournée terrain (TourneeItem Link + icon), et colonne collante (sticky) pour la matrice de charge. |
 | 2026-06-23 | Refonte Mobile iOS ✅ | Refonte mobile iOS haute-fidélité des écrans Métrologie et Maintenances (boutons retour mobile, filtres style pilules glissantes iOS, codes équipement en monospace, et pastilles de statut avec points 6px). Fixes d'imports UserAvatar et types TS. |
+| 2026-06-23 | Troncature Nom Matériel ✅ | Correction de la troncature des noms complets et codes d'équipements dans la liste de matériel. |
 
 
 

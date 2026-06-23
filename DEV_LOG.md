@@ -2,6 +2,15 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 137 — Affichage du nom complet des équipements
+**23 juin 2026**
+
+### Ce qui a été fait
+
+**Écran Matériel**
+- [EquipementCard.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/materiel/EquipementCard.tsx) : Suppression de la classe `truncate` sur la ligne principale (marque · modèle · catégorie) et la ligne secondaire (code de l'équipement) pour permettre d'afficher la totalité du nom de l'équipement sans ellipse (`...`).
+- Validation du build et exécution de l'ensemble de la suite de tests (157 tests passés).
+
 ## Session 136 — Refonte Mobile iOS (Métrologie & Maintenances)
 **23 juin 2026**
 
