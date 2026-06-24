@@ -57,7 +57,7 @@ export default function DonutChart({ segments, total, size = 120, strokeWidth = 
         </svg>
         {/* Texte centré */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold font-mono" style={{ color: COLORS.TEXT_PRIMARY, letterSpacing: '-0.5px' }}>
+          <span className="text-2xl font-bold" style={{ color: COLORS.TEXT_PRIMARY, letterSpacing: '-0.5px' }}>
             {total}
           </span>
           <span className="text-[10px]" style={{ color: 'var(--color-text-tertiary)' }}>équip.</span>
@@ -70,7 +70,7 @@ export default function DonutChart({ segments, total, size = 120, strokeWidth = 
           <div key={s.label} className="flex items-center gap-2">
             <span className="size-2.5 rounded-full shrink-0" style={{ background: s.color }} />
             <span className="text-sm whitespace-nowrap" style={{ color: COLORS.TEXT_SECONDARY }}>{s.label}</span>
-            <span className="text-sm font-semibold ml-auto pl-4 font-mono" style={{ color: COLORS.TEXT_PRIMARY }}>
+            <span className="text-sm font-semibold ml-auto pl-4" style={{ color: COLORS.TEXT_PRIMARY }}>
               {s.value}
             </span>
           </div>

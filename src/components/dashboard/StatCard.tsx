@@ -37,7 +37,7 @@ export function StatCard({ value, label, sub, accent, warning, danger, onClick }
       }}
     >
       <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>{label}</p>
-      <p className="text-2xl font-bold leading-none mb-1.5 font-mono" style={{ color, letterSpacing: '-0.5px' }}>{value}</p>
+      <p className="text-2xl font-bold leading-none mb-1.5" style={{ color, letterSpacing: '-0.5px' }}>{value}</p>
       {sub && <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{sub}</p>}
     </m.div>
   )
