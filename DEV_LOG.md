@@ -2,6 +2,21 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 141 — En-têtes responsives mobiles
+**24 juin 2026**
+
+### Ce qui a été fait
+
+**En-têtes responsives (fixes 390px et moins)**
+- Alignement vertical automatique et boutons adaptatifs sur mobile (390px et moins) pour éviter tout chevauchement ou débordement.
+- Fichiers mis à jour : [ClientHeader.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/client/ClientHeader.tsx), [EquipementPage.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/pages/EquipementPage.tsx), [MaintenancePage.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/pages/MaintenancePage.tsx), [VerificationPage.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/pages/VerificationPage.tsx), [PlanPage.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/pages/PlanPage.tsx), [DemandesPage.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/pages/DemandesPage.tsx) et [RapportsPage.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/pages/RapportsPage.tsx).
+- Utilisation de `flex-wrap` pour les boutons d'action afin de s'assurer de leur adaptation sur petits écrans.
+- Bouton "Nouvelle demande" configuré à 100% de la largeur sur mobile.
+
+### Prochaines étapes
+- Tester la photo rapide dashboard en conditions réelles (prélèvement planifié aujourd'hui)
+- Accord DSIN + plan de bascule équipe Brest (organisationnel)
+
 ## Session 140 — WCAG, photo rapide dashboard, fix police monospace
 **24 juin 2026**
 

@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '130'
+export const CHANGELOG_VERSION = '131'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '131',
+    date: '24 juin 2026',
+    items: [
+      { type: 'fix', label: 'En-têtes : Alignement vertical automatique et boutons adaptatifs sur mobile (390px et moins) pour éviter tout chevauchement.' },
+    ],
+  },
   {
     version: '130',
     date: '23 juin 2026',
