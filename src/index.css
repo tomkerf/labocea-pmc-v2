@@ -17,9 +17,9 @@
   --color-text-tertiary: #6B7280; /* WCAG AA 4.6:1 on white */
 
   /* Accents */
-  --color-accent:        #2E4A6B; /* Bleu encre désaturé */
-  --color-accent-hover:  #3B5B82;
-  --color-accent-light:  rgba(46, 74, 107, 0.09);
+  --color-accent:        #34527A; /* Bleu encre désaturé */
+  --color-accent-hover:  #41618D;
+  --color-accent-light:  rgba(52, 82, 122, 0.09);
 
   /* Statuts */
   --color-success:       #1F9D4D; /* Green (OK) */

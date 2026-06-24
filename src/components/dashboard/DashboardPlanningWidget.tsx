@@ -186,7 +186,7 @@ export function DashboardPlanningWidget({
           style={{
             background: COLORS.ACCENT,
             color: '#FFFFFF',
-            boxShadow: '0 2px 8px rgba(46, 74, 107, 0.25)',
+            boxShadow: '0 2px 8px rgba(52, 82, 122, 0.25)',
           }}
         >
           <span className="text-base leading-none">🚙</span>
