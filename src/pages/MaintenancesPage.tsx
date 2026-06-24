@@ -289,7 +289,7 @@ export default function MaintenancesPage() {
 
                 {/* Infos */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate font-mono" style={{ color: COLORS.TEXT_PRIMARY }}>
+                  <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                     {m.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }} className="font-sans">Équipement non défini</span>}
                   </p>
                   {!compact && m.description && (

@@ -225,7 +225,7 @@ export default function MerologiePage() {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate font-mono" style={{ color: COLORS.TEXT_PRIMARY }}>
+                    <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                       {v.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }} className="font-sans">Équipement non défini</span>}
                     </p>
                     {!compact && (
@@ -287,7 +287,7 @@ export default function MerologiePage() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate font-mono" style={{ color: COLORS.TEXT_PRIMARY }}>
+                  <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                     {eq.nom || <span style={{ color: 'var(--color-text-tertiary)' }} className="font-sans">Sans nom</span>}
                   </p>
                   {!compact && (
