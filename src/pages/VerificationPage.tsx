@@ -12,6 +12,13 @@ import type { Verification, TypeVerification, ResultatVerification } from '@/typ
 import { COLLECTIONS, COLORS } from '@/lib/constants'
 
 
+function addOneYear(dateStr: string): string {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  d.setFullYear(d.getFullYear() + 1)
+  return d.toISOString().split('T')[0]
+}
+
 const TYPES: { value: TypeVerification; label: string }[] = [
   { value: 'etalonnage_interne',   label: 'Étalonnage interne' },
   { value: 'verification_externe', label: 'Vérification externe' },
@@ -38,7 +45,7 @@ function NewVerificationForm() {
     equipementId: '', equipementNom: '',
     type: 'etalonnage_interne' as TypeVerification,
     date: today, resultat: 'conforme' as ResultatVerification,
-    remarques: '', prochainControle: '',
+    remarques: '', prochainControle: addOneYear(today),
   })
   const [saving, setSaving] = useState(false)
 
@@ -46,6 +53,8 @@ function NewVerificationForm() {
     if (field === 'equipementId') {
       const eq = equipements.find((e) => e.id === value)
       setForm((f) => ({ ...f, equipementId: value, equipementNom: eq?.nom ?? '' }))
+    } else if (field === 'date') {
+      setForm((f) => ({ ...f, date: value, prochainControle: addOneYear(value) }))
     } else {
       setForm((f) => ({ ...f, [field]: value }))
     }
@@ -148,6 +157,8 @@ export default function VerificationPage() {
     if (field === 'equipementId') {
       const eq = equipements.find((e) => e.id === value)
       updated.equipementNom = eq?.nom ?? ''
+    } else if (field === 'date' && typeof value === 'string') {
+      updated.prochainControle = addOneYear(value)
     }
     triggerSave(updated)
   }

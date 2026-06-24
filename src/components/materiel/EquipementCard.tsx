@@ -193,19 +193,14 @@ export default function EquipementCard({ equipement, compact = false }: Equipeme
 
         {/* Infos */}
         <div className="flex-1 min-w-0">
-          {/* Ligne principale : modèle + catégorie (marque en retrait) */}
+          {/* Ligne principale : code équipement + type */}
           <p className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
-            {[equipement.modele, CATEGORIE_LABELS[equipement.categorie] ?? equipement.categorie].filter(Boolean).join(' · ') || equipement.nom || 'Sans nom'}
-            {equipement.marque && (
-              <span className="font-normal text-xs ml-1.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-                ({equipement.marque})
-              </span>
-            )}
+            {[equipement.nom, CATEGORIE_LABELS[equipement.categorie] ?? equipement.categorie].filter(Boolean).join(' · ') || 'Sans nom'}
           </p>
-          {/* Ligne secondaire : code équipement */}
-          {!compact && equipement.nom && (
-            <p className="text-xs mt-0.5 font-mono" style={{ color: COLORS.TEXT_SECONDARY }}>
-              {equipement.nom}
+          {/* Ligne secondaire : marque + modèle en retrait */}
+          {!compact && (equipement.marque || equipement.modele) && (
+            <p className="text-xs mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+              {[equipement.marque, equipement.modele].filter(Boolean).join(' · ')}
             </p>
           )}
           {!compact && (

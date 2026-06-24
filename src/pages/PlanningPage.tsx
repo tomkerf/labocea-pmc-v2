@@ -1,4 +1,4 @@
-import { useState, useMemo, useReducer } from 'react'
+import { useState, useMemo, useReducer, useEffect, useRef } from 'react'
 import { useClientsListener } from '@/hooks/useClients'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useVerificationsListener } from '@/hooks/useVerifications'
@@ -103,13 +103,24 @@ export default function PlanningPage() {
   const [filterTech, setFilterTech] = useState(() => {
     const saved = localStorage.getItem('planning_filter_tech')
     if (saved && saved !== 'ALL') return saved
-    const ini = useAuthStore.getState().appUser?.initiales ?? ''
-    if (ini) localStorage.setItem('planning_filter_tech', ini)
-    return ini
+    return ''
   })
-  const [filterSite, setFilterSite] = useState<string>(
-    () => localStorage.getItem('planning_filter_site') ?? ''
-  )
+  const [filterSite, setFilterSite] = useState<string>(() => {
+    const saved = localStorage.getItem('planning_filter_site')
+    if (saved !== null) return saved
+    const ini = useAuthStore.getState().appUser?.initiales ?? ''
+    const prel = usePreleveursStore.getState().preleveurs.find(p => p.code === ini)
+    return prel?.site ?? ''
+  })
+  const siteDefaultApplied = useRef(false)
+  useEffect(() => {
+    if (siteDefaultApplied.current || !preleveurs.length) return
+    siteDefaultApplied.current = true
+    if (localStorage.getItem('planning_filter_site') !== null) return
+    const ini = useAuthStore.getState().appUser?.initiales ?? ''
+    const prel = preleveurs.find(p => p.code === ini)
+    if (prel?.site) { setFilterSite(prel.site); setFilterTech('') }
+  }, [preleveurs])
   const filterRetard = false
 
   function handleSelectEvent(event: PlanningEvent, dateStr: string) {
