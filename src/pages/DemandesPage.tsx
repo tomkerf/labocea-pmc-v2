@@ -80,7 +80,7 @@ export default function DemandesPage() {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0">
+      <div className="px-6 pt-6 pb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shrink-0">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Demandes clients</h1>
           <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
@@ -89,7 +89,7 @@ export default function DemandesPage() {
         </div>
         <button type="button"
           onClick={() => setModal({})}
-          className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg"
+          className="flex items-center justify-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg w-full sm:w-auto transition-transform active:scale-[0.98] cursor-pointer"
           style={{ background: COLORS.ACCENT, color: 'white' }}>
           <Plus size={15} /> Nouvelle demande
         </button>

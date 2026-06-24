@@ -195,7 +195,7 @@ export default function MerologiePage() {
           </button>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {filtered.map((row) => {
             if (row.kind === 'verification') {
               const v = row.data as Verification
@@ -207,7 +207,7 @@ export default function MerologiePage() {
               return (
                 <button type="button" key={v.id}
                   onClick={() => navigate(`/metrologie/${v.id}`)}
-                  className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-4'}`}
+                  className={`w-full text-left rounded-xl px-4 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-3'}`}
                   style={{
                     background: COLORS.BG_SECONDARY,
                     border: '1px solid var(--color-border-subtle)',
@@ -269,7 +269,7 @@ export default function MerologiePage() {
             return (
               <button type="button" key={eq.id}
                 onClick={() => navigate(`/materiel/${eq.id}`)}
-                className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-4'}`}
+                className={`w-full text-left rounded-xl px-4 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-3'}`}
                 style={{
                   background: COLORS.BG_SECONDARY,
                   border: '1px solid var(--color-border-subtle)',

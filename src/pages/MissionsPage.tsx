@@ -171,7 +171,7 @@ export default function MissionsPage() {
           </div>
         )
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {filtered.map((client) => (
             <ClientCard key={client.id} client={client} />
           ))}

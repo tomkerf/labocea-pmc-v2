@@ -95,7 +95,7 @@ export default function PlanPage() {
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             {plan.nom || 'Point sans nom'}
@@ -104,7 +104,7 @@ export default function PlanPage() {
             {plan.siteNom || 'Site non renseigné'}
           </p>
         </div>
-        {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
+        {saving && <span className="text-xs self-start sm:self-auto" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
       </div>
 
       <PlanConfigSection plan={plan} onUpdate={updatePlan} clientId={clientId!} planId={planId!} />

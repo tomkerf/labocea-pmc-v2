@@ -182,7 +182,7 @@ export default function VerificationPage() {
       </button>
 
       {/* En-tête */}
-      <div className="flex items-start justify-between mb-6 gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             {verification.equipementNom || 'Nouvelle vérification'}
@@ -191,8 +191,8 @@ export default function VerificationPage() {
             {verification.date ? new Date(verification.date).toLocaleDateString('fr-FR', { dateStyle: 'long' }) : '—'}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {saving && <span className="text-xs mr-1" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
           {confirmDelete ? (
             <div className="flex items-center gap-1.5">
               <button type="button" onClick={handleDelete} className="text-sm px-3 py-1.5 rounded-lg font-medium"

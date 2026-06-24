@@ -170,7 +170,7 @@ export default function EquipementPage() {
         <ChevronLeft size={16} /> Matériel
       </button>
 
-      <div className="flex items-start justify-between mb-6 gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
         <div className="flex items-center gap-4">
           {metroPercent !== null ? (
             <CircleProgress percent={metroPercent} size={64} strokeWidth={4} label="métrologie" />
@@ -209,8 +209,8 @@ export default function EquipementPage() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {saving && <span className="text-xs mr-1" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
           {confirmDelete ? (
             <div className="flex items-center gap-1.5">
               <button type="button" onClick={() => { dispatch({ type: 'SET_CONFIRM_DELETE', payload: false }); handleDelete() }}

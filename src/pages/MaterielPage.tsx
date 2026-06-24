@@ -409,7 +409,7 @@ export default function MaterielPage() {
           </button>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {filtered.map((e: Equipement) => (
             <EquipementCard key={e.id} equipement={e} compact={compact} />
           ))}

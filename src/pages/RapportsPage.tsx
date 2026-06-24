@@ -109,7 +109,7 @@ export default function RapportsPage() {
       </div>
 
       {/* En-tête */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div className="flex items-center gap-3">
           <FileText size={22} strokeWidth={1.5} style={{ color: COLORS.ACCENT }} />
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Rapports</h1>

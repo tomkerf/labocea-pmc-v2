@@ -249,7 +249,7 @@ export default function MaintenancesPage() {
           </button>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {filtered.map((m: Maintenance) => {
             const typeCfg = TYPE_CONFIG[m.type] ?? TYPE_CONFIG.corrective
             const statutCfg = STATUT_CONFIG[m.statut] ?? STATUT_CONFIG.planifiee
@@ -264,7 +264,7 @@ export default function MaintenancesPage() {
               <button type="button"
                 key={m.id}
                 onClick={() => navigate(`/maintenances/${m.id}`)}
-                className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-4'}`}
+                className={`w-full text-left rounded-xl px-4 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-3'}`}
                 style={{
                   background: COLORS.BG_SECONDARY,
                   border: '1px solid var(--color-border-subtle)',

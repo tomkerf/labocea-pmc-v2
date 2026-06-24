@@ -154,7 +154,7 @@ export default function EquipementCard({ equipement, compact = false }: Equipeme
 
   return (
     <div
-      className={`w-full text-left rounded-xl px-5 flex items-center gap-4 transition-colors relative group ${compact ? 'py-2' : 'py-4'}`}
+      className={`w-full text-left rounded-xl px-4 flex items-center gap-4 transition-colors relative group ${compact ? 'py-2' : 'py-3'}`}
       style={{
         background: COLORS.BG_SECONDARY,
         border: '1px solid var(--color-border-subtle)',

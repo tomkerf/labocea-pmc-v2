@@ -52,12 +52,12 @@ export function ClientHeader({
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
           {client.nom || 'Client sans nom'}
         </h1>
-        <div className="flex items-center gap-3">
-          {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {saving && <span className="text-xs mr-1" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
 
           <button type="button"
             onClick={() => {

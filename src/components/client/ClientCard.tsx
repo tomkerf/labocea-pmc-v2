@@ -50,7 +50,7 @@ export default function ClientCard({ client }: Props) {
   return (
     <button type="button"
       onClick={() => navigate(`/missions/${client.id}`)}
-      className="w-full text-left flex items-center gap-4 px-5 py-4 rounded-xl transition-colors"
+      className="w-full text-left flex items-center gap-4 px-4 py-3 rounded-xl transition-colors"
       style={{
         background: COLORS.BG_SECONDARY,
         border: '1px solid var(--color-border-subtle)',
