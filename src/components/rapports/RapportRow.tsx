@@ -52,10 +52,10 @@ export default function RapportRow({ r, isLast, todayStr, touteEquipe, resolveNo
           aria-label="Date prévue du rapport"
           defaultValue={r.rapportDatePrevue}
           onBlur={(e) => { if (e.target.value !== r.rapportDatePrevue) onUpdateDate(r.clientId, r.planId, r.samplingId, e.target.value) }}
-          className="rounded-md px-2 py-1 text-xs font-mono"
+          className="rounded-md px-2 py-1 text-xs"
           style={{ border: '1px solid var(--color-border)', background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }}
         />
-        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] inline-flex items-center gap-1.5 font-mono"
+        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] inline-flex items-center gap-1.5"
           style={{ color: delaiColor }}>
           <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: delaiColor }} />
           {delaiLabel}
