@@ -1,5 +1,7 @@
+import { useState, useRef } from 'react'
 import { m, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { Camera, Loader2 } from 'lucide-react'
 import { SectionTitle, EmptyCard } from '@/components/dashboard/StatCard'
 import type { PlanningEvent } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
@@ -13,6 +15,7 @@ interface DashboardPlanningWidgetProps {
   activeItems: any[];
   activeDateISO: string;
   setEventDetail: (detail: { event: PlanningEvent, dateStr: string }) => void;
+  onUploadPhoto?: (clientId: string, planId: string, samplingId: string, file: File) => Promise<void>;
 }
 
 export function DashboardPlanningWidget({
@@ -22,9 +25,33 @@ export function DashboardPlanningWidget({
   hasRainTomorrow,
   activeItems,
   activeDateISO,
-  setEventDetail
+  setEventDetail,
+  onUploadPhoto,
 }: DashboardPlanningWidgetProps) {
   const navigate = useNavigate()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const pendingUpload = useRef<{ clientId: string; planId: string; samplingId: string } | null>(null)
+  const [uploadingId, setUploadingId] = useState<string | null>(null)
+
+  function handleCameraClick(e: React.MouseEvent, clientId: string, planId: string, samplingId: string) {
+    e.stopPropagation()
+    pendingUpload.current = { clientId, planId, samplingId }
+    fileInputRef.current?.click()
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    const pending = pendingUpload.current
+    if (!file || !pending || !onUploadPhoto) return
+    setUploadingId(pending.samplingId)
+    try {
+      await onUploadPhoto(pending.clientId, pending.planId, pending.samplingId, file)
+    } finally {
+      setUploadingId(null)
+      pendingUpload.current = null
+      e.target.value = ''
+    }
+  }
 
   return (
     <div>
@@ -120,6 +147,20 @@ export function DashboardPlanningWidget({
                 {'meteo' in item && item.meteo === 'pluie' && (
                   <span title="Prélèvement temps de pluie" className="shrink-0 text-base leading-none">🌧</span>
                 )}
+                {item.kind === 'sampling' && item.modalEvent?.samplingId && onUploadPhoto && (
+                  <button
+                    type="button"
+                    aria-label="Ajouter une photo"
+                    onClick={(e) => handleCameraClick(e, item.modalEvent.clientId, item.modalEvent.planId, item.modalEvent.samplingId)}
+                    className="shrink-0 p-1 rounded-lg transition-colors hover:bg-[var(--color-bg-tertiary)]"
+                    style={{ color: uploadingId === item.modalEvent.samplingId ? COLORS.ACCENT : COLORS.TEXT_SECONDARY }}
+                  >
+                    {uploadingId === item.modalEvent.samplingId
+                      ? <Loader2 size={14} className="animate-spin" />
+                      : <Camera size={14} />
+                    }
+                  </button>
+                )}
                 <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
                   style={{ background: item.badge.bg, color: item.badge.color }}>{item.badge.label}</span>
               </m.div>
@@ -127,6 +168,15 @@ export function DashboardPlanningWidget({
           </AnimatePresence>
         </m.div>
       )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,.heic,.heif"
+        capture="environment"
+        className="hidden"
+        onChange={handleFileChange}
+      />
 
       {planningMode === 'today' && (
         <button

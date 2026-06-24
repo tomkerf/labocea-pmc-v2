@@ -37,6 +37,8 @@ import { TodosWidget } from '@/components/dashboard/TodosWidget'
 import { useTodosListener } from '@/hooks/useTodos'
 import { useTodosStore } from '@/stores/todosStore'
 import { COLORS } from '@/lib/constants'
+import { uploadSamplingPhoto } from '@/lib/uploadPhoto'
+import { toast } from '@/stores/toastStore'
 
 
 // ── useReducer ────────────────────────────────────────────────
@@ -145,6 +147,26 @@ export default function DashboardPage() {
   const activeDateISO = planningMode === 'today' ? todayISO : tomorrowISO
 
   // ── Actions ────────────────────────────────────────────────
+
+  async function handleDashboardPhotoUpload(clientId: string, planId: string, samplingId: string, file: File) {
+    const client = clients.find((c: Client) => c.id === clientId)
+    if (!client || !uid) return
+    try {
+      const url = await uploadSamplingPhoto(file, clientId, planId, samplingId)
+      await saveClient({
+        ...client,
+        plans: client.plans.map((p: Plan) => p.id !== planId ? p : {
+          ...p,
+          samplings: p.samplings.map((s: Sampling) =>
+            s.id !== samplingId ? s : { ...s, photos: [...(s.photos ?? []), url] }
+          ),
+        }),
+      }, uid)
+      toast.success('Photo ajoutée')
+    } catch {
+      toast.error('Échec de l\'envoi de la photo. Vérifie ta connexion.')
+    }
+  }
 
   async function markRapportEnvoye(clientId: string, planId: string, samplingId: string) {
     const client = clients.find((c: Client) => c.id === clientId)
@@ -276,6 +298,7 @@ export default function DashboardPage() {
                 activeItems={activeItems}
                 activeDateISO={activeDateISO}
                 setEventDetail={(detail) => dispatch({ type: 'SET_EVENT_DETAIL', payload: detail })}
+                onUploadPhoto={handleDashboardPhotoUpload}
               />
 
               {/* État du parc */}
