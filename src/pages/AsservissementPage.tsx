@@ -65,7 +65,7 @@ export default function AsservissementPage() {
 
       {/* Header sticky */}
       <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3"
-        style={{ background: 'rgba(245,245,247,0.92)', backdropFilter: 'blur(9px)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+        style={{ background: 'rgba(245,245,247,0.92)', backdropFilter: 'var(--glass-panel)', WebkitBackdropFilter: 'var(--glass-panel)', borderBottom: '1px solid var(--color-border-subtle)' }}>
         <button type="button" onClick={() => navigate(-1)} className="p-1.5 rounded-lg shrink-0"
           style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
           <ChevronLeft size={18} strokeWidth={1.8} />

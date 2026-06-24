@@ -52,8 +52,8 @@ export default function IssueListModal({ onClose, type, rows, year }: IssueListM
         className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-0"
         style={{
           background: 'rgba(0, 0, 0, 0.25)',
-          backdropFilter: 'blur(5px)',
-          WebkitBackdropFilter: 'blur(5px)',
+          backdropFilter: 'var(--glass-scrim)',
+          WebkitBackdropFilter: 'var(--glass-scrim)',
         }}
         onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
       >

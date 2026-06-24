@@ -18,7 +18,8 @@ export function MissionDetailActions({ isAutoJ1, saving, onTerminer, onDecaler, 
         style={{
           bottom: 'calc(65px + env(safe-area-inset-bottom))',
           background: 'rgba(245,245,247,0.92)',
-          backdropFilter: 'blur(8px)',
+          backdropFilter: 'var(--glass-panel)',
+          WebkitBackdropFilter: 'var(--glass-panel)',
           borderTop: '1px solid var(--color-border-subtle)',
           paddingBottom: '12px',
         }}>

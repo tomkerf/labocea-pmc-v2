@@ -83,7 +83,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
           {/* Overlay */}
           <m.div
             className="md:hidden fixed inset-0 z-40"
-            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }}
+            style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'var(--glass-scrim)', WebkitBackdropFilter: 'var(--glass-scrim)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -97,7 +97,8 @@ export default function MobileDrawer({ open, onClose }: Props) {
             style={{
               width: 280,
               background: 'rgba(255,255,255,0.97)',
-              backdropFilter: 'blur(9px)',
+              backdropFilter: 'var(--glass-panel)',
+              WebkitBackdropFilter: 'var(--glass-panel)',
               borderLeft: '1px solid var(--color-border-subtle)',
               boxShadow: '-4px 0 32px rgba(0,0,0,0.12)',
               paddingBottom: 'env(safe-area-inset-bottom, 0px)',

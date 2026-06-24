@@ -85,7 +85,8 @@ export default function Sidebar() {
       className="hidden md:flex flex-col w-[220px] shrink-0 h-screen sticky top-0"
       style={{
         background: 'rgba(255,255,255,0.85)',
-        backdropFilter: 'blur(9px)',
+        backdropFilter: 'var(--glass-panel)',
+        WebkitBackdropFilter: 'var(--glass-panel)',
         borderRight: '1px solid var(--color-border-subtle)',
       }}
     >

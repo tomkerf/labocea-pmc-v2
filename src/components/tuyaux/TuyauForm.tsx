@@ -110,7 +110,7 @@ export default function TuyauForm({ tuyau = EMPTY_TUYAU, onSave, onClose }: Tuya
 
   return (
     <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'var(--glass-scrim)', WebkitBackdropFilter: 'var(--glass-scrim)' }}
       onClick={onClose}>
       <div className="w-full max-w-xl rounded-xl overflow-hidden"
         style={{ background: COLORS.BG_SECONDARY, boxShadow: 'var(--shadow-modal)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}

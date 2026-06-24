@@ -43,8 +43,8 @@ export default function BottomTabBar() {
       style={{
         height: 80,
         background: 'rgba(248,248,250,0.82)',
-        backdropFilter: 'blur(24px) saturate(1.6)',
-        WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
+        backdropFilter: 'var(--glass-bar)',
+        WebkitBackdropFilter: 'var(--glass-bar)',
         borderTop: '1px solid var(--color-border-subtle)',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}

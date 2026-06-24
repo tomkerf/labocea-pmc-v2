@@ -60,8 +60,8 @@ export default function BaseModal({
           style={{
             zIndex: Z_INDEX.MODAL,
             background: 'rgba(0, 0, 0, 0.25)',
-            backdropFilter: 'blur(5px)',
-            WebkitBackdropFilter: 'blur(5px)',
+            backdropFilter: 'var(--glass-scrim)',
+            WebkitBackdropFilter: 'var(--glass-scrim)',
           }}
           onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
         >

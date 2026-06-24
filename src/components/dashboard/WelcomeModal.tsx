@@ -11,7 +11,7 @@ export function WelcomeModal({ show, onDismiss }: WelcomeModalProps) {
   return (
     <AnimatePresence>
       {show && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'var(--glass-scrim)', WebkitBackdropFilter: 'var(--glass-scrim)' }}>
           <m.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

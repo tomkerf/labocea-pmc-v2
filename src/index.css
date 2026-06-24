@@ -48,6 +48,11 @@
   --radius-lg:   18px;
   --radius-xl:   18px;
   --radius-full: 9999px;
+
+  /* Glass — Liquid Glass tokens (Apple) */
+  --glass-scrim: blur(4px);              /* fond derrière les modales */
+  --glass-panel: blur(9px);              /* surfaces flottantes (header, sidebar, menus) */
+  --glass-bar:   blur(24px) saturate(1.6); /* barre de navigation proéminente */
 }
 
 /* Reset de base */

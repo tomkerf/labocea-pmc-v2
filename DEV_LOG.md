@@ -2,6 +2,43 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 140 — WCAG, photo rapide dashboard, fix police monospace
+**24 juin 2026**
+
+### Ce qui a été fait
+
+**Audit pistes d'amélioration**
+- Vérification de l'état réel du code vs les items listés : backup Firestore (`backup-firestore.sh`) et champs immuables (`firestore.rules` avec `immutableOn()`) déjà implémentés — retirés de la liste.
+- Contrastes WCAG badges et UserAvatar déjà corrigés en session 126.
+
+**Fix WCAG AA — texte tertiaire**
+- `--color-text-tertiary` : `#AEAEB2` → `#6B7280` dans `src/index.css` (ratio 2.21:1 → 4.6:1 ✓)
+- Seul token restant non conforme WCAG AA ; `--color-text-secondary` conservé (`#8E8E93`, choix design iOS délibéré).
+
+**Photo rapide depuis le dashboard**
+- Bouton `<Camera>` inline sur les lignes `kind === 'sampling'` du widget "Planning du jour".
+- Tap → `<input type="file" capture="environment">` caché → upload Firebase Storage via `uploadSamplingPhoto()` → mise à jour `sampling.photos` nested → toast succès/erreur.
+- `e.stopPropagation()` pour ne pas déclencher `EventDetailModal`.
+- Fichiers : `DashboardPlanningWidget.tsx` (prop `onUploadPhoto`, état `uploadingId`, `pendingUpload` ref), `DashboardPage.tsx` (`handleDashboardPhotoUpload`).
+
+**Fix police monospace parasite**
+- Cause racine : session 138 avait ajouté `font-mono` sur les noms d'équipement dans Métrologie/Maintenances, et `font-mono` existait aussi sur les KPI StatCard, DonutChart et badges RapportRow.
+- Suppression de `font-mono` dans 5 fichiers : `MetrologiePage.tsx`, `MaintenancesPage.tsx`, `RapportRow.tsx`, `StatCard.tsx`, `DonutChart.tsx`.
+
+### Commits
+- `7498382` fix(a11y): --color-text-tertiary WCAG AA
+- `cb0d958` feat(dashboard): bouton photo rapide sampling
+- `bbf1e7a` fix(ui): font-mono Métrologie/Maintenances
+- `3359f1a` fix(ui): font-mono RapportRow
+- `4476306` fix(ui): font-mono StatCard/DonutChart
+
+### Prochaines étapes
+- Tester la photo rapide dashboard en conditions réelles (prélèvement planifié aujourd'hui)
+- Responsive 390px header (titre + bouton d'action se chevauchent)
+- Accord DSIN + plan de bascule équipe Brest (organisationnel)
+
+---
+
 ## Session 138 — Mise en valeur du modèle et du type du matériel
 **23 juin 2026**
 
