@@ -147,8 +147,8 @@ export default function Sidebar() {
                     ) : null}
                     <span className="flex-1 z-10 truncate">{label}</span>
                     {badge && overdueCount > 0 && (
-                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full z-10"
-                        style={{ background: COLORS.DANGER, color: 'white', minWidth: 18, textAlign: 'center' }}>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10"
+                        style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger-text)', minWidth: 18, textAlign: 'center' }}>
                         {overdueCount}
                       </span>
                     )}

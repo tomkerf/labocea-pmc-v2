@@ -17,9 +17,9 @@
   --color-text-tertiary: #6B7280; /* WCAG AA 4.6:1 on white */
 
   /* Accents */
-  --color-accent:        #1768F5; /* iOS Blue */
-  --color-accent-hover:  #2B7BFF;
-  --color-accent-light:  rgba(23, 104, 245, 0.1);
+  --color-accent:        #2E4A6B; /* Bleu encre désaturé */
+  --color-accent-hover:  #3B5B82;
+  --color-accent-light:  rgba(46, 74, 107, 0.09);
 
   /* Statuts */
   --color-success:       #1F9D4D; /* Green (OK) */
@@ -39,8 +39,8 @@
   --color-border-subtle: rgba(60, 60, 67, 0.07);
 
   /* Ombres */
-  --shadow-card:  0 0.5px 1.5px rgba(0,0,0,.04), 0 10px 26px -14px rgba(0,0,0,.16);
-  --shadow-modal: 0 20px 60px rgba(0,0,0,0.15);
+  --shadow-card:  0 1px 2px rgba(30,41,59,.04), 0 8px 24px -16px rgba(30,41,59,.18);
+  --shadow-modal: 0 20px 60px rgba(30,41,59,0.16);
 
   /* Rayons */
   --radius-sm:   6px;
