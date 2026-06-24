@@ -106,9 +106,9 @@ export default function MerologiePage() {
             onClick={handleCreate}
             className="flex items-center justify-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-lg flex-1 sm:flex-none cursor-pointer transition-transform active:scale-[0.98]"
             style={{
-              background: 'linear-gradient(135deg, #2B7BFF 0%, #1768F5 100%)',
+              background: COLORS.ACCENT,
               color: 'white',
-              boxShadow: '0 4px 14px rgba(23, 104, 245, 0.4)',
+              boxShadow: '0 2px 8px rgba(52, 82, 122, 0.25)',
             }}
           >
             <Plus size={16} />
@@ -124,7 +124,7 @@ export default function MerologiePage() {
           const isActive = filterStatut === f.value
           let activeBg = 'var(--color-accent-light)'
           let activeColor: string = COLORS.ACCENT
-          let activeBorder = '1px solid rgba(23, 104, 245, 0.2)'
+          let activeBorder = '1px solid rgba(52, 82, 122, 0.2)'
 
           if (f.value === 'ok') {
             activeBg = 'var(--color-success-light)'

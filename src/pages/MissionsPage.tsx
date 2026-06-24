@@ -92,9 +92,9 @@ export default function MissionsPage() {
           disabled={creating}
           className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold w-full sm:w-auto transition-transform active:scale-[0.98] cursor-pointer"
           style={{
-            background: 'linear-gradient(135deg, #2B7BFF 0%, #1768F5 100%)',
+            background: COLORS.ACCENT,
             color: 'white',
-            boxShadow: '0 4px 14px rgba(23, 104, 245, 0.4)',
+            boxShadow: '0 2px 8px rgba(52, 82, 122, 0.25)',
             opacity: creating ? 0.7 : 1,
           }}
         >
