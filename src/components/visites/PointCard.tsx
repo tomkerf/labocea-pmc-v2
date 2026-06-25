@@ -33,6 +33,7 @@ export default function PointCard({ point, idx, total, uploading, plans, onChang
   const [showCreatePlan, setShowCreatePlan] = useState(false)
   const [newFrequence, setNewFrequence] = useState<FrequenceType>('Annuel')
   const [newSiteNom, setNewSiteNom] = useState('')
+  const filteredPlans = plans?.filter(p => !p.separator) ?? []
 
   return (
     <div className="rounded-xl p-5"
@@ -115,11 +116,11 @@ export default function PointCard({ point, idx, total, uploading, plans, onChang
       {plans !== undefined && (
         <div className="mb-3">
           <label htmlFor={`pc-pm-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Point de prélèvement associé</label>
-          {plans.filter(p => !p.separator).length > 0 ? (
+          {filteredPlans.length > 0 ? (
             <select id={`pc-pm-${point.id}`} value={point.pointMesureId ?? ''} onChange={e => onChange('pointMesureId', e.target.value || undefined)}
               className="field-input w-full">
               <option value="">— Non lié —</option>
-              {plans.filter(p => !p.separator).map(p => (
+              {filteredPlans.map(p => (
                 <option key={p.id} value={p.id}>{p.nom}{p.siteNom ? ` · ${p.siteNom}` : ''}</option>
               ))}
             </select>
@@ -139,14 +140,14 @@ export default function PointCard({ point, idx, total, uploading, plans, onChang
               <p className="text-xs font-semibold" style={{ color: COLORS.ACCENT }}>Nouveau point : {point.nom || '…'}</p>
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <label className="block text-xs mb-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>Fréquence</label>
-                  <select value={newFrequence} onChange={e => setNewFrequence(e.target.value as FrequenceType)} className="field-input w-full text-sm">
+                  <label htmlFor={`pc-freq-${point.id}`} className="block text-xs mb-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>Fréquence</label>
+                  <select id={`pc-freq-${point.id}`} value={newFrequence} onChange={e => setNewFrequence(e.target.value as FrequenceType)} className="field-input w-full text-sm">
                     {FREQUENCES.map(f => <option key={f}>{f}</option>)}
                   </select>
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs mb-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>Site</label>
-                  <input value={newSiteNom} onChange={e => setNewSiteNom(e.target.value)} className="field-input w-full text-sm" placeholder="Moreac, Brest…" />
+                  <label htmlFor={`pc-site-${point.id}`} className="block text-xs mb-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>Site</label>
+                  <input id={`pc-site-${point.id}`} value={newSiteNom} onChange={e => setNewSiteNom(e.target.value)} className="field-input w-full text-sm" placeholder="Moreac, Brest…" />
                 </div>
               </div>
               <div className="flex gap-2 justify-end">

@@ -113,3 +113,7 @@
 ## react-doctor/no-many-boolean-props (déféré — refactor architectural)
 
 - `src/components/planning/PlanningHeader.tsx:50` — 4 props booléennes (`showMiniCal`, `showRain`, `showDragHint`, `showBilanMois`). Vrai positif mais le découpage en sous-composants est un refactor architectural majeur (PlanningHeader est déjà optimisé et < 250L). À adresser si score target passe à 80+.
+
+## react-doctor/control-has-associated-label (faux positifs — PointCard)
+
+- `src/components/visites/PointCard.tsx` — `<input type="file" hidden>` imbriqué à l'intérieur d'un `<label>` (pattern standard pour les custom file upload buttons). L'association est correcte par imbrication DOM ; react-doctor ne la détecte pas car il cherche `htmlFor`/`aria-label`/`aria-labelledby` explicites.
