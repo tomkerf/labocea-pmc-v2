@@ -309,10 +309,10 @@ export default function DashboardPage() {
                   <DonutChart
                     total={equipements.length}
                     segments={[
-                      { value: parcDonut.en_service,     color: COLORS.SUCCESS, label: 'En service'     },
-                      { value: parcDonut.a_calibrer,     color: COLORS.WARNING, label: 'À calibrer'     },
+                      { value: parcDonut.en_service,     color: '#34C759',      label: 'En service'     },
+                      { value: parcDonut.a_calibrer,     color: '#FF9F0A',      label: 'À calibrer'     },
                       { value: parcDonut.en_maintenance, color: COLORS.ACCENT,  label: 'En maintenance' },
-                      { value: parcDonut.hors_service,   color: COLORS.DANGER,  label: 'Hors service'   },
+                      { value: parcDonut.hors_service,   color: '#FF3B30',      label: 'Hors service'   },
                       { value: parcDonut.prete,          color: 'var(--color-neutral)', label: 'Prêté'          },
                     ]}
                   />

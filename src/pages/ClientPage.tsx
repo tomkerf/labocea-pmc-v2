@@ -20,8 +20,8 @@ type Tab = 'infos' | 'plans' | 'visites'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'infos',   label: 'Informations' },
-  { id: 'plans',   label: 'Points de prélèvement' },
   { id: 'visites', label: 'Visites' },
+  { id: 'plans',   label: 'Points de prélèvement' },
 ]
 
 type State = {

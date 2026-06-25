@@ -4,11 +4,13 @@ import { Plus } from 'lucide-react'
 import { doc, getDoc, Timestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useAuthStore } from '@/stores/authStore'
+import { useClientData } from '@/hooks/useClientData'
 import { createVisite, saveVisite, deleteVisite } from '@/services/visiteService'
 import { uploadVisitePhoto, deleteVisitePhoto } from '@/lib/uploadPhoto'
 import { generateVisiteHTML } from '@/lib/generateVisiteHTML'
-import type { VisitePreliminaire, PointVisite } from '@/types'
+import type { VisitePreliminaire, PointVisite, FrequenceType } from '@/types'
 import { COLLECTIONS, COLORS } from '@/lib/constants'
+import { generateId } from '@/lib/ids'
 import PointCard from '@/components/visites/PointCard'
 import VisiteFormHeader from '@/components/visites/VisiteFormHeader'
 import VisiteGeneralFields from '@/components/visites/VisiteGeneralFields'
@@ -66,6 +68,7 @@ export default function VisiteFormPage() {
     linkedIdState: linkedId,
   })
   const { date, technicienNom, technicienUid, notes, points, createdAt, linkedNomState, linkedTypeState, linkedIdState } = form
+  const { client: linkedClient, triggerSave: saveClient } = useClientData(linkedTypeState === 'client' ? linkedIdState : undefined)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(!isNew)
   const [uploadingPointId, setUploadingPointId] = useState<string | null>(null)
@@ -113,14 +116,15 @@ export default function VisiteFormPage() {
   }
 
   async function handlePhotoAdd(pointId: string, file: File) {
+    let id = visiteId ?? null
     if (isNew) {
-      await handleSave(false)
-      return
+      id = await handleSave(true)
+      if (!id) return
+      navigate(`/visites/${id}`, { replace: true })
     }
-    const id = visiteId!
     setUploadingPointId(pointId)
     try {
-      const url = await uploadVisitePhoto(file, id, pointId)
+      const url = await uploadVisitePhoto(file, id!, pointId)
       dispatch({ points: points.map(p => p.id === pointId ? { ...p, photos: [...p.photos, url] } : p) })
     } finally {
       setUploadingPointId(null)
@@ -130,6 +134,27 @@ export default function VisiteFormPage() {
   async function handlePhotoDelete(pointId: string, url: string) {
     await deleteVisitePhoto(url)
     dispatch({ points: points.map(p => p.id === pointId ? { ...p, photos: p.photos.filter(u => u !== url) } : p) })
+  }
+
+  function handleCreatePlan(pointId: string, frequence: FrequenceType, siteNom: string) {
+    if (!linkedClient) return
+    const visitePoint = points.find(p => p.id === pointId)
+    if (!visitePoint) return
+    const newPlanId = generateId()
+    const newPlan = {
+      id: newPlanId,
+      nom: visitePoint.nom,
+      siteNom,
+      frequence,
+      meteo: '',
+      nature: visitePoint.typeEau,
+      methode: visitePoint.methode,
+      lat: '', lng: '', gpsApprox: false,
+      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
+      samplings: [],
+    }
+    saveClient({ ...linkedClient, plans: [...linkedClient.plans, newPlan] })
+    dispatch({ points: points.map(p => p.id === pointId ? { ...p, pointMesureId: newPlanId } : p) })
   }
 
   async function handleSave(silent = false): Promise<string | null> {
@@ -176,7 +201,7 @@ export default function VisiteFormPage() {
     if (!win) return
     win.document.write(html)
     win.document.close()
-    win.print()
+    win.onload = () => win.print()
   }
 
   const backPath = linkedTypeState === 'client'
@@ -218,11 +243,13 @@ export default function VisiteFormPage() {
             idx={idx}
             total={points.length}
             uploading={uploadingPointId === point.id}
+            plans={linkedClient?.plans}
             onChange={(field, value) => updatePoint(point.id, field, value)}
             onMove={(dir) => movePoint(idx, dir)}
             onRemove={() => removePoint(point.id)}
             onPhotoAdd={(file) => handlePhotoAdd(point.id, file)}
             onPhotoDelete={(url) => handlePhotoDelete(point.id, url)}
+            onCreatePlan={linkedClient ? (freq, site) => handleCreatePlan(point.id, freq, site) : undefined}
           />
         ))}
       </div>

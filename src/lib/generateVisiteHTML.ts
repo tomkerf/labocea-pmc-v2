@@ -23,6 +23,8 @@ export function generateVisiteHTML(visite: VisitePreliminaire): string {
         <tr><td class="label">Faisabilité</td><td style="color:${faisabiliteColor(p.faisabilite)};font-weight:600">${faisabiliteLabel(p.faisabilite)}</td></tr>
         ${p.securite ? `<tr><td class="label">Sécurité</td><td>${escapeHtml(p.securite)}</td></tr>` : ''}
         ${p.notes ? `<tr><td class="label">Notes</td><td>${escapeHtml(p.notes)}</td></tr>` : ''}
+        ${p.difficultes ? `<tr><td class="label">Difficultés</td><td>${escapeHtml(p.difficultes)}</td></tr>` : ''}
+        ${p.solutions ? `<tr><td class="label">Solutions</td><td>${escapeHtml(p.solutions)}</td></tr>` : ''}
       </table>
       ${
         p.photos.length > 0

@@ -54,11 +54,13 @@ export default function PointMesureFichePage() {
 
   // 1. Mappage des inspections du point dans les visites préliminaires
   const pointVisits = visites.flatMap(v =>
-    (v.points || []).flatMap(p =>
-      p.nom.trim().toLowerCase() === plan.nom.trim().toLowerCase()
+    (v.points || []).flatMap(p => {
+      const matchById = p.pointMesureId ? p.pointMesureId === plan.id : false
+      const matchByName = !p.pointMesureId && p.nom.trim().toLowerCase() === plan.nom.trim().toLowerCase()
+      return matchById || matchByName
         ? [{ visitId: v.id, date: v.date, technicienNom: v.technicienNom, ...p }]
         : []
-    )
+    })
   )
 
   // 2. Historique des prélèvements réalisés sur ce plan

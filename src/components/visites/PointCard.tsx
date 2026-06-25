@@ -1,7 +1,9 @@
-import { useRef } from 'react'
-import { Camera, Loader2, X } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Camera, Loader2, X, PlusCircle, Check } from 'lucide-react'
 import { COLORS } from '@/lib/constants'
-import type { PointVisite, NatureEauType, MethodeType, FaisabiliteVisite } from '@/types'
+import type { PointVisite, NatureEauType, MethodeType, FaisabiliteVisite, FrequenceType, Plan } from '@/types'
+
+const FREQUENCES: FrequenceType[] = ['Mensuel', 'Bimensuel', 'Trimestriel', 'Semestriel', 'Annuel', 'Personnalisé']
 
 const NATURE_EAU: NatureEauType[] = ['Eau usée', 'Rivière', 'Souterraine', 'Eau pluviale', 'Eau saline', 'Boues', 'Autre']
 const METHODES: MethodeType[] = ['Ponctuel', 'Composite', 'Automatique']
@@ -17,15 +19,20 @@ export interface PointCardProps {
   idx: number
   total: number
   uploading: boolean
+  plans?: Plan[]
   onChange: (field: keyof PointVisite, value: unknown) => void
   onMove: (dir: -1 | 1) => void
   onRemove: () => void
   onPhotoAdd: (file: File) => void
   onPhotoDelete: (url: string) => void
+  onCreatePlan?: (frequence: FrequenceType, siteNom: string) => void
 }
 
-export default function PointCard({ point, idx, total, uploading, onChange, onMove, onRemove, onPhotoAdd, onPhotoDelete }: PointCardProps) {
+export default function PointCard({ point, idx, total, uploading, plans, onChange, onMove, onRemove, onPhotoAdd, onPhotoDelete, onCreatePlan }: PointCardProps) {
   const fileRef = useRef<HTMLInputElement>(null)
+  const [showCreatePlan, setShowCreatePlan] = useState(false)
+  const [newFrequence, setNewFrequence] = useState<FrequenceType>('Annuel')
+  const [newSiteNom, setNewSiteNom] = useState('')
 
   return (
     <div className="rounded-xl p-5"
@@ -105,10 +112,76 @@ export default function PointCard({ point, idx, total, uploading, onChange, onMo
           className="field-input w-full" placeholder="EPI requis, risques, accès…" />
       </div>
 
+      {plans !== undefined && (
+        <div className="mb-3">
+          <label htmlFor={`pc-pm-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Point de prélèvement associé</label>
+          {plans.filter(p => !p.separator).length > 0 ? (
+            <select id={`pc-pm-${point.id}`} value={point.pointMesureId ?? ''} onChange={e => onChange('pointMesureId', e.target.value || undefined)}
+              className="field-input w-full">
+              <option value="">— Non lié —</option>
+              {plans.filter(p => !p.separator).map(p => (
+                <option key={p.id} value={p.id}>{p.nom}{p.siteNom ? ` · ${p.siteNom}` : ''}</option>
+              ))}
+            </select>
+          ) : (
+            <p className="text-xs mb-1" style={{ color: 'var(--color-text-tertiary)' }}>Aucun point existant pour ce client.</p>
+          )}
+          {onCreatePlan && !point.pointMesureId && !showCreatePlan && (
+            <button type="button" onClick={() => setShowCreatePlan(true)}
+              className="mt-1.5 flex items-center gap-1.5 text-xs font-medium"
+              style={{ color: COLORS.ACCENT }}>
+              <PlusCircle size={13} /> Créer un point de prélèvement
+            </button>
+          )}
+          {showCreatePlan && (
+            <div className="mt-2 p-3 rounded-xl flex flex-col gap-2"
+              style={{ background: 'var(--color-accent-light)', border: `1px solid ${COLORS.ACCENT}33` }}>
+              <p className="text-xs font-semibold" style={{ color: COLORS.ACCENT }}>Nouveau point : {point.nom || '…'}</p>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="block text-xs mb-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>Fréquence</label>
+                  <select value={newFrequence} onChange={e => setNewFrequence(e.target.value as FrequenceType)} className="field-input w-full text-sm">
+                    {FREQUENCES.map(f => <option key={f}>{f}</option>)}
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs mb-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>Site</label>
+                  <input value={newSiteNom} onChange={e => setNewSiteNom(e.target.value)} className="field-input w-full text-sm" placeholder="Moreac, Brest…" />
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button type="button" onClick={() => setShowCreatePlan(false)}
+                  className="text-xs px-3 py-1.5 rounded-lg" style={{ color: COLORS.TEXT_SECONDARY, background: COLORS.BG_TERTIARY }}>
+                  Annuler
+                </button>
+                <button type="button"
+                  onClick={() => { onCreatePlan?.(newFrequence, newSiteNom); setShowCreatePlan(false) }}
+                  className="text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 font-semibold"
+                  style={{ background: COLORS.ACCENT, color: 'white' }}>
+                  <Check size={12} /> Créer
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="mb-3">
         <label htmlFor={`pc-notes-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Notes</label>
-        <input id={`pc-notes-${point.id}`} aria-label="Notes" value={point.notes} onChange={e => onChange('notes', e.target.value)}
-          className="field-input w-full" placeholder="Remarques spécifiques…" />
+        <textarea id={`pc-notes-${point.id}`} aria-label="Notes" value={point.notes} onChange={e => onChange('notes', e.target.value)}
+          className="field-input w-full resize-none" rows={2} placeholder="Observations générales…" />
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor={`pc-difficultes-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Difficultés</label>
+        <textarea id={`pc-difficultes-${point.id}`} aria-label="Difficultés" value={point.difficultes ?? ''} onChange={e => onChange('difficultes', e.target.value)}
+          className="field-input w-full resize-none" rows={2} placeholder="Accès bloqué, canalisation fermée…" />
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor={`pc-solutions-${point.id}`} className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Solutions</label>
+        <textarea id={`pc-solutions-${point.id}`} aria-label="Solutions" value={point.solutions ?? ''} onChange={e => onChange('solutions', e.target.value)}
+          className="field-input w-full resize-none" rows={2} placeholder="Contournement, alternative mise en place…" />
       </div>
 
       {/* Photos */}

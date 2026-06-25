@@ -388,6 +388,9 @@ export interface PointVisite {
   faisabilite: FaisabiliteVisite
   securite: string
   notes: string
+  difficultes?: string
+  solutions?: string
+  pointMesureId?: string
   photos: string[]
 }
 
