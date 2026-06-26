@@ -145,7 +145,6 @@ export default function EquipementCard({ equipement, compact = false }: Equipeme
   }
 
   const Icon = CATEGORIE_ICONS[equipement.categorie] ?? Package
-  const iconSize = 16
 
   // Couleur de l'icône selon statut métrologique (ou neutre si pas d'étalonnage)
   const iconColor = metroPercent !== null
@@ -154,7 +153,7 @@ export default function EquipementCard({ equipement, compact = false }: Equipeme
 
   return (
     <div
-      className={`w-full text-left rounded-xl px-4 flex items-center gap-4 transition-colors relative group ${compact ? 'py-2' : 'py-3'}`}
+      className={`w-full text-left rounded-xl px-4 flex items-center gap-4 transition-colors relative group ${compact ? 'py-2' : 'py-2.5'}`}
       style={{
         background: COLORS.BG_SECONDARY,
         border: '1px solid var(--color-border-subtle)',
@@ -182,11 +181,11 @@ export default function EquipementCard({ equipement, compact = false }: Equipeme
             </div>
           )}
           {metroPercent !== null ? (
-            <CircleProgress percent={metroPercent} size={compact ? 28 : 44} icon={<Icon size={compact ? 10 : iconSize} strokeWidth={1.8} color={iconColor} />} />
+            <CircleProgress percent={metroPercent} size={compact ? 28 : 36} icon={<Icon size={compact ? 10 : 14} strokeWidth={1.8} color={iconColor} />} />
           ) : (
-            <div className={`${compact ? 'size-7' : 'size-11'} rounded-full flex items-center justify-center`}
+            <div className={`${compact ? 'size-7' : 'size-9'} rounded-full flex items-center justify-center`}
               style={{ background: COLORS.BG_TERTIARY, border: '2px solid var(--color-border)' }}>
-              <Icon size={compact ? 10 : iconSize} strokeWidth={1.8} color="var(--color-text-tertiary)" />
+              <Icon size={compact ? 10 : 14} strokeWidth={1.8} color="var(--color-text-tertiary)" />
             </div>
           )}
         </div>
@@ -194,18 +193,14 @@ export default function EquipementCard({ equipement, compact = false }: Equipeme
         {/* Infos */}
         <div className="flex-1 min-w-0">
           {/* Ligne principale : code équipement + type */}
-          <p className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
+          <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
             {[equipement.nom, CATEGORIE_LABELS[equipement.categorie] ?? equipement.categorie].filter(Boolean).join(' · ') || 'Sans nom'}
           </p>
-          {/* Ligne secondaire : marque + modèle en retrait */}
-          {!compact && (equipement.marque || equipement.modele) && (
-            <p className="text-xs mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-              {[equipement.marque, equipement.modele].filter(Boolean).join(' · ')}
-            </p>
-          )}
           {!compact && (
-            <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
+            <p className="text-xs mt-0.5 truncate" style={{ color: COLORS.TEXT_SECONDARY }}>
               {[
+                equipement.marque,
+                equipement.modele,
                 equipement.numSerie,
                 equipement.volume,
                 equipement.poids,
@@ -226,7 +221,7 @@ export default function EquipementCard({ equipement, compact = false }: Equipeme
             e.stopPropagation()
             exportFicheDeViePDF(equipement, entries)
           }}
-          className="p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors text-neutral-500 hover:text-neutral-700"
+          className="hidden sm:flex p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors text-neutral-500 hover:text-neutral-700"
           title="Exporter la fiche de vie (PDF)"
         >
           <FileText size={16} />

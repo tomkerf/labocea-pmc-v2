@@ -207,7 +207,7 @@ export default function MerologiePage() {
               return (
                 <button type="button" key={v.id}
                   onClick={() => navigate(`/metrologie/${v.id}`)}
-                  className={`w-full text-left rounded-xl px-4 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-3'}`}
+                  className={`w-full text-left rounded-xl px-4 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-2.5'}`}
                   style={{
                     background: COLORS.BG_SECONDARY,
                     border: '1px solid var(--color-border-subtle)',
@@ -219,8 +219,8 @@ export default function MerologiePage() {
                   <div className="shrink-0">
                     <CircleProgress
                       percent={percent}
-                      size={compact ? 28 : 44}
-                      icon={<Gauge size={compact ? 10 : 16} strokeWidth={1.8} color={iconColor} />}
+                      size={compact ? 28 : 36}
+                      icon={<Gauge size={compact ? 10 : 14} strokeWidth={1.8} color={iconColor} />}
                     />
                   </div>
 
@@ -230,13 +230,8 @@ export default function MerologiePage() {
                     </p>
                     {!compact && (
                       <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-                        {TYPE_LABELS[v.type] ?? v.type}
-                      </p>
-                    )}
-                    {!compact && (
-                      <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
                         {[
-                          v.date ? `Réalisé le ${new Date(v.date).toLocaleDateString('fr-FR')}` : null,
+                          TYPE_LABELS[v.type] ?? v.type,
                           v.prochainControle ? `Prochain : ${new Date(v.prochainControle).toLocaleDateString('fr-FR')}` : null,
                         ].filter(Boolean).join(' · ')}
                       </p>
@@ -269,7 +264,7 @@ export default function MerologiePage() {
             return (
               <button type="button" key={eq.id}
                 onClick={() => navigate(`/materiel/${eq.id}`)}
-                className={`w-full text-left rounded-xl px-4 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-3'}`}
+                className={`w-full text-left rounded-xl px-4 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-2.5'}`}
                 style={{
                   background: COLORS.BG_SECONDARY,
                   border: '1px solid var(--color-border-subtle)',
@@ -292,14 +287,12 @@ export default function MerologiePage() {
                   </p>
                   {!compact && (
                     <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-                      {[eq.marque, eq.modele].filter(Boolean).join(' ') || '—'}
-                    </p>
-                  )}
-                  {!compact && (
-                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                      {eq.prochainEtalonnage
-                        ? `Prochain : ${new Date(eq.prochainEtalonnage).toLocaleDateString('fr-FR')}`
-                        : 'Aucune vérification enregistrée'}
+                      {[
+                        [eq.marque, eq.modele].filter(Boolean).join(' ') || null,
+                        eq.prochainEtalonnage
+                          ? `Prochain : ${new Date(eq.prochainEtalonnage).toLocaleDateString('fr-FR')}`
+                          : 'Aucune vérification',
+                      ].filter(Boolean).join(' · ')}
                     </p>
                   )}
                 </div>

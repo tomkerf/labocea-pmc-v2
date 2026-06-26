@@ -53,7 +53,7 @@ export default function AppLayout() {
         </header>
 
         {/* Pages avec transition */}
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pb-[74px] md:pb-0">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto md:pb-0" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
           <AnimatePresence mode="wait">
             <m.div
               key={pathname}
@@ -61,7 +61,7 @@ export default function AppLayout() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="h-full"
+              className="min-h-full"
             >
               <ErrorBoundary key={pathname}>
                 <Outlet />

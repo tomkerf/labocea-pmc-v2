@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText, Sparkles, FlaskConical } from 'lucide-react'
 import { m } from 'framer-motion'
+import { COLORS } from '@/lib/constants'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
@@ -9,7 +10,6 @@ import UserAvatar from '@/components/ui/UserAvatar'
 import BugReportModal from '@/components/ui/BugReportModal'
 import SyncBadge from '@/components/ui/SyncBadge'
 import { useChangelogState } from '@/components/ui/ChangelogModal'
-import { COLORS } from '@/lib/constants'
 
 
 interface NavItem {
@@ -25,6 +25,7 @@ interface NavSection {
   title: string
   items: NavItem[]
 }
+
 
 export default function Sidebar() {
   const { clients } = useMissionsStore()
@@ -107,11 +108,11 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-3 flex flex-col gap-4">
+      <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-3 flex flex-col gap-4" style={{ scrollbarWidth: 'none' }}>
         {sections.map((section) => (
           <div key={section.title} className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wider px-3 mb-1.5 block select-none"
-              style={{ color: 'var(--color-text-secondary)', opacity: 0.8 }}>
+            <span className="text-[10px] font-semibold uppercase tracking-widest px-3 mb-1.5 block select-none"
+              style={{ color: COLORS.TEXT_SECONDARY, opacity: 0.5 }}>
               {section.title}
             </span>
             {section.items.map(({ to, icon: Icon, label, end, badge, isAccount }) => (
@@ -119,10 +120,11 @@ export default function Sidebar() {
                 key={to}
                 to={to}
                 end={end}
-                className="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
+                className="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm"
                 style={({ isActive }) => ({
                   color: isActive ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
-                  fontWeight: isActive ? 500 : 400,
+                  fontWeight: isActive ? 600 : 400,
+                  transition: 'color 0.2s cubic-bezier(0.4,0,0.2,1)',
                 })}
               >
                 {({ isActive }) => (
@@ -135,6 +137,7 @@ export default function Sidebar() {
                         transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                       />
                     )}
+
                     {isAccount ? (
                       <UserAvatar
                         initiales={appUser?.initiales}
@@ -143,7 +146,7 @@ export default function Sidebar() {
                         fontSize={8}
                       />
                     ) : Icon ? (
-                      <Icon size={17} strokeWidth={1.8} />
+                      <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} />
                     ) : null}
                     <span className="flex-1 z-10 truncate">{label}</span>
                     {badge && overdueCount > 0 && (
@@ -161,7 +164,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Sync badge + Bouton signalement bug */}
-      <div className="shrink-0 px-3 pb-4 flex flex-col gap-1">
+      <div className="shrink-0 px-3 pb-4 flex flex-col gap-1" style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: 12 }}>
         <div className="flex items-center gap-2 px-3 py-1.5">
           <SyncBadge />
         </div>

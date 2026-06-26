@@ -264,7 +264,7 @@ export default function MaintenancesPage() {
               <button type="button"
                 key={m.id}
                 onClick={() => navigate(`/maintenances/${m.id}`)}
-                className={`w-full text-left rounded-xl px-4 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-3'}`}
+                className={`w-full text-left rounded-xl px-4 flex items-center gap-4 transition-colors relative cursor-pointer active:opacity-90 ${compact ? 'py-2' : 'py-2.5'}`}
                 style={{
                   background: COLORS.BG_SECONDARY,
                   border: '1px solid var(--color-border-subtle)',
@@ -275,9 +275,9 @@ export default function MaintenancesPage() {
               >
                 {/* Icône type */}
                 {!compact && (
-                  <div className="size-11 rounded-full flex items-center justify-center shrink-0"
+                  <div className="size-9 rounded-full flex items-center justify-center shrink-0"
                     style={{ background: typeCfg.bg }}>
-                    <TypeIcon size={18} strokeWidth={1.8} color={typeCfg.color} />
+                    <TypeIcon size={15} strokeWidth={1.8} color={typeCfg.color} />
                   </div>
                 )}
                 {compact && (
@@ -292,14 +292,9 @@ export default function MaintenancesPage() {
                   <p className="text-sm font-semibold truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
                     {m.equipementNom || <span style={{ color: 'var(--color-text-tertiary)' }} className="font-sans">Équipement non défini</span>}
                   </p>
-                  {!compact && m.description && (
-                    <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-                      {m.description}
-                    </p>
-                  )}
                   {!compact && (
-                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                      {[typeCfg.label, date].filter(Boolean).join(' · ')}
+                    <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+                      {[m.description || null, typeCfg.label, date].filter(Boolean).join(' · ')}
                     </p>
                   )}
                 </div>

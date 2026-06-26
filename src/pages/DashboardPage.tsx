@@ -245,9 +245,9 @@ export default function DashboardPage() {
             transition={{ duration: 0.15 }}
             className="space-y-6"
           >
-            {/* KPIs — grille sur desktop, scroll horizontal sur mobile */}
-            <div className="-mx-6 px-6 md:mx-0 md:px-0 flex overflow-x-auto gap-3 pb-1 md:grid md:grid-cols-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div className="min-w-[140px] md:min-w-0 flex-shrink-0 md:flex-shrink">
+            {/* KPIs — grille 2×2 mobile, 4 colonnes desktop */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div>
                 <StatCard
                   value={missionsCeMois}
                   label="Missions ce mois"
@@ -256,7 +256,7 @@ export default function DashboardPage() {
                   onClick={() => navigate('/missions')}
                 />
               </div>
-              <div className="min-w-[140px] md:min-w-0 flex-shrink-0 md:flex-shrink">
+              <div>
                 <StatCard
                   value={rapportsAFaireMoi.length}
                   label="Rapports à rédiger"
@@ -266,7 +266,7 @@ export default function DashboardPage() {
                   onClick={() => navigate('/rapports')}
                 />
               </div>
-              <div className="min-w-[140px] md:min-w-0 flex-shrink-0 md:flex-shrink">
+              <div>
                 <StatCard
                   value={conformitePct !== null ? `${conformitePct}%` : '—'}
                   label="Conformité métrologie"
@@ -276,7 +276,7 @@ export default function DashboardPage() {
                   onClick={() => navigate('/metrologie')}
                 />
               </div>
-              <div className="min-w-[140px] md:min-w-0 flex-shrink-0 md:flex-shrink">
+              <div>
                 <StatCard
                   value={aCalibrrer}
                   label="À calibrer (30j)"

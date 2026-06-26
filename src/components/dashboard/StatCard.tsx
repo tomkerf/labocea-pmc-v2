@@ -29,14 +29,14 @@ export function StatCard({ value, label, sub, accent, warning, danger, onClick }
       whileTap={onClick ? { scale: 0.98 } : {}}
       transition={{ type: 'spring', stiffness: 350, damping: 25 }}
       onClick={onClick}
-      className={`rounded-xl p-6 select-none ${onClick ? 'cursor-pointer' : ''}`}
+      className={`rounded-xl p-4 select-none ${onClick ? 'cursor-pointer' : ''}`}
       style={{
         background: gradient,
         border: '1px solid var(--color-border-subtle)',
         boxShadow: 'var(--shadow-card)',
       }}
     >
-      <p className="text-[11px] font-semibold uppercase mb-2" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.08em' }}>{label}</p>
+      <p className="text-[10px] font-semibold uppercase mb-2 leading-tight" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.08em' }}>{label}</p>
       <p className="text-[28px] font-bold leading-none mb-2" style={{ color, letterSpacing: '-0.03em' }}>{value}</p>
       {sub && <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{sub}</p>}
     </m.div>

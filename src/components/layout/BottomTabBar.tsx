@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, CalendarDays, ClipboardList, Wrench, MoreHorizontal } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, ClipboardList, Wrench, LayoutGrid } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { COLORS } from '@/lib/constants'
@@ -34,7 +34,7 @@ export default function BottomTabBar() {
     { to: '/planning',  key: '/planning',  label: 'Planning', icon: CalendarDays    },
     { to: '/missions',  key: '/missions',  label: 'Missions', icon: ClipboardList,  badge: overdueCount || undefined },
     { to: '/materiel',  key: '/materiel',  label: 'Matériel', icon: Wrench          },
-    { to: '/plus',      key: '/plus',      label: 'Plus',     icon: MoreHorizontal  },
+    { to: '/plus',      key: '/plus',      label: 'Menu',     icon: LayoutGrid      },
   ]
 
   return (
@@ -42,10 +42,11 @@ export default function BottomTabBar() {
       className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex"
       style={{
         height: 80,
-        background: 'rgba(248,248,250,0.82)',
+        background: 'rgba(248,248,250,0.92)',
         backdropFilter: 'var(--glass-bar)',
         WebkitBackdropFilter: 'var(--glass-bar)',
         borderTop: '1px solid var(--color-border-subtle)',
+        boxShadow: '0 -1px 0 rgba(0,0,0,0.04), 0 -8px 24px rgba(0,0,0,0.05)',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
     >
@@ -55,21 +56,31 @@ export default function BottomTabBar() {
           <NavLink
             key={to}
             to={to}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 pt-2"
-            style={{ color: active ? COLORS.ACCENT : INACTIVE, textDecoration: 'none' }}
+            className="flex-1 flex flex-col items-center justify-center gap-0.5 pt-1"
+            style={{
+              color: active ? COLORS.ACCENT : INACTIVE,
+              textDecoration: 'none',
+              transition: 'color 0.2s cubic-bezier(0.4,0,0.2,1)',
+            }}
           >
-            <div className="relative">
-              <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
+            <div
+              className="relative flex items-center justify-center rounded-xl px-4 py-1"
+              style={{
+                background: active ? `${COLORS.ACCENT}18` : 'transparent',
+                transition: 'background 0.2s cubic-bezier(0.4,0,0.2,1)',
+              }}
+            >
+              <Icon size={22} strokeWidth={active ? 2.2 : 1.6} />
               {badge !== undefined && (
                 <span
-                  className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center"
+                  className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center"
                   style={{ background: COLORS.DANGER, color: 'white' }}
                 >
                   {badge > 99 ? '99+' : badge}
                 </span>
               )}
             </div>
-            <span className="text-[10px] font-semibold">{label}</span>
+            <span className={`text-[10px] ${active ? 'font-semibold' : 'font-medium'}`}>{label}</span>
           </NavLink>
         )
       })}
