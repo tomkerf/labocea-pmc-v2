@@ -2,6 +2,46 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 143 — Density pass, KPI 2×2 et polish navbar
+**26 juin 2026**
+
+### Ce qui a été fait
+
+**Density pass listes (EquipementCard, MetrologiePage, MaintenancesPage)**
+- Padding, taille icônes et infos secondaires compactés sur les trois composants de liste
+- Infos secondaires collapsées sur une seule ligne tronquée
+- Variable `iconSize` inutilisée supprimée (TS6133)
+
+**StatCard — fix labels KPI 2×2 dashboard**
+- Padding réduit de `p-6` → `p-4`
+- Label réduit de `text-[11px]` → `text-[10px]` avec `leading-tight`
+- Résultat : labels "MISSIONS CE MOIS", "CONFORMITÉ MÉTROLOGIE" etc. ne wrappent plus
+
+**AppLayout — safe area iOS**
+- `paddingBottom` du conteneur scroll : `calc(80px + env(safe-area-inset-bottom, 0px))`
+
+**BottomTabBar — polish navbar mobile**
+- Onglet "Plus" (MoreHorizontal) → "Menu" (LayoutGrid) — plus explicite sur le contenu
+- Pill bleue translucide (`accent + 10% opacity`) sous l'icône active, remplace la barre horizontale
+- Shadow douce vers le haut (`0 -8px 24px rgba(0,0,0,0.05)`)
+- Transitions `cubic-bezier(0.4,0,0.2,1)` sur couleur et fond
+- Icônes inactives : `strokeWidth` 1.6 vs 2.2 actif pour creuser l'écart visuel
+- Labels : `font-medium` inactif, `font-semibold` actif
+
+**Sidebar — polish desktop**
+- Dark sidebar testée et revertée (trop éloigné de l'identité visuelle)
+- Labels de section : `tracking-widest` + `opacity: 0.5` (plus discrets)
+- `scrollbar-width: none` sur le nav
+- Séparateur `border-top` ajouté au-dessus des boutons du bas
+- Barre verticale accent supprimée (visuellement gênante)
+
+### Décisions
+- Dark sidebar abandonnée — trop loin du design actuel iOS/Apple
+
+### Prochaines étapes
+- Tester photo rapide dashboard en conditions réelles
+- Blocages prod : rôles Firestore 🔴, accord DSIN 🔴
+
 ## Session 141 — En-têtes responsives mobiles
 **24 juin 2026**
 

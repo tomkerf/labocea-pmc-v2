@@ -348,6 +348,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-23 | Mise en valeur Matériel ✅ | Mise en valeur du modèle et du type du matériel sur la ligne principale, marque en retrait entre parenthèses. |
 | 2026-06-24 | WCAG + Photo dashboard + Fix monospace ✅ | --color-text-tertiary WCAG AA (2.21→4.6:1), bouton photo rapide inline sur lignes sampling du dashboard, suppression font-mono parasite (5 composants). |
 | 2026-06-24 | En-têtes responsives mobiles ✅ | Alignement vertical automatique et boutons adaptatifs sur mobile (390px et moins) pour éviter tout chevauchement ou débordement sur 7 fichiers. |
+| 2026-06-26 | Density pass + polish navbar ✅ | Density pass EquipementCard/Métrologie/Maintenances, StatCard padding+font fix (KPI 2×2 sans wrapping), safe area iOS, navbar mobile : pill active + shadow + cubic-bezier + Menu/LayoutGrid, sidebar : labels discrets + scrollbar masquée. |
 
 
 
