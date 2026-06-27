@@ -1,7 +1,7 @@
 import { useState, useReducer } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, ExternalLink, Trash2, ChevronRight } from 'lucide-react'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, selectRole } from '@/stores/authStore'
 import type { PlanningEvent, TechOption } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
 import { useEquipementsStore } from '@/stores/equipementsStore'
@@ -31,6 +31,7 @@ export default function EventDetailModal({
 }: EventDetailModalProps) {
   const navigate = useNavigate()
   const connectedInitiales = useAuthStore(s => s.appUser?.initiales) ?? ''
+  const role               = useAuthStore(selectRole)
   const { equipements } = useEquipementsStore()
 
   const [state, dispatch] = useReducer(modalReducer, {
@@ -207,7 +208,7 @@ export default function EventDetailModal({
             </button>
           )}
 
-          {isEvt && (
+          {isEvt && role === 'admin' && (
             <button type="button" onClick={() => { onDelete(event); onClose() }}
               className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full mt-1"
               style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>

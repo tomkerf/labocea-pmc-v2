@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { LazyMotion, domAnimation } from 'framer-motion'
+import * as Sentry from '@sentry/react'
 import { useAuthInit } from '@/hooks/useAuth'
 import RequireAuth from '@/components/layout/RequireAuth'
 import RequireAdmin from '@/components/layout/RequireAdmin'
@@ -37,6 +38,18 @@ const AidePage              = lazy(() => import('@/pages/AidePage'))
 const VisiteFormPage        = lazy(() => import('@/pages/VisiteFormPage'))
 const TodosPage             = lazy(() => import('@/pages/TodosPage'))
 const PlusPage              = lazy(() => import('@/pages/PlusPage'))
+
+function AppError() {
+  return (
+    <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-danger)' }}>
+      <p style={{ fontWeight: 600 }}>Une erreur inattendue s'est produite.</p>
+      <button type="button" onClick={() => location.reload()}
+        style={{ marginTop: '1rem', padding: '0.5rem 1.25rem', borderRadius: '0.5rem', cursor: 'pointer', border: '1px solid var(--color-border)' }}>
+        Recharger
+      </button>
+    </div>
+  )
+}
 
 /** Spinner affiché pendant le chargement d'un chunk */
 function PageSpinner() {
@@ -146,10 +159,12 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <LazyMotion features={domAnimation}>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </LazyMotion>
+    <Sentry.ErrorBoundary fallback={<AppError />}>
+      <LazyMotion features={domAnimation}>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </LazyMotion>
+    </Sentry.ErrorBoundary>
   )
 }

@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore'
+import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import type { Equipement } from '@/types'
@@ -10,7 +10,7 @@ export function useEquipementsListener() {
   const { setEquipements, setError } = useEquipementsStore()
 
   useEffect(() => {
-    const q = query(collection(db, COLLECTIONS.EQUIPEMENTS), orderBy('nom'))
+    const q = query(collection(db, COLLECTIONS.EQUIPEMENTS), orderBy('nom'), limit(200))
     const unsub = onSnapshot(
       q,
       (snap) => {

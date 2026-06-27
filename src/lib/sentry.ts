@@ -8,6 +8,7 @@ export function initSentry() {
     dsn,
     environment: import.meta.env.MODE,
     release: `pmc-v2@${import.meta.env.VITE_APP_VERSION ?? 'unknown'}`,
+    integrations: [Sentry.browserTracingIntegration()],
     tracesSampleRate: 0.1,
     sendDefaultPii: false,
     ignoreErrors: [

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { Plus, Printer, Pencil, Trash2, FlaskConical } from 'lucide-react'
 import { useTuyauxListener, saveTuyau, deleteTuyau } from '@/hooks/useTuyaux'
 import { useTuyauxStore } from '@/stores/tuyauxStore'
-import { useAuthStore, selectUid } from '@/stores/authStore'
+import { useAuthStore, selectUid, selectRole } from '@/stores/authStore'
 import { toast } from '@/stores/toastStore'
 import { matColor, fmtDate, printLabel } from '@/lib/tuyauxUtils'
 import TuyauForm, { Row, Tag } from '@/components/tuyaux/TuyauForm'
@@ -23,7 +23,8 @@ const chipStyle = (active: boolean, color?: string) => ({
 export default function TuyauxPage() {
   useTuyauxListener()
   const { tuyaux, loading } = useTuyauxStore()
-  const uid = useAuthStore(selectUid)
+  const uid  = useAuthStore(selectUid)
+  const role = useAuthStore(selectRole)
 
   const [filterYear, setFilterYear] = useState<string>('all')
   const [filterMat,  setFilterMat]  = useState<string>('all')
@@ -245,11 +246,13 @@ export default function TuyauxPage() {
                         style={{ background: COLORS.BG_TERTIARY, border: '1px solid var(--color-border)', color: COLORS.TEXT_SECONDARY, borderRadius: 'var(--radius-sm)' }}>
                         <Printer size={12} /> Étiquette
                       </button>
-                      <button type="button" onClick={() => setConfirmDel(t.id)}
-                        className="flex items-center justify-center px-2.5 py-1.5"
-                        style={{ background: 'none', border: '1px solid var(--color-border)', color: 'var(--color-text-tertiary)', borderRadius: 'var(--radius-sm)' }}>
-                        <Trash2 size={12} />
-                      </button>
+                      {role === 'admin' && (
+                        <button type="button" onClick={() => setConfirmDel(t.id)}
+                          className="flex items-center justify-center px-2.5 py-1.5"
+                          style={{ background: 'none', border: '1px solid var(--color-border)', color: 'var(--color-text-tertiary)', borderRadius: 'var(--radius-sm)' }}>
+                          <Trash2 size={12} />
+                        </button>
+                      )}
                     </div>
 
                     {confirmDel === t.id && (

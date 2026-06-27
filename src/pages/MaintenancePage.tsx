@@ -6,6 +6,7 @@ import { saveMaintenance } from '@/services/maintenanceService'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useDocumentData } from '@/hooks/useDocumentData'
+import { useAuthStore, selectRole } from '@/stores/authStore'
 import type { Maintenance, TypeMaintenance, StatutMaintenance } from '@/types'
 import { COLLECTIONS, COLORS } from '@/lib/constants'
 
@@ -29,6 +30,7 @@ export default function MaintenancePage() {
 
   useEquipementsListener()
   const { equipements } = useEquipementsStore()
+  const role = useAuthStore(selectRole)
 
   const { data: maintenance, loading, saving, triggerSave, handleDelete, confirmDelete, requestDelete, cancelDelete } = useDocumentData<Maintenance>({
     collection: 'maintenances',
@@ -87,7 +89,7 @@ export default function MaintenancePage() {
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {saving && <span className="text-xs mr-1" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
-          {confirmDelete ? (
+          {role === 'admin' && (confirmDelete ? (
             <div className="flex items-center gap-1.5">
               <button type="button" onClick={handleDelete} className="text-sm px-3 py-1.5 rounded-lg font-medium"
                 style={{ background: COLORS.DANGER, color: 'white' }}>Supprimer</button>
@@ -99,7 +101,7 @@ export default function MaintenancePage() {
               style={{ color: COLORS.DANGER, background: 'var(--color-danger-light)' }}>
               <Trash2 size={16} />
             </button>
-          )}
+          ))}
         </div>
       </div>
 
