@@ -131,7 +131,6 @@ function NewVerificationForm() {
 
 export default function VerificationPage() {
   const { verificationId } = useParams<{ verificationId: string }>()
-  if (verificationId === 'nouveau') return <NewVerificationForm />
   const navigate = useNavigate()
 
   useEquipementsListener()
@@ -151,6 +150,8 @@ export default function VerificationPage() {
     },
     deleteRedirect: '/metrologie',
   })
+
+  if (verificationId === 'nouveau') return <NewVerificationForm />
 
   function update(field: keyof Verification, value: unknown) {
     if (!verification) return
