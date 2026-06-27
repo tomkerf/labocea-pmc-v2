@@ -21,16 +21,16 @@
   --color-accent-hover:  #41618D;
   --color-accent-light:  rgba(52, 82, 122, 0.09);
 
-  /* Statuts */
-  --color-success:       #1F9D4D; /* Green (OK) */
-  --color-success-light: rgba(31, 157, 77, 0.1);
-  --color-success-text:  #1F9D4D;
-  --color-warning:       #D97706; /* Amber */
-  --color-warning-light: rgba(217, 119, 6, 0.1);
-  --color-warning-text:  #D97706;
-  --color-danger:        #E53E3E; /* Red */
-  --color-danger-light:  rgba(229, 62, 62, 0.1);
-  --color-danger-text:   #E53E3E;
+  /* Statuts — couleurs système iOS */
+  --color-success:       #34C759; /* iOS Green */
+  --color-success-light: rgba(52, 199, 89, 0.12);
+  --color-success-text:  #248A3D; /* foncé pour lisibilité texte */
+  --color-warning:       #FF9F0A; /* iOS Orange */
+  --color-warning-light: rgba(255, 159, 10, 0.12);
+  --color-warning-text:  #C47600; /* foncé pour lisibilité texte */
+  --color-danger:        #FF3B30; /* iOS Red */
+  --color-danger-light:  rgba(255, 59, 48, 0.12);
+  --color-danger-text:   #C0392B; /* foncé pour lisibilité texte */
   --color-neutral:       #8E8E93;
   --color-meeting:       #7C3AED; /* Violet */
 
