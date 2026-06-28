@@ -48,6 +48,7 @@ export function PointRejetManager() {
       {/* nouveau point */}
       <div className="flex gap-2">
         <input value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Nom du point"
+          aria-label="Nom du point de rejet"
           className="flex-1 px-3 py-2 rounded-lg text-sm" style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }} />
         <button type="button" onClick={addPoint} className="px-3 rounded-lg" style={{ background: COLORS.ACCENT, color: 'white' }}>
           <Plus size={18} />
@@ -72,17 +73,21 @@ export function PointRejetManager() {
       {/* ajout bilan */}
       <div className="flex flex-col gap-2 pt-2" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
         <select value={selId} onChange={(e) => setSelId(e.target.value)}
+          aria-label="Point de rejet à enrichir"
           className="px-3 py-2 rounded-lg text-sm" style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }}>
           <option value="">Ajouter un bilan à…</option>
           {pointsRejet.map((p) => <option key={p.id} value={p.id}>{p.nom}</option>)}
         </select>
         <div className="flex gap-2">
           <input type="date" value={bilan.date} onChange={(e) => setBilan({ ...bilan, date: e.target.value })}
+            aria-label="Date du bilan"
             className="flex-1 px-2 py-2 rounded-lg text-sm" style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }} />
           <input type="number" value={bilan.pluieMm} onChange={(e) => setBilan({ ...bilan, pluieMm: Number(e.target.value) })}
-            placeholder="mm" className="w-20 px-2 py-2 rounded-lg text-sm" style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }} />
+            placeholder="mm" aria-label="Pluviométrie en mm"
+            className="w-20 px-2 py-2 rounded-lg text-sm" style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }} />
           <input type="number" value={bilan.volumeM3} onChange={(e) => setBilan({ ...bilan, volumeM3: Number(e.target.value) })}
-            placeholder="m³" className="w-24 px-2 py-2 rounded-lg text-sm" style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }} />
+            placeholder="m³" aria-label="Volume en m³"
+            className="w-24 px-2 py-2 rounded-lg text-sm" style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }} />
           <button type="button" onClick={addBilan} className="px-3 rounded-lg" style={{ background: COLORS.ACCENT, color: 'white' }}>
             <Plus size={18} />
           </button>

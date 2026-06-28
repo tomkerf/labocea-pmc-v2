@@ -5,6 +5,7 @@ import { parseBilansCsv, type ParsedBilanRow, type CsvParseError } from '@/lib/p
 import { importBilans } from '@/services/pointsRejetService'
 import { usePointsRejetStore } from '@/stores/pointsRejetStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
+import { toast } from '@/stores/toastStore'
 
 interface Props {
   onClose: () => void
@@ -34,10 +35,10 @@ export function BilanImportModal({ onClose }: Props) {
     setImporting(true)
     try {
       const r = await importBilans(rows, pointsRejet, uid)
-      alert(`Import terminé : ${r.created} point(s) créé(s), ${r.updated} enrichi(s), ${r.added} bilan(s) ajouté(s).`)
+      toast.success(`Import terminé : ${r.created} point(s) créé(s), ${r.updated} enrichi(s), ${r.added} bilan(s) ajouté(s).`)
       onClose()
     } catch (err) {
-      alert(`Échec de l'import : ${(err as Error).message}`)
+      toast.error(`Échec de l'import : ${(err as Error).message}`)
     } finally {
       setImporting(false)
     }
@@ -61,7 +62,7 @@ export function BilanImportModal({ onClose }: Props) {
           Format : <code>point,date,pluie_mm,volume_m3</code> — date au format AAAA-MM-JJ.
         </p>
 
-        <input type="file" accept=".csv,text/csv" onChange={handleFile} className="mb-4 text-sm" />
+        <input type="file" accept=".csv,text/csv" onChange={handleFile} className="mb-4 text-sm" aria-label="Fichier CSV" />
 
         {parsed && (
           <div className="text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>
