@@ -434,3 +434,22 @@ export interface Todo {
   createdAt: Timestamp
   updatedAt: Timestamp
 }
+
+// --- Points de rejet ---
+
+export interface BilanRejet {
+  date: string      // 'YYYY-MM-DD'
+  pluieMm: number   // pluviométrie 24h (mm)
+  volumeM3: number  // volume total 24h mesuré (m³)
+}
+
+export interface PointRejet {
+  id: string
+  nom: string
+  code?: string
+  bilans: BilanRejet[]
+  createdBy?: string
+  updatedBy?: string
+  createdAt?: Timestamp
+  updatedAt?: Timestamp
+}

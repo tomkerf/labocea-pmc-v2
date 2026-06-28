@@ -32,6 +32,7 @@ const DemandesPage      = lazy(() => import('@/pages/DemandesPage'))
 const ComptePage        = lazy(() => import('@/pages/ComptePage'))
 const AdminPage             = lazy(() => import('@/pages/AdminPage'))
 const AsservissementPage    = lazy(() => import('@/pages/AsservissementPage'))
+const EstimationVolumePage  = lazy(() => import('@/pages/EstimationVolumePage'))
 const InfosPage             = lazy(() => import('@/pages/InfosPage'))
 const TuyauxPage            = lazy(() => import('@/pages/TuyauxPage'))
 const AidePage              = lazy(() => import('@/pages/AidePage'))
@@ -136,6 +137,9 @@ function AppRoutes() {
         } />
         <Route path="/outils/asservissement" element={
           <Suspense fallback={<PageSpinner />}><AsservissementPage /></Suspense>
+        } />
+        <Route path="/outils/estimation-volume" element={
+          <Suspense fallback={<PageSpinner />}><EstimationVolumePage /></Suspense>
         } />
         <Route path="/outils/tuyaux" element={
           <Suspense fallback={<PageSpinner />}><TuyauxPage /></Suspense>

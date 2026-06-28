@@ -1,5 +1,5 @@
 import { useState, useEffect, useReducer } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
 import { COLORS } from '@/lib/constants'
 import { calcResult, PRESETS_V24H, PRESETS_FLACON } from '@/components/asservissement/asservissementConfig'
@@ -32,8 +32,14 @@ function calcReducer(state: CalcState, action: CalcAction): CalcState {
 
 export default function AsservissementPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const v24hParam = searchParams.get('v24h')
 
-  const [calc, dispatch] = useReducer(calcReducer, initialCalcState)
+  const [calc, dispatch] = useReducer(
+    calcReducer,
+    initialCalcState,
+    (s): CalcState => (v24hParam && Number.isFinite(Number(v24hParam)) ? { ...s, v24h: v24hParam } : s),
+  )
   const { v24h, vFlacon, vUnit, mode, vEntre } = calc
   const [copied, setCopied] = useState(false)
 

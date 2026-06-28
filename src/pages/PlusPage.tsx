@@ -4,7 +4,7 @@ import type { LucideIcon } from 'lucide-react'
 import {
   ListTodo, FileText, Gauge, Hammer,
   FlaskConical, Pipette, BookOpen, HelpCircle,
-  ShieldAlert, ChevronRight, Inbox,
+  ShieldAlert, ChevronRight, Inbox, CloudRain,
 } from 'lucide-react'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import { useTodosStore } from '@/stores/todosStore'
@@ -58,8 +58,9 @@ export default function PlusPage() {
       {
         title: 'Outils terrain',
         items: [
-          { to: '/outils/asservissement', icon: FlaskConical, label: 'Asservissement'          },
-          { to: '/outils/tuyaux',         icon: Pipette,      label: 'Tuyaux de prélèvement'  },
+          { to: '/outils/asservissement',    icon: FlaskConical, label: 'Asservissement'          },
+          { to: '/outils/estimation-volume', icon: CloudRain,    label: 'Estimation volume'       },
+          { to: '/outils/tuyaux',            icon: Pipette,      label: 'Tuyaux de prélèvement'  },
           { to: '/infos',                 icon: BookOpen,     label: 'Infos terrain'           },
           { to: '/demandes',              icon: Inbox,        label: 'Demandes'                },
         ]
