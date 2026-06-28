@@ -98,6 +98,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ── points-rejet ──────────────────────────────────────────
+    match /points-rejet/{pointId} {
+      allow read, create: if isAuthenticated();
+      allow update: if isAuthenticated() && immutableOn(['createdBy']);
+      allow delete: if isAdmin();
+    }
+
     // ── bugs ──────────────────────────────────────────────────
     // Création : tout utilisateur authentifié.
     // Lecture/suppression : admin uniquement.
