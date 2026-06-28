@@ -11,6 +11,7 @@ export const COLLECTIONS = {
   DEMANDES: 'demandes',
   BUGS: 'bugs',
   TUYAUX: 'tuyaux',
+  POINTS_REJET: 'points-rejet',
 } as const;
 
 export const Z_INDEX = {
