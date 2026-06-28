@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { m, AnimatePresence } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 import {
-  LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, BookOpen, ShieldAlert, X, FlaskConical, Pipette, HelpCircle, Gauge, Hammer, FileText,
+  LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, BookOpen, ShieldAlert, X, FlaskConical, Pipette, HelpCircle, Gauge, Hammer, FileText, CloudRain,
 } from 'lucide-react'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import UserAvatar from '@/components/ui/UserAvatar'
@@ -62,6 +62,7 @@ export default function MobileDrawer({ open, onClose }: Props) {
       title: 'Outils & Support',
       items: [
         { to: '/outils/asservissement', icon: FlaskConical, label: 'Asservissement'   },
+        { to: '/outils/estimation-volume', icon: CloudRain, label: 'Estimation volume' },
         { to: '/outils/tuyaux',        icon: Pipette,      label: 'Tuyaux'             },
         { to: '/infos',                icon: BookOpen,        label: 'Infos terrain'       },
         { to: '/aide',                 icon: HelpCircle,  label: 'Mode d\'emploi'       },
