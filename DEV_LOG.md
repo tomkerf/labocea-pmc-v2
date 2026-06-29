@@ -37,9 +37,22 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 - Mergé sur `main` local + déployé sur **staging** (labocea-pmc-v2-dev). **Non poussé sur origin** au moment de la rédaction.
 - ⚠️ Ne PAS déployer en prod avant le chantier rôles Firestore.
 
+### Simplification UX (suite, 29 juin)
+Premier retour utilisateur : « je ne comprends rien à l'outil ». Tout était mélangé sur un écran et la partie estimation était invisible tant qu'il n'y avait pas de données.
+- **Deux onglets** dans `EstimationVolumePage` : **Estimer** (par défaut, le quotidien) et **Données** (préparation). Toggle segmenté façon Auto/Manuel de l'asservissement.
+- Onglet **Estimer** épuré : phrase d'explication, **état vide** explicite (« ajoutez d'abord vos bilans » → bouton vers Données), puis sélecteur + pluie annoncée + résultat. La gestion de données n'y apparaît plus.
+- Onglet **Données** : import CSV en bouton visible (plus l'icône orpheline du header), création de points, ajout de bilan avec **libellés visibles** Date / Pluie (mm) / Volume (m³) + phrase d'aide.
+- Réorganisation UI pure : aucune modif de logique, données, service ni tests (163/163 toujours verts).
+- Spec/plan : `docs/superpowers/specs/2026-06-29-...` et `docs/superpowers/plans/2026-06-29-...`.
+
+### Vérifications & déploiement
+- Règles Firestore `points-rejet` **déployées** sur le projet `labocea-pmc` (`firebase deploy --only firestore:rules`) — sans ça l'outil tombait dans le deny par défaut. ⚠️ Les règles ne sont PAS déployées par `deploy-dev.sh`.
+- Constat important : le « blocage rôles Firestore » du premortem était **déjà résolu** (règles durcies session 130, champs immuables, backup). Mémoire mise à jour. Blocages prod restants = **organisationnels** (DSIN, bascule Brest, run book, quota Firebase).
+- Staging déployé + `origin/main` poussé.
+
 ### Prochaines étapes
-- **Backfill de l'historique via import CSV** (`point,date,pluie_mm,volume_m3`) — l'outil est vide tant que les données ne sont pas importées.
-- Chantier prod : **rôles Firestore 🔴**, accord DSIN 🔴.
+- **Backfill de l'historique via import CSV** (`point,date,pluie_mm,volume_m3`) — l'outil reste vide tant que les données ne sont pas importées.
+- Prod : uniquement des points **organisationnels** (DSIN, plan de bascule Brest).
 
 ## Session 143 — Density pass, KPI 2×2 et polish navbar
 **26 juin 2026**

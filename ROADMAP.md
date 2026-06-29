@@ -350,6 +350,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-06-24 | En-têtes responsives mobiles ✅ | Alignement vertical automatique et boutons adaptatifs sur mobile (390px et moins) pour éviter tout chevauchement ou débordement sur 7 fichiers. |
 | 2026-06-26 | Density pass + polish navbar ✅ | Density pass EquipementCard/Métrologie/Maintenances, StatCard padding+font fix (KPI 2×2 sans wrapping), safe area iOS, navbar mobile : pill active + shadow + cubic-bezier + Menu/LayoutGrid, sidebar : labels discrets + scrollbar masquée. |
 | 2026-06-29 | Outil Estimation volume rejet ✅ | Nouvel outil `/outils/estimation-volume` : estimation du volume 24h sur point de rejet en temps de pluie par régression volume↔pluviométrie (lib pure + 14 tests), collection Firestore `points-rejet`, import CSV avec aperçu, nuage de points SVG, branchement asservissement (`?v24h=`), entrées sidebar/drawer/Plus. Mergé main + staging. Reste : backfill CSV historique. |
+| 2026-06-29 | Estimation volume — simplification UX ✅ | Suite au retour « je ne comprends rien » : refonte en deux onglets Estimer (épuré, défaut) / Données (préparation), état vide guidé, libellés clairs Date/Pluie/Volume, import CSV en bouton visible. Réorga UI pure (0 modif logique/tests). Règles Firestore points-rejet déployées. Staging + push. |
 
 
 
