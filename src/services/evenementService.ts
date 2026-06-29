@@ -1,4 +1,4 @@
-import { collection, doc, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, doc, addDoc, deleteDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { trackWrite } from '@/lib/trackWrite'
 import type { TypeEvenement } from '@/types'
@@ -31,4 +31,12 @@ export async function createEvenement(
 
 export async function deleteEvenement(id: string): Promise<void> {
   await trackWrite(deleteDoc(doc(db, COLLECTIONS.EVENEMENTS, id)))
+}
+
+/** Décale un événement à une nouvelle date (préserve id/createdAt). dateFin déjà recalculée par l'appelant. */
+export async function updateEvenementDate(id: string, date: string, dateFin?: string): Promise<void> {
+  await trackWrite(updateDoc(doc(db, COLLECTIONS.EVENEMENTS, id), {
+    date,
+    dateFin: dateFin || null,
+  }))
 }

@@ -16,6 +16,7 @@ import { DashboardPlanningWidget } from '@/components/dashboard/DashboardPlannin
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
 import EventDetailModal from '@/components/planning/EventDetailModal'
 import type { PlanningEvent, TechOption } from '@/lib/planningUtils'
+import { shiftDateFin } from '@/lib/planningUtils'
 import { useAuthStore, selectPrenom, selectInitiales, selectUid, selectRole } from '@/stores/authStore'
 import { updateUserProfile } from '@/services/userService'
 import { useClientsListener } from '@/hooks/useClients'
@@ -26,7 +27,7 @@ import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMetrologieStore } from '@/stores/metrologieStore'
 import { useEvenementsListener } from '@/hooks/useEvenements'
-import { deleteEvenement } from '@/services/evenementService'
+import { deleteEvenement, updateEvenementDate } from '@/services/evenementService'
 import { useEvenementsStore } from '@/stores/evenementsStore'
 import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
@@ -352,6 +353,11 @@ export default function DashboardPage() {
           techOptions={techOptions}
           onCancel={handleCancelEvent}
           onMove={handleMoveEvent}
+          onMoveEvenement={async (ev, newDate) => {
+            const data = ev.evenementData
+            if (!data || !newDate) return
+            await updateEvenementDate(data.id, newDate, shiftDateFin(data.date, newDate, data.dateFin))
+          }}
           onDelete={(ev) => { if (ev.evenementData) deleteEvenement(ev.evenementData.id) }}
           onChangeTech={async (ev, initiales_) => {
             if (!uid || !ev.clientId) return

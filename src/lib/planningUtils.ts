@@ -209,6 +209,17 @@ export function toISO(d: Date): string {
 
 export function sameDay(a: Date, b: Date): boolean { return toISO(a) === toISO(b) }
 
+/**
+ * Décale `dateFin` du même nombre de jours que le passage de `oldDate` à `newDate`
+ * (préserve la durée d'un événement multi-jours). Retourne undefined si pas de dateFin.
+ */
+export function shiftDateFin(oldDate: string, newDate: string, dateFin?: string): string | undefined {
+  if (!dateFin) return undefined
+  const MS = 86400000
+  const deltaJours = Math.round((new Date(newDate + 'T12:00:00').getTime() - new Date(oldDate + 'T12:00:00').getTime()) / MS)
+  return toISO(addDays(new Date(dateFin + 'T12:00:00'), deltaJours))
+}
+
 // ── Grilles calendrier ───────────────────────────────────────────
 
 /** Grille mensuelle 7 colonnes (lun-dim) */

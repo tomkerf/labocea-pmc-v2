@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { saveClient } from '@/services/clientService'
-import { createEvenement, deleteEvenement } from '@/services/evenementService'
-import { toISO } from '@/lib/planningUtils'
+import { createEvenement, deleteEvenement, updateEvenementDate } from '@/services/evenementService'
+import { toISO, shiftDateFin } from '@/lib/planningUtils'
 import { useToastStore } from '@/stores/toastStore'
 import type { Client, Sampling, TypeEvenement } from '@/types'
 import type { PlanningEvent, PoolItem } from '@/lib/planningUtils'
@@ -70,6 +70,19 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
       }, uid)
     } catch {
       addToast('error', 'Erreur lors du report du prélèvement')
+    } finally {
+      isPending.current = false
+    }
+  }
+
+  async function handleMoveEvenement(event: PlanningEvent, newDate: string) {
+    const data = event.evenementData
+    if (isPending.current || !newDate || !data) return
+    isPending.current = true
+    try {
+      await updateEvenementDate(data.id, newDate, shiftDateFin(data.date, newDate, data.dateFin))
+    } catch {
+      addToast('error', 'Erreur lors du déplacement de l\'événement')
     } finally {
       isPending.current = false
     }
@@ -188,6 +201,7 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
   return {
     handleCancelSampling,
     handleMoveEvent,
+    handleMoveEvenement,
     handleDeleteEvent,
     toggleRainDay,
     handleChangeTechnicien,

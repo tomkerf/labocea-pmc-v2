@@ -165,7 +165,7 @@ export default function PlanningPage() {
   })
 
   const {
-    handleCancelSampling, handleMoveEvent, handleDeleteEvent,
+    handleCancelSampling, handleMoveEvent, handleMoveEvenement, handleDeleteEvent,
     toggleRainDay, handleChangeTechnicien, handleChangeEquipements,
     handleSaveEvenement, handleValidatePool,
   } = usePlanningActions({ uid, initiales, clients, evenements, holidays })
@@ -237,7 +237,7 @@ export default function PlanningPage() {
         setDayModalInitialTab={setDayModalInitialTab} setCtxMenu={setCtxMenu}
         eventDetail={eventDetail} assignedEqIdsForDate={assignedEqIdsForDate}
         techOptions={techOptions} handleCancelSampling={handleCancelSampling}
-        handleMoveEvent={handleMoveEvent} handleDeleteEvent={handleDeleteEvent}
+        handleMoveEvent={handleMoveEvent} handleMoveEvenement={handleMoveEvenement} handleDeleteEvent={handleDeleteEvent}
         handleChangeTechnicien={handleChangeTechnicien}
         handleChangeEquipements={handleChangeEquipements} setEventDetail={setEventDetail}
         ghostDetail={ghostDetail} setGhostDetail={setGhostDetail}

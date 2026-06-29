@@ -33,6 +33,7 @@ interface PlanningModalsProps {
   techOptions:          TechOption[]
   handleCancelSampling: (event: PlanningEvent, reason: string) => Promise<void>
   handleMoveEvent:      (event: PlanningEvent, newDate: string, reason: string) => Promise<void>
+  handleMoveEvenement:  (event: PlanningEvent, newDate: string) => Promise<void>
   handleDeleteEvent:    (event: PlanningEvent) => void
   handleChangeTechnicien:   (event: PlanningEvent, initiales: string) => Promise<void>
   handleChangeEquipements:  (event: PlanningEvent, eqIds: string[]) => Promise<void>
@@ -56,7 +57,7 @@ export default function PlanningModals({
   holidays, handleValidatePool, setSelectedDay,
   ctxMenu, evenements, toggleRainDay, setDayModalInitialTab, setCtxMenu,
   eventDetail, assignedEqIdsForDate, techOptions,
-  handleCancelSampling, handleMoveEvent, handleDeleteEvent,
+  handleCancelSampling, handleMoveEvent, handleMoveEvenement, handleDeleteEvent,
   handleChangeTechnicien, handleChangeEquipements, setEventDetail,
   ghostDetail, setGhostDetail,
   dragModal, handleSaveEvenement, setDragModal,
@@ -101,6 +102,7 @@ export default function PlanningModals({
           onClose={() => setEventDetail(null)}
           onCancel={handleCancelSampling}
           onMove={handleMoveEvent}
+          onMoveEvenement={handleMoveEvenement}
           onDelete={handleDeleteEvent}
           onChangeTech={handleChangeTechnicien}
           onChangeEquipements={handleChangeEquipements}

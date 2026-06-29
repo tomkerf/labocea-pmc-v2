@@ -18,6 +18,7 @@ export interface EventDetailModalProps {
   onClose: () => void
   onCancel: (event: PlanningEvent, reason: string) => Promise<void>
   onMove: (event: PlanningEvent, newDate: string, reason: string) => Promise<void>
+  onMoveEvenement?: (event: PlanningEvent, newDate: string) => Promise<void>
   onDelete: (event: PlanningEvent) => void
   onChangeTech: (event: PlanningEvent, initiales: string) => Promise<void>
   onChangeEquipements: (event: PlanningEvent, eqIds: string[]) => Promise<void>
@@ -27,7 +28,7 @@ export interface EventDetailModalProps {
 const EMPTY_ITEMS: string[] = []
 
 export default function EventDetailModal({
-  event, dateStr, assignedEqIdsForDate = EMPTY_ITEMS, onClose, onCancel, onMove, onDelete, onChangeTech, onChangeEquipements, techOptions,
+  event, dateStr, assignedEqIdsForDate = EMPTY_ITEMS, onClose, onCancel, onMove, onMoveEvenement, onDelete, onChangeTech, onChangeEquipements, techOptions,
 }: EventDetailModalProps) {
   const navigate = useNavigate()
   const connectedInitiales = useAuthStore(s => s.appUser?.initiales) ?? ''
@@ -53,6 +54,7 @@ export default function EventDetailModal({
   const isPrelev   = event.type === 'prelevement'
   const isEvt      = event.type === 'evenement'
   const isBilan24h = event.methode === 'Composite' || event.methode === 'Automatique'
+  const isMovableEvt = isEvt && event.evenementData?.type !== 'meteo' && !!onMoveEvenement
 
   const dateLabel = new Date(dateStr + 'T12:00:00')
     .toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
@@ -60,7 +62,11 @@ export default function EventDetailModal({
   async function handleMove() {
     if (!moveDate || saving) return
     setSaving(true)
-    try { await onMove(event, moveDate, moveReason.trim()); onClose() }
+    try {
+      if (isMovableEvt) await onMoveEvenement!(event, moveDate)
+      else await onMove(event, moveDate, moveReason.trim())
+      onClose()
+    }
     finally { setSaving(false) }
   }
 
@@ -131,7 +137,7 @@ export default function EventDetailModal({
 
         {isMoving && (
           <EventDetailMovePanel moveDate={moveDate} moveReason={moveReason} saving={saving}
-            dispatch={dispatch} onConfirm={handleMove} />
+            showReason={!isMovableEvt} dispatch={dispatch} onConfirm={handleMove} />
         )}
         {isChangingTech && (
           <EventDetailTechPanel techInitiales={techInitiales} techOptions={techOptions} saving={saving}
@@ -205,6 +211,15 @@ export default function EventDetailModal({
               style={{ background: COLORS.BG_TERTIARY, color: COLORS.DANGER, border: '1px solid var(--color-border-subtle)' }}>
               <ChevronRight size={15} style={{ transform: isCanceling ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
               Retirer du calendrier
+            </button>
+          )}
+
+          {isMovableEvt && (
+            <button type="button" onClick={() => dispatch({ type: 'TOGGLE_PANEL', panel: 'moving' })}
+              className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium text-left w-full"
+              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY, border: '1px solid var(--color-border-subtle)' }}>
+              <ChevronRight size={15} style={{ transform: isMoving ? 'rotate(90deg)' : 'none', transition: 'transform 150ms' }} />
+              Déplacer à une autre date
             </button>
           )}
 

@@ -2,6 +2,27 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 145 — Déplacer un événement dans le temps
+**29 juin 2026**
+
+### Ce qui a été fait
+Retour utilisateur : le popover d'un événement (rappels/réunions/congés) n'offrait que « Supprimer », impossible de le décaler sans le recréer. Les prélèvements avaient déjà un « Déplacer à une autre date » ; on l'étend aux événements.
+- **Service** `evenementService.ts` : `updateEvenementDate(id, date, dateFin?)` (vrai `updateDoc`, préserve `id`/`createdAt`/`createdBy`).
+- **Helper pur** `shiftDateFin()` dans `planningUtils.ts` : décale `dateFin` du même delta que le début → **durée préservée** sur les événements multi-jours. 5 tests dédiés (nouveau `planningUtils.test.ts`).
+- **Handler** `handleMoveEvenement` dans `usePlanningActions.ts` (+ variante inline dans `DashboardPage`), `try/catch` + toast d'erreur.
+- **UI** : bouton « Déplacer à une autre date » sur les événements, en réutilisant `EventDetailMovePanel` (nouveau prop `showReason`, masqué pour les événements — un rappel n'a pas de motif de report). Câblage `PlanningPage` → `PlanningModals` → `EventDetailModal`.
+
+### Décisions
+- **Interaction** : bouton dans le popover (phase 1). Glisser-déposer de la pastille souhaité mais **reporté à une phase 2**.
+- **Durée** : préservée (décalage en bloc), pas de modification de durée/heure depuis ce panneau.
+- **Permission** : tout utilisateur connecté peut déplacer (la suppression reste admin-only).
+- **Exclusion** : pas de déplacement pour les événements météo (`type === 'meteo'`, gérés par toggle).
+
+### État
+- **173/173 tests** verts, build OK. Lint propre sur les fichiers touchés (l'unique erreur `set-state-in-effect` sur `PlanningPage:122` est **préexistante**, vérifié par stash).
+- Spec : `docs/superpowers/specs/2026-06-29-deplacer-evenement-design.md`.
+- Déployé sur **staging**. Pas de modification de règles Firestore (collection `evenements` déjà autorisée en update).
+
 ## Session 144 — Outil d'estimation du volume 24h sur point de rejet
 **28-29 juin 2026**
 
