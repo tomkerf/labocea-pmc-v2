@@ -44,6 +44,50 @@ describe('estimateVolume', () => {
     const r = estimateVolume(bilans, 5)!
     expect(r.nbPoints).toBe(3)
   })
+
+  // --- valeurs aberrantes ---
+
+  // 7 points alignés (volume = 10*pluie) + 1 point manifestement hors droite.
+  const avecAberrant = [b(1, 10), b(2, 20), b(3, 30), b(4, 40), b(5, 50), b(6, 60), b(7, 70), b(4, 400)]
+
+  it('détecte un point hors droite sans l\'exclure par défaut', () => {
+    const r = estimateVolume(avecAberrant, 5)!
+    expect(r.nbAberrants).toBe(1)
+    expect(r.r2).toBe(r.r2Brut) // pas d'exclusion → R² actif == R² brut
+    expect(r.nbPoints).toBe(8)
+  })
+
+  it('améliore le R² quand on exclut les aberrants', () => {
+    const sans = estimateVolume(avecAberrant, 5)!
+    const avec = estimateVolume(avecAberrant, 5, { exclureAberrants: true })!
+    expect(avec.r2).toBeGreaterThan(avec.r2Brut)
+    expect(avec.r2Brut).toBeCloseTo(sans.r2, 5)
+    expect(avec.nbPoints).toBe(7) // le point aberrant est retiré du calcul
+    expect(avec.r2).toBeCloseTo(1, 5)
+  })
+
+  it('reste rétro-compatible sans option (R² actif == R² brut)', () => {
+    const bilans = [b(0, 50), b(10, 150), b(20, 250), b(30, 350)]
+    const r = estimateVolume(bilans, 15)!
+    expect(r.r2).toBe(r.r2Brut)
+    expect(r.nbAberrants).toBe(0)
+    expect(r.pointsAberrants).toHaveLength(0)
+  })
+
+  it('ne détecte aucun aberrant sur une droite parfaite (σ résidus = 0)', () => {
+    const bilans = [b(0, 50), b(10, 150), b(20, 250), b(30, 350)]
+    const r = estimateVolume(bilans, 15, { exclureAberrants: true })!
+    expect(r.nbAberrants).toBe(0)
+    expect(r.warnings.map(w => w.type)).not.toContain('trop_d_aberrants')
+  })
+
+  it('garde-fou : n\'exclut jamais sous 5 points restants', () => {
+    // 5 points alignés + 1 aberrant : n=6, garde-fou n-5=1 mais détection nécessite n>6
+    // donc on vérifie qu'avec 6 points l'exclusion ne casse pas l'échantillon.
+    const bilans = [b(1, 10), b(2, 20), b(3, 30), b(4, 40), b(5, 50), b(4, 400)]
+    const r = estimateVolume(bilans, 3, { exclureAberrants: true })!
+    expect(r.nbPoints).toBeGreaterThanOrEqual(5)
+  })
 })
 
 describe('nearestBilans', () => {

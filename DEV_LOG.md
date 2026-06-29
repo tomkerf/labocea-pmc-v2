@@ -54,6 +54,15 @@ Premier retour utilisateur : « je ne comprends rien à l'outil ». Tout était 
 - **Backfill de l'historique via import CSV** (`point,date,pluie_mm,volume_m3`) — l'outil reste vide tant que les données ne sont pas importées.
 - Prod : uniquement des points **organisationnels** (DSIN, plan de bascule Brest).
 
+### Détection des valeurs aberrantes (suite, 29 juin)
+Retour utilisateur : « est-ce que l'outil peut proposer d'enlever les valeurs aberrantes ? » (R² 0.11 sur un nuage très dispersé).
+- Brainstorm → spec (`docs/superpowers/specs/2026-06-29-estimation-aberrants-design.md`). Objectif retenu : améliorer l'estimation affichée, **détection auto + interrupteur** (jamais d'exclusion silencieuse).
+- `estimationVolume.ts` : détection par **résidu > 2σ** (cohérent avec le calcul de fourchette), recalcul de la droite/R² sur les points conservés si l'interrupteur est ON. Nouveaux champs `pointsAberrants`, `nbAberrants`, `r2Brut` (toujours renseignés). Signature : `estimateVolume(bilans, pluieMm, { exclureAberrants })`.
+- **Garde-fous** : au plus 20 % des points exclus, jamais sous 5 points restants. Au-delà → interrupteur grisé + warning `trop_d_aberrants` (« vérifie tes données plutôt que de les exclure »).
+- UI `EstimationVolumePage` : encart conditionnel (si `nbAberrants > 0`) avec switch + **R² avant/après** affiché (anti-illusion). `EstimationChart` : points aberrants en **cercle creux estompé**, jamais effacés.
+- 5 nouveaux tests (suite à **168/168**). Build + lint OK. Rétro-compatible : sans l'option, `r2 === r2Brut`, calcul identique.
+- **Limite assumée** : le seuil 2σ est volontairement conservateur. Sur un nuage sans tendance (comme le point de rejet de test), il ne flague rien — c'est l'honnêteté statistique (absence de corrélation ≠ aberrants), pas un bug. L'encart sert sur les points qui ont une vraie tendance + 1-2 points hors droite (erreur de saisie, événement exceptionnel). Décision validée par l'utilisateur : garder 2σ plutôt que d'abaisser la sensibilité.
+
 ## Session 143 — Density pass, KPI 2×2 et polish navbar
 **26 juin 2026**
 

@@ -14,6 +14,7 @@ const WARN_LABEL: Record<string, string> = {
   correlation_faible: 'Corrélation faible entre pluie et volume — estimation peu fiable.',
   extrapolation: 'Pluviométrie hors de la plage des bilans connus — extrapolation.',
   peu_de_points: 'Pas assez de bilans pour une estimation fiable.',
+  trop_d_aberrants: 'Trop de valeurs atypiques — vérifie tes données plutôt que de les exclure.',
 }
 
 export default function EstimationVolumePage() {
@@ -25,10 +26,12 @@ export default function EstimationVolumePage() {
   const [selId, setSelId] = useState('')
   const [pluie, setPluie] = useState('10')
   const [showImport, setShowImport] = useState(false)
+  const [exclureAberrants, setExclureAberrants] = useState(false)
 
   const point = pointsRejet.find((p) => p.id === selId)
   const pluieMm = Number(pluie) || 0
-  const res = point ? estimateVolume(point.bilans, pluieMm) : null
+  const res = point ? estimateVolume(point.bilans, pluieMm, { exclureAberrants }) : null
+  const tropAberrants = res?.warnings.some((w) => w.type === 'trop_d_aberrants') ?? false
   const degraded = point && !res ? nearestBilans(point.bilans, pluieMm) : []
 
   function useInAsservissement() {
@@ -113,14 +116,39 @@ export default function EstimationVolumePage() {
                       </p>
                     </div>
 
-                    {res.warnings.map((w) => (
+                    {res.warnings.filter((w) => w.type !== 'trop_d_aberrants').map((w) => (
                       <p key={w.type} className="text-[12px] px-3 py-2 rounded-lg"
                         style={{ background: 'var(--color-warning-light, rgba(255,149,0,0.12))', color: COLORS.WARNING }}>
                         {WARN_LABEL[w.type]}
                       </p>
                     ))}
 
-                    <EstimationChart bilans={point!.bilans} base={res.base} coef={res.coef} pluieMm={pluieMm} volumeEstime={res.volumeEstime} />
+                    {/* valeurs aberrantes */}
+                    {res.nbAberrants > 0 && (
+                      <div className="rounded-lg p-3 flex flex-col gap-2" style={{ background: COLORS.BG_TERTIARY }}>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-[12px] font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>
+                            {res.nbAberrants} valeur{res.nbAberrants > 1 ? 's' : ''} atypique{res.nbAberrants > 1 ? 's' : ''} détectée{res.nbAberrants > 1 ? 's' : ''}
+                          </span>
+                          <button type="button" role="switch" aria-checked={exclureAberrants} disabled={tropAberrants}
+                            onClick={() => setExclureAberrants((v) => !v)}
+                            className="relative w-10 h-6 rounded-full shrink-0 transition-colors"
+                            style={{ background: exclureAberrants && !tropAberrants ? COLORS.ACCENT : COLORS.BG_SECONDARY, opacity: tropAberrants ? 0.4 : 1, cursor: tropAberrants ? 'not-allowed' : 'pointer' }}>
+                            <span className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform"
+                              style={{ left: 2, transform: exclureAberrants && !tropAberrants ? 'translateX(16px)' : 'translateX(0)', boxShadow: 'var(--shadow-card)' }} />
+                          </button>
+                        </div>
+                        <label className="text-[12px]" style={{ color: 'var(--color-text-tertiary)' }}>
+                          {tropAberrants
+                            ? WARN_LABEL.trop_d_aberrants
+                            : exclureAberrants
+                              ? `Exclues du calcul · R² ${res.r2.toFixed(2)} (avec : ${res.r2Brut.toFixed(2)})`
+                              : `Exclure les valeurs aberrantes · sans : R² ${res.r2Brut.toFixed(2)}`}
+                        </label>
+                      </div>
+                    )}
+
+                    <EstimationChart bilans={point!.bilans} base={res.base} coef={res.coef} pluieMm={pluieMm} volumeEstime={res.volumeEstime} pointsAberrants={res.pointsAberrants} />
 
                     <button type="button" onClick={useInAsservissement}
                       className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"

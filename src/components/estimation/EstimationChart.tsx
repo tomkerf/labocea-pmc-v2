@@ -7,14 +7,16 @@ interface Props {
   coef: number
   pluieMm: number
   volumeEstime: number
+  pointsAberrants?: BilanRejet[]
 }
 
 const W = 320
 const H = 200
 const PAD = 36
 
-export function EstimationChart({ bilans, base, coef, pluieMm, volumeEstime }: Props) {
+export function EstimationChart({ bilans, base, coef, pluieMm, volumeEstime, pointsAberrants = [] }: Props) {
   const pts = bilans.filter(b => Number.isFinite(b.pluieMm) && Number.isFinite(b.volumeM3))
+  const estAberrant = (b: BilanRejet) => pointsAberrants.includes(b)
   const xs = [...pts.map(b => b.pluieMm), pluieMm]
   const ys = [...pts.map(b => b.volumeM3), volumeEstime]
   const xMin = Math.min(...xs), xMax = Math.max(...xs)
@@ -41,8 +43,11 @@ export function EstimationChart({ bilans, base, coef, pluieMm, volumeEstime }: P
       <line x1={sx(lineX1)} y1={sy(lineY1)} x2={sx(lineX2)} y2={sy(lineY2)}
         stroke={COLORS.ACCENT} strokeWidth={1.5} strokeDasharray="4 3" />
 
-      {/* bilans historiques */}
-      {pts.map((b, i) => (
+      {/* bilans historiques (aberrants estompés en cercle creux) */}
+      {pts.map((b, i) => estAberrant(b) ? (
+        <circle key={i} cx={sx(b.pluieMm)} cy={sy(b.volumeM3)} r={3.5}
+          fill="none" stroke="var(--color-text-tertiary)" strokeWidth={1.2} strokeDasharray="2 1.5" opacity={0.7} />
+      ) : (
         <circle key={i} cx={sx(b.pluieMm)} cy={sy(b.volumeM3)} r={3.5}
           fill="var(--color-text-secondary)" />
       ))}
