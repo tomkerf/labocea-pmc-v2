@@ -2,6 +2,45 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 144 — Outil d'estimation du volume 24h sur point de rejet
+**28-29 juin 2026**
+
+### Ce qui a été fait
+
+**Nouvel outil `/outils/estimation-volume` (temps de pluie)**
+- Besoin métier : estimer le volume qui passera sur un point de rejet lors d'un bilan 24h temps de pluie, pour régler l'asservissement de l'échantillonneur (saturation/sous-remplissage évités).
+- Approche : régression linéaire `volume = base_temps_sec + coef × pluie_mm` par point de rejet, à partir de l'historique des bilans passés. **Pas d'IA** (modèle explicable), **aucune dépendance ajoutée** (nuage de points en SVG fait main).
+- Brainstorm → spec (`docs/superpowers/specs/2026-06-28-...`) → plan (`docs/superpowers/plans/2026-06-28-...`) → exécution en 3 lots de sous-agents.
+
+**Architecture (flux existant respecté)**
+- Collection Firestore `points-rejet` (clé `POINTS_REJET` dans `COLLECTIONS`), document `{ nom, code?, bilans: {date, pluieMm, volumeM3}[] }` — tableau embarqué (~10 bilans/point).
+- Libs pures testées : `estimationVolume.ts` (régression + R² + intervalle de prédiction + garde-fous) et `parseBilansCsv.ts` (parseur CSV). 14 nouveaux tests Vitest, suite à 163/163.
+- Store `pointsRejetStore`, hook `usePointsRejet` (onSnapshot), service `pointsRejetService` (écritures + import CSV batch, wrappées `trackWrite`).
+- UI : `EstimationVolumePage` + composants `EstimationChart` (SVG), `BilanImportModal` (import CSV avec aperçu), `PointRejetManager` (CRUD points/bilans).
+
+**Garde-fous estimation**
+- < 3 bilans → mode dégradé (bilans les plus proches en pluviométrie, pas de régression).
+- R² faible → bandeau « corrélation faible ». Pluie hors plage → bandeau « extrapolation ».
+
+**Intégrations**
+- Bouton « Utiliser dans l'asservissement » → `/outils/asservissement?v24h=<estimé>` ; `AsservissementPage` lit désormais `v24h` initial depuis le query param.
+- Entrée « Estimation volume » ajoutée dans la sidebar desktop, le drawer mobile et `PlusPage` (sous Asservissement).
+- Règle Firestore `points-rejet` calquée sur `tuyaux`.
+- Qualité : `toast` au lieu d'`alert`, `aria-label` sur tous les champs.
+
+### Décisions
+- Périmètre limité à l'estimation du volume (Option A) — le réglage reste géré par la page Asservissement existante.
+- Tableau `bilans` embarqué plutôt que sous-collection (~10 entrées, volume négligeable).
+- Doublon à l'import (même point + même date) → ignoré.
+
+### État
+- Mergé sur `main` local + déployé sur **staging** (labocea-pmc-v2-dev). **Non poussé sur origin** au moment de la rédaction.
+- ⚠️ Ne PAS déployer en prod avant le chantier rôles Firestore.
+
+### Prochaines étapes
+- **Backfill de l'historique via import CSV** (`point,date,pluie_mm,volume_m3`) — l'outil est vide tant que les données ne sont pas importées.
+- Chantier prod : **rôles Firestore 🔴**, accord DSIN 🔴.
+
 ## Session 143 — Density pass, KPI 2×2 et polish navbar
 **26 juin 2026**
 
