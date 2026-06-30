@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useReducer, useCallback } from 'react'
+import { useMemo, useEffect, useReducer, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { m, AnimatePresence } from 'framer-motion'
@@ -143,8 +143,7 @@ export default function DashboardPage() {
 
   const activeItems = planningMode === 'today' ? jourItems : lendemainItems
   const todayISO = localISO(new Date())
-  const [nowMs] = useState(() => Date.now())
-  const tomorrowISO = localISO(new Date(nowMs + 86_400_000))
+  const tomorrowISO = localISO(new Date(Date.now() + 86_400_000))
   const activeDateISO = planningMode === 'today' ? todayISO : tomorrowISO
 
   // ── Actions ────────────────────────────────────────────────

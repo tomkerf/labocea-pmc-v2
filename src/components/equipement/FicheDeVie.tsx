@@ -44,10 +44,9 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
     handleCancelNote()
   }
 
-  const [nowMs] = useState(() => Date.now())
   const anciennete = (() => {
     if (!equipement.dateAcquisition) return null
-    const ms = nowMs - new Date(equipement.dateAcquisition).getTime()
+    const ms = Date.now() - new Date(equipement.dateAcquisition).getTime()
     const totalMonths = Math.floor(ms / (1000 * 60 * 60 * 24 * 30.44))
     const years  = Math.floor(totalMonths / 12)
     const months = totalMonths % 12

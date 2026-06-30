@@ -143,7 +143,7 @@ export default function EquipementPage() {
     navigate('/materiel')
   }
 
-  const [nowMs] = useState(() => Date.now())
+  const nowMs = Date.now()
 
   if (loading) return (
     <div className="flex justify-center py-20">
