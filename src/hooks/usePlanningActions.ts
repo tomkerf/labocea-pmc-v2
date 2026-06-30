@@ -6,9 +6,6 @@ import { useToastStore } from '@/stores/toastStore'
 import type { Client, Sampling, TypeEvenement } from '@/types'
 import type { PlanningEvent, PoolItem } from '@/lib/planningUtils'
 
-function handleDeleteEvent(event: PlanningEvent) {
-  if (event.evenementData) deleteEvenement(event.evenementData.id)
-}
 
 interface UsePlanningActionsProps {
   uid: string | null
@@ -21,6 +18,15 @@ interface UsePlanningActionsProps {
 export function usePlanningActions({ uid, initiales, clients, evenements, holidays }: UsePlanningActionsProps) {
   const isPending = useRef(false)
   const { add: addToast } = useToastStore()
+
+  async function handleDeleteEvent(event: PlanningEvent) {
+    if (!event.evenementData) return
+    try {
+      await deleteEvenement(event.evenementData.id)
+    } catch {
+      addToast('error', 'Erreur lors de la suppression de l\'événement')
+    }
+  }
 
   async function handleCancelSampling(event: PlanningEvent, reason: string) {
     if (isPending.current || !uid || !event.clientId || !event.planId || !event.samplingId) return
