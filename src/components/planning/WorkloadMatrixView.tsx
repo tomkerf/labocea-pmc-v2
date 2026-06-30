@@ -59,7 +59,8 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
         if (filterSite && prel?.site !== filterSite) return
         if (filterTech && assigned !== filterTech) return
 
-        const techKey = assigned && preleveurs.some(pr => pr.code === assigned) ? assigned : 'NON_ASSIGNE'
+        const techKey = assigned || 'NON_ASSIGNE'
+        if (!stats.has(techKey)) stats.set(techKey, { total: 0, months: Array(12).fill(0) })
         const techData = stats.get(techKey)!
 
         p.samplings.forEach(s => {
