@@ -2,6 +2,21 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 146 — Bugfix Plan de Charge : barres orange et stats techniciens
+**30 juin 2026**
+
+### Ce qui a été fait
+
+**Bug : tout s'affichait en orange dans la vue "Plan de Charge"**
+- Cause racine 1 : `maxCapacityPerMonth = nbActiveTechs * 35`. Quand aucun technicien actif (`nbActiveTechs = 0`), la capacité vaut 0, donc `val > 0` était toujours vrai → toutes les barres s'affichaient en orange (surcharge). Fix : `const isOverCapacity = maxCapacityPerMonth > 0 && val > maxCapacityPerMonth`.
+- Cause racine 2 (plus profonde) : la condition `preleveurs.some(pr => pr.code === assigned)` pour attribuer un prélèvement à son technicien nécessitait que le document Firestore `preleveurs/data` soit chargé. Sans ce document, `preleveurs = []` → tous les prélèvements tombaient en `NON_ASSIGNE` → `nbActiveTechs = 0` → orange. Fix : `const techKey = assigned || 'NON_ASSIGNE'` + création d'entrée à la volée dans `stats` si elle n'existe pas encore.
+
+### Décisions
+- **Attribution directe** : le code technicien stocké sur le client (`c.preleveur`) fait foi, sans validation croisée avec le store préleveurs. Le store reste utile pour afficher les noms et les filtres, mais ne doit pas bloquer l'attribution des prélèvements.
+
+### État
+- Build OK. Déployé sur **staging** (commits `4c30cb1` et `ca7810c`). Stats vérifiées via browser automation : 562 prélèv., 2 techs actifs, 1 non assigné, surcharge uniquement sur Septembre.
+
 ## Session 145 — Déplacer un événement dans le temps
 **29 juin 2026**
 
