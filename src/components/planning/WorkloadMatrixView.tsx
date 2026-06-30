@@ -201,7 +201,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
             {totalPerMonth.map((val, i) => {
               const chartMax = Math.max(maxCapacityPerMonth, maxMonthValue, 1)
               const heightPct = (val / chartMax) * 100
-              const isOverCapacity = val > maxCapacityPerMonth
+              const isOverCapacity = maxCapacityPerMonth > 0 && val > maxCapacityPerMonth
               
               return (
                 <div key={i} className="flex-1 flex flex-col items-center gap-2 relative group h-full">
