@@ -89,6 +89,10 @@
 
 - `src/components/planning/DayModalPoolTab.tsx:166` — `poolDate` est initialisé depuis `dateStr` mais est intentionnellement éditable par l'utilisateur (champ date dans PoolItemRow). La correction canonique (prop `key` depuis le parent) nécessiterait de modifier le composant parent DayModal. Accepté comme dette mineure — le seul risque réel est une valeur stale si `dateStr` change sans que le modal se ferme et rouvre, ce qui ne se produit pas dans l'UX actuelle.
 
+## react-doctor/set-state-in-effect (faux positifs)
+
+- `src/pages/PlanningPage.tsx:122` — Initialisation unique de `filterSite`/`filterTech` quand le store `preleveurs` arrive (cas async). La lazy initializer de `useState` gère le cas synchrone (store déjà hydraté) ; l'effect prend le relais si les preleveurs n'étaient pas encore chargés au mount. Le `useRef siteDefaultApplied` garantit une exécution au plus une fois, et le guard `localStorage` évite d'écraser une préférence déjà sauvegardée. Pas de sync d'état en boucle — initialisation one-shot depuis données async.
+
 ## react-doctor/no-array-index-as-key (faux positifs)
 
 - `src/components/planning/WorkloadMatrixView.tsx:207` — Les 12 mois de l'année sont un tableau statique et ordonné, jamais réordonné ni filtré. Aucun risque de désynchronisation React avec un index stable.

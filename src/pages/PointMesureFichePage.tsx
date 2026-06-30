@@ -52,15 +52,9 @@ export default function PointMesureFichePage() {
     return <div className="p-6 text-sm" style={{ color: COLORS.DANGER }}>Point de prélèvement introuvable.</div>
   }
 
-  // 1. Mappage des inspections du point dans les visites préliminaires
+  // 1. Toutes les inspections de toutes les visites préliminaires du client (Option A — site entier)
   const pointVisits = visites.flatMap(v =>
-    (v.points || []).flatMap(p => {
-      const matchById = p.pointMesureId ? p.pointMesureId === plan.id : false
-      const matchByName = !p.pointMesureId && p.nom.trim().toLowerCase() === plan.nom.trim().toLowerCase()
-      return matchById || matchByName
-        ? [{ visitId: v.id, date: v.date, technicienNom: v.technicienNom, ...p }]
-        : []
-    })
+    (v.points || []).map((p, i) => ({ visitId: `${v.id}-${i}`, date: v.date, technicienNom: v.technicienNom, ...p }))
   )
 
   // 2. Historique des prélèvements réalisés sur ce plan
