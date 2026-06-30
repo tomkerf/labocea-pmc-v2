@@ -11,9 +11,11 @@ interface StatusChangeModalProps {
 
 export function StatusChangeModal({ isOpen, onClose, onConfirm, newLabel }: StatusChangeModalProps) {
   const [reason, setReason] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setSubmitting(true)
     onConfirm(reason)
   }
 
@@ -56,10 +58,11 @@ export function StatusChangeModal({ isOpen, onClose, onConfirm, newLabel }: Stat
           </button>
           <button
             type="submit"
+            disabled={submitting}
             className="px-4 py-2 text-sm rounded-lg font-medium transition-opacity hover:opacity-90"
-            style={{ background: COLORS.ACCENT, color: 'white' }}
+            style={{ background: COLORS.ACCENT, color: 'white', opacity: submitting ? 0.6 : 1 }}
           >
-            Confirmer
+            {submitting ? 'Confirmation…' : 'Confirmer'}
           </button>
         </div>
       </form>

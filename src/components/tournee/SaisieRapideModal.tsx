@@ -62,6 +62,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
   }))
   const { status, doneDate, newPlannedDate, nappe, commentaire, motif } = form
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const isSouterraine = nature === 'Souterraine'
 
@@ -75,6 +76,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
       return
     }
     setError('')
+    setSubmitting(true)
     onConfirm({ status, doneDate, nappe, commentaire, motif: motif.trim(), newPlannedDate })
   }
 
@@ -176,9 +178,10 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
               Annuler
             </button>
             <button type="button" onClick={handleConfirm} aria-label="Valider"
+              disabled={submitting}
               className="flex-1 py-2.5 rounded-lg text-sm font-medium"
-              style={{ background: COLORS.ACCENT, color: 'white' }}>
-              Valider
+              style={{ background: COLORS.ACCENT, color: 'white', opacity: submitting ? 0.6 : 1 }}>
+              {submitting ? 'Enregistrement…' : 'Valider'}
             </button>
           </div>
         </m.div>

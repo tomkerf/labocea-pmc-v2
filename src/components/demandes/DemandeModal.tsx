@@ -34,6 +34,7 @@ interface DemandeModalProps {
 export function DemandeModal({ demande, users, onClose, onSave, onDelete, onConvertir }: DemandeModalProps) {
   const isNew = !demande.id
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<Omit<Demande, 'id' | 'createdBy' | 'createdAt' | 'updatedAt'>>({
     ...EMPTY,
     ...demande,
@@ -45,6 +46,7 @@ export function DemandeModal({ demande, users, onClose, onSave, onDelete, onConv
 
   function handleSave() {
     if (!form.contactNom.trim() && !form.contactSociete.trim()) return
+    setSaving(true)
     onSave({ ...demande, ...form } as Demande)
   }
 
@@ -177,16 +179,18 @@ export function DemandeModal({ demande, users, onClose, onSave, onDelete, onConv
             </button>
             {form.statut === 'devis_signe' && !isNew && onConvertir && (
               <button type="button"
+                disabled={saving}
                 onClick={() => { handleSave(); onConvertir({ ...demande, ...form } as Demande) }}
                 className="text-sm px-4 py-2 rounded-lg font-semibold"
-                style={{ background: COLORS.SUCCESS, color: 'white' }}>
+                style={{ background: COLORS.SUCCESS, color: 'white', opacity: saving ? 0.6 : 1 }}>
                 → Créer la mission
               </button>
             )}
             <button type="button" onClick={handleSave}
+              disabled={saving}
               className="text-sm px-4 py-2 rounded-lg font-medium"
-              style={{ background: COLORS.ACCENT, color: 'white' }}>
-              {isNew ? 'Créer' : 'Enregistrer'}
+              style={{ background: COLORS.ACCENT, color: 'white', opacity: saving ? 0.6 : 1 }}>
+              {isNew ? (saving ? 'Création…' : 'Créer') : (saving ? 'Enregistrement…' : 'Enregistrer')}
             </button>
           </div>
         </div>
