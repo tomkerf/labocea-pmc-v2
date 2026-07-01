@@ -4,6 +4,7 @@ import { AnimatePresence, m } from 'framer-motion'
 import Sidebar from './Sidebar'
 import BottomTabBar from './BottomTabBar'
 import ErrorBoundary from './ErrorBoundary'
+import GlobalListeners from './GlobalListeners'
 import ToastContainer from '@/components/ui/ToastContainer'
 import ChangelogModal, { useChangelogState } from '@/components/ui/ChangelogModal'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
@@ -29,6 +30,9 @@ export default function AppLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: COLORS.BG_PRIMARY }}>
+      {/* Listeners Firestore globaux — montés une seule fois pour toute la session */}
+      <GlobalListeners />
+
       {/* Sidebar desktop */}
       <Sidebar />
 

@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { ShieldAlert, ChevronLeft } from 'lucide-react'
 import { useAuthStore, selectRole } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
-import { useUsersListener } from '@/hooks/useUsers'
-import { useClientsListener } from '@/hooks/useClients'
 import { AdminChargeEquipe } from '@/components/admin/AdminChargeEquipe'
 import { AdminCreateUserForm } from '@/components/admin/AdminCreateUserForm'
 import { AdminUsersList } from '@/components/admin/AdminUsersList'
@@ -17,8 +15,6 @@ export default function AdminPage() {
   const navigate      = useNavigate()
   const role          = useAuthStore(selectRole)
   const { users }     = useUsersStore()
-  useUsersListener()
-  useClientsListener()
 
   useEffect(() => {
     if (role && role !== 'admin') navigate('/', { replace: true })

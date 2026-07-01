@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Plus, FileText, AlertTriangle, BookOpen } from 'lucide-react'
 import { useAuthStore, selectUid } from '@/stores/authStore'
-import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { useClientData } from '@/hooks/useClientData'
 import { PlanConfigSection } from '@/components/plan/PlanConfigSection'
@@ -18,7 +17,6 @@ export default function PlanPage() {
   const { clientId, planId } = useParams<{ clientId: string; planId: string }>()
   const navigate = useNavigate()
   const uid = useAuthStore(selectUid)
-  useUsersListener()
   const users = useUsersStore((s) => s.users)
   const currentUser = users.find((u) => u.uid === uid)
   const currentUserNom = currentUser

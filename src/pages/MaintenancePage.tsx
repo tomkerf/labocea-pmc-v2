@@ -4,7 +4,6 @@ import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveMaintenance } from '@/services/maintenanceService'
 import { useEquipementsStore } from '@/stores/equipementsStore'
-import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useDocumentData } from '@/hooks/useDocumentData'
 import { useAuthStore, selectRole } from '@/stores/authStore'
 import type { Maintenance, TypeMaintenance, StatutMaintenance } from '@/types'
@@ -28,7 +27,6 @@ export default function MaintenancePage() {
   const { maintenanceId } = useParams<{ maintenanceId: string }>()
   const navigate = useNavigate()
 
-  useEquipementsListener()
   const { equipements } = useEquipementsStore()
   const role = useAuthStore(selectRole)
 

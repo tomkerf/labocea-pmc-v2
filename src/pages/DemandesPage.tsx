@@ -4,7 +4,6 @@ import { Plus } from 'lucide-react'
 import { useDemandesListener, saveDemande, createDemande, deleteDemande } from '@/hooks/useDemandes'
 import { useDemandesStore } from '@/stores/demandesStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
-import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { createClient } from '@/services/clientService'
 import type { Demande } from '@/types'
@@ -15,7 +14,6 @@ import { DemandeModal } from '@/components/demandes/DemandeModal'
 
 export default function DemandesPage() {
   useDemandesListener()
-  useUsersListener()
 
   const { demandes, loading } = useDemandesStore()
   const users = useUsersStore(s => s.users)

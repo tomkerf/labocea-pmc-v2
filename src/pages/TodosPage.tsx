@@ -1,10 +1,6 @@
 import { useMemo, useReducer } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, ListTodo, ChevronLeft } from 'lucide-react'
-import { useTodosListener } from '@/hooks/useTodos'
-import { useClientsListener } from '@/hooks/useClients'
-import { useEquipementsListener } from '@/hooks/useEquipements'
-import { useUsersListener } from '@/hooks/useUsers'
 import { useTodosStore } from '@/stores/todosStore'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useEquipementsStore } from '@/stores/equipementsStore'
@@ -22,11 +18,6 @@ import { pageReducer, initialPageState, sortTasks } from '@/pages/todos/todosPag
 import type { Todo, TodoStatus } from '@/types'
 
 export default function TodosPage() {
-  useTodosListener()
-  useClientsListener()
-  useEquipementsListener()
-  useUsersListener()
-
   const uid = useAuthStore(selectUid)
   const appUser = useAuthStore((s) => s.appUser)
   const { todos, loading } = useTodosStore()

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Search, ClipboardList } from 'lucide-react'
-import { useClientsListener } from '@/hooks/useClients'
 import { createClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
@@ -18,8 +17,6 @@ function hasOverdue(client: Client): boolean {
 }
 
 export default function MissionsPage() {
-  useClientsListener()
-
   const navigate = useNavigate()
   const { clients, loading } = useMissionsStore()
   const uid = useAuthStore(selectUid)

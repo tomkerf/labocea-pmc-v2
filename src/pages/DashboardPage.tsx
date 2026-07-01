@@ -19,23 +19,17 @@ import type { PlanningEvent, TechOption } from '@/lib/planningUtils'
 import { shiftDateFin } from '@/lib/planningUtils'
 import { useAuthStore, selectPrenom, selectInitiales, selectUid, selectRole } from '@/stores/authStore'
 import { updateUserProfile } from '@/services/userService'
-import { useClientsListener } from '@/hooks/useClients'
 import { saveClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
-import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useEquipementsStore } from '@/stores/equipementsStore'
-import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMetrologieStore } from '@/stores/metrologieStore'
-import { useEvenementsListener } from '@/hooks/useEvenements'
 import { deleteEvenement, updateEvenementDate } from '@/services/evenementService'
 import { useEvenementsStore } from '@/stores/evenementsStore'
-import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { localISO } from '@/lib/dashboardUtils'
 import type { Sampling, Client, Plan } from '@/types'
 import { TodosWidget } from '@/components/dashboard/TodosWidget'
-import { useTodosListener } from '@/hooks/useTodos'
 import { useTodosStore } from '@/stores/todosStore'
 import { COLORS } from '@/lib/constants'
 import { uploadSamplingPhoto } from '@/lib/uploadPhoto'
@@ -112,13 +106,6 @@ export default function DashboardPage() {
       navigate('/aide')
     }
   }
-
-  useClientsListener()
-  useEquipementsListener()
-  useVerificationsListener()
-  useEvenementsListener()
-  useMaintenancesListener()
-  useTodosListener()
 
   const { clients }       = useMissionsStore()
   const { equipements }   = useEquipementsStore()

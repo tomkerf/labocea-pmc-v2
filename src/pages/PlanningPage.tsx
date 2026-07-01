@@ -1,10 +1,4 @@
 import { useState, useMemo, useReducer, useEffect, useRef } from 'react'
-import { useClientsListener } from '@/hooks/useClients'
-import { useEquipementsListener } from '@/hooks/useEquipements'
-import { useVerificationsListener } from '@/hooks/useVerifications'
-import { useMaintenancesListener } from '@/hooks/useMaintenances'
-import { useEvenementsListener } from '@/hooks/useEvenements'
-import { useUsersListener } from '@/hooks/useUsers'
 import { usePreleveursListener } from '@/hooks/usePreleveurs'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useEquipementsStore } from '@/stores/equipementsStore'
@@ -13,7 +7,6 @@ import { useEvenementsStore } from '@/stores/evenementsStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { usePreleveursStore } from '@/stores/preleveursStore'
 import { useTodosStore } from '@/stores/todosStore'
-import { useTodosListener } from '@/hooks/useTodos'
 import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
 import {
   type PlanningEvent, type ViewMode,
@@ -37,10 +30,8 @@ import PlanningModals       from '@/components/planning/PlanningModals'
 import { uiReducer, navReducer } from '@/pages/planning/planningPageReducers'
 
 export default function PlanningPage() {
-  useClientsListener(); useEquipementsListener()
-  useVerificationsListener(); useMaintenancesListener()
-  useEvenementsListener(); useUsersListener()
-  usePreleveursListener(); useTodosListener()
+  // Listeners globaux montés dans AppLayout ; preleveurs est spécifique au planning
+  usePreleveursListener()
 
   const uid        = useAuthStore(selectUid)
   const initiales  = useAuthStore(selectInitiales)

@@ -1,6 +1,5 @@
 import { useReducer, useMemo, useCallback, type ElementType } from 'react'
 import { Search, X, Plus, ChevronDown, ChevronRight } from 'lucide-react'
-import { useClientsListener } from '@/hooks/useClients'
 import { saveClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
@@ -67,7 +66,6 @@ const TABS: { key: TerrainType | 'all'; label: string; Icon?: ElementType }[] = 
 ]
 
 export default function InfosPage() {
-  useClientsListener()
   const uid       = useAuthStore(selectUid)
   const { clients } = useMissionsStore()
 

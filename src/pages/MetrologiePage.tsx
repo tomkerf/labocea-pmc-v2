@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { Plus, Gauge, Ruler, AlignJustify, LayoutList, ChevronLeft } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useVerificationsListener } from '@/hooks/useVerifications'
 import { useMetrologieStore } from '@/stores/metrologieStore'
-import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useMetrologieRows, calcStatut } from '@/hooks/useMetrologieRows'
 import CircleProgress from '@/components/materiel/CircleProgress'
@@ -46,8 +44,6 @@ function getMetroColor(percent: number): string {
 }
 
 export default function MerologiePage() {
-  useVerificationsListener()
-  useEquipementsListener()
   const navigate = useNavigate()
   const { verifications, loading: loadingVerif } = useMetrologieStore()
   const { equipements, loading: loadingEq } = useEquipementsStore()

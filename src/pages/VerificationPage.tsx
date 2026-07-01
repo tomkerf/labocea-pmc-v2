@@ -5,7 +5,6 @@ import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { saveVerification, createVerification } from '@/services/verificationService'
 import { useEquipementsStore } from '@/stores/equipementsStore'
-import { useEquipementsListener } from '@/hooks/useEquipements'
 import { useDocumentData } from '@/hooks/useDocumentData'
 import { useAuthStore, selectUid, selectPrenom, selectInitiales, selectRole } from '@/stores/authStore'
 import type { Verification, TypeVerification, ResultatVerification } from '@/types'
@@ -33,7 +32,6 @@ const RESULTATS: { value: ResultatVerification; label: string }[] = [
 
 function NewVerificationForm() {
   const navigate = useNavigate()
-  useEquipementsListener()
   const { equipements } = useEquipementsStore()
   const uid = useAuthStore(selectUid)
   const prenom = useAuthStore(selectPrenom)
@@ -133,7 +131,6 @@ export default function VerificationPage() {
   const { verificationId } = useParams<{ verificationId: string }>()
   const navigate = useNavigate()
 
-  useEquipementsListener()
   const { equipements } = useEquipementsStore()
   const role = useAuthStore(selectRole)
 

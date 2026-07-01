@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { arrayMove } from '@dnd-kit/sortable'
 import type { DragEndEvent } from '@dnd-kit/core'
 import { generateId } from '@/lib/ids'
-import { useUsersListener } from '@/hooks/useUsers'
 import { useUsersStore } from '@/stores/usersStore'
 import { useClientData } from '@/hooks/useClientData'
 import { ClientHeader } from '@/components/client/ClientHeader'
@@ -77,7 +76,6 @@ function reducer(state: State, action: Action): State {
 export default function ClientPage() {
   const { clientId } = useParams<{ clientId: string }>()
   const navigate = useNavigate()
-  useUsersListener()
   const users = useUsersStore(s => s.users)
 
   const {

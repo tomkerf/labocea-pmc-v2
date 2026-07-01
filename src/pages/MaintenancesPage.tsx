@@ -1,7 +1,6 @@
 import { useState, useMemo, useReducer } from 'react'
 import { Plus, Wrench, Zap, Hammer, AlignJustify, LayoutList, ChevronLeft } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { createMaintenance } from '@/services/maintenanceService'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useAuthStore, selectUid, selectPrenom, selectInitiales } from '@/stores/authStore'
@@ -49,7 +48,6 @@ function filtersReducer(state: Filters, action: FilterAction): Filters {
 const INITIAL_FILTERS: Filters = { statut: '', type: '', appareil: '' }
 
 export default function MaintenancesPage() {
-  useMaintenancesListener()
   const navigate = useNavigate()
   const uid = useAuthStore(selectUid)
   const prenom = useAuthStore(selectPrenom)

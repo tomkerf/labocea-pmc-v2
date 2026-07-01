@@ -4,8 +4,6 @@ import { FileText, ChevronLeft } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectUid, selectAppUser } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
-import { useUsersListener } from '@/hooks/useUsers'
-import { useClientsListener } from '@/hooks/useClients'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useMetrologieStore } from '@/stores/metrologieStore'
@@ -40,8 +38,6 @@ export default function RapportsPage() {
   const uid = useAuthStore(selectUid)
   const appUser = useAuthStore(selectAppUser)
   const { users } = useUsersStore()
-  useUsersListener()
-  useClientsListener()
 
   const equipements = useEquipementsStore((s) => s.equipements)
   const verifications = useMetrologieStore((s) => s.verifications)

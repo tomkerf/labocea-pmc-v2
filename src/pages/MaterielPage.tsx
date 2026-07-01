@@ -1,10 +1,6 @@
 import { useState, useReducer } from 'react'
 import { Plus, Package, FileDown, AlignJustify, LayoutList } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useEquipementsListener } from '@/hooks/useEquipements'
-import { useUsersListener } from '@/hooks/useUsers'
-import { useVerificationsListener } from '@/hooks/useVerifications'
-import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { createEquipement } from '@/services/equipementService'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
@@ -29,10 +25,6 @@ function normalizeCategorie(cat: string): string {
 }
 
 export default function MaterielPage() {
-  useEquipementsListener()
-  useUsersListener()
-  useVerificationsListener()
-  useMaintenancesListener()
   const navigate = useNavigate()
   const uid = useAuthStore(selectUid)
   const { equipements, loading } = useEquipementsStore()
