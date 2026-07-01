@@ -2,6 +2,33 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 147 — Couverture de tests logique métier + fix matColor
+**1er juillet 2026**
+
+### Contexte
+Suite à un point « il reste quoi avant prod ? » : vérification que les risques modérés/premortem encore ouverts étaient bien soldés (ils l'étaient tous côté code — race `useAuthInit`, champs immuables Firestore, backup, `nowMs`, double-clic), puis renforcement du seul vrai levier « niveau pro » restant : la couverture de tests.
+
+### Ce qui a été fait
+
+**+59 tests sur la logique pure non couverte** (suite 173 → 232)
+- `dashboardUtils.test.ts` (16) : `getGreeting`, `localISO`, `isToday`, `isThisMonth`, `daysDiff` — dont tests de non-régression du bug UTC (interprétation à midi local, plus de décalage -1 jour avant 2h).
+- `yearMatrixUtils.test.ts` (13) : `getStatusColor/Label/Icon` (transparent / done / non_effectue / en retard / planifié).
+- `tuyauxUtils.test.ts` (4) : `matColor`, `fmtDate`.
+- `planningUtils.test.ts` (+26) : helpers date, jours fériés fixes ET mobiles (Pâques 2026), `isVeilleJourFerie`, `getISOWeek`, grilles calendrier `buildMonthGrid/MiniGrid`, `parseHHMM`, `normTech`, `getPeriodLabel`.
+
+**Bug latent corrigé — `matColor`**
+- Cause racine : le fallback `MAT_COLORS['AUTRE']` n'existe pas → `matColor('matériau inconnu')` renvoyait `undefined`, exposant l'appelant à un crash (`.text` sur undefined).
+- Fix : constante `MAT_DEFAULT` (gris neutre) comme fallback.
+
+### Décisions
+- **Découpe des gros fichiers abandonnée** (`useDashboardStats.ts` 490, `planningUtils.ts` 407). Jugé mauvais ratio risque/gain : `planningUtils` est déjà proprement sectionné, `useDashboardStats` est un hub de ~20 `useMemo` interdépendants alimentant tout le dashboard. Découper pour la ligne de compte = risque de régression sur le composant le plus central, gain cosmétique. Fichiers sains, on garde.
+
+### État
+- Suite complète : **232/232** verts. Code-review OK (aucun secret, aucun catch vide, fonctions pures). Commit `afdb0cd` poussé sur `origin/main` (avec les 4 fixes en attente de la session précédente). Pas de déploiement : ajouts de tests + fix trivial, zéro changement de comportement prod.
+
+### Prochaines étapes
+- Restants avant prod = 100 % organisationnels : accord DSIN, plan de bascule Brest (date + référent + formation), vérif plan Firebase Spark/Blaze + alerte budget.
+
 ## Session 146 — Bugfix Plan de Charge : barres orange et stats techniciens
 **30 juin 2026**
 
