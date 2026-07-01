@@ -6,6 +6,8 @@ function escapeHtml(s: unknown): string {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 }
 
+const MAT_DEFAULT = { bg: 'rgba(100,116,139,0.08)', border: 'rgba(100,116,139,0.25)', text: '#475569' }
+
 const MAT_COLORS: Record<string, { bg: string; border: string; text: string }> = {
   'VINYL (tricoclair)': { bg: 'rgba(244,114,182,0.08)', border: 'rgba(244,114,182,0.25)', text: '#be185d' },
   'TEFLON':            { bg: 'rgba(249,115,22,0.08)',  border: 'rgba(249,115,22,0.25)',  text: '#c2410c' },
@@ -13,7 +15,7 @@ const MAT_COLORS: Record<string, { bg: string; border: string; text: string }> =
 }
 
 export function matColor(m: string) {
-  return MAT_COLORS[m] ?? MAT_COLORS['AUTRE']
+  return MAT_COLORS[m] ?? MAT_DEFAULT
 }
 
 export function fmtDate(iso: string) {
