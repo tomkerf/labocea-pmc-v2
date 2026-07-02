@@ -17,6 +17,20 @@ export interface WeatherResult {
   tempMin?: number
 }
 
+interface OpenMeteoResponse {
+  hourly: {
+    time: string[]
+    precipitation_probability: (number | null)[]
+    precipitation: (number | null)[]
+  }
+  daily?: {
+    time: string[]
+    weather_code: number[]
+    temperature_2m_max: number[]
+    temperature_2m_min: number[]
+  }
+}
+
 const EMPTY: WeatherResult = { loading: false, error: false, maxProba: 0, maxMm: 0, rainWindows: [] }
 
 export function useWeather(
@@ -54,7 +68,7 @@ export function useWeather(
         if (!r.ok) throw new Error('weather fetch failed')
         return r.json()
       })
-      .then((data: any) => {
+      .then((data: OpenMeteoResponse) => {
         if (cancelled) return
 
         const times = data.hourly.time
@@ -63,9 +77,9 @@ export function useWeather(
 
         const dailyTimes = data.daily?.time || []
         const dailyIndex = dailyTimes.indexOf(dateStr)
-        const weatherCode = dailyIndex >= 0 ? data.daily.weather_code[dailyIndex] : undefined
-        const tempMax = dailyIndex >= 0 ? data.daily.temperature_2m_max[dailyIndex] : undefined
-        const tempMin = dailyIndex >= 0 ? data.daily.temperature_2m_min[dailyIndex] : undefined
+        const weatherCode = dailyIndex >= 0 ? data.daily?.weather_code[dailyIndex] : undefined
+        const tempMax = dailyIndex >= 0 ? data.daily?.temperature_2m_max[dailyIndex] : undefined
+        const tempMin = dailyIndex >= 0 ? data.daily?.temperature_2m_min[dailyIndex] : undefined
 
         const windows: RainWindow[] = []
         let maxProba = 0

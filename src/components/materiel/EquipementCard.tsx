@@ -63,6 +63,8 @@ const CATEGORIE_ICONS: Record<string, LucideIcon> = {
   autre:          Package,
 }
 
+// Co-localisé intentionnellement avec EquipementCard — cf. .react-doctor/false-positives.md
+// eslint-disable-next-line react-refresh/only-export-components
 export const ETAT_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
   operationnel:    { label: 'Opérationnel',    bg: 'var(--color-success-light)', color: 'var(--color-success-text)' },
   en_maintenance:  { label: 'En maintenance',  bg: 'var(--color-warning-light)', color: 'var(--color-warning-text)' },

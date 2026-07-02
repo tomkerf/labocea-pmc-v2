@@ -46,6 +46,8 @@ export function FicheDeVie({ equipement, verifications, maintenances, onAddNote,
 
   const anciennete = (() => {
     if (!equipement.dateAcquisition) return null
+    // Ancienneté lue à l'instant du render, volontairement — SPA sans SSR, valeur d'affichage
+    // eslint-disable-next-line react-hooks/purity
     const ms = Date.now() - new Date(equipement.dateAcquisition).getTime()
     const totalMonths = Math.floor(ms / (1000 * 60 * 60 * 24 * 30.44))
     const years  = Math.floor(totalMonths / 12)

@@ -137,6 +137,8 @@ export default function EquipementPage() {
     navigate('/materiel')
   }
 
+  // Heure courante lue au render, volontairement — SPA sans SSR, recalculée à chaque render
+  // eslint-disable-next-line react-hooks/purity
   const nowMs = Date.now()
 
   if (loading) return (

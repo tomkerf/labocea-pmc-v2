@@ -129,8 +129,9 @@ export default function DashboardPage() {
     [rawTechOptions])
 
   const activeItems = planningMode === 'today' ? jourItems : lendemainItems
-  const todayISO = localISO(new Date())
-  const tomorrowISO = localISO(new Date(Date.now() + 86_400_000))
+  const now = new Date()
+  const todayISO = localISO(now)
+  const tomorrowISO = localISO(new Date(now.getTime() + 86_400_000))
   const activeDateISO = planningMode === 'today' ? todayISO : tomorrowISO
 
   // ── Actions ────────────────────────────────────────────────

@@ -76,7 +76,6 @@ export default function VisiteFormPage() {
 
   useEffect(() => {
     if (user && isNew) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       dispatch({ technicienUid: user.uid, technicienNom: `${user.prenom} ${user.nom}` })
     }
   }, [user, isNew])

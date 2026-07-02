@@ -37,7 +37,7 @@ export default function BaseModal({
 }: BaseModalProps) {
 
   const onCloseRef = useRef(onClose)
-  onCloseRef.current = onClose
+  useEffect(() => { onCloseRef.current = onClose })
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {

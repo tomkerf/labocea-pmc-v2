@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Search, SlidersHorizontal, X } from 'lucide-react'
 import { COLORS } from '@/lib/constants'
 import type { AppUser } from '@/types'
+import type { FiltersState, FiltersAction } from './materielFilters'
 
 const CATEGORIES = [
   { value: '', label: 'Toutes catégories' },
@@ -26,38 +27,6 @@ const ETATS = [
   { value: 'hors_service',    label: 'Hors service'    },
   { value: 'prete',           label: 'Prêté'           },
 ]
-
-export interface FiltersState {
-  search: string
-  filterCategorie: string
-  filterEtat: string
-  filterSite: string
-  filterTechnicien: string
-  filterMateriau: string
-  filterMarque: string
-}
-
-export type FiltersAction =
-  | { type: 'setFilter'; name: keyof FiltersState; value: string }
-  | { type: 'reset' }
-
-export const initialFilters: FiltersState = {
-  search: '',
-  filterCategorie: '',
-  filterEtat: '',
-  filterSite: '',
-  filterTechnicien: '',
-  filterMateriau: '',
-  filterMarque: '',
-}
-
-export function filtersReducer(state: FiltersState, action: FiltersAction): FiltersState {
-  switch (action.type) {
-    case 'setFilter': return { ...state, [action.name]: action.value }
-    case 'reset':     return initialFilters
-    default:          return state
-  }
-}
 
 interface Props {
   filters: FiltersState

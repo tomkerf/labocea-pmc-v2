@@ -110,6 +110,8 @@ export default function PlanningPage() {
     if (localStorage.getItem('planning_filter_site') !== null) return
     const ini = useAuthStore.getState().appUser?.initiales ?? ''
     const prel = preleveurs.find(p => p.code === ini)
+    // Init one-shot depuis données async (guard siteDefaultApplied) — cf. .react-doctor/false-positives.md
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (prel?.site) { setFilterSite(prel.site); setFilterTech('') }
   }, [preleveurs])
   const filterRetard = false

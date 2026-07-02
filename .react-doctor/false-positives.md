@@ -5,6 +5,10 @@
 - `storage.rules` — `allow read: if request.auth != null` sur tous les chemins (`samplings/`, `visites/`, `plans/`). Intentionnel : toute l'équipe doit pouvoir consulter les photos de tous les clients. Politique validée pour cette stack interne.
 - `storage.rules` — `allow delete: if request.auth != null` sur les mêmes chemins. Intentionnel : les techniciens suppriment leurs propres photos depuis SamplingForm, VisiteFormPage et PlanConfigSection. Restreindre à admin casserait l'UX. Un lookup Firestore pour vérifier le rôle ajouterait de la latence sans apport de sécurité réel (tous les utilisateurs authentifiés sont des employés Labocea).
 
+## Sécurité — react-doctor/firebase-client-owned-authz-field
+
+- `src/hooks/useAuth.ts` — `setDoc(userRef, { lastLoginAt: serverTimestamp() }, { merge: true })`. `lastLoginAt` est un horodatage de connexion, pas un champ d'autorisation. Les champs sensibles (`role`, etc.) sont protégés comme immuables côté `firestore.rules` (validation livrée, cf. commit 6df9921). FP.
+
 ## Sécurité — dangerouslySetInnerHTML
 
 - Signalé en session 128 par react-doctor. Introuvable dans `src/` au 2026-06-15 — faux positif de l'outil ou déjà corrigé dans un commit antérieur. Aucune occurrence de `dangerouslySetInnerHTML` ni d'`innerHTML` dynamique dans le code source.
@@ -91,7 +95,7 @@
 
 ## react-doctor/set-state-in-effect (faux positifs)
 
-- `src/pages/PlanningPage.tsx:122` — Initialisation unique de `filterSite`/`filterTech` quand le store `preleveurs` arrive (cas async). La lazy initializer de `useState` gère le cas synchrone (store déjà hydraté) ; l'effect prend le relais si les preleveurs n'étaient pas encore chargés au mount. Le `useRef siteDefaultApplied` garantit une exécution au plus une fois, et le guard `localStorage` évite d'écraser une préférence déjà sauvegardée. Pas de sync d'état en boucle — initialisation one-shot depuis données async.
+- `src/pages/PlanningPage.tsx:115` (eslint-disable inline depuis 2026-07-02) — Initialisation unique de `filterSite`/`filterTech` quand le store `preleveurs` arrive (cas async). La lazy initializer de `useState` gère le cas synchrone (store déjà hydraté) ; l'effect prend le relais si les preleveurs n'étaient pas encore chargés au mount. Le `useRef siteDefaultApplied` garantit une exécution au plus une fois, et le guard `localStorage` évite d'écraser une préférence déjà sauvegardée. Pas de sync d'état en boucle — initialisation one-shot depuis données async.
 
 ## react-doctor/no-array-index-as-key (faux positifs)
 
@@ -117,6 +121,10 @@
 ## react-doctor/no-many-boolean-props (déféré — refactor architectural)
 
 - `src/components/planning/PlanningHeader.tsx:50` — 4 props booléennes (`showMiniCal`, `showRain`, `showDragHint`, `showBilanMois`). Vrai positif mais le découpage en sous-composants est un refactor architectural majeur (PlanningHeader est déjà optimisé et < 250L). À adresser si score target passe à 80+.
+
+## react-hooks/purity (disables intentionnels — eslint-plugin-react-hooks v7)
+
+- `src/components/equipement/FicheDeVie.tsx` (ancienneté) et `src/pages/EquipementPage.tsx` (`nowMs`) — `Date.now()` lu pendant le render, volontairement. SPA sans SSR : la valeur se rafraîchit à chaque render, c'est le comportement voulu pour l'affichage de durées/retards. Figer la valeur au mount (`useState` lazy) réintroduirait le bug « heure figée après minuit ». Disables inline avec justification.
 
 ## react-doctor/control-has-associated-label (faux positifs — PointCard)
 

@@ -286,7 +286,7 @@ export function useDashboardStats({
       if (!b.time) return 1
       return a.time.localeCompare(b.time)
     })
-  }, [clients, evenements, initiales, isGeneraliste, nowMs])
+  }, [clients, evenements, initiales, nowMs])
 
   const lendemainItems = useMemo((): JourItem[] => {
     const tomorrowISO = localISO(new Date(nowMs + 86_400_000))
@@ -363,7 +363,7 @@ export function useDashboardStats({
       if (!b.time) return 1
       return a.time.localeCompare(b.time)
     })
-  }, [clients, evenements, initiales, isGeneraliste, nowMs])
+  }, [clients, evenements, initiales, nowMs])
 
   // ── État du parc ──────────────────────────────────────────
 
