@@ -87,7 +87,7 @@ L'application est fonctionnellement complète (phases 1-7 done). En attente des 
 
 **À consulter avant de coder :** [TODO_REFACTORING.md](./TODO_REFACTORING.md)
 
-Score react-doctor actuel : **39/100** (changement d'algorithme de scoring react-doctor post-session 121 — les warnings restants sont documentés comme faux positifs dans `.react-doctor/false-positives.md`). Prochain seuil : réduction des warnings réels.
+Score react-doctor actuel : **71/100** (les warnings restants sont documentés comme faux positifs dans `.react-doctor/false-positives.md`). Prochain seuil : réduction des warnings réels.
 
 ---
 

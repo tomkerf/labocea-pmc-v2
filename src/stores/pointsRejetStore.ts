@@ -16,5 +16,3 @@ export const usePointsRejetStore = create<PointsRejetStore>((set) => ({
   setPointsRejet: (pointsRejet) => set({ pointsRejet, loading: false }),
   setError: (error) => set({ error, loading: false }),
 }))
-
-export const selectPointsRejet = (s: PointsRejetStore) => s.pointsRejet

@@ -14,9 +14,3 @@ export const AVATAR_COLORS = [
   { id: 'gray',   value: '#5E5E62', label: 'Gris',    accentLight: '#F3F4F6', text: '#1F2937', gradient: 'linear-gradient(135deg, #8E8E93, #5E5E62)' },
   { id: 'slate',  value: '#3A6073', label: 'Ardoise', accentLight: '#F1F5F9', text: '#334155', gradient: 'linear-gradient(135deg, #5A738E, #2D4B5B)' },
 ]
-
-const DEFAULT_AVATAR_COLOR = AVATAR_COLORS[0].value
-
-export function getAvatarColor(color?: string): string {
-  return color ?? DEFAULT_AVATAR_COLOR
-}

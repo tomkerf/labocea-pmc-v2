@@ -40,5 +40,4 @@ export const selectUid            = (s: AuthState): string | null  => s.firebase
 export const selectPrenom         = (s: AuthState): string         => s.appUser?.prenom ?? ''
 export const selectInitiales      = (s: AuthState): string         => s.appUser?.initiales ?? ''
 export const selectRole           = (s: AuthState): UserRole | null => s.appUser?.role ?? null
-export const selectIsAuthenticated = (s: AuthState): boolean       => s.firebaseUser !== null
 export const selectAppUser        = (s: AuthState): AppUser | null => s.appUser

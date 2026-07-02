@@ -13,7 +13,7 @@ import { ETAT_CONFIG } from '@/components/materiel/EquipementCard'
 import { StatusChangeModal } from '@/components/materiel/StatusChangeModal'
 import { EquipementForm } from '@/components/equipement/EquipementForm'
 import { FicheDeVie } from '@/components/equipement/FicheDeVie'
-import type { Equipement } from '@/types'
+import type { Equipement, EtatEquipement } from '@/types'
 import { COLLECTIONS, COLORS } from '@/lib/constants'
 import { useToastStore } from '@/stores/toastStore'
 
@@ -123,7 +123,7 @@ export default function EquipementPage() {
     
     triggerSave({ 
       ...equipement, 
-      etat: pendingEtat as any,
+      etat: pendingEtat as EtatEquipement,
       ficheDeVieNotes: [...(equipement.ficheDeVieNotes || []), note]
     })
     
