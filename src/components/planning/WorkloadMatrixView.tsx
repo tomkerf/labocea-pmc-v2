@@ -205,7 +205,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
               const isOverCapacity = maxCapacityPerMonth > 0 && val > maxCapacityPerMonth
               
               return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2 relative group h-full">
+                <div key={MOIS_LONG[i]} className="flex-1 flex flex-col items-center gap-2 relative group h-full">
                   {val > 0 && (
                     <div className="absolute -top-6 text-xs font-semibold text-[var(--color-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity">
                       {val}

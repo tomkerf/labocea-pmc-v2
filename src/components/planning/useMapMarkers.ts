@@ -114,7 +114,7 @@ export function useMapMarkers(
       markers.forEach(m => m.off())
       markerGroup.clearLayers()
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- react-doctor/exhaustive-deps
   }, [mappedEvts, mapReady])
 
   function handleCenterOnMarker(evt: PlanningEvent) {

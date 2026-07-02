@@ -99,7 +99,7 @@
 
 ## react-doctor/no-array-index-as-key (faux positifs)
 
-- `src/components/planning/WorkloadMatrixView.tsx:207` — Les 12 mois de l'année sont un tableau statique et ordonné, jamais réordonné ni filtré. Aucun risque de désynchronisation React avec un index stable.
+- `src/components/planning/WorkloadMatrixView.tsx` — ✅ soldé le 2026-07-02 : les colonnes des 12 mois utilisent désormais `key={MOIS_LONG[i]}` (identifiant sémantique stable).
 
 ## react-doctor/no-event-handler (faux positifs — suite)
 

@@ -73,13 +73,13 @@ export function BilanImportModal({ onClose }: Props) {
 
             {errors.length > 0 && (
               <ul className="mb-3 text-[12px]" style={{ color: COLORS.DANGER }}>
-                {errors.slice(0, 10).map((e, i) => <li key={i}>Ligne {e.line} : {e.message}</li>)}
+                {errors.slice(0, 10).map((e) => <li key={`${e.line}-${e.message}`}>Ligne {e.line} : {e.message}</li>)}
               </ul>
             )}
 
             <div className="rounded-lg overflow-hidden mb-4" style={{ border: '1px solid var(--color-border-subtle)' }}>
               {rows.slice(0, 8).map((r, i) => (
-                <div key={i} className="flex justify-between px-3 py-1.5 text-[12px]"
+                <div key={`${r.point}-${r.bilan.date}`} className="flex justify-between px-3 py-1.5 text-[12px]"
                   style={{ borderBottom: i < Math.min(rows.length, 8) - 1 ? '1px solid var(--color-border-subtle)' : undefined }}>
                   <span>{r.point}</span>
                   <span style={{ color: 'var(--color-text-tertiary)' }}>{r.bilan.date} · {r.bilan.pluieMm} mm · {r.bilan.volumeM3} m³</span>
