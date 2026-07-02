@@ -32,7 +32,7 @@ import type { Sampling, Client, Plan } from '@/types'
 import { TodosWidget } from '@/components/dashboard/TodosWidget'
 import { useTodosStore } from '@/stores/todosStore'
 import { COLORS } from '@/lib/constants'
-import { uploadSamplingPhoto } from '@/lib/uploadPhoto'
+import { uploadSamplingPhoto, ImageValidationError } from '@/lib/uploadPhoto'
 import { toast } from '@/stores/toastStore'
 
 
@@ -151,8 +151,9 @@ export default function DashboardPage() {
         }),
       }, uid)
       toast.success('Photo ajoutée')
-    } catch {
-      toast.error('Échec de l\'envoi de la photo. Vérifie ta connexion.')
+    } catch (err) {
+      if (err instanceof ImageValidationError) toast.error(err.message)
+      else toast.error('Échec de l\'envoi de la photo. Vérifie ta connexion.')
     }
   }
 

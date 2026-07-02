@@ -27,6 +27,15 @@ export function isToday(dateStr: string): boolean {
   return dateStr === localISO(new Date())
 }
 
+/**
+ * Nombre de jours entre aujourd'hui et `dateStr` (positif = futur, négatif = passé).
+ *
+ * Une date seule (`YYYY-MM-DD`) est interprétée à MIDI LOCAL, pas à minuit UTC.
+ * Sinon `new Date("2026-07-01")` parse en UTC minuit et, tôt le matin en Europe,
+ * le résultat décalait d'un jour (-1). Le suffixe `T12:00:00` neutralise ce biais
+ * de fuseau (±12 h de marge). Les chaînes contenant déjà une heure sont laissées
+ * telles quelles. Ne PAS remplacer par un calcul UTC (régression session 147).
+ */
 export function daysDiff(dateStr: string): number {
   const d = dateStr.length === 10 ? new Date(dateStr + 'T12:00:00') : new Date(dateStr)
   return Math.round((d.getTime() - Date.now()) / (1000 * 60 * 60 * 24))

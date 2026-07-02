@@ -1,11 +1,12 @@
 import { useEffect } from 'react'
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import { COLLECTIONS } from '@/lib/constants'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { toast } from '@/stores/toastStore'
 import type { Client } from '@/types'
 
-const COLLECTION = 'clients-v2'
+const COLLECTION = COLLECTIONS.CLIENTS
 
 export function useClientsListener() {
   const { setClients, setError } = useMissionsStore()

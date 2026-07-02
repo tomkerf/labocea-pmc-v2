@@ -6,7 +6,8 @@ import { db } from '@/lib/firebase'
 import { useAuthStore } from '@/stores/authStore'
 import { useClientData } from '@/hooks/useClientData'
 import { createVisite, saveVisite, deleteVisite } from '@/services/visiteService'
-import { uploadVisitePhoto, deleteVisitePhoto } from '@/lib/uploadPhoto'
+import { uploadVisitePhoto, deleteVisitePhoto, ImageValidationError } from '@/lib/uploadPhoto'
+import { toast } from '@/stores/toastStore'
 import { generateVisiteHTML } from '@/lib/generateVisiteHTML'
 import type { VisitePreliminaire, PointVisite, FrequenceType } from '@/types'
 import { COLLECTIONS, COLORS } from '@/lib/constants'
@@ -125,6 +126,9 @@ export default function VisiteFormPage() {
     try {
       const url = await uploadVisitePhoto(file, id!, pointId)
       dispatch({ points: points.map(p => p.id === pointId ? { ...p, photos: [...p.photos, url] } : p) })
+    } catch (err) {
+      if (err instanceof ImageValidationError) toast.error(err.message)
+      else toast.error('Échec de l\'envoi de la photo. Vérifie ta connexion.')
     } finally {
       setUploadingPointId(null)
     }

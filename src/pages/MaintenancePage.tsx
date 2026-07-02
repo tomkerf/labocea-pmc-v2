@@ -31,7 +31,7 @@ export default function MaintenancePage() {
   const role = useAuthStore(selectRole)
 
   const { data: maintenance, loading, saving, triggerSave, handleDelete, confirmDelete, requestDelete, cancelDelete } = useDocumentData<Maintenance>({
-    collection: 'maintenances',
+    collection: COLLECTIONS.MAINTENANCES,
     docId: maintenanceId,
     saveFn: saveMaintenance,
     onAfterSave: async (updated) => {

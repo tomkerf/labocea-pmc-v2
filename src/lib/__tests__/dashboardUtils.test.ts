@@ -90,4 +90,16 @@ describe('daysDiff', () => {
     freeze(2026, 6, 1, 1) // 1h du matin
     expect(daysDiff('2026-07-01')).toBe(0)
   })
+  it('ne subit pas de décalage en fin de journée', () => {
+    // Symétrique du cas 1h : à 23h le même jour doit rester 0 (pas +1).
+    freeze(2026, 6, 1, 23)
+    // Math.abs neutralise le -0 que Math.round peut produire ; fonctionnellement = 0.
+    expect(Math.abs(daysDiff('2026-07-01'))).toBe(0)
+  })
+  it('accepte une chaîne ISO complète avec heure', () => {
+    // Les call sites passent parfois un datetime complet (prochainControle, datePrevue) :
+    // la branche else doit rester cohérente.
+    freeze(2026, 6, 1, 9)
+    expect(daysDiff('2026-07-04T12:00:00')).toBe(3)
+  })
 })

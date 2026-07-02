@@ -1,15 +1,32 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 import { storage } from '@/lib/firebase'
 
-const MAX_SIZE_BYTES = 20 * 1024 * 1024 // 20 MB
+// Aligné sur les règles Storage (storage.rules) : size < 10 Mo et contentType image/*.
+const MAX_SIZE_BYTES = 10 * 1024 * 1024 // 10 Mo
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif']
+const ALLOWED_EXTS = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif']
+
+/**
+ * Erreur de validation levée AVANT tout upload (mauvais type ou fichier trop volumineux).
+ * Les appelants peuvent afficher `error.message` tel quel dans un toast : il est clair pour l'utilisateur.
+ */
+export class ImageValidationError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ImageValidationError'
+  }
+}
 
 function validateImageFile(file: File): void {
-  if (file.size > MAX_SIZE_BYTES) throw new Error(`Fichier trop volumineux (max 20 Mo, reçu ${(file.size / 1024 / 1024).toFixed(1)} Mo)`)
+  if (file.size > MAX_SIZE_BYTES) {
+    throw new ImageValidationError(`Fichier trop volumineux (max 10 Mo, reçu ${(file.size / 1024 / 1024).toFixed(1)} Mo)`)
+  }
   const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
-  const isAllowedExt = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif'].includes(ext)
+  const isAllowedExt = ALLOWED_EXTS.includes(ext)
   const isAllowedType = !file.type || ALLOWED_TYPES.includes(file.type)
-  if (!isAllowedExt && !isAllowedType) throw new Error(`Format non supporté : ${file.type || ext}`)
+  if (!isAllowedExt && !isAllowedType) {
+    throw new ImageValidationError(`Format non supporté : ${file.type || ext || 'inconnu'}. Formats acceptés : JPEG, PNG, WEBP, GIF, HEIC.`)
+  }
 }
 
 /**

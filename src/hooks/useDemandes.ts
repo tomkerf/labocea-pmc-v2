@@ -4,10 +4,11 @@ import {
   setDoc, addDoc, deleteDoc, serverTimestamp, query, orderBy,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import { COLLECTIONS } from '@/lib/constants'
 import { useDemandesStore } from '@/stores/demandesStore'
 import type { Demande } from '@/types'
 
-const COLLECTION = 'demandes'
+const COLLECTION = COLLECTIONS.DEMANDES
 
 export function useDemandesListener() {
   const { setDemandes } = useDemandesStore()

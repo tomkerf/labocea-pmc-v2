@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { X, Camera, Loader2 } from 'lucide-react'
 import { PlanField } from '@/components/plan/SamplingForm'
 import type { Plan, FrequenceType, NatureEauType, MethodeType } from '@/types'
-import { uploadPlanPhoto, deletePlanPhoto } from '@/lib/uploadPhoto'
+import { uploadPlanPhoto, deletePlanPhoto, ImageValidationError } from '@/lib/uploadPhoto'
 import { toast } from '@/stores/toastStore'
 import { COLORS } from '@/lib/constants'
 
@@ -31,7 +31,8 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
       toast.success('Photo ajoutée avec succès !')
     } catch (err) {
       console.error(err)
-      toast.error('Erreur lors de l\'ajout de la photo. Vérifie les permissions ou ta connexion.')
+      if (err instanceof ImageValidationError) toast.error(err.message)
+      else toast.error('Erreur lors de l\'ajout de la photo. Vérifie les permissions ou ta connexion.')
     } finally {
       setUploading(false)
     }

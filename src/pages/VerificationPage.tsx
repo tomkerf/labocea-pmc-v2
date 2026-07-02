@@ -135,7 +135,7 @@ export default function VerificationPage() {
   const role = useAuthStore(selectRole)
 
   const { data: verification, loading, saving, triggerSave, handleDelete, confirmDelete, requestDelete, cancelDelete } = useDocumentData<Verification>({
-    collection: 'verifications',
+    collection: COLLECTIONS.VERIFICATIONS,
     docId: verificationId,
     saveFn: saveVerification,
     onAfterSave: async (updated) => {

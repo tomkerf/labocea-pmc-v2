@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { HelpCircle } from 'lucide-react'
-import { uploadSamplingPhoto, deleteSamplingPhoto } from '@/lib/uploadPhoto'
+import { uploadSamplingPhoto, deleteSamplingPhoto, ImageValidationError } from '@/lib/uploadPhoto'
 import { toast } from '@/stores/toastStore'
 import type { AppUser, Sampling, SamplingStatus, NappeType, ChecklistItem } from '@/types'
 import { COLORS } from '@/lib/constants'
@@ -46,8 +46,9 @@ export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId
     try {
       const url = await uploadSamplingPhoto(file, clientId, planId, sampling.id)
       onUpdate('photos', [...(sampling.photos ?? []), url])
-    } catch {
-      toast.error('Échec de l\'envoi de la photo. Vérifie ta connexion.')
+    } catch (err) {
+      if (err instanceof ImageValidationError) toast.error(err.message)
+      else toast.error('Échec de l\'envoi de la photo. Vérifie ta connexion.')
     } finally {
       setUploading(false)
       e.target.value = ''
