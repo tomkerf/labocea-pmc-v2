@@ -64,6 +64,10 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
       if (isDirty.current) {
         const remoteUid = (snap.data().updatedBy ?? '') as string
         if (remoteUid && remoteUid !== uid) {
+          // Conflit : un autre utilisateur a écrit pendant qu'on éditait.
+          // On annule la sauvegarde auto en attente pour ne pas écraser sa modif ;
+          // l'utilisateur tranche via le bandeau (recharger ou continuer).
+          if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null }
           remoteDataRef.current = data
           const remoteUser = useUsersStore.getState().users.find(u => u.uid === remoteUid)
           dispatch({ type: 'REMOTE_CHANGED', client: data, byName: remoteUser?.prenom ?? 'un autre utilisateur' })
