@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, ClipboardList } from 'lucide-react'
+import { Plus, Search, ClipboardList, List, CalendarRange, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
+import { usePreleveursStore } from '@/stores/preleveursStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import ClientCard from '@/components/client/ClientCard'
+import YearMatrixView from '@/components/planning/YearMatrixView'
 import { SkeletonList } from '@/components/ui/Skeleton'
 import type { Client } from '@/types'
 import { COLORS } from '@/lib/constants'
@@ -19,11 +21,14 @@ function hasOverdue(client: Client): boolean {
 export default function MissionsPage() {
   const navigate = useNavigate()
   const { clients, loading } = useMissionsStore()
+  const preleveurs = usePreleveursStore((s) => s.preleveurs)
   const uid = useAuthStore(selectUid)
 
   const [search, setSearch] = useState('')
   const [onlyRetard, setOnlyRetard] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [view, setView] = useState<'liste' | 'annee'>('liste')
+  const [year, setYear] = useState(new Date().getFullYear())
 
   const overdueCount = clients.filter(hasOverdue).length
 
@@ -100,45 +105,87 @@ export default function MissionsPage() {
         </button>
       </div>
 
-      {/* Recherche + filtre retard */}
-      <div className="flex gap-2 mb-4">
-        <div className="relative flex-1">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
-            style={{ color: 'var(--color-text-tertiary)' }} />
-          <input
-            type="text"
-            aria-label="Rechercher un client"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher un client, segment, préleveur…"
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
-            style={{
-              background: COLORS.BG_SECONDARY,
-              border: '1px solid var(--color-border-subtle)',
-              color: COLORS.TEXT_PRIMARY,
-            }}
-          />
-        </div>
-
-        {overdueCount > 0 && (
-          <button type="button"
-            onClick={() => setOnlyRetard((v) => !v)}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold shrink-0 transition-all cursor-pointer select-none active:scale-95"
-            style={{
-              background: onlyRetard ? 'var(--color-danger)' : 'var(--color-danger-light)',
-              color: onlyRetard ? 'white' : 'var(--color-danger)',
-              border: '1px solid transparent',
-              boxShadow: onlyRetard ? '0 2px 6px rgba(229, 62, 62, 0.2)' : 'none',
-            }}
-          >
-            <span className="size-1.5 rounded-full bg-current shrink-0" />
-            {overdueCount} en retard
+      {/* Toggle Liste / Vue annuelle */}
+      <div className="flex gap-1.5 p-1.5 rounded-xl mb-4 w-fit"
+        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
+        {([['liste', 'Liste', List], ['annee', 'Vue annuelle', CalendarRange]] as const).map(([v, label, Icon]) => (
+          <button type="button" key={v} onClick={() => setView(v)}
+            className="px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+            style={{ background: view === v ? COLORS.ACCENT : 'transparent', color: view === v ? 'white' : COLORS.TEXT_SECONDARY }}>
+            <Icon size={15} /> {label}
           </button>
-        )}
+        ))}
       </div>
 
-      {/* Liste */}
-      {loading ? (
+      {view === 'annee' ? (
+        <>
+          {/* Navigation année */}
+          <div className="flex items-center gap-3 mb-4">
+            <button type="button" onClick={() => setYear((y) => y - 1)}
+              aria-label="Année précédente"
+              className="size-8 rounded-lg flex items-center justify-center cursor-pointer"
+              style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_SECONDARY }}>
+              <ChevronLeft size={16} />
+            </button>
+            <span className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
+              Année {year}
+            </span>
+            <button type="button" onClick={() => setYear((y) => y + 1)}
+              aria-label="Année suivante"
+              className="size-8 rounded-lg flex items-center justify-center cursor-pointer"
+              style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_SECONDARY }}>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+
+          <YearMatrixView
+            clients={clients}
+            year={year}
+            filterTech=""
+            filterSite=""
+            preleveurs={preleveurs}
+          />
+        </>
+      ) : (
+        <>
+          {/* Recherche + filtre retard */}
+          <div className="flex gap-2 mb-4">
+            <div className="relative flex-1">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
+                style={{ color: 'var(--color-text-tertiary)' }} />
+              <input
+                type="text"
+                aria-label="Rechercher un client"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Rechercher un client, segment, préleveur…"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
+                style={{
+                  background: COLORS.BG_SECONDARY,
+                  border: '1px solid var(--color-border-subtle)',
+                  color: COLORS.TEXT_PRIMARY,
+                }}
+              />
+            </div>
+
+            {overdueCount > 0 && (
+              <button type="button"
+                onClick={() => setOnlyRetard((v) => !v)}
+                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold shrink-0 transition-all cursor-pointer select-none active:scale-95"
+                style={{
+                  background: onlyRetard ? 'var(--color-danger)' : 'var(--color-danger-light)',
+                  color: onlyRetard ? 'white' : 'var(--color-danger)',
+                  border: '1px solid transparent',
+                  boxShadow: onlyRetard ? '0 2px 6px rgba(229, 62, 62, 0.2)' : 'none',
+                }}
+              >
+                <span className="size-1.5 rounded-full bg-current shrink-0" />
+                {overdueCount} en retard
+              </button>
+            )}
+          </div>
+
+          {loading ? (
         <SkeletonList count={5} variant="card" />
       ) : filtered.length === 0 ? (
         onlyRetard || search ? (
@@ -173,6 +220,8 @@ export default function MissionsPage() {
             <ClientCard key={client.id} client={client} />
           ))}
         </div>
+      )}
+        </>
       )}
     </div>
   )

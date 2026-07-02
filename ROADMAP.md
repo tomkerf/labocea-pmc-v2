@@ -355,6 +355,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-07-01 | Couverture tests + fix matColor ✅ | +59 tests logique pure (dashboardUtils, yearMatrixUtils, tuyauxUtils, planningUtils : jours fériés, semaine ISO, grilles). Suite 173 → 232. Fix bug latent `matColor` (fallback undefined → MAT_DEFAULT). Découpe gros fichiers écartée (mauvais ratio risque/gain). Commit `afdb0cd` poussé. |
 | 2026-06-30 | Bugfix Plan de Charge ✅ | Barres orange quand 0 techniciens actifs (division par zéro capacité). Attribution technicien découplée du store preleveurs (preleveurs vides causaient tout en NON_ASSIGNE). Stats vérifiées. |
 | 2026-06-29 | Planning — déplacer un événement ✅ | Bouton « Déplacer à une autre date » dans le popover d'un événement (rappels/réunions/congés), réutilise le sélecteur de date des prélèvements sans le motif. Durée préservée (décalage en bloc via `shiftDateFin`). Service `updateEvenementDate`. Tout utilisateur peut déplacer (suppression reste admin). Glisser-déposer = phase 2. 5 tests, suite 173/173. Staging. |
+| 2026-07-02 | Agents parallèles ✅ | RUN_BOOK.md créé, 27 tests vues planning ajoutés (DayView/WeekView/MonthView), collections en dur → COLLECTIONS, validation uploads fix (plafond 20→10 Mo, catch manquant VisiteFormPage), daysDiff UTC clarifié. Suite 232→261 tests, lint 0. Staging déployée. 🔴 Blocage découvert : staging/prod partagent le même Firestore `labocea-pmc` — nécessite séparation avant bascule Brest. |
 
 
 

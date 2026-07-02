@@ -2,6 +2,61 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 148 — Agents parallèles : run book + tests planning + cleanup dette
+**2 juillet 2026**
+
+### Contexte
+Phases 1-7 complètes, staging stable, 232/232 tests. Production bloquée organisationnellement (DSIN 🔴, Brest 🔴). Trois workstreams lancés en parallèle via agents spécialisés pour préparer la production et enrichir le projet pendant l'attente des décisions organisationnelles.
+
+### Ce qui a été fait
+
+**Workstream A — Run book + checks pré-prod (agent A)**
+- Créé `/RUN_BOOK.md` (9 sections : stack, secrets, redéploiement, backup/restauration, rollback, monitoring, checklist pré-prod, blocages, problèmes fréquents).
+- Audit code : lint 0, tests verts, build OK. Chunk `heic-to` ~2,99 Mo warning pré-existant.
+- Identifié 4 actions manuelles pour Tom : confirmer `FIREBASE_SERVICE_ACCOUNT` sur staging/prod, plan Firebase, **alerte critique sur Firestore partagé**.
+
+**Workstream B — Tests planning + WCAG (agent B, worktree isolé)**
+- Ajouté 27 tests de rendu réel (`DayView.test.tsx` 11, `WeekView.test.tsx` 9, `MonthView.test.tsx` 7) couvrant regroupement par client, événements fantômes, grisage congé scopé, statuts/badges.
+- Vérification WCAG : déjà conforme AA, aucune action nécessaire.
+- Suite : 232 → 261 tests (+29). Lint 0, build OK.
+- Commit `70261f3`.
+
+**Workstream C — Cleanup dette mineure (agent C, worktree isolé)**
+- **Collections Firestore en dur → `COLLECTIONS`** (4 fichiers, plus aucune string littérale).
+- **Validation uploads** : plafond client incohérent corrigé (20 Mo → 10 Mo, aligné Storage rules). **Bug trouvé** : `VisiteFormPage.handlePhotoAdd` sans `catch` → erreurs upload silencieuses, maintenant avec toast. Classe `ImageValidationError` exportée, validation **avant** tout upload.
+- **`daysDiff` UTC** : déjà correct (interprétation midi local), commentaire d'intention + 2 tests non-régression ajoutés.
+- Suite : 261 tests. Lint 0, build OK.
+- Commit `bdfa880`.
+
+**Intégration et déploiement**
+- Deux commits cherry-pickés sur `main` sans conflit (worktrees isolés, aucun fichier commun).
+- Commits finaux sur `main` : `e5b80a3` (RUN_BOOK.md), `bdfa880` (cleanup), `70261f3` (tests planning).
+- Poussé sur `origin/main` et **déployé staging** : https://labocea-pmc-v2-dev.tomkerf.workers.dev (version `17902a78`).
+
+### Blocages et décisions
+
+**🔴 CRITIQUE — Firestore partagé (découvert en session 148)**
+- Staging (`labocea-pmc-v2-dev`) et production (`labocea-pmc-v2`) écrivent dans le **même** projet Firestore `labocea-pmc`.
+- Impact : un test ou bug sur staging modifie les données de production.
+- **Avant bascule Brest en prod, nécessite séparation des environnements** (Option 1 : créer `labocea-pmc-dev`, ~3h). Documenté dans mémoire `project_firestore_env_isolation.md`.
+
+**🟡 À vérifier manuellement (Tom)**
+1. `FIREBASE_SERVICE_ACCOUNT` : confirmer injecté sur les deux Workers (`wrangler secret list`)
+2. Plan Firebase (Spark vs Blaze) + alerte budget : vérifier en console GCP
+3. Décider : accepter risque Firestore partagé ou séparer les environnements avant prod ?
+
+### État
+- **261 tests** verts (232 + 29 new). **Lint** 0 erreur. **Build** OK.
+- **Staging déployée** et prête pour retours équipe.
+- **Production bloquée** sur 3 points organisationnels : DSIN 🔴, Brest 🔴, Firestore env 🔴.
+
+### Prochaines étapes
+1. Décision : séparer Firestore staging/prod avant tout déploiement prod (critique).
+2. Attendre accord DSIN + plan de bascule Brest.
+3. Reconfirmer secrets Worker + plan Firebase.
+
+---
+
 ## Session 147 — Couverture de tests logique métier + fix matColor
 **1er juillet 2026**
 
