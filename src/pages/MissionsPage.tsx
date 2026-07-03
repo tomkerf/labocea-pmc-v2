@@ -78,9 +78,9 @@ export default function MissionsPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className={view === 'annee' ? 'p-6 h-full flex flex-col' : 'p-6'}>
       {/* En-tête */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Missions
@@ -106,7 +106,7 @@ export default function MissionsPage() {
       </div>
 
       {/* Toggle Liste / Vue annuelle */}
-      <div className="flex gap-1.5 p-1.5 rounded-xl mb-4 w-fit"
+      <div className="shrink-0 flex gap-1.5 p-1.5 rounded-xl mb-4 w-fit"
         style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
         {([['liste', 'Liste', List], ['annee', 'Vue annuelle', CalendarRange]] as const).map(([v, label, Icon]) => (
           <button type="button" key={v} onClick={() => setView(v)}
@@ -118,9 +118,9 @@ export default function MissionsPage() {
       </div>
 
       {view === 'annee' ? (
-        <>
+        <div className="flex-1 min-h-0 flex flex-col">
           {/* Navigation année */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="shrink-0 flex items-center gap-3 mb-4">
             <button type="button" onClick={() => setYear((y) => y - 1)}
               aria-label="Année précédente"
               className="size-8 rounded-lg flex items-center justify-center cursor-pointer"
@@ -145,7 +145,7 @@ export default function MissionsPage() {
             filterSite=""
             preleveurs={preleveurs}
           />
-        </>
+        </div>
       ) : (
         <>
           {/* Recherche + filtre retard */}

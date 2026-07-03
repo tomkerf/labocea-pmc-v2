@@ -65,7 +65,7 @@ export default function AppLayout() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="min-h-full"
+              className="h-full"
             >
               <ErrorBoundary key={pathname}>
                 <Outlet />
