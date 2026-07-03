@@ -106,7 +106,7 @@ export default function MissionsPage() {
       </div>
 
       {/* Toggle Liste / Vue annuelle */}
-      <div className={`shrink-0 flex gap-1.5 p-1.5 rounded-xl mb-4 w-fit${view === 'annee' ? ' mx-6' : ''}`}
+      <div className={`shrink-0 self-start flex gap-1.5 p-1.5 rounded-xl mb-4 w-fit${view === 'annee' ? ' mx-6' : ''}`}
         style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
         {([['liste', 'Liste', List], ['annee', 'Vue annuelle', CalendarRange]] as const).map(([v, label, Icon]) => (
           <button type="button" key={v} onClick={() => setView(v)}
