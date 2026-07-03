@@ -2,6 +2,25 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 150 — Rapport d'intervention prévu : saisie dans la modale de tournée
+**3 juillet 2026**
+
+### Contexte
+Demande utilisateur : pouvoir indiquer si un rapport d'intervention est attendu au moment de valider un prélèvement "Réalisé" dans la modale de tournée du jour.
+
+### Ce qui a été fait
+- Le champ `sampling.rapportPrevu` existait déjà dans le modèle (alimente RapportsPage, widget dashboard, exports) mais n'avait aucun point de saisie côté terrain — seul `SamplingForm.tsx` (écran admin/plan) l'exposait.
+- **`SaisieRapideModal.tsx`** : ajout d'un toggle « Rapport d'intervention prévu », visible uniquement quand statut = Réalisé. Pré-rempli avec la valeur existante du sampling (prop `initialRapportPrevu`).
+- **`TourneePage.tsx`** : `TourneeItemData` expose `rapportPrevu` ; `handleConfirm` écrit `rapportPrevu` + calcule `rapportDatePrevue` (doneDate + 1 mois) si nécessaire.
+- **`lib/samplings.ts`** : extraction de `computeRapportDatePrevue()` — cette règle de calcul était déjà dupliquée dans `usePlanActions.ts` et `SamplingForm.tsx`, réutilisée ici plutôt que réimplémentée une 4e fois.
+
+### État
+- TypeScript 0 erreur, lint 0 erreur, 261/261 tests verts, react-doctor sans régression.
+- Commit `215fd45`, staging déployé (version `bc0f4c19`).
+- Non testé visuellement en session (pas d'accès aux identifiants de connexion) — à valider par Tom sur staging.
+
+---
+
 ## Session 149 — Bugfix UI + SW cache invalidation : MissionsPage toggle pill
 **3 juillet 2026**
 
