@@ -3,6 +3,8 @@ import * as Sentry from '@sentry/react'
 export function initSentry() {
   const dsn = import.meta.env.VITE_SENTRY_DSN
   if (!dsn) return
+  // Dev local (Vite HMR + Firestore reconnects transitoires) génère du bruit sans valeur — voir session 151
+  if (import.meta.env.DEV) return
 
   Sentry.init({
     dsn,

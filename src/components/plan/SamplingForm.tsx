@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { HelpCircle } from 'lucide-react'
 import { uploadSamplingPhoto, deleteSamplingPhoto, ImageValidationError } from '@/lib/uploadPhoto'
+import { computeRapportDatePrevue } from '@/lib/samplings'
 import { toast } from '@/stores/toastStore'
 import type { AppUser, Sampling, SamplingStatus, NappeType, ChecklistItem } from '@/types'
 import { COLORS } from '@/lib/constants'
@@ -27,9 +28,7 @@ export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId
   // Auto-remplir rapportDatePrevue = doneDate + 1 mois pour les prélèvements existants
   useEffect(() => {
     if (sampling.rapportPrevu && !sampling.rapportDatePrevue && sampling.doneDate) {
-      const d = new Date(sampling.doneDate)
-      d.setMonth(d.getMonth() + 1)
-      onUpdate('rapportDatePrevue', d.toISOString().slice(0, 10))
+      onUpdate('rapportDatePrevue', computeRapportDatePrevue(sampling.doneDate))
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- react-doctor/exhaustive-deps
   }, [sampling.rapportPrevu, sampling.rapportDatePrevue, sampling.doneDate])

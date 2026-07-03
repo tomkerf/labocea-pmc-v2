@@ -1,5 +1,5 @@
 import { generateId } from '@/lib/ids'
-import { generateSamplings } from '@/lib/samplings'
+import { generateSamplings, computeRapportDatePrevue } from '@/lib/samplings'
 import { buildReportHtml } from '@/lib/reportHtml'
 import React from 'react'
 import type { Client, Plan, Sampling, SamplingStatus, NappeType, SamplingHistoryEntry, AppUser } from '@/types'
@@ -68,9 +68,7 @@ export function usePlanActions({
       const effectiveDoneDate = field === 'doneDate' ? String(value) : s.doneDate
       const effectiveRapportPrevu = field === 'rapportPrevu' ? Boolean(value) : s.rapportPrevu
       if (effectiveRapportPrevu && !s.rapportDatePrevue && effectiveDoneDate) {
-        const d = new Date(effectiveDoneDate)
-        d.setMonth(d.getMonth() + 1)
-        patch.rapportDatePrevue = d.toISOString().slice(0, 10)
+        patch.rapportDatePrevue = computeRapportDatePrevue(effectiveDoneDate)
       }
 
       const formatter = AUDIT_FIELDS[field]
