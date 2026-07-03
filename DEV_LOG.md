@@ -2,6 +2,70 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 149 — Bugfix UI + SW cache invalidation : MissionsPage toggle pill
+**3 juillet 2026**
+
+### Contexte
+User report : le cartouche « Liste / Vue annuelle » sur MissionsPage s'étire à la pleine largeur au lieu de rester compact. Investigation et déploiement du fix de session 148 (commit aada487 ajoutant `self-start`) n'a pas résolu le bug — le problème persiste en staging.
+
+### Root causes investigués et validés
+
+**Root cause 1 — Service Worker cache stale (🔴 CRITIQUE)**
+- `public/sw.js` a `CACHE_VERSION = 'pmc-v2-2'` hardcodée, ne change jamais entre déploiements
+- SW utilise Cache First strategy pour `/assets/*` (bundles JS)
+- Quand on déploie version 495e2548, le navigateur voit toujours `CACHE_VERSION = 'pmc-v2-2'` (identique)
+- Cache reste valide, ancien bundle compilé continue d'être servi
+- Le fix du code source (commit aada487) n'est jamais exécuté côté client
+
+**Root cause 2 — Tailwind v4 class purging (SECONDAIRE)**
+- Tailwind v4.2.4 utilise Oxide scanner (static string analysis) sans `tailwind.config.js` (CSS-based config)
+- className ligne 109 de MissionsPage.tsx : template literal avec condition
+  ```tsx
+  className={`shrink-0 self-start flex gap-1.5 p-1.5 rounded-xl mb-4 w-fit${view === 'annee' ? ' mx-6' : ''}`}
+  ```
+- Oxide scanner conservateur : complexité du template peut dépasser seuil détection
+- Classes `flex` et `w-fit` potentiellement purgées du CSS généré
+- L'élément devient block div (pas flexbox) → stretch 100% width = symptôme visible
+
+**Pourquoi le bug apparaît dans LES DEUX modes (liste ET annee)**
+- Mode 'liste' (parent = block) : sans `flex` + `w-fit` générées, élément = block div → 100% width
+- Mode 'annee' (parent = flex-col) : sans `flex` + `w-fit`, élément = block div → cross-axis stretch
+
+### Fixes appliquées
+
+**Fix 1 — MissionsPage.tsx (commit c3a37d5, ligne 108-117)**
+- `className` rendu **totalement statique** (pas de template literal avec condition)
+- Styles inline force : `display: 'flex'`, `width: 'fit-content'`, `alignSelf: 'flex-start'`, `marginLeft` dynamique
+- Résultat : layout garanti flexbox + width indépendant du CSS Tailwind généré
+- Alternative : wrapper div supplémentaire, mais solution inline est minimale et claire
+
+**Fix 2 — public/sw.js (commit c3a37d5)**
+- CACHE_VERSION 'pmc-v2-2' → 'pmc-v2-3'
+- Invalide caches périmés immédiatement au rechargement du SW
+- Force téléchargement des nouveaux bundles assets
+
+### Déploiement et validation
+
+- Build : `npm run build` ✓ 622ms, aucune erreur
+- Staging : `bash deploy-dev.sh` ✓ version `edac02b1` (nouveau hash CACHE_VERSION)
+- React Doctor : aucune régression (staged check ok)
+- Git : pushed to origin/main (commit c3a37d5)
+
+### Prochaines étapes
+
+1. **User side** : hard-refresh navigateur (Cmd+Shift+R / Ctrl+Shift+R) pour bypasser ancien SW cache
+2. **Long-term** : injecter dynamiquement `CACHE_VERSION` depuis le build (hash asset, timestamp, ou env var) pour auto-invalidation à chaque déploiement
+3. **Tailwind best practice** : voir s'il existe une option Oxide pour améliorer la détection sur templates complexes, ou documenter le pattern "inline styles pour flexbox critical"
+
+### Blocages restants
+
+Tous en attente organisationnelle :
+- 🔴 Firestore staging/prod partagé (session 148)
+- 🔴 DSIN approbation prod
+- 🔴 Plan bascule équipe Brest
+
+---
+
 ## Session 148 — Agents parallèles : run book + tests planning + cleanup dette
 **2 juillet 2026**
 
