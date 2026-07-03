@@ -106,8 +106,15 @@ export default function MissionsPage() {
       </div>
 
       {/* Toggle Liste / Vue annuelle */}
-      <div className={`shrink-0 self-start flex gap-1.5 p-1.5 rounded-xl mb-4 w-fit${view === 'annee' ? ' mx-6' : ''}`}
-        style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
+      <div className="shrink-0 flex gap-1.5 p-1.5 rounded-xl mb-4 w-fit"
+        style={{
+          background: COLORS.BG_SECONDARY,
+          border: '1px solid var(--color-border-subtle)',
+          display: 'flex',
+          width: 'fit-content',
+          alignSelf: 'flex-start',
+          marginLeft: view === 'annee' ? '1.5rem' : '0'
+        }}>
         {([['liste', 'Liste', List], ['annee', 'Vue annuelle', CalendarRange]] as const).map(([v, label, Icon]) => (
           <button type="button" key={v} onClick={() => setView(v)}
             className="px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
