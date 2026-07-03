@@ -34,13 +34,11 @@ export default function MissionsPage() {
     return Array.from(sites).sort()
   }, [preleveurs])
 
-  // Extraire les techniciens uniques assignés à des plans
+  // Extraire les techniciens uniques assignés aux clients
   const availableTechs = useMemo(() => {
     const techs = new Set<string>()
     clients.forEach(c => {
-      c.plans.forEach(p => {
-        if (c.preleveur) techs.add(c.preleveur)
-      })
+      if (c.preleveur) techs.add(c.preleveur)
     })
     return Array.from(techs).sort()
   }, [clients])
