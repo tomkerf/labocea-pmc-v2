@@ -34,6 +34,8 @@ Vérification visuelle sur staging (Chrome MCP) : le filtre Technicien recalcula
 
 **Revalidation staging après déploiement** : filtre Site "Brest" → 0 prélèv. (cohérent, aucun client de staging n'est assigné aux 4 techniciens Brest) ; filtre "Quimper" → 567/568 prélèv. (cohérent avec les 2 techniciens ROD/THK). Filtre confirmé fonctionnel de bout en bout.
 
+**Test avec volume non-nul côté Brest** : staging et prod partageant le même Firestore (blocage connu), pas de "clients de test" existants — création d'un client jetable `TEST - à supprimer` (préleveur FBA, technicien Brest) avec un point de prélèvement mensuel généré (12 prélèvements 2026). Filtre Site "Brest" → passe de 0 à 12 prélèv., "Pic d'activité Janvier", capacité 140 (4 techs Brest actifs). Confirme le filtrage de bout en bout y compris avec du volume réel. Client de test supprimé immédiatement après (retour à 41 clients, aucune donnée réelle modifiée).
+
 ### État
 - TypeScript/Vite build OK. 261/261 tests verts. Score react-doctor 213 issues (+2 warnings accessibilité mineurs vs 211 avant, pas de régression bloquante).
 - Poussé sur `origin/main` (commits `e20588b`→`14ae250` puis fix `60589a1`). Staging redéployé et filtres Site + Technicien validés visuellement.
