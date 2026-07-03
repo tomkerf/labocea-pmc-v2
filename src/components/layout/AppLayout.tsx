@@ -57,7 +57,7 @@ export default function AppLayout() {
         </header>
 
         {/* Pages avec transition */}
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto md:pb-0" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-0">
           <AnimatePresence mode="wait">
             <m.div
               key={pathname}
