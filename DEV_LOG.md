@@ -2,6 +2,31 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 151 — Investigation Sentry : "send was called before connect"
+**3 juillet 2026**
+
+### Contexte
+Deux liens Sentry partagés par l'utilisateur (issue `LABOCEA-PMC-V2-5` / `131849709`) : erreur `Error: send was called before connect` sur `/missions`, marquée "Escalating" par Sentry.
+
+### Analyse
+- Stack trace 100% dans `/@vite/client` (client HMR de Vite), pas dans le code applicatif.
+- Tags de l'event : `environment: development`, `url: http://localhost:5173/missions` — confirmé : erreur générée en dev local, pas en staging/prod.
+- Chaîne causale reconstituée via les breadcrumbs :
+  1. Firestore WebChannel `Listen` stream errore (400) — accroc réseau transitoire, se reconnecte seul.
+  2. Firebase logge un `console.warn`.
+  3. L'intégration console de `@sentry/react` intercepte ce warn et tente de le relayer.
+  4. Le relai passe par `sendLog` du client Vite, dont le WebSocket HMR n'est pas encore connecté → exception.
+- 11 occurrences / 1 seul utilisateur (Tom, en local) sur 15h. Aucun impact utilisateur réel.
+
+### Conclusion
+Faux positif lié à l'environnement de dev local (interaction Sentry ↔ Vite HMR), sans rapport avec la prod. Aucune modification de code effectuée en session.
+
+### Prochaines étapes
+- Décider si on filtre ce type d'erreur côté config Sentry (exclure `environment: development` ou les URLs `/@vite/client`) pour garder la liste d'issues propre.
+- Reste en attente (reporté de sessions précédentes) : `MissionDetailPage.handleTerminer` sans prompt rapport prévu ; isolation Firestore staging/prod (🔴) ; dédup `computeRapportDatePrevue` restante dans `usePlanActions.ts`/`SamplingForm.tsx` ; SW `CACHE_VERSION` statique.
+
+---
+
 ## Session 150 — Rapport d'intervention prévu : saisie dans la modale de tournée
 **3 juillet 2026**
 
