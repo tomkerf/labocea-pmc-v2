@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, ClipboardList, List, CalendarRange, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Search, ClipboardList, List, CalendarRange, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { usePreleveursStore } from '@/stores/preleveursStore'
@@ -8,6 +8,7 @@ import { useAuthStore, selectUid } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import ClientCard from '@/components/client/ClientCard'
 import YearMatrixView from '@/components/planning/YearMatrixView'
+import WorkloadMatrixView from '@/components/planning/WorkloadMatrixView'
 import { SkeletonList } from '@/components/ui/Skeleton'
 import type { Client } from '@/types'
 import { COLORS } from '@/lib/constants'
@@ -27,7 +28,7 @@ export default function MissionsPage() {
   const [search, setSearch] = useState('')
   const [onlyRetard, setOnlyRetard] = useState(false)
   const [creating, setCreating] = useState(false)
-  const [view, setView] = useState<'liste' | 'annee'>('liste')
+  const [view, setView] = useState<'liste' | 'annee' | 'charge'>('liste')
   const [year, setYear] = useState(new Date().getFullYear())
 
   const overdueCount = clients.filter(hasOverdue).length
@@ -77,10 +78,12 @@ export default function MissionsPage() {
     }
   }
 
+  const isMatrixView = view === 'annee' || view === 'charge'
+
   return (
-    <div className={view === 'annee' ? 'h-full flex flex-col' : 'p-6'}>
+    <div className={isMatrixView ? 'h-full flex flex-col' : 'p-6'}>
       {/* En-tête */}
-      <div className={`shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6${view === 'annee' ? ' px-6 pt-6' : ''}`}>
+      <div className={`shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6${isMatrixView ? ' px-6 pt-6' : ''}`}>
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Missions
@@ -105,7 +108,7 @@ export default function MissionsPage() {
         </button>
       </div>
 
-      {/* Toggle Liste / Vue annuelle */}
+      {/* Toggle Liste / Vue annuelle / Charge */}
       <div className="shrink-0 flex gap-1.5 p-1.5 rounded-xl mb-4 w-fit"
         style={{
           background: COLORS.BG_SECONDARY,
@@ -113,9 +116,9 @@ export default function MissionsPage() {
           display: 'flex',
           width: 'fit-content',
           alignSelf: 'flex-start',
-          marginLeft: view === 'annee' ? '1.5rem' : '0'
+          marginLeft: isMatrixView ? '1.5rem' : '0'
         }}>
-        {([['liste', 'Liste', List], ['annee', 'Vue annuelle', CalendarRange]] as const).map(([v, label, Icon]) => (
+        {([['liste', 'Liste', List], ['annee', 'Vue annuelle', CalendarRange], ['charge', 'Charge', BarChart3]] as const).map(([v, label, Icon]) => (
           <button type="button" key={v} onClick={() => setView(v)}
             className="px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
             style={{ background: view === v ? COLORS.ACCENT : 'transparent', color: view === v ? 'white' : COLORS.TEXT_SECONDARY }}>
@@ -124,7 +127,7 @@ export default function MissionsPage() {
         ))}
       </div>
 
-      {view === 'annee' ? (
+      {isMatrixView ? (
         <div className="flex-1 min-h-0 flex flex-col">
           {/* Navigation année */}
           <div className="shrink-0 flex items-center gap-3 mb-4 px-6">
@@ -145,13 +148,23 @@ export default function MissionsPage() {
             </button>
           </div>
 
-          <YearMatrixView
-            clients={clients}
-            year={year}
-            filterTech=""
-            filterSite=""
-            preleveurs={preleveurs}
-          />
+          {view === 'annee' ? (
+            <YearMatrixView
+              clients={clients}
+              year={year}
+              filterTech=""
+              filterSite=""
+              preleveurs={preleveurs}
+            />
+          ) : (
+            <WorkloadMatrixView
+              clients={clients}
+              year={year}
+              filterTech=""
+              filterSite=""
+              preleveurs={preleveurs}
+            />
+          )}
         </div>
       ) : (
         <>
