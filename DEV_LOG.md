@@ -25,13 +25,20 @@ Demande utilisateur : ajouter des filtres par site (Brest/Quimper) et par techni
 - Filtres câblés jusqu'à `YearMatrixView` et `WorkloadMatrixView` (double filtrage données + liste techniciens affichés dans `WorkloadMatrixView`).
 - Exécuté en `subagent-driven-development` (4 tâches, review de conformité indépendant après chaque tâche — a détecté et fait corriger le bug de câblage manquant à la tâche 4).
 
+### Bugfix — filtre Site vide sur MissionsPage (commit `60589a1`)
+Vérification visuelle sur staging (Chrome MCP) : le filtre Technicien recalculait bien les KPIs (568→314 prélèv., capacité 70→35, 2→1 technicien actif sur "ROD"), mais le filtre Site n'affichait jamais que "Tous les sites" alors que les 6 préleveurs ont un site configuré en Admin (`ROD`/`THK` → Quimper, 4 autres → Brest).
+
+**Cause racine** : `availableSites` se calcule depuis `usePreleveursStore` (champ `Preleveur.site`), pas depuis les clients. Mais `MissionsPage.tsx` ne lit que le store sans jamais monter `usePreleveursListener()` — ce listener est volontairement local à chaque page consommatrice (voir `GlobalListeners.tsx`), et seule `PlanningPage` le montait jusqu'ici. Résultat : le store restait vide sur `/missions` sauf si l'utilisateur était passé par le Planning avant dans la même session.
+
+**Fix** : ajout de `usePreleveursListener()` dans `MissionsPage.tsx`.
+
+**Revalidation staging après déploiement** : filtre Site "Brest" → 0 prélèv. (cohérent, aucun client de staging n'est assigné aux 4 techniciens Brest) ; filtre "Quimper" → 567/568 prélèv. (cohérent avec les 2 techniciens ROD/THK). Filtre confirmé fonctionnel de bout en bout.
+
 ### État
 - TypeScript/Vite build OK. 261/261 tests verts. Score react-doctor 213 issues (+2 warnings accessibilité mineurs vs 211 avant, pas de régression bloquante).
-- Poussé sur `origin/main`.
-- **Vérifié visuellement sur staging** (Chrome MCP) : le filtre Technicien change bien les KPIs (568→314 prélèv., capacité 70→35, 2→1 technicien actif en sélectionnant "ROD"). Le filtre Site n'affiche que "Tous les sites" — aucun bug : les 41 clients de staging n'ont simplement pas de champ `site` renseigné, donc `availableSites` est vide. Le code est correct, c'est une limite des données de test.
+- Poussé sur `origin/main` (commits `e20588b`→`14ae250` puis fix `60589a1`). Staging redéployé et filtres Site + Technicien validés visuellement.
 
 ### Prochaines étapes
-- Si le filtre Site doit être testé fonctionnellement, renseigner le champ `site` (Brest/Quimper) sur quelques clients de staging.
 - Reste organisationnel : isolation Firestore staging/prod 🔴, accord DSIN 🔴, plan de bascule Brest 🟡.
 
 ---
