@@ -168,6 +168,51 @@ export default function MissionsPage() {
             </button>
           </div>
 
+          {/* Filtres Site et Technicien */}
+          <div className="shrink-0 flex gap-3 px-6 mb-4">
+            <div className="flex-1 flex flex-col gap-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+                Site
+              </label>
+              <select
+                value={filterSite}
+                onChange={(e) => setFilterSite(e.target.value)}
+                className="px-3 py-2 rounded-lg text-sm outline-none"
+                style={{
+                  background: COLORS.BG_SECONDARY,
+                  border: '1px solid var(--color-border-subtle)',
+                  color: COLORS.TEXT_PRIMARY,
+                }}
+              >
+                <option value="">Tous les sites</option>
+                {availableSites.map(site => (
+                  <option key={site} value={site}>{site}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex-1 flex flex-col gap-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+                Technicien
+              </label>
+              <select
+                value={filterTech}
+                onChange={(e) => setFilterTech(e.target.value)}
+                className="px-3 py-2 rounded-lg text-sm outline-none"
+                style={{
+                  background: COLORS.BG_SECONDARY,
+                  border: '1px solid var(--color-border-subtle)',
+                  color: COLORS.TEXT_PRIMARY,
+                }}
+              >
+                <option value="">Tous les techniciens</option>
+                {availableTechs.map(tech => (
+                  <option key={tech} value={tech}>{tech}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           {view === 'annee' ? (
             <YearMatrixView
               clients={clients}
