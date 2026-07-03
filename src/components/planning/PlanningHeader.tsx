@@ -165,7 +165,7 @@ export default function PlanningHeader({
             {/* Cartouche 1: Vues Calendaires */}
             <div className="relative flex p-0.5 rounded-lg shrink-0 w-full md:w-auto overflow-x-auto no-scrollbar"
               style={{ border:'1px solid var(--color-border-subtle)', background:COLORS.BG_TERTIARY }}>
-              {(['jour', 'semaine', 'mois', 'charge'] as ViewMode[]).concat(window.innerWidth >= 768 ? ['annee'] : []).map(view => {
+              {(['jour', 'semaine', 'mois', 'charge'] as ViewMode[]).map(view => {
                 const labelMap: Record<ViewMode, string> = {
                   jour: 'Jour',
                   semaine: 'Semaine',
