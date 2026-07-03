@@ -11,6 +11,7 @@ import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { saveClient } from '@/services/clientService'
 import { localISO } from '@/lib/dashboardUtils'
+import { computeRapportDatePrevue } from '@/lib/samplings'
 import type { Client, Plan, Sampling, NappeType } from '@/types'
 
 import { TourneeItem } from '@/components/tournee/TourneeItem'
@@ -32,6 +33,7 @@ interface ModalState {
   siteNom: string
   nature: string
   initialStatus: 'done' | 'non_effectue' | 'reporte'
+  initialRapportPrevu: boolean
   hideRealise?: boolean
 }
 
@@ -77,6 +79,7 @@ export default function TourneePage() {
           status:     (s?.status === 'done' ? 'done' : s?.status === 'non_effectue' ? 'non_effectue' : 'todo') as TourneeItemData['status'],
           motif:      s?.motif ?? '',
           isJ1Bilan24: i.isJ1Bilan24,
+          rapportPrevu: s?.rapportPrevu ?? false,
         }]
       })
       .sort((a, b) => {
@@ -117,6 +120,7 @@ export default function TourneePage() {
         siteNom:  item.siteNom,
         nature:   item.nature,
         initialStatus: 'reporte',
+        initialRapportPrevu: item.rapportPrevu,
         hideRealise: true,
       })
       return
@@ -129,6 +133,7 @@ export default function TourneePage() {
       siteNom:  item.siteNom,
       nature:   item.nature,
       initialStatus: action,
+      initialRapportPrevu: item.rapportPrevu,
       hideRealise: item.isJ1Bilan24 ? true : undefined,
     })
   }
@@ -146,12 +151,17 @@ export default function TourneePage() {
         samplings: plan.samplings.map((s: Sampling) => {
           if (s.id !== modal.samplingId) return s
           if (data.status === 'done') {
+            const doneDate = localISO(d)
             return {
               ...s,
               status:   'done',
-              doneDate: localISO(d),
+              doneDate,
               nappe:    data.nappe as NappeType,
               comment:  data.commentaire,
+              rapportPrevu: data.rapportPrevu,
+              rapportDatePrevue: data.rapportPrevu && !s.rapportDatePrevue
+                ? computeRapportDatePrevue(doneDate)
+                : s.rapportDatePrevue,
             }
           }
           if (data.status === 'reporte') {
@@ -315,6 +325,7 @@ export default function TourneePage() {
           siteNom={modal.siteNom}
           nature={modal.nature}
           initialStatus={modal.initialStatus}
+          initialRapportPrevu={modal.initialRapportPrevu}
           hideRealise={modal.hideRealise}
           onConfirm={handleConfirm}
           onClose={() => setModal(null)}

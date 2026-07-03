@@ -18,6 +18,7 @@ const baseItem: TourneeItemData = {
   lng: '',
   status: 'todo',
   motif: '',
+  rapportPrevu: false,
 }
 
 function renderWithRouter(ui: React.ReactElement) {

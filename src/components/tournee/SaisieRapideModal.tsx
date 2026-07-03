@@ -19,6 +19,7 @@ export interface SaisieRapideData {
   commentaire: string
   motif: string
   newPlannedDate: string
+  rapportPrevu: boolean
 }
 
 interface Props {
@@ -26,6 +27,7 @@ interface Props {
   siteNom: string
   nature: string
   initialStatus: 'done' | 'non_effectue' | 'reporte'
+  initialRapportPrevu?: boolean
   hideRealise?: boolean
   onConfirm: (data: SaisieRapideData) => void
   onClose: () => void
@@ -40,9 +42,10 @@ interface FormState {
   nappe: NappeType
   commentaire: string
   motif: string
+  rapportPrevu: boolean
 }
 
-type FormAction = { type: 'field'; name: keyof FormState; value: string | NappeType | 'done' | 'non_effectue' | 'reporte' }
+type FormAction = { type: 'field'; name: keyof FormState; value: string | boolean | NappeType | 'done' | 'non_effectue' | 'reporte' }
 
 function formReducer(state: FormState, action: FormAction): FormState {
   if (action.type === 'field') {
@@ -51,7 +54,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
   return state
 }
 
-export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, hideRealise, onConfirm, onClose }: Props) {
+export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, initialRapportPrevu, hideRealise, onConfirm, onClose }: Props) {
   const [form, dispatch] = useReducer(formReducer, undefined, (): FormState => ({
     status:         initialStatus === 'done' && hideRealise ? 'non_effectue' : initialStatus,
     doneDate:       todayISO(),
@@ -59,8 +62,9 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
     nappe:          '',
     commentaire:    '',
     motif:          '',
+    rapportPrevu:   initialRapportPrevu ?? false,
   }))
-  const { status, doneDate, newPlannedDate, nappe, commentaire, motif } = form
+  const { status, doneDate, newPlannedDate, nappe, commentaire, motif, rapportPrevu } = form
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -77,7 +81,7 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
     }
     setError('')
     setSubmitting(true)
-    onConfirm({ status, doneDate, nappe, commentaire, motif: motif.trim(), newPlannedDate })
+    onConfirm({ status, doneDate, nappe, commentaire, motif: motif.trim(), newPlannedDate, rapportPrevu })
   }
 
   return (
@@ -123,6 +127,20 @@ export function SaisieRapideModal({ clientNom, siteNom, nature, initialStatus, h
               <input type="date" value={doneDate} onChange={e => dispatch({ type: 'field', name: 'doneDate', value: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ border: '1px solid var(--color-border)', background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }} />
+            </label>
+          )}
+
+          {/* Rapport d'intervention prévu — uniquement si done */}
+          {status === 'done' && (
+            <label className="flex items-center gap-2.5 mb-3 px-3 py-2.5 rounded-lg cursor-pointer"
+              style={{ background: COLORS.BG_TERTIARY }}>
+              <input type="checkbox" aria-label="Rapport d'intervention prévu"
+                checked={rapportPrevu}
+                onChange={e => dispatch({ type: 'field', name: 'rapportPrevu', value: e.target.checked })}
+                className="size-4 rounded cursor-pointer" />
+              <span className="text-sm font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>
+                Rapport d'intervention prévu
+              </span>
             </label>
           )}
 

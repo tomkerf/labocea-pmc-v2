@@ -18,6 +18,7 @@ export interface TourneeItemData {
   status: 'todo' | 'done' | 'non_effectue' | 'reporte'
   motif: string
   isJ1Bilan24?: boolean
+  rapportPrevu: boolean
 }
 
 interface Props {

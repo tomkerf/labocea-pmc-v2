@@ -1,6 +1,13 @@
 import type { Plan, Sampling, SamplingStatus, NappeType } from '@/types'
 import { generateId } from './ids'
 
+/** Date d'envoi par défaut d'un rapport prévu : un mois après la date de réalisation. */
+export function computeRapportDatePrevue(doneDateISO: string): string {
+  const d = new Date(doneDateISO)
+  d.setMonth(d.getMonth() + 1)
+  return d.toISOString().slice(0, 10)
+}
+
 /** Génère la liste initiale des prélèvements pour un plan selon sa fréquence.
  *  - 'Personnalisé' → retourne [] (saisie manuelle uniquement)
  *  - 'Bimensuel'    → 2 prélèvements par mois, jour non fixé (plannedDay = 0)
