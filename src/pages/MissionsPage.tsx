@@ -30,6 +30,8 @@ export default function MissionsPage() {
   const [creating, setCreating] = useState(false)
   const [view, setView] = useState<'liste' | 'annee' | 'charge'>('liste')
   const [year, setYear] = useState(new Date().getFullYear())
+  const [filterSite, setFilterSite] = useState('')
+  const [filterTech, setFilterTech] = useState('')
 
   const overdueCount = clients.filter(hasOverdue).length
 
