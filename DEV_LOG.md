@@ -2,6 +2,39 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 152 — Filtres site/technicien + réorganisation vue Charge
+**3 juillet 2026**
+
+### Contexte
+Demande utilisateur : ajouter des filtres par site (Brest/Quimper) et par technicien dans l'onglet Charge des Missions. En marge, nettoyage de dette identifiée (dédup `computeRapportDatePrevue`, bruit Sentry en dev) et réorganisation de la navigation Planning/Missions.
+
+### Ce qui a été fait
+
+**Dédup + Sentry (commit `cdca2a2`)**
+- `usePlanActions.ts` et `SamplingForm.tsx` dupliquaient encore la logique `doneDate + 1 mois` extraite en session 150 dans `lib/samplings.ts` — remplacés par l'appel à `computeRapportDatePrevue()`.
+- `src/lib/sentry.ts` : Sentry ne s'initialise plus en dev (`import.meta.env.DEV`), supprime le faux positif "send was called before connect" (session 151) sans impact staging/prod.
+
+**Réorganisation Planning → Missions (commits `b1b29e0`, `8c5c10a`)**
+- Onglet "Année" retiré du sélecteur de vues du Planning.
+- Vue "Plan de Charge" (`WorkloadMatrixView`) déplacée du Planning vers un 3ᵉ onglet de `MissionsPage`, aux côtés de Liste et Vue annuelle (même navigation par année). `ViewMode` perd la valeur `'charge'` côté Planning.
+
+**Filtres site/technicien dans l'onglet Charge (commits `e20588b`, `0a42293`, `5c082f5`, `091f641`, `14ae250`)**
+- États `filterSite`/`filterTech` ajoutés dans `MissionsPage.tsx`.
+- `availableSites`/`availableTechs` calculés via `useMemo` à partir des clients (bug de boucle imbriquée redondante corrigé au passage sur `availableTechs`).
+- Selects "Site" et "Technicien" ajoutés dans la zone matrice.
+- Filtres câblés jusqu'à `YearMatrixView` et `WorkloadMatrixView` (double filtrage données + liste techniciens affichés dans `WorkloadMatrixView`).
+- Exécuté en `subagent-driven-development` (4 tâches, review de conformité indépendant après chaque tâche — a détecté et fait corriger le bug de câblage manquant à la tâche 4).
+
+### État
+- TypeScript/Vite build OK. 261/261 tests verts. Score react-doctor 213 issues (+2 warnings accessibilité mineurs vs 211 avant, pas de régression bloquante).
+- Poussé sur `origin/main`. **Non testé visuellement** (nécessite une session authentifiée) — à valider par Tom sur staging.
+
+### Prochaines étapes
+- Validation visuelle des filtres Site/Technicien sur staging par Tom.
+- Reste organisationnel : isolation Firestore staging/prod 🔴, accord DSIN 🔴, plan de bascule Brest 🟡.
+
+---
+
 ## Session 151 — Investigation Sentry : "send was called before connect"
 **3 juillet 2026**
 
