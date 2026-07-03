@@ -27,10 +27,11 @@ Demande utilisateur : ajouter des filtres par site (Brest/Quimper) et par techni
 
 ### État
 - TypeScript/Vite build OK. 261/261 tests verts. Score react-doctor 213 issues (+2 warnings accessibilité mineurs vs 211 avant, pas de régression bloquante).
-- Poussé sur `origin/main`. **Non testé visuellement** (nécessite une session authentifiée) — à valider par Tom sur staging.
+- Poussé sur `origin/main`.
+- **Vérifié visuellement sur staging** (Chrome MCP) : le filtre Technicien change bien les KPIs (568→314 prélèv., capacité 70→35, 2→1 technicien actif en sélectionnant "ROD"). Le filtre Site n'affiche que "Tous les sites" — aucun bug : les 41 clients de staging n'ont simplement pas de champ `site` renseigné, donc `availableSites` est vide. Le code est correct, c'est une limite des données de test.
 
 ### Prochaines étapes
-- Validation visuelle des filtres Site/Technicien sur staging par Tom.
+- Si le filtre Site doit être testé fonctionnellement, renseigner le champ `site` (Brest/Quimper) sur quelques clients de staging.
 - Reste organisationnel : isolation Firestore staging/prod 🔴, accord DSIN 🔴, plan de bascule Brest 🟡.
 
 ---
