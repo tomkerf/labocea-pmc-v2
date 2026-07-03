@@ -217,16 +217,16 @@ export default function MissionsPage() {
             <YearMatrixView
               clients={clients}
               year={year}
-              filterTech=""
-              filterSite=""
+              filterTech={filterTech}
+              filterSite={filterSite}
               preleveurs={preleveurs}
             />
           ) : (
             <WorkloadMatrixView
               clients={clients}
               year={year}
-              filterTech=""
-              filterSite=""
+              filterTech={filterTech}
+              filterSite={filterSite}
               preleveurs={preleveurs}
             />
           )}
