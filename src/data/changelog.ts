@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '131'
+export const CHANGELOG_VERSION = '135'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,42 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '135',
+    date: '3 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Planning : Suppression de l\'onglet "Année" du sélecteur de vues (Jour/Semaine/Mois)' },
+      { type: 'feat', label: 'Missions : Ajout d\'un 3e onglet "Charge" (vue Plan de Charge) aux côtés de Liste et Vue annuelle' },
+      { type: 'fix', label: 'Code : Déduplication de la logique `computeRapportDatePrevue` (utilisée par usePlanActions et SamplingForm)' },
+      { type: 'fix', label: 'Sentry : Désactivation en environnement de développement local pour éviter le bruit des faux positifs Vite HMR' },
+    ],
+  },
+  {
+    version: '134',
+    date: '3 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Tournée : Checkbox "Rapport d\'intervention prévu" lors de la validation d\'un prélèvement Réalisé' },
+      { type: 'fix', label: 'Code : Extraction de la fonction `computeRapportDatePrevue()` partagée (calcul doneDate + 1 mois)' },
+    ],
+  },
+  {
+    version: '133',
+    date: '2 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Tests : Ajout de 27 tests de rendu réel sur les vues Planning (DayView/WeekView/MonthView)' },
+      { type: 'fix', label: 'Nettoyage : Remplacement de toutes les collections Firestore en dur par la constante COLLECTIONS' },
+      { type: 'fix', label: 'Validation : Harmonisation du plafond upload client (20 Mo → 10 Mo, aligné sur Storage rules) + gestion d\'erreur VisiteFormPage' },
+    ],
+  },
+  {
+    version: '132',
+    date: '2 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Infra : Création du fichier RUN_BOOK.md (procédures déploiement, secrets, rollback, troubleshooting)' },
+      { type: 'fix', label: 'Perf : Ajout de limit(200) sur useVerificationsListener et useMaintenancesListener pour réduire le volume Firestore' },
+      { type: 'feat', label: 'Planning : Ajout de la légende des événements (À FAIRE / FAIT / ÉVÉNEMENT / RAPPORT / etc.)' },
+    ],
+  },
   {
     version: '131',
     date: '24 juin 2026',
