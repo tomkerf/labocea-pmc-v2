@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Search, ClipboardList, List, CalendarRange, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createClient } from '@/services/clientService'
@@ -24,6 +24,26 @@ export default function MissionsPage() {
   const { clients, loading } = useMissionsStore()
   const preleveurs = usePreleveursStore((s) => s.preleveurs)
   const uid = useAuthStore(selectUid)
+
+  // Extraire les sites uniques des prélèveurs
+  const availableSites = useMemo(() => {
+    const sites = new Set<string>()
+    preleveurs.forEach(p => {
+      if (p.site) sites.add(p.site)
+    })
+    return Array.from(sites).sort()
+  }, [preleveurs])
+
+  // Extraire les techniciens uniques assignés à des plans
+  const availableTechs = useMemo(() => {
+    const techs = new Set<string>()
+    clients.forEach(c => {
+      c.plans.forEach(p => {
+        if (c.preleveur) techs.add(c.preleveur)
+      })
+    })
+    return Array.from(techs).sort()
+  }, [clients])
 
   const [search, setSearch] = useState('')
   const [onlyRetard, setOnlyRetard] = useState(false)
