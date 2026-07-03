@@ -4,6 +4,7 @@ import { Plus, Search, ClipboardList, List, CalendarRange, BarChart3, ChevronLef
 import { createClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { usePreleveursStore } from '@/stores/preleveursStore'
+import { usePreleveursListener } from '@/hooks/usePreleveurs'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import ClientCard from '@/components/client/ClientCard'
@@ -22,6 +23,7 @@ function hasOverdue(client: Client): boolean {
 export default function MissionsPage() {
   const navigate = useNavigate()
   const { clients, loading } = useMissionsStore()
+  usePreleveursListener()
   const preleveurs = usePreleveursStore((s) => s.preleveurs)
   const uid = useAuthStore(selectUid)
 
