@@ -1,6 +1,27 @@
 import { describe, it, expect } from 'vitest'
-import { generateSamplings } from '../samplings'
+import { generateSamplings, computeRapportDatePrevue } from '../samplings'
 import type { Plan } from '@/types'
+
+describe('computeRapportDatePrevue', () => {
+  it('ajoute un mois à la date de réalisation', () => {
+    expect(computeRapportDatePrevue('2026-06-10')).toBe('2026-07-10')
+  })
+
+  it('ne recule pas d\'un jour quand le mois ajouté franchit le passage à l\'heure d\'été', () => {
+    // Non-régression : setMonth() local + toISOString() UTC donnait 2026-04-14
+    // sur une machine en Europe/Paris (CET mars → CEST avril)
+    expect(computeRapportDatePrevue('2026-03-15')).toBe('2026-04-15')
+  })
+
+  it('franchit le changement d\'année', () => {
+    expect(computeRapportDatePrevue('2026-12-20')).toBe('2027-01-20')
+  })
+
+  it('déborde sur le mois suivant si le jour n\'existe pas (comportement JS assumé)', () => {
+    // 31 janvier + 1 mois → 3 mars (février n'a pas de 31) : comportement Date natif, documenté
+    expect(computeRapportDatePrevue('2026-01-31')).toBe('2026-03-03')
+  })
+})
 
 // Plan minimal réutilisable dans les tests
 function makePlan(overrides: Partial<Plan> = {}): Plan {

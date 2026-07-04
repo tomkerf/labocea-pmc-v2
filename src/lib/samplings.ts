@@ -1,10 +1,12 @@
 import type { Plan, Sampling, SamplingStatus, NappeType } from '@/types'
 import { generateId } from './ids'
 
-/** Date d'envoi par défaut d'un rapport prévu : un mois après la date de réalisation. */
+/** Date d'envoi par défaut d'un rapport prévu : un mois après la date de réalisation.
+ *  Arithmétique 100 % UTC : setMonth() local + toISOString() UTC décalait la date
+ *  d'un jour quand le mois ajouté franchissait le passage à l'heure d'été (mars → avril). */
 export function computeRapportDatePrevue(doneDateISO: string): string {
   const d = new Date(doneDateISO)
-  d.setMonth(d.getMonth() + 1)
+  d.setUTCMonth(d.getUTCMonth() + 1)
   return d.toISOString().slice(0, 10)
 }
 
