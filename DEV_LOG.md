@@ -2,6 +2,38 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 153 — RUN_BOOK enrichi + campagne de tests (mutations Firestore)
+**4 juillet 2026**
+
+### Contexte
+Deux demandes distinctes dans la même session : (1) enrichir le RUN_BOOK pour réduire le bus factor, (2) lancer une campagne de tests QA sur les modules critiques identifiés (services Firebase, hooks de mutation) — logique métier déjà bien couverte, mais les mutations Firestore et l'auto-save ne l'étaient quasiment pas.
+
+### RUN_BOOK.md (commit `211c38e`)
+- §9 Problèmes fréquents : 5 → 13 entrées, capitalisant des incidents réels du DEV_LOG (listener préleveurs manquant, SW cache stale, Tailwind purge, Sentry faux positif dev, écritures concurrentes, Plan de Charge orange, upload photo silencieux, HEIC, quota Firestore Spark).
+- Nouveau §10 "Logs et debugging" : console navigateur, Sentry (filtre `environment:production`), Firebase Console, `wrangler tail`, GitHub Actions.
+- §8 : ligne "Base Firestore partagée staging/prod" repassée de 🟡 à 🔴 avec action concrète (créer `labocea-pmc-dev`).
+
+### Campagne de tests — mutations Firestore (commits `77191ab`→`01d9675`)
+Priorité P1 du plan QQ : logique de mutation critique jusqu'ici non testée.
+- **`useDocumentData`** (11 tests) : debounce 800ms, flag "dirty" (écho de sa propre écriture ignoré pendant la frappe, modif d'un autre utilisateur appliquée — *last write wins*, comportement documenté par le test), échec `saveFn` → toast, suppression two-step.
+- **`clientService`/`equipementService`** (8 tests) : garde-fou `runTransaction` — rejet **sans écriture** si le document a été supprimé entre-temps, `updatedBy`/`updatedAt` posés, payload de création par défaut.
+- **`usePlanActions`** (15 tests) : audit trail lisible (Planifié → Réalisé), `doneBy` posé/vidé selon statut, `dateUndefined` effacé dès qu'une date est fixée, push notification seulement si le technicien assigné change réellement, renumérotation à la suppression d'un prélèvement.
+- **`usePlanningActions`** (14 tests) : verrou anti-double-clic (`isPending`) validé par test — deux reports simultanés ne déclenchent qu'une seule écriture ; durée préservée au déplacement d'un événement multi-jours ; refus des jours fériés dans le pool.
+
+### Bug de prod trouvé et corrigé (commit `5ce1901`)
+`computeRapportDatePrevue()` (doneDate + 1 mois) décalait la date d'un jour quand le mois ajouté franchissait le passage à l'heure d'été (ex: réalisation le 15 mars → rapport prévu le 14 avril au lieu du 15). Cause : `new Date()` parse en UTC minuit, mais `setMonth()` travaille en heure locale — le décalage CET→CEST retombe la date la veille via `toISOString()`. Même famille que le bug `daysDiff` de la session 147. Fonction extraite session 150, dédupliquée session 152, jamais testée directement. Fix : arithmétique 100% UTC (`setUTCMonth`/`getUTCMonth`). 4 tests de non-régression (dont le cas DST et le débordement de fin de mois).
+
+### État
+- Suite : **261 → 313 tests** verts. Lint 0, build OK.
+- 6 commits poussés sur `origin/main`.
+
+### Prochaines étapes
+- **P2 (recommandé)** : tests des règles Firestore sous émulateur (`@firebase/rules-unit-testing`) — matrice de rôles technicien/CM/admin, champs immuables, sans jamais toucher la vraie base (pertinent vu le Firestore partagé staging/prod).
+- **P3** : tests composants — filtres Charge de MissionsPage (livrés session 152, validés seulement visuellement), `SamplingForm`.
+- Reste organisationnel inchangé : isolation Firestore staging/prod 🔴, accord DSIN 🔴, plan de bascule Brest 🟡.
+
+---
+
 ## Session 152 — Filtres site/technicien + réorganisation vue Charge
 **3 juillet 2026**
 
