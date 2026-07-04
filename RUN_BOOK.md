@@ -216,7 +216,7 @@ firebase deploy --only firestore:rules --project labocea-pmc
 | **Accord DSIN Labocea** | 🔴 Bloquant | Validation formelle non obtenue. Prérequis absolu à la mise en prod. |
 | **Plan de bascule équipe Brest** | 🔴 Bloquant | Date, référent local et plan de formation à définir. |
 | **Quota / plan Firebase** | 🟡 À vérifier | Confirmer Spark vs Blaze en console, poser une alerte budget si Blaze. Spark = 50 000 reads/j, 1 Go Storage, 10 Go download/j. Migrer vers Blaze si dépassement imminent (coût ~nul à l'usage réel). |
-| **Base Firestore partagée staging/prod** | 🟡 Risque | Les deux Workers pointent sur le même projet `labocea-pmc`. Un test staging écrit dans la vraie base. Décider avant prod : accepter, ou séparer les environnements. |
+| **Base Firestore partagée staging/prod** | 🔴 Critique | Les deux Workers pointent sur le même projet `labocea-pmc`. Un test staging écrit dans la vraie base. **Action requise avant prod** : Créer nouveau projet GCP `labocea-pmc-dev`, reconfigurer staging vers ce projet (`wrangler.toml`), puis redéployer. Risque inacceptable sans cette séparation. |
 | **Secret `FIREBASE_SERVICE_ACCOUNT`** | 🟡 À confirmer | Vérifier sa présence sur staging ET prod (§2.2). |
 | **Bundle `heic-to` (~3 Mo)** | 🟢 Accepté | Warning build connu, chargé en lazy. Dette documentée, non bloquant. |
 
@@ -226,11 +226,34 @@ firebase deploy --only firestore:rules --project labocea-pmc
 
 | Symptôme | Cause probable | Action |
 |---|---|---|
+| Filtre "Site" vide sur MissionsPage malgré préleveurs configurés | `usePreleveursListener()` non monté sur la page (listener local par page, pas global) | Vérifier que la page consommatrice monte bien son listener (session 152, commit `60589a1`) |
+| Cartouche/toggle UI qui s'étire pleine largeur ou « Chunk failed to load » après déploiement | Service Worker sert l'ancien bundle (`CACHE_VERSION` inchangée en cache) | Hard refresh (Cmd/Ctrl+Shift+R) ; vérifier que `public/sw.js` `CACHE_VERSION` a été incrémentée au déploiement (session 149) |
+| Classe Tailwind (`flex`, `w-fit`...) absente du rendu malgré le code source correct | Oxide scanner ne détecte pas les classes dans un template literal conditionnel complexe | Utiliser des classNames statiques ou des styles inline pour les layouts critiques (pattern documenté session 149) |
+| Erreur Sentry "send was called before connect" en dev uniquement | Faux positif : interaction Sentry ↔ Vite HMR sur warning Firestore transitoire | Aucune action — Sentry désactivé en dev depuis session 151 (`import.meta.env.DEV`) |
+| Deux utilisateurs écrasent les mêmes données sans avertissement | Écriture Firestore sans vérification de conflit (`setDoc` simple) | Le pattern `runTransaction` + bandeau "modifié depuis votre ouverture" est la norme (clientService, equipementService) — à répliquer sur tout nouveau service d'écriture |
+| Plan de Charge affiche tout en orange (surcharge) alors qu'il ne devrait pas | `nbActiveTechs = 0` (store préleveurs vide) → capacité max = 0 → tout dépasse | Vérifier que le document `preleveurs-v1/data` est chargé ; voir fix session 146 (`maxCapacityPerMonth > 0 &&`) |
+| Upload photo échoue sans message d'erreur visible | `catch` manquant autour de l'appel d'upload | Vérifier que tout point d'upload utilise `ImageValidationError` + toast (pattern session 148, `VisiteFormPage`) |
+| Conversion HEIC (photos iPhone) échoue ou timeout | Format HEIC récent (iOS 17+/iPhone 15+) non supporté par l'ancienne lib | Vérifier que `heic-to` (pas `heic2any`) est bien utilisé (migration session 128) |
+| Consommation Firestore approche/dépasse le quota Spark (50k reads/j) | Listener global sans `limit()`, ou navigation qui refetch en boucle | Vérifier `limit(200)` sur les listeners haut-volume (verifications, maintenances) ; consulter Firebase Console → Usage |
 | « Missing or insufficient permissions » | Règles non déployées après modif | `firebase deploy --only firestore:rules --project labocea-pmc` |
 | Push notifications ne partent pas | `FIREBASE_SERVICE_ACCOUNT` absent/expiré côté Worker | `wrangler secret list` puis `wrangler secret put` |
 | Feed iCal renvoie 500 | idem (service account) ou `calendarToken` invalide | Vérifier le secret + le token dans `users/{uid}.calendarToken` |
-| « Chunk failed to load » après déploiement | Ancien asset en cache | Hard refresh (Ctrl+Shift+R) |
 | Build échoue (TypeScript) | Erreur TS | `npm run build` en local, corriger avant de redéployer |
+
+---
+
+## 10. Logs et debugging
+
+- **Console navigateur (dev)** : `F12` → Console. Filtrer par pattern applicatif si des préfixes de log existent.
+- **Sentry** : sentry.io → projet `labocea-pmc-v2` → Issues. Filtrer par `environment:production` pour exclure le bruit dev. Chaque issue a une stack trace + breadcrumbs (utile pour reconstituer une chaîne causale, cf. investigation session 151).
+- **Firebase Console** : console.firebase.google.com → projet `labocea-pmc` → Firestore Database (données brutes) et onglet Usage (lectures/écritures/quota).
+- **Logs du Worker Cloudflare (temps réel)** :
+  ```bash
+  npx wrangler tail --name labocea-pmc-v2       # prod
+  npx wrangler tail --name labocea-pmc-v2-dev   # staging
+  ```
+  Utile pour déboguer `/api/send-notification` ou le feed iCal.
+- **CI / GitHub Actions** : github.com → repo → onglet Actions, pour les échecs de build sur push.
 
 ---
 
