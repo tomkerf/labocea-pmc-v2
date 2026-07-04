@@ -67,6 +67,23 @@ Ce document liste les dettes techniques identifiées lors des audits successifs.
 - [x] **`control-has-associated-label`** — disparu avec react-doctor v0.5.1 (détection HTML classique corrigée). `no-gray-on-colored-background` × 2 : `TodoRow.tsx:167` corrigé (neutral-400→500), `SamplingForm.tsx:32` FP de pointage. ✅ 2026-06-12
 - Note : react-doctor v0.2.9 a ajouté de nouvelles règles (em-dash × 53, letter-spacing × 43) qui n'étaient pas dans le scope initial.
 
+## 12. Audit UI/UX — retour design 2026-07-04
+
+Retour externe (revue visuelle staging), non encore traité. Classé par effort.
+
+**Quick wins (CSS/contenu seul)**
+- [ ] Bouton "Charge" actif (MissionsPage) trop saturé vs "Liste"/"Vue annuelle" — variante moins contrastée, même famille de bleu que le CTA principal
+- [ ] Badges de statut incohérents : Missions utilise `—` pour "pas de date" alors qu'ailleurs (Planning) c'est un point coloré — uniformiser sur un seul système
+- [ ] Graphique "Charge 2026" : barres écrasées en bas de leur zone, dur de comparer les mois — augmenter la hauteur utile + afficher la valeur au-dessus de chaque barre (pas seulement au survol)
+
+**Effort moyen**
+- [ ] États vides pauvres (Demandes : "Visite préliminaire"/"Devis signé" ; Planning du jour : "Aucune intervention") — juste du texte gris. Ajouter icône + CTA (ex: "Planifier une visite")
+- [ ] Liste Missions : tags techniciens (ROD/THK/SRA) en gris peu lisibles à distance — utiliser le mapping couleur par technicien déjà existant (`TECH_COLORS`/`TECH_PALETTE` dans `planningUtils.ts`)
+- [ ] Planning hebdo : RDV/tâches/rappels/retraits tassés sans distinction visuelle claire — léger fond ou bordure par type d'item
+
+**À vérifier avant d'agir**
+- [ ] Avatar "THK" en haut à droite du dashboard sans affordance claire (pas de chevron, pas d'indice de clic) — vérifier si un menu existe déjà au clic ; si oui, juste ajouter l'affordance visuelle
+
 ## 11. Hors scope V2
 
 - Virtualisation listes — jamais >50 items en pratique
