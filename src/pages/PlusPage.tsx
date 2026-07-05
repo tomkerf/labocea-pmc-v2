@@ -53,7 +53,7 @@ export default function PlusPage() {
         title: 'Suivi & production',
         items: [
           { to: '/todos',        icon: ListTodo,  label: 'Tâches',       badge: todosActives || undefined,       badgeColor: COLORS.DANGER  },
-          { to: '/chat',         icon: MessageSquare, label: 'Messagerie', badge: chatUnreadCount || undefined, badgeColor: chatHasMention ? COLORS.DANGER : COLORS.ACCENT },
+          { to: '/chat',         icon: MessageSquare, label: 'Messagerie', badge: chatUnreadCount || undefined, badgeColor: COLORS.DANGER },
           { to: '/rapports',     icon: FileText,  label: 'Rapports'                                                                          },
           { to: '/metrologie',   icon: Gauge,     label: 'Métrologie',   badge: metrologieRetard || undefined,   badgeColor: COLORS.DANGER  },
           { to: '/maintenances', icon: Hammer,    label: 'Maintenances', badge: maintenancesActives || undefined, badgeColor: COLORS.TEXT_SECONDARY },

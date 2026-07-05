@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { LayoutDashboard, CalendarDays, ClipboardList, Wrench, LayoutGrid } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
+import { useChatNotificationStore } from '@/stores/chatNotificationStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { COLORS } from '@/lib/constants'
 
@@ -18,6 +19,7 @@ function getActiveTab(pathname: string): string {
 export default function BottomTabBar() {
   const { pathname } = useLocation()
   const { clients } = useMissionsStore()
+  const { unreadCount: chatUnreadCount } = useChatNotificationStore()
   const activeTab = getActiveTab(pathname)
 
   const overdueCount = useMemo(() => {
@@ -34,7 +36,7 @@ export default function BottomTabBar() {
     { to: '/planning',  key: '/planning',  label: 'Planning', icon: CalendarDays    },
     { to: '/missions',  key: '/missions',  label: 'Missions', icon: ClipboardList,  badge: overdueCount || undefined },
     { to: '/materiel',  key: '/materiel',  label: 'Matériel', icon: Wrench          },
-    { to: '/plus',      key: '/plus',      label: 'Menu',     icon: LayoutGrid      },
+    { to: '/plus',      key: '/plus',      label: 'Menu',     icon: LayoutGrid,      badge: chatUnreadCount || undefined },
   ]
 
   return (
