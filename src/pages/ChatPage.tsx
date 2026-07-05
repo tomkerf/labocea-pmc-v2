@@ -99,7 +99,7 @@ export default function ChatPage() {
       },
       (err) => {
         console.error('Erreur écouteur chat:', err)
-        setError(`Impossible de charger les messages de cette conversation : ${err.message} (${err.code})`)
+        setError('Impossible de charger les messages de cette conversation.')
         setLoading(false)
       }
     )
