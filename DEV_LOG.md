@@ -25,6 +25,8 @@ L'utilisateur a demandé d'intégrer une messagerie d'équipe (Option A : canal 
     - **Navigation responsive** : Sur mobile, la liste et le chat s'alternent de façon fluide grâce à Tailwind CSS.
   - **Correction du contraste (bugfix)** : Résolution d'un problème de contraste qui rendait les mentions invisibles dans les bulles de messages envoyés (bleu sur bleu). Désormais, les mentions dans les messages envoyés prennent un fond blanc semi-transparent (`bg-white/20 text-white`).
   - **Affichage des Trigrammes (bugfix)** : Remplacement de l'affichage du prénom par le trigramme (initiales en majuscules, ex: `@ROD` ou `@FBA`) dans les badges de mentions.
+  - **Provision des index composites (bugfix)** : Création et déploiement de deux index composites Firestore pour supporter les requêtes de filtrage (`chatId` et `participants` combinés avec le tri temporel `createdAt desc`).
+  - **Migration de l'historique (bugfix)** : Mise à jour des documents de messages existants dans Firestore pour leur assigner la propriété `chatId: 'general'` afin de conserver l'historique visible.
   - **Autocomplétion et suggestions** : Autocomplétion active pour les mentions `@` dans le canal général.
   - **Marquage comme lu** : Réinitialisation automatique des badges et du statut dans `localStorage` lors de la consultation de la messagerie.
 - **Navigation & Routage :**
