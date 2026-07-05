@@ -135,3 +135,37 @@ export async function togglePollVote(
   })
 }
 
+export async function toggleReaction(
+  messageId: string,
+  emoji: string,
+  userId: string
+): Promise<void> {
+  const messageRef = doc(db, COLLECTIONS.CHAT_MESSAGES, messageId)
+
+  await runTransaction(db, async (transaction) => {
+    const snap = await transaction.get(messageRef)
+    if (!snap.exists()) return
+
+    const data = snap.data()
+    const reactions = { ...(data.reactions || {}) }
+    const currentVoters = reactions[emoji] ? [...reactions[emoji]] : []
+
+    const userIndex = currentVoters.indexOf(userId)
+    if (userIndex > -1) {
+      // Retirer la réaction (toggle)
+      currentVoters.splice(userIndex, 1)
+    } else {
+      // Ajouter la réaction
+      currentVoters.push(userId)
+    }
+
+    if (currentVoters.length > 0) {
+      reactions[emoji] = currentVoters
+    } else {
+      delete reactions[emoji]
+    }
+
+    transaction.update(messageRef, { reactions })
+  })
+}
+

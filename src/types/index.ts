@@ -475,5 +475,8 @@ export interface ChatMessage {
   // Images/Photos
   isImage?: boolean
   imageUrl?: string
+
+  // Réactions emoji
+  reactions?: { [emoji: string]: string[] } // associe l'emoji aux UIDs ayant réagi
 }
 

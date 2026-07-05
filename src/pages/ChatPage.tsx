@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { collection, query, orderBy, limit, onSnapshot, where } from 'firebase/firestore'
-import { Send, ArrowLeft, AtSign, Users, Search, BarChart2, Plus, Trash2, X, Camera, Loader2 } from 'lucide-react'
+import { Send, ArrowLeft, AtSign, Users, Search, BarChart2, Plus, Trash2, X, Camera, Loader2, SmilePlus } from 'lucide-react'
 import { m, AnimatePresence } from 'framer-motion'
 import { db } from '@/lib/firebase'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { useChatNotificationStore } from '@/stores/chatNotificationStore'
-import { sendChatMessage, getDmChatId, sendChatPoll, togglePollVote, sendChatImage } from '@/services/chatService'
+import { sendChatMessage, getDmChatId, sendChatPoll, togglePollVote, sendChatImage, toggleReaction } from '@/services/chatService'
 import { uploadChatPhoto } from '@/lib/uploadPhoto'
 import type { ChatMessage, AppUser } from '@/types'
 import { COLLECTIONS } from '@/lib/constants'
@@ -173,6 +173,9 @@ export default function ChatPage() {
   const [uploadingImage, setUploadingImage] = useState(false)
   const [zoomImageUrl, setZoomImageUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Réactions emoji
+  const [reactionPickerFor, setReactionPickerFor] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -357,6 +360,18 @@ export default function ChatPage() {
       await togglePollVote(messageId, optionIndex, appUser.uid)
     } catch (err) {
       console.error('Erreur vote:', err)
+    }
+  }
+
+  const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🙏']
+
+  const handleReact = async (messageId: string, emoji: string) => {
+    if (!appUser) return
+    setReactionPickerFor(null)
+    try {
+      await toggleReaction(messageId, emoji, appUser.uid)
+    } catch (err) {
+      console.error('Erreur réaction:', err)
     }
   }
 
@@ -695,46 +710,121 @@ export default function ChatPage() {
                             {msg.senderName}
                           </span>
                         )}
-                        <div
-                          className="px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed break-words shadow-[var(--shadow-card)] transition-all"
-                          style={{
-                            backgroundColor: isMe 
-                              ? 'var(--color-accent)' 
-                              : containsMyMention 
-                                ? 'var(--color-warning-light)' 
-                                : 'var(--color-bg-secondary)',
-                            color: isMe ? 'white' : 'var(--color-text-primary)',
-                            border: isMe 
-                              ? 'none' 
-                              : containsMyMention 
-                                ? '1px solid var(--color-warning)' 
-                                : '1px solid var(--color-border-subtle)',
-                            borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                          }}
-                        >
-                          {msg.isPoll ? (
-                            <PollView
-                              message={msg}
-                              isMe={isMe}
-                              currentUserId={appUser?.uid || ''}
-                              users={users}
-                              appUserInitials={appUser?.initiales || ''}
-                              onVote={(optIdx) => handleVote(msg.id, optIdx)}
-                            />
-                          ) : msg.isImage && msg.imageUrl ? (
-                            <div className="flex flex-col gap-1 max-w-[280px] sm:max-w-[320px]">
-                              <img
-                                src={msg.imageUrl}
-                                alt="Photo"
-                                className="rounded-lg object-cover w-full max-h-[220px] cursor-pointer hover:opacity-95 transition-opacity"
-                                onClick={() => setZoomImageUrl(msg.imageUrl || null)}
+                        <div className={`relative group/message flex items-center gap-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                          <div
+                            className="px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed break-words shadow-[var(--shadow-card)] transition-all"
+                            style={{
+                              backgroundColor: isMe
+                                ? 'var(--color-accent)'
+                                : containsMyMention
+                                  ? 'var(--color-warning-light)'
+                                  : 'var(--color-bg-secondary)',
+                              color: isMe ? 'white' : 'var(--color-text-primary)',
+                              border: isMe
+                                ? 'none'
+                                : containsMyMention
+                                  ? '1px solid var(--color-warning)'
+                                  : '1px solid var(--color-border-subtle)',
+                              borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                            }}
+                          >
+                            {msg.isPoll ? (
+                              <PollView
+                                message={msg}
+                                isMe={isMe}
+                                currentUserId={appUser?.uid || ''}
+                                users={users}
+                                appUserInitials={appUser?.initiales || ''}
+                                onVote={(optIdx) => handleVote(msg.id, optIdx)}
                               />
-                            </div>
-                          ) : (
-                            renderMessageContent(msg.text, isMe)
-                          )}
+                            ) : msg.isImage && msg.imageUrl ? (
+                              <div className="flex flex-col gap-1 max-w-[280px] sm:max-w-[320px]">
+                                <img
+                                  src={msg.imageUrl}
+                                  alt="Photo"
+                                  className="rounded-lg object-cover w-full max-h-[220px] cursor-pointer hover:opacity-95 transition-opacity"
+                                  onClick={() => setZoomImageUrl(msg.imageUrl || null)}
+                                />
+                              </div>
+                            ) : (
+                              renderMessageContent(msg.text, isMe)
+                            )}
+                          </div>
+
+                          {/* Déclencheur du sélecteur de réactions */}
+                          <button
+                            type="button"
+                            onClick={() => setReactionPickerFor(reactionPickerFor === msg.id ? null : msg.id)}
+                            className="opacity-0 group-hover/message:opacity-100 focus:opacity-100 p-1.5 rounded-full text-[var(--color-text-tertiary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] active:scale-90 transition-all shrink-0"
+                            title="Réagir"
+                          >
+                            <SmilePlus size={15} />
+                          </button>
+
+                          {/* Sélecteur rapide de réactions */}
+                          <AnimatePresence>
+                            {reactionPickerFor === msg.id && (
+                              <>
+                                <div
+                                  className="fixed inset-0 z-10"
+                                  onClick={() => setReactionPickerFor(null)}
+                                />
+                                <m.div
+                                  initial={{ opacity: 0, y: 4, scale: 0.95 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: 4, scale: 0.95 }}
+                                  transition={{ duration: 0.12 }}
+                                  className={`absolute -top-11 z-20 flex items-center gap-0.5 px-1.5 py-1 rounded-full shadow-[var(--shadow-card)] border border-[var(--color-border-subtle)] bg-[var(--color-bg-primary)] ${
+                                    isMe ? 'right-0' : 'left-0'
+                                  }`}
+                                >
+                                  {QUICK_REACTIONS.map((emoji) => (
+                                    <button
+                                      key={emoji}
+                                      type="button"
+                                      onClick={() => handleReact(msg.id, emoji)}
+                                      className="text-base p-1 rounded-full hover:bg-[var(--color-bg-tertiary)] active:scale-90 transition-all"
+                                    >
+                                      {emoji}
+                                    </button>
+                                  ))}
+                                </m.div>
+                              </>
+                            )}
+                          </AnimatePresence>
                         </div>
-                        <span 
+
+                        {/* Badges de réactions */}
+                        {msg.reactions && Object.values(msg.reactions).some((uids) => uids.length > 0) && (
+                          <div className={`flex flex-wrap gap-1 mt-1 ${isMe ? 'self-end justify-end mr-1' : 'self-start justify-start ml-1'}`}>
+                            {Object.entries(msg.reactions).map(([emoji, uids]) => {
+                              if (!uids || uids.length === 0) return null
+                              const iReacted = appUser ? uids.includes(appUser.uid) : false
+                              const voterNames = uids
+                                .map((uid) => uid === appUser?.uid ? 'Vous' : users.find((u) => u.uid === uid)?.prenom)
+                                .filter(Boolean)
+                                .join(', ')
+                              return (
+                                <button
+                                  key={emoji}
+                                  type="button"
+                                  onClick={() => handleReact(msg.id, emoji)}
+                                  title={voterNames}
+                                  className={`text-[11px] px-1.5 py-0.5 rounded-full border flex items-center gap-1 transition-all active:scale-95 ${
+                                    iReacted
+                                      ? 'border-[var(--color-accent)] bg-[var(--color-accent-light)]'
+                                      : 'border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)]'
+                                  }`}
+                                >
+                                  <span>{emoji}</span>
+                                  <span className="font-semibold opacity-70">{uids.length}</span>
+                                </button>
+                              )
+                            })}
+                          </div>
+                        )}
+
+                        <span
                           className={`text-[9px] text-[var(--color-text-tertiary)] mt-1 ml-1 ${isMe ? 'self-end mr-1' : 'self-start'}`}
                         >
                           {formatMessageTime(msg.createdAt)}
