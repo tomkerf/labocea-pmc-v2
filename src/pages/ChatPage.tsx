@@ -79,19 +79,30 @@ export default function ChatPage() {
     setLoading(true)
     setMessages([])
     
-    const q = query(
-      collection(db, COLLECTIONS.CHAT_MESSAGES),
-      where('chatId', '==', selectedChatId),
-      orderBy('createdAt', 'desc'),
-      limit(100)
-    )
+    const isGeneral = selectedChatId === 'general'
+    const q = isGeneral
+      ? query(
+          collection(db, COLLECTIONS.CHAT_MESSAGES),
+          where('chatId', '==', 'general'),
+          orderBy('createdAt', 'desc'),
+          limit(100)
+        )
+      : query(
+          collection(db, COLLECTIONS.CHAT_MESSAGES),
+          where('participants', 'array-contains', appUser.uid),
+          orderBy('createdAt', 'desc'),
+          limit(200)
+        )
 
     const unsub = onSnapshot(
       q,
       (snap) => {
         const loadedMessages: ChatMessage[] = []
         snap.forEach((doc) => {
-          loadedMessages.push({ id: doc.id, ...doc.data() } as ChatMessage)
+          const data = doc.data() as ChatMessage
+          if (isGeneral || data.chatId === selectedChatId) {
+            loadedMessages.push({ id: doc.id, ...data })
+          }
         })
         setMessages(loadedMessages.reverse())
         setLoading(false)
