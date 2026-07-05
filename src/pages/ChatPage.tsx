@@ -181,7 +181,7 @@ export default function ChatPage() {
               key={idx}
               className={`font-semibold px-1.5 py-0.5 rounded text-[13px] inline-block ${badgeClass}`}
             >
-              @{matchedUser.prenom}
+              @{matchedUser.initiales}
             </span>
           )
         }

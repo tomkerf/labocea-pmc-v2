@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '140'
+export const CHANGELOG_VERSION = '141'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '141',
+    date: '5 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Messagerie : Affichage du trigramme (initiales) à la place du prénom dans les badges de mentions (@)' },
+    ],
+  },
   {
     version: '140',
     date: '5 juillet 2026',
