@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { collection, query, orderBy, limit, onSnapshot, where } from 'firebase/firestore'
-import { Send, ArrowLeft, AtSign, Users, Search, BarChart2, Plus, Trash2, X, Camera, Image, Loader2 } from 'lucide-react'
+import { Send, ArrowLeft, AtSign, Users, Search, BarChart2, Plus, Trash2, X, Camera, Loader2 } from 'lucide-react'
 import { m, AnimatePresence } from 'framer-motion'
 import { db } from '@/lib/firebase'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
