@@ -453,3 +453,15 @@ export interface PointRejet {
   createdAt?: Timestamp
   updatedAt?: Timestamp
 }
+
+// --- Messagerie / Chat ---
+export interface ChatMessage {
+  id: string
+  text: string
+  senderUid: string
+  senderName: string
+  senderInitials: string
+  senderAvatarColor?: string
+  createdAt: Timestamp
+}
+

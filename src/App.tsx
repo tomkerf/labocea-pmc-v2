@@ -39,6 +39,8 @@ const AidePage              = lazy(() => import('@/pages/AidePage'))
 const VisiteFormPage        = lazy(() => import('@/pages/VisiteFormPage'))
 const TodosPage             = lazy(() => import('@/pages/TodosPage'))
 const PlusPage              = lazy(() => import('@/pages/PlusPage'))
+const ChatPage              = lazy(() => import('@/pages/ChatPage'))
+
 
 function AppError() {
   return (
@@ -152,6 +154,9 @@ function AppRoutes() {
         } />
         <Route path="/plus" element={
           <Suspense fallback={<PageSpinner />}><PlusPage /></Suspense>
+        } />
+        <Route path="/chat" element={
+          <Suspense fallback={<PageSpinner />}><ChatPage /></Suspense>
         } />
       </Route>
 

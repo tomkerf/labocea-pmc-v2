@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '137'
+export const CHANGELOG_VERSION = '138'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '138',
+    date: '5 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Messagerie : Création du canal de discussion général de l\'équipe (Chat) accessible en temps réel sur mobile et ordinateur' },
+    ],
+  },
   {
     version: '137',
     date: '5 juillet 2026',

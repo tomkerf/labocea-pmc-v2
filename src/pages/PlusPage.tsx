@@ -5,6 +5,7 @@ import {
   ListTodo, FileText, Gauge, Hammer,
   FlaskConical, Pipette, BookOpen, HelpCircle,
   ShieldAlert, ChevronRight, Inbox, CloudRain,
+  MessageSquare,
 } from 'lucide-react'
 import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import { useTodosStore } from '@/stores/todosStore'
@@ -50,6 +51,7 @@ export default function PlusPage() {
         title: 'Suivi & production',
         items: [
           { to: '/todos',        icon: ListTodo,  label: 'Tâches',       badge: todosActives || undefined,       badgeColor: COLORS.DANGER  },
+          { to: '/chat',         icon: MessageSquare, label: 'Messagerie' },
           { to: '/rapports',     icon: FileText,  label: 'Rapports'                                                                          },
           { to: '/metrologie',   icon: Gauge,     label: 'Métrologie',   badge: metrologieRetard || undefined,   badgeColor: COLORS.DANGER  },
           { to: '/maintenances', icon: Hammer,    label: 'Maintenances', badge: maintenancesActives || undefined, badgeColor: COLORS.TEXT_SECONDARY },

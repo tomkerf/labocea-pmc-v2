@@ -213,6 +213,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 
 | Date | Phase | Ce qui a été fait |
 |------|-------|-------------------|
+| 2026-07-05 | Messagerie d'équipe | Option A : création du canal général (Chat) temps réel via Firestore onSnapshot (limité aux 100 derniers messages), layout Apple-style responsive, auto-scroll, Framer Motion, service d'envoi avec trackWrite, routes et liens Sidebar/PlusPage |
 | 2026-04-18 | Phase 1 ✅ | Vite + React TS initialisé, Tailwind configuré avec tokens design system, Firebase SDK, Wrangler, deploy scripts, types Firestore complets, useAuthStore Zustand, useAuthInit hook, LoginPage, RequireAuth, AppLayout, Sidebar, TabBar, pages placeholder, router — build OK |
 | 2026-04-18 | Phase 2 ✅ | Module Missions complet : store + onSnapshot, MissionsPage (liste + recherche + nouveau client), ClientCard, ClientPage (tous champs V1 + auto-save 800ms + gestion plans), PlanPage (config plan + calendrier prélèvements + SamplingForm inline), routes /missions/:clientId/plan/:planId — TypeScript 0 erreur |
 | 2026-04-18 | Phase 3 ✅ | Module Matériel complet : equipementsStore, useEquipements (onSnapshot + save + create), CircleProgress (anneau SVG métrologie), EquipementCard (avec calcul % étalonnage), MaterielPage (liste + filtres catégorie/état + recherche), EquipementPage (fiche complète + auto-save 800ms + suppression), routes /materiel + /materiel/:equipementId — TypeScript 0 erreur |

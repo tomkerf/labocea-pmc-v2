@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText, Sparkles, FlaskConical, CloudRain } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText, Sparkles, FlaskConical, CloudRain, MessageSquare } from 'lucide-react'
 import { m } from 'framer-motion'
 import { COLORS } from '@/lib/constants'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -52,6 +52,7 @@ export default function Sidebar() {
         { to: '/missions',     icon: ClipboardList,   label: 'Missions',        badge: true },
         { to: '/demandes',     icon: Inbox,           label: 'Demandes'               },
         { to: '/todos',        icon: ListTodo,        label: 'Tâches'                 },
+        { to: '/chat',         icon: MessageSquare,   label: 'Messagerie'             },
       ]
     },
     {

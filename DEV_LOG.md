@@ -2,6 +2,32 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 155 — Messagerie d'équipe temps réel (Chat)
+**5 juillet 2026**
+
+### Contexte
+L'utilisateur a demandé si l'on pouvait envisager d'intégrer un système de chat dans l'application. Après discussion des différentes options, l'Option A (Canal général d'équipe pour toute la messagerie) a été retenue et implémentée.
+
+### Modifications apportées
+- **Architecture de données & Types :**
+  - Enregistrement de la nouvelle collection Firestore `chat-messages` (`CHAT_MESSAGES`) dans [constants.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/lib/constants.ts).
+  - Déclaration de l'interface `ChatMessage` dans [types/index.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/types/index.ts).
+- **Service Messagerie (`chatService.ts`) :**
+  - Implémentation de `sendChatMessage` pour pousser les messages dans Firestore. La fonction encapsule l'opération dans `trackWrite` pour s'assurer que les messages envoyés hors-ligne (en zone blanche terrain) sont sauvegardés localement et synchronisés dès le retour du réseau.
+- **Interface Utilisateur Chat (`ChatPage.tsx`) :**
+  - Conception d'une interface de chat moderne respectant le design system Apple (bulles bleues pour l'utilisateur connecté, bulles grises avec initiales/avatar colorés pour les autres membres de l'équipe).
+  - Abonnement temps réel via `onSnapshot` limité aux 100 derniers messages pour préserver les quotas Firestore et la batterie des appareils mobiles.
+  - Intégration du scroll automatique vers le bas à la réception/envoi d'un message, et de micro-animations fluides avec `framer-motion`.
+- **Routage & Navigation :**
+  - Ajout de la route `/chat` avec chargement paresseux (lazy loading) dans [App.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/App.tsx).
+  - Intégration du lien d'accès "Messagerie" (icône `MessageSquare`) dans la [Sidebar](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/layout/Sidebar.tsx) (Activité & Planning) pour le desktop et dans [PlusPage.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/pages/PlusPage.tsx) (Suivi & production) pour le menu mobile.
+- **Validation technique :**
+  - Validation réussie de la compilation TypeScript de l'ensemble du projet via `npx tsc --noEmit`.
+
+### Prochaines étapes
+- Tester la fluidité et le comportement temps réel sur l'environnement de staging.
+- Rendre possible le chat contextuel par mission/client (Option B) si l'usage d'équipe le nécessite par la suite.
+
 ## Session 154 — Filtre par méthode et répartition détaillée (Plan de Charge)
 **4 juillet 2026**
 
