@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '147'
+export const CHANGELOG_VERSION = '148'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '148',
+    date: '5 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Messagerie : Ajustement de la hauteur du chat pour éviter le chevauchement avec la barre de navigation du bas (BottomTabBar) sur mobile' },
+    ],
+  },
   {
     version: '147',
     date: '5 juillet 2026',

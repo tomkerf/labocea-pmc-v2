@@ -2,6 +2,19 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 161 — Ajustement de la hauteur du chat pour mobile
+**5 juillet 2026**
+
+### Contexte
+L'utilisateur a signalé que la barre de navigation du bas (la navbar) masquait le bas du chat sur mobile (la zone de saisie des messages).
+
+### Modifications apportées
+- **Correction CSS hauteur réactive (`ChatPage.tsx`) :**
+  - Remplacement de `h-screen max-h-screen` par des calculs dynamiques de hauteur de viewport soustrayant le header de l'application (56px) et la barre d'onglets du bas (80px) sur mobile : `h-[calc(100vh-56px-80px)] max-h-[calc(100vh-56px-80px)] md:h-[calc(100vh-56px)] md:max-h-[calc(100vh-56px)]` pour le conteneur racine et la zone de discussion.
+- **Mises à jour du projet :**
+  - Version changelog incrémentée à `148`.
+  - Validation de la compilation TypeScript.
+
 ## Session 160 — Partage de photos et d'images en temps réel dans le chat
 **5 juillet 2026**
 
