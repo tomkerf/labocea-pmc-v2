@@ -171,6 +171,8 @@ export default function Sidebar() {
                         {chatUnreadCount}
                       </span>
                     )}
+                  </>
+                )}
               </NavLink>
             ))}
           </div>
