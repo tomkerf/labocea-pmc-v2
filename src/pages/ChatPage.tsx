@@ -101,7 +101,7 @@ export default function ChatPage() {
         snap.forEach((doc) => {
           const data = doc.data() as ChatMessage
           if (isGeneral || data.chatId === selectedChatId) {
-            loadedMessages.push({ id: doc.id, ...data })
+            loadedMessages.push({ ...data, id: doc.id })
           }
         })
         setMessages(loadedMessages.reverse())
