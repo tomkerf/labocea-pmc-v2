@@ -119,7 +119,7 @@ export default function Sidebar() {
               style={{ color: COLORS.TEXT_SECONDARY, opacity: 0.5 }}>
               {section.title}
             </span>
-            {section.items.map(({ to, icon: Icon, label, end, badge, isAccount }) => (
+            {section.items.map(({ to, icon: Icon, label, end, isAccount }) => (
               <NavLink
                 key={to}
                 to={to}
