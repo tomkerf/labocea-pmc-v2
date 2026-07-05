@@ -2,6 +2,19 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 159 — Alignement stylistique du badge de notification de la Messagerie sur celui des Missions
+**5 juillet 2026**
+
+### Contexte
+L'utilisateur a demandé d'aligner le style de la pastille rouge de notification de la Messagerie sur celle de l'onglet Missions (rose clair avec texte rouge foncé).
+
+### Modifications apportées
+- **Harmonisation stylistique des badges de notification (`Sidebar.tsx`) :**
+  - Alignement des styles CSS de la pastille de messagerie non lue pour utiliser le même couple de tokens : `background: 'var(--color-danger-light)'` et `color: 'var(--color-danger-text)'`.
+- **Mises à jour du projet :**
+  - Version changelog incrémentée à `146`.
+  - Validation de la compilation.
+
 ## Session 158 — Pastilles de notification in-app unifiées au rouge iOS-style et titre d'onglet dynamique
 **5 juillet 2026**
 

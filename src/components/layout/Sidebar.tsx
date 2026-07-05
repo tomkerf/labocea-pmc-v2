@@ -162,8 +162,8 @@ export default function Sidebar() {
                     {to === '/chat' && chatUnreadCount > 0 && (
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10"
                         style={{ 
-                          background: 'var(--color-danger)', 
-                          color: 'white', 
+                          background: 'var(--color-danger-light)', 
+                          color: 'var(--color-danger-text)', 
                           minWidth: 18, 
                           textAlign: 'center' 
                         }}

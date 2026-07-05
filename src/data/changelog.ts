@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '145'
+export const CHANGELOG_VERSION = '146'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '146',
+    date: '5 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Messagerie : Alignement du style de la pastille de notification sur celle de l\'onglet Missions (rouge clair sur fond rose)' },
+    ],
+  },
   {
     version: '145',
     date: '5 juillet 2026',
