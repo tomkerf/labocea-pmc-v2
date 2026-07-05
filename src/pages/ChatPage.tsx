@@ -145,7 +145,7 @@ export default function ChatPage() {
   }
 
   // Rendu du contenu du message avec mise en surbrillance des mentions
-  const renderMessageContent = (text: string) => {
+  const renderMessageContent = (text: string, isMeMessage: boolean) => {
     if (!text.includes('@')) return text
 
     const words = text.split(/(\s+)/) // Découper par mots en gardant les espaces
@@ -161,15 +161,25 @@ export default function ChatPage() {
         )
 
         if (matchedUser) {
-          const isMe = matchedUser.uid === appUser?.uid
+          const isMeMention = matchedUser.uid === appUser?.uid
+          
+          let badgeClass = ''
+          if (isMeMessage) {
+            // Dans nos propres messages (bulle bleue)
+            badgeClass = isMeMention 
+              ? 'bg-[var(--color-danger)] text-white border border-white/20' 
+              : 'bg-white/20 text-white'
+          } else {
+            // Dans les messages des autres (bulle blanche/grise)
+            badgeClass = isMeMention 
+              ? 'bg-[var(--color-danger-light)] text-[var(--color-danger)] border border-[var(--color-danger)]/20' 
+              : 'bg-[var(--color-accent-light)] text-[var(--color-accent)]'
+          }
+
           return (
             <span
               key={idx}
-              className={`font-semibold px-1.5 py-0.5 rounded text-[13px] inline-block ${
-                isMe
-                  ? 'bg-[var(--color-danger-light)] text-[var(--color-danger)] border border-[var(--color-danger)]/20'
-                  : 'bg-[var(--color-accent-light)] text-[var(--color-accent)]'
-              }`}
+              className={`font-semibold px-1.5 py-0.5 rounded text-[13px] inline-block ${badgeClass}`}
             >
               @{matchedUser.prenom}
             </span>
@@ -280,7 +290,7 @@ export default function ChatPage() {
                           borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
                         }}
                       >
-                        {renderMessageContent(msg.text)}
+                        {renderMessageContent(msg.text, isMe)}
                       </div>
                       <span 
                         className={`text-[9px] text-[var(--color-text-tertiary)] mt-1 ml-1 ${isMe ? 'self-end mr-1' : 'self-start'}`}

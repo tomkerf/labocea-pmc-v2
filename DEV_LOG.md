@@ -21,6 +21,7 @@ L'utilisateur a demandé d'intégrer une messagerie d'équipe (Option A : canal 
 - **Interface Utilisateur Chat & Mentions (`ChatPage.tsx`) :**
   - Conception d'une interface de chat Apple-style avec bulles de couleur (bleu pour soi, gris pour les autres), avatars/initiales colorés et scroll automatique.
   - **Détection et mise en valeur des mentions** : Parseur de texte affichant les mentions valides sous forme de badges (`@Nom`). Si l'utilisateur connecté est mentionné, son badge apparaît en rouge clair, et sa bulle de message complète prend un fond jaune/orange distinctif (`var(--color-warning-light)`) pour attirer l'attention.
+  - **Correction du contraste (bugfix)** : Résolution d'un problème de contraste qui rendait les mentions (ex: `@ROD`) invisibles dans les bulles de messages envoyés (bleu sur bleu). Désormais, les mentions dans les messages envoyés prennent un fond blanc semi-transparent (`bg-white/20 text-white`) ce qui les rend parfaitement visibles.
   - **Autocomplétion et suggestions** : Affichage d'un panneau de suggestions horizontal au-dessus du champ d'écriture dès que l'utilisateur tape `@`, permettant de cliquer sur un technicien pour insérer instantanément sa mention.
   - **Marquage comme lu** : Réinitialisation automatique des badges et du statut dans `localStorage` lors de la consultation de la messagerie.
 - **Navigation & Routage :**

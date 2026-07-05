@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '139'
+export const CHANGELOG_VERSION = '140'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '140',
+    date: '5 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Messagerie : Correction du contraste des mentions (@) invisibles dans les bulles de messages envoyés' },
+    ],
+  },
   {
     version: '139',
     date: '5 juillet 2026',
