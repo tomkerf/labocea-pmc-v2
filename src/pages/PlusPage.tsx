@@ -34,7 +34,7 @@ export default function PlusPage() {
   const role    = useAuthStore(selectRole)
   const navigate = useNavigate()
   const [bugOpen, setBugOpen] = useState(false)
-  const { unreadCount: chatUnreadCount, hasMention: chatHasMention } = useChatNotificationStore()
+  const { unreadCount: chatUnreadCount } = useChatNotificationStore()
 
   const todos        = useTodosStore(s => s.todos)
   const maintenances = useMaintenancesStore(s => s.maintenances)

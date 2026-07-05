@@ -34,7 +34,7 @@ export default function Sidebar() {
   const role    = useAuthStore(selectRole)
   const [bugOpen, setBugOpen] = useState(false)
   const changelog = useChangelogState()
-  const { unreadCount: chatUnreadCount, hasMention: chatHasMention } = useChatNotificationStore()
+  const { unreadCount: chatUnreadCount } = useChatNotificationStore()
 
   const overdueCount = useMemo(() => {
     let count = 0
