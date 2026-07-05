@@ -2,6 +2,20 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 157 — Intégration de la pastille de notification native iOS (App Badging API)
+**5 juillet 2026**
+
+### Contexte
+L'utilisateur a demandé d'afficher une pastille de notification rouge sur l'icône de l'application sur l'écran d'accueil de son téléphone (comme sur iOS) pour indiquer la présence de messages non lus.
+
+### Modifications apportées
+- **Intégration de l'App Badging API (`chatNotificationStore.ts`) :**
+  - Ajout d'appels à `navigator.setAppBadge(total)` et `navigator.clearAppBadge()` lors des changements du nombre total de messages non lus (dans `setUnreadCounts` et `markAsRead`).
+  - Cela permet aux Progressive Web Apps (PWA) installées sur l'écran d'accueil iOS (depuis iOS 16.4+) ou sur Android/Desktop d'afficher de manière native la pastille rouge avec le compte exact de notifications.
+- **Mises à jour du projet :**
+  - Version changelog incrémentée à `144`.
+  - Validation réussie de la compilation.
+
 ## Session 156 — Sondages interactifs temps réel dans la messagerie
 **5 juillet 2026**
 

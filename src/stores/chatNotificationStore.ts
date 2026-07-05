@@ -26,6 +26,15 @@ export const useChatNotificationStore = create<ChatNotificationStore>((set, get)
   setUnreadCounts: (unreadCounts) => {
     const total = Object.values(unreadCounts).reduce((acc, count) => acc + count, 0)
     set({ unreadCounts, unreadCount: total })
+    
+    // Pastille native d'application (App Badging API pour iOS/Android PWA)
+    if ('setAppBadge' in navigator) {
+      if (total > 0) {
+        navigator.setAppBadge(total).catch(err => console.error('Erreur setAppBadge:', err))
+      } else {
+        navigator.clearAppBadge().catch(err => console.error('Erreur clearAppBadge:', err))
+      }
+    }
   },
   setHasMention: (hasMention) => set({ hasMention }),
   getLastSeenTimestamp: (chatId) => {
@@ -45,5 +54,14 @@ export const useChatNotificationStore = create<ChatNotificationStore>((set, get)
       unreadCounts: updatedUnreadCounts,
       unreadCount: total
     })
+
+    // Pastille native d'application (App Badging API pour iOS/Android PWA)
+    if ('setAppBadge' in navigator) {
+      if (total > 0) {
+        navigator.setAppBadge(total).catch(err => console.error('Erreur setAppBadge:', err))
+      } else {
+        navigator.clearAppBadge().catch(err => console.error('Erreur clearAppBadge:', err))
+      }
+    }
   }
 }))

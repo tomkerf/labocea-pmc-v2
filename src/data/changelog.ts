@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '143'
+export const CHANGELOG_VERSION = '144'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '144',
+    date: '5 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Messagerie : Intégration de l\'API native App Badging (pastille rouge iOS/PWA pour l\'icône de l\'application sur l\'écran d'accueil)' },
+    ],
+  },
   {
     version: '143',
     date: '5 juillet 2026',
