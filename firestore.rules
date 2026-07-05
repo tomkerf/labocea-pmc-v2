@@ -142,7 +142,11 @@ service cloud.firestore {
         request.resource.data.chatId == 'general' ||
         (request.auth.uid in request.resource.data.participants)
       );
-      allow update, delete: if false;
+      // Seul le champ pollVotes peut être modifié (vote sur un sondage) ;
+      // tout le reste du message (texte, image, sondage) reste immuable.
+      allow update: if isAuthenticated() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pollVotes']);
+      allow delete: if false;
     }
 
     // ── clients (V1 — archive, lecture seule) ─────────────────
