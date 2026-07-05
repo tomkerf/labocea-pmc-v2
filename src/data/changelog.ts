@@ -11,7 +11,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: '144',
     date: '5 juillet 2026',
     items: [
-      { type: 'feat', label: 'Messagerie : Intégration de l\'API native App Badging (pastille rouge iOS/PWA pour l\'icône de l\'application sur l\'écran d'accueil)' },
+      { type: 'feat', label: 'Messagerie : Intégration de l\'API native App Badging (pastille rouge iOS/PWA pour l\'icône de l\'application sur l\'écran d\'accueil)' },
     ],
   },
   {
