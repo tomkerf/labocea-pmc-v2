@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '148'
+export const CHANGELOG_VERSION = '149'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '149',
+    date: '5 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Layout : Correction du scroll et padding global de la page de chat pour désactiver la superposition mobile de la BottomTabBar' },
+    ],
+  },
   {
     version: '148',
     date: '5 juillet 2026',

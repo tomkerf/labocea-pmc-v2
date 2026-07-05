@@ -454,7 +454,7 @@ export default function ChatPage() {
     })
 
   return (
-    <div className="flex-1 flex h-[calc(100vh-56px-80px)] max-h-[calc(100vh-56px-80px)] md:h-[calc(100vh-56px)] md:max-h-[calc(100vh-56px)] bg-[var(--color-bg-primary)] overflow-hidden">
+    <div className="flex-1 flex h-[calc(100dvh-56px-80px)] max-h-[calc(100dvh-56px-80px)] md:h-[calc(100dvh-56px)] md:max-h-[calc(100dvh-56px)] bg-[var(--color-bg-primary)] overflow-hidden">
       
       {/* 1. LISTE DES DISCUSSIONS (Side Panel) */}
       <div 
@@ -578,7 +578,7 @@ export default function ChatPage() {
 
       {/* 2. ZONE DE DISCUSSION PRINCIPALE */}
       <div 
-        className={`flex-1 flex flex-col h-[calc(100vh-56px-80px)] max-h-[calc(100vh-56px-80px)] md:h-[calc(100vh-56px)] md:max-h-[calc(100vh-56px)] bg-[var(--color-bg-primary)] overflow-hidden ${
+        className={`flex-1 flex flex-col h-[calc(100dvh-56px-80px)] max-h-[calc(100dvh-56px-80px)] md:h-[calc(100dvh-56px)] md:max-h-[calc(100dvh-56px)] bg-[var(--color-bg-primary)] overflow-hidden ${
           !selectedChatId ? 'hidden md:flex' : 'flex'
         }`}
       >

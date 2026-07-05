@@ -2,6 +2,22 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 162 — Suppression du scroll et padding parents pour la page de chat
+**5 juillet 2026**
+
+### Contexte
+Le chevauchement du chat avec la barre de navigation persistait sur mobile Safari. L'analyse montre que le layout parent (`AppLayout.tsx`) applique à toutes les pages de façon inconditionnelle un défilement vertical (`overflow-y-auto`) et un padding-bottom (`pb-80px`), ce qui repoussait la page de chat vers le bas de 80px supplémentaires et créait un double défilement invisible cachant la barre d'input.
+
+### Modifications apportées
+- **Désactivation conditionnelle du scroll parent (`AppLayout.tsx`) :**
+  - Ajout d'une constante `isChatPage = pathname.startsWith('/chat')`.
+  - Application conditionnelle des classes CSS du conteneur parent (`scrollContainerRef`) : si l'utilisateur est sur la page de chat, on force `overflow-hidden pb-0` au lieu de `overflow-y-auto pb-[calc(80px+...)]`. Ainsi, le chat remplit exactement la zone visible sans scroll parent parasite.
+- **Utilisation des unités DVH (`ChatPage.tsx`) :**
+  - Remplacement des unités de hauteur `vh` par des unités dynamiques `dvh` (Dynamic Viewport Height) : `h-[calc(100dvh-56px-80px)]` pour compenser les barres d'adresse dynamiques de Safari sur iOS.
+- **Mises à jour du projet :**
+  - Version changelog incrémentée à `149`.
+  - Validation de la compilation TypeScript.
+
 ## Session 161 — Ajustement de la hauteur du chat pour mobile
 **5 juillet 2026**
 

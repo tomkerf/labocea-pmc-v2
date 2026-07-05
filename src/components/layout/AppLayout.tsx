@@ -19,6 +19,8 @@ export default function AppLayout() {
   const changelog = useChangelogState()
   useNetworkStatus()
 
+  const isChatPage = pathname.startsWith('/chat')
+
   useEffect(() => {
     const container = scrollContainerRef.current
     if (!container) return
@@ -57,7 +59,14 @@ export default function AppLayout() {
         </header>
 
         {/* Pages avec transition */}
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-0">
+        <div 
+          ref={scrollContainerRef} 
+          className={`flex-1 ${
+            isChatPage 
+              ? 'overflow-hidden pb-0' 
+              : 'overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-0'
+          }`}
+        >
           <AnimatePresence mode="wait">
             <m.div
               key={pathname}
