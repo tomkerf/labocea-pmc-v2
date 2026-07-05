@@ -2,6 +2,22 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 158 — Pastilles de notification in-app unifiées au rouge iOS-style et titre d'onglet dynamique
+**5 juillet 2026**
+
+### Contexte
+L'utilisateur a signalé ne pas voir de pastille rouge à côté de la messagerie. Les pastilles in-app étaient auparavant colorées en bleu clair (si pas de mention directe) ou rouge (si mention directe), et ne s'activaient que si un message arrivait après l'ouverture de l'application. De plus, aucun indicateur visuel n'était présent sur le titre de l'onglet du navigateur.
+
+### Modifications apportées
+- **Badges In-App unifiés rouge iOS-style (`Sidebar.tsx`, `PlusPage.tsx`, `BottomTabBar.tsx`) :**
+  - Modification de `Sidebar.tsx` et `PlusPage.tsx` pour forcer le badge de messagerie non lu à toujours arborer le style rouge iOS vif (`var(--color-danger)` background, `white` text), qu'il y ait une mention directe ou simplement des messages non lus.
+  - Ajout d'une notification sur le bouton "Menu" de la `BottomTabBar.tsx` sur mobile s'il y a des messages non lus dans le chat, afin d'alerter instantanément l'utilisateur mobile.
+- **Titre d'onglet dynamique (`chatNotificationStore.ts`) :**
+  - Ajout de la mise à jour automatique de `document.title` s'il y a des messages non lus (ex: `(1) Labocea PMC` sinon `Labocea PMC`), similaire au comportement de WhatsApp Web.
+- **Mises à jour du projet :**
+  - Version changelog incrémentée à `145`.
+  - Validation réussie de la compilation.
+
 ## Session 157 — Intégration de la pastille de notification native iOS (App Badging API)
 **5 juillet 2026**
 

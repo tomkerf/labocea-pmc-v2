@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '144'
+export const CHANGELOG_VERSION = '145'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '145',
+    date: '5 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Messagerie : Mise à jour dynamique du titre de l\'onglet du navigateur avec le nombre de messages non lus (ex: (1) Labocea PMC)' },
+    ],
+  },
   {
     version: '144',
     date: '5 juillet 2026',

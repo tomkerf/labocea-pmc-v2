@@ -27,6 +27,13 @@ export const useChatNotificationStore = create<ChatNotificationStore>((set, get)
     const total = Object.values(unreadCounts).reduce((acc, count) => acc + count, 0)
     set({ unreadCounts, unreadCount: total })
     
+    // Titre de l'onglet du navigateur (ex: (1) Labocea PMC)
+    if (total > 0) {
+      document.title = `(${total}) Labocea PMC`
+    } else {
+      document.title = 'Labocea PMC'
+    }
+
     // Pastille native d'application (App Badging API pour iOS/Android PWA)
     if ('setAppBadge' in navigator) {
       if (total > 0) {
@@ -54,6 +61,13 @@ export const useChatNotificationStore = create<ChatNotificationStore>((set, get)
       unreadCounts: updatedUnreadCounts,
       unreadCount: total
     })
+
+    // Titre de l'onglet du navigateur (ex: (1) Labocea PMC)
+    if (total > 0) {
+      document.title = `(${total}) Labocea PMC`
+    } else {
+      document.title = 'Labocea PMC'
+    }
 
     // Pastille native d'application (App Badging API pour iOS/Android PWA)
     if ('setAppBadge' in navigator) {
