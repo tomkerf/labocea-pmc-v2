@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '135'
+export const CHANGELOG_VERSION = '137'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,23 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '137',
+    date: '5 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Plan de charge : Charge exprimée en heures pondérées par type — Bilan 24h et Composite 2h (installation + désinstallation), Ponctuel 15 min, eau souterraine 1h sur place' },
+      { type: 'feat', label: 'Plan de charge : Capacité et seuils de surcharge convertis en heures de terrain (70h/mois/technicien, seuils 50h/80h)' },
+    ],
+  },
+  {
+    version: '136',
+    date: '4 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Plan de charge : Ajout d\'un filtre par Méthode (Ponctuel, Composite, Bilan 24) pour affiner la matrice et les totaux' },
+      { type: 'feat', label: 'Plan de charge : Affichage de la répartition détaillée des prélèvements dans le KPI du Volume Annuel' },
+      { type: 'feat', label: 'Plan de charge : Ajout d\'infobulles détaillées au survol de chaque cellule de la matrice' },
+    ],
+  },
   {
     version: '135',
     date: '3 juillet 2026',

@@ -2,23 +2,28 @@ import { useMemo } from 'react'
 import type { Client } from '@/types'
 import type { Preleveur } from '@/stores/preleveursStore'
 import { MOIS_LONG } from '@/lib/planningUtils'
+import {
+  getSamplingDurationHours,
+  formatHours,
+  CAPACITY_HOURS_PER_TECH_PER_MONTH,
+  THRESHOLD_WARNING_HOURS,
+  THRESHOLD_DANGER_HOURS,
+} from '@/lib/workloadUtils'
 
 interface WorkloadMatrixViewProps {
   clients: Client[]
   year: number
   filterTech: string
   filterSite: string
+  filterMethod?: string
   preleveurs: Preleveur[]
 }
 
-// Seuils de charge par mois pour un technicien
-const THRESHOLD_WARNING = 25
-const THRESHOLD_DANGER = 40
-
-function getHeatmapColor(value: number) {
-  if (value === 0) return 'transparent'
-  if (value >= THRESHOLD_DANGER) return 'var(--color-danger-light)'
-  if (value >= THRESHOLD_WARNING) return 'var(--color-warning-light)'
+// Seuils de charge mensuelle par technicien, en heures
+function getHeatmapColor(hours: number) {
+  if (hours === 0) return 'transparent'
+  if (hours >= THRESHOLD_DANGER_HOURS) return 'var(--color-danger-light)'
+  if (hours >= THRESHOLD_WARNING_HOURS) return 'var(--color-warning-light)'
   return 'var(--color-bg-secondary)'
 }
 
@@ -27,24 +32,35 @@ function getHeatmapTextColor(value: number) {
   return 'var(--color-text-primary)'
 }
 
-export default function WorkloadMatrixView({ clients, year, filterTech, filterSite, preleveurs }: WorkloadMatrixViewProps) {
+export default function WorkloadMatrixView({ clients, year, filterTech, filterSite, filterMethod = '', preleveurs }: WorkloadMatrixViewProps) {
   
   // 1. Agréger les données par technicien et par mois
-  const { techStats, totalPerMonth, globalStats } = useMemo(() => {
+  const { techStats, totalPerMonthHours, totalPerMonthCount, globalStats, methodBreakdown, methodBreakdownHours } = useMemo(() => {
     // Initialisation
-    const stats = new Map<string, { total: number, months: number[] }>()
-    
+    const emptyTechData = () => ({
+      totalCount: 0,
+      totalHours: 0,
+      monthsCount: Array(12).fill(0) as number[],
+      monthsHours: Array(12).fill(0) as number[],
+      monthDetails: Array.from({ length: 12 }, () => ({ Ponctuel: 0, Composite: 0, Automatique: 0 }))
+    })
+    const stats = new Map<string, ReturnType<typeof emptyTechData>>()
+
     // On ajoute tous les techniciens existants pour qu'ils s'affichent même s'ils sont à 0
     preleveurs.forEach(p => {
-      stats.set(p.code, { total: 0, months: Array(12).fill(0) })
+      stats.set(p.code, emptyTechData())
     })
     // Entrée pour les prélèvements "Non assignés"
-    stats.set('NON_ASSIGNE', { total: 0, months: Array(12).fill(0) })
+    stats.set('NON_ASSIGNE', emptyTechData())
 
-    const totalMonth = Array(12).fill(0)
+    const totalMonthCount = Array(12).fill(0)
+    const totalMonthHours = Array(12).fill(0)
     let totalYear = 0
+    let totalYearHours = 0
     let planned = 0
     let done = 0
+    const mBreakdown = { Ponctuel: 0, Composite: 0, Automatique: 0 }
+    const mBreakdownHours = { Ponctuel: 0, Composite: 0, Automatique: 0 }
 
     clients.forEach(c => {
       if (c.annee && c.annee !== year.toString()) return
@@ -58,21 +74,38 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
         // Appliquer les filtres
         if (filterSite && prel?.site !== filterSite) return
         if (filterTech && assigned !== filterTech) return
+        if (filterMethod && p.methode !== filterMethod) return
 
         const techKey = assigned || 'NON_ASSIGNE'
-        if (!stats.has(techKey)) stats.set(techKey, { total: 0, months: Array(12).fill(0) })
+        if (!stats.has(techKey)) {
+          stats.set(techKey, emptyTechData())
+        }
         const techData = stats.get(techKey)!
+
+        const durationH = getSamplingDurationHours(p)
 
         p.samplings.forEach(s => {
           // On ne compte pas les "non_effectue" (annulés) dans la charge de travail
           if (s.status === 'non_effectue') return
-          
+
           if (s.plannedMonth >= 0 && s.plannedMonth < 12) {
-            techData.months[s.plannedMonth] += 1
-            techData.total += 1
-            totalMonth[s.plannedMonth] += 1
+            techData.monthsCount[s.plannedMonth] += 1
+            techData.monthsHours[s.plannedMonth] += durationH
+            techData.totalCount += 1
+            techData.totalHours += durationH
+
+            const meth = p.methode || 'Ponctuel'
+            if (meth === 'Ponctuel' || meth === 'Composite' || meth === 'Automatique') {
+              techData.monthDetails[s.plannedMonth][meth] += 1
+              mBreakdown[meth] += 1
+              mBreakdownHours[meth] += durationH
+            }
+
+            totalMonthCount[s.plannedMonth] += 1
+            totalMonthHours[s.plannedMonth] += durationH
             totalYear += 1
-            
+            totalYearHours += durationH
+
             if (s.status === 'planned' || s.status === 'overdue') planned++
             if (s.status === 'done') done++
           }
@@ -96,24 +129,30 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
       .sort((a, b) => {
         if (a.code === 'NON_ASSIGNE') return 1 // Non assigné à la fin
         if (b.code === 'NON_ASSIGNE') return -1
-        return b.total - a.total // Trier par charge totale décroissante
+        return b.totalHours - a.totalHours // Trier par charge totale décroissante
       })
 
-    return { 
-      techStats: sortedStats, 
-      totalPerMonth: totalMonth,
-      globalStats: { totalYear, planned, done }
+    return {
+      techStats: sortedStats,
+      totalPerMonthHours: totalMonthHours,
+      totalPerMonthCount: totalMonthCount,
+      globalStats: { totalYear, totalYearHours, planned, done },
+      methodBreakdown: mBreakdown,
+      methodBreakdownHours: mBreakdownHours
     }
-  }, [clients, year, filterTech, filterSite, preleveurs])
+  }, [clients, year, filterTech, filterSite, filterMethod, preleveurs])
 
-  // Calcul du mois le plus chargé
-  const maxMonthValue = Math.max(...totalPerMonth)
-  const maxMonthIndex = totalPerMonth.indexOf(maxMonthValue)
-  const maxMonthName = maxMonthValue > 0 ? MOIS_LONG[maxMonthIndex] : 'Aucun'
+  // Calcul du mois le plus chargé (en heures)
+  const maxMonthHours = Math.max(...totalPerMonthHours)
+  const maxMonthIndex = totalPerMonthHours.indexOf(maxMonthHours)
+  const maxMonthName = maxMonthHours > 0 ? MOIS_LONG[maxMonthIndex] : 'Aucun'
+  const maxMonthCount = maxMonthHours > 0 ? totalPerMonthCount[maxMonthIndex] : 0
 
-  // Capacité théorique (exemple: 35 prélèvements * nb de techs)
+  // Capacité théorique en heures de terrain par mois
   const nbActiveTechs = techStats.filter(t => t.code !== 'NON_ASSIGNE').length
-  const maxCapacityPerMonth = nbActiveTechs * 35 
+  const maxCapacityPerMonth = nbActiveTechs * CAPACITY_HOURS_PER_TECH_PER_MONTH
+
+  const unassigned = techStats.find(t => t.code === 'NON_ASSIGNE')
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[var(--color-bg-primary)] p-4 md:p-6 overflow-y-auto">
@@ -129,27 +168,51 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
 
         {/* 1. KPIs Bilan de charge */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)]">
-            <div className="text-sm text-[var(--color-text-secondary)] mb-1">Volume total annuel</div>
-            <div className="text-2xl font-bold text-[var(--color-text-primary)]">{globalStats.totalYear} <span className="text-sm font-medium text-[var(--color-text-tertiary)]">prélèv.</span></div>
-            <div className="mt-2 text-xs flex gap-2">
-              <span className="text-[var(--color-success)] font-medium">✓ {globalStats.done} faits</span>
-              <span className="text-[var(--color-warning)] font-medium">● {globalStats.planned} à faire</span>
+          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)] flex flex-col justify-between">
+            <div>
+              <div className="text-sm text-[var(--color-text-secondary)] mb-1">Volume total annuel</div>
+              <div className="text-2xl font-bold text-[var(--color-text-primary)]">{formatHours(globalStats.totalYearHours)} <span className="text-sm font-medium text-[var(--color-text-tertiary)]">{globalStats.totalYear} prélèv.</span></div>
+              <div className="mt-1.5 text-xs flex gap-2">
+                <span className="text-[var(--color-success)] font-medium">✓ {globalStats.done} faits</span>
+                <span className="text-[var(--color-warning)] font-medium">● {globalStats.planned} à faire</span>
+              </div>
             </div>
+            {globalStats.totalYear > 0 && (
+              <div className="mt-3 pt-3 border-t border-[var(--color-border-subtle)] flex flex-col gap-1 text-[11px] text-[var(--color-text-secondary)]">
+                {methodBreakdown.Ponctuel > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span>Ponctuels</span>
+                    <span className="font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded-full">{methodBreakdown.Ponctuel} · {formatHours(methodBreakdownHours.Ponctuel)}</span>
+                  </div>
+                )}
+                {methodBreakdown.Composite > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span>Composites</span>
+                    <span className="font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded-full">{methodBreakdown.Composite} · {formatHours(methodBreakdownHours.Composite)}</span>
+                  </div>
+                )}
+                {methodBreakdown.Automatique > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span>Bilans 24h (Auto)</span>
+                    <span className="font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded-full">{methodBreakdown.Automatique} · {formatHours(methodBreakdownHours.Automatique)}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)]">
             <div className="text-sm text-[var(--color-text-secondary)] mb-1">Pic d'activité</div>
             <div className="text-2xl font-bold text-[var(--color-text-primary)]">{maxMonthName}</div>
             <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
-              {maxMonthValue > 0 ? `Avec ${maxMonthValue} interventions prévues` : 'Aucune intervention'}
+              {maxMonthHours > 0 ? `Avec ${formatHours(maxMonthHours)} prévues (${maxMonthCount} interventions)` : 'Aucune intervention'}
             </div>
           </div>
 
           <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)]">
             <div className="text-sm text-[var(--color-text-secondary)] mb-1">Charge moyenne</div>
             <div className="text-2xl font-bold text-[var(--color-text-primary)]">
-              {nbActiveTechs > 0 ? Math.round(globalStats.totalYear / 12 / nbActiveTechs) : 0} <span className="text-sm font-medium text-[var(--color-text-tertiary)]">/ mois / tech</span>
+              {formatHours(nbActiveTechs > 0 ? globalStats.totalYearHours / 12 / nbActiveTechs : 0)} <span className="text-sm font-medium text-[var(--color-text-tertiary)]">/ mois / tech</span>
             </div>
             <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
               Base de {nbActiveTechs} techniciens actifs
@@ -159,7 +222,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
           <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)]">
             <div className="text-sm text-[var(--color-text-secondary)] mb-1">Non assignés</div>
             <div className="text-2xl font-bold text-[var(--color-text-primary)]">
-              {techStats.find(t => t.code === 'NON_ASSIGNE')?.total || 0} <span className="text-sm font-medium text-[var(--color-text-tertiary)]">prélèv.</span>
+              {formatHours(unassigned?.totalHours || 0)} <span className="text-sm font-medium text-[var(--color-text-tertiary)]">{unassigned?.totalCount || 0} prélèv.</span>
             </div>
             <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
               Volume de travail orphelin
@@ -182,7 +245,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
                 
                 <div className="absolute bottom-full right-0 mb-2 w-56 p-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-[var(--radius-md)] shadow-[var(--shadow-modal)] text-xs leading-relaxed text-[var(--color-text-secondary)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
                   <span className="font-semibold text-[var(--color-text-primary)] block mb-1">Capacité maximale</span>
-                  Calculé sur la base de 35 prélèvements par mois par technicien actif ({nbActiveTechs} actuellement affichés).
+                  Calculé sur la base de {CAPACITY_HOURS_PER_TECH_PER_MONTH}h de terrain par mois par technicien actif ({nbActiveTechs} actuellement affichés).
                 </div>
               </div>
             </div>
@@ -190,25 +253,25 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
           
           <div className="flex items-stretch gap-2 h-48 relative pt-6 pb-2">
             {/* Ligne de flottaison (Capacité max) */}
-            {maxCapacityPerMonth > 0 && maxMonthValue > 0 && (
-              <div 
+            {maxCapacityPerMonth > 0 && maxMonthHours > 0 && (
+              <div
                 className="absolute w-full border-t border-dashed border-[var(--color-danger)] opacity-50 z-10 flex items-center"
-                style={{ bottom: `${Math.min(100, (maxCapacityPerMonth / Math.max(maxCapacityPerMonth, maxMonthValue)) * 100)}%` }}
+                style={{ bottom: `${Math.min(100, (maxCapacityPerMonth / Math.max(maxCapacityPerMonth, maxMonthHours)) * 100)}%` }}
               >
-                <span className="absolute right-0 -top-5 text-[10px] text-[var(--color-danger)] font-medium">Capacité max théo. ({maxCapacityPerMonth})</span>
+                <span className="absolute right-0 -top-5 text-[10px] text-[var(--color-danger)] font-medium">Capacité max théo. ({formatHours(maxCapacityPerMonth)})</span>
               </div>
             )}
 
-            {totalPerMonth.map((val, i) => {
-              const chartMax = Math.max(maxCapacityPerMonth, maxMonthValue, 1)
+            {totalPerMonthHours.map((val, i) => {
+              const chartMax = Math.max(maxCapacityPerMonth, maxMonthHours, 1)
               const heightPct = (val / chartMax) * 100
               const isOverCapacity = maxCapacityPerMonth > 0 && val > maxCapacityPerMonth
-              
+
               return (
                 <div key={MOIS_LONG[i]} className="flex-1 flex flex-col items-center gap-2 relative group h-full">
                   {val > 0 && (
-                    <div className="absolute -top-6 text-xs font-semibold text-[var(--color-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity">
-                      {val}
+                    <div className="absolute -top-6 text-xs font-semibold text-[var(--color-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      {formatHours(val)}
                     </div>
                   )}
                   <div className="w-full max-w-[40px] bg-[var(--color-bg-tertiary)] rounded-t-[6px] relative flex items-end justify-center overflow-hidden flex-1">
@@ -235,8 +298,8 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
             <h3 className="text-base font-semibold text-[var(--color-text-primary)]">Matrice de Charge par Technicien</h3>
             <div className="flex items-center gap-4 text-xs">
               <div className="flex items-center gap-1.5"><span className="size-3 rounded border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)]" /> Normal</div>
-              <div className="flex items-center gap-1.5"><span className="size-3 rounded bg-[var(--color-warning-light)] border border-[var(--color-warning)] opacity-50" /> Chargé ({'>'}{THRESHOLD_WARNING})</div>
-              <div className="flex items-center gap-1.5"><span className="size-3 rounded bg-[var(--color-danger-light)] border border-[var(--color-danger)] opacity-50" /> Surcharge ({'>'}{THRESHOLD_DANGER})</div>
+              <div className="flex items-center gap-1.5"><span className="size-3 rounded bg-[var(--color-warning-light)] border border-[var(--color-warning)] opacity-50" /> Chargé ({'>'}{THRESHOLD_WARNING_HOURS}h)</div>
+              <div className="flex items-center gap-1.5"><span className="size-3 rounded bg-[var(--color-danger-light)] border border-[var(--color-danger)] opacity-50" /> Surcharge ({'>'}{THRESHOLD_DANGER_HOURS}h)</div>
             </div>
           </div>
           
@@ -270,22 +333,34 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
                           {!isUnassigned && <span className="text-xs text-[var(--color-text-secondary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded">{tech.code}</span>}
                         </div>
                       </td>
-                      <td className="px-2 py-3 border-r border-[var(--color-border-subtle)] text-center font-bold text-[var(--color-text-primary)] text-sm">
-                        {tech.total > 0 ? tech.total : '-'}
+                      <td className="px-2 py-3 border-r border-[var(--color-border-subtle)] text-center font-bold text-[var(--color-text-primary)] text-sm whitespace-nowrap">
+                        {tech.totalHours > 0 ? formatHours(tech.totalHours) : '-'}
                       </td>
-                      {tech.months.map((val, i) => (
-                        <td key={i} className="px-1.5 py-1.5 border-r border-[var(--color-border-subtle)] last:border-0 relative group">
-                          <div 
-                            className="w-full h-8 flex items-center justify-center font-medium rounded-md transition-colors"
-                            style={{ 
-                              backgroundColor: getHeatmapColor(val),
-                              color: getHeatmapTextColor(val)
-                            }}
-                          >
-                            {val > 0 ? val : '-'}
-                          </div>
-                        </td>
-                      ))}
+                      {tech.monthsHours.map((val, i) => {
+                        const details = tech.monthDetails[i]
+                        const detailParts: string[] = []
+                        if (details.Ponctuel > 0) detailParts.push(`${details.Ponctuel} Ponctuel${details.Ponctuel > 1 ? 's' : ''}`)
+                        if (details.Composite > 0) detailParts.push(`${details.Composite} Composite${details.Composite > 1 ? 's' : ''}`)
+                        if (details.Automatique > 0) detailParts.push(`${details.Automatique} Bilan 24h`)
+                        const tooltipText = detailParts.length > 0
+                          ? `${name} - ${MOIS_LONG[i]} : ${formatHours(val)} — ${detailParts.join(', ')}`
+                          : undefined
+
+                        return (
+                          <td key={i} className="px-1.5 py-1.5 border-r border-[var(--color-border-subtle)] last:border-0 relative group">
+                            <div
+                              className="w-full h-8 flex items-center justify-center font-medium rounded-md transition-colors text-xs whitespace-nowrap"
+                              style={{
+                                backgroundColor: getHeatmapColor(val),
+                                color: getHeatmapTextColor(val)
+                              }}
+                              title={tooltipText}
+                            >
+                              {val > 0 ? formatHours(val) : '-'}
+                            </div>
+                          </td>
+                        )
+                      })}
                     </tr>
                   )
                 })}

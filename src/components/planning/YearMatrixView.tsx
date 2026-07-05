@@ -15,10 +15,11 @@ interface YearMatrixViewProps {
   year: number
   filterTech: string
   filterSite: string
+  filterMethod?: string
   preleveurs: Preleveur[]
 }
 
-export default function YearMatrixView({ clients, year, filterTech, filterSite, preleveurs }: YearMatrixViewProps) {
+export default function YearMatrixView({ clients, year, filterTech, filterSite, filterMethod = '', preleveurs }: YearMatrixViewProps) {
   const [issueModalType, setIssueModalType] = useState<'overdue' | 'non_effectue' | null>(null)
 
   const rows = useMemo(() => {
@@ -34,6 +35,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
         const prel = preleveurs.find(pr => pr.code === assigned)
         if (filterSite && prel?.site !== filterSite) return
         if (filterTech && assigned !== filterTech) return
+        if (filterMethod && p.methode !== filterMethod) return
 
         const samplingsByMonth: (Sampling | null)[] = Array(12).fill(null)
         const pairsByMonth: (Sampling | null)[][] = Array.from({ length: 12 }, () => [])
@@ -66,7 +68,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
       if (c !== 0) return c
       return a.plan.siteNom.localeCompare(b.plan.siteNom)
     })
-  }, [clients, year, filterTech, filterSite, preleveurs])
+  }, [clients, year, filterTech, filterSite, filterMethod, preleveurs])
 
   const groupedRows = useMemo(() => {
     const map = new Map<string, GroupData>()

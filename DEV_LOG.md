@@ -2,6 +2,26 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 154 — Filtre par méthode et répartition détaillée (Plan de Charge)
+**4 juillet 2026**
+
+### Contexte
+L'utilisateur a demandé s'il était possible de différencier les types de prélèvements (Bilan 24h, Ponctuels, etc.) dans l'application, et plus précisément de les mettre en valeur dans l'onglet **Charge** (Plan de Charge).
+
+### Modifications apportées
+- **MissionsPage (`MissionsPage.tsx`) :**
+  - Ajout d'un état `filterMethod` et d'un nouveau sélecteur dropdown **Méthode** dans la barre de filtres (choix : Ponctuel, Composite, Bilan 24).
+  - Transmission du filtre à `YearMatrixView` et `WorkloadMatrixView`.
+- **Matrice annuelle (`YearMatrixView.tsx`) :**
+  - Réception du prop optionnel `filterMethod` (avec valeur par défaut `""`) pour filtrer dynamiquement les plans et rafraîchir la matrice.
+- **Plan de Charge (`WorkloadMatrixView.tsx`) :**
+  - Réception du prop optionnel `filterMethod` pour filtrer l'agrégation de charge par méthode.
+  - Calcul et affichage de la répartition détaillée par méthode (`Ponctuel`, `Composite`, `Automatique`/Bilan 24h) dans le KPI **Volume total annuel**.
+  - Agrégation mensuelle des prélèvements par méthode et par technicien.
+  - Affichage d'infobulles détaillées au survol (`title`) sur chaque case de la matrice de charge, listant précisément les types de prélèvements prévus (ex. `Thomas Kerfendal - Septembre : 2 Ponctuels, 1 Bilan 24h`).
+- **Nouveautés (`changelog.ts`) :**
+  - Version incrémentée à `136` pour notifier les utilisateurs de ces nouveautés dans le volet in-app.
+
 ## Session 153 — RUN_BOOK enrichi + campagne de tests (mutations Firestore)
 **4 juillet 2026**
 

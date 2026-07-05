@@ -52,6 +52,7 @@ export default function MissionsPage() {
   const [year, setYear] = useState(new Date().getFullYear())
   const [filterSite, setFilterSite] = useState('')
   const [filterTech, setFilterTech] = useState('')
+  const [filterMethod, setFilterMethod] = useState('')
 
   const overdueCount = clients.filter(hasOverdue).length
 
@@ -170,7 +171,7 @@ export default function MissionsPage() {
             </button>
           </div>
 
-          {/* Filtres Site et Technicien */}
+          {/* Filtres Site, Technicien et Méthode */}
           <div className="shrink-0 flex gap-3 px-6 mb-4">
             <div className="flex-1 flex flex-col gap-1.5">
               <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
@@ -213,6 +214,27 @@ export default function MissionsPage() {
                 ))}
               </select>
             </div>
+
+            <div className="flex-1 flex flex-col gap-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+                Méthode
+              </label>
+              <select
+                value={filterMethod}
+                onChange={(e) => setFilterMethod(e.target.value)}
+                className="px-3 py-2 rounded-lg text-sm outline-none"
+                style={{
+                  background: COLORS.BG_SECONDARY,
+                  border: '1px solid var(--color-border-subtle)',
+                  color: COLORS.TEXT_PRIMARY,
+                }}
+              >
+                <option value="">Toutes les méthodes</option>
+                <option value="Ponctuel">Ponctuel</option>
+                <option value="Composite">Composite</option>
+                <option value="Automatique">Bilan 24 (Automatique)</option>
+              </select>
+            </div>
           </div>
 
           {view === 'annee' ? (
@@ -221,6 +243,7 @@ export default function MissionsPage() {
               year={year}
               filterTech={filterTech}
               filterSite={filterSite}
+              filterMethod={filterMethod}
               preleveurs={preleveurs}
             />
           ) : (
@@ -229,6 +252,7 @@ export default function MissionsPage() {
               year={year}
               filterTech={filterTech}
               filterSite={filterSite}
+              filterMethod={filterMethod}
               preleveurs={preleveurs}
             />
           )}
