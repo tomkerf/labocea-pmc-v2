@@ -128,6 +128,14 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && (request.auth.uid == resource.data.createdBy || isAdmin());
     }
 
+    // ── chat-messages ─────────────────────────────────────────
+    // Tout utilisateur authentifié peut lire et envoyer des messages.
+    // L'historique est immuable (pas de modification ni de suppression).
+    match /chat-messages/{messageId} {
+      allow read, create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
     // ── clients (V1 — archive, lecture seule) ─────────────────
     match /clients/{clientId} {
       allow read: if isAuthenticated();
