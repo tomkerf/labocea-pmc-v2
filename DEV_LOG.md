@@ -2,6 +2,29 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 160 — Partage de photos et d'images en temps réel dans le chat
+**5 juillet 2026**
+
+### Contexte
+L'utilisateur a choisi la fonctionnalité de partage de photos/médias (Option 1) pour le chat. L'objectif est de permettre aux techniciens d'envoyer des photos en direct du terrain avec compression HEIC automatique et hébergement sécurisé sur Firebase Storage.
+
+### Modifications apportées
+- **Sécurisation Firebase Storage (`storage.rules`) :**
+  - Ajout des règles de sécurité pour le dossier `chats/{chatId}/{filename}` afin d'autoriser la lecture/écriture d'images par les utilisateurs connectés (limite à 10 Mo par image). Déploiement réussi avec `firebase deploy`.
+- **Helpers d'upload (`uploadPhoto.ts`) :**
+  - Ajout des fonctions `uploadChatPhoto` (avec import dynamique de `heic-to` pour conversion HEIC/HEIF automatique sur mobile) et `deleteChatPhoto`.
+- **Modèle de données & Services (`types/index.ts`, `chatService.ts`) :**
+  - Ajout des propriétés optionnelles `isImage` et `imageUrl` au type `ChatMessage`.
+  - Implémentation du service `sendChatImage` pour enregistrer le message photo dans Firestore.
+- **Rendu & Interface (`ChatPage.tsx`) :**
+  - Ajout d'un bouton photo (icône `Camera` de Lucide) à côté du champ texte avec gestion de l'état d'upload (`uploadingImage` avec spinner de chargement `Loader2`).
+  - Intégration de l'input fichier caché pour déclencher la caméra ou la galerie.
+  - Affichage de l'image miniature avec des angles arrondis dans la bulle de chat si `msg.isImage` est vrai.
+  - Implémentation d'une visionneuse interactive plein écran (`zoomImageUrl` avec overlay flouté et animation spring de framer-motion) s'ouvrant au clic sur la photo.
+- **Mises à jour du projet :**
+  - Version changelog incrémentée à `147`.
+  - Validation de la compilation.
+
 ## Session 159 — Alignement stylistique du badge de notification de la Messagerie sur celui des Missions
 **5 juillet 2026**
 

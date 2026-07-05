@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { collection, query, orderBy, limit, onSnapshot, where } from 'firebase/firestore'
-import { Send, ArrowLeft, AtSign, Users, Search, BarChart2, Plus, Trash2, X } from 'lucide-react'
+import { Send, ArrowLeft, AtSign, Users, Search, BarChart2, Plus, Trash2, X, Camera, Image, Loader2 } from 'lucide-react'
 import { m, AnimatePresence } from 'framer-motion'
 import { db } from '@/lib/firebase'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { useChatNotificationStore } from '@/stores/chatNotificationStore'
-import { sendChatMessage, getDmChatId, sendChatPoll, togglePollVote } from '@/services/chatService'
+import { sendChatMessage, getDmChatId, sendChatPoll, togglePollVote, sendChatImage } from '@/services/chatService'
+import { uploadChatPhoto } from '@/lib/uploadPhoto'
 import type { ChatMessage, AppUser } from '@/types'
 import { COLLECTIONS } from '@/lib/constants'
 import UserAvatar from '@/components/ui/UserAvatar'
@@ -167,6 +168,11 @@ export default function ChatPage() {
   const [isPollModalOpen, setIsPollModalOpen] = useState(false)
   const [pollQuestion, setPollQuestion] = useState('')
   const [pollOptions, setPollOptions] = useState<string[]>(['', ''])
+
+  // Photos/Images
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [zoomImageUrl, setZoomImageUrl] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -351,6 +357,40 @@ export default function ChatPage() {
       await togglePollVote(messageId, optionIndex, appUser.uid)
     } catch (err) {
       console.error('Erreur vote:', err)
+    }
+  }
+
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !appUser || !selectedChatId) return
+
+    try {
+      setUploadingImage(true)
+      const url = await uploadChatPhoto(file, selectedChatId)
+      await sendChatImage(
+        url,
+        {
+          uid: appUser.uid,
+          prenom: appUser.prenom,
+          nom: appUser.nom,
+          initiales: appUser.initiales,
+          avatarColor: appUser.avatarColor,
+        },
+        selectedChatId,
+        selectedContact ? [appUser.uid, selectedContact.uid] : undefined
+      )
+    } catch (err: any) {
+      console.error('Erreur envoi image:', err)
+      alert(err.message || "Impossible d'envoyer la photo.")
+    } finally {
+      setUploadingImage(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     }
   }
 
@@ -681,6 +721,15 @@ export default function ChatPage() {
                               appUserInitials={appUser?.initiales || ''}
                               onVote={(optIdx) => handleVote(msg.id, optIdx)}
                             />
+                          ) : msg.isImage && msg.imageUrl ? (
+                            <div className="flex flex-col gap-1 max-w-[280px] sm:max-w-[320px]">
+                              <img
+                                src={msg.imageUrl}
+                                alt="Photo"
+                                className="rounded-lg object-cover w-full max-h-[220px] cursor-pointer hover:opacity-95 transition-opacity"
+                                onClick={() => setZoomImageUrl(msg.imageUrl || null)}
+                              />
+                            </div>
                           ) : (
                             renderMessageContent(msg.text, isMe)
                           )}
@@ -741,6 +790,29 @@ export default function ChatPage() {
             }}
           >
             <form onSubmit={handleSend} className="flex items-center gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handlePhotoChange}
+                accept="image/*"
+                className="hidden"
+              />
+              
+              {uploadingImage ? (
+                <div className="p-2.5 shrink-0 flex items-center justify-center">
+                  <Loader2 className="animate-spin text-[var(--color-accent)]" size={20} />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handlePhotoClick}
+                  className="p-2.5 rounded-full flex items-center justify-center text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] active:scale-95 transition-all shrink-0"
+                  title="Envoyer une photo"
+                >
+                  <Camera size={20} />
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => setIsPollModalOpen(true)}
@@ -897,6 +969,44 @@ export default function ChatPage() {
                   </button>
                 </div>
               </form>
+            </m.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Visionneuse de photos Plein écran */}
+      <AnimatePresence>
+        {zoomImageUrl && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Overlay flouté */}
+            <m.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setZoomImageUrl(null)}
+              className="absolute inset-0 bg-black/85 backdrop-blur-[4px] cursor-zoom-out"
+            />
+            
+            {/* Conteneur de l'image */}
+            <m.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: 'spring', duration: 0.3 }}
+              className="relative max-w-full max-h-[85vh] z-10 flex flex-col items-center gap-4"
+            >
+              <img
+                src={zoomImageUrl}
+                alt="Zoom"
+                className="max-w-full max-h-[80vh] rounded-xl object-contain shadow-2xl"
+              />
+              <button
+                type="button"
+                onClick={() => setZoomImageUrl(null)}
+                className="px-4 py-2 text-xs font-semibold text-white bg-white/10 hover:bg-white/20 rounded-full border border-white/10 backdrop-blur-md active:scale-95 transition-all flex items-center gap-1.5"
+              >
+                <X size={14} /> Fermer
+              </button>
             </m.div>
           </div>
         )}

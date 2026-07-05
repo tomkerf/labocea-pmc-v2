@@ -36,6 +36,33 @@ export async function sendChatMessage(
   )
 }
 
+export async function sendChatImage(
+  imageUrl: string,
+  user: { uid: string; prenom: string; nom: string; initiales: string; avatarColor?: string },
+  chatId: string = 'general',
+  participants?: string[]
+): Promise<void> {
+  const payload: any = {
+    text: '📷 Photo',
+    chatId,
+    senderUid: user.uid,
+    senderName: `${user.prenom} ${user.nom}`,
+    senderInitials: user.initiales,
+    senderAvatarColor: user.avatarColor || '',
+    createdAt: Timestamp.now(),
+    isImage: true,
+    imageUrl,
+  }
+
+  if (participants) {
+    payload.participants = participants
+  }
+
+  await trackWrite(
+    addDoc(collection(db, COLLECTIONS.CHAT_MESSAGES), payload)
+  )
+}
+
 export async function sendChatPoll(
   question: string,
   options: string[],

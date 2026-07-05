@@ -471,5 +471,9 @@ export interface ChatMessage {
   pollQuestion?: string
   pollOptions?: string[]
   pollVotes?: { [optionIndex: string]: string[] } // associe l'index (string) aux UIDs des votants
+
+  // Images/Photos
+  isImage?: boolean
+  imageUrl?: string
 }
 

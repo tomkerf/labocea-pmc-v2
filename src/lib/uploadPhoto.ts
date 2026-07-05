@@ -169,3 +169,33 @@ export async function deletePlanPhoto(url: string): Promise<void> {
   }
 }
 
+/**
+ * Upload une photo dans le chat.
+ * Chemin : chats/{chatId}/{timestamp}.{ext}
+ */
+export async function uploadChatPhoto(
+  file: File,
+  chatId: string
+): Promise<string> {
+  validateImageFile(file)
+  const { data, ext, contentType } = await processImageFile(file)
+  const path = `chats/${chatId}/${Date.now()}.${ext}`
+  const storageRef = ref(storage, path)
+  await uploadBytes(storageRef, data, { contentType })
+  return getDownloadURL(storageRef)
+}
+
+/**
+ * Supprime une photo de chat depuis son URL.
+ */
+export async function deleteChatPhoto(url: string): Promise<void> {
+  try {
+    const match = url.match(/\/o\/(.+?)(\?|$)/)
+    if (!match) return
+    const path = decodeURIComponent(match[1])
+    await deleteObject(ref(storage, path))
+  } catch {
+    // Ignorer silencieusement
+  }
+}
+

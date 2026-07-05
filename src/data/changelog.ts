@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '146'
+export const CHANGELOG_VERSION = '147'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,14 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '147',
+    date: '5 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Messagerie : Ajout du partage de photos et images en temps réel (upload Firebase Storage, compression HEIC à la volée)' },
+      { type: 'feat', label: 'Messagerie : Visionneuse d\'images plein écran avec overlay flouté et animations spring' },
+    ],
+  },
   {
     version: '146',
     date: '5 juillet 2026',
