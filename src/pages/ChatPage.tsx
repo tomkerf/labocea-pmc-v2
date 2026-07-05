@@ -6,7 +6,7 @@ import { db } from '@/lib/firebase'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { useChatNotificationStore } from '@/stores/chatNotificationStore'
-import { sendChatMessage, getDmChatId, sendChatPoll, togglePollVote, sendChatImage, toggleReaction } from '@/services/chatService'
+import { sendChatMessage, getDmChatId, sendChatPoll, togglePollVote, sendChatImage, toggleReaction, ALLOWED_REACTIONS } from '@/services/chatService'
 import { uploadChatPhoto } from '@/lib/uploadPhoto'
 import type { ChatMessage, AppUser } from '@/types'
 import { COLLECTIONS } from '@/lib/constants'
@@ -362,8 +362,6 @@ export default function ChatPage() {
       console.error('Erreur vote:', err)
     }
   }
-
-  const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🙏']
 
   const handleReact = async (messageId: string, emoji: string) => {
     if (!appUser) return
@@ -778,7 +776,7 @@ export default function ChatPage() {
                                     isMe ? 'right-0' : 'left-0'
                                   }`}
                                 >
-                                  {QUICK_REACTIONS.map((emoji) => (
+                                  {ALLOWED_REACTIONS.map((emoji) => (
                                     <button
                                       key={emoji}
                                       type="button"

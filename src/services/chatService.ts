@@ -135,11 +135,17 @@ export async function togglePollVote(
   })
 }
 
+/** Seuls ces emojis sont acceptés pour une réaction — évite qu'un appel direct au SDK
+ * (hors UI) ne stocke des clés arbitraires dans `reactions` (abus de quota / stockage). */
+export const ALLOWED_REACTIONS = ['👍', '❤️', '😂', '😮', '😢', '🙏']
+
 export async function toggleReaction(
   messageId: string,
   emoji: string,
   userId: string
 ): Promise<void> {
+  if (!ALLOWED_REACTIONS.includes(emoji)) return
+
   const messageRef = doc(db, COLLECTIONS.CHAT_MESSAGES, messageId)
 
   await runTransaction(db, async (transaction) => {

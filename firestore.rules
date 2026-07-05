@@ -26,6 +26,40 @@ service cloud.firestore {
         request.resource.data.annee.size() > 0;
     }
 
+    // Vérifie que pour une clé donnée d'un champ map<string, list<string>> (ex: pollVotes,
+    // reactions), seul l'uid de l'appelant a pu être ajouté/retiré de la liste — jamais
+    // celui d'un tiers.
+    function selfOnlyKeyDiff(oldMap, newMap, key) {
+      let oldVoters = key in oldMap ? oldMap[key] : [];
+      let newVoters = key in newMap ? newMap[key] : [];
+      return oldVoters.removeAll(newVoters).hasOnly([request.auth.uid]) &&
+        newVoters.removeAll(oldVoters).hasOnly([request.auth.uid]);
+    }
+
+    // pollVotes : clés = index d'option (sendChatPoll limite à 10 options, index "0".."9").
+    // La liste des clés autorisées borne aussi la taille du document (anti-abus).
+    function isSelfOnlyPollVotesUpdate(oldField, newField) {
+      let oldMap = oldField is map ? oldField : {};
+      let newMap = newField is map ? newField : {};
+      return newMap.keys().hasOnly(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']) &&
+        selfOnlyKeyDiff(oldMap, newMap, '0') && selfOnlyKeyDiff(oldMap, newMap, '1') &&
+        selfOnlyKeyDiff(oldMap, newMap, '2') && selfOnlyKeyDiff(oldMap, newMap, '3') &&
+        selfOnlyKeyDiff(oldMap, newMap, '4') && selfOnlyKeyDiff(oldMap, newMap, '5') &&
+        selfOnlyKeyDiff(oldMap, newMap, '6') && selfOnlyKeyDiff(oldMap, newMap, '7') &&
+        selfOnlyKeyDiff(oldMap, newMap, '8') && selfOnlyKeyDiff(oldMap, newMap, '9');
+    }
+
+    // reactions : clés = emojis autorisés (voir ALLOWED_REACTIONS dans chatService.ts).
+    // La liste des clés autorisées borne aussi la taille du document (anti-abus).
+    function isSelfOnlyReactionsUpdate(oldField, newField) {
+      let oldMap = oldField is map ? oldField : {};
+      let newMap = newField is map ? newField : {};
+      return newMap.keys().hasOnly(['👍', '❤️', '😂', '😮', '😢', '🙏']) &&
+        selfOnlyKeyDiff(oldMap, newMap, '👍') && selfOnlyKeyDiff(oldMap, newMap, '❤️') &&
+        selfOnlyKeyDiff(oldMap, newMap, '😂') && selfOnlyKeyDiff(oldMap, newMap, '😮') &&
+        selfOnlyKeyDiff(oldMap, newMap, '😢') && selfOnlyKeyDiff(oldMap, newMap, '🙏');
+    }
+
     // ── clients-v2 ────────────────────────────────────────────
     // Lecture et create/update : tout utilisateur authentifié.
     // Suppression : admin uniquement (données critiques métier).
@@ -143,9 +177,18 @@ service cloud.firestore {
         (request.auth.uid in request.resource.data.participants)
       );
       // Seuls pollVotes (vote sur un sondage) et reactions (réactions emoji)
-      // peuvent être modifiés ; tout le reste du message reste immuable.
+      // peuvent être modifiés, uniquement par un participant du DM (ou tout
+      // authentifié sur le canal général), et uniquement pour ajouter/retirer
+      // son propre uid — jamais celui d'un tiers. Tout le reste est immuable.
       allow update: if isAuthenticated() &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pollVotes', 'reactions']);
+        (
+          !('chatId' in resource.data) ||
+          resource.data.chatId == 'general' ||
+          (request.auth.uid in resource.data.participants)
+        ) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pollVotes', 'reactions']) &&
+        isSelfOnlyPollVotesUpdate(resource.data.get('pollVotes', {}), request.resource.data.get('pollVotes', {})) &&
+        isSelfOnlyReactionsUpdate(resource.data.get('reactions', {}), request.resource.data.get('reactions', {}));
       allow delete: if false;
     }
 
