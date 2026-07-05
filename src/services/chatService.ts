@@ -1,4 +1,4 @@
-import { collection, addDoc, Timestamp } from 'firebase/firestore'
+import { collection, addDoc, Timestamp, doc, runTransaction } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { trackWrite } from '@/lib/trackWrite'
 import { COLLECTIONS } from '@/lib/constants'
@@ -35,3 +35,76 @@ export async function sendChatMessage(
     addDoc(collection(db, COLLECTIONS.CHAT_MESSAGES), payload)
   )
 }
+
+export async function sendChatPoll(
+  question: string,
+  options: string[],
+  user: { uid: string; prenom: string; nom: string; initiales: string; avatarColor?: string },
+  chatId: string = 'general',
+  participants?: string[]
+): Promise<void> {
+  const trimmedQuestion = question.trim()
+  if (!trimmedQuestion || options.length < 2) return
+
+  const cleanOptions = options.map(o => o.trim()).filter(Boolean)
+  if (cleanOptions.length < 2) return
+
+  const initialVotes: { [key: string]: string[] } = {}
+  cleanOptions.forEach((_, idx) => {
+    initialVotes[idx.toString()] = []
+  })
+
+  const payload: any = {
+    text: `📊 Sondage : ${trimmedQuestion}`,
+    chatId,
+    senderUid: user.uid,
+    senderName: `${user.prenom} ${user.nom}`,
+    senderInitials: user.initiales,
+    senderAvatarColor: user.avatarColor || '',
+    createdAt: Timestamp.now(),
+    isPoll: true,
+    pollQuestion: trimmedQuestion,
+    pollOptions: cleanOptions,
+    pollVotes: initialVotes,
+  }
+
+  if (participants) {
+    payload.participants = participants
+  }
+
+  await trackWrite(
+    addDoc(collection(db, COLLECTIONS.CHAT_MESSAGES), payload)
+  )
+}
+
+export async function togglePollVote(
+  messageId: string,
+  optionIndex: number,
+  userId: string
+): Promise<void> {
+  const messageRef = doc(db, COLLECTIONS.CHAT_MESSAGES, messageId)
+
+  await runTransaction(db, async (transaction) => {
+    const snap = await transaction.get(messageRef)
+    if (!snap.exists()) return
+
+    const data = snap.data()
+    const votes = { ...(data.pollVotes || {}) }
+    const key = optionIndex.toString()
+    const currentOptionVotes = votes[key] ? [...votes[key]] : []
+
+    const userIndex = currentOptionVotes.indexOf(userId)
+    if (userIndex > -1) {
+      // Retirer le vote (toggle)
+      currentOptionVotes.splice(userIndex, 1)
+    } else {
+      // Ajouter le vote
+      currentOptionVotes.push(userId)
+    }
+
+    votes[key] = currentOptionVotes
+
+    transaction.update(messageRef, { pollVotes: votes })
+  })
+}
+

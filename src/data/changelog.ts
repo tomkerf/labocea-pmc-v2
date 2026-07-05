@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '142'
+export const CHANGELOG_VERSION = '143'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,14 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '143',
+    date: '5 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Messagerie : Ajout des sondages interactifs temps réel (barres de progression, votes en un clic, liste des votants par trigramme)' },
+      { type: 'feat', label: 'Messagerie : Modal de création de sondage avec ajout et suppression d\'options dynamiques (jusqu\'à 10 options)' },
+    ],
+  },
   {
     version: '142',
     date: '5 juillet 2026',

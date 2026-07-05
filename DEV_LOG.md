@@ -2,6 +2,34 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 156 — Sondages interactifs temps réel dans la messagerie
+**5 juillet 2026**
+
+### Contexte
+L'utilisateur a demandé d'implémenter des sondages interactifs au sein de la messagerie d'équipe (style WhatsApp Polls) pour simplifier les votes et les prises de décisions (matériel, horaires de terrain...). Les sondages doivent être interactifs, réactifs en temps réel et respectueux de la charte graphique Apple-style de Labocea.
+
+### Modifications apportées
+- **Modèle de données & Types (`types/index.ts`) :**
+  - Ajout des propriétés optionnelles de sondages dans `ChatMessage` : `isPoll` (boolean), `pollQuestion` (string), `pollOptions` (string[]), et `pollVotes` (dictionnaire index optionnel `[optionIndex: string]: string[]` associant l'index de l'option aux UIDs des votants).
+- **Service Messagerie (`chatService.ts`) :**
+  - Implémentation de `sendChatPoll` pour instancier un nouveau sondage Firestore avec les options formatées et des listes de votes vides.
+  - Implémentation de `togglePollVote` utilisant une transaction Firestore (`runTransaction`) pour garantir la cohérence des votes concurrents en direct sur les téléphones et ordinateurs.
+- **Rendu des Sondages (`ChatPage.tsx`) :**
+  - Création du composant interactif `PollView` affichant :
+    - La question en gras.
+    - Les options sous forme de boutons, avec barres de progression horizontales représentant le pourcentage des voix (en blanc semi-transparent sur fond bleu pour ses propres messages, et en bleu clair pour les autres).
+    - Les compteurs de votes et le pourcentage en direct.
+    - Les petits badges de trigrammes des techniciens ayant voté sous chaque option (résolution des UIDs en temps réel depuis le store `usersStore`).
+  - Intégration du composant `PollView` dans les bulles de messages si `msg.isPoll` est vrai.
+- **Création de Sondages (`ChatPage.tsx`) :**
+  - Ajout du bouton Sondage (icône `BarChart2`) à côté du champ de saisie de texte.
+  - Implémentation du modal d'édition `isPollModalOpen` (Apple-style, overlay flouté et animation spring de framer-motion) :
+    - Formulaire d'édition de la question.
+    - Ajout dynamique d'options (jusqu'à 10) et suppression (icône poubelle, minimum 2 options requises).
+- **Mises à jour du projet :**
+  - Version changelog incrémentée à `143` dans `changelog.ts`.
+  - Validation réussie de la compilation TypeScript du projet.
+
 ## Session 155 — Messagerie d'équipe temps réel, mentions (@) et messages privés (DMs)
 **5 juillet 2026**
 

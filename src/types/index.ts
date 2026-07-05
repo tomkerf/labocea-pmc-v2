@@ -465,5 +465,11 @@ export interface ChatMessage {
   senderInitials: string
   senderAvatarColor?: string
   createdAt: Timestamp
+  
+  // Sondages
+  isPoll?: boolean
+  pollQuestion?: string
+  pollOptions?: string[]
+  pollVotes?: { [optionIndex: string]: string[] } // associe l'index (string) aux UIDs des votants
 }
 

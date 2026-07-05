@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { collection, query, orderBy, limit, onSnapshot, where } from 'firebase/firestore'
-import { Send, ArrowLeft, AtSign, Users, Search } from 'lucide-react'
+import { Send, ArrowLeft, AtSign, Users, Search, BarChart2, Plus, Trash2, X } from 'lucide-react'
 import { m, AnimatePresence } from 'framer-motion'
 import { db } from '@/lib/firebase'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { useChatNotificationStore } from '@/stores/chatNotificationStore'
-import { sendChatMessage, getDmChatId } from '@/services/chatService'
+import { sendChatMessage, getDmChatId, sendChatPoll, togglePollVote } from '@/services/chatService'
 import type { ChatMessage, AppUser } from '@/types'
 import { COLLECTIONS } from '@/lib/constants'
 import UserAvatar from '@/components/ui/UserAvatar'
@@ -42,6 +42,107 @@ function formatMessageTime(timestamp: any): string {
   return `${dayStr.charAt(0).toUpperCase() + dayStr.slice(1)} à ${timeStr}`
 }
 
+interface PollViewProps {
+  message: ChatMessage
+  isMe: boolean
+  currentUserId: string
+  users: any[]
+  appUserInitials: string
+  onVote: (optionIndex: number) => void
+}
+
+function PollView({ message, isMe, currentUserId, users, appUserInitials, onVote }: PollViewProps) {
+  const votes = message.pollVotes || {}
+  const totalVotes = Object.values(votes).reduce((acc, curr) => acc + (curr?.length || 0), 0)
+
+  const getVoterInitials = (uid: string) => {
+    if (uid === currentUserId) return appUserInitials
+    const match = users.find(u => u.uid === uid)
+    return match ? match.initiales : '??'
+  }
+
+  return (
+    <div className="w-full max-w-[280px] sm:w-[320px] select-none">
+      {/* Titre/Question */}
+      <div className="font-semibold text-sm mb-3 flex items-center gap-2">
+        <span className="text-base">📊</span>
+        <span>{message.pollQuestion}</span>
+      </div>
+
+      {/* Options */}
+      <div className="flex flex-col gap-2">
+        {message.pollOptions?.map((option, idx) => {
+          const optionKey = idx.toString()
+          const optionVoters = votes[optionKey] || []
+          const hasVoted = optionVoters.includes(currentUserId)
+          const percent = totalVotes > 0 ? Math.round((optionVoters.length / totalVotes) * 100) : 0
+
+          return (
+            <div key={idx} className="flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={() => onVote(idx)}
+                className={`relative w-full overflow-hidden rounded-xl border text-left px-3.5 py-2.5 transition-all active:scale-[0.98] flex items-center justify-between group ${
+                  isMe
+                    ? hasVoted
+                      ? 'border-white bg-white/10 text-white'
+                      : 'border-white/20 hover:bg-white/5 text-white/95'
+                    : hasVoted
+                      ? 'border-[var(--color-accent)] bg-[var(--color-accent-light)] text-[var(--color-text-primary)]'
+                      : 'border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)]'
+                }`}
+              >
+                {/* Barre de progression */}
+                <div
+                  className={`absolute left-0 top-0 bottom-0 transition-all duration-300 z-0 ${
+                    isMe ? 'bg-white/15' : 'bg-[var(--color-accent)]/10'
+                  }`}
+                  style={{ width: `${percent}%` }}
+                />
+
+                {/* Contenu textuel */}
+                <span className="z-10 font-medium text-xs break-words pr-2 max-w-[70%]">
+                  {option}
+                </span>
+
+                {/* Score */}
+                <span className="z-10 text-[10px] font-semibold opacity-80 shrink-0">
+                  {optionVoters.length} {optionVoters.length > 1 ? 'votes' : 'vote'} ({percent}%)
+                </span>
+              </button>
+
+              {/* Votants */}
+              {optionVoters.length > 0 && (
+                <div className={`flex flex-wrap gap-1 px-1 mt-0.5 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                  {optionVoters.map((uid) => (
+                    <span
+                      key={uid}
+                      title={users.find(u => u.uid === uid)?.prenom || ''}
+                      className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
+                        isMe
+                          ? 'bg-white/25 text-white border border-white/10'
+                          : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] border border-var(--color-border-subtle)'
+                      }`}
+                    >
+                      {getVoterInitials(uid)}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Total votes */}
+      <div className={`text-[9px] mt-2.5 opacity-60 ${isMe ? 'text-right' : 'text-left'}`}>
+        Total : {totalVotes} {totalVotes > 1 ? 'réponses' : 'réponse'}
+      </div>
+    </div>
+  )
+}
+
+
 export default function ChatPage() {
   const appUser = useAuthStore(selectAppUser)
   const users = useUsersStore((s) => s.users)
@@ -61,6 +162,11 @@ export default function ChatPage() {
   
   // Suggestion de mention (@)
   const [mentionQuery, setMentionQuery] = useState<string | null>(null)
+
+  // Sondages
+  const [isPollModalOpen, setIsPollModalOpen] = useState(false)
+  const [pollQuestion, setPollQuestion] = useState('')
+  const [pollOptions, setPollOptions] = useState<string[]>(['', ''])
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -185,6 +291,66 @@ export default function ChatPage() {
     } catch (err) {
       console.error("Erreur lors de l'envoi du message :", err)
       setError("Erreur lors de l'envoi. Veuillez réessayer.")
+    }
+  }
+
+  const handleAddPollOption = () => {
+    if (pollOptions.length < 10) {
+      setPollOptions([...pollOptions, ''])
+    }
+  }
+
+  const handleRemovePollOption = (index: number) => {
+    if (pollOptions.length > 2) {
+      const updated = [...pollOptions]
+      updated.splice(index, 1)
+      setPollOptions(updated)
+    }
+  }
+
+  const handlePollOptionChange = (index: number, val: string) => {
+    const updated = [...pollOptions]
+    updated[index] = val
+    setPollOptions(updated)
+  }
+
+  const handleSendPoll = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!pollQuestion.trim() || !appUser) return
+    const validOptions = pollOptions.map(o => o.trim()).filter(Boolean)
+    if (validOptions.length < 2) return
+
+    try {
+      const participants = selectedChatId === 'general' ? undefined : [appUser.uid, selectedContact!.uid]
+      await sendChatPoll(
+        pollQuestion,
+        validOptions,
+        {
+          uid: appUser.uid,
+          prenom: appUser.prenom,
+          nom: appUser.nom,
+          initiales: appUser.initiales,
+          avatarColor: appUser.avatarColor,
+        },
+        selectedChatId,
+        participants
+      )
+      
+      setPollQuestion('')
+      setPollOptions(['', ''])
+      setIsPollModalOpen(false)
+    } catch (err) {
+      console.error('Erreur envoi sondage:', err)
+      setError("Impossible d'envoyer le sondage.")
+    }
+  }
+
+  const handleVote = async (messageId: string, optionIndex: number) => {
+    if (!appUser) return
+    try {
+      await togglePollVote(messageId, optionIndex, appUser.uid)
+    } catch (err) {
+      console.error('Erreur vote:', err)
     }
   }
 
@@ -506,7 +672,18 @@ export default function ChatPage() {
                             borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
                           }}
                         >
-                          {renderMessageContent(msg.text, isMe)}
+                          {msg.isPoll ? (
+                            <PollView
+                              message={msg}
+                              isMe={isMe}
+                              currentUserId={appUser?.uid || ''}
+                              users={users}
+                              appUserInitials={appUser?.initiales || ''}
+                              onVote={(optIdx) => handleVote(msg.id, optIdx)}
+                            />
+                          ) : (
+                            renderMessageContent(msg.text, isMe)
+                          )}
                         </div>
                         <span 
                           className={`text-[9px] text-[var(--color-text-tertiary)] mt-1 ml-1 ${isMe ? 'self-end mr-1' : 'self-start'}`}
@@ -564,6 +741,14 @@ export default function ChatPage() {
             }}
           >
             <form onSubmit={handleSend} className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsPollModalOpen(true)}
+                className="p-2.5 rounded-full flex items-center justify-center text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] active:scale-95 transition-all shrink-0"
+                title="Créer un sondage"
+              >
+                <BarChart2 size={20} />
+              </button>
               <input
                 type="text"
                 placeholder={
@@ -573,12 +758,12 @@ export default function ChatPage() {
                 }
                 value={inputText}
                 onChange={(e) => handleInputChange(e.target.value)}
-                className="flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--color-accent)] transition-all placeholder:text-[var(--color-text-tertiary)] text-[var(--color-text-primary)]"
+                className="flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--color-accent)] transition-all placeholder:text-[var(--color-text-tertiary)] text-[var(--color-text-primary)] min-w-0"
               />
               <button
                 type="submit"
                 disabled={!inputText.trim()}
-                className={`p-2.5 rounded-full flex items-center justify-center transition-all ${
+                className={`p-2.5 rounded-full flex items-center justify-center transition-all shrink-0 ${
                   inputText.trim() 
                     ? 'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] active:scale-95' 
                     : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-tertiary)]'
@@ -592,6 +777,130 @@ export default function ChatPage() {
         )}
       </div>
 
+      {/* Modal de création de sondage */}
+      <AnimatePresence>
+        {isPollModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Overlay */}
+            <m.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsPollModalOpen(false)}
+              className="absolute inset-0 bg-black/35 backdrop-blur-[2px]"
+            />
+            
+            {/* Contenu du Modal */}
+            <m.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: 'spring', duration: 0.3 }}
+              className="relative bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-2xl shadow-[var(--shadow-modal)] w-full max-w-[420px] overflow-hidden z-10 flex flex-col max-h-[90vh]"
+            >
+              {/* Header */}
+              <div className="px-5 py-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">📊</span>
+                  <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Créer un sondage</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsPollModalOpen(false)}
+                  className="p-1.5 rounded-full text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Formulaire */}
+              <form onSubmit={handleSendPoll} className="flex-1 overflow-y-auto p-5 space-y-5">
+                {/* Question */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider block">
+                    Question du sondage
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Saisir la question..."
+                    required
+                    value={pollQuestion}
+                    onChange={(e) => setPollQuestion(e.target.value)}
+                    className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[var(--color-accent)] transition-all text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)]"
+                  />
+                </div>
+
+                {/* Options */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider block">
+                    Options de réponse
+                  </label>
+                  <div className="space-y-2.5 max-h-[35vh] overflow-y-auto pr-1">
+                    {pollOptions.map((option, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <span className="text-[11px] text-[var(--color-text-tertiary)] font-bold w-5 shrink-0 text-center">
+                          {idx + 1}.
+                        </span>
+                        <input
+                          type="text"
+                          placeholder={`Option ${idx + 1}`}
+                          required={idx < 2}
+                          value={option}
+                          onChange={(e) => handlePollOptionChange(idx, e.target.value)}
+                          className="flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-[var(--color-accent)] transition-all text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)]"
+                        />
+                        {pollOptions.length > 2 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePollOption(idx)}
+                            className="p-2 text-[var(--color-text-secondary)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-light)] rounded-xl transition-all"
+                            title="Supprimer cette option"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {pollOptions.length < 10 && (
+                    <button
+                      type="button"
+                      onClick={handleAddPollOption}
+                      className="w-full mt-2 py-2 border border-dashed border-[var(--color-border)] rounded-xl text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] hover:border-[var(--color-accent)] flex items-center justify-center gap-1.5 text-xs font-semibold transition-all"
+                    >
+                      <Plus size={14} />
+                      <span>Ajouter une option</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="pt-4 border-t border-[var(--color-border-subtle)] flex items-center justify-end gap-2.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIsPollModalOpen(false)}
+                    className="px-4 py-2 text-xs font-semibold text-[var(--color-text-secondary)] border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-bg-tertiary)] active:scale-95 transition-all"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!pollQuestion.trim() || pollOptions.map(o => o.trim()).filter(Boolean).length < 2}
+                    className={`px-4 py-2 text-xs font-semibold text-white rounded-xl active:scale-95 transition-all ${
+                      pollQuestion.trim() && pollOptions.map(o => o.trim()).filter(Boolean).length >= 2
+                        ? 'bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)]'
+                        : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-tertiary)] cursor-not-allowed border border-[var(--color-border-subtle)]'
+                    }`}
+                  >
+                    Envoyer le sondage
+                  </button>
+                </div>
+              </form>
+            </m.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
