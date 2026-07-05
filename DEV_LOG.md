@@ -2,28 +2,30 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
-## Session 155 — Messagerie d'équipe temps réel et mentions (@)
+## Session 155 — Messagerie d'équipe temps réel, mentions (@) et messages privés (DMs)
 **5 juillet 2026**
 
 ### Contexte
-L'utilisateur a demandé d'intégrer une messagerie d'équipe (Option A : canal général) en temps réel. Après une première version fonctionnelle, l'utilisateur a demandé d'y ajouter des fonctionnalités WhatsApp, en commençant par les mentions (`@prenom` / `@initiales`) et les notifications in-app (badges).
+L'utilisateur a demandé d'intégrer une messagerie d'équipe (Option A : canal général) en temps réel avec des fonctionnalités WhatsApp (mentions `@`, autocomplétion, badges de notification). Après la mise en place de ces fonctionnalités, l'utilisateur a demandé s'il était possible de créer des canaux séparés pour discuter de façon privée avec certains techniciens (ex: ROD, FBA). Cette fonctionnalité de Direct Messages (DMs) a été implémentée avec une isolation de sécurité stricte.
 
 ### Modifications apportées
 - **Architecture de données & Types :**
-  - Enregistrement de la nouvelle collection Firestore `chat-messages` (`CHAT_MESSAGES`) dans [constants.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/lib/constants.ts).
-  - Déclaration de l'interface `ChatMessage` dans [types/index.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/types/index.ts).
-  - Firestore Security Rules [firestore.rules](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/firestore.rules) mises à jour pour autoriser la lecture et la création par les utilisateurs authentifiés, tout en interdisant la modification/suppression pour garantir l'immutabilité des discussions.
+  - Ajout des champs `chatId` (string) et `participants` (tableau d'UIDs optionnel) sur l'interface `ChatMessage` dans [types/index.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/types/index.ts).
+  - Firestore Security Rules [firestore.rules](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/firestore.rules) renforcées pour n'autoriser la lecture et la création des messages de type DM que si le UID de l'utilisateur connecté fait partie de la liste des `participants` de la conversation (le canal général reste accessible à tous). Déploiement réussi des règles sur Firebase.
 - **Service Messagerie (`chatService.ts`) :**
-  - Implémentation de `sendChatMessage` pour pousser les messages dans Firestore, encapsulée dans `trackWrite` pour s'assurer que les messages envoyés hors-ligne (terrain) sont stockés localement et synchronisés dès le retour du réseau.
+  - Ajout de la fonction `getDmChatId(uidA, uidB)` pour générer un identifiant de discussion privée unique et déterministe en triant les deux UIDs.
+  - Mise à jour de `sendChatMessage` pour accepter un `chatId` (par défaut `'general'`) et la liste des `participants`.
 - **Gestion des Notifications & Badges :**
-  - Création de [chatNotificationStore.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/stores/chatNotificationStore.ts) (Zustand + local storage) pour gérer le compteur de messages non lus (`unreadCount`) et l'indicateur de mention (`hasMention`).
-  - Implémentation du hook de synchronisation globale [useChatNotification.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/hooks/useChatNotification.ts), branché sur [GlobalListeners.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/layout/GlobalListeners.tsx) pour surveiller en direct l'arrivée de nouveaux messages depuis la dernière consultation de la messagerie par l'utilisateur.
-- **Interface Utilisateur Chat & Mentions (`ChatPage.tsx`) :**
-  - Conception d'une interface de chat Apple-style avec bulles de couleur (bleu pour soi, gris pour les autres), avatars/initiales colorés et scroll automatique.
-  - **Détection et mise en valeur des mentions** : Parseur de texte affichant les mentions valides sous forme de badges (`@Nom`). Si l'utilisateur connecté est mentionné, son badge apparaît en rouge clair, et sa bulle de message complète prend un fond jaune/orange distinctif (`var(--color-warning-light)`) pour attirer l'attention.
-  - **Correction du contraste (bugfix)** : Résolution d'un problème de contraste qui rendait les mentions (ex: `@ROD`) invisibles dans les bulles de messages envoyés (bleu sur bleu). Désormais, les mentions dans les messages envoyés prennent un fond blanc semi-transparent (`bg-white/20 text-white`) ce qui les rend parfaitement visibles.
-  - **Affichage des Trigrammes (bugfix)** : Modification du rendu des badges de mentions pour afficher le trigramme (initiales en majuscules, ex: `@ROD` ou `@FBA`) à la place du prénom de l'utilisateur, conformément aux habitudes et au système d'identification des techniciens de Labocea.
-  - **Autocomplétion et suggestions** : Affichage d'un panneau de suggestions horizontal au-dessus du champ d'écriture dès que l'utilisateur tape `@`, permettant de cliquer sur un technicien pour insérer instantanément sa mention.
+  - Refonte complète de [chatNotificationStore.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/stores/chatNotificationStore.ts) pour suivre le statut "dernière visite" (`lastSeenTimestamps`) et les messages non lus (`unreadCounts`) de façon indépendante pour chaque discussion (clé-valeur stocké en JSON dans le `localStorage`).
+  - Refonte de [useChatNotification.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/hooks/useChatNotification.ts) pour monter deux écouteurs parallèles Firestore : un pour le canal général, un pour les messages privés dont l'utilisateur fait partie. Les résultats sont agrégés de façon asynchrone sécurisée pour mettre à jour les badges globaux.
+- **Interface Utilisateur Chat Multi-Canaux (`ChatPage.tsx`) :**
+  - Refonte de la page de chat sous la forme d'un panneau à double colonne (style WhatsApp) :
+    - **Panneau de gauche (Sidebar de chat)** : Contient l'en-tête, une barre de recherche de contact en temps réel, le bouton d'accès au canal général, et la liste de tous les autres techniciens du projet avec leur badge de messages non lus respectif.
+    - **Zone de discussion à droite** : Affiche les messages du salon sélectionné.
+    - **Navigation responsive** : Sur mobile, la liste et le chat s'alternent de façon fluide grâce à Tailwind CSS.
+  - **Correction du contraste (bugfix)** : Résolution d'un problème de contraste qui rendait les mentions invisibles dans les bulles de messages envoyés (bleu sur bleu). Désormais, les mentions dans les messages envoyés prennent un fond blanc semi-transparent (`bg-white/20 text-white`).
+  - **Affichage des Trigrammes (bugfix)** : Remplacement de l'affichage du prénom par le trigramme (initiales en majuscules, ex: `@ROD` ou `@FBA`) dans les badges de mentions.
+  - **Autocomplétion et suggestions** : Autocomplétion active pour les mentions `@` dans le canal général.
   - **Marquage comme lu** : Réinitialisation automatique des badges et du statut dans `localStorage` lors de la consultation de la messagerie.
 - **Navigation & Routage :**
   - Ajout de la route `/chat` avec lazy loading dans [App.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/App.tsx).

@@ -458,6 +458,8 @@ export interface PointRejet {
 export interface ChatMessage {
   id: string
   text: string
+  chatId: string           // 'general' ou 'uidA_uidB'
+  participants?: string[]  // UIDs des membres autorisés (pour les DMs)
   senderUid: string
   senderName: string
   senderInitials: string

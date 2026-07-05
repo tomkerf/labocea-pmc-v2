@@ -1,31 +1,49 @@
 import { create } from 'zustand'
 
 interface ChatNotificationStore {
-  unreadCount: number
-  hasMention: boolean
-  lastSeenTimestamp: number
-  setUnreadCount: (count: number) => void
+  unreadCount: number                    // Total global non lus
+  hasMention: boolean                    // Présence de mention non lue
+  lastSeenTimestamps: Record<string, number> // Timestamps par chatId
+  unreadCounts: Record<string, number>    // Non lus par chatId
+  setUnreadCounts: (counts: Record<string, number>) => void
   setHasMention: (hasMention: boolean) => void
-  setLastSeenTimestamp: (timestamp: number) => void
-  markAsRead: () => void
+  getLastSeenTimestamp: (chatId: string) => number
+  markAsRead: (chatId: string) => void
 }
 
-export const useChatNotificationStore = create<ChatNotificationStore>((set) => ({
+export const useChatNotificationStore = create<ChatNotificationStore>((set, get) => ({
   unreadCount: 0,
   hasMention: false,
-  lastSeenTimestamp: (() => {
-    const val = localStorage.getItem('chat_last_seen_timestamp')
-    return val ? Number(val) : 0
+  lastSeenTimestamps: (() => {
+    try {
+      const val = localStorage.getItem('chat_last_seen_timestamps')
+      return val ? JSON.parse(val) : {}
+    } catch {
+      return {}
+    }
   })(),
-  setUnreadCount: (unreadCount) => set({ unreadCount }),
-  setHasMention: (hasMention) => set({ hasMention }),
-  setLastSeenTimestamp: (lastSeenTimestamp) => {
-    localStorage.setItem('chat_last_seen_timestamp', String(lastSeenTimestamp))
-    set({ lastSeenTimestamp })
+  unreadCounts: {},
+  setUnreadCounts: (unreadCounts) => {
+    const total = Object.values(unreadCounts).reduce((acc, count) => acc + count, 0)
+    set({ unreadCounts, unreadCount: total })
   },
-  markAsRead: () => {
+  setHasMention: (hasMention) => set({ hasMention }),
+  getLastSeenTimestamp: (chatId) => {
+    return get().lastSeenTimestamps[chatId] || 0
+  },
+  markAsRead: (chatId) => {
     const now = Date.now()
-    localStorage.setItem('chat_last_seen_timestamp', String(now))
-    set({ unreadCount: 0, hasMention: false, lastSeenTimestamp: now })
+    const updatedTimestamps = { ...get().lastSeenTimestamps, [chatId]: now }
+    localStorage.setItem('chat_last_seen_timestamps', JSON.stringify(updatedTimestamps))
+    
+    // Mettre à jour localement unreadCounts pour ce chatId à 0
+    const updatedUnreadCounts = { ...get().unreadCounts, [chatId]: 0 }
+    const total = Object.values(updatedUnreadCounts).reduce((acc, count) => acc + count, 0)
+    
+    set({ 
+      lastSeenTimestamps: updatedTimestamps,
+      unreadCounts: updatedUnreadCounts,
+      unreadCount: total
+    })
   }
 }))

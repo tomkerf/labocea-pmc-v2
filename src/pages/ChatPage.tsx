@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
-import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore'
-import { Send, ArrowLeft, AtSign } from 'lucide-react'
+import { collection, query, orderBy, limit, onSnapshot, where } from 'firebase/firestore'
+import { Send, ArrowLeft, AtSign, Users, Search } from 'lucide-react'
 import { m, AnimatePresence } from 'framer-motion'
 import { db } from '@/lib/firebase'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { useChatNotificationStore } from '@/stores/chatNotificationStore'
-import { sendChatMessage } from '@/services/chatService'
+import { sendChatMessage, getDmChatId } from '@/services/chatService'
 import type { ChatMessage, AppUser } from '@/types'
-import { COLLECTIONS, COLORS } from '@/lib/constants'
+import { COLLECTIONS } from '@/lib/constants'
 import UserAvatar from '@/components/ui/UserAvatar'
 import { useNavigate } from 'react-router-dom'
 
@@ -45,24 +45,43 @@ function formatMessageTime(timestamp: any): string {
 export default function ChatPage() {
   const appUser = useAuthStore(selectAppUser)
   const users = useUsersStore((s) => s.users)
-  const markAsRead = useChatNotificationStore((s) => s.markAsRead)
+  const { markAsRead, unreadCounts } = useChatNotificationStore()
   
   const navigate = useNavigate()
+  
+  // Salon sélectionné ('general' par défaut, ou '' si rien sur mobile pour afficher la liste)
+  const [selectedChatId, setSelectedChatId] = useState<string>('general')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputText, setInputText] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // Recherche de contact dans la liste
+  const [searchQuery, setSearchQuery] = useState('')
   
   // Suggestion de mention (@)
   const [mentionQuery, setMentionQuery] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // S'abonner aux messages Firestore
+  // Identifier le contact s'il s'agit d'un DM
+  const selectedContact = selectedChatId !== 'general' && selectedChatId && appUser
+    ? users.find(u => getDmChatId(appUser.uid, u.uid) === selectedChatId)
+    : null
+
+  // S'abonner aux messages Firestore de la discussion sélectionnée
   useEffect(() => {
+    if (!appUser || !selectedChatId) {
+      setMessages([])
+      return
+    }
+    
     setLoading(true)
+    setMessages([])
+    
     const q = query(
       collection(db, COLLECTIONS.CHAT_MESSAGES),
+      where('chatId', '==', selectedChatId),
       orderBy('createdAt', 'desc'),
       limit(100)
     )
@@ -80,18 +99,20 @@ export default function ChatPage() {
       },
       (err) => {
         console.error('Erreur écouteur chat:', err)
-        setError('Impossible de charger la messagerie.')
+        setError('Impossible de charger les messages de cette conversation.')
         setLoading(false)
       }
     )
 
     return () => unsub()
-  }, [])
+  }, [selectedChatId, appUser])
 
-  // Marquer comme lu à l'ouverture et dès que des messages arrivent
+  // Marquer comme lu à l'ouverture et dès que des messages arrivent dans cette conversation
   useEffect(() => {
-    markAsRead()
-  }, [messages, markAsRead])
+    if (selectedChatId) {
+      markAsRead(selectedChatId)
+    }
+  }, [selectedChatId, messages, markAsRead])
 
   // Faire défiler automatiquement vers le bas lors de l'arrivée de messages
   useEffect(() => {
@@ -102,12 +123,16 @@ export default function ChatPage() {
   const handleInputChange = (text: string) => {
     setInputText(text)
     
-    // Détecter si on est en train de taper une mention
-    const words = text.split(' ')
-    const lastWord = words[words.length - 1]
-    
-    if (lastWord.startsWith('@')) {
-      setMentionQuery(lastWord.slice(1))
+    // Détecter si on est en train de taper une mention (uniquement possible en canal général)
+    if (selectedChatId === 'general') {
+      const words = text.split(' ')
+      const lastWord = words[words.length - 1]
+      
+      if (lastWord.startsWith('@')) {
+        setMentionQuery(lastWord.slice(1))
+      } else {
+        setMentionQuery(null)
+      }
     } else {
       setMentionQuery(null)
     }
@@ -116,7 +141,6 @@ export default function ChatPage() {
   // Sélectionner un utilisateur à mentionner
   const handleSelectMention = (user: AppUser) => {
     const words = inputText.split(' ')
-    // Remplacer le dernier mot commençant par @
     words[words.length - 1] = `@${user.initiales} `
     setInputText(words.join(' '))
     setMentionQuery(null)
@@ -131,13 +155,22 @@ export default function ChatPage() {
     setMentionQuery(null)
 
     try {
-      await sendChatMessage(textToSend, {
-        uid: appUser.uid,
-        prenom: appUser.prenom,
-        nom: appUser.nom,
-        initiales: appUser.initiales,
-        avatarColor: appUser.avatarColor,
-      })
+      const participants = selectedChatId !== 'general' && selectedContact
+        ? [appUser.uid, selectedContact.uid]
+        : undefined
+
+      await sendChatMessage(
+        textToSend,
+        {
+          uid: appUser.uid,
+          prenom: appUser.prenom,
+          nom: appUser.nom,
+          initiales: appUser.initiales,
+          avatarColor: appUser.avatarColor,
+        },
+        selectedChatId,
+        participants
+      )
     } catch (err) {
       console.error("Erreur lors de l'envoi du message :", err)
       setError("Erreur lors de l'envoi. Veuillez réessayer.")
@@ -148,14 +181,12 @@ export default function ChatPage() {
   const renderMessageContent = (text: string, isMeMessage: boolean) => {
     if (!text.includes('@')) return text
 
-    const words = text.split(/(\s+)/) // Découper par mots en gardant les espaces
+    const words = text.split(/(\s+)/)
     return words.map((word, idx) => {
       if (word.startsWith('@')) {
-        // Enlever la ponctuation en fin de mot (ex: "@THK," ou "@THK.")
         const cleanWord = word.slice(1).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
         const lowerCleanWord = cleanWord.toLowerCase()
 
-        // Chercher l'utilisateur mentionné par ses initiales ou son prénom
         const matchedUser = users.find(
           u => u.initiales.toLowerCase() === lowerCleanWord || u.prenom.toLowerCase() === lowerCleanWord
         )
@@ -165,12 +196,10 @@ export default function ChatPage() {
           
           let badgeClass = ''
           if (isMeMessage) {
-            // Dans nos propres messages (bulle bleue)
             badgeClass = isMeMention 
               ? 'bg-[var(--color-danger)] text-white border border-white/20' 
               : 'bg-white/20 text-white'
           } else {
-            // Dans les messages des autres (bulle blanche/grise)
             badgeClass = isMeMention 
               ? 'bg-[var(--color-danger-light)] text-[var(--color-danger)] border border-[var(--color-danger)]/20' 
               : 'bg-[var(--color-accent-light)] text-[var(--color-accent)]'
@@ -190,7 +219,7 @@ export default function ChatPage() {
     })
   }
 
-  // Filtrer les suggestions de membres de l'équipe
+  // Filtrer les suggestions de membres de l'équipe pour les mentions @
   const suggestions = mentionQuery !== null
     ? users.filter(u => 
         u.prenom.toLowerCase().includes(mentionQuery.toLowerCase()) ||
@@ -199,173 +228,359 @@ export default function ChatPage() {
       ).slice(0, 5)
     : []
 
+  // Filtrer la liste des utilisateurs pour les DMs privés selon la recherche
+  const filteredContacts = users
+    .filter(u => u.uid !== appUser?.uid)
+    .filter(u => {
+      const label = `${u.prenom} ${u.nom} ${u.initiales}`.toLowerCase()
+      return label.includes(searchQuery.toLowerCase())
+    })
+
   return (
-    <div className="flex-1 flex flex-col h-screen max-h-screen bg-[var(--color-bg-primary)] overflow-hidden">
-      {/* En-tête / Navigation */}
+    <div className="flex-1 flex h-screen max-h-screen bg-[var(--color-bg-primary)] overflow-hidden">
+      
+      {/* 1. LISTE DES DISCUSSIONS (Side Panel) */}
       <div 
-        className="px-4 py-3 flex items-center gap-3 shrink-0" 
-        style={{ 
-          background: 'rgba(255,255,255,0.85)',
-          backdropFilter: 'var(--glass-panel)',
-          WebkitBackdropFilter: 'var(--glass-panel)',
-          borderBottom: '1px solid var(--color-border-subtle)',
-        }}
+        className={`w-full md:w-80 border-r border-[var(--color-border-subtle)] flex flex-col shrink-0 bg-white transition-all ${
+          selectedChatId ? 'hidden md:flex' : 'flex'
+        }`}
       >
-        <button type="button" onClick={() => navigate(-1)} className="p-1 -ml-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors" aria-label="Retour">
-          <ArrowLeft size={20} />
-        </button>
-        <div className="flex-1">
-          <h1 className="text-base font-semibold text-[var(--color-text-primary)]">Messagerie d'équipe</h1>
-          <p className="text-[11px] text-[var(--color-text-secondary)]">Discussions générales de l'équipe terrain</p>
+        {/* En-tête de liste */}
+        <div className="p-4 border-b border-[var(--color-border-subtle)] flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <button 
+              type="button" 
+              onClick={() => navigate(-1)} 
+              className="p-1 -ml-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+              aria-label="Retour"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <h1 className="text-lg font-bold text-[var(--color-text-primary)]">Discussions</h1>
+          </div>
+          
+          {/* Recherche */}
+          <div className="relative">
+            <Search className="absolute left-3 top-2.5 text-[var(--color-text-secondary)]" size={16} />
+            <input
+              type="text"
+              placeholder="Rechercher un contact..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] rounded-lg pl-9 pr-3 py-2 text-xs border border-transparent focus:border-[var(--color-accent)] focus:outline-none transition-colors"
+            />
+          </div>
+        </div>
+
+        {/* Liste défilante */}
+        <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
+          {/* A. Canal Général */}
+          <button
+            type="button"
+            onClick={() => setSelectedChatId('general')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${
+              selectedChatId === 'general'
+                ? 'bg-[var(--color-accent-light)] text-[var(--color-accent)] font-semibold'
+                : 'hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)]'
+            }`}
+          >
+            <div 
+              className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                selectedChatId === 'general' ? 'bg-[var(--color-accent)] text-white' : 'bg-[var(--color-accent-light)] text-[var(--color-accent)]'
+              }`}
+            >
+              <Users size={18} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <span className="text-sm truncate">Canal Général</span>
+                {unreadCounts['general'] > 0 && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--color-accent)] text-white">
+                    {unreadCounts['general']}
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-[var(--color-text-secondary)] truncate">Discussion de toute l'équipe</p>
+            </div>
+          </button>
+
+          <div className="h-px bg-[var(--color-border-subtle)] my-2 mx-2" />
+          <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider px-3 mb-1">
+            Discussions privées
+          </span>
+
+          {/* B. DMs Individuels */}
+          {filteredContacts.length === 0 ? (
+            <div className="text-center py-6 text-xs text-[var(--color-text-secondary)]">
+              Aucun technicien trouvé.
+            </div>
+          ) : (
+            filteredContacts.map(u => {
+              const dmId = getDmChatId(appUser?.uid || '', u.uid)
+              const unread = unreadCounts[dmId] || 0
+              const isSelected = selectedChatId === dmId
+
+              return (
+                <button
+                  key={u.uid}
+                  type="button"
+                  onClick={() => setSelectedChatId(dmId)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left ${
+                    isSelected
+                      ? 'bg-[var(--color-accent-light)] text-[var(--color-accent)] font-semibold'
+                      : 'hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)]'
+                  }`}
+                >
+                  <UserAvatar 
+                    initiales={u.initiales} 
+                    color={u.avatarColor} 
+                    size={40} 
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm truncate">{u.prenom} {u.nom}</span>
+                      {unread > 0 && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--color-accent)] text-white">
+                          {unread}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-[var(--color-text-secondary)]">Technicien</span>
+                      <span className="text-[10px] font-medium text-[var(--color-text-secondary)] bg-[var(--color-bg-tertiary)] px-1 rounded">
+                        {u.initiales}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              )
+            })
+          )}
         </div>
       </div>
 
-      {/* Zone des messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 flex flex-col">
-        {loading ? (
-          <div className="flex justify-center items-center py-20 my-auto">
-            <div className="size-6 rounded-full border-2 animate-spin"
-              style={{ borderColor: COLORS.BORDER, borderTopColor: COLORS.ACCENT }} />
-          </div>
-        ) : error ? (
-          <div className="text-center py-12 text-[var(--color-danger)] font-medium my-auto">
-            {error}
-          </div>
-        ) : messages.length === 0 ? (
-          <div className="text-center py-12 text-[var(--color-text-secondary)] text-sm my-auto">
-            Aucun message. Commencez la discussion !
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            <AnimatePresence initial={false}>
-              {messages.map((msg, index) => {
-                const isMe = msg.senderUid === appUser?.uid
-                const showSenderName = index === 0 || messages[index - 1].senderUid !== msg.senderUid
+      {/* 2. ZONE DE DISCUSSION PRINCIPALE */}
+      <div 
+        className={`flex-1 flex flex-col h-screen max-h-screen bg-[var(--color-bg-primary)] overflow-hidden ${
+          !selectedChatId ? 'hidden md:flex' : 'flex'
+        }`}
+      >
+        {/* En-tête du chat actif */}
+        <div 
+          className="px-4 py-3 flex items-center gap-3 shrink-0 animate-fade-in" 
+          style={{ 
+            background: 'rgba(255,255,255,0.85)',
+            backdropFilter: 'var(--glass-panel)',
+            WebkitBackdropFilter: 'var(--glass-panel)',
+            borderBottom: '1px solid var(--color-border-subtle)',
+          }}
+        >
+          {/* Bouton retour mobile */}
+          <button 
+            type="button" 
+            onClick={() => setSelectedChatId('')} 
+            className="p-1 -ml-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors md:hidden flex items-center gap-1 text-sm font-medium animate-fade-in"
+          >
+            <ArrowLeft size={20} />
+            <span>Discussions</span>
+          </button>
 
-                // Détecter si ce message contient une mention de l'utilisateur actuel
-                const containsMyMention = appUser && 
-                  (msg.text.toLowerCase().includes(`@${appUser.initiales.toLowerCase()}`) || 
-                   msg.text.toLowerCase().includes(`@${appUser.prenom.toLowerCase()}`))
+          {/* Bouton retour desktop pour quitter la page */}
+          <button 
+            type="button" 
+            onClick={() => navigate(-1)} 
+            className="p-1 -ml-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors hidden md:block" 
+            aria-label="Retour"
+          >
+            <ArrowLeft size={20} />
+          </button>
 
-                return (
-                  <m.div
-                    key={msg.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className={`flex items-start gap-2.5 max-w-[85%] ${isMe ? 'self-end flex-row-reverse' : 'self-start'}`}
-                  >
-                    {/* Avatar de l'expéditeur */}
-                    {!isMe && (
-                      <div className="shrink-0 pt-0.5">
-                        <UserAvatar 
-                          initiales={msg.senderInitials} 
-                          color={msg.senderAvatarColor} 
-                          size={32} 
-                        />
-                      </div>
-                    )}
+          {selectedChatId === 'general' ? (
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[var(--color-accent-light)] text-[var(--color-accent)] flex items-center justify-center">
+                <Users size={16} />
+              </div>
+              <div>
+                <h1 className="text-sm font-semibold text-[var(--color-text-primary)]">Canal Général</h1>
+                <p className="text-[10px] text-[var(--color-text-secondary)]">Discussions de toute l'équipe terrain</p>
+              </div>
+            </div>
+          ) : selectedContact ? (
+            <div className="flex items-center gap-3">
+              <UserAvatar initiales={selectedContact.initiales} color={selectedContact.avatarColor} size={36} />
+              <div>
+                <h1 className="text-sm font-semibold text-[var(--color-text-primary)]">{selectedContact.prenom} {selectedContact.nom}</h1>
+                <p className="text-[10px] text-[var(--color-text-secondary)]">Discussion privée • {selectedContact.initiales}</p>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <h1 className="text-sm font-semibold text-[var(--color-text-primary)]">Sélectionnez une discussion</h1>
+            </div>
+          )}
+        </div>
 
-                    {/* Contenu du message */}
-                    <div className="flex flex-col">
-                      {showSenderName && !isMe && (
-                        <span className="text-[11px] font-semibold text-[var(--color-text-secondary)] mb-1 ml-1">
-                          {msg.senderName}
-                        </span>
+        {/* Zone de messages */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 min-h-0">
+          {!selectedChatId ? (
+            <div className="h-full flex flex-col items-center justify-center text-[var(--color-text-secondary)] text-sm gap-2">
+              <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center border border-[var(--color-border-subtle)] text-[var(--color-accent)]">
+                <Users size={24} />
+              </div>
+              <span>Sélectionnez un contact pour démarrer une discussion.</span>
+            </div>
+          ) : loading ? (
+            <div className="h-full flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-transparent border-[var(--color-accent)]" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-12 text-[var(--color-danger)] font-medium my-auto">
+              {error}
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-[var(--color-text-secondary)] text-sm">
+              Aucun message dans cette conversation. Lancez la discussion !
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <AnimatePresence initial={false}>
+                {messages.map((msg, index) => {
+                  const isMe = msg.senderUid === appUser?.uid
+                  const showSenderName = selectedChatId === 'general' && (index === 0 || messages[index - 1].senderUid !== msg.senderUid)
+
+                  const containsMyMention = selectedChatId === 'general' && appUser && 
+                    (msg.text.toLowerCase().includes(`@${appUser.initiales.toLowerCase()}`) || 
+                     msg.text.toLowerCase().includes(`@${appUser.prenom.toLowerCase()}`))
+
+                  return (
+                    <m.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className={`flex items-start gap-2.5 max-w-[85%] ${isMe ? 'self-end flex-row-reverse' : 'self-start'}`}
+                    >
+                      {/* Avatar de l'expéditeur (uniquement sur le canal général pour les autres) */}
+                      {selectedChatId === 'general' && !isMe && (
+                        <div className="shrink-0 pt-0.5">
+                          <UserAvatar 
+                            initiales={msg.senderInitials} 
+                            color={msg.senderAvatarColor} 
+                            size={32} 
+                          />
+                        </div>
                       )}
-                      <div
-                        className="px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed break-words shadow-[var(--shadow-card)] transition-all"
-                        style={{
-                          backgroundColor: isMe 
-                            ? 'var(--color-accent)' 
-                            : containsMyMention 
-                              ? 'var(--color-warning-light)' 
-                              : 'var(--color-bg-secondary)',
-                          color: isMe ? 'white' : 'var(--color-text-primary)',
-                          border: isMe 
-                            ? 'none' 
-                            : containsMyMention 
-                              ? '1px solid var(--color-warning)' 
-                              : '1px solid var(--color-border-subtle)',
-                          borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                        }}
-                      >
-                        {renderMessageContent(msg.text, isMe)}
+
+                      {/* Contenu du message */}
+                      <div className="flex flex-col">
+                        {showSenderName && (
+                          <span className="text-[11px] font-semibold text-[var(--color-text-secondary)] mb-1 ml-1">
+                            {msg.senderName}
+                          </span>
+                        )}
+                        <div
+                          className="px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed break-words shadow-[var(--shadow-card)] transition-all"
+                          style={{
+                            backgroundColor: isMe 
+                              ? 'var(--color-accent)' 
+                              : containsMyMention 
+                                ? 'var(--color-warning-light)' 
+                                : 'var(--color-bg-secondary)',
+                            color: isMe ? 'white' : 'var(--color-text-primary)',
+                            border: isMe 
+                              ? 'none' 
+                              : containsMyMention 
+                                ? '1px solid var(--color-warning)' 
+                                : '1px solid var(--color-border-subtle)',
+                            borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                          }}
+                        >
+                          {renderMessageContent(msg.text, isMe)}
+                        </div>
+                        <span 
+                          className={`text-[9px] text-[var(--color-text-tertiary)] mt-1 ml-1 ${isMe ? 'self-end mr-1' : 'self-start'}`}
+                        >
+                          {formatMessageTime(msg.createdAt)}
+                        </span>
                       </div>
-                      <span 
-                        className={`text-[9px] text-[var(--color-text-tertiary)] mt-1 ml-1 ${isMe ? 'self-end mr-1' : 'self-start'}`}
-                      >
-                        {formatMessageTime(msg.createdAt)}
-                      </span>
-                    </div>
-                  </m.div>
-                )
-              })}
-            </AnimatePresence>
+                    </m.div>
+                  )
+                })}
+              </AnimatePresence>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Barre de suggestions @mentions */}
+        {suggestions.length > 0 && (
+          <m.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mx-4 mb-2 p-2 rounded-xl flex flex-wrap gap-1.5 shrink-0 shadow-[var(--shadow-card)]"
+            style={{ 
+              background: 'var(--color-bg-secondary)',
+              border: '1px solid var(--color-border-subtle)' 
+            }}
+          >
+            <span className="text-[11px] font-medium text-[var(--color-text-secondary)] w-full mb-1 px-1 flex items-center gap-1">
+              <AtSign size={12} /> Mentionner un membre :
+            </span>
+            {suggestions.map(u => (
+              <button
+                key={u.uid}
+                type="button"
+                onClick={() => handleSelectMention(u)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-accent-light)] hover:text-[var(--color-accent)] text-[12px] font-medium transition-colors"
+              >
+                <UserAvatar initiales={u.initiales} color={u.avatarColor} size={18} fontSize={7} />
+                <span>{u.prenom} {u.nom}</span>
+                <span className="text-[10px] text-[var(--color-text-secondary)] bg-[var(--color-bg-secondary)] px-1 rounded">{u.initiales}</span>
+              </button>
+            ))}
+          </m.div>
+        )}
+
+        {/* Barre de saisie */}
+        {selectedChatId && (
+          <div 
+            className="p-4 shrink-0" 
+            style={{ 
+              background: 'rgba(255,255,255,0.85)',
+              backdropFilter: 'var(--glass-panel)',
+              WebkitBackdropFilter: 'var(--glass-panel)',
+              borderTop: '1px solid var(--color-border-subtle)',
+            }}
+          >
+            <form onSubmit={handleSend} className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder={
+                  selectedChatId === 'general' 
+                    ? "Écrire un message (@ pour mentionner)..." 
+                    : `Écrire à ${selectedContact?.prenom}...`
+                }
+                value={inputText}
+                onChange={(e) => handleInputChange(e.target.value)}
+                className="flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--color-accent)] transition-all placeholder:text-[var(--color-text-tertiary)] text-[var(--color-text-primary)]"
+              />
+              <button
+                type="submit"
+                disabled={!inputText.trim()}
+                className={`p-2.5 rounded-full flex items-center justify-center transition-all ${
+                  inputText.trim() 
+                    ? 'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] active:scale-95' 
+                    : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-tertiary)]'
+                }`}
+                aria-label="Envoyer"
+              >
+                <Send size={16} />
+              </button>
+            </form>
           </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
-      {/* Barre de suggestions @mentions */}
-      {suggestions.length > 0 && (
-        <m.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mx-4 mb-2 p-2 rounded-xl flex flex-wrap gap-1.5 shrink-0 shadow-[var(--shadow-card)]"
-          style={{ 
-            background: 'var(--color-bg-secondary)',
-            border: '1px solid var(--color-border-subtle)' 
-          }}
-        >
-          <span className="text-[11px] font-medium text-[var(--color-text-secondary)] w-full mb-1 px-1 flex items-center gap-1">
-            <AtSign size={12} /> Mentionner un membre :
-          </span>
-          {suggestions.map(u => (
-            <button
-              key={u.uid}
-              type="button"
-              onClick={() => handleSelectMention(u)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-accent-light)] hover:text-[var(--color-accent)] text-[12px] font-medium transition-colors"
-            >
-              <UserAvatar initiales={u.initiales} color={u.avatarColor} size={18} fontSize={6} />
-              <span>{u.prenom} {u.nom}</span>
-              <span className="text-[10px] text-[var(--color-text-secondary)] opacity-60 bg-[var(--color-border)]/20 px-1 rounded">{u.initiales}</span>
-            </button>
-          ))}
-        </m.div>
-      )}
-
-      {/* Barre de saisie en bas */}
-      <form 
-        onSubmit={handleSend} 
-        className="px-4 py-3 shrink-0 flex items-center gap-2 border-t border-[var(--color-border-subtle)] pb-[calc(12px+env(safe-area-inset-bottom,0px))]"
-        style={{ 
-          background: 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-        }}
-      >
-        <input
-          type="text"
-          value={inputText}
-          onChange={(e) => handleInputChange(e.target.value)}
-          placeholder="Écrire un message..."
-          className="flex-1 bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] placeholder-[var(--color-text-tertiary)] px-4 py-2.5 rounded-full text-[14px] border border-[var(--color-border-subtle)] focus:outline-none focus:border-[var(--color-accent)] focus:bg-[var(--color-bg-secondary)] transition-all"
-        />
-        <button
-          type="submit"
-          disabled={!inputText.trim()}
-          className="size-9 rounded-full flex items-center justify-center text-white transition-all disabled:opacity-40 disabled:scale-100 active:scale-95"
-          style={{ 
-            backgroundColor: 'var(--color-accent)',
-            boxShadow: 'var(--shadow-card)',
-          }}
-          aria-label="Envoyer"
-        >
-          <Send size={16} />
-        </button>
-      </form>
     </div>
   )
 }

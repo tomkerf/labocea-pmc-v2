@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '141'
+export const CHANGELOG_VERSION = '142'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,15 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '142',
+    date: '5 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Messagerie : Ajout des discussions privées individuelles (DMs) en temps réel (WhatsApp-style)' },
+      { type: 'feat', label: 'Messagerie : Interface avec panneau de conversations (Sidebar de chat) et recherche de contact' },
+      { type: 'feat', label: 'Messagerie : Sécurisation stricte des messages privés par des règles de sécurité Firestore par participants' },
+    ],
+  },
   {
     version: '141',
     date: '5 juillet 2026',
