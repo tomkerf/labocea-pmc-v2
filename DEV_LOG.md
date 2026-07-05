@@ -2,31 +2,35 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
-## Session 155 — Messagerie d'équipe temps réel (Chat)
+## Session 155 — Messagerie d'équipe temps réel et mentions (@)
 **5 juillet 2026**
 
 ### Contexte
-L'utilisateur a demandé si l'on pouvait envisager d'intégrer un système de chat dans l'application. Après discussion des différentes options, l'Option A (Canal général d'équipe pour toute la messagerie) a été retenue et implémentée.
+L'utilisateur a demandé d'intégrer une messagerie d'équipe (Option A : canal général) en temps réel. Après une première version fonctionnelle, l'utilisateur a demandé d'y ajouter des fonctionnalités WhatsApp, en commençant par les mentions (`@prenom` / `@initiales`) et les notifications in-app (badges).
 
 ### Modifications apportées
 - **Architecture de données & Types :**
   - Enregistrement de la nouvelle collection Firestore `chat-messages` (`CHAT_MESSAGES`) dans [constants.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/lib/constants.ts).
   - Déclaration de l'interface `ChatMessage` dans [types/index.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/types/index.ts).
+  - Firestore Security Rules [firestore.rules](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/firestore.rules) mises à jour pour autoriser la lecture et la création par les utilisateurs authentifiés, tout en interdisant la modification/suppression pour garantir l'immutabilité des discussions.
 - **Service Messagerie (`chatService.ts`) :**
-  - Implémentation de `sendChatMessage` pour pousser les messages dans Firestore. La fonction encapsule l'opération dans `trackWrite` pour s'assurer que les messages envoyés hors-ligne (en zone blanche terrain) sont sauvegardés localement et synchronisés dès le retour du réseau.
-- **Interface Utilisateur Chat (`ChatPage.tsx`) :**
-  - Conception d'une interface de chat moderne respectant le design system Apple (bulles bleues pour l'utilisateur connecté, bulles grises avec initiales/avatar colorés pour les autres membres de l'équipe).
-  - Abonnement temps réel via `onSnapshot` limité aux 100 derniers messages pour préserver les quotas Firestore et la batterie des appareils mobiles.
-  - Intégration du scroll automatique vers le bas à la réception/envoi d'un message, et de micro-animations fluides avec `framer-motion`.
-- **Routage & Navigation :**
-  - Ajout de la route `/chat` avec chargement paresseux (lazy loading) dans [App.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/App.tsx).
-  - Intégration du lien d'accès "Messagerie" (icône `MessageSquare`) dans la [Sidebar](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/layout/Sidebar.tsx) (Activité & Planning) pour le desktop et dans [PlusPage.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/pages/PlusPage.tsx) (Suivi & production) pour le menu mobile.
+  - Implémentation de `sendChatMessage` pour pousser les messages dans Firestore, encapsulée dans `trackWrite` pour s'assurer que les messages envoyés hors-ligne (terrain) sont stockés localement et synchronisés dès le retour du réseau.
+- **Gestion des Notifications & Badges :**
+  - Création de [chatNotificationStore.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/stores/chatNotificationStore.ts) (Zustand + local storage) pour gérer le compteur de messages non lus (`unreadCount`) et l'indicateur de mention (`hasMention`).
+  - Implémentation du hook de synchronisation globale [useChatNotification.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/hooks/useChatNotification.ts), branché sur [GlobalListeners.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/layout/GlobalListeners.tsx) pour surveiller en direct l'arrivée de nouveaux messages depuis la dernière consultation de la messagerie par l'utilisateur.
+- **Interface Utilisateur Chat & Mentions (`ChatPage.tsx`) :**
+  - Conception d'une interface de chat Apple-style avec bulles de couleur (bleu pour soi, gris pour les autres), avatars/initiales colorés et scroll automatique.
+  - **Détection et mise en valeur des mentions** : Parseur de texte affichant les mentions valides sous forme de badges (`@Nom`). Si l'utilisateur connecté est mentionné, son badge apparaît en rouge clair, et sa bulle de message complète prend un fond jaune/orange distinctif (`var(--color-warning-light)`) pour attirer l'attention.
+  - **Autocomplétion et suggestions** : Affichage d'un panneau de suggestions horizontal au-dessus du champ d'écriture dès que l'utilisateur tape `@`, permettant de cliquer sur un technicien pour insérer instantanément sa mention.
+  - **Marquage comme lu** : Réinitialisation automatique des badges et du statut dans `localStorage` lors de la consultation de la messagerie.
+- **Navigation & Routage :**
+  - Ajout de la route `/chat` avec lazy loading dans [App.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/App.tsx).
+  - Affichage de badges sur l'icône "Messagerie" de la [Sidebar](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/layout/Sidebar.tsx) (desktop) et dans [PlusPage.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/pages/PlusPage.tsx) (mobile), colorés en rouge si l'utilisateur est mentionné, ou en bleu si ce sont de simples messages non lus.
 - **Validation technique :**
-  - Validation réussie de la compilation TypeScript de l'ensemble du projet via `npx tsc --noEmit`.
+  - Validation réussie de la compilation TypeScript via `npx tsc --noEmit`.
 
 ### Prochaines étapes
-- Tester la fluidité et le comportement temps réel sur l'environnement de staging.
-- Rendre possible le chat contextuel par mission/client (Option B) si l'usage d'équipe le nécessite par la suite.
+- Étape suivante : Poursuivre avec les autres fonctionnalités inspirées de WhatsApp (envoi de photos, messages vocaux, partage de position GPS).
 
 ## Session 154 — Filtre par méthode et répartition détaillée (Plan de Charge)
 **4 juillet 2026**

@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore'
-import { Send, ArrowLeft } from 'lucide-react'
+import { Send, ArrowLeft, AtSign } from 'lucide-react'
 import { m, AnimatePresence } from 'framer-motion'
 import { db } from '@/lib/firebase'
 import { useAuthStore, selectAppUser } from '@/stores/authStore'
+import { useUsersStore } from '@/stores/usersStore'
+import { useChatNotificationStore } from '@/stores/chatNotificationStore'
 import { sendChatMessage } from '@/services/chatService'
-import type { ChatMessage } from '@/types'
+import type { ChatMessage, AppUser } from '@/types'
 import { COLLECTIONS, COLORS } from '@/lib/constants'
 import UserAvatar from '@/components/ui/UserAvatar'
 import { useNavigate } from 'react-router-dom'
@@ -42,12 +44,18 @@ function formatMessageTime(timestamp: any): string {
 
 export default function ChatPage() {
   const appUser = useAuthStore(selectAppUser)
+  const users = useUsersStore((s) => s.users)
+  const markAsRead = useChatNotificationStore((s) => s.markAsRead)
+  
   const navigate = useNavigate()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputText, setInputText] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
+  // Suggestion de mention (@)
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null)
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // S'abonner aux messages Firestore
@@ -66,7 +74,6 @@ export default function ChatPage() {
         snap.forEach((doc) => {
           loadedMessages.push({ id: doc.id, ...doc.data() } as ChatMessage)
         })
-        // On inverse pour les avoir dans l'ordre chronologique (du plus vieux au plus récent)
         setMessages(loadedMessages.reverse())
         setLoading(false)
         setError(null)
@@ -81,17 +88,47 @@ export default function ChatPage() {
     return () => unsub()
   }, [])
 
+  // Marquer comme lu à l'ouverture et dès que des messages arrivent
+  useEffect(() => {
+    markAsRead()
+  }, [messages, markAsRead])
+
   // Faire défiler automatiquement vers le bas lors de l'arrivée de messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Gérer la saisie de texte et détecter le déclencheur @
+  const handleInputChange = (text: string) => {
+    setInputText(text)
+    
+    // Détecter si on est en train de taper une mention
+    const words = text.split(' ')
+    const lastWord = words[words.length - 1]
+    
+    if (lastWord.startsWith('@')) {
+      setMentionQuery(lastWord.slice(1))
+    } else {
+      setMentionQuery(null)
+    }
+  }
+
+  // Sélectionner un utilisateur à mentionner
+  const handleSelectMention = (user: AppUser) => {
+    const words = inputText.split(' ')
+    // Remplacer le dernier mot commençant par @
+    words[words.length - 1] = `@${user.initiales} `
+    setInputText(words.join(' '))
+    setMentionQuery(null)
+  }
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!inputText.trim() || !appUser) return
 
     const textToSend = inputText
-    setInputText('') // Vider l'input immédiatement pour un feedback instantané
+    setInputText('') // Vider l'input immédiatement
+    setMentionQuery(null)
 
     try {
       await sendChatMessage(textToSend, {
@@ -106,6 +143,51 @@ export default function ChatPage() {
       setError("Erreur lors de l'envoi. Veuillez réessayer.")
     }
   }
+
+  // Rendu du contenu du message avec mise en surbrillance des mentions
+  const renderMessageContent = (text: string) => {
+    if (!text.includes('@')) return text
+
+    const words = text.split(/(\s+)/) // Découper par mots en gardant les espaces
+    return words.map((word, idx) => {
+      if (word.startsWith('@')) {
+        // Enlever la ponctuation en fin de mot (ex: "@THK," ou "@THK.")
+        const cleanWord = word.slice(1).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+        const lowerCleanWord = cleanWord.toLowerCase()
+
+        // Chercher l'utilisateur mentionné par ses initiales ou son prénom
+        const matchedUser = users.find(
+          u => u.initiales.toLowerCase() === lowerCleanWord || u.prenom.toLowerCase() === lowerCleanWord
+        )
+
+        if (matchedUser) {
+          const isMe = matchedUser.uid === appUser?.uid
+          return (
+            <span
+              key={idx}
+              className={`font-semibold px-1.5 py-0.5 rounded text-[13px] inline-block ${
+                isMe
+                  ? 'bg-[var(--color-danger-light)] text-[var(--color-danger)] border border-[var(--color-danger)]/20'
+                  : 'bg-[var(--color-accent-light)] text-[var(--color-accent)]'
+              }`}
+            >
+              @{matchedUser.prenom}
+            </span>
+          )
+        }
+      }
+      return word
+    })
+  }
+
+  // Filtrer les suggestions de membres de l'équipe
+  const suggestions = mentionQuery !== null
+    ? users.filter(u => 
+        u.prenom.toLowerCase().includes(mentionQuery.toLowerCase()) ||
+        u.nom.toLowerCase().includes(mentionQuery.toLowerCase()) ||
+        u.initiales.toLowerCase().includes(mentionQuery.toLowerCase())
+      ).slice(0, 5)
+    : []
 
   return (
     <div className="flex-1 flex flex-col h-screen max-h-screen bg-[var(--color-bg-primary)] overflow-hidden">
@@ -150,6 +232,11 @@ export default function ChatPage() {
                 const isMe = msg.senderUid === appUser?.uid
                 const showSenderName = index === 0 || messages[index - 1].senderUid !== msg.senderUid
 
+                // Détecter si ce message contient une mention de l'utilisateur actuel
+                const containsMyMention = appUser && 
+                  (msg.text.toLowerCase().includes(`@${appUser.initiales.toLowerCase()}`) || 
+                   msg.text.toLowerCase().includes(`@${appUser.prenom.toLowerCase()}`))
+
                 return (
                   <m.div
                     key={msg.id}
@@ -158,7 +245,7 @@ export default function ChatPage() {
                     transition={{ duration: 0.15 }}
                     className={`flex items-start gap-2.5 max-w-[85%] ${isMe ? 'self-end flex-row-reverse' : 'self-start'}`}
                   >
-                    {/* Avatar de l'expéditeur (uniquement si ce n'est pas moi) */}
+                    {/* Avatar de l'expéditeur */}
                     {!isMe && (
                       <div className="shrink-0 pt-0.5">
                         <UserAvatar 
@@ -177,15 +264,23 @@ export default function ChatPage() {
                         </span>
                       )}
                       <div
-                        className="px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed break-words shadow-[var(--shadow-card)]"
+                        className="px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed break-words shadow-[var(--shadow-card)] transition-all"
                         style={{
-                          backgroundColor: isMe ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
+                          backgroundColor: isMe 
+                            ? 'var(--color-accent)' 
+                            : containsMyMention 
+                              ? 'var(--color-warning-light)' 
+                              : 'var(--color-bg-secondary)',
                           color: isMe ? 'white' : 'var(--color-text-primary)',
-                          border: isMe ? 'none' : '1px solid var(--color-border-subtle)',
+                          border: isMe 
+                            ? 'none' 
+                            : containsMyMention 
+                              ? '1px solid var(--color-warning)' 
+                              : '1px solid var(--color-border-subtle)',
                           borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
                         }}
                       >
-                        {msg.text}
+                        {renderMessageContent(msg.text)}
                       </div>
                       <span 
                         className={`text-[9px] text-[var(--color-text-tertiary)] mt-1 ml-1 ${isMe ? 'self-end mr-1' : 'self-start'}`}
@@ -202,6 +297,35 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Barre de suggestions @mentions */}
+      {suggestions.length > 0 && (
+        <m.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mx-4 mb-2 p-2 rounded-xl flex flex-wrap gap-1.5 shrink-0 shadow-[var(--shadow-card)]"
+          style={{ 
+            background: 'var(--color-bg-secondary)',
+            border: '1px solid var(--color-border-subtle)' 
+          }}
+        >
+          <span className="text-[11px] font-medium text-[var(--color-text-secondary)] w-full mb-1 px-1 flex items-center gap-1">
+            <AtSign size={12} /> Mentionner un membre :
+          </span>
+          {suggestions.map(u => (
+            <button
+              key={u.uid}
+              type="button"
+              onClick={() => handleSelectMention(u)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-accent-light)] hover:text-[var(--color-accent)] text-[12px] font-medium transition-colors"
+            >
+              <UserAvatar initiales={u.initiales} color={u.avatarColor} size={18} fontSize={6} />
+              <span>{u.prenom} {u.nom}</span>
+              <span className="text-[10px] text-[var(--color-text-secondary)] opacity-60 bg-[var(--color-border)]/20 px-1 rounded">{u.initiales}</span>
+            </button>
+          ))}
+        </m.div>
+      )}
+
       {/* Barre de saisie en bas */}
       <form 
         onSubmit={handleSend} 
@@ -215,7 +339,7 @@ export default function ChatPage() {
         <input
           type="text"
           value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
+          onChange={(e) => handleInputChange(e.target.value)}
           placeholder="Écrire un message..."
           className="flex-1 bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] placeholder-[var(--color-text-tertiary)] px-4 py-2.5 rounded-full text-[14px] border border-[var(--color-border-subtle)] focus:outline-none focus:border-[var(--color-accent)] focus:bg-[var(--color-bg-secondary)] transition-all"
         />

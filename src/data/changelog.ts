@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '138'
+export const CHANGELOG_VERSION = '139'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,14 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '139',
+    date: '5 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Messagerie : Ajout des mentions (@prenom / @initiales) avec autocomplétion lors de la frappe' },
+      { type: 'feat', label: 'Messagerie : Badges de notifications intelligents et mise en valeur visuelle des messages où vous êtes mentionné' },
+    ],
+  },
   {
     version: '138',
     date: '5 juillet 2026',

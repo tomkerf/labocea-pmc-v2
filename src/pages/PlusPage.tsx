@@ -11,6 +11,7 @@ import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
 import { useTodosStore } from '@/stores/todosStore'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useEquipementsStore } from '@/stores/equipementsStore'
+import { useChatNotificationStore } from '@/stores/chatNotificationStore'
 import UserAvatar from '@/components/ui/UserAvatar'
 import BugReportModal from '@/components/ui/BugReportModal'
 import { COLORS } from '@/lib/constants'
@@ -33,6 +34,7 @@ export default function PlusPage() {
   const role    = useAuthStore(selectRole)
   const navigate = useNavigate()
   const [bugOpen, setBugOpen] = useState(false)
+  const { unreadCount: chatUnreadCount, hasMention: chatHasMention } = useChatNotificationStore()
 
   const todos        = useTodosStore(s => s.todos)
   const maintenances = useMaintenancesStore(s => s.maintenances)
@@ -51,7 +53,7 @@ export default function PlusPage() {
         title: 'Suivi & production',
         items: [
           { to: '/todos',        icon: ListTodo,  label: 'Tâches',       badge: todosActives || undefined,       badgeColor: COLORS.DANGER  },
-          { to: '/chat',         icon: MessageSquare, label: 'Messagerie' },
+          { to: '/chat',         icon: MessageSquare, label: 'Messagerie', badge: chatUnreadCount || undefined, badgeColor: chatHasMention ? COLORS.DANGER : COLORS.ACCENT },
           { to: '/rapports',     icon: FileText,  label: 'Rapports'                                                                          },
           { to: '/metrologie',   icon: Gauge,     label: 'Métrologie',   badge: metrologieRetard || undefined,   badgeColor: COLORS.DANGER  },
           { to: '/maintenances', icon: Hammer,    label: 'Maintenances', badge: maintenancesActives || undefined, badgeColor: COLORS.TEXT_SECONDARY },

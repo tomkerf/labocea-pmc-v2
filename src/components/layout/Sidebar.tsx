@@ -10,6 +10,7 @@ import UserAvatar from '@/components/ui/UserAvatar'
 import BugReportModal from '@/components/ui/BugReportModal'
 import SyncBadge from '@/components/ui/SyncBadge'
 import { useChangelogState } from '@/components/ui/ChangelogModal'
+import { useChatNotificationStore } from '@/stores/chatNotificationStore'
 
 
 interface NavItem {
@@ -33,6 +34,7 @@ export default function Sidebar() {
   const role    = useAuthStore(selectRole)
   const [bugOpen, setBugOpen] = useState(false)
   const changelog = useChangelogState()
+  const { unreadCount: chatUnreadCount, hasMention: chatHasMention } = useChatNotificationStore()
 
   const overdueCount = useMemo(() => {
     let count = 0
@@ -151,14 +153,24 @@ export default function Sidebar() {
                       <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} />
                     ) : null}
                     <span className="flex-1 z-10 truncate">{label}</span>
-                    {badge && overdueCount > 0 && (
+                    {to === '/missions' && overdueCount > 0 && (
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10"
                         style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger-text)', minWidth: 18, textAlign: 'center' }}>
                         {overdueCount}
                       </span>
                     )}
-                  </>
-                )}
+                    {to === '/chat' && chatUnreadCount > 0 && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10"
+                        style={{ 
+                          background: chatHasMention ? 'var(--color-danger)' : 'var(--color-accent-light)', 
+                          color: chatHasMention ? 'white' : 'var(--color-accent)', 
+                          minWidth: 18, 
+                          textAlign: 'center' 
+                        }}
+                      >
+                        {chatUnreadCount}
+                      </span>
+                    )}
               </NavLink>
             ))}
           </div>
