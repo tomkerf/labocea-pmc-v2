@@ -2,6 +2,37 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 165 — Premortem #3 + fixes solidité du module chat
+**6 juillet 2026**
+
+### Contexte
+Premortem refait à la demande de Tom (« PMC V2 est un échec 6 mois après la prod — pourquoi ? »). Le précédent (21 juin, màj 1er juillet) concluait « tous les risques code soldés » — mais le module messagerie complet (sessions 155-164) a été livré depuis, sans passe de solidité globale. Analyse ancrée dans le code actuel, puis correction immédiate des 3 risques techniques identifiés.
+
+### Analyse premortem — risques identifiés
+- 🔴 **Churn de listeners chat + mesure quota périmée** : la baseline Spark (7,8k lectures/jour, 01/07) date d'avant le chat ; et `useChatNotificationListener` détruisait/recréait ses 2 écouteurs globaux à chaque `markAsRead` (`lastSeenTimestamps` dans les deps du useEffect, `markAsRead` déclenché à chaque message reçu chat ouvert).
+- 🟡 **Photos DM non isolées** : `storage.rules` autorisait tout utilisateur authentifié à lire/supprimer les photos d'un DM dont il n'est pas participant (le texte, lui, était bien isolé par firestore.rules).
+- 🟡 **Horloge client** : `createdAt` posé par `Timestamp.now()` — un téléphone à l'heure décalée désordonnait les messages et faussait le comptage des non-lus.
+- 🟢 Mineurs notés sans action : croissance chat non bornée (delete: if false), pas de limite de taille sur `text` côté règles, listener DM limit(200) trans-conversations, mention par substring, pas de push FCM chat.
+- Aggravation notée : le **Firestore partagé staging/prod** devient user-visible avec le chat (un message de test staging apparaît dans le chat de prod en temps réel).
+
+### Fixes appliqués (commit `623c221`)
+- **`useChatNotification.ts`** : `lastSeenTimestamps` lu via `getState()` au moment de chaque snapshot, deps du useEffect réduites à `[appUser]` — les 2 écouteurs restent stables. Test de non-régression anti-churn (`onSnapshot` appelé exactement 2×, jamais réabonné après `markAsRead`).
+- **`chatService.ts`** : `Timestamp.now()` → `serverTimestamp()` sur les 3 types de messages (texte, image, sondage). `ChatPage.tsx` lit avec `serverTimestamps: 'estimate'` pour afficher une heure sur ses propres messages en attente d'ack serveur (`formatMessageTime` gérait déjà le cas null).
+- **`storage.rules`** : `chats/{chatId}` restreint aux participants — fonction `isChatParticipant()` (`chatId == 'general' || request.auth.uid in chatId.split('_')`), appliquée à read/create/update/delete. **Règles déployées** (`firebase deploy --only storage`).
+- `public/sw.js` : CACHE_VERSION `pmc-v2-3` → `pmc-v2-4`.
+
+### État
+- Suite **323 → 335 tests** verts (12 nouveaux : `useChatNotification.test.ts`, `chatService.test.ts`). Lint : 11 problèmes tous **préexistants** des sessions chat (vérifié par stash — sessions 155-164 ne validaient que tsc), aucun introduit. Build OK, react-doctor clean sur les fichiers touchés.
+- Staging déployé (version `ed028956`). Règles Storage déployées. firestore.rules inchangées (vérifiées à jour en début de session).
+
+### Prochaines étapes
+- **Tom** : re-mesurer l'usage Firestore réel en console Firebase (baseline périmée depuis le chat).
+- Solder les 10 erreurs lint héritées des sessions chat (`payload: any`, `set-state-in-effect` ChatPage…).
+- Isolation Firestore staging/prod (~3h, priorité montée d'un cran — pollution chat visible en temps réel).
+- Organisationnel inchangé : DSIN 🔴, bascule Brest 🟡.
+
+---
+
 ## Session 164 — Durcissement sécurité Firestore (pollVotes/reactions)
 **5 juillet 2026**
 
