@@ -1,7 +1,12 @@
-import { collection, addDoc, serverTimestamp, doc, runTransaction } from 'firebase/firestore'
+import { collection, addDoc, serverTimestamp, doc, runTransaction, type FieldValue } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { trackWrite } from '@/lib/trackWrite'
 import { COLLECTIONS } from '@/lib/constants'
+import type { ChatMessage } from '@/types'
+
+/** Payload d'un nouveau message : ChatMessage sans id (généré par Firestore),
+ * avec createdAt en sentinelle serverTimestamp() plutôt qu'en Timestamp résolu. */
+type NewChatMessage = Omit<ChatMessage, 'id' | 'createdAt'> & { createdAt: FieldValue }
 
 /** Génère un identifiant déterministe unique pour une conversation privée entre deux utilisateurs */
 export function getDmChatId(uidA: string, uidB: string): string {
@@ -17,7 +22,7 @@ export async function sendChatMessage(
   const trimmed = text.trim()
   if (!trimmed) return
   
-  const payload: any = {
+  const payload: NewChatMessage = {
     text: trimmed,
     chatId,
     senderUid: user.uid,
@@ -44,7 +49,7 @@ export async function sendChatImage(
   chatId: string = 'general',
   participants?: string[]
 ): Promise<void> {
-  const payload: any = {
+  const payload: NewChatMessage = {
     text: '📷 Photo',
     chatId,
     senderUid: user.uid,
@@ -83,7 +88,7 @@ export async function sendChatPoll(
     initialVotes[idx.toString()] = []
   })
 
-  const payload: any = {
+  const payload: NewChatMessage = {
     text: `📊 Sondage : ${trimmedQuestion}`,
     chatId,
     senderUid: user.uid,

@@ -78,7 +78,7 @@ export default function PlusPage() {
       },
     ]
     return base
-  }, [todosActives, metrologieRetard, maintenancesActives, role])
+  }, [todosActives, metrologieRetard, maintenancesActives, role, chatUnreadCount])
 
   return (
     <div className="p-6 pb-28 max-w-lg">

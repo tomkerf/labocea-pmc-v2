@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { collection, query, orderBy, limit, onSnapshot, where } from 'firebase/firestore'
+import { collection, query, orderBy, limit, onSnapshot, where, type Timestamp } from 'firebase/firestore'
 import { Send, ArrowLeft, AtSign, Users, Search, BarChart2, Plus, Trash2, X, Camera, Loader2, SmilePlus } from 'lucide-react'
 import { m, AnimatePresence } from 'framer-motion'
 import { db } from '@/lib/firebase'
@@ -12,9 +12,14 @@ import type { ChatMessage, AppUser } from '@/types'
 import { COLLECTIONS } from '@/lib/constants'
 import UserAvatar from '@/components/ui/UserAvatar'
 import { useNavigate } from 'react-router-dom'
+import { toast } from '@/stores/toastStore'
+
+// Référence stable pour les rendus sans messages (évite un nouveau [] à chaque
+// rendu, qui redéclencherait les effets dépendant de `messages`)
+const EMPTY_MESSAGES: ChatMessage[] = []
 
 // Formateur de date convivial
-function formatMessageTime(timestamp: any): string {
+function formatMessageTime(timestamp: Timestamp | null | undefined): string {
   if (!timestamp) return ''
   const date = timestamp.toDate()
   const now = new Date()
@@ -47,7 +52,7 @@ interface PollViewProps {
   message: ChatMessage
   isMe: boolean
   currentUserId: string
-  users: any[]
+  users: AppUser[]
   appUserInitials: string
   onVote: (optionIndex: number) => void
 }
@@ -153,9 +158,11 @@ export default function ChatPage() {
   
   // Salon sélectionné ('general' par défaut, ou '' si rien sur mobile pour afficher la liste)
   const [selectedChatId, setSelectedChatId] = useState<string>('general')
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  // Messages du dernier snapshot reçu, étiquetés par leur salon d'origine :
+  // messages et loading se dérivent en comparant chatData.chatId au salon
+  // sélectionné, sans setState synchrone au changement de salon.
+  const [chatData, setChatData] = useState<{ chatId: string; messages: ChatMessage[] } | null>(null)
   const [inputText, setInputText] = useState('')
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
   // Recherche de contact dans la liste
@@ -184,16 +191,14 @@ export default function ChatPage() {
     ? users.find(u => getDmChatId(appUser.uid, u.uid) === selectedChatId)
     : null
 
+  // Messages et statut de chargement dérivés du dernier snapshot reçu
+  const messages = chatData?.chatId === selectedChatId ? chatData.messages : EMPTY_MESSAGES
+  const loading = !!appUser && !!selectedChatId && chatData?.chatId !== selectedChatId && !error
+
   // S'abonner aux messages Firestore de la discussion sélectionnée
   useEffect(() => {
-    if (!appUser || !selectedChatId) {
-      setMessages([])
-      return
-    }
-    
-    setLoading(true)
-    setMessages([])
-    
+    if (!appUser || !selectedChatId) return
+
     const isGeneral = selectedChatId === 'general'
     const q = isGeneral
       ? query(
@@ -221,14 +226,12 @@ export default function ChatPage() {
             loadedMessages.push({ ...data, id: doc.id })
           }
         })
-        setMessages(loadedMessages.reverse())
-        setLoading(false)
+        setChatData({ chatId: selectedChatId, messages: loadedMessages.reverse() })
         setError(null)
       },
       (err) => {
         console.error('Erreur écouteur chat:', err)
         setError('Impossible de charger les messages de cette conversation.')
-        setLoading(false)
       }
     )
 
@@ -398,9 +401,9 @@ export default function ChatPage() {
         selectedChatId,
         selectedContact ? [appUser.uid, selectedContact.uid] : undefined
       )
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erreur envoi image:', err)
-      alert(err.message || "Impossible d'envoyer la photo.")
+      toast.error(err instanceof Error ? err.message : "Impossible d'envoyer la photo.")
     } finally {
       setUploadingImage(false)
       if (fileInputRef.current) {
@@ -416,7 +419,7 @@ export default function ChatPage() {
     const words = text.split(/(\s+)/)
     return words.map((word, idx) => {
       if (word.startsWith('@')) {
-        const cleanWord = word.slice(1).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+        const cleanWord = word.slice(1).replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "")
         const lowerCleanWord = cleanWord.toLowerCase()
 
         const matchedUser = users.find(
