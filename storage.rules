@@ -36,12 +36,19 @@ service firebase.storage {
 
     // Photos de messagerie
     // Chemin : chats/{chatId}/{filename}
+    // Canal général (chatId = 'general') : tout utilisateur authentifié.
+    // DM (chatId = 'uidA_uidB', cf. getDmChatId) : réservé aux deux participants,
+    // pour que les photos privées aient la même isolation que le texte (firestore.rules).
     match /chats/{chatId}/{filename} {
-      allow read: if request.auth != null;
+      function isChatParticipant() {
+        return chatId == 'general' || request.auth.uid in chatId.split('_');
+      }
+      allow read: if request.auth != null && isChatParticipant();
       allow create, update: if request.auth != null
+        && isChatParticipant()
         && request.resource.size < 10 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
-      allow delete: if request.auth != null;
+      allow delete: if request.auth != null && isChatParticipant();
     }
 
   }

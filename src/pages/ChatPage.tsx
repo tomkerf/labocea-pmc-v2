@@ -214,7 +214,9 @@ export default function ChatPage() {
       (snap) => {
         const loadedMessages: ChatMessage[] = []
         snap.forEach((doc) => {
-          const data = doc.data() as ChatMessage
+          // 'estimate' : un message qu'on vient d'envoyer (serverTimestamp en
+          // attente) reçoit une heure estimée au lieu d'un createdAt null.
+          const data = doc.data({ serverTimestamps: 'estimate' }) as ChatMessage
           if (isGeneral || data.chatId === selectedChatId) {
             loadedMessages.push({ ...data, id: doc.id })
           }

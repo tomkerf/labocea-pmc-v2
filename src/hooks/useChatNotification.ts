@@ -7,13 +7,18 @@ import { COLLECTIONS } from '@/lib/constants'
 
 export function useChatNotificationListener() {
   const appUser = useAuthStore(selectAppUser)
-  const { lastSeenTimestamps, setUnreadCounts, setHasMention } = useChatNotificationStore()
 
   // Référence pour stocker les comptes non lus de chaque écouteur pour éviter de boucler
   const unreadStateRef = useRef<Record<string, { count: number; hasMention: boolean }>>({})
 
   useEffect(() => {
     if (!appUser) return
+
+    // lastSeenTimestamps est lu via getState() au moment de chaque snapshot.
+    // Ne PAS le remettre dans les deps : cela détruirait/recréerait les 2
+    // écouteurs à chaque markAsRead (soit à chaque message reçu chat ouvert),
+    // avec re-lecture Firestore des snapshots initiaux à chaque fois.
+    const { setUnreadCounts, setHasMention } = useChatNotificationStore.getState()
 
     unreadStateRef.current = {}
 
@@ -45,7 +50,7 @@ export function useChatNotificationListener() {
       (snap) => {
         let count = 0
         let mentioned = false
-        const lastSeen = lastSeenTimestamps['general'] || 0
+        const lastSeen = useChatNotificationStore.getState().lastSeenTimestamps['general'] || 0
 
         snap.forEach((doc) => {
           const data = doc.data()
@@ -90,6 +95,7 @@ export function useChatNotificationListener() {
       (snap) => {
         // Regrouper les messages par chatId (ex: uidA_uidB)
         const dmsByChat: Record<string, { count: number; hasMention: boolean }> = {}
+        const lastSeenTimestamps = useChatNotificationStore.getState().lastSeenTimestamps
 
         snap.forEach((doc) => {
           const data = doc.data()
@@ -144,5 +150,5 @@ export function useChatNotificationListener() {
       unsubGeneral()
       unsubDms()
     }
-  }, [appUser, lastSeenTimestamps, setUnreadCounts, setHasMention])
+  }, [appUser])
 }

@@ -1,4 +1,4 @@
-import { collection, addDoc, Timestamp, doc, runTransaction } from 'firebase/firestore'
+import { collection, addDoc, serverTimestamp, doc, runTransaction } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { trackWrite } from '@/lib/trackWrite'
 import { COLLECTIONS } from '@/lib/constants'
@@ -24,7 +24,9 @@ export async function sendChatMessage(
     senderName: `${user.prenom} ${user.nom}`,
     senderInitials: user.initiales,
     senderAvatarColor: user.avatarColor || '',
-    createdAt: Timestamp.now(),
+    // Horloge serveur obligatoire : une horloge de téléphone décalée
+    // désordonnerait les messages et fausserait le comptage des non-lus.
+    createdAt: serverTimestamp(),
   }
 
   if (participants) {
@@ -49,7 +51,7 @@ export async function sendChatImage(
     senderName: `${user.prenom} ${user.nom}`,
     senderInitials: user.initiales,
     senderAvatarColor: user.avatarColor || '',
-    createdAt: Timestamp.now(),
+    createdAt: serverTimestamp(),
     isImage: true,
     imageUrl,
   }
@@ -88,7 +90,7 @@ export async function sendChatPoll(
     senderName: `${user.prenom} ${user.nom}`,
     senderInitials: user.initiales,
     senderAvatarColor: user.avatarColor || '',
-    createdAt: Timestamp.now(),
+    createdAt: serverTimestamp(),
     isPoll: true,
     pollQuestion: trimmedQuestion,
     pollOptions: cleanOptions,
