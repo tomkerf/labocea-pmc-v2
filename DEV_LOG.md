@@ -2,6 +2,42 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 164 — Durcissement sécurité Firestore (pollVotes/reactions)
+**5 juillet 2026**
+
+### Contexte
+Revue de sécurité automatisée sur les règles Firestore couvrant les sondages et réactions du chat (session 163).
+
+### Modifications apportées
+- **`firestore.rules` :**
+  - **authorization-bypass** : un utilisateur pouvait forger le vote/la réaction d'un tiers en appelant directement l'API Firestore (`userId` non vérifié côté règles). Chaque clé ne peut désormais être modifiée que pour ajouter/retirer le propre uid de l'appelant (`isSelfOnlyPollVotesUpdate` / `isSelfOnlyReactionsUpdate`).
+  - **missing-authorization** : la règle `update` ne vérifiait pas l'appartenance au DM, permettant à un utilisateur non participant de voter/réagir sur une conversation privée. Ajout du même check que create/read.
+  - **resource-exhaustion** : `reactions`/`pollVotes` acceptaient des clés arbitraires. Restriction aux clés connues (index 0-9 pour les sondages, emojis de `ALLOWED_REACTIONS` pour les réactions), avec allowlist miroir côté client dans `chatService.ts`.
+- Vérifié manuellement sur staging : vote de sondage et toggle de réaction fonctionnent toujours après durcissement.
+
+### État
+- Commit `0c39a14`. **Règles redéployées** (`firebase deploy --only firestore:rules`) — confirmé déjà à jour lors de la reprise de session suivante (aucun changement en attente).
+- 323/323 tests verts.
+
+---
+
+## Session 163 — Réactions emoji sur les messages du chat
+**5 juillet 2026**
+
+### Contexte
+Suite logique des fonctionnalités WhatsApp-like du chat : ajout de réactions emoji rapides sur les messages.
+
+### Modifications apportées
+- **`ChatPage.tsx` :** bouton de réaction au survol/tap sur chaque message, palette de 6 emojis courants, badges cumulés par emoji avec toggle (ajouter/retirer sa propre réaction), isolation general/DM identique aux messages.
+- **`chatService.ts` :** fonction de mise à jour du champ `reactions` sur un message.
+- **`types/index.ts` :** ajout du champ optionnel `reactions` sur `ChatMessage`.
+- **`firestore.rules` :** règles étendues pour autoriser la mise à jour du champ `reactions` en plus de `pollVotes` (durcies ensuite en session 164).
+
+### État
+- Commit `232e828`.
+
+---
+
 ## Session 162 — Suppression du scroll et padding parents pour la page de chat
 **5 juillet 2026**
 
