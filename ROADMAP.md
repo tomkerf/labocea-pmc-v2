@@ -366,6 +366,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-07-04 | Filtre par méthode et répartition détaillée (Plan de Charge) ✅ | Ajout d'un filtre Méthode (Ponctuel / Composite / Bilan 24) dans l'onglet Charge, répartition par méthode dans le KPI du Volume total annuel, et infobulles détaillées au survol sur chaque cellule de la matrice de charge. |
 | 2026-07-05 | Réactions emoji + durcissement sécurité chat ✅ | Réactions emoji rapides sur les messages (6 emojis, badges cumulés, toggle). Revue sécurité automatisée : 3 failles Firestore corrigées sur pollVotes/reactions (authorization-bypass, missing-authorization DM, resource-exhaustion clés arbitraires). Règles redéployées et vérifiées. 323/323 tests. |
 | 2026-07-06 | Premortem #3 + solidité chat ✅ | Premortem refait sur le module messagerie : churn de listeners corrigé (lastSeen via getState, deps stables), createdAt → serverTimestamp (horloge client faussait ordre + non-lus), photos DM isolées aux participants (storage.rules déployées). 335 tests (+12). Restent : re-mesure quota Spark, 10 erreurs lint héritées du chat, isolation Firestore. |
+| 2026-07-06 | Lint 0 rétabli (module chat) ✅ | Les 10 erreurs + 1 warning hérités des sessions chat soldés : état messages/loading dérivé dans ChatPage (fin du set-state-in-effect), types any éliminés, alert→toast, payloads chatService typés. Bug corrigé au passage : badge Messagerie du menu mobile figé (dep useMemo manquante). Lint 0/0, 335 tests, staging déployé. |
 
 
 

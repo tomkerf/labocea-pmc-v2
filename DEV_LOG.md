@@ -2,6 +2,33 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+## Session 166 — Lint 0 rétabli sur le module chat
+**6 juillet 2026**
+
+### Contexte
+Suite de la session 165 : les sessions chat (155-164) ne validaient que `tsc`, laissant 10 erreurs ESLint + 1 warning. Le projet était à « lint 0 » depuis la session 153 — rétablissement du standard.
+
+### Modifications apportées (commit `7663845`)
+- **`ChatPage.tsx`** :
+  - `set-state-in-effect` : l'état `messages`/`loading` est remplacé par un état `chatData` étiqueté par salon (`{ chatId, messages }`) ; `messages` et `loading` sont **dérivés** en comparant `chatData.chatId` au salon sélectionné — plus aucun setState synchrone au changement de salon. Constante module `EMPTY_MESSAGES` pour garder une référence stable (sinon chaque rendu recréerait `[]` et redéclencherait les effets dépendant de `messages`).
+  - Types : `formatMessageTime(Timestamp | null | undefined)`, `PollViewProps.users: AppUser[]` (fini les `any`).
+  - `alert()` → `toast.error()` sur l'échec d'envoi photo (standard projet, les `alert` avaient été éradiqués en session 2026-05-16).
+  - Regex de nettoyage de mention : échappements inutiles supprimés (`\/ \^ \*`).
+- **`PlusPage.tsx`** : `chatUnreadCount` ajouté aux deps du `useMemo` — **vrai bug corrigé** : le badge Messagerie du menu mobile restait figé à sa valeur de montage et ne se mettait jamais à jour à l'arrivée de messages.
+- **`chatService.ts`** : type `NewChatMessage` (`Omit<ChatMessage, 'id' | 'createdAt'> & { createdAt: FieldValue }`) remplace les 3 `payload: any`.
+- `public/sw.js` : CACHE_VERSION `pmc-v2-4` → `pmc-v2-5`.
+
+### État
+- **Lint : 0 erreur, 0 warning** (11 → 0). 335/335 tests. Build OK. react-doctor : aucune issue sur les fichiers touchés.
+- Staging déployé (version `b28f4f1c`), poussé sur `origin/main`.
+
+### Prochaines étapes
+- **Tom** : validation visuelle staging (chat, photo DM, sondage) + re-mesure quota Firestore en console.
+- Isolation Firestore staging/prod (~3h) — prochain chantier code, à faire sur un modèle haut de gamme.
+- Organisationnel : DSIN 🔴, bascule Brest 🟡.
+
+---
+
 ## Session 165 — Premortem #3 + fixes solidité du module chat
 **6 juillet 2026**
 
