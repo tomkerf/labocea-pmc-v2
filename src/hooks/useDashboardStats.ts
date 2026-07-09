@@ -76,7 +76,7 @@ function getSamplingBadge(s: Sampling): SamplingBadge {
 }
 
 export function useDashboardStats({
-  clients, verifications: rawVerifications, equipements: rawEquipements, evenements, maintenances: rawMaintenances,
+  clients: rawClients, verifications: rawVerifications, equipements: rawEquipements, evenements, maintenances: rawMaintenances,
   uid, initiales, isGeneraliste,
 }: Params) {
   const preleveurs = usePreleveursStore((s) => s.preleveurs)
@@ -86,6 +86,14 @@ export function useDashboardStats({
     const prel = preleveurs.find(p => p.code === initiales)
     return prel?.site?.toLowerCase() || null
   }, [preleveurs, initiales])
+
+  const clients = useMemo(() => {
+    if (!userSite) return rawClients
+    return rawClients.filter((client) => {
+      const prel = preleveurs.find(p => p.code === client.preleveur)
+      return prel?.site?.toLowerCase() === userSite
+    })
+  }, [rawClients, preleveurs, userSite])
 
   const equipements = useMemo(() => {
     if (!userSite) return rawEquipements

@@ -298,7 +298,7 @@ export default function DashboardPage() {
                 <div className="rounded-xl px-6 py-5"
                   style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
                   <DonutChart
-                    total={equipements.length}
+                    total={parcDonut.en_service + parcDonut.a_calibrer + parcDonut.en_maintenance + parcDonut.hors_service + parcDonut.prete}
                     segments={[
                       { value: parcDonut.en_service,     color: '#34C759',      label: 'En service'     },
                       { value: parcDonut.a_calibrer,     color: '#FF9F0A',      label: 'À calibrer'     },
