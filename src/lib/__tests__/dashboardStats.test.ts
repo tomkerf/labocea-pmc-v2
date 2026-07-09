@@ -161,6 +161,20 @@ describe('useDashboardStats — site filtering', () => {
     )
     expect(result.current.parcDonut.en_service).toBe(1)
   })
+
+  it('filtre également par site pour les chargés de mission / admins avec des initiales configurées', () => {
+    usePreleveursStore.getState().setPreleveurs([
+      { id: 'p1', code: 'LDU', nom: 'Ludovic', site: 'Brest' }
+    ])
+    const equipements = [
+      makeEquipement({ id: 'eq1', nom: 'Eq Brest', site: 'brest' }),
+      makeEquipement({ id: 'eq2', nom: 'Eq Quimper', site: 'quimper' }),
+    ]
+    const { result } = renderHook(() =>
+      useDashboardStats({ ...BASE_PARAMS, initiales: 'LDU', isGeneraliste: true, equipements })
+    )
+    expect(result.current.parcDonut.en_service).toBe(1)
+  })
 })
 
 // ─── conformitePct ────────────────────────────────────────────────────────────

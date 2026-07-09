@@ -82,10 +82,10 @@ export function useDashboardStats({
   const preleveurs = usePreleveursStore((s) => s.preleveurs)
 
   const userSite = useMemo(() => {
-    if (isGeneraliste || !initiales) return null
+    if (!initiales) return null
     const prel = preleveurs.find(p => p.code === initiales)
     return prel?.site?.toLowerCase() || null
-  }, [preleveurs, initiales, isGeneraliste])
+  }, [preleveurs, initiales])
 
   const equipements = useMemo(() => {
     if (!userSite) return rawEquipements
