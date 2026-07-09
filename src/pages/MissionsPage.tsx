@@ -82,9 +82,10 @@ export default function MissionsPage() {
     if (siteDefaultApplied.current) return
     siteDefaultApplied.current = true
     const prel = preleveurs.find(p => p.code === initiales)
-    if (prel?.site) {
+    const site = prel?.site
+    if (site) {
       setTimeout(() => {
-        setFilterSite(prel.site)
+        setFilterSite(site)
       }, 0)
     }
   }, [preleveurs, initiales, uid])
