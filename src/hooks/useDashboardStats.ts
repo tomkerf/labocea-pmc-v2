@@ -96,6 +96,18 @@ export function useDashboardStats({
         c + plan.samplings.filter((s: Sampling) => s.status === 'done' && isThisMonth(s.doneDate)).length, 0), 0),
     [clients])
 
+  const missionsCeMoisMoi = useMemo(() =>
+    clients.reduce((count, client) =>
+      count + client.plans.reduce((c, plan) =>
+        c + plan.samplings.filter((s: Sampling) => {
+          if (s.status !== 'done' || !isThisMonth(s.doneDate)) return false
+          const estMonPrelevement = s.assignedTo
+            ? s.assignedTo === initiales
+            : (s.doneBy ? s.doneBy === uid : client.preleveur === initiales)
+          return estMonPrelevement
+        }).length, 0), 0),
+    [clients, initiales, uid])
+
   const { verifiTotal, verifiConformes, conformitePct } = useMemo(() => {
     const total = verifications.length
     const conformes = verifications.filter((v: Verification) =>
@@ -470,6 +482,7 @@ export function useDashboardStats({
 
   return {
     missionsCeMois,
+    missionsCeMoisMoi,
     verifiTotal, verifiConformes, conformitePct,
     aCalibrrer,
     rapportsAFaire,

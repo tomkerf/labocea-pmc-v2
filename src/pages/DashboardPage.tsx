@@ -116,7 +116,7 @@ export default function DashboardPage() {
 
 
   const {
-    missionsCeMois, verifiTotal, verifiConformes, conformitePct,
+    missionsCeMoisMoi, verifiTotal, verifiConformes, conformitePct,
     aCalibrrer, rapportsAFaireMoi, jourItems, lendemainItems,
     hasRainToday, hasRainTomorrow,
     parcDonut,
@@ -238,7 +238,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div>
                 <StatCard
-                  value={missionsCeMois}
+                  value={missionsCeMoisMoi}
                   label="Missions ce mois"
                   sub="prélèvements réalisés"
                   accent

@@ -126,6 +126,22 @@ describe('useDashboardStats — missionsCeMois', () => {
   })
 })
 
+describe('useDashboardStats — missionsCeMoisMoi', () => {
+  it('compte seulement les prélèvements de l\'utilisateur connecté', () => {
+    const client = makeClient({
+      preleveur: 'THK',
+      plans: [makePlan({ samplings: [
+        makeSampling({ id: 's1', status: 'done', doneDate: THIS_MONTH_DATE }),
+        makeSampling({ id: 's2', status: 'done', doneDate: THIS_MONTH_DATE, assignedTo: 'LDU' }),
+      ]})],
+    })
+    const { result } = renderHook(() =>
+      useDashboardStats({ ...BASE_PARAMS, clients: [client] })
+    )
+    expect(result.current.missionsCeMoisMoi).toBe(1)
+  })
+})
+
 // ─── conformitePct ────────────────────────────────────────────────────────────
 
 describe('useDashboardStats — conformitePct', () => {
