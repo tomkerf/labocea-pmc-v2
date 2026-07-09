@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '153'
+export const CHANGELOG_VERSION = '154'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,14 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '154',
+    date: '9 juillet 2026',
+    items: [
+      { type: 'feat', label: 'News/Actualités : Assistant IA intégré pour synthétiser des textes réglementaires bruts complexes (Gemini-powered)' },
+      { type: 'feat', label: 'News/Actualités : Configuration optionnelle d\'une clé API Gemini personnalisée stockée localement' },
+    ],
+  },
   {
     version: '153',
     date: '9 juillet 2026',
