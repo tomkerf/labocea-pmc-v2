@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '152'
+export const CHANGELOG_VERSION = '153'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,14 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '153',
+    date: '9 juillet 2026',
+    items: [
+      { type: 'feat', label: 'News/Actualités : Création de la section Actualités (/actus) avec flux d\'actu, veille réglementaire et nouveaux clients' },
+      { type: 'feat', label: 'News/Actualités : Ajout des indicateurs de lecture (point bleu, badge non-lu) et intégration dans la Sidebar et le Dashboard' },
+    ],
+  },
   {
     version: '152',
     date: '9 juillet 2026',

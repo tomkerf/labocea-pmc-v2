@@ -5,13 +5,14 @@ import {
   ListTodo, FileText, Gauge, Hammer,
   FlaskConical, Pipette, BookOpen, HelpCircle,
   ShieldAlert, ChevronRight, Inbox, CloudRain,
-  MessageSquare,
+  MessageSquare, Newspaper,
 } from 'lucide-react'
-import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
+import { useAuthStore, selectAppUser, selectRole, selectUid } from '@/stores/authStore'
 import { useTodosStore } from '@/stores/todosStore'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useChatNotificationStore } from '@/stores/chatNotificationStore'
+import { useActusStore } from '@/stores/actusStore'
 import UserAvatar from '@/components/ui/UserAvatar'
 import BugReportModal from '@/components/ui/BugReportModal'
 import { COLORS } from '@/lib/constants'
@@ -35,6 +36,13 @@ export default function PlusPage() {
   const navigate = useNavigate()
   const [bugOpen, setBugOpen] = useState(false)
   const { unreadCount: chatUnreadCount } = useChatNotificationStore()
+  const uid = useAuthStore(selectUid)
+  const actus = useActusStore(s => s.actus)
+
+  const actusUnreadCount = useMemo(() => {
+    if (!uid) return 0
+    return actus.filter(actu => !actu.lectureUids.includes(uid)).length
+  }, [actus, uid])
 
   const todos        = useTodosStore(s => s.todos)
   const maintenances = useMaintenancesStore(s => s.maintenances)
@@ -54,6 +62,7 @@ export default function PlusPage() {
         items: [
           { to: '/todos',        icon: ListTodo,  label: 'Tâches',       badge: todosActives || undefined,       badgeColor: COLORS.DANGER  },
           { to: '/chat',         icon: MessageSquare, label: 'Messagerie', badge: chatUnreadCount || undefined, badgeColor: COLORS.DANGER },
+          { to: '/actus',        icon: Newspaper, label: 'Actualités',   badge: actusUnreadCount || undefined,  badgeColor: COLORS.ACCENT },
           { to: '/rapports',     icon: FileText,  label: 'Rapports'                                                                          },
           { to: '/metrologie',   icon: Gauge,     label: 'Métrologie',   badge: metrologieRetard || undefined,   badgeColor: COLORS.DANGER  },
           { to: '/maintenances', icon: Hammer,    label: 'Maintenances', badge: maintenancesActives || undefined, badgeColor: COLORS.TEXT_SECONDARY },

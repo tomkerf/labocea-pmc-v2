@@ -210,9 +210,9 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 ---
 
 ## Journal de progression
-
 | Date | Phase | Ce qui a été fait |
 |------|-------|-------------------|
+| 2026-07-09 | Onglet Actualités | Création de la section Actualités (/actus) avec flux d'actus par catégorie (veille réglementaire, vie du service, nouveaux clients), indicateurs de lecture (point bleu, badge unread dans la sidebar) et outil d'édition pour les managers/admins. |
 | 2026-07-09 | Dashboard Matériel | Filtrage par site du matériel, des alertes de métrologie et des maintenances actives sur le tableau de bord individuel des techniciens. |
 | 2026-07-09 | Filtres Mission | Filtres par site et par technicien (préleveur) sur la page Missions (vue Liste). Site par défaut initialisé au site du technicien connecté, sauvegardé et persistant dans le localStorage par utilisateur. |
 | 2026-07-09 | Saisie Mission | Saisie obligatoire du technicien (préleveur) via une liste déroulante dynamique lors de la création/édition de mission. Mise à jour de la documentation intégrée pour refléter cette cohérence. Déploiement staging. |

@@ -6,6 +6,7 @@ import { useMaintenancesListener } from '@/hooks/useMaintenances'
 import { useEvenementsListener } from '@/hooks/useEvenements'
 import { useTodosListener } from '@/hooks/useTodos'
 import { useChatNotificationListener } from '@/hooks/useChatNotification'
+import { useActusListener } from '@/hooks/useActus'
 
 /**
  * Monte une seule fois les listeners Firestore des collections globales
@@ -28,5 +29,6 @@ export default function GlobalListeners() {
   useEvenementsListener()
   useTodosListener()
   useChatNotificationListener()
+  useActusListener()
   return null
 }

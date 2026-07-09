@@ -1,16 +1,17 @@
 import React, { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText, Sparkles, FlaskConical, CloudRain, MessageSquare } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText, Sparkles, FlaskConical, CloudRain, MessageSquare, Newspaper } from 'lucide-react'
 import { m } from 'framer-motion'
 import { COLORS } from '@/lib/constants'
 import { useMissionsStore } from '@/stores/missionsStore'
-import { useAuthStore, selectAppUser, selectRole } from '@/stores/authStore'
+import { useAuthStore, selectAppUser, selectRole, selectUid } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import UserAvatar from '@/components/ui/UserAvatar'
 import BugReportModal from '@/components/ui/BugReportModal'
 import SyncBadge from '@/components/ui/SyncBadge'
 import { useChangelogState } from '@/components/ui/ChangelogModal'
 import { useChatNotificationStore } from '@/stores/chatNotificationStore'
+import { useActusStore } from '@/stores/actusStore'
 
 
 interface NavItem {
@@ -35,6 +36,13 @@ export default function Sidebar() {
   const [bugOpen, setBugOpen] = useState(false)
   const changelog = useChangelogState()
   const { unreadCount: chatUnreadCount } = useChatNotificationStore()
+  const uid = useAuthStore(selectUid)
+  const actus = useActusStore(s => s.actus)
+
+  const actusUnreadCount = useMemo(() => {
+    if (!uid) return 0
+    return actus.filter(actu => !actu.lectureUids.includes(uid)).length
+  }, [actus, uid])
 
   const overdueCount = useMemo(() => {
     let count = 0
@@ -55,6 +63,7 @@ export default function Sidebar() {
         { to: '/demandes',     icon: Inbox,           label: 'Demandes'               },
         { to: '/todos',        icon: ListTodo,        label: 'Tâches'                 },
         { to: '/chat',         icon: MessageSquare,   label: 'Messagerie'             },
+        { to: '/actus',        icon: Newspaper,       label: 'Actualités'             },
       ]
     },
     {
@@ -169,6 +178,18 @@ export default function Sidebar() {
                         }}
                       >
                         {chatUnreadCount}
+                      </span>
+                    )}
+                    {to === '/actus' && actusUnreadCount > 0 && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10"
+                        style={{ 
+                          background: 'var(--color-accent-light)', 
+                          color: 'var(--color-accent)', 
+                          minWidth: 18, 
+                          textAlign: 'center' 
+                        }}
+                      >
+                        {actusUnreadCount}
                       </span>
                     )}
                   </>

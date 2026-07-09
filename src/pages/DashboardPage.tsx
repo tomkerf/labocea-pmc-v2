@@ -32,6 +32,7 @@ import { usePreleveursListener } from '@/hooks/usePreleveurs'
 import type { Sampling, Client, Plan } from '@/types'
 import { TodosWidget } from '@/components/dashboard/TodosWidget'
 import { useTodosStore } from '@/stores/todosStore'
+import { useActusStore } from '@/stores/actusStore'
 import { COLORS } from '@/lib/constants'
 import { uploadSamplingPhoto, ImageValidationError } from '@/lib/uploadPhoto'
 import { toast } from '@/stores/toastStore'
@@ -66,6 +67,59 @@ function reducer(state: State, action: Action): State {
     case 'SET_EVENT_DETAIL':   return { ...state, eventDetail: action.payload }
     case 'SET_PLANNING_MODE':  return { ...state, planningMode: action.payload }
   }
+}
+
+function DashboardNewsWidget() {
+  const navigate = useNavigate()
+  const actus = useActusStore(s => s.actus)
+  const uid = useAuthStore(selectUid)
+  const recentActus = useMemo(() => actus.slice(0, 2), [actus])
+  const unreadCount = useMemo(() => {
+    if (!uid) return 0
+    return actus.filter(a => !a.lectureUids.includes(uid)).length
+  }, [actus, uid])
+
+  if (recentActus.length === 0) return null
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex justify-between items-center">
+        <SectionTitle>Dernières actualités</SectionTitle>
+        {unreadCount > 0 && (
+          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+            {unreadCount} non lue{unreadCount > 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {recentActus.map(actu => {
+          const isUnread = uid && !actu.lectureUids.includes(uid)
+          return (
+            <div
+              key={actu.id}
+              onClick={() => navigate('/actus')}
+              className="p-4 rounded-xl cursor-pointer hover:translate-y-[-1px] transition-all relative flex flex-col gap-1.5"
+              style={{
+                background: COLORS.BG_SECONDARY,
+                border: isUnread ? `1.5px solid ${COLORS.ACCENT}` : '1px solid var(--color-border-subtle)',
+                boxShadow: 'var(--shadow-card)',
+              }}
+            >
+              {isUnread && (
+                <div className="absolute top-4 right-4 w-2 h-2 rounded-full" style={{ background: COLORS.ACCENT }} />
+              )}
+              <h4 className="text-sm font-bold truncate pr-6" style={{ color: COLORS.TEXT_PRIMARY }}>
+                {actu.titre}
+              </h4>
+              <p className="text-xs line-clamp-2" style={{ color: COLORS.TEXT_SECONDARY }}>
+                {actu.contenu}
+              </p>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 const containerVariants = {
@@ -315,6 +369,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Bottom Widgets */}
+            <DashboardNewsWidget />
             <TodosWidget todos={todos} uid={uid || ''} />
             <RapportsWidget rapports={rapportsAFaireMoi} onMarkEnvoye={markRapportEnvoye} />
             <RetardWidget items={prelevementsEnRetard} />

@@ -480,3 +480,19 @@ export interface ChatMessage {
   reactions?: { [emoji: string]: string[] } // associe l'emoji aux UIDs ayant réagi
 }
 
+// --- Actualités / News ---
+export type ActuCategorie = 'client' | 'reglementation' | 'service' | 'autre'
+
+export interface Actu {
+  id: string
+  titre: string
+  contenu: string
+  categorie: ActuCategorie
+  auteurUid: string
+  auteurInitiales: string
+  createdAt: string // date ISO string
+  updatedAt?: string
+  prioritaire: boolean
+  lectureUids: string[] // Liste des UIDs ayant lu l'actu
+}
+

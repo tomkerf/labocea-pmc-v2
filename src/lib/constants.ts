@@ -13,6 +13,7 @@ export const COLLECTIONS = {
   TUYAUX: 'tuyaux',
   POINTS_REJET: 'points-rejet',
   CHAT_MESSAGES: 'chat-messages',
+  ACTUS: 'actus',
 } as const;
 
 export const Z_INDEX = {

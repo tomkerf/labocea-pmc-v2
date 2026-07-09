@@ -3,6 +3,52 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 171 — Onglet Actualités (News) pour l'équipe
+**9 juillet 2026**
+
+### Contexte
+L'utilisateur souhaite implémenter une section « Actualités » pour diffuser les actus du service, la veille réglementaire et les signatures de nouveaux clients, avec indicateurs de lecture in-app.
+
+### Modifications apportées
+- **`types/index.ts`** : ajout des types `Actu` et `ActuCategorie`.
+- **`constants.ts`** : enregistrement de la collection `'actus'`.
+- **`firestore.rules`** :
+  - Lecture autorisée pour tout utilisateur connecté.
+  - Création/Suppression restreinte aux administrateurs et chargés de mission (`isManagerOrAdmin`).
+  - Validation fine de la mise à jour : modification libre pour les admins/managers, ou restriction pour les autres utilisateurs à l'unique édition de leur présence dans la liste `lectureUids` (vérification via `.removeAll().hasOnly([request.auth.uid])`).
+- **`actuService.ts`** : création du service gérant la création, édition, suppression et l'état de lecture.
+- **`actusStore.ts`** : store Zustand pour conserver l'état du flux d'actus.
+- **`useActus.ts`** : listener Firestore en temps réel.
+- **`GlobalListeners.tsx`** : montage du listener d'actualités global pour garder le badge de notification à jour sur toutes les pages.
+- **`ActusPage.tsx`** :
+  - Design Sequoia épuré avec segmented control pour le filtrage par catégories (`Service`, `Réglementation`, `Clients`, `Autre`) et barre de recherche textuelle.
+  - Cartes d'actualités avec point bleu « non lu » et tags pastels.
+  - Modal de lecture complète (qui marque automatiquement l'actu comme lue).
+  - Actions d'édition/suppression pour les chargés de mission et admins.
+- **`ActuFormModal.tsx`** : modal de création/édition d'actus (support du gras, italiques et liens en Markdown léger via parser in-app sécurisé contre XSS).
+- **`Sidebar.tsx` & `PlusPage.tsx`** : ajout de l'onglet « Actualités » dans la navigation avec compteur de notification dynamique des actualités non lues.
+- **`DashboardPage.tsx`** : intégration du widget `DashboardNewsWidget` affichant les deux actualités les plus récentes avec point bleu « non lu ».
+- **`App.tsx`** : routage de la page `/actus` en chargement différé (*lazy*).
+- **`changelog.ts`** & **`sw.js`** : version de l'application incrémentée à `153`, cache sw.js à `pmc-v2-8`.
+
+### État
+- **Lint & Types** : 0 erreur, 0 warning.
+- **Tests** : 338/338 tests unitaires au vert.
+
+---
+
+## Session 170 — Filtrage des interventions par site géographique et Donut Chart
+**9 juillet 2026**
+
+### Contexte
+Suite de la Session 169 : correction de l'affichage global des interventions et du total des équipements sur le tableau de bord individuel ("Mon activité").
+
+### Modifications apportées
+- **`useDashboardStats.ts`** : application du filtrage par site géographique sur la liste des missions/clients résolu via le site du préleveur affecté. Ainsi, toutes les alertes (Temps de pluie, Retards, Tâches prioritaires) sont automatiquement restreintes au site de l'utilisateur connecté (Brest pour Ludovic).
+- **`DashboardPage.tsx`** : remplacement du total d'équipements non-filtré (`equipements.length`) par la somme dynamique des segments de matériel filtrés du site de l'utilisateur.
+
+---
+
 ## Session 169 — Filtrage du matériel du dashboard par site géographique
 **9 juillet 2026**
 

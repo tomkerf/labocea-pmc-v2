@@ -13,6 +13,13 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    function isManagerOrAdmin() {
+      return isAuthenticated() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'charge_mission'
+      );
+    }
+
     // Vérifie qu'aucun des champs listés n'est modifié sur un update
     function immutableOn(fields) {
       return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
@@ -208,6 +215,18 @@ service cloud.firestore {
     match /preleveurs-v1/{docId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
+    }
+
+    // ── actus (flux d'actualités éditables par managers/admins) 
+    match /actus/{actuId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isManagerOrAdmin();
+      allow update: if isManagerOrAdmin() || (
+        isAuthenticated() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lectureUids']) &&
+        request.resource.data.lectureUids.removeAll(resource.data.lectureUids).hasOnly([request.auth.uid]) &&
+        resource.data.lectureUids.removeAll(request.resource.data.lectureUids).hasOnly([request.auth.uid])
+      );
     }
 
   }
