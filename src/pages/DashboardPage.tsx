@@ -28,6 +28,7 @@ import { useEvenementsStore } from '@/stores/evenementsStore'
 import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { localISO } from '@/lib/dashboardUtils'
+import { usePreleveursListener } from '@/hooks/usePreleveurs'
 import type { Sampling, Client, Plan } from '@/types'
 import { TodosWidget } from '@/components/dashboard/TodosWidget'
 import { useTodosStore } from '@/stores/todosStore'
@@ -78,6 +79,7 @@ const containerVariants = {
 } as const
 
 export default function DashboardPage() {
+  usePreleveursListener()
   const navigate = useNavigate()
   const appUser   = useAuthStore(s => s.appUser)
   const prenom    = useAuthStore(selectPrenom)
