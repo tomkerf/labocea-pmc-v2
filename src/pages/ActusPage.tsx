@@ -5,7 +5,6 @@ import { useAuthStore, selectUid, selectAppUser } from '@/stores/authStore'
 import { deleteActu, markActuAsRead, markActuAsUnread } from '@/services/actuService'
 import { COLORS } from '@/lib/constants'
 import { toast } from '@/stores/toastStore'
-import SectionTitle from '@/components/ui/SectionTitle'
 import ActuFormModal from '@/components/actus/ActuFormModal'
 import BaseModal from '@/components/ui/BaseModal'
 import type { Actu, ActuCategorie } from '@/types'
@@ -334,11 +333,14 @@ export default function ActusPage() {
       </BaseModal>
 
       {/* Modal de création/édition */}
-      <ActuFormModal
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        editingActu={editingActu}
-      />
+      {isFormOpen && (
+        <ActuFormModal
+          key={editingActu?.id || 'new'}
+          isOpen={isFormOpen}
+          onClose={() => setIsFormOpen(false)}
+          editingActu={editingActu}
+        />
+      )}
     </div>
   )
 }

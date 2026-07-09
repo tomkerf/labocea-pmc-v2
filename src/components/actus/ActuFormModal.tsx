@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Newspaper } from 'lucide-react'
 import { createActu, updateActu } from '@/services/actuService'
 import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
@@ -21,28 +21,14 @@ const CATEGORIES: { value: ActuCategorie; label: string }[] = [
 ]
 
 export default function ActuFormModal({ isOpen, onClose, editingActu }: Props) {
-  const [titre, setTitre] = useState('')
-  const [contenu, setContenu] = useState('')
-  const [categorie, setCategorie] = useState<ActuCategorie>('service')
-  const [prioritaire, setPrioritaire] = useState(false)
+  const [titre, setTitre] = useState(() => editingActu?.titre ?? '')
+  const [contenu, setContenu] = useState(() => editingActu?.contenu ?? '')
+  const [categorie, setCategorie] = useState<ActuCategorie>(() => editingActu?.categorie ?? 'service')
+  const [prioritaire, setPrioritaire] = useState(() => editingActu?.prioritaire ?? false)
   const [submitting, setSubmitting] = useState(false)
 
   const uid = useAuthStore(selectUid)
   const initiales = useAuthStore(selectInitiales)
-
-  useEffect(() => {
-    if (editingActu) {
-      setTitre(editingActu.titre)
-      setContenu(editingActu.contenu)
-      setCategorie(editingActu.categorie)
-      setPrioritaire(editingActu.prioritaire)
-    } else {
-      setTitre('')
-      setContenu('')
-      setCategorie('service')
-      setPrioritaire(false)
-    }
-  }, [editingActu, isOpen])
 
   function handleClose() {
     setTitre('')
