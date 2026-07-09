@@ -2,6 +2,31 @@
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
+
+## Session 169 — Filtrage du matériel du dashboard par site géographique
+**9 juillet 2026**
+
+### Contexte
+Le matériel affiché sur le tableau de bord (état du parc, métrologie, maintenances actives) était global et incluait tous les sites (Brest, Quimper). Les techniciens terrain ne doivent voir sur leur dashboard ("Mon activité") que les équipements liés à leur propre site géographique.
+
+### Modifications apportées
+- **`useDashboardStats.ts`** :
+  - Import du store `usePreleveursStore`.
+  - Résolution du site de l'utilisateur connecté (`initiales`) de manière insensible à la casse.
+  - Filtrage des listes d'équipements (`equipements`), de vérifications métrologiques (`verifications`) et de maintenances (`maintenances`) en fonction du site du technicien connecté lorsque `isGeneraliste` est faux.
+- **`dashboardStats.test.ts`** :
+  - Ajout de tests unitaires pour valider le filtrage par site géographique du matériel sur le dashboard.
+  - Ajout d'une clause `afterEach` pour réinitialiser le store `usePreleveursStore` et éviter les pollutions d'état inter-tests.
+- **`changelog.ts`** :
+  - Incrément en version `152`.
+
+### État
+- **Lint & Types** : 0 erreur, 0 warning.
+- **Tests** : 337/337 tests unitaires passés.
+- Déploiement staging effectué.
+
+---
+
 ## Session 168 — Filtres géographique et technicien sur la liste des missions
 **9 juillet 2026**
 

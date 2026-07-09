@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '151'
+export const CHANGELOG_VERSION = '152'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '152',
+    date: '9 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Dashboard : Filtrage du matériel, de la métrologie et des maintenances actives par site géographique pour les techniciens terrain (Mon activité)' },
+    ],
+  },
   {
     version: '151',
     date: '9 juillet 2026',

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { calcStatut } from '@/hooks/useMetrologieRows'
 import { isThisMonth, localISO, isToday, daysDiff } from '@/lib/dashboardUtils'
+import { usePreleveursStore } from '@/stores/preleveursStore'
 
 import type { Client, Sampling, Verification, Equipement, Plan, EvenementPersonnel, Maintenance, Todo } from '@/types'
 import { COLORS } from '@/lib/constants'
@@ -75,9 +76,35 @@ function getSamplingBadge(s: Sampling): SamplingBadge {
 }
 
 export function useDashboardStats({
-  clients, verifications, equipements, evenements, maintenances,
+  clients, verifications: rawVerifications, equipements: rawEquipements, evenements, maintenances: rawMaintenances,
   uid, initiales, isGeneraliste,
 }: Params) {
+  const preleveurs = usePreleveursStore((s) => s.preleveurs)
+
+  const userSite = useMemo(() => {
+    if (isGeneraliste || !initiales) return null
+    const prel = preleveurs.find(p => p.code === initiales)
+    return prel?.site?.toLowerCase() || null
+  }, [preleveurs, initiales, isGeneraliste])
+
+  const equipements = useMemo(() => {
+    if (!userSite) return rawEquipements
+    return rawEquipements.filter(e => e.site?.toLowerCase() === userSite)
+  }, [rawEquipements, userSite])
+
+  const verifications = useMemo(() => {
+    if (!userSite) return rawVerifications
+    const allowedIds = new Set(equipements.map(e => e.id))
+    const allowedNoms = new Set(equipements.map(e => e.nom))
+    return rawVerifications.filter(v => allowedIds.has(v.equipementId) || allowedNoms.has(v.equipementNom))
+  }, [rawVerifications, equipements, userSite])
+
+  const maintenances = useMemo(() => {
+    if (!userSite) return rawMaintenances
+    const allowedIds = new Set(equipements.map(e => e.id))
+    const allowedNoms = new Set(equipements.map(e => e.nom))
+    return rawMaintenances.filter(m => allowedIds.has(m.equipementId) || allowedNoms.has(m.equipementNom))
+  }, [rawMaintenances, equipements, userSite])
   const [todayStr, setTodayStr] = useState(() => new Date().toISOString().slice(0, 10))
   useEffect(() => {
     const now = new Date()

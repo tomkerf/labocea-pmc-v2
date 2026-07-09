@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import type { Client, Sampling, Plan, Equipement, Verification, Maintenance, EvenementPersonnel } from '@/types'
 import { Timestamp } from 'firebase/firestore'
+import { usePreleveursStore } from '@/stores/preleveursStore'
 
 // ─── Factories ────────────────────────────────────────────────────────────────
 
@@ -77,6 +78,10 @@ const BASE_PARAMS = {
   verifications: [], equipements: [], clients: [], todos: [],
 }
 
+afterEach(() => {
+  usePreleveursStore.getState().setPreleveurs([])
+})
+
 // ─── missionsCeMois ───────────────────────────────────────────────────────────
 
 describe('useDashboardStats — missionsCeMois', () => {
@@ -139,6 +144,22 @@ describe('useDashboardStats — missionsCeMoisMoi', () => {
       useDashboardStats({ ...BASE_PARAMS, clients: [client] })
     )
     expect(result.current.missionsCeMoisMoi).toBe(1)
+  })
+})
+
+describe('useDashboardStats — site filtering', () => {
+  it('filtre les équipements par site pour les techniciens', () => {
+    usePreleveursStore.getState().setPreleveurs([
+      { id: 'p1', code: 'THK', nom: 'Thomas', site: 'Quimper' }
+    ])
+    const equipements = [
+      makeEquipement({ id: 'eq1', nom: 'Eq Brest', site: 'brest' }),
+      makeEquipement({ id: 'eq2', nom: 'Eq Quimper', site: 'quimper' }),
+    ]
+    const { result } = renderHook(() =>
+      useDashboardStats({ ...BASE_PARAMS, initiales: 'THK', isGeneraliste: false, equipements })
+    )
+    expect(result.current.parcDonut.en_service).toBe(1)
   })
 })
 
