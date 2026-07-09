@@ -271,6 +271,7 @@ export default function ActusPage() {
         onClose={() => setSelectedActu(null)}
         title={selectedActu?.titre || ''}
         icon={<BookOpen size={17} strokeWidth={1.8} style={{ color: COLORS.ACCENT }} />}
+        maxWidth="2xl"
         footer={
           <div className="flex w-full justify-between items-center">
             {uid && selectedActu && (
