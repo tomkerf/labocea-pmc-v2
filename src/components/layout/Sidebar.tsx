@@ -58,12 +58,12 @@ export default function Sidebar() {
       title: 'Activité & Planning',
       items: [
         { to: '/',             icon: LayoutDashboard, label: 'Tableau de bord', end: true },
+        { to: '/actus',        icon: Newspaper,       label: 'Actualités'             },
         { to: '/planning',     icon: CalendarDays,    label: 'Planning'               },
         { to: '/missions',     icon: ClipboardList,   label: 'Missions',        badge: true },
         { to: '/demandes',     icon: Inbox,           label: 'Demandes'               },
         { to: '/todos',        icon: ListTodo,        label: 'Tâches'                 },
         { to: '/chat',         icon: MessageSquare,   label: 'Messagerie'             },
-        { to: '/actus',        icon: Newspaper,       label: 'Actualités'             },
       ]
     },
     {
