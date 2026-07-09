@@ -83,11 +83,9 @@ export default function MissionsPage() {
     siteDefaultApplied.current = true
     const prel = preleveurs.find(p => p.code === initiales)
     const site = prel?.site
-    if (site) {
-      setTimeout(() => {
-        setFilterSite(site)
-      }, 0)
-    }
+    // Init one-shot depuis données async (guard siteDefaultApplied) — cf. .react-doctor/false-positives.md
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (site) setFilterSite(site)
   }, [preleveurs, initiales, uid])
 
   const handleFilterSiteChange = (val: string) => {

@@ -80,7 +80,11 @@ export default function ActusPage() {
 
     escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     escaped = escaped.replace(/_(.*?)_/g, '<em>$1</em>')
-    escaped = escaped.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: var(--color-accent); font-weight: 500; text-decoration: underline;">$1</a>')
+    escaped = escaped.replace(/\[(.*?)\]\((.*?)\)/g, (_match, label, url) =>
+      /^https?:\/\//i.test(url)
+        ? `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: var(--color-accent); font-weight: 500; text-decoration: underline;">${label}</a>`
+        : label
+    )
     escaped = escaped.replace(/\n/g, '<br />')
 
     return <span dangerouslySetInnerHTML={{ __html: escaped }} />
