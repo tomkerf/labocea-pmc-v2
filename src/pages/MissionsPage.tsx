@@ -1,11 +1,11 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Search, ClipboardList, List, CalendarRange, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { usePreleveursStore } from '@/stores/preleveursStore'
 import { usePreleveursListener } from '@/hooks/usePreleveurs'
-import { useAuthStore, selectUid } from '@/stores/authStore'
+import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import ClientCard from '@/components/client/ClientCard'
 import YearMatrixView from '@/components/planning/YearMatrixView'
@@ -26,6 +26,7 @@ export default function MissionsPage() {
   usePreleveursListener()
   const preleveurs = usePreleveursStore((s) => s.preleveurs)
   const uid = useAuthStore(selectUid)
+  const initiales = useAuthStore(selectInitiales)
 
   // Extraire les sites uniques des prélèveurs
   const availableSites = useMemo(() => {
@@ -50,9 +51,55 @@ export default function MissionsPage() {
   const [creating, setCreating] = useState(false)
   const [view, setView] = useState<'liste' | 'annee' | 'charge'>('liste')
   const [year, setYear] = useState(new Date().getFullYear())
-  const [filterSite, setFilterSite] = useState('')
-  const [filterTech, setFilterTech] = useState('')
+
+  // Initialisation des filtres et sauvegarde dans le localStorage par utilisateur
+  const [filterSite, setFilterSite] = useState<string>(() => {
+    const key = uid ? `missions_filter_site_${uid}` : 'missions_filter_site'
+    const saved = localStorage.getItem(key)
+    if (saved !== null) return saved
+    const ini = useAuthStore.getState().appUser?.initiales ?? ''
+    const prel = usePreleveursStore.getState().preleveurs.find(p => p.code === ini)
+    return prel?.site ?? ''
+  })
+
+  const [filterTech, setFilterTech] = useState<string>(() => {
+    const key = uid ? `missions_filter_tech_${uid}` : 'missions_filter_tech'
+    const saved = localStorage.getItem(key)
+    return saved ?? ''
+  })
+
   const [filterMethod, setFilterMethod] = useState('')
+
+  // Effet pour appliquer le site géographique du préleveur par défaut lors de sa première connexion
+  const siteDefaultApplied = useRef(false)
+  useEffect(() => {
+    if (!preleveurs.length || !uid) return
+    const key = `missions_filter_site_${uid}`
+    if (localStorage.getItem(key) !== null) {
+      siteDefaultApplied.current = true
+      return
+    }
+    if (siteDefaultApplied.current) return
+    siteDefaultApplied.current = true
+    const prel = preleveurs.find(p => p.code === initiales)
+    if (prel?.site) {
+      setFilterSite(prel.site)
+    }
+  }, [preleveurs, initiales, uid])
+
+  const handleFilterSiteChange = (val: string) => {
+    setFilterSite(val)
+    if (uid) {
+      localStorage.setItem(`missions_filter_site_${uid}`, val)
+    }
+  }
+
+  const handleFilterTechChange = (val: string) => {
+    setFilterTech(val)
+    if (uid) {
+      localStorage.setItem(`missions_filter_tech_${uid}`, val)
+    }
+  }
 
   const overdueCount = clients.filter(hasOverdue).length
 
@@ -63,7 +110,16 @@ export default function MissionsPage() {
       (c.segment ?? '').toLowerCase().includes(q) ||
       (c.preleveur ?? '').toLowerCase().includes(q)
     const matchRetard = !onlyRetard || hasOverdue(c)
-    return matchSearch && matchRetard
+
+    // Filtre par site (si le préleveur assigné appartient au site géographique sélectionné)
+    const assigned = c.preleveur || ''
+    const prel = preleveurs.find(pr => pr.code === assigned)
+    const matchSite = !filterSite || prel?.site === filterSite
+
+    // Filtre par technicien (préleveur)
+    const matchTech = !filterTech || assigned === filterTech
+
+    return matchSearch && matchRetard && matchSite && matchTech
   })
 
   async function handleNewClient() {
@@ -150,9 +206,77 @@ export default function MissionsPage() {
         ))}
       </div>
 
+      {/* Filtres globaux (Site et Technicien) */}
+      <div className={`shrink-0 flex flex-col sm:flex-row gap-3 mb-4${isMatrixView ? ' px-6' : ''}`}>
+        <div className="flex-1 flex flex-col gap-1.5">
+          <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+            Site géographique
+          </label>
+          <select
+            value={filterSite}
+            onChange={(e) => handleFilterSiteChange(e.target.value)}
+            className="px-3 py-2 rounded-lg text-sm outline-none"
+            style={{
+              background: COLORS.BG_SECONDARY,
+              border: '1px solid var(--color-border-subtle)',
+              color: COLORS.TEXT_PRIMARY,
+            }}
+          >
+            <option value="">Tous les sites</option>
+            {availableSites.map(site => (
+              <option key={site} value={site}>{site}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex-1 flex flex-col gap-1.5">
+          <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+            Technicien (préleveur)
+          </label>
+          <select
+            value={filterTech}
+            onChange={(e) => handleFilterTechChange(e.target.value)}
+            className="px-3 py-2 rounded-lg text-sm outline-none"
+            style={{
+              background: COLORS.BG_SECONDARY,
+              border: '1px solid var(--color-border-subtle)',
+              color: COLORS.TEXT_PRIMARY,
+            }}
+          >
+            <option value="">Tous les techniciens</option>
+            {availableTechs.map(tech => (
+              <option key={tech} value={tech}>{tech}</option>
+            ))}
+          </select>
+        </div>
+
+        {isMatrixView && (
+          <div className="flex-1 flex flex-col gap-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+              Méthode
+            </label>
+            <select
+              value={filterMethod}
+              onChange={(e) => setFilterMethod(e.target.value)}
+              className="px-3 py-2 rounded-lg text-sm outline-none"
+              style={{
+                background: COLORS.BG_SECONDARY,
+                border: '1px solid var(--color-border-subtle)',
+                color: COLORS.TEXT_PRIMARY,
+              }}
+            >
+              <option value="">Toutes les méthodes</option>
+              <option value="Ponctuel">Ponctuel</option>
+              <option value="Composite">Composite</option>
+              <option value="Automatique">Bilan 24 (Automatique)</option>
+            </select>
+          </div>
+        )}
+      </div>
+
       {isMatrixView ? (
         <div className="flex-1 min-h-0 flex flex-col">
-          {/* Navigation année */}
+          {/* Navigation Année */}
           <div className="shrink-0 flex items-center gap-3 mb-4 px-6">
             <button type="button" onClick={() => setYear((y) => y - 1)}
               aria-label="Année précédente"
@@ -169,72 +293,6 @@ export default function MissionsPage() {
               style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_SECONDARY }}>
               <ChevronRight size={16} />
             </button>
-          </div>
-
-          {/* Filtres Site, Technicien et Méthode */}
-          <div className="shrink-0 flex gap-3 px-6 mb-4">
-            <div className="flex-1 flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
-                Site
-              </label>
-              <select
-                value={filterSite}
-                onChange={(e) => setFilterSite(e.target.value)}
-                className="px-3 py-2 rounded-lg text-sm outline-none"
-                style={{
-                  background: COLORS.BG_SECONDARY,
-                  border: '1px solid var(--color-border-subtle)',
-                  color: COLORS.TEXT_PRIMARY,
-                }}
-              >
-                <option value="">Tous les sites</option>
-                {availableSites.map(site => (
-                  <option key={site} value={site}>{site}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex-1 flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
-                Technicien
-              </label>
-              <select
-                value={filterTech}
-                onChange={(e) => setFilterTech(e.target.value)}
-                className="px-3 py-2 rounded-lg text-sm outline-none"
-                style={{
-                  background: COLORS.BG_SECONDARY,
-                  border: '1px solid var(--color-border-subtle)',
-                  color: COLORS.TEXT_PRIMARY,
-                }}
-              >
-                <option value="">Tous les techniciens</option>
-                {availableTechs.map(tech => (
-                  <option key={tech} value={tech}>{tech}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex-1 flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
-                Méthode
-              </label>
-              <select
-                value={filterMethod}
-                onChange={(e) => setFilterMethod(e.target.value)}
-                className="px-3 py-2 rounded-lg text-sm outline-none"
-                style={{
-                  background: COLORS.BG_SECONDARY,
-                  border: '1px solid var(--color-border-subtle)',
-                  color: COLORS.TEXT_PRIMARY,
-                }}
-              >
-                <option value="">Toutes les méthodes</option>
-                <option value="Ponctuel">Ponctuel</option>
-                <option value="Composite">Composite</option>
-                <option value="Automatique">Bilan 24 (Automatique)</option>
-              </select>
-            </div>
           </div>
 
           {view === 'annee' ? (

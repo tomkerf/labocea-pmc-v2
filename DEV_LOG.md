@@ -1,6 +1,29 @@
 # DEV_LOG — Labocea PMC V2
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
+
+## Session 168 — Filtres géographique et technicien sur la liste des missions
+**9 juillet 2026**
+
+### Contexte
+L'utilisateur souhaite pouvoir filtrer les clients/missions par site géographique et par préleveur sur l'onglet Missions (y compris dans la vue Liste), et faire en sorte que lorsqu'un préleveur se connecte, il soit filtré par défaut sur les missions de son site géographique.
+
+### Modifications apportées
+- **`MissionsPage.tsx`** :
+  - Extraction des filtres `Site géographique` et `Technicien (préleveur)` de la vue matrice (`isMatrixView`) pour les rendre globaux et applicables à la vue Liste.
+  - Implémentation du filtrage sur la vue Liste en faisant correspondre le site géographique du client avec le site du technicien (préleveur) assigné par défaut.
+  - Initialisation automatique du filtre de site géographique au site du technicien connecté (`appUser?.initiales`) à sa première connexion.
+  - Persistance des filtres de site et de technicien dans le `localStorage` sous une clé propre à l'utilisateur connecté (`missions_filter_site_${uid}` et `missions_filter_tech_${uid}`) pour éviter tout conflit entre utilisateurs.
+- **`changelog.ts`** :
+  - Incrément en version `151`.
+
+### État
+- **Lint & Types** : 0 erreur, 0 warning.
+- **Tests** : 335/335 tests unitaires verts.
+- Déploiement staging en cours.
+
+---
+
 ## Session 167 — Choix obligatoire du préleveur à la création de mission
 **9 juillet 2026**
 

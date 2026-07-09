@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '150'
+export const CHANGELOG_VERSION = '151'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,15 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '151',
+    date: '9 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Missions : Ajout des filtres par site géographique et technicien (préleveur) sur la vue Liste des clients' },
+      { type: 'feat', label: 'Missions : Application automatique du site géographique du technicien connecté comme filtre par défaut' },
+      { type: 'feat', label: 'Missions : Sauvegarde persistante des filtres par utilisateur connecté dans le localStorage' },
+    ],
+  },
   {
     version: '150',
     date: '9 juillet 2026',
