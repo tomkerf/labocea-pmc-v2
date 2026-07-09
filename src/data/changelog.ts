@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '149'
+export const CHANGELOG_VERSION = '150'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,14 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '150',
+    date: '9 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Missions : Choix obligatoire du technicien (préleveur) via une liste déroulante lors de la création ou l\'édition de mission' },
+      { type: 'fix', label: 'Aide : Mise à jour du mode d\'emploi intégré pour refléter l\'obligation de choix du préleveur' },
+    ],
+  },
   {
     version: '149',
     date: '5 juillet 2026',

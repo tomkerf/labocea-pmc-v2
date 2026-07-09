@@ -1,3 +1,7 @@
+import { useMemo } from 'react'
+import { usePreleveursListener } from '@/hooks/usePreleveurs'
+import { usePreleveursStore } from '@/stores/preleveursStore'
+import { useUsersStore } from '@/stores/usersStore'
 import type { Client, SegmentType, NouvelleDemandeType } from '@/types'
 import { COLORS } from '@/lib/constants'
 
@@ -13,6 +17,22 @@ interface Props {
 }
 
 export function ClientInfoForm({ client, sitesInput, update, onSitesChange }: Props) {
+  usePreleveursListener()
+  const preleveurs = usePreleveursStore((s) => s.preleveurs)
+  const users = useUsersStore((s) => s.users)
+
+  const techOptions = useMemo(() => {
+    const map = new Map<string, string>()
+    preleveurs.forEach(p => map.set(p.code, `${p.nom} (${p.code})`))
+    users.forEach(u => {
+      if (u.initiales && !map.has(u.initiales))
+        map.set(u.initiales, `${u.prenom} ${u.nom} (${u.initiales})`)
+    })
+    return Array.from(map.entries())
+      .map(([code, label]) => ({ code, label }))
+      .sort((a, b) => a.code.localeCompare(b.code))
+  }, [preleveurs, users])
+
   return (
     <>
       <Section title="Informations générales">
@@ -36,9 +56,18 @@ export function ClientInfoForm({ client, sitesInput, update, onSitesChange }: Pr
             {NOUVELLES_DEMANDES.map((s) => <option key={s}>{s}</option>)}
           </select>
         </Field>
-        <Field label="Préleveur (initiales)">
-          <input aria-label="Préleveur (initiales)" value={client.preleveur} onChange={(e) => update('preleveur', e.target.value)}
-            className="field-input" placeholder="ex: THK" />
+        <Field label="Préleveur (technicien)">
+          <select aria-label="Préleveur (technicien)" value={client.preleveur} onChange={(e) => update('preleveur', e.target.value)}
+            className="field-input"
+            style={!client.preleveur ? { borderColor: COLORS.DANGER } : undefined}>
+            <option value="">Sélectionner un technicien...</option>
+            {techOptions.map((opt) => (
+              <option key={opt.code} value={opt.code}>{opt.label}</option>
+            ))}
+          </select>
+          {!client.preleveur && (
+            <p className="text-xs mt-1" style={{ color: COLORS.DANGER }}>Le préleveur est obligatoire.</p>
+          )}
         </Field>
         <Field label="Année">
           <input aria-label="Année" value={client.annee} onChange={(e) => update('annee', e.target.value)}

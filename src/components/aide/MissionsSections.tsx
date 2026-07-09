@@ -28,7 +28,7 @@ export function MissionClientSection() {
           <div className="mt-3 ml-8 flex flex-col rounded-xl overflow-hidden"
             style={{ border: '1px solid var(--color-border-subtle)', background: COLORS.BG_SECONDARY }}>
             {[
-              { label: 'Informations générales', desc: 'Nom, segment, type de demande, préleveur assigné, année, sites.' },
+              { label: 'Informations générales', desc: 'Nom, segment, type de demande, choix obligatoire du préleveur (technicien), année, sites.' },
               { label: 'Description de la mission', desc: 'Intitulé libre de la mission — visible dans les exports.' },
               { label: 'Contact', desc: 'Interlocuteur client, fonction, tél/email, contact prévenance, et le commercial interne Labocea (Céline, CRO, JBE…).' },
               { label: 'Contrat', desc: 'N° devis, convention, BC, durée, montants PMC/sous-traitance, mode facturation, situation administrative.' },

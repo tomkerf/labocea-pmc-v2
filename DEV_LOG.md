@@ -1,6 +1,27 @@
 # DEV_LOG — Labocea PMC V2
 
 Journal de développement chronologique. Mis à jour à chaque session de travail.
+## Session 167 — Choix obligatoire du préleveur à la création de mission
+**9 juillet 2026**
+
+### Contexte
+L'application permettait de créer ou modifier des missions/clients sans attribuer de préleveur par défaut (champ texte libre optionnel). Cela conduisait à des interventions orphelines (non attribuées) sur le planning, comme la collecte SARP créée par Ludovic Dugue (LDU).
+
+### Modifications apportées
+- **`ClientInfoForm.tsx`** :
+  - Remplacement du champ de saisie texte libre `preleveur` par un menu déroulant (`<select>`).
+  - Chargement et fusion des techniciens depuis `preleveursStore` et `usersStore` (avec initiales).
+  - Validation visuelle forte : affichage d'une bordure rouge et du message "Le préleveur est obligatoire." si aucun préleveur n'est sélectionné.
+- **`MissionsSections.tsx`** :
+  - Mise à jour du mode d'emploi in-app pour mentionner que le choix du préleveur (technicien) est désormais obligatoire dans les informations générales de la mission.
+- **`changelog.ts`** :
+  - Passage en version `150`.
+
+### État
+- **Lint & Types** : 0 erreur, 0 warning. 335/335 tests passés. Build OK.
+- Déploiement staging OK sur `https://labocea-pmc-v2-dev.tomkerf.workers.dev`.
+
+---
 
 ## Session 166 — Lint 0 rétabli sur le module chat
 **6 juillet 2026**
