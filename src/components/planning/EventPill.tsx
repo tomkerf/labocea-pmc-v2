@@ -94,7 +94,7 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
       >
         <div className="flex items-center gap-1">
           <span className="shrink-0 text-[10px]">🏖️</span>
-          <span className="flex-1 truncate text-[11px] font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>
+          <span className="flex-1 min-w-[3ch] truncate text-[11px] font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>
             {event.title || 'Congé/RTT'}
           </span>
           {hasTech && (
@@ -147,7 +147,7 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
         {veilleFerrieNom && (
           <span className="shrink-0 text-[10px]" title={`Analyses sous-traitées — veille de ${veilleFerrieNom}`}>⚠️</span>
         )}
-        <span className="flex-1 truncate text-[11px] font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>
+        <span className="flex-1 min-w-[3ch] truncate text-[11px] font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>
           {event.title}
         </span>
         {(isJ1 || isJ2) && (

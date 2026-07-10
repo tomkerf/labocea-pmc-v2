@@ -171,7 +171,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
           <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)] flex flex-col justify-between">
             <div>
               <div className="text-sm text-[var(--color-text-secondary)] mb-1">Volume total annuel</div>
-              <div className="text-2xl font-bold text-[var(--color-text-primary)]">{formatHours(globalStats.totalYearHours)} <span className="text-sm font-medium text-[var(--color-text-tertiary)]">{globalStats.totalYear} prélèv.</span></div>
+              <div className="text-2xl font-bold text-[var(--color-text-primary)] flex flex-wrap items-baseline gap-x-1.5">{formatHours(globalStats.totalYearHours)} <span className="text-sm font-medium text-[var(--color-text-tertiary)] whitespace-nowrap">{globalStats.totalYear} prélèv.</span></div>
               <div className="mt-1.5 text-xs flex gap-2">
                 <span className="text-[var(--color-success)] font-medium">✓ {globalStats.done} faits</span>
                 <span className="text-[var(--color-warning)] font-medium">● {globalStats.planned} à faire</span>
@@ -221,8 +221,8 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
 
           <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)]">
             <div className="text-sm text-[var(--color-text-secondary)] mb-1">Non assignés</div>
-            <div className="text-2xl font-bold text-[var(--color-text-primary)]">
-              {formatHours(unassigned?.totalHours || 0)} <span className="text-sm font-medium text-[var(--color-text-tertiary)]">{unassigned?.totalCount || 0} prélèv.</span>
+            <div className="text-2xl font-bold text-[var(--color-text-primary)] flex flex-wrap items-baseline gap-x-1.5">
+              {formatHours(unassigned?.totalHours || 0)} <span className="text-sm font-medium text-[var(--color-text-tertiary)] whitespace-nowrap">{unassigned?.totalCount || 0} prélèv.</span>
             </div>
             <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
               Volume de travail orphelin
@@ -295,7 +295,10 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
         {/* 3. Heatmap Matrice */}
         <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl shadow-[var(--shadow-card)] overflow-hidden">
           <div className="px-5 py-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
-            <h3 className="text-base font-semibold text-[var(--color-text-primary)]">Matrice de Charge par Technicien</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-semibold text-[var(--color-text-primary)]">Matrice de Charge par Technicien</h3>
+              <span className="text-[11px] text-[var(--color-text-tertiary)] hidden lg:inline">— faites défiler pour voir tous les mois →</span>
+            </div>
             <div className="flex items-center gap-4 text-xs">
               <div className="flex items-center gap-1.5"><span className="size-3 rounded border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)]" /> Normal</div>
               <div className="flex items-center gap-1.5"><span className="size-3 rounded bg-[var(--color-warning-light)] border border-[var(--color-warning)] opacity-50" /> Chargé ({'>'}{THRESHOLD_WARNING_HOURS}h)</div>

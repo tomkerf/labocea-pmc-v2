@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from 'react'
 import { COLORS } from '@/lib/constants'
+import { isChunkError, reloadOnceForChunkError } from '@/lib/chunkError'
 
 
 interface Props { children: ReactNode }
@@ -9,13 +10,6 @@ interface State { error: Error | null }
  * Remplace l'écran blanc par un message d'erreur lisible.
  * Encapsuler les routes protégées pour intercepter les crashes de rendu.
  */
-const CHUNK_LOAD_ERRORS = [
-  'Failed to fetch dynamically imported module',
-  'Importing a module script failed',
-]
-
-const isChunkError = (msg: string) => CHUNK_LOAD_ERRORS.some(s => msg.includes(s))
-
 export default class ErrorBoundary extends Component<Props, State> {
   state: State = { error: null }
 
@@ -26,7 +20,8 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error) {
     if (isChunkError(error.message)) {
-      window.location.reload()
+      if (reloadOnceForChunkError()) return
+      this.setState({ error })
       return
     }
     console.error('[ErrorBoundary]', error.message, error)

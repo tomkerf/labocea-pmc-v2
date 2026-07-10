@@ -56,44 +56,46 @@ export function ClientHeader({
         <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
           {client.nom || 'Client sans nom'}
         </h1>
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
           {saving && <span className="text-xs mr-1" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
 
-          <button type="button"
-            onClick={() => {
-              try { onPdfPreview(buildClientReportHtml(client, users)) }
-              catch { toast.error('Erreur lors de la génération du rapport.') }
-            }}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
-            style={{ color: COLORS.ACCENT, background: 'var(--color-accent-light)' }}>
-            <FileDown size={13} />
-            PDF
-          </button>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button type="button"
+              onClick={() => {
+                try { onPdfPreview(buildClientReportHtml(client, users)) }
+                catch { toast.error('Erreur lors de la génération du rapport.') }
+              }}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
+              style={{ color: COLORS.ACCENT, background: 'var(--color-accent-light)' }}>
+              <FileDown size={13} />
+              PDF
+            </button>
 
-          <button type="button"
-            onClick={async () => {
-              try {
-                const { exportClientExcel } = await import('@/lib/exportExcel')
-                exportClientExcel(client)
-              } catch (err) {
-                console.error('[Excel export]', err)
-                toast.error('Erreur Excel : ' + (err instanceof Error ? err.message : String(err)))
-              }
-            }}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
-            style={{ color: '#217346', background: '#E8F5EC' }}>
-            <FileDown size={13} />
-            Excel
-          </button>
+            <button type="button"
+              onClick={async () => {
+                try {
+                  const { exportClientExcel } = await import('@/lib/exportExcel')
+                  exportClientExcel(client)
+                } catch (err) {
+                  console.error('[Excel export]', err)
+                  toast.error('Erreur Excel : ' + (err instanceof Error ? err.message : String(err)))
+                }
+              }}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
+              style={{ color: '#217346', background: '#E8F5EC' }}>
+              <FileDown size={13} />
+              Excel
+            </button>
+          </div>
 
           {!confirmDelete ? (
             <button type="button" onClick={() => onSetConfirmDelete(true)}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
-              style={{ color: COLORS.DANGER, background: 'var(--color-danger-light)' }}>
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium ml-auto sm:ml-3 sm:pl-3"
+              style={{ color: COLORS.DANGER, background: 'var(--color-danger-light)', borderLeft: '1px solid var(--color-border)' }}>
               <Trash2 size={13} /> Supprimer
             </button>
           ) : (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg ml-auto sm:ml-3"
               style={{ background: 'var(--color-danger-light)', border: '1px solid var(--color-danger)' }}>
               <AlertTriangle size={13} style={{ color: COLORS.DANGER }} />
               <span className="text-xs font-medium" style={{ color: COLORS.DANGER }}>

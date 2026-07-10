@@ -6,6 +6,7 @@ import { useAuthInit } from '@/hooks/useAuth'
 import RequireAuth from '@/components/layout/RequireAuth'
 import RequireAdmin from '@/components/layout/RequireAdmin'
 import AppLayout from '@/components/layout/AppLayout'
+import { isChunkError, reloadOnceForChunkError } from '@/lib/chunkError'
 
 // ── Chargement différé des pages (code-splitting) ───────────
 // LoginPage reste eager — elle est la première page affichée sans auth
@@ -43,7 +44,16 @@ const ChatPage              = lazy(() => import('@/pages/ChatPage'))
 const ActusPage             = lazy(() => import('@/pages/ActusPage'))
 
 
-function AppError() {
+function AppError({ error }: { error: unknown }) {
+  const message = error instanceof Error ? error.message : String(error)
+
+  // Filet de sécurité : si une erreur de chunk périmé échappe à l'ErrorBoundary
+  // interne (ex: erreur avant montage d'AppLayout), on tente un reload unique
+  // avant d'afficher l'écran d'erreur générique.
+  if (isChunkError(message) && reloadOnceForChunkError()) {
+    return null
+  }
+
   return (
     <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-danger)' }}>
       <p style={{ fontWeight: 600 }}>Une erreur inattendue s'est produite.</p>
@@ -172,7 +182,7 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <Sentry.ErrorBoundary fallback={<AppError />}>
+    <Sentry.ErrorBoundary fallback={({ error }) => <AppError error={error} />}>
       <LazyMotion features={domAnimation}>
         <BrowserRouter>
           <AppRoutes />

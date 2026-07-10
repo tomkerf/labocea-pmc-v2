@@ -165,7 +165,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                 <th className="px-4 py-3 font-semibold border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)]">Plan</th>
                 {MOIS_LONG.map(m => (
                   <th key={m} className="px-2 py-3 font-semibold text-center border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)] w-14">
-                    {m.substring(0, 3)}
+                    {m === 'Juin' ? 'JUN' : m === 'Juillet' ? 'JUL' : m.substring(0, 3).toUpperCase()}
                   </th>
                 ))}
               </tr>
