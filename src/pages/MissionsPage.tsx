@@ -152,7 +152,7 @@ export default function MissionsPage() {
         },
         uid,
       )
-      navigate(`/missions/${id}`)
+      navigate(`/missions/${id}`, { state: { isNewDraft: true } })
     } finally {
       setCreating(false)
     }

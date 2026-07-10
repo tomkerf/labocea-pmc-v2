@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useReducer } from 'react'
+import { useEffect, useRef, useState, useReducer, type RefObject } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
@@ -40,6 +40,7 @@ export interface UseClientDataReturn {
   handleReload: () => void
   handleDeleteClient: () => Promise<void>
   dismissRemoteChanged: () => void
+  isDirtyRef: RefObject<boolean>
 }
 
 export function useClientData(clientId: string | undefined): UseClientDataReturn {
@@ -155,5 +156,6 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
     handleReload,
     handleDeleteClient,
     dismissRemoteChanged,
+    isDirtyRef: isDirty,
   }
 }

@@ -1,10 +1,11 @@
-import { useReducer } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useEffect, useReducer } from 'react'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { arrayMove } from '@dnd-kit/sortable'
 import type { DragEndEvent } from '@dnd-kit/core'
 import { generateId } from '@/lib/ids'
 import { useUsersStore } from '@/stores/usersStore'
 import { useClientData } from '@/hooks/useClientData'
+import { deleteClient } from '@/services/clientService'
 import { ClientHeader } from '@/components/client/ClientHeader'
 import { ClientInfoForm } from '@/components/client/ClientInfoForm'
 import { ClientPlans } from '@/components/client/ClientPlans'
@@ -71,20 +72,45 @@ function reducer(state: State, action: Action): State {
   }
 }
 
+// Garde trace des brouillons montés pour éviter de les supprimer en cours de double-montage Strict Mode
+const mountedDrafts = new Set<string>()
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export default function ClientPage() {
   const { clientId } = useParams<{ clientId: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const users = useUsersStore(s => s.users)
 
   const {
     client, loading, saving, remoteChanged,
     triggerSave, update, handleReload, handleDeleteClient, dismissRemoteChanged,
+    isDirtyRef,
   } = useClientData(clientId)
 
   const [state, dispatch] = useReducer(reducer, initialState)
   const { activeTab, confirmDelete, pdfPreview, confirmDeletePlanId, sitesInput, plansLocked } = state
+
+  // "Nouveau client" crée le document Firestore immédiatement (nécessaire pour
+  // l'autosave par écriture partielle). Si l'utilisateur quitte sans avoir rien
+  // rempli, on supprime ce brouillon fantôme au lieu de le laisser en base.
+  const isNewDraft = (location.state as { isNewDraft?: boolean } | null)?.isNewDraft === true
+  useEffect(() => {
+    if (!isNewDraft || !clientId) return
+    mountedDrafts.add(clientId)
+    return () => {
+      mountedDrafts.delete(clientId)
+      // On retarde la suppression pour être sûr que ce n'est pas un double-montage Strict Mode
+      setTimeout(() => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        if (!mountedDrafts.has(clientId) && !isDirtyRef.current) {
+          deleteClient(clientId).catch(() => {})
+        }
+      }, 100)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientId, isNewDraft])
 
   function handleSitesChange(raw: string) {
     dispatch({ type: 'SET_SITES_INPUT', payload: raw })
