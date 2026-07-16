@@ -251,7 +251,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
             </div>
           </div>
           
-          <div className="flex items-stretch gap-2 h-48 relative pt-6 pb-2">
+          <div className="flex items-stretch gap-2 h-64 relative pt-7 pb-2">
             {/* Ligne de flottaison (Capacité max) */}
             {maxCapacityPerMonth > 0 && maxMonthHours > 0 && (
               <div
@@ -270,7 +270,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
               return (
                 <div key={MOIS_LONG[i]} className="flex-1 flex flex-col items-center gap-2 relative group h-full">
                   {val > 0 && (
-                    <div className="absolute -top-6 text-xs font-semibold text-[var(--color-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    <div className="absolute -top-6 text-xs font-semibold text-[var(--color-text-secondary)] whitespace-nowrap">
                       {formatHours(val)}
                     </div>
                   )}

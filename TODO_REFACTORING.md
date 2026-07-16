@@ -72,14 +72,14 @@ Ce document liste les dettes techniques identifiées lors des audits successifs.
 Retour externe (revue visuelle staging), non encore traité. Classé par effort.
 
 **Quick wins (CSS/contenu seul)**
-- [ ] Bouton "Charge" actif (MissionsPage) trop saturé vs "Liste"/"Vue annuelle" — variante moins contrastée, même famille de bleu que le CTA principal
-- [ ] Badges de statut incohérents : Missions utilise `—` pour "pas de date" alors qu'ailleurs (Planning) c'est un point coloré — uniformiser sur un seul système
-- [ ] Graphique "Charge 2026" : barres écrasées en bas de leur zone, dur de comparer les mois — augmenter la hauteur utile + afficher la valeur au-dessus de chaque barre (pas seulement au survol)
+- [x] Bouton "Charge" actif (MissionsPage) trop saturé vs "Liste"/"Vue annuelle" — variante moins contrastée, même famille de bleu que le CTA principal
+- [x] Badges de statut incohérents : Missions utilise `—` pour "pas de date" alors qu'ailleurs (Planning) c'est un point coloré — uniformiser sur un seul système
+- [x] Graphique "Charge 2026" : barres écrasées en bas de leur zone, dur de comparer les mois — augmenter la hauteur utile + afficher la valeur au-dessus de chaque barre (pas seulement au survol)
 
 **Effort moyen**
-- [ ] États vides pauvres (Demandes : "Visite préliminaire"/"Devis signé" ; Planning du jour : "Aucune intervention") — juste du texte gris. Ajouter icône + CTA (ex: "Planifier une visite")
-- [ ] Liste Missions : tags techniciens (ROD/THK/SRA) en gris peu lisibles à distance — utiliser le mapping couleur par technicien déjà existant (`TECH_COLORS`/`TECH_PALETTE` dans `planningUtils.ts`)
-- [ ] Planning hebdo : RDV/tâches/rappels/retraits tassés sans distinction visuelle claire — léger fond ou bordure par type d'item
+- [x] États vides pauvres (Demandes : "Visite préliminaire"/"Devis signé" ; Planning du jour : "Aucune intervention") — juste du texte gris. Ajouter icône + CTA (ex: "Planifier une visite")
+- [x] Liste Missions : tags techniciens (ROD/THK/SRA) en gris peu lisibles à distance — utiliser le mapping couleur par technicien déjà existant (`TECH_COLORS`/`TECH_PALETTE` dans `planningUtils.ts`)
+- [x] Planning hebdo : RDV/tâches/rappels/retraits tassés sans distinction visuelle claire — léger fond ou bordure par type d'item
 
 **À vérifier avant d'agir**
 - [ ] Avatar "THK" en haut à droite du dashboard sans affordance claire (pas de chevron, pas d'indice de clic) — vérifier si un menu existe déjà au clic ; si oui, juste ajouter l'affordance visuelle

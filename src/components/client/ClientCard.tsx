@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronRight, AlertTriangle } from 'lucide-react'
 import type { Client } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
+import { getTechColor } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
 
 
@@ -46,6 +47,7 @@ export default function ClientCard({ client }: Props) {
   const navigate = useNavigate()
   const next = getNextSampling(client)
   const counts = countByStatus(client)
+  const techColor = client.preleveur ? getTechColor(client.preleveur).color : undefined
 
   return (
     <button type="button"
@@ -79,9 +81,9 @@ export default function ClientCard({ client }: Props) {
           <span className="text-xs truncate" style={{ color: COLORS.TEXT_SECONDARY }}>
             {client.segment || '—'}
           </span>
-          {client.preleveur && (
+          {client.preleveur && techColor && (
             <span className="text-xs px-1.5 py-0.5 rounded font-medium"
-              style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }}>
+              style={{ background: techColor + '18', color: techColor }}>
               {client.preleveur}
             </span>
           )}
@@ -103,7 +105,10 @@ export default function ClientCard({ client }: Props) {
             </p>
           </>
         ) : (
-          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>—</p>
+          <p className="text-xs flex items-center justify-end gap-1.5" style={{ color: 'var(--color-text-tertiary)' }}>
+            <span className="size-[5px] rounded-full shrink-0" style={{ background: 'var(--color-text-tertiary)' }} />
+            Aucune
+          </p>
         )}
       </div>
 

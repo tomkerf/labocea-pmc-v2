@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { m, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { Camera, Loader2 } from 'lucide-react'
+import { Camera, Loader2, CalendarCheck } from 'lucide-react'
 import { SectionTitle, EmptyCard } from '@/components/dashboard/StatCard'
 import type { PlanningEvent } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
@@ -105,7 +105,9 @@ export function DashboardPlanningWidget({
         </div>
       )}
       {activeItems.length === 0 ? (
-        <EmptyCard>Aucune intervention ni événement{planningMode === 'today' ? " aujourd'hui" : " demain"}.</EmptyCard>
+        <EmptyCard icon={<CalendarCheck size={16} strokeWidth={1.5} style={{ color: COLORS.ACCENT }} />}>
+          Aucune intervention ni événement{planningMode === 'today' ? " aujourd'hui" : " demain"}.
+        </EmptyCard>
       ) : (
         <m.div
           layout

@@ -102,6 +102,12 @@ export const EVENEMENT_LABEL: Record<TypeEvenement, string> = {
   rappel: 'Rappel', reunion: 'Réunion', rapport: 'Rapport', autre: 'Autre', conge: 'Congé/RTT', meteo: 'Météo',
 }
 
+// Bordure distinctive par type d'événement dans la bande "toute la journée" du planning
+// (ne pas réutiliser les couleurs de statut : danger #FF3B30, success #34C759, warning #FF9F0A, accent #0071E3, neutral #8E8E93)
+export const EVENEMENT_TYPE_COLOR: Record<TypeEvenement, string> = {
+  rappel: '#AF52DE', reunion: '#5E5CE6', rapport: '#FF375F', autre: '#AC8E68', conge: '#8E8E93', meteo: '#64D2FF',
+}
+
 import { AVATAR_COLORS } from '@/components/ui/avatarColors'
 import { useUsersStore } from '@/stores/usersStore'
 import { COLORS } from '@/lib/constants'
@@ -363,6 +369,7 @@ export type AllDayItem = {
   colEnd:   number
   row:      number
   bg:       string
+  evType?:  TypeEvenement
   label:    string
   badge?:   string
   onClick:  () => void

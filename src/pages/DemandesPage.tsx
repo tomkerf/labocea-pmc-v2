@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus } from 'lucide-react'
+import { Plus, Inbox } from 'lucide-react'
 import { useDemandesListener, saveDemande, createDemande, deleteDemande } from '@/hooks/useDemandes'
 import { useDemandesStore } from '@/stores/demandesStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
@@ -8,7 +8,7 @@ import { useUsersStore } from '@/stores/usersStore'
 import { createClient } from '@/services/clientService'
 import type { Demande } from '@/types'
 import { COLORS } from '@/lib/constants'
-import { STATUTS } from '@/components/demandes/demandesConfig'
+import { STATUTS, EMPTY } from '@/components/demandes/demandesConfig'
 import { DemandeCard } from '@/components/demandes/DemandeCard'
 import { DemandeModal } from '@/components/demandes/DemandeModal'
 
@@ -115,9 +115,18 @@ export default function DemandesPage() {
                 <div className="flex-1 overflow-y-auto rounded-b-xl p-2 flex flex-col gap-2"
                   style={{ borderLeft: '1px solid var(--color-border-subtle)', borderRight: '1px solid var(--color-border-subtle)', borderBottom: '1px solid var(--color-border-subtle)', background: COLORS.BG_PRIMARY, minHeight: 120 }}>
                   {col.items.length === 0 ? (
-                    <div className="flex flex-col items-center py-8 gap-1.5">
-                      <span className="text-lg">📭</span>
+                    <div className="flex flex-col items-center py-8 gap-2">
+                      <div className="size-9 rounded-full flex items-center justify-center"
+                        style={{ background: 'var(--color-accent-light)' }}>
+                        <Inbox size={16} strokeWidth={1.5} style={{ color: COLORS.ACCENT }} />
+                      </div>
                       <p className="text-xs text-center" style={{ color: 'var(--color-text-tertiary)' }}>Aucune demande</p>
+                      <button type="button"
+                        onClick={() => setModal({ ...EMPTY, statut: col.key })}
+                        className="text-[11px] font-medium px-2.5 py-1 rounded-md cursor-pointer"
+                        style={{ color: COLORS.ACCENT }}>
+                        + Ajouter
+                      </button>
                     </div>
                   ) : (
                     col.items.map(d => (

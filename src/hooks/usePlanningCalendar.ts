@@ -176,6 +176,7 @@ export function usePlanningCalendar({
         key: ev.id,
         colStart, colEnd,
         bg: tc.bg,
+        evType: ev.type,
         label: ev.titre,
         badge: ev.createdByInitiales || undefined,
         onClick: () => handleSelectEvent(evObj, ev.date),

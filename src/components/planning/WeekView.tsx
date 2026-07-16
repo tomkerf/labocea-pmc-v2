@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { Plus } from 'lucide-react'
 import {
   type PlanningEvent, type BilanGroup, type AllDayItem,
-  JOURS_COURT,
+  JOURS_COURT, EVENEMENT_TYPE_COLOR,
   toISO, sameDay,
   isMultiDay, sortEvts, filterEvents, groupByClient,
 } from '@/lib/planningUtils'
@@ -209,7 +209,7 @@ export default function WeekView({
             gridTemplateRows: `repeat(${allDayNumRows}, 18px)`,
             gap: '2px 0',
           }}>
-              {allDayItems.map(({ key, colStart, colEnd, row, bg, label, badge, onClick, tooltip }) => (
+              {allDayItems.map(({ key, colStart, colEnd, row, bg, evType, label, badge, onClick, tooltip }) => (
                 <button type="button"
                   key={key}
                   onMouseDown={e => e.stopPropagation()}
@@ -219,6 +219,7 @@ export default function WeekView({
                     gridColumn: `${colStart + 1} / ${colEnd + 2}`,
                     gridRow: row + 1,
                     background: bg,
+                    borderLeft: evType ? `3px solid ${EVENEMENT_TYPE_COLOR[evType]}` : undefined,
                     marginLeft: 1,
                     marginRight: 1,
                   }}

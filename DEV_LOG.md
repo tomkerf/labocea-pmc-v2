@@ -3,6 +3,88 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 177 — Audit UI/UX §12 : quick wins + effort moyen soldés
+**16 juillet 2026**
+
+### Contexte
+Traitement du retour de design externe du 4 juillet (TODO_REFACTORING.md §12), classé par effort.
+
+### Modifications apportées
+- **`MissionsPage.tsx`** : bouton "Charge" actif désaturé (`--color-accent-light`) au lieu du bleu plein du CTA principal, pour le distinguer visuellement de "Liste"/"Vue annuelle".
+- **`ClientCard.tsx`** : badge "pas de prochaine intervention" uniformisé sur le système à point coloré du Planning (au lieu du `—` isolé) ; tags techniciens colorés via `getTechColor()` (mapping `TECH_COLORS` déjà existant) au lieu du gris plat.
+- **`WorkloadMatrixView.tsx`** : hauteur du graphique "Charge" augmentée (h-48 → h-64) et valeur affichée en permanence au-dessus de chaque barre (plus seulement au survol).
+- **`EmptyCard.tsx`** : nouvelle prop `icon` optionnelle (pastille circulaire) réutilisée sur `DashboardPlanningWidget` (icône CalendarCheck) et `DemandesPage` (icône Inbox + bouton "+ Ajouter" contextuel par colonne kanban) pour enrichir les états vides.
+- **`WeekView.tsx` / `usePlanningCalendar.ts` / `planningUtils.ts`** : distinction visuelle par type d'événement dans la bande "toute la journée" du planning hebdo — nouvelle constante `EVENEMENT_TYPE_COLOR` (bordure gauche colorée par type : rappel/réunion/rapport/congé/météo/autre).
+
+### État
+- Lint : 0 erreur. Build prod : OK (2959 modules, 1m13s, seul warning connu = chunk `heic-to` 2,9 Mo, déjà en dette technique).
+- Tests : 39/39 fichiers, tous verts.
+- TODO_REFACTORING.md §12 : quick wins + effort moyen entièrement cochés. Reste "Avatar THK sans affordance" (à vérifier avant d'agir) — non traité.
+- Note d'environnement : build/tests se sont révélés bloqués en session à cause d'une pression mémoire système (swap quasi saturé, 8,6/9,2 Go) — pas un bug de code. Résolu en libérant de la RAM côté machine.
+
+---
+
+## Session 176 — Fix ghost draft client (double mount strict mode)
+**10 juillet 2026**
+
+### Contexte
+En React 18 strict mode (dev), le double montage d'un composant pouvait laisser un brouillon de client fantôme se faire supprimer par erreur (mount → unmount immédiat → suppression du draft encore utilisé par le second mount).
+
+### Modifications apportées
+- **`useClientData.ts`** / **`ClientPage.tsx`** : ajout d'un tracker de brouillons montés (`mountedDrafts`) pour ne supprimer un draft que si plus aucun mount actif ne le référence.
+- **`MissionsPage.tsx`** : ajustement mineur lié au même flux.
+
+---
+
+## Session 175 — Audit UI/UX manuel : 6 correctifs
+**10 juillet 2026**
+
+### Contexte
+Audit manuel de l'application relevant 6 problèmes UI/UX distincts.
+
+### Modifications apportées
+- **Crash générique sur chunk load périmé** (ex: navigation directe vers Rapports après déploiement) : détection élargie Firefox/Safari + reload unique auto-guardé, appliqué au boundary interne (par route) et au boundary Sentry externe. Nouveau helper `src/lib/chunkError.ts`.
+- **Vue annuelle Missions** : Juin/Juillet tronqués en "JUI" identique (`substring(0,3)`) — corrigé avec la même règle JUN/JUL que l'onglet Charge (`YearMatrixView.tsx`).
+- **Onglet Charge** : "566 prélèv." se coupait entre le nombre et le mot — `nowrap` + wrap du conteneur (`WorkloadMatrixView.tsx`).
+- **Fiche client** : bouton "Supprimer" séparé visuellement des exports PDF/Excel (bordure + poussée à droite) pour réduire le risque de clic accidentel (`ClientHeader.tsx`).
+- **Matrice de Charge** : ajout d'un indice textuel de scroll horizontal.
+- **Pastilles d'événements du Planning** : largeur minimale pour éviter la troncature à une seule lettre (`EventPill.tsx`).
+
+### État
+- Cache SW incrémenté (`sw.js`).
+
+---
+
+## Session 174 — Résumé IA Gemini sur les actus réglementaires
+**9 juillet 2026**
+
+### Contexte
+Faciliter la rédaction d'actualités de veille réglementaire en résumant automatiquement un texte long collé par l'utilisateur.
+
+### Modifications apportées
+- **`aiService.ts`** : nouveau service d'appel à l'API Gemini pour résumer un texte réglementaire.
+- **`ActuFormModal.tsx`** : intégration du résumé IA dans le formulaire de création d'actu (bouton dédié, état de chargement, insertion du résultat).
+- **`changelog.ts`** : incrément de version.
+
+---
+
+## Session 173 — Fixes actus : largeur du modal de lecture
+**9 juillet 2026**
+
+### Modifications apportées
+- **`ActusPage.tsx`** : modal de lecture élargi (`md` → `2xl`) — le format par défaut (448px) forçait un scroll vertical excessif sur un article un peu long.
+
+---
+
+## Session 172 — Sécurité liens markdown actus + fix filtre site Missions
+**9 juillet 2026**
+
+### Modifications apportées
+- **`ActusPage.tsx`** : `renderMarkdown` ne génère un `<a href>` que pour les URLs `http(s)`, empêchant l'injection `javascript:`/`data:` dans le contenu des actualités (faille XSS).
+- **`MissionsPage.tsx`** : remplacement du `setTimeout(fn, 0)` de contournement du lint `set-state-in-effect` par le pattern `eslint-disable` déjà validé dans `PlanningPage.tsx`, évitant le flash du filtre site au premier chargement.
+
+---
+
 ## Session 171 — Onglet Actualités (News) pour l'équipe
 **9 juillet 2026**
 

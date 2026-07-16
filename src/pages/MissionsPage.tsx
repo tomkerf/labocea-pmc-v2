@@ -198,13 +198,20 @@ export default function MissionsPage() {
           alignSelf: 'flex-start',
           marginLeft: isMatrixView ? '1.5rem' : '0'
         }}>
-        {([['liste', 'Liste', List], ['annee', 'Vue annuelle', CalendarRange], ['charge', 'Charge', BarChart3]] as const).map(([v, label, Icon]) => (
-          <button type="button" key={v} onClick={() => setView(v)}
-            className="px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
-            style={{ background: view === v ? COLORS.ACCENT : 'transparent', color: view === v ? 'white' : COLORS.TEXT_SECONDARY }}>
-            <Icon size={15} /> {label}
-          </button>
-        ))}
+        {([['liste', 'Liste', List], ['annee', 'Vue annuelle', CalendarRange], ['charge', 'Charge', BarChart3]] as const).map(([v, label, Icon]) => {
+          const active = view === v
+          const softActive = v === 'charge'
+          return (
+            <button type="button" key={v} onClick={() => setView(v)}
+              className="px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+              style={{
+                background: active ? (softActive ? 'var(--color-accent-light)' : COLORS.ACCENT) : 'transparent',
+                color: active ? (softActive ? COLORS.ACCENT : 'white') : COLORS.TEXT_SECONDARY,
+              }}>
+              <Icon size={15} /> {label}
+            </button>
+          )
+        })}
       </div>
 
       {/* Filtres globaux (Site et Technicien) */}
