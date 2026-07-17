@@ -91,6 +91,9 @@ function AppRoutes() {
         <Route path="/missions" element={
           <Suspense fallback={<PageSpinner />}><MissionsPage /></Suspense>
         } />
+        <Route path="/vue-annuelle" element={
+          <Suspense fallback={<PageSpinner />}><MissionsPage /></Suspense>
+        } />
         <Route path="/missions/:clientId" element={
           <Suspense fallback={<PageSpinner />}><ClientPage /></Suspense>
         } />

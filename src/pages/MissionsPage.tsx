@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Plus, Search, ClipboardList, List, CalendarRange, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -22,6 +22,7 @@ function hasOverdue(client: Client): boolean {
 
 export default function MissionsPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { clients, loading } = useMissionsStore()
   usePreleveursListener()
   const preleveurs = usePreleveursStore((s) => s.preleveurs)
@@ -49,7 +50,10 @@ export default function MissionsPage() {
   const [search, setSearch] = useState('')
   const [onlyRetard, setOnlyRetard] = useState(false)
   const [creating, setCreating] = useState(false)
-  const [view, setView] = useState<'liste' | 'annee' | 'charge'>('liste')
+  // Accès direct depuis la sidebar via /vue-annuelle ; le toggle interne reste ensuite libre.
+  const [view, setView] = useState<'liste' | 'annee' | 'charge'>(
+    () => location.pathname === '/vue-annuelle' ? 'annee' : 'liste'
+  )
   const [year, setYear] = useState(new Date().getFullYear())
 
   // Initialisation des filtres et sauvegarde dans le localStorage par utilisateur
