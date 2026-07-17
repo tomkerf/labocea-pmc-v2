@@ -62,6 +62,7 @@ export default function Sidebar() {
         { to: '/demandes',     icon: Inbox,           label: 'Demandes'               },
         { to: '/missions',     icon: ClipboardList,   label: 'Missions',        badge: true },
         { to: '/planning',     icon: CalendarDays,    label: 'Planning'               },
+        { to: '/rapports',     icon: FileText,        label: 'Rapports'               },
         { to: '/todos',        icon: ListTodo,        label: 'Tâches'                 },
         { to: '/chat',         icon: MessageSquare,   label: 'Messagerie'             },
       ]
@@ -72,7 +73,6 @@ export default function Sidebar() {
         { to: '/materiel',     icon: Wrench,          label: 'Matériel'               },
         { to: '/metrologie',   icon: Gauge,           label: 'Métrologie'             },
         { to: '/maintenances', icon: Hammer,          label: 'Maintenances'           },
-        { to: '/rapports',     icon: FileText,        label: 'Rapports'               },
       ]
     },
     {
