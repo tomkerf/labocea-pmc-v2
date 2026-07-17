@@ -59,9 +59,9 @@ export default function Sidebar() {
       items: [
         { to: '/',             icon: LayoutDashboard, label: 'Tableau de bord', end: true },
         { to: '/actus',        icon: Newspaper,       label: 'Actualités'             },
-        { to: '/planning',     icon: CalendarDays,    label: 'Planning'               },
-        { to: '/missions',     icon: ClipboardList,   label: 'Missions',        badge: true },
         { to: '/demandes',     icon: Inbox,           label: 'Demandes'               },
+        { to: '/missions',     icon: ClipboardList,   label: 'Missions',        badge: true },
+        { to: '/planning',     icon: CalendarDays,    label: 'Planning'               },
         { to: '/todos',        icon: ListTodo,        label: 'Tâches'                 },
         { to: '/chat',         icon: MessageSquare,   label: 'Messagerie'             },
       ]
