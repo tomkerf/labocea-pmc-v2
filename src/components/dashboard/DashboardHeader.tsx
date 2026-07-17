@@ -1,4 +1,5 @@
 import { m } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { COLORS } from '@/lib/constants'
 import { getGreeting, formatDate } from '@/lib/dashboardUtils'
 import UserAvatar from '@/components/ui/UserAvatar'
@@ -38,9 +39,14 @@ export function DashboardHeader({ prenom, isGeneraliste, activeTab, setActiveTab
           </h1>
         </div>
         {initiales && (
-          <div className="shrink-0">
+          <Link
+            to="/compte"
+            className="shrink-0 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            style={{ '--tw-ring-color': COLORS.ACCENT } as React.CSSProperties}
+            aria-label="Mon compte"
+          >
             <UserAvatar initiales={initiales} color={avatarColor} size={44} />
-          </div>
+          </Link>
         )}
       </m.div>
 

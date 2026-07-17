@@ -82,7 +82,7 @@ Retour externe (revue visuelle staging), non encore traité. Classé par effort.
 - [x] Planning hebdo : RDV/tâches/rappels/retraits tassés sans distinction visuelle claire — léger fond ou bordure par type d'item
 
 **À vérifier avant d'agir**
-- [ ] Avatar "THK" en haut à droite du dashboard sans affordance claire (pas de chevron, pas d'indice de clic) — vérifier si un menu existe déjà au clic ; si oui, juste ajouter l'affordance visuelle
+- [x] Avatar "THK" en haut à droite du dashboard sans affordance claire (pas de chevron, pas d'indice de clic) — rendu cliquable vers /compte avec hover scale pour meilleure affordance.
 
 ## 11. Hors scope V2
 
