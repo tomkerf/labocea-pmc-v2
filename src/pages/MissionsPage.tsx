@@ -237,10 +237,11 @@ export default function MissionsPage() {
       {/* Filtres globaux (Site et Technicien) */}
       <div className={`shrink-0 flex flex-col sm:flex-row gap-3 mb-4${isMatrixView ? ' px-6' : ''}`}>
         <div className="flex-1 flex flex-col gap-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+          <label htmlFor="missions-filter-site" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
             Site géographique
           </label>
           <select
+            id="missions-filter-site"
             value={filterSite}
             onChange={(e) => handleFilterSiteChange(e.target.value)}
             className="px-3 py-2 rounded-lg text-sm outline-none"
@@ -258,10 +259,11 @@ export default function MissionsPage() {
         </div>
 
         <div className="flex-1 flex flex-col gap-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+          <label htmlFor="missions-filter-tech" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
             Technicien (préleveur)
           </label>
           <select
+            id="missions-filter-tech"
             value={filterTech}
             onChange={(e) => handleFilterTechChange(e.target.value)}
             className="px-3 py-2 rounded-lg text-sm outline-none"
@@ -279,10 +281,11 @@ export default function MissionsPage() {
         </div>
 
         <div className="flex-1 flex flex-col gap-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+          <label htmlFor="missions-filter-pause" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
             Statut
           </label>
           <select
+            id="missions-filter-pause"
             value={filterPause}
             onChange={(e) => handleFilterPauseChange(e.target.value)}
             className="px-3 py-2 rounded-lg text-sm outline-none"
@@ -300,10 +303,11 @@ export default function MissionsPage() {
 
         {isMatrixView && (
           <div className="flex-1 flex flex-col gap-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+            <label htmlFor="missions-filter-method" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
               Méthode
             </label>
             <select
+              id="missions-filter-method"
               value={filterMethod}
               onChange={(e) => setFilterMethod(e.target.value)}
               className="px-3 py-2 rounded-lg text-sm outline-none"
