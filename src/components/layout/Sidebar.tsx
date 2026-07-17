@@ -73,6 +73,7 @@ export default function Sidebar() {
         { to: '/materiel',     icon: Wrench,          label: 'Matériel'               },
         { to: '/metrologie',   icon: Gauge,           label: 'Métrologie'             },
         { to: '/maintenances', icon: Hammer,          label: 'Maintenances'           },
+        { to: '/outils/tuyaux', icon: Pipette,        label: 'Tuyaux'                 },
       ]
     },
     {
@@ -80,7 +81,6 @@ export default function Sidebar() {
       items: [
         { to: '/outils/asservissement', icon: FlaskConical, label: 'Asservissement'   },
         { to: '/outils/estimation-volume', icon: CloudRain, label: 'Estimation volume' },
-        { to: '/outils/tuyaux',        icon: Pipette,      label: 'Tuyaux'             },
         { to: '/infos',                icon: BookOpen,        label: 'Infos terrain'       },
         { to: '/aide',                 icon: HelpCircle,  label: 'Mode d\'emploi'       },
       ]
