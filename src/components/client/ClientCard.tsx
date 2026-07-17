@@ -76,6 +76,12 @@ export default function ClientCard({ client }: Props) {
           {counts.overdue > 0 && (
             <AlertTriangle size={14} strokeWidth={2} className="shrink-0" style={{ color: COLORS.DANGER }} />
           )}
+          {client.pause && (
+            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full shrink-0"
+              style={{ color: COLORS.TEXT_SECONDARY, background: COLORS.BG_TERTIARY }}>
+              En pause
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-3 mt-0.5">
           <span className="text-xs truncate" style={{ color: COLORS.TEXT_SECONDARY }}>

@@ -35,7 +35,8 @@ export default function PlanningPage() {
 
   const uid        = useAuthStore(selectUid)
   const initiales  = useAuthStore(selectInitiales)
-  const { clients }       = useMissionsStore()
+  const { clients: rawClients } = useMissionsStore()
+  const clients = useMemo(() => rawClients.filter((c) => !c.pause), [rawClients])
   const { equipements }   = useEquipementsStore()
   const { maintenances }  = useMaintenancesStore()
   const { evenements }    = useEvenementsStore()

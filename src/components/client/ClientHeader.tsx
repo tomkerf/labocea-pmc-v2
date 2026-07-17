@@ -1,4 +1,4 @@
-import { ChevronLeft, Trash2, AlertTriangle, FileDown } from 'lucide-react'
+import { ChevronLeft, Trash2, AlertTriangle, FileDown, Pause, Play } from 'lucide-react'
 import { toast } from '@/stores/toastStore'
 import { buildClientReportHtml } from '@/lib/exportClientHtml'
 import type { Client, AppUser } from '@/types'
@@ -17,12 +17,13 @@ interface Props {
   onSetConfirmDelete: (v: boolean) => void
   onDelete: () => void
   onPdfPreview: (html: string) => void
+  onTogglePause: () => void
 }
 
 export function ClientHeader({
   client, saving, remoteChanged, confirmDelete, users,
   onBack, onReload, onDismissRemoteChanged,
-  onSetConfirmDelete, onDelete, onPdfPreview,
+  onSetConfirmDelete, onDelete, onPdfPreview, onTogglePause,
 }: Props) {
   return (
     <>
@@ -53,8 +54,14 @@ export function ClientHeader({
       )}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
+        <h1 className="text-xl font-semibold flex items-center gap-2" style={{ color: COLORS.TEXT_PRIMARY }}>
           {client.nom || 'Client sans nom'}
+          {client.pause && (
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full"
+              style={{ color: COLORS.TEXT_SECONDARY, background: 'var(--color-bg-tertiary)' }}>
+              En pause
+            </span>
+          )}
         </h1>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
           {saving && <span className="text-xs mr-1" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
@@ -87,6 +94,13 @@ export function ClientHeader({
               Excel
             </button>
           </div>
+
+          <button type="button" onClick={onTogglePause}
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium"
+            style={{ color: COLORS.TEXT_SECONDARY, background: 'var(--color-bg-tertiary)' }}>
+            {client.pause ? <Play size={13} /> : <Pause size={13} />}
+            {client.pause ? 'Réactiver' : 'Mettre en pause'}
+          </button>
 
           {!confirmDelete ? (
             <button type="button" onClick={() => onSetConfirmDelete(true)}

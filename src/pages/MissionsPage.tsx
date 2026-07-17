@@ -70,6 +70,18 @@ export default function MissionsPage() {
 
   const [filterMethod, setFilterMethod] = useState('')
 
+  const [filterPause, setFilterPause] = useState<string>(() => {
+    const key = uid ? `missions_filter_pause_${uid}` : 'missions_filter_pause'
+    return localStorage.getItem(key) ?? 'actifs'
+  })
+
+  const handleFilterPauseChange = (val: string) => {
+    setFilterPause(val)
+    if (uid) {
+      localStorage.setItem(`missions_filter_pause_${uid}`, val)
+    }
+  }
+
   // Effet pour appliquer le site géographique du préleveur par défaut lors de sa première connexion
   const siteDefaultApplied = useRef(false)
   useEffect(() => {
@@ -104,7 +116,15 @@ export default function MissionsPage() {
 
   const overdueCount = clients.filter(hasOverdue).length
 
-  const filtered = clients.filter((c) => {
+  // Filtre pause : Actifs (défaut) exclut les clients en pause partout dans la page Missions
+  // (liste, vue annuelle, charge) ; Planning et dashboard les excluent toujours, indépendamment.
+  const visibleClients = clients.filter((c) => {
+    if (filterPause === 'pause') return !!c.pause
+    if (filterPause === 'tous') return true
+    return !c.pause
+  })
+
+  const filtered = visibleClients.filter((c) => {
     const q = search.toLowerCase()
     const matchSearch =
       c.nom.toLowerCase().includes(q) ||
@@ -258,6 +278,26 @@ export default function MissionsPage() {
           </select>
         </div>
 
+        <div className="flex-1 flex flex-col gap-1.5">
+          <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+            Statut
+          </label>
+          <select
+            value={filterPause}
+            onChange={(e) => handleFilterPauseChange(e.target.value)}
+            className="px-3 py-2 rounded-lg text-sm outline-none"
+            style={{
+              background: COLORS.BG_SECONDARY,
+              border: '1px solid var(--color-border-subtle)',
+              color: COLORS.TEXT_PRIMARY,
+            }}
+          >
+            <option value="actifs">Actifs</option>
+            <option value="pause">En pause</option>
+            <option value="tous">Tous</option>
+          </select>
+        </div>
+
         {isMatrixView && (
           <div className="flex-1 flex flex-col gap-1.5">
             <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
@@ -305,7 +345,7 @@ export default function MissionsPage() {
 
           {view === 'annee' ? (
             <YearMatrixView
-              clients={clients}
+              clients={visibleClients}
               year={year}
               filterTech={filterTech}
               filterSite={filterSite}
@@ -314,7 +354,7 @@ export default function MissionsPage() {
             />
           ) : (
             <WorkloadMatrixView
-              clients={clients}
+              clients={visibleClients}
               year={year}
               filterTech={filterTech}
               filterSite={filterSite}

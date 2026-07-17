@@ -112,6 +112,11 @@ export default function ClientPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId, isNewDraft])
 
+  function handleTogglePause() {
+    if (!client) return
+    triggerSave({ ...client, pause: !client.pause })
+  }
+
   function handleSitesChange(raw: string) {
     dispatch({ type: 'SET_SITES_INPUT', payload: raw })
     if (!client) return
@@ -188,6 +193,7 @@ export default function ClientPage() {
           onSetConfirmDelete={(v) => dispatch({ type: 'SET_CONFIRM_DELETE', payload: v })}
           onDelete={handleDeleteClient}
           onPdfPreview={(v) => dispatch({ type: 'SET_PDF_PREVIEW', payload: v })}
+          onTogglePause={handleTogglePause}
         />
       </div>
 

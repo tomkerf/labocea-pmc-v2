@@ -181,6 +181,7 @@ export interface Client {
   plans: Plan[]
   terrain?: TerrainEntry[]
   numBC?: string
+  pause?: boolean
   modeFacturation?: string
   situationActuelle?: string
   interlocuteurCommercial?: string

@@ -88,8 +88,9 @@ export function useDashboardStats({
   }, [preleveurs, initiales])
 
   const clients = useMemo(() => {
-    if (!userSite) return rawClients
-    return rawClients.filter((client) => {
+    const actifs = rawClients.filter((client) => !client.pause)
+    if (!userSite) return actifs
+    return actifs.filter((client) => {
       const prel = preleveurs.find(p => p.code === client.preleveur)
       return prel?.site?.toLowerCase() === userSite
     })
