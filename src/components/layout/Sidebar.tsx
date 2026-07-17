@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, CalendarRange, ListTodo, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText, Sparkles, FlaskConical, CloudRain, MessageSquare, Newspaper } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, CalendarDays, CalendarRange, ListTodo, Wrench, Gauge, Hammer, Inbox, ShieldAlert, Pipette, Bug, FileText, Sparkles, FlaskConical, MessageSquare, Newspaper } from 'lucide-react'
 import { m } from 'framer-motion'
 import { COLORS } from '@/lib/constants'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -80,10 +80,7 @@ export default function Sidebar() {
     {
       title: 'Outils & Support',
       items: [
-        { to: '/outils/asservissement', icon: FlaskConical, label: 'Asservissement'   },
-        { to: '/outils/estimation-volume', icon: CloudRain, label: 'Estimation volume' },
-        { to: '/infos',                icon: BookOpen,        label: 'Infos terrain'       },
-        { to: '/aide',                 icon: HelpCircle,  label: 'Mode d\'emploi'       },
+        { to: '/outils',                icon: FlaskConical, label: 'Outils'              },
       ]
     },
     {

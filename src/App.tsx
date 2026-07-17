@@ -32,6 +32,7 @@ const TourneePage        = lazy(() => import('@/pages/TourneePage'))
 const DemandesPage      = lazy(() => import('@/pages/DemandesPage'))
 const ComptePage        = lazy(() => import('@/pages/ComptePage'))
 const AdminPage             = lazy(() => import('@/pages/AdminPage'))
+const OutilsPage             = lazy(() => import('@/pages/OutilsPage'))
 const AsservissementPage    = lazy(() => import('@/pages/AsservissementPage'))
 const EstimationVolumePage  = lazy(() => import('@/pages/EstimationVolumePage'))
 const InfosPage             = lazy(() => import('@/pages/InfosPage'))
@@ -150,6 +151,9 @@ function AppRoutes() {
         } />
         <Route path="/admin" element={
           <RequireAdmin><Suspense fallback={<PageSpinner />}><AdminPage /></Suspense></RequireAdmin>
+        } />
+        <Route path="/outils" element={
+          <Suspense fallback={<PageSpinner />}><OutilsPage /></Suspense>
         } />
         <Route path="/outils/asservissement" element={
           <Suspense fallback={<PageSpinner />}><AsservissementPage /></Suspense>
