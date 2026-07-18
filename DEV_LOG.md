@@ -3,6 +3,22 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 182 — Navbar : retour à une section unique
+**18 juillet 2026**
+
+### Contexte
+Retour arrière demandé sur les sessions 179-181 : fusion de "Plus" dans "Activité & Planning", ordre explicite donné (Tableau de bord, Actualités, Demandes, Missions, Planning, Rapports, Tâches, Messagerie).
+
+### Modifications apportées
+- **`Sidebar.tsx`** : "Activité & Planning" redevient une section unique de 8 items, dans l'ordre ci-dessus. "Vue annuelle" retirée de la sidebar (absente de la liste demandée) — reste accessible via l'onglet dédié dans `MissionsPage`, la route `/vue-annuelle` étant conservée pour l'initialisation du mode vue. Import `CalendarRange` (icône désormais inutilisée) supprimé. "Matériel & Suivi" et "Outils & Support" restent repliables (non concernées par la demande).
+
+### État
+- TypeScript 0 erreur, lint 0 erreur, 339/339 tests verts.
+- Vérifié visuellement (Chrome MCP) : ordre conforme, sidebar tient sans scroll.
+- Commit `ed190e2` poussé, staging déployé (`dd074acc`).
+
+---
+
 ## Session 181 — Navbar : retrait du collapse sur "Plus"
 **18 juillet 2026**
 
