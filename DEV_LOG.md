@@ -3,6 +3,22 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 179 — Navbar : section "Plus" repliable
+**18 juillet 2026**
+
+### Contexte
+Retour utilisateur persistant après la réorg du 17 juillet (session 178) : la sidebar force toujours un scroll vertical (4 sections, 16 items — la section "Activité & Planning" à elle seule en comptait 9).
+
+### Modifications apportées
+- **`Sidebar.tsx`** : section "Activité & Planning" réduite aux 3 items les plus utilisés (Tableau de bord, Missions, Planning). Les 6 autres (Actualités, Demandes, Vue annuelle, Rapports, Tâches, Messagerie) déplacés dans une nouvelle section "Plus", repliable, fermée par défaut (`useState`, pas de persistance localStorage). En-tête cliquable avec chevron animé + badge agrégé rouge (non-lus chat + actus) visible uniquement quand la section est fermée, pour ne pas perdre en visibilité des notifications.
+
+### État
+- TypeScript 0 erreur, lint 0 erreur, 339/339 tests verts.
+- Vérifié visuellement en local (Chrome MCP) : sidebar tient sans scroll, dépliage/repliage fluide, badge "3" Messagerie conservé une fois "Plus" ouvert.
+- Commit `4022d9b` poussé, staging déployé (`e241b054`).
+
+---
+
 ## Session 178 — Mise en pause client + réorganisation navigation
 **17 juillet 2026**
 
