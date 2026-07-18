@@ -3,6 +3,22 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 180 — Navbar : généralisation des sections repliables
+**18 juillet 2026**
+
+### Contexte
+Suite de la session 179 : demande de déplier toutes les sections par défaut et de rendre "Matériel & Suivi" et "Outils & Support" repliables au même titre que "Plus".
+
+### Modifications apportées
+- **`Sidebar.tsx`** : remplacement de l'état `plusOpen` (booléen unique) par `collapsedSections` (`Set<string>` des titres repliés, vide par défaut → tout déplié à l'ouverture). `collapsible: true` ajouté sur les sections "Matériel & Suivi" et "Outils & Support" en plus de "Plus". Toggle générique `toggleSection(title)`.
+
+### État
+- TypeScript 0 erreur, lint 0 erreur, 339/339 tests verts.
+- Vérifié visuellement (Chrome MCP) : toutes les sections dépliées par défaut, chevrons présents sur Plus/Matériel/Outils, repli fonctionnel testé sur "Matériel & Suivi".
+- Commit `9bea52a` poussé, staging déployé (`0c7f3718`).
+
+---
+
 ## Session 179 — Navbar : section "Plus" repliable
 **18 juillet 2026**
 

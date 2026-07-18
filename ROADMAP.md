@@ -373,6 +373,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-07-16 | Audit UI/UX §12 ✅ | Quick wins + effort moyen soldés (bouton Charge désaturé, badges ClientCard, hauteur graphique Charge, EmptyCard icône, couleurs types événements planning). 39/39 tests. |
 | 2026-07-17 | Pause client + Navigation ✅ | Mise en pause d'un client (champ `pause`, toggle ClientHeader, filtre Missions/Dashboard/Planning). Réorg sidebar : ordre onglets, Rapports sous Planning, Tuyaux dans Matériel, accès direct Vue annuelle, page Outils regroupant les outils secondaires. Commit `40a398a` poussé. |
 | 2026-07-18 | Navbar section "Plus" ✅ | Scroll sidebar toujours présent malgré la réorg du 17/07 (9 items dans "Activité & Planning"). Section réduite à 3 items essentiels, 6 déplacés dans "Plus" repliable (badge agrégé non-lus). Commit `4022d9b`, staging déployé. |
+| 2026-07-18 | Navbar sections repliables généralisées ✅ | "Matériel & Suivi" et "Outils & Support" rendues repliables comme "Plus" ; toutes les sections dépliées par défaut à l'ouverture. Commit `9bea52a`, staging déployé. |
 
 
 
