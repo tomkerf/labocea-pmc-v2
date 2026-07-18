@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, CalendarRange, ListTodo, Wrench, Gauge, Hammer, Inbox, ShieldAlert, Pipette, Bug, FileText, Sparkles, FlaskConical, MessageSquare, Newspaper, ChevronDown } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, Gauge, Hammer, Inbox, ShieldAlert, Pipette, Bug, FileText, Sparkles, FlaskConical, MessageSquare, Newspaper, ChevronDown } from 'lucide-react'
 import { m } from 'framer-motion'
 import { COLORS } from '@/lib/constants'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -67,16 +67,10 @@ export default function Sidebar() {
       title: 'Activité & Planning',
       items: [
         { to: '/',             icon: LayoutDashboard, label: 'Tableau de bord', end: true },
-        { to: '/missions',     icon: ClipboardList,   label: 'Missions',        badge: true },
-        { to: '/planning',     icon: CalendarDays,    label: 'Planning'               },
-      ]
-    },
-    {
-      title: 'Plus',
-      items: [
         { to: '/actus',        icon: Newspaper,       label: 'Actualités'             },
         { to: '/demandes',     icon: Inbox,           label: 'Demandes'               },
-        { to: '/vue-annuelle', icon: CalendarRange,   label: 'Vue annuelle'           },
+        { to: '/missions',     icon: ClipboardList,   label: 'Missions',        badge: true },
+        { to: '/planning',     icon: CalendarDays,    label: 'Planning'               },
         { to: '/rapports',     icon: FileText,        label: 'Rapports'               },
         { to: '/todos',        icon: ListTodo,        label: 'Tâches'                 },
         { to: '/chat',         icon: MessageSquare,   label: 'Messagerie'             },
