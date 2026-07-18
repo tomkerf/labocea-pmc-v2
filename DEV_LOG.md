@@ -3,6 +3,18 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 181 — Navbar : retrait du collapse sur "Plus"
+**18 juillet 2026**
+
+### Modifications apportées
+- **`Sidebar.tsx`** : retrait de `collapsible: true` sur la section "Plus", qui redevient un header statique toujours déplié (comme "Activité & Planning" et "Mon Espace"). Seules "Matériel & Suivi" et "Outils & Support" restent repliables. Suppression du badge agrégé associé (devenu mort).
+
+### État
+- TypeScript 0 erreur, lint 0 erreur, 339/339 tests verts.
+- Commit `3d1e890` poussé, staging déployé (`e34891a6`).
+
+---
+
 ## Session 180 — Navbar : généralisation des sections repliables
 **18 juillet 2026**
 
