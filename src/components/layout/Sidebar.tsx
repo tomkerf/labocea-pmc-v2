@@ -73,7 +73,6 @@ export default function Sidebar() {
     },
     {
       title: 'Plus',
-      collapsible: true,
       items: [
         { to: '/actus',        icon: Newspaper,       label: 'Actualités'             },
         { to: '/demandes',     icon: Inbox,           label: 'Demandes'               },
@@ -139,7 +138,6 @@ export default function Sidebar() {
       <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-3 flex flex-col gap-4" style={{ scrollbarWidth: 'none' }}>
         {sections.map((section) => {
           const isExpanded = !collapsedSections.has(section.title)
-          const badgeCount = section.title === 'Plus' ? chatUnreadCount + actusUnreadCount : 0
           const showItems = !section.collapsible || isExpanded
           return (
           <div key={section.title} className="flex flex-col gap-0.5">
@@ -152,12 +150,6 @@ export default function Sidebar() {
                 aria-expanded={isExpanded}
               >
                 {section.title}
-                {badgeCount > 0 && !isExpanded && (
-                  <span className="text-[9px] font-bold px-1.5 rounded-full"
-                    style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger-text)', minWidth: 15, textAlign: 'center' }}>
-                    {badgeCount}
-                  </span>
-                )}
                 <ChevronDown size={12} strokeWidth={2.2}
                   style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s cubic-bezier(0.4,0,0.2,1)' }} />
               </button>
