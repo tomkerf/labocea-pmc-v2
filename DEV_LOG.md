@@ -3,6 +3,29 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 178 — Mise en pause client + réorganisation navigation
+**17 juillet 2026**
+
+### Contexte
+Rattrapage de journalisation : 9 commits du 17 juillet non documentés au moment de la session (dashboard fixes, feature pause, refonte navigation).
+
+### Modifications apportées
+- **Avatar THK dashboard** : rendu cliquable vers `/compte` avec affordance hover (`5ca74bf`).
+- **Mise en pause d'un client** (`51872e7`, spec `dc59ce3`) : champ `pause` sur `Client`, toggle pause/réactivation dans `ClientHeader.tsx` (badge « En pause »), filtre pause sur `MissionsPage.tsx` (liste + matrices, `visibleClients`), exclusion automatique des clients en pause des statistiques dashboard (`useDashboardStats`) et du Planning. Tests ajoutés sur `useDashboardStats`.
+- **Accessibilité filtres Missions** : association label↔select sur les filtres (`901f227`).
+- **Réorganisation de la sidebar** (série de commits `1500cdb`→`40a398a`) :
+  - Réordonnancement des onglets principaux : Dashboard, Actualités, Demandes, Missions, Planning.
+  - Onglet Rapports déplacé sous Planning.
+  - Onglet Tuyaux déplacé dans la section Matériel & Suivi.
+  - Accès direct à la Vue annuelle depuis la sidebar (nouvelle route `/vue-annuelle`, initialisation du mode vue à partir de la route).
+  - Regroupement des outils secondaires (Estimation volume rejet, Asservissement, etc.) derrière une page dédiée `/outils`, pour désencombrer la sidebar (trop d'onglets → scroll nécessaire, cf. observation 6277).
+
+### État
+- Commit `40a398a` poussé vers `origin/main`.
+- Fichier parasite `ClientHeader 2.tsx` (doublon obsolète pré-pause, généré par erreur) supprimé du répertoire de travail.
+
+---
+
 ## Session 177 — Audit UI/UX §12 : quick wins + effort moyen soldés
 **16 juillet 2026**
 

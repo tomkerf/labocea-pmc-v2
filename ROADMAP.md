@@ -370,6 +370,8 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-07-05 | Réactions emoji + durcissement sécurité chat ✅ | Réactions emoji rapides sur les messages (6 emojis, badges cumulés, toggle). Revue sécurité automatisée : 3 failles Firestore corrigées sur pollVotes/reactions (authorization-bypass, missing-authorization DM, resource-exhaustion clés arbitraires). Règles redéployées et vérifiées. 323/323 tests. |
 | 2026-07-06 | Premortem #3 + solidité chat ✅ | Premortem refait sur le module messagerie : churn de listeners corrigé (lastSeen via getState, deps stables), createdAt → serverTimestamp (horloge client faussait ordre + non-lus), photos DM isolées aux participants (storage.rules déployées). 335 tests (+12). Restent : re-mesure quota Spark, 10 erreurs lint héritées du chat, isolation Firestore. |
 | 2026-07-06 | Lint 0 rétabli (module chat) ✅ | Les 10 erreurs + 1 warning hérités des sessions chat soldés : état messages/loading dérivé dans ChatPage (fin du set-state-in-effect), types any éliminés, alert→toast, payloads chatService typés. Bug corrigé au passage : badge Messagerie du menu mobile figé (dep useMemo manquante). Lint 0/0, 335 tests, staging déployé. |
+| 2026-07-16 | Audit UI/UX §12 ✅ | Quick wins + effort moyen soldés (bouton Charge désaturé, badges ClientCard, hauteur graphique Charge, EmptyCard icône, couleurs types événements planning). 39/39 tests. |
+| 2026-07-17 | Pause client + Navigation ✅ | Mise en pause d'un client (champ `pause`, toggle ClientHeader, filtre Missions/Dashboard/Planning). Réorg sidebar : ordre onglets, Rapports sous Planning, Tuyaux dans Matériel, accès direct Vue annuelle, page Outils regroupant les outils secondaires. Commit `40a398a` poussé. |
 
 
 
