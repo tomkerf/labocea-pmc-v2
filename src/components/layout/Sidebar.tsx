@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, CalendarRange, ListTodo, Wrench, Gauge, Hammer, Inbox, ShieldAlert, Pipette, Bug, FileText, Sparkles, FlaskConical, MessageSquare, Newspaper } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, CalendarDays, CalendarRange, ListTodo, Wrench, Gauge, Hammer, Inbox, ShieldAlert, Pipette, Bug, FileText, Sparkles, FlaskConical, MessageSquare, Newspaper, ChevronDown } from 'lucide-react'
 import { m } from 'framer-motion'
 import { COLORS } from '@/lib/constants'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -26,6 +26,7 @@ interface NavItem {
 interface NavSection {
   title: string
   items: NavItem[]
+  collapsible?: boolean
 }
 
 
@@ -34,6 +35,7 @@ export default function Sidebar() {
   const appUser = useAuthStore(selectAppUser)
   const role    = useAuthStore(selectRole)
   const [bugOpen, setBugOpen] = useState(false)
+  const [plusOpen, setPlusOpen] = useState(false)
   const changelog = useChangelogState()
   const { unreadCount: chatUnreadCount } = useChatNotificationStore()
   const uid = useAuthStore(selectUid)
@@ -58,11 +60,17 @@ export default function Sidebar() {
       title: 'Activité & Planning',
       items: [
         { to: '/',             icon: LayoutDashboard, label: 'Tableau de bord', end: true },
+        { to: '/missions',     icon: ClipboardList,   label: 'Missions',        badge: true },
+        { to: '/planning',     icon: CalendarDays,    label: 'Planning'               },
+      ]
+    },
+    {
+      title: 'Plus',
+      collapsible: true,
+      items: [
         { to: '/actus',        icon: Newspaper,       label: 'Actualités'             },
         { to: '/demandes',     icon: Inbox,           label: 'Demandes'               },
-        { to: '/missions',     icon: ClipboardList,   label: 'Missions',        badge: true },
         { to: '/vue-annuelle', icon: CalendarRange,   label: 'Vue annuelle'           },
-        { to: '/planning',     icon: CalendarDays,    label: 'Planning'               },
         { to: '/rapports',     icon: FileText,        label: 'Rapports'               },
         { to: '/todos',        icon: ListTodo,        label: 'Tâches'                 },
         { to: '/chat',         icon: MessageSquare,   label: 'Messagerie'             },
@@ -120,13 +128,36 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-3 flex flex-col gap-4" style={{ scrollbarWidth: 'none' }}>
-        {sections.map((section) => (
+        {sections.map((section) => {
+          const plusBadgeCount = section.collapsible ? chatUnreadCount + actusUnreadCount : 0
+          const showItems = !section.collapsible || plusOpen
+          return (
           <div key={section.title} className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-semibold uppercase tracking-widest px-3 mb-1.5 block select-none"
-              style={{ color: COLORS.TEXT_SECONDARY, opacity: 0.5 }}>
-              {section.title}
-            </span>
-            {section.items.map(({ to, icon: Icon, label, end, isAccount }) => (
+            {section.collapsible ? (
+              <button
+                type="button"
+                onClick={() => setPlusOpen(o => !o)}
+                className="flex items-center gap-1.5 px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest select-none"
+                style={{ color: COLORS.TEXT_SECONDARY, opacity: 0.7 }}
+                aria-expanded={plusOpen}
+              >
+                {section.title}
+                {plusBadgeCount > 0 && !plusOpen && (
+                  <span className="text-[9px] font-bold px-1.5 rounded-full"
+                    style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger-text)', minWidth: 15, textAlign: 'center' }}>
+                    {plusBadgeCount}
+                  </span>
+                )}
+                <ChevronDown size={12} strokeWidth={2.2}
+                  style={{ transform: plusOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s cubic-bezier(0.4,0,0.2,1)' }} />
+              </button>
+            ) : (
+              <span className="text-[10px] font-semibold uppercase tracking-widest px-3 mb-1.5 block select-none"
+                style={{ color: COLORS.TEXT_SECONDARY, opacity: 0.5 }}>
+                {section.title}
+              </span>
+            )}
+            {showItems && section.items.map(({ to, icon: Icon, label, end, isAccount }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -195,7 +226,8 @@ export default function Sidebar() {
               </NavLink>
             ))}
           </div>
-        ))}
+          )
+        })}
       </nav>
 
       {/* Sync badge + Bouton signalement bug */}
