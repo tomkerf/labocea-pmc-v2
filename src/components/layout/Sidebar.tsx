@@ -35,7 +35,14 @@ export default function Sidebar() {
   const appUser = useAuthStore(selectAppUser)
   const role    = useAuthStore(selectRole)
   const [bugOpen, setBugOpen] = useState(false)
-  const [plusOpen, setPlusOpen] = useState(false)
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set())
+
+  const toggleSection = (title: string) => setCollapsedSections(prev => {
+    const next = new Set(prev)
+    if (next.has(title)) next.delete(title)
+    else next.add(title)
+    return next
+  })
   const changelog = useChangelogState()
   const { unreadCount: chatUnreadCount } = useChatNotificationStore()
   const uid = useAuthStore(selectUid)
@@ -78,6 +85,7 @@ export default function Sidebar() {
     },
     {
       title: 'Matériel & Suivi',
+      collapsible: true,
       items: [
         { to: '/materiel',     icon: Wrench,          label: 'Matériel'               },
         { to: '/metrologie',   icon: Gauge,           label: 'Métrologie'             },
@@ -87,6 +95,7 @@ export default function Sidebar() {
     },
     {
       title: 'Outils & Support',
+      collapsible: true,
       items: [
         { to: '/outils',                icon: FlaskConical, label: 'Outils'              },
       ]
@@ -129,27 +138,28 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-3 flex flex-col gap-4" style={{ scrollbarWidth: 'none' }}>
         {sections.map((section) => {
-          const plusBadgeCount = section.collapsible ? chatUnreadCount + actusUnreadCount : 0
-          const showItems = !section.collapsible || plusOpen
+          const isExpanded = !collapsedSections.has(section.title)
+          const badgeCount = section.title === 'Plus' ? chatUnreadCount + actusUnreadCount : 0
+          const showItems = !section.collapsible || isExpanded
           return (
           <div key={section.title} className="flex flex-col gap-0.5">
             {section.collapsible ? (
               <button
                 type="button"
-                onClick={() => setPlusOpen(o => !o)}
+                onClick={() => toggleSection(section.title)}
                 className="flex items-center gap-1.5 px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest select-none"
                 style={{ color: COLORS.TEXT_SECONDARY, opacity: 0.7 }}
-                aria-expanded={plusOpen}
+                aria-expanded={isExpanded}
               >
                 {section.title}
-                {plusBadgeCount > 0 && !plusOpen && (
+                {badgeCount > 0 && !isExpanded && (
                   <span className="text-[9px] font-bold px-1.5 rounded-full"
                     style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger-text)', minWidth: 15, textAlign: 'center' }}>
-                    {plusBadgeCount}
+                    {badgeCount}
                   </span>
                 )}
                 <ChevronDown size={12} strokeWidth={2.2}
-                  style={{ transform: plusOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s cubic-bezier(0.4,0,0.2,1)' }} />
+                  style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s cubic-bezier(0.4,0,0.2,1)' }} />
               </button>
             ) : (
               <span className="text-[10px] font-semibold uppercase tracking-widest px-3 mb-1.5 block select-none"
