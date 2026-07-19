@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
@@ -8,11 +8,23 @@ import { useSpotlightStore } from '@/stores/spotlightStore'
 import { useSpotlightResults } from '@/hooks/useSpotlightResults'
 import { COLORS } from '@/lib/constants'
 
-interface FlatResult {
-  key: string
+interface ResultRowProps {
   label: string
   sublabel: string
-  to: string
+  isSelected: boolean
+  onClick: () => void
+}
+
+function ResultRow({ label, sublabel, isSelected, onClick }: ResultRowProps) {
+  return (
+    <button type="button"
+      onClick={onClick}
+      className="flex flex-col items-start px-2 py-2 rounded-lg text-left"
+      style={{ background: isSelected ? 'var(--color-accent-light)' : 'transparent' }}>
+      <span className="text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>{label}</span>
+      <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{sublabel}</span>
+    </button>
+  )
 }
 
 export default function SpotlightModal() {
@@ -21,54 +33,50 @@ export default function SpotlightModal() {
   const close = useSpotlightStore((s) => s.close)
   const clients = useMissionsStore((s) => s.clients)
   const [query, setQuery] = useState('')
+  const [prevQuery, setPrevQuery] = useState(query)
   const [selectedIndex, setSelectedIndex] = useState(0)
 
   const results = useSpotlightResults(clients, query)
 
-  const flatResults = useMemo<FlatResult[]>(() => [
-    ...results.clients.map((c) => ({
-      key: `client-${c.id}`,
-      label: c.nom,
-      sublabel: c.segment || 'Client',
-      to: `/missions/${c.id}`,
-    })),
-    ...results.plans.map(({ plan, client }) => ({
-      key: `plan-${plan.id}`,
-      label: plan.nom,
-      sublabel: `${client.nom} · ${plan.siteNom}`,
-      to: `/missions/${client.id}/plan/${plan.id}`,
-    })),
+  // Adjust state during render (React-documented pattern) instead of an
+  // effect: keeps selection in sync with the query without a set-state-in-effect.
+  if (query !== prevQuery) {
+    setPrevQuery(query)
+    setSelectedIndex(0)
+  }
+
+  const flatTargets = useMemo<string[]>(() => [
+    ...results.clients.map((c) => `/missions/${c.id}`),
+    ...results.plans.map(({ plan, client }) => `/missions/${client.id}/plan/${plan.id}`),
   ], [results])
 
-  useEffect(() => {
-    setSelectedIndex(0)
-  }, [query])
-
-  useEffect(() => {
-    if (!isOpen) setQuery('')
-  }, [isOpen])
-
-  function handleSelect(result: FlatResult) {
-    navigate(result.to)
+  function handleClose() {
     close()
+    setQuery('')
+    setSelectedIndex(0)
+  }
+
+  function handleSelect(to: string) {
+    navigate(to)
+    handleClose()
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'ArrowDown') {
       e.preventDefault()
-      setSelectedIndex((i) => Math.min(i + 1, flatResults.length - 1))
+      setSelectedIndex((i) => Math.min(i + 1, flatTargets.length - 1))
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       setSelectedIndex((i) => Math.max(i - 1, 0))
     } else if (e.key === 'Enter') {
       e.preventDefault()
-      const selected = flatResults[selectedIndex]
-      if (selected) handleSelect(selected)
+      const target = flatTargets[selectedIndex]
+      if (target) handleSelect(target)
     }
   }
 
   return (
-    <BaseModal isOpen={isOpen} onClose={close} hideCloseButton maxWidth="lg">
+    <BaseModal isOpen={isOpen} onClose={handleClose} hideCloseButton maxWidth="lg">
       <div className="flex flex-col gap-1 -mt-2">
         <div className="flex items-center gap-2 px-1 pb-3" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
           <Search size={16} style={{ color: 'var(--color-text-tertiary)' }} />
@@ -84,7 +92,7 @@ export default function SpotlightModal() {
           />
         </div>
 
-        {query.trim() && flatResults.length === 0 && (
+        {query.trim() && flatTargets.length === 0 && (
           <p className="text-sm px-1 py-4" style={{ color: 'var(--color-text-tertiary)' }}>
             Aucun résultat pour « {query} »
           </p>
@@ -96,13 +104,12 @@ export default function SpotlightModal() {
               Clients
             </p>
             {results.clients.map((c, i) => (
-              <button key={c.id} type="button"
-                onClick={() => handleSelect(flatResults[i])}
-                className="flex flex-col items-start px-2 py-2 rounded-lg text-left"
-                style={{ background: selectedIndex === i ? 'var(--color-accent-light)' : 'transparent' }}>
-                <span className="text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>{c.nom}</span>
-                <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{c.segment || 'Client'}</span>
-              </button>
+              <ResultRow key={c.id}
+                label={c.nom}
+                sublabel={c.segment || 'Client'}
+                isSelected={selectedIndex === i}
+                onClick={() => handleSelect(flatTargets[i])}
+              />
             ))}
           </div>
         )}
@@ -115,13 +122,12 @@ export default function SpotlightModal() {
             {results.plans.map(({ plan, client }, i) => {
               const flatIndex = results.clients.length + i
               return (
-                <button key={plan.id} type="button"
-                  onClick={() => handleSelect(flatResults[flatIndex])}
-                  className="flex flex-col items-start px-2 py-2 rounded-lg text-left"
-                  style={{ background: selectedIndex === flatIndex ? 'var(--color-accent-light)' : 'transparent' }}>
-                  <span className="text-sm" style={{ color: COLORS.TEXT_PRIMARY }}>{plan.nom}</span>
-                  <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{client.nom} · {plan.siteNom}</span>
-                </button>
+                <ResultRow key={plan.id}
+                  label={plan.nom}
+                  sublabel={`${client.nom} · ${plan.siteNom}`}
+                  isSelected={selectedIndex === flatIndex}
+                  onClick={() => handleSelect(flatTargets[flatIndex])}
+                />
               )
             })}
           </div>
