@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '154'
+export const CHANGELOG_VERSION = '155'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,14 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '155',
+    date: '19 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Mode d\'emploi : Refonte complète de la page d\'aide pour la rendre interactive et fluide (split-pane sur ordinateur, accordéons animés sur mobile)' },
+      { type: 'feat', label: 'Mode d\'emploi : Ajout d\'une barre de recherche par mots-clés, de raccourcis FAQ et d\'un indicateur de progression de lecture persistant' },
+    ],
+  },
   {
     version: '154',
     date: '9 juillet 2026',

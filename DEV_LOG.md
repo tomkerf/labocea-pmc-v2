@@ -3,6 +3,24 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 185 — Refonte interactive du Mode d'emploi
+**19 juillet 2026**
+
+### Modifications apportées
+- **`AidePage.tsx`** : Refonte complète de la page d'aide en interface interactive "Apple-style" :
+  - **Mise en page réactive** : layout split-pane (sidebar pour les catégories de navigation et panneau central de lecture) sur desktop, accordéons individuels et animés avec Framer Motion sur mobile.
+  - **Recherche par mots-clés** : barre de recherche effectuant un filtrage flou en temps réel sur les titres, sous-titres et mots-clés prédéfinis de chaque section du guide.
+  - **Accès rapides FAQ** : rangée de questions courantes cliquables pour rediriger instantanément l'utilisateur vers la bonne section.
+  - **Suivi de progression de lecture** : barre de progression dynamique montrant le pourcentage du guide lu, avec persistence locale dans le `localStorage` de l'appareil (possibilité de marquer comme lu/non lu et de réinitialiser la progression).
+  - **Raccourcis clavier** : focus automatique de la barre de recherche via la touche `/` ou `meta+k`.
+- **`changelog.ts`** : Incrémentation en version `155` avec description des nouveautés du mode d'emploi.
+
+### État
+- TypeScript 0 erreur, lint 0 erreur, 339/339 tests verts.
+- Build de production compilé avec succès (0 avertissement critique).
+
+---
+
 ## Session 184 — Navbar : sections repliables fermées par défaut
 **19 juillet 2026**
 
