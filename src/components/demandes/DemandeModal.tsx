@@ -13,13 +13,29 @@ function Sec({ label }: { label: string }) {
   )
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>{label}</label>
+      <label className="text-xs font-medium" style={{ color: COLORS.TEXT_SECONDARY }}>
+        {label}{required && <span style={{ color: COLORS.DANGER }}> *</span>}
+      </label>
       {children}
+      {error && <p className="text-xs" style={{ color: COLORS.DANGER }}>{error}</p>}
     </div>
   )
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function validate(form: { contactNom: string; contactSociete: string; contactEmail: string }) {
+  const errors: { contact?: string; contactEmail?: string } = {}
+  if (!form.contactNom.trim() && !form.contactSociete.trim()) {
+    errors.contact = 'Le nom ou la société est obligatoire'
+  }
+  if (form.contactEmail.trim() && !EMAIL_RE.test(form.contactEmail.trim())) {
+    errors.contactEmail = "Format d'email invalide"
+  }
+  return errors
 }
 
 interface DemandeModalProps {
@@ -39,13 +55,25 @@ export function DemandeModal({ demande, users, onClose, onSave, onDelete, onConv
     ...EMPTY,
     ...demande,
   })
+  const [touched, setTouched] = useState<{ contactNom?: boolean; contactSociete?: boolean; contactEmail?: boolean }>({})
 
   function set(field: string, val: string) {
     setForm(f => ({ ...f, [field]: val }))
   }
 
+  function touch(field: 'contactNom' | 'contactSociete' | 'contactEmail') {
+    setTouched(t => ({ ...t, [field]: true }))
+  }
+
+  const errors = validate(form)
+  const isInvalid = !!errors.contact || !!errors.contactEmail
+  const invalidReasons = [errors.contact, errors.contactEmail].filter(Boolean).join(' — ')
+
   function handleSave() {
-    if (!form.contactNom.trim() && !form.contactSociete.trim()) return
+    if (isInvalid) {
+      setTouched({ contactNom: true, contactSociete: true, contactEmail: true })
+      return
+    }
     setSaving(true)
     onSave({ ...demande, ...form } as Demande)
   }
@@ -85,10 +113,17 @@ export function DemandeModal({ demande, users, onClose, onSave, onDelete, onConv
         <div className="flex flex-col gap-4">
           {/* Contact */}
           <Sec label="Contact" />
+          <p className="text-xs -mt-2" style={{ color: 'var(--color-text-tertiary)' }}>Nom ou société obligatoire</p>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Nom"><input aria-label="Nom" value={form.contactNom} onChange={e => set('contactNom', e.target.value)} placeholder="Prénom Nom" className="field-input w-full" /></Field>
-            <Field label="Société"><input aria-label="Société" value={form.contactSociete} onChange={e => set('contactSociete', e.target.value)} placeholder="Organisme" className="field-input w-full" /></Field>
-            <Field label="Email"><input aria-label="Email" type="email" value={form.contactEmail} onChange={e => set('contactEmail', e.target.value)} placeholder="email@…" className="field-input w-full" /></Field>
+            <Field label="Nom" required error={touched.contactNom && errors.contact ? errors.contact : undefined}>
+              <input aria-label="Nom" value={form.contactNom} onChange={e => set('contactNom', e.target.value)} onBlur={() => touch('contactNom')} placeholder="Prénom Nom" className="field-input w-full" />
+            </Field>
+            <Field label="Société" required error={touched.contactSociete && errors.contact ? errors.contact : undefined}>
+              <input aria-label="Société" value={form.contactSociete} onChange={e => set('contactSociete', e.target.value)} onBlur={() => touch('contactSociete')} placeholder="Organisme" className="field-input w-full" />
+            </Field>
+            <Field label="Email" error={touched.contactEmail && errors.contactEmail ? errors.contactEmail : undefined}>
+              <input aria-label="Email" type="email" value={form.contactEmail} onChange={e => set('contactEmail', e.target.value)} onBlur={() => touch('contactEmail')} placeholder="email@…" className="field-input w-full" />
+            </Field>
             <Field label="Téléphone"><input aria-label="Téléphone" value={form.contactTel} onChange={e => set('contactTel', e.target.value)} placeholder="06 XX…" className="field-input w-full" /></Field>
           </div>
 
@@ -179,17 +214,19 @@ export function DemandeModal({ demande, users, onClose, onSave, onDelete, onConv
             </button>
             {form.statut === 'devis_signe' && !isNew && onConvertir && (
               <button type="button"
-                disabled={saving}
+                disabled={saving || isInvalid}
+                title={isInvalid ? invalidReasons : undefined}
                 onClick={() => { handleSave(); onConvertir({ ...demande, ...form } as Demande) }}
                 className="text-sm px-4 py-2 rounded-lg font-semibold"
-                style={{ background: COLORS.SUCCESS, color: 'white', opacity: saving ? 0.6 : 1 }}>
+                style={{ background: COLORS.SUCCESS, color: 'white', opacity: saving || isInvalid ? 0.6 : 1 }}>
                 → Créer la mission
               </button>
             )}
             <button type="button" onClick={handleSave}
-              disabled={saving}
+              disabled={saving || isInvalid}
+              title={isInvalid ? invalidReasons : undefined}
               className="text-sm px-4 py-2 rounded-lg font-medium"
-              style={{ background: COLORS.ACCENT, color: 'white', opacity: saving ? 0.6 : 1 }}>
+              style={{ background: COLORS.ACCENT, color: 'white', opacity: saving || isInvalid ? 0.6 : 1 }}>
               {isNew ? (saving ? 'Création…' : 'Créer') : (saving ? 'Enregistrement…' : 'Enregistrer')}
             </button>
           </div>
