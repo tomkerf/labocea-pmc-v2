@@ -3,6 +3,18 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 184 — Navbar : sections repliables fermées par défaut
+**19 juillet 2026**
+
+### Modifications apportées
+- **`Sidebar.tsx`** : `collapsedSections` initialisé avec `['Matériel & Suivi', 'Outils & Support']` au lieu d'un `Set` vide — ces deux sections démarrent repliées.
+
+### État
+- TypeScript 0 erreur, lint 0 erreur, 339/339 tests verts.
+- Commit `6c9c3e4` poussé, staging déployé (`1a91a962`).
+
+---
+
 ## Session 183 — Navbar : retour des onglets Outils
 **19 juillet 2026**
 
