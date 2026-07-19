@@ -26,6 +26,11 @@
 ## react-doctor/effect-needs-cleanup
 
 - `src/components/planning/MapView.tsx:153` — `marker.on()` sont des listeners Leaflet. Le cleanup du premier `useEffect` appelle `mapRef.current.remove()` qui détruit la carte et tous ses layers/listeners. Pas de fuite mémoire.
+- `src/components/planning/useMapMarkers.ts:49` — même famille : `marker.on('popupopen'/'popupclose', …)` par marqueur Leaflet. Le cleanup du `useEffect` (lignes 113-116) appelle `markers.forEach(m => m.off())` (retire tous les listeners du marqueur) puis `markerGroup.clearLayers()`. Pas de fuite mémoire. FP.
+
+## react-doctor/no-prop-callback-in-render
+
+- `src/hooks/usePlanningExports.ts:32` — `filteredForDayFlat(dateStr)` (prop callback) est appelé dans un `useMemo`, pas pendant un rendu impur. La fonction est pure : elle enchaîne `filterEvents` → `sortEvts`/`groupByClient` (filtrage, tri) sans effet de bord, `setState` ni mutation externe. FP.
 
 ## dist_old/
 

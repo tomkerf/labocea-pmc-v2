@@ -101,11 +101,13 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
                 return (
                   <m.div
                     key={todo.id}
-                    initial={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                    layout
+                    initial={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
                     className="flex items-start gap-3 px-4 py-3 group relative transition-colors hover:bg-neutral-50"
                     style={{
+                      overflow: 'hidden',
                       borderBottom:
                         i < visibleTodos.length - 1 ? '1px solid var(--color-border-subtle)' : 'none',
                     }}
