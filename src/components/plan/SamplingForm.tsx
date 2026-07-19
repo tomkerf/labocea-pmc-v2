@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { HelpCircle } from 'lucide-react'
 import { uploadSamplingPhoto, deleteSamplingPhoto, ImageValidationError } from '@/lib/uploadPhoto'
-import { computeRapportDatePrevue } from '@/lib/samplings'
+import { computeRapportDatePrevue, validateSampling } from '@/lib/samplings'
 import { toast } from '@/stores/toastStore'
 import type { AppUser, Sampling, SamplingStatus, NappeType, ChecklistItem } from '@/types'
 import { COLORS } from '@/lib/constants'
@@ -22,9 +22,11 @@ interface SamplingFormProps {
   users?: AppUser[]
   clientId: string
   planId: string
+  saving?: boolean
 }
 
-export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId, planId }: SamplingFormProps) {
+export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId, planId, saving }: SamplingFormProps) {
+  const errors = validateSampling(sampling)
   // Auto-remplir rapportDatePrevue = doneDate + 1 mois pour les prélèvements existants
   useEffect(() => {
     if (sampling.rapportPrevu && !sampling.rapportDatePrevue && sampling.doneDate) {
@@ -79,6 +81,9 @@ export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+      {saving && (
+        <p className="sm:col-span-2 text-xs -mb-1" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</p>
+      )}
       <div>
         <label htmlFor="sf-status" className="flex items-center gap-1 text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
           Statut
@@ -146,7 +151,9 @@ export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId
         <label htmlFor="sf-done-date" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>Date réalisée</label>
         <input id="sf-done-date" type="date" value={sampling.doneDate}
           onChange={(e) => onUpdate('doneDate', e.target.value)}
-          className="field-input w-full" />
+          className="field-input w-full"
+          style={errors.doneDate ? { borderColor: COLORS.DANGER } : undefined} />
+        {errors.doneDate && <p className="text-xs mt-1" style={{ color: COLORS.DANGER }}>{errors.doneDate}</p>}
       </div>
 
       {sampling.status === 'done' && users.length > 0 && (
@@ -249,7 +256,9 @@ export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId
             onChange={(e) => onUpdate('motif', e.target.value)}
             placeholder="Ex : Pas d'eau sur site / Annulation client / Accès impossible…"
             className="field-input w-full"
+            style={errors.motif ? { borderColor: COLORS.DANGER } : undefined}
           />
+          {errors.motif && <p className="text-xs mt-1" style={{ color: COLORS.DANGER }}>{errors.motif}</p>}
         </div>
       )}
 

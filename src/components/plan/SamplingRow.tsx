@@ -2,6 +2,7 @@ import { X, Trash2, Clock, ChevronRight } from 'lucide-react'
 import { SamplingForm } from './SamplingForm'
 import type { Sampling, SamplingStatus, AppUser } from '@/types'
 import { COLORS } from '@/lib/constants'
+import { validateSampling } from '@/lib/samplings'
 
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -24,6 +25,7 @@ interface SamplingRowProps {
   clientId: string
   planId: string
   users: AppUser[]
+  saving?: boolean
   onSelect: () => void
   onUpdate: (field: keyof Sampling, val: unknown) => void
   onDeleteRequest: () => void
@@ -41,6 +43,7 @@ export function SamplingRow({
   clientId,
   planId,
   users,
+  saving,
   onSelect,
   onUpdate,
   onDeleteRequest,
@@ -48,6 +51,7 @@ export function SamplingRow({
   onDeleteConfirm,
 }: SamplingRowProps) {
   const cfg = STATUS_CONFIG[s.status] ?? STATUS_CONFIG['planned']
+  const incomplete = Object.keys(validateSampling(s)).length > 0
   const dateLabel = s.dateUndefined
     ? 'Date à définir'
     : isCustom
@@ -84,6 +88,12 @@ export function SamplingRow({
             style={{ background: cfg.bg, color: cfg.color }}>
             {cfg.label}
           </span>
+          {incomplete && (
+            <span className="text-xs px-2.5 py-1 rounded-full font-medium"
+              style={{ background: 'var(--color-danger-light)', color: COLORS.DANGER }}>
+              Incomplet
+            </span>
+          )}
           <ChevronRight size={14} className="shrink-0 transition-transform" style={{ color: 'var(--color-text-tertiary)', transform: isSelected ? 'rotate(90deg)' : 'none' }} />
         </button>
 
@@ -132,6 +142,7 @@ export function SamplingRow({
             users={users}
             clientId={clientId}
             planId={planId}
+            saving={saving}
           />
         </div>
       )}

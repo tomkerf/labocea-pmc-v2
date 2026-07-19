@@ -183,6 +183,7 @@ export default function PlanPage() {
                 clientId={clientId!}
                 planId={planId!}
                 users={users}
+                saving={saving}
                 onSelect={() => setSelectedSampling(selectedSampling === s.id ? null : s.id)}
                 onUpdate={(field, val) => updateSampling(s.id, field, val)}
                 onDeleteRequest={() => setConfirmDelSampling(s.id)}

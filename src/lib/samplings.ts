@@ -10,6 +10,18 @@ export function computeRapportDatePrevue(doneDateISO: string): string {
   return d.toISOString().slice(0, 10)
 }
 
+/** Champs requis selon le statut : motif si Non effectué/En retard, date réalisée si Réalisé. */
+export function validateSampling(s: Pick<Sampling, 'status' | 'motif' | 'doneDate'>) {
+  const errors: { motif?: string; doneDate?: string } = {}
+  if ((s.status === 'non_effectue' || s.status === 'overdue') && !(s.motif ?? '').trim()) {
+    errors.motif = 'Motif obligatoire pour ce statut'
+  }
+  if (s.status === 'done' && !s.doneDate) {
+    errors.doneDate = 'Date réalisée obligatoire pour un prélèvement réalisé'
+  }
+  return errors
+}
+
 /** Génère la liste initiale des prélèvements pour un plan selon sa fréquence.
  *  - 'Personnalisé' → retourne [] (saisie manuelle uniquement)
  *  - 'Bimensuel'    → 2 prélèvements par mois, jour non fixé (plannedDay = 0)
