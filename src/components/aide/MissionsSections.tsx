@@ -161,8 +161,9 @@ export function MissionClientSection() {
         </Tip>
         <Tip icon={FileText}>
           <span>
-            <strong>Matrice annuelle</strong> — depuis le Planning en vue Année, filtre par agence (Brest / Quimper)
-            pour voir le planning de ton secteur en un coup d'œil.
+            <strong>Matrice annuelle</strong> — depuis <strong>Missions</strong>, bascule sur l'onglet{' '}
+            <strong>Vue annuelle</strong> pour voir toute l'année d'un coup d'œil. L'onglet <strong>Charge</strong>{' '}
+            à côté donne la répartition de la charge de travail.
           </span>
         </Tip>
       </div>

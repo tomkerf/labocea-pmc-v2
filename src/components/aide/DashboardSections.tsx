@@ -25,14 +25,24 @@ export function DashboardSection() {
             <Step num={2}>
               <strong>Planning du jour</strong> — interventions prévues aujourd'hui (et demain en basculant),
               avec statut et lien vers la fiche mission. Un badge météo s'affiche si des prélèvements pluie sont au programme.
+              L'icône <strong>appareil photo</strong> sur une ligne rattache directement une photo au prélèvement.
             </Step>
             <Step num={3}>
+              <strong>🚙 Mode Tournée du Jour</strong> — le gros bouton bleu sous le planning du jour.
+              C'est le chemin le plus rapide pour valider tes prélèvements sur le terrain.
+            </Step>
+            <Step num={4}>
               <strong>Rapports à rédiger</strong> — liste des rapports prévus non encore envoyés, triés par date.
               Clique sur "Marqué envoyé" pour valider directement depuis le dashboard.
             </Step>
-            <Step num={4}>
-              <strong>État du matériel</strong> — répartition des équipements par état
-              (opérationnel, à calibrer, en maintenance, hors service).
+            <Step num={5}>
+              Puis, en dessous : <strong>Actualités</strong>, <strong>Tâches</strong>,{' '}
+              <strong>Prélèvements en retard</strong>, <strong>Temps de pluie</strong>,{' '}
+              <strong>Maintenances</strong> et <strong>Métrologie</strong>.
+            </Step>
+            <Step num={6}>
+              Si tu es <strong>chargé de mission</strong> ou <strong>admin</strong>, un onglet en haut bascule
+              entre la vue <strong>Technicien</strong> (ci-dessus) et la vue <strong>Manager</strong> (suivi de l'équipe).
             </Step>
           </div>
         </div>

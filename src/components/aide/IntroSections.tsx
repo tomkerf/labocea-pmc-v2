@@ -60,7 +60,7 @@ export function ParOuCommencerSection() {
               { label: 'Dashboard',      desc: "Vue synthétique du jour — interventions, rapports à rédiger, état du matériel." },
               { label: 'Demandes',       desc: "Nouvelles demandes clients à qualifier avant création d'une mission." },
               { label: 'Missions',       desc: "Clients, plans de prélèvement et calendrier annuel par site." },
-              { label: 'Planning',       desc: "Calendrier commun — vues Jour, Semaine, Mois, Année et Carte." },
+              { label: 'Planning',       desc: "Calendrier commun de l'équipe — vues Jour, Semaine, Mois et Carte." },
               { label: 'Tâches',         desc: "Suivi des actions internes de l'équipe." },
               { label: 'Infos terrain',  desc: "Contacts, accès et notes sur les sites d'intervention." },
               { label: 'Rapports',       desc: "Suivi des rapports à envoyer aux clients." },
@@ -90,8 +90,9 @@ export function ParOuCommencerSection() {
               et les alertes en cours.
             </Step>
             <Step num={6}>
-              <strong>Sur le terrain</strong> — ouvre le <strong>Planning</strong>, clique sur ton intervention,
-              passe-la à <strong>Réalisé</strong> et saisis la date effective.
+              <strong>Sur le terrain</strong> — depuis le Dashboard, lance le <strong>🚙 Mode Tournée du Jour</strong> :
+              tes prélèvements du jour s'enchaînent, un appui sur <strong>Réalisé</strong>, <strong>Non effectué</strong>{' '}
+              ou <strong>Décaler</strong> suffit à valider chacun.
             </Step>
             <Step num={7}>
               <strong>Si quelque chose ne va pas</strong> — utilise <strong>Signaler un problème</strong>

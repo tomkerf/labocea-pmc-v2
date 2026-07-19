@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuthStore, selectRole } from '@/stores/authStore'
 import type { UserRole } from '@/types'
 import { ParOuCommencerSection, StatutsSection } from '@/components/aide/IntroSections'
-import { PlanningSection, Bilan24hSection } from '@/components/aide/PlanningSections'
+import { PlanningSection, ValidationSection, Bilan24hSection } from '@/components/aide/PlanningSections'
 import { MissionClientSection, VisitePreliminaireSection } from '@/components/aide/MissionsSections'
 import { MaterielSection, MetrologieSection } from '@/components/aide/MaterielSections'
 import { DashboardSection, SignalerProblemeSection } from '@/components/aide/DashboardSections'
@@ -20,10 +20,10 @@ const ROLES: { value: RoleFilter; label: string; desc: string }[] = [
 
 // Sections visibles par rôle
 const VISIBLE: Record<RoleFilter, string[]> = {
-  tous:           ['debut', 'statuts', 'planning', 'bilan24h', 'missions', 'visite', 'materiel', 'metrologie', 'dashboard', 'signaler'],
-  technicien:     ['debut', 'statuts', 'planning', 'bilan24h', 'materiel', 'metrologie', 'dashboard', 'signaler'],
-  charge_mission: ['debut', 'statuts', 'planning', 'bilan24h', 'missions', 'visite', 'materiel', 'metrologie', 'dashboard', 'signaler'],
-  admin:          ['debut', 'statuts', 'planning', 'bilan24h', 'missions', 'visite', 'materiel', 'metrologie', 'dashboard', 'signaler'],
+  tous:           ['debut', 'statuts', 'planning', 'validation', 'bilan24h', 'missions', 'visite', 'materiel', 'metrologie', 'dashboard', 'signaler'],
+  technicien:     ['debut', 'statuts', 'planning', 'validation', 'bilan24h', 'materiel', 'metrologie', 'dashboard', 'signaler'],
+  charge_mission: ['debut', 'statuts', 'planning', 'validation', 'bilan24h', 'missions', 'visite', 'materiel', 'metrologie', 'dashboard', 'signaler'],
+  admin:          ['debut', 'statuts', 'planning', 'validation', 'bilan24h', 'missions', 'visite', 'materiel', 'metrologie', 'dashboard', 'signaler'],
 }
 
 export default function AidePage() {
@@ -93,6 +93,7 @@ export default function AidePage() {
       {show('debut')     && <ParOuCommencerSection />}
       {show('statuts')   && <StatutsSection />}
       {show('planning')  && <PlanningSection />}
+      {show('validation')&& <ValidationSection />}
       {show('missions')  && <MissionClientSection />}
       {show('visite')    && <VisitePreliminaireSection />}
       {show('bilan24h')  && <Bilan24hSection />}
