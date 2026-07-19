@@ -35,7 +35,7 @@ export default function Sidebar() {
   const appUser = useAuthStore(selectAppUser)
   const role    = useAuthStore(selectRole)
   const [bugOpen, setBugOpen] = useState(false)
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set())
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set(['Matériel & Suivi', 'Outils & Support']))
 
   const toggleSection = (title: string) => setCollapsedSections(prev => {
     const next = new Set(prev)
