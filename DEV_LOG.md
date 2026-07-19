@@ -3,6 +3,24 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 183 — Navbar : retour des onglets Outils
+**19 juillet 2026**
+
+### Contexte
+Retour arrière sur la consolidation du 17 juillet (commit `40a398a`) : les 4 outils secondaires étaient regroupés derrière une page intermédiaire `/outils`.
+
+### Modifications apportées
+- **`Sidebar.tsx`** : "Outils & Support" retrouve ses 4 items directs (Asservissement, Estimation volume, Infos terrain, Mode d'emploi), repris tels quels de la structure d'avant le 17/07. Section reste repliable.
+- **`OutilsPage.tsx`** supprimée (page intermédiaire devenue orpheline, plus aucun lien ne pointait vers elle).
+- **`App.tsx`** : route `/outils` et son lazy import retirés.
+
+### État
+- TypeScript 0 erreur, lint 0 erreur, 339/339 tests verts.
+- Vérifié visuellement (Chrome MCP) : les 4 items apparaissent bien sous "Outils & Support".
+- Commit `ff961d3` poussé, staging déployé (`392b6af4`).
+
+---
+
 ## Session 182 — Navbar : retour à une section unique
 **18 juillet 2026**
 
