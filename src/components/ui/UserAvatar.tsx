@@ -34,7 +34,8 @@ function getDynamicGradient(hex: string): string {
   return `linear-gradient(135deg, ${startHex}, ${hex})`
 }
 
-export default function UserAvatar({ initiales, color, size = 40, fontSize }: UserAvatarProps) {
+export default function UserAvatar({ initiales: initialesRaw, color, size = 40, fontSize }: UserAvatarProps) {
+  const initiales = initialesRaw?.slice(0, 4)
   const baseColor = useMemo(() => {
     if (!color) return '#4B5563'
     const normalizedColor = color.toLowerCase()
@@ -110,6 +111,8 @@ export default function UserAvatar({ initiales, color, size = 40, fontSize }: Us
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
     color: textColor,
     fontWeight: 600,
     fontSize: fs,
