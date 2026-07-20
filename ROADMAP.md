@@ -377,3 +377,5 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 | 2026-07-18 | Navbar section "Plus" ✅ | Scroll sidebar toujours présent malgré la réorg du 17/07 (9 items dans "Activité & Planning"). Section réduite à 3 items essentiels, 6 déplacés dans "Plus" repliable (badge agrégé non-lus). Commit `4022d9b`, staging déployé. |
 | 2026-07-18 | Navbar sections repliables généralisées ✅ | "Matériel & Suivi" et "Outils & Support" rendues repliables comme "Plus" ; toutes les sections dépliées par défaut à l'ouverture. Commit `9bea52a`, staging déployé. |
 | 2026-07-19 | Refonte Mode d'emploi ✅ | Refonte de la page d'aide (/aide) en format interactif et fluide Apple-style (split-pane sur desktop, accordéons animés sur mobile). Recherche globale par mots-clés, barre de progression persistée, FAQ raccourcis et raccourci clavier. 339 tests OK. |
+| 2026-07-20 | Refonte UI/UX premium Apple-style ✅ | Refonte globale des modules Rapports, Tâches, Messagerie, Missions, Actualités et Tableau de bord. Suppression de COLORS, harmonisation avec des variables CSS pastelles et des micro-interactions Apple-style. |
+

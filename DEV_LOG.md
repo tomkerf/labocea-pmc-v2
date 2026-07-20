@@ -3,6 +3,30 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 188 — Missions, Actualités & Tableau de bord : Refonte premium Apple-style
+**20 juillet 2026**
+
+### Modifications apportées
+- **`Missions` (Refonte UI/UX complète)** :
+  - **`MissionsPage.tsx`** : Suppression de `COLORS`. Remplacement des filtres selects géographiques, techniciens et statut par des sélecteurs plus aérés, arrondis et soignés. Bouton de filtre "retard" modernisé en badge capsule cliquable avec clignotement discret.
+  - **`ClientCard.tsx`** : Élimination de `COLORS`. Remplacement de la gestion manuelle du survol (`onMouseEnter`/`onMouseLeave`) par du survol Tailwind natif (`hover:bg-[var(--color-bg-tertiary)]`). Harmonisation des contrastes, des badges d'état (en pause) et du badge préleveur dynamique.
+- **`Actualités` (Refonte UI/UX complète)** :
+  - **`ActusPage.tsx`** : Retrait de `COLORS`. Remplacement des couleurs d'en-tête et de la palette en dur de `CATEGORY_MAP` par des teintes pastelles coordonnées issues du design system. Modernisation de la barre de recherche, de la segmented control et des cartes d'actualités avec transitions au survol et indicateurs d'inédit pulsés.
+- **`Tableau de bord` (Affinage UI/UX)** :
+  - **`DashboardPage.tsx`** : Harmonisation du widget d'actualités rapides avec micro-badges pastels et suppression des styles inlines.
+  - **`DashboardHeader.tsx`** : Modernisation du commutateur de rôles en pilule Apple-style double et en-tête épurée.
+  - **`StatCard.tsx`** : Intégration de bordures et de fonds pastels adaptés au niveau d'alerte (danger, warning, accent, normal) en totale adéquation avec la charte graphique.
+  - **`DonutChart` / Parc matériel** : Utilisation des variables CSS et des tokens pastels à la place de l'ancienne palette brute.
+- **`Infrastructure et Cache`** :
+  - **`sw.js`** : Incrémentation de la version de cache à `'pmc-v2-15'` pour recharger les actifs de refonte.
+  - **`changelog.ts`** : Enregistrement de la version `160` avec les refontes des trois modules.
+
+### État
+- TypeScript 0 erreur, 353/353 tests verts.
+- Déploiement staging réussi : `https://labocea-pmc-v2-dev.tomkerf.workers.dev`.
+
+---
+
 ## Session 187 — Rapports, Tâches & Messagerie : Refondues premium Apple-style
 **20 juillet 2026**
 
