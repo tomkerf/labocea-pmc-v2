@@ -86,7 +86,7 @@ export default function ClientPage() {
   const {
     client, loading, saving, remoteChanged,
     triggerSave, update, handleReload, handleDeleteClient, dismissRemoteChanged,
-    isDirtyRef,
+    hasEditedRef,
   } = useClientData(clientId)
 
   const [state, dispatch] = useReducer(reducer, initialState)
@@ -104,7 +104,7 @@ export default function ClientPage() {
       // On retarde la suppression pour être sûr que ce n'est pas un double-montage Strict Mode
       setTimeout(() => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        if (!mountedDrafts.has(clientId) && !isDirtyRef.current) {
+        if (!mountedDrafts.has(clientId) && !hasEditedRef.current) {
           deleteClient(clientId).catch(() => {})
         }
       }, 100)

@@ -41,6 +41,7 @@ export interface UseClientDataReturn {
   handleDeleteClient: () => Promise<void>
   dismissRemoteChanged: () => void
   isDirtyRef: RefObject<boolean>
+  hasEditedRef: RefObject<boolean>
 }
 
 export function useClientData(clientId: string | undefined): UseClientDataReturn {
@@ -53,6 +54,10 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
   const remoteDataRef = useRef<Client | null>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isDirty = useRef(false)
+  // Contrairement à isDirty (qui redevient false dès qu'une sauvegarde aboutit), hasEdited
+  // reste vrai pour toujours dès la première modification — sert à distinguer un brouillon
+  // jamais touché (supprimable) d'un document déjà modifié et sauvegardé avec succès.
+  const hasEdited = useRef(false)
   const isDeleted = useRef(false)
   const savingPromise = useRef<Promise<void> | null>(null)
 
@@ -84,6 +89,7 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
 
   function triggerSave(updated: Client) {
     isDirty.current = true
+    hasEdited.current = true
     dispatch({ type: 'SET_CLIENT', client: updated })
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(async () => {
@@ -157,5 +163,6 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
     handleDeleteClient,
     dismissRemoteChanged,
     isDirtyRef: isDirty,
+    hasEditedRef: hasEdited,
   }
 }
