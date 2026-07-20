@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '155'
+export const CHANGELOG_VERSION = '156'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,14 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '156',
+    date: '20 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Plan de charge : Refonte du calcul de charge en points de charge (prélèvements équivalents) basés sur la complexité réelle (Ponctuel = 1 pt, Souterraine = 2 pts, Composite/Auto = 4 pts)' },
+      { type: 'feat', label: 'Plan de charge : Ajout d\'une légende fixe et d\'infobulles détaillant le barème des points de charge et la capacité mensuelle (35 pts/technicien)' },
+    ],
+  },
   {
     version: '155',
     date: '19 juillet 2026',

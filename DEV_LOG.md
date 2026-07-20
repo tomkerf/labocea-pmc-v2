@@ -3,6 +3,26 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 186 — Plan de Charge : Refonte du calcul de surcharge (Points de charge)
+**20 juillet 2026**
+
+### Modifications apportées
+- **`workloadUtils.ts`** : Refonte du modèle de calcul de charge en remplaçant les heures par des points de charge (prélèvements équivalents) :
+  - Coefficients appliqués : Ponctuel = 1 pt, Eau Souterraine = 2 pts, Composite / Automatique = 4 pts.
+  - Limite mensuelle fixée à 35 pts par technicien (attention à 25 pts, danger à 40 pts).
+  - Renommage des constantes et fonctions d'évaluation en `getSamplingPoints` et `formatPoints`.
+- **`WorkloadMatrixView.tsx`** :
+  - Adaptation de la logique et du JSX pour utiliser les points de charge à la place des heures terrain.
+  - Intégration d'un petit encart de légende fixe en haut à droite avec le barème.
+  - Enrichissement du tooltip d'aide sur l'évolution de la charge globale avec le détail des équivalences.
+- **`changelog.ts`** : Incrémentation en version `156` et description des nouveautés.
+
+### État
+- TypeScript 0 erreur, 353/353 tests verts.
+- Déployé et validé par l'utilisateur.
+
+---
+
 ## Session 185 — Refonte interactive du Mode d'emploi
 **19 juillet 2026**
 
