@@ -10,6 +10,9 @@ import ChangelogModal, { useChangelogState } from '@/components/ui/ChangelogModa
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import SyncBadge from '@/components/ui/SyncBadge'
 import { COLORS } from '@/lib/constants'
+import SpotlightModal from '@/components/spotlight/SpotlightModal'
+import { useSpotlightStore } from '@/stores/spotlightStore'
+import { useGlobalHotkey } from '@/hooks/useGlobalHotkey'
 
 
 export default function AppLayout() {
@@ -18,6 +21,9 @@ export default function AppLayout() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const changelog = useChangelogState()
   useNetworkStatus()
+
+  const openSpotlight = useSpotlightStore((s) => s.open)
+  useGlobalHotkey('k', openSpotlight)
 
   const isChatPage = pathname.startsWith('/chat')
 
@@ -92,6 +98,9 @@ export default function AppLayout() {
 
       {/* Changelog */}
       <ChangelogModal open={changelog.open} onClose={changelog.dismiss} />
+
+      {/* Spotlight */}
+      <SpotlightModal />
     </div>
   )
 }

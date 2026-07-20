@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText, Sparkles, FlaskConical, CloudRain, MessageSquare, Newspaper, ChevronDown } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText, Sparkles, FlaskConical, CloudRain, MessageSquare, Newspaper, ChevronDown, Search } from 'lucide-react'
 import { m } from 'framer-motion'
 import { COLORS } from '@/lib/constants'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -12,6 +12,7 @@ import SyncBadge from '@/components/ui/SyncBadge'
 import { useChangelogState } from '@/components/ui/ChangelogModal'
 import { useChatNotificationStore } from '@/stores/chatNotificationStore'
 import { useActusStore } from '@/stores/actusStore'
+import { useSpotlightStore } from '@/stores/spotlightStore'
 
 
 interface NavItem {
@@ -36,6 +37,7 @@ export default function Sidebar() {
   const role    = useAuthStore(selectRole)
   const [bugOpen, setBugOpen] = useState(false)
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set(['Matériel & Suivi', 'Outils & Support']))
+  const openSpotlight = useSpotlightStore((s) => s.open)
 
   const toggleSection = (title: string) => setCollapsedSections(prev => {
     const next = new Set(prev)
@@ -234,6 +236,19 @@ export default function Sidebar() {
         <div className="flex items-center gap-2 px-3 py-1.5">
           <SyncBadge />
         </div>
+        <button type="button"
+          onClick={openSpotlight}
+          className="relative flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs transition-colors"
+          style={{ color: 'var(--color-text-tertiary)' }}
+          onMouseEnter={e => (e.currentTarget.style.color = COLORS.TEXT_SECONDARY)}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-tertiary)')}>
+          <Search size={14} strokeWidth={1.8} />
+          Rechercher
+          <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded"
+            style={{ background: COLORS.BG_TERTIARY, color: 'var(--color-text-tertiary)' }}>
+            ⌘K
+          </span>
+        </button>
         <button type="button"
           onClick={() => changelog.show()}
           className="relative flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs transition-colors"
