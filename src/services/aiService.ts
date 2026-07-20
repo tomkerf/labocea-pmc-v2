@@ -1,7 +1,7 @@
 export async function generateRegulatorySummary(rawText: string, customApiKey?: string): Promise<string> {
-  const apiKey = customApiKey || localStorage.getItem('pmc_gemini_api_key') || import.meta.env.VITE_FIREBASE_API_KEY
+  const apiKey = customApiKey || localStorage.getItem('pmc_gemini_api_key')
   if (!apiKey) {
-    throw new Error('Aucune clé API configurée')
+    throw new Error('Aucune clé API Gemini configurée')
   }
 
   const model = 'gemini-2.5-flash'
