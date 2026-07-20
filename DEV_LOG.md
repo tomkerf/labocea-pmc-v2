@@ -9,11 +9,11 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 ### Modifications apportées
 - **`workloadUtils.ts`** : Refonte du modèle de calcul de charge en remplaçant les heures par des points de charge (prélèvements équivalents) :
   - Coefficients appliqués : Ponctuel = 1 pt, Eau Souterraine = 2 pts, Composite / Automatique = 4 pts.
-  - Limite mensuelle fixée à 35 pts par technicien (attention à 25 pts, danger à 40 pts).
+  - Limite mensuelle fixée à 50 pts par technicien (attention à 35 pts, danger à 60 pts), basée sur une moyenne de 2h de trajet + intervention par prélèvement simple (Scénario C).
   - Renommage des constantes et fonctions d'évaluation en `getSamplingPoints` et `formatPoints`.
 - **`WorkloadMatrixView.tsx`** :
   - Adaptation de la logique et du JSX pour utiliser les points de charge à la place des heures terrain.
-  - Intégration d'un panneau de légende fixe en haut à droite détaillant le barème des points et expliquant textuellement et dynamiquement le calcul de la capacité maximale de l'équipe (ex. : `2 techniciens actifs × 35 pts = 70 pts / mois`).
+  - Intégration d'un panneau de légende fixe en haut à droite détaillant le barème des points et expliquant textuellement et dynamiquement le calcul de la capacité maximale de l'équipe (ex. : `2 techniciens actifs × 50 pts = 100 pts / mois`).
   - Enrichissement du tooltip d'aide sur l'évolution de la charge globale avec le détail des équivalences.
 - **`changelog.ts`** : Incrémentation en version `156` et description des nouveautés.
 
