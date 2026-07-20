@@ -15,15 +15,15 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 - **`Tableau de bord` (Affinage UI/UX)** :
   - **`DashboardPage.tsx`** : Harmonisation du widget d'actualités rapides avec micro-badges pastels et suppression des styles inlines.
   - **`DashboardHeader.tsx`** : Modernisation du commutateur de rôles en pilule Apple-style double. Restauration de la taille de police de l'en-tête de section (`text-xs font-semibold`) et des boutons switch tab (`text-sm font-semibold`).
-  - **`StatCard.tsx`** : Intégration de bordures et de fonds pastels adaptés au niveau d'alerte. Restauration du label à `font-semibold` et de la valeur à `text-[28px]` avec interlettrage.
+  - **`StatCard.tsx`** : Restauration du fond blanc neutre et des bordures standard (retrait de la couleur sur la carte). Seuls les chiffres de valeurs conservent leur coloration d'état distinctive. Restauration du label à `font-semibold` et de la valeur à `text-[28px]` avec interlettrage.
   - **`DonutChart` / Parc matériel** : Utilisation des variables CSS et des tokens pastels à la place de l'ancienne palette brute.
 - **`Layouts & Navigation` (Cohérence UI/UX globale)** :
   - **`Sidebar.tsx`** : Suppression de `COLORS`. Remplacement complet des hovers JS par des classes de survol Tailwind natives (`hover:bg-[var(--color-bg-tertiary)]/40` et `hover:text-[var(--color-text-primary)]`). Restauration de la taille de police d'origine (`text-sm`/13px) et des marges / arrondis sur la navigation pour une meilleure lisibilité.
   - **`BottomTabBar.tsx`** : Retrait de `COLORS`. Utilisation des variables d'accent système, de texte secondaire et de danger en Tailwind pur. Coins plus arrondis et transitions de couleur optimisées pour le mobile.
   - **`AppLayout.tsx`** : Retrait de l'import `COLORS` et conversion du fond principal en variable CSS globale.
 - **`Infrastructure et Cache`** :
-  - **`sw.js`** : Incrémentation de la version de cache à `'pmc-v2-18'` pour propager la cohérence globale et les polices restaurées.
-  - **`changelog.ts`** : Enregistrement de la version `163`.
+  - **`sw.js`** : Incrémentation de la version de cache à `'pmc-v2-19'` pour propager la cohérence globale et la correction de couleur.
+  - **`changelog.ts`** : Enregistrement de la version `164`.
 
 ### État
 - TypeScript 0 erreur, 353/353 tests verts.
