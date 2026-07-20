@@ -78,13 +78,13 @@ export function useDocumentData<T extends { id: string }>(
       try {
         await saveFn(updated, uid)
         await onAfterSave?.(updated)
+        if (!saveTimer.current) {
+          isDirty.current = false
+        }
       } catch {
         toast.error('Échec de la sauvegarde. Vérifie ta connexion.')
       } finally {
         setSaving(false)
-        if (!saveTimer.current) {
-          isDirty.current = false
-        }
       }
     }, DEBOUNCE)
   }

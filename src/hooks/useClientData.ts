@@ -96,11 +96,11 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
       const p = (async () => {
         try {
           await saveClient(updated, uid)
+          if (!saveTimer.current) isDirty.current = false
         } catch {
           toast.error('Échec de la sauvegarde. Vérifie ta connexion.')
         } finally {
           setSaving(false)
-          if (!saveTimer.current) isDirty.current = false
         }
       })()
       savingPromise.current = p
