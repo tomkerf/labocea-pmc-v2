@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText, Sparkles, FlaskConical, CloudRain, MessageSquare, Newspaper, ChevronDown, Search } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText, Sparkles, FlaskConical, CloudRain, MessageSquare, Newspaper, ChevronDown, Search, Compass } from 'lucide-react'
 import { m } from 'framer-motion'
 import { COLORS } from '@/lib/constants'
 import { useMissionsStore } from '@/stores/missionsStore'
@@ -72,6 +72,7 @@ export default function Sidebar() {
         { to: '/actus',        icon: Newspaper,       label: 'Actualités'             },
         { to: '/demandes',     icon: Inbox,           label: 'Demandes'               },
         { to: '/missions',     icon: ClipboardList,   label: 'Missions',        badge: true },
+        { to: '/pilotage',     icon: Compass,         label: 'Pilotage'                },
         { to: '/planning',     icon: CalendarDays,    label: 'Planning'               },
         { to: '/rapports',     icon: FileText,        label: 'Rapports'               },
         { to: '/todos',        icon: ListTodo,        label: 'Tâches'                 },

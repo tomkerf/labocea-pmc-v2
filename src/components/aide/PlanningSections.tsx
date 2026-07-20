@@ -24,7 +24,7 @@ export function PlanningSection() {
               Utilise les flèches ← → pour avancer ou reculer.
               <br />
               <span className="text-xs mt-1 block" style={{ color: 'var(--color-text-tertiary)' }}>
-                La matrice annuelle n'est plus dans le Planning : elle se trouve dans <strong>Missions → Vue annuelle</strong>.
+                La matrice annuelle n'est plus dans le Planning : elle se trouve dans <strong>Pilotage</strong>.
               </span>
             </Step>
             <Step num={2}>

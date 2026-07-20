@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { Plus, Search, ClipboardList, List, CalendarRange, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Plus, Search, ClipboardList } from 'lucide-react'
 import { createClient } from '@/services/clientService'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { usePreleveursStore } from '@/stores/preleveursStore'
@@ -8,8 +8,6 @@ import { usePreleveursListener } from '@/hooks/usePreleveurs'
 import { useAuthStore, selectUid, selectInitiales } from '@/stores/authStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import ClientCard from '@/components/client/ClientCard'
-import YearMatrixView from '@/components/planning/YearMatrixView'
-import WorkloadMatrixView from '@/components/planning/WorkloadMatrixView'
 import { SkeletonList } from '@/components/ui/Skeleton'
 import type { Client } from '@/types'
 import { COLORS } from '@/lib/constants'
@@ -22,7 +20,6 @@ function hasOverdue(client: Client): boolean {
 
 export default function MissionsPage() {
   const navigate = useNavigate()
-  const location = useLocation()
   const { clients, loading } = useMissionsStore()
   usePreleveursListener()
   const preleveurs = usePreleveursStore((s) => s.preleveurs)
@@ -50,11 +47,6 @@ export default function MissionsPage() {
   const [search, setSearch] = useState('')
   const [onlyRetard, setOnlyRetard] = useState(false)
   const [creating, setCreating] = useState(false)
-  // Accès direct depuis la sidebar via /vue-annuelle ; le toggle interne reste ensuite libre.
-  const [view, setView] = useState<'liste' | 'annee' | 'charge'>(
-    () => location.pathname === '/vue-annuelle' ? 'annee' : 'liste'
-  )
-  const [year, setYear] = useState(new Date().getFullYear())
 
   // Initialisation des filtres et sauvegarde dans le localStorage par utilisateur
   const [filterSite, setFilterSite] = useState<string>(() => {
@@ -71,8 +63,6 @@ export default function MissionsPage() {
     const saved = localStorage.getItem(key)
     return saved ?? ''
   })
-
-  const [filterMethod, setFilterMethod] = useState('')
 
   const [filterPause, setFilterPause] = useState<string>(() => {
     const key = uid ? `missions_filter_pause_${uid}` : 'missions_filter_pause'
@@ -120,8 +110,8 @@ export default function MissionsPage() {
 
   const overdueCount = clients.filter(hasOverdue).length
 
-  // Filtre pause : Actifs (défaut) exclut les clients en pause partout dans la page Missions
-  // (liste, vue annuelle, charge) ; Planning et dashboard les excluent toujours, indépendamment.
+  // Filtre pause : Actifs (défaut) exclut les clients en pause de la liste Missions ;
+  // Planning et dashboard les excluent toujours, indépendamment.
   const visibleClients = clients.filter((c) => {
     if (filterPause === 'pause') return !!c.pause
     if (filterPause === 'tous') return true
@@ -182,12 +172,10 @@ export default function MissionsPage() {
     }
   }
 
-  const isMatrixView = view === 'annee' || view === 'charge'
-
   return (
-    <div className={isMatrixView ? 'h-full flex flex-col' : 'p-6'}>
+    <div className="p-6">
       {/* En-tête */}
-      <div className={`shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6${isMatrixView ? ' px-6 pt-6' : ''}`}>
+      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Missions
@@ -212,34 +200,8 @@ export default function MissionsPage() {
         </button>
       </div>
 
-      {/* Toggle Liste / Vue annuelle / Charge */}
-      <div className="shrink-0 flex gap-1.5 p-1.5 rounded-xl mb-4 w-fit"
-        style={{
-          background: COLORS.BG_SECONDARY,
-          border: '1px solid var(--color-border-subtle)',
-          display: 'flex',
-          width: 'fit-content',
-          alignSelf: 'flex-start',
-          marginLeft: isMatrixView ? '1.5rem' : '0'
-        }}>
-        {([['liste', 'Liste', List], ['annee', 'Vue annuelle', CalendarRange], ['charge', 'Charge', BarChart3]] as const).map(([v, label, Icon]) => {
-          const active = view === v
-          const softActive = v === 'charge'
-          return (
-            <button type="button" key={v} onClick={() => setView(v)}
-              className="px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
-              style={{
-                background: active ? (softActive ? 'var(--color-accent-light)' : COLORS.ACCENT) : 'transparent',
-                color: active ? (softActive ? COLORS.ACCENT : 'white') : COLORS.TEXT_SECONDARY,
-              }}>
-              <Icon size={15} /> {label}
-            </button>
-          )
-        })}
-      </div>
-
       {/* Filtres globaux (Site et Technicien) */}
-      <div className={`shrink-0 flex flex-col sm:flex-row gap-3 mb-4${isMatrixView ? ' px-6' : ''}`}>
+      <div className="shrink-0 flex flex-col sm:flex-row gap-3 mb-4">
         <div className="flex-1 flex flex-col gap-1.5">
           <label htmlFor="missions-filter-site" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
             Site géographique
@@ -304,113 +266,46 @@ export default function MissionsPage() {
             <option value="tous">Tous</option>
           </select>
         </div>
+      </div>
 
-        {isMatrixView && (
-          <div className="flex-1 flex flex-col gap-1.5">
-            <label htmlFor="missions-filter-method" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
-              Méthode
-            </label>
-            <select
-              id="missions-filter-method"
-              value={filterMethod}
-              onChange={(e) => setFilterMethod(e.target.value)}
-              className="px-3 py-2 rounded-lg text-sm outline-none"
-              style={{
-                background: COLORS.BG_SECONDARY,
-                border: '1px solid var(--color-border-subtle)',
-                color: COLORS.TEXT_PRIMARY,
-              }}
-            >
-              <option value="">Toutes les méthodes</option>
-              <option value="Ponctuel">Ponctuel</option>
-              <option value="Composite">Composite</option>
-              <option value="Automatique">Bilan 24 (Automatique)</option>
-            </select>
-          </div>
+      {/* Recherche + filtre retard */}
+      <div className="flex gap-2 mb-4">
+        <div className="relative flex-1">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
+            style={{ color: 'var(--color-text-tertiary)' }} />
+          <input
+            type="text"
+            aria-label="Rechercher un client"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un client, segment, préleveur…"
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
+            style={{
+              background: COLORS.BG_SECONDARY,
+              border: '1px solid var(--color-border-subtle)',
+              color: COLORS.TEXT_PRIMARY,
+            }}
+          />
+        </div>
+
+        {overdueCount > 0 && (
+          <button type="button"
+            onClick={() => setOnlyRetard((v) => !v)}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold shrink-0 transition-all cursor-pointer select-none active:scale-95"
+            style={{
+              background: onlyRetard ? 'var(--color-danger)' : 'var(--color-danger-light)',
+              color: onlyRetard ? 'white' : 'var(--color-danger)',
+              border: '1px solid transparent',
+              boxShadow: onlyRetard ? '0 2px 6px rgba(229, 62, 62, 0.2)' : 'none',
+            }}
+          >
+            <span className="size-1.5 rounded-full bg-current shrink-0" />
+            {overdueCount} en retard
+          </button>
         )}
       </div>
 
-      {isMatrixView ? (
-        <div className="flex-1 min-h-0 flex flex-col">
-          {/* Navigation Année */}
-          <div className="shrink-0 flex items-center gap-3 mb-4 px-6">
-            <button type="button" onClick={() => setYear((y) => y - 1)}
-              aria-label="Année précédente"
-              className="size-8 rounded-lg flex items-center justify-center cursor-pointer"
-              style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_SECONDARY }}>
-              <ChevronLeft size={16} />
-            </button>
-            <span className="text-sm font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
-              Année {year}
-            </span>
-            <button type="button" onClick={() => setYear((y) => y + 1)}
-              aria-label="Année suivante"
-              className="size-8 rounded-lg flex items-center justify-center cursor-pointer"
-              style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_SECONDARY }}>
-              <ChevronRight size={16} />
-            </button>
-          </div>
-
-          {view === 'annee' ? (
-            <YearMatrixView
-              clients={visibleClients}
-              year={year}
-              filterTech={filterTech}
-              filterSite={filterSite}
-              filterMethod={filterMethod}
-              preleveurs={preleveurs}
-            />
-          ) : (
-            <WorkloadMatrixView
-              clients={visibleClients}
-              year={year}
-              filterTech={filterTech}
-              filterSite={filterSite}
-              filterMethod={filterMethod}
-              preleveurs={preleveurs}
-            />
-          )}
-        </div>
-      ) : (
-        <>
-          {/* Recherche + filtre retard */}
-          <div className="flex gap-2 mb-4">
-            <div className="relative flex-1">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
-                style={{ color: 'var(--color-text-tertiary)' }} />
-              <input
-                type="text"
-                aria-label="Rechercher un client"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher un client, segment, préleveur…"
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
-                style={{
-                  background: COLORS.BG_SECONDARY,
-                  border: '1px solid var(--color-border-subtle)',
-                  color: COLORS.TEXT_PRIMARY,
-                }}
-              />
-            </div>
-
-            {overdueCount > 0 && (
-              <button type="button"
-                onClick={() => setOnlyRetard((v) => !v)}
-                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold shrink-0 transition-all cursor-pointer select-none active:scale-95"
-                style={{
-                  background: onlyRetard ? 'var(--color-danger)' : 'var(--color-danger-light)',
-                  color: onlyRetard ? 'white' : 'var(--color-danger)',
-                  border: '1px solid transparent',
-                  boxShadow: onlyRetard ? '0 2px 6px rgba(229, 62, 62, 0.2)' : 'none',
-                }}
-              >
-                <span className="size-1.5 rounded-full bg-current shrink-0" />
-                {overdueCount} en retard
-              </button>
-            )}
-          </div>
-
-          {loading ? (
+      {loading ? (
         <SkeletonList count={5} variant="card" />
       ) : filtered.length === 0 ? (
         onlyRetard || search ? (
@@ -445,8 +340,6 @@ export default function MissionsPage() {
             <ClientCard key={client.id} client={client} />
           ))}
         </div>
-      )}
-        </>
       )}
     </div>
   )
