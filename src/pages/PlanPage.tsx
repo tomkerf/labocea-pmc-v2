@@ -102,7 +102,13 @@ export default function PlanPage() {
             {plan.siteNom || 'Site non renseigné'}
           </p>
         </div>
-        {saving && <span className="text-xs self-start sm:self-auto" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
+        <span
+          className="text-xs self-start sm:self-auto transition-opacity duration-150"
+          style={{ color: 'var(--color-text-tertiary)', opacity: saving ? 1 : 0 }}
+          aria-hidden={!saving}
+        >
+          Sauvegarde…
+        </span>
       </div>
 
       <PlanConfigSection plan={plan} onUpdate={updatePlan} clientId={clientId!} planId={planId!} />

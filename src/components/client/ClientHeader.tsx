@@ -64,7 +64,13 @@ export function ClientHeader({
           )}
         </h1>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          {saving && <span className="text-xs mr-1" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}
+          <span
+            className="text-xs mr-1 transition-opacity duration-150"
+            style={{ color: 'var(--color-text-tertiary)', opacity: saving ? 1 : 0 }}
+            aria-hidden={!saving}
+          >
+            Sauvegarde…
+          </span>
 
           <div className="flex items-center gap-2 sm:gap-3">
             <button type="button"
