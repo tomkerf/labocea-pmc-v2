@@ -3,7 +3,32 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
-## Session 186 — Plan de Charge : Refonte du calcul de surcharge et refonte UI/UX
+## Session 187 — Rapports, Tâches & Messagerie : Refondues premium Apple-style
+**20 juillet 2026**
+
+### Modifications apportées
+- **`Rapports` (Refonte UI/UX complète)** :
+  - **`RapportsPage.tsx`** : Allégement de la structure et du style. Suppression de l'import obsolète de `COLORS`. Remplacement des styles inline par des classes Tailwind et ajout de badges temporels de retard discrets. Modernisation des conteneurs d'état vide sous forme de bannières de succès vertes et douces.
+  - **`RapportClientGroup.tsx`** : Allégement et standardisation du bandeau de regroupement par client avec un fond et une bordure plus discrets. Nom de client en texte fin et resserré, sans surcharge visuelle.
+  - **`RapportRow.tsx`** : Transformation du sélecteur de date brut en un champ de saisie raffiné avec focus stylisé. Conversion des indicateurs de délai textuels en jolis badges capsules pastels aux teintes cohérentes (`bg-danger-light` pour le retard, `bg-warning-light` pour l'imminent et `bg-success-light` pour le délai confortable). Modernisation des boutons d'actions en boutons secondaires et primaires Apple-style avec transitions de clic fluides.
+  - **`RapportEnvoyeRow.tsx`** : Optimisation de l'alignement et remplacement du rond vert par un point de statut discret de 8px. Affichage du trigramme du technicien dans un badge capsule neutre et aéré.
+- **`Tâches` (Refonte UI/UX complète)** :
+  - **`TodosPage.tsx`** : Élimination de `COLORS` au profit de Tailwind. Modernisation de l'en-tête et du bouton principal "+ Nouvelle tâche". Remplacement de la zone d'état vide par une carte épurée et élégante.
+  - **`TodoSection.tsx`** : Remplacement des compteurs simples par des micro-badges pastels et modernisation des boutons d'accordéons pliants.
+  - **`TodoRow.tsx`** : Remplacement de tous les émojis par des icônes Lucide fines (`Briefcase` pour le client, `Wrench` pour le matériel, `Calendar` pour la date). Conversion des priorités (`HAUTE`, `MOYENNE`, `BASSE`) et statuts (`EN COURS`) en badges pastels aux contours estompés. Alignement des styles de boutons de modification/suppression avec l'accent système et le rouge de danger pastel.
+- **`Messagerie` (Affinage UI/UX)** :
+  - **`ChatPage.tsx`** : Retrait des styles inline restants sur l'en-tête du chat actif, la barre de suggestions de mentions, la barre d'input des messages et le sélecteur de réactions. Application du flou de fond natif `backdrop-blur-md` et de fonds translucides pour une vraie intégration "glassmorphism" Apple-style.
+- **`Infrastructure et Cache`** :
+  - **`sw.js`** : Incrémentation du cache à `'pmc-v2-14'` pour propager instantanément les refontes d'interface en staging.
+  - **`changelog.ts`** : Enregistrement de la version `159` décrivant les nouveautés de cette refonte UI/UX des outils.
+
+### État
+- TypeScript 0 erreur, 353/353 tests verts.
+- Déploiement staging réussi : `https://labocea-pmc-v2-dev.tomkerf.workers.dev`.
+
+---
+
+## Session 186 — Plan de Charge, Vue Annuelle & Demandes : Refonte des calculs et de l'UI/UX
 **20 juillet 2026**
 
 ### Modifications apportées
@@ -11,12 +36,20 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
   - Coefficients appliqués : Ponctuel = 1 pt, Eau Souterraine = 2 pts, Composite / Automatique = 4 pts.
   - Limite mensuelle fixée à 50 pts par technicien (attention à 35 pts, danger à 60 pts), basée sur une moyenne de 2h de trajet + intervention par prélèvement simple (Scénario C).
   - Renommage des constantes et fonctions d'évaluation en `getSamplingPoints` et `formatPoints`.
-- **`WorkloadMatrixView.tsx` (Refonte UI/UX complète)** :
+- **`WorkloadMatrixView.tsx` (Refonte UI/UX complète Plan de Charge)** :
   - **En-tête épuré** : Déplacement de la boîte d'explications et de la justification du Scénario C dans un bloc collapsible discret activable via le bouton "Comprendre le calcul de charge" à côté du titre.
   - **KPIs minimalistes** : Réduction de la densité visuelle des 4 cartes et intégration d'une barre de progression segmentée multicolore dans le KPI "Volume annuel" pour représenter graphiquement la répartition des méthodes de prélèvement.
   - **Histogramme affiné** : Barres mensuelles plus fines et arrondies, couleurs plus douces (orange pastel pour la surcharge), et affichage du volume au survol pour éviter la surcharge textuelle.
   - **Heatmap épurée (Pastels)** : Remplacement de la coloration complète et agressive des cellules par des pastilles arrondies aux tons pastels ultra-doux (fonds à 8% d'opacité avec bordure fine à 15% assortie). Les mois vides affichent désormais un simple tiret discret sans couleur pour orienter directement le regard vers les périodes chargées.
-- **`changelog.ts`** : Incrémentation en version `156` et description des nouveautés.
+- **`YearMatrixView.tsx` & `YearMatrixPlanRow.tsx` (Refonte UI/UX complète Vue Annuelle)** :
+  - **Légende premium** : Transformation des simples ronds et textes bruts en jolis petits badges discrets dotés de teintes pastels harmonisées, et modernisation du bouton "Tout déplier/replier" en bouton secondaire sobre.
+  - **En-têtes pliables allégés** : Remplacement du fond gris lourd de regroupement des clients par un fond gris clair très délicat (`bg-[var(--color-bg-primary)]`), suppression de la double bordure supérieure, et affichage des décomptes de statut sous forme de micro-badges pastels alignés.
+  - **Pastilles de prélèvements épurées** : Remplacement des ronds de couleur opaque par de fines pastilles aux tons pastels doux avec bordures transparentes assorties et une coche/signe fin au centre (`✓`, `✕`, `!`), pour un rendu premium à la Apple et une lisibilité 10 fois plus confortable.
+- **`DemandesPage.tsx` & `DemandeCard.tsx` (Refonte UI/UX complète Demandes)** :
+  - **Tableau Kanban modernisé** : Colonnes unifiées dans des conteneurs à bordure fine et coins arrondis (`rounded-2xl`). Header épuré avec compteurs intégrés dans des micro-badges pastels. Fond de colonne en gris-bleu très doux.
+  - **Cartes Demandes premium** : Suppression des styles d'ombres en JS au profit de transitions Tailwind fluides. Remplacement des emojis de géolocalisation par de fines icônes Lucide (`MapPin`). Ajout de badges temporels de retard discrets et pastels (`bg-danger-light` ou `bg-warning-light` avec bordures subtiles).
+  - **Section Archives redécorée** : Cartes archivées regroupées en bas de page sous un séparateur discret et dotées d'une opacité réduite de 75% s'activant au survol, afin de séparer nettement l'activité en cours de l'historique.
+- **`changelog.ts`** : Incrémentation en version `158` et description de la refonte globale de l'onglet Pilotage et des Demandes.
 
 ### État
 - TypeScript 0 erreur, 353/353 tests verts.

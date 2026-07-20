@@ -4,7 +4,7 @@
 //   - Navigation HTML                              → Network First + fallback /index.html
 //   - Firebase / Firestore / Auth                  → ignoré (SDK gère son cache IndexedDB)
 
-const CACHE_VERSION = 'pmc-v2-10'
+const CACHE_VERSION = 'pmc-v2-14'
 const CACHE_ASSETS  = `${CACHE_VERSION}-assets`
 const CACHE_NAV     = `${CACHE_VERSION}-nav`
 

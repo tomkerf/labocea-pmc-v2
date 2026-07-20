@@ -11,7 +11,6 @@ import { useMaintenancesStore } from '@/stores/maintenancesStore'
 import { saveClient } from '@/services/clientService'
 import type { Client, Plan, Sampling } from '@/types'
 import type { RapportItem } from '@/hooks/useDashboardStats'
-import { COLORS } from '@/lib/constants'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import RapportClientGroup from '@/components/rapports/RapportClientGroup'
 import RapportRow from '@/components/rapports/RapportRow'
@@ -95,20 +94,20 @@ export default function RapportsPage() {
   const envoyesGroups = useMemo(() => groupByClient(rapportsEnvoyes), [rapportsEnvoyes])
 
   return (
-    <div className="px-4 py-6 pb-10 sm:px-6 max-w-4xl">
+    <div className="px-4 py-6 pb-12 sm:px-6 max-w-4xl bg-[var(--color-bg-primary)]">
       {/* Bouton retour mobile */}
       <div className="md:hidden mb-4">
-        <Link to="/plus" className="inline-flex items-center gap-1 font-semibold text-sm transition-opacity active:opacity-80" style={{ color: COLORS.ACCENT }}>
-          <ChevronLeft size={16} />
+        <Link to="/plus" className="inline-flex items-center gap-1 font-semibold text-xs text-[var(--color-accent)] hover:underline transition-opacity active:opacity-85">
+          <ChevronLeft size={14} />
           Plus
         </Link>
       </div>
 
       {/* En-tête */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <FileText size={22} strokeWidth={1.5} style={{ color: COLORS.ACCENT }} />
-          <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Rapports</h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 border-b border-[var(--color-border-subtle)] pb-4">
+        <div className="flex items-center gap-2.5">
+          <FileText size={22} strokeWidth={1.5} className="text-[var(--color-accent)]" />
+          <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Rapports</h1>
         </div>
         <SegmentedControl
           options={[
@@ -121,23 +120,21 @@ export default function RapportsPage() {
       </div>
 
       {/* Section À rédiger */}
-      <section className="mb-8">
-        <div className="flex items-center gap-2 mb-3">
-          <h2 className="text-xs font-semibold uppercase" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>À rédiger</h2>
+      <section className="mb-10">
+        <div className="flex items-center gap-2 mb-4">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">À rédiger</h2>
           {rapportsAFaire.length > 0 && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-              style={{ background: 'var(--color-warning-light)', color: COLORS.WARNING }}>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-warning-light)] text-[var(--color-warning)] border border-[rgba(255,159,10,0.15)]">
               {rapportsAFaire.length}
             </span>
           )}
         </div>
         {rapportsAFaire.length === 0 ? (
-          <div className="rounded-xl px-5 py-4 text-sm"
-            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)', color: COLORS.TEXT_SECONDARY }}>
-            ✓ Tous les rapports ont été rédigés.
+          <div className="rounded-xl px-5 py-4 text-xs font-semibold bg-[var(--color-success-light)]/40 border border-[rgba(52,199,89,0.15)] text-[var(--color-success)] flex items-center gap-2 shadow-sm">
+            <span className="text-sm font-bold">✓</span> Tous les rapports ont été rédigés.
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             {aFaireGroups.map(({ clientId, clientNom, siteEntries }) => (
               <RapportClientGroup key={clientId} clientNom={clientNom} siteEntries={siteEntries}
                 renderRow={(r, isLast) => (
@@ -153,20 +150,18 @@ export default function RapportsPage() {
 
       {/* Section Rédigés */}
       <section>
-        <div className="flex items-center gap-2 mb-3">
-          <h2 className="text-xs font-semibold uppercase" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}>Rédigés</h2>
-          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-            style={{ background: 'var(--color-success-light)', color: COLORS.SUCCESS }}>
+        <div className="flex items-center gap-2 mb-4">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">Rédigés</h2>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-success-light)] text-[var(--color-success)] border border-[rgba(52,199,89,0.15)]">
             {rapportsEnvoyes.length}
           </span>
         </div>
         {rapportsEnvoyes.length === 0 ? (
-          <div className="rounded-xl px-5 py-4 text-sm"
-            style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)', color: COLORS.TEXT_SECONDARY }}>
+          <div className="rounded-xl px-5 py-4 text-xs font-medium bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] shadow-sm">
             Aucun rapport rédigé pour le moment.
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             {envoyesGroups.map(({ clientId, clientNom, siteEntries }) => (
               <RapportClientGroup key={clientId} clientNom={clientNom} siteEntries={siteEntries}
                 renderRow={(r, isLast) => (

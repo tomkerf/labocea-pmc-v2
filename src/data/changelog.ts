@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '156'
+export const CHANGELOG_VERSION = '159'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,30 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '159',
+    date: '20 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Rapports : Refonte UI/UX en style pastel Apple-style (badges de délai pastel synchronisés, groupes de clients épurés avec bordures fines, input date modernisé)' },
+      { type: 'feat', label: 'Tâches : Refonte UI/UX complète (utilisation d\'icônes Lucide à la place des émojis pour les liaisons client/matériel/date, badges de priorité et d\'état en tons pastels doux, états vides aérés)' },
+      { type: 'feat', label: 'Messagerie : Affinage UI/UX (en-tête du chat actif, barre de suggestions @mentions et barre de saisie des messages sans styles inline et bénéficiant du flou de fond natif backdrop-blur-md)' },
+    ],
+  },
+  {
+    version: '158',
+    date: '20 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Demandes : Refonte UI/UX complète du tableau Kanban en style pastel Apple-style (colonnes unifiées et aérées, cartes de demandes avec badges temporels discrets et icônes géographiques, zone archives épurée)' },
+    ],
+  },
+  {
+    version: '157',
+    date: '20 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Vue annuelle : Refonte UI/UX complète en style pastel Apple-style (légende sous forme de pilules d\'états, en-têtes pliables allégés et pastilles de prélèvements épurées avec coches fines)' },
+      { type: 'feat', label: 'Plan de charge : Refonte UI/UX complète et aérée (panneau explicatif Scénario C collapsible, indicateurs de volume segmentés multicolores et heatmap aux teintes pastels douces)' },
+    ],
+  },
   {
     version: '156',
     date: '20 juillet 2026',
