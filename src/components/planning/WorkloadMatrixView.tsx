@@ -175,12 +175,19 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
                 <span>• Composite / Auto : <strong>4 pts</strong></span>
               </div>
             </div>
-            <div className="border-t border-[var(--color-border-subtle)] pt-2 mt-0.5">
-              <span className="font-semibold text-[var(--color-text-primary)] block mb-1">Capacité maximale théorique de l'équipe :</span>
-              <p className="leading-relaxed">
-                Fixée à <strong>{CAPACITY_POINTS_PER_TECH_PER_MONTH} pts / mois par technicien actif</strong>.
-              </p>
-              <p className="mt-1 text-[11px] text-[var(--color-text-tertiary)]">
+            <div className="border-t border-[var(--color-border-subtle)] pt-2 mt-0.5 flex flex-col gap-1.5">
+              <div>
+                <span className="font-semibold text-[var(--color-text-primary)] block mb-1">Capacité maximale théorique de l'équipe :</span>
+                <p className="leading-relaxed">
+                  Fixée à <strong>{CAPACITY_POINTS_PER_TECH_PER_MONTH} pts / mois par technicien actif</strong>.
+                </p>
+              </div>
+              <div className="bg-[var(--color-bg-primary)] rounded-lg p-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+                <span className="font-medium text-[var(--color-text-primary)] block mb-0.5">Détail du calcul (Scénario C) :</span>
+                Sur un temps mensuel de 151,7h, après déduction de l'administratif (15%) et de la préparation/labo (15%), il reste ~107h pour le terrain.
+                À raison d'une moyenne de <strong>2h par prélèvement Ponctuel</strong> (1h45 route + 15 min site), la capacité est de : 107h / 2h ≈ <strong>50 prélèvements (points) / mois</strong>.
+              </div>
+              <p className="text-[11px] text-[var(--color-text-tertiary)] mt-0.5">
                 Calcul en cours : {nbActiveTechs} {nbActiveTechs > 1 ? 'techniciens actifs' : 'technicien actif'} × {CAPACITY_POINTS_PER_TECH_PER_MONTH} pts = <strong>{maxCapacityPerMonth} pts / mois</strong> pour l'ensemble de l'équipe.
               </p>
             </div>

@@ -13,7 +13,7 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
   - Renommage des constantes et fonctions d'évaluation en `getSamplingPoints` et `formatPoints`.
 - **`WorkloadMatrixView.tsx`** :
   - Adaptation de la logique et du JSX pour utiliser les points de charge à la place des heures terrain.
-  - Intégration d'un panneau de légende fixe en haut à droite détaillant le barème des points et expliquant textuellement et dynamiquement le calcul de la capacité maximale de l'équipe (ex. : `2 techniciens actifs × 50 pts = 100 pts / mois`).
+  - Intégration d'un panneau de légende fixe en haut à droite détaillant le barème des points et justifiant le calcul de la capacité maximale théorique par le détail du Scénario C (151,7h base - 30% administratif/labo = ~107h terrain / 2h par ponctuel = 50 pts/mois/tech).
   - Enrichissement du tooltip d'aide sur l'évolution de la charge globale avec le détail des équivalences.
 - **`changelog.ts`** : Incrémentation en version `156` et description des nouveautés.
 
