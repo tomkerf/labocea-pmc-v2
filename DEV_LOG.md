@@ -3,6 +3,35 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 189 — Revue UI/UX Rapports/Tâches + audit sécurité complet
+**20 juillet 2026**
+
+### Contexte
+- Vérification du déploiement staging (session 188) : historique GitHub Actions en échec expliqué (build cassé transitoirement par un commit intermédiaire déjà corrigé dans la même session, rien à faire).
+- Question sur la tenue de l'app à l'arrivée de nouveaux techniciens (Brest) : confirmation en direct dans la console Firebase que le projet `labocea-pmc` est bien passé sur le forfait **Blaze** (paiement à l'usage, budget d'alerte actif) — mémoire projet mise à jour, le risque de coupure des listeners `onSnapshot` par dépassement du quota Spark est écarté.
+
+### UI/UX — Rapports & Tâches
+- **Bug** : `TodoRow.tsx` — boutons Modifier/Supprimer en `opacity-0 group-hover:opacity-100`, donc invisibles et inaccessibles au tactile (pas de hover réel sur mobile). Fix : visibles par défaut sous le breakpoint `sm`, comportement hover conservé au-dessus.
+- **Bug** : `RapportRow.tsx` — aucune réaction visuelle au survol, incohérent avec `TodoRow` qui a un hover marqué. Fix : ajout d'un `hover:bg-[var(--color-bg-primary)]` avec transition.
+- Filtre "Priorité" identifié comme mort dans `TodoFilters.tsx` (prop `filterPriority` jamais branchée à un contrôle) — laissé de côté à la demande de l'utilisateur (décision produit, pas un bug).
+- Commit `4a65702`, vérifié visuellement sur staging après déploiement.
+
+### Audit sécurité complet (Firestore rules, Storage rules, secrets, XSS, auth)
+- **Firestore/Storage rules** : contrôle d'accès par rôle cohérent, champs immuables bien protégés, DM chat correctement isolés, votes/réactions auto-only. Rien à corriger.
+- **`ActusPage.tsx` `renderMarkdown`** : échappement HTML appliqué avant génération des balises — pas de XSS exploitable malgré l'absence de DOMPurify.
+- **Vulnérabilité corrigée (sévérité réévaluée Élevée → Faible après vérification)** : `aiService.ts` utilisait `VITE_FIREBASE_API_KEY` (clé publique du bundle) comme fallback pour authentifier l'appel à l'API Gemini facturée. Vérification a posteriori dans Google Cloud Console : la clé est restreinte à 25 API n'incluant pas "Generative Language API", donc l'exploitation directe n'était probablement pas possible aujourd'hui — le fallback restait un anti-pattern à supprimer (defense in depth). Fallback retiré. Commit `be037a9`.
+- **Vulnérabilité corrigée (Faible)** : clé Gemini personnelle de l'utilisateur stockée en clair dans `localStorage` (persistance illimitée, exposée à toute XSS future). Migrée vers `sessionStorage`. Commits `506d7f4`, `7c9d546`. Finding react-doctor `auth-token-in-web-storage` qui en résulte documenté dans `.react-doctor/false-positives.md` (clé perso optionnelle, pas un secret projet).
+
+### État
+- TypeScript 0 erreur, ESLint 0 erreur, 353/353 tests verts après chaque fix.
+- Tous les commits poussés sur `origin/main`.
+
+### Prochaines étapes
+- 🔴 Isolation Firestore staging/prod (bloquant restant avant élargissement de l'équipe) — toujours non traité.
+- Décider du sort du filtre "Priorité" mort dans Tâches (le finir ou le retirer).
+
+---
+
 ## Session 188 — Missions, Actualités & Tableau de bord : Refonte premium Apple-style
 **20 juillet 2026**
 
