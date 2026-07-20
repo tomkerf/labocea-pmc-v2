@@ -77,7 +77,7 @@ export default function SpotlightModal() {
 
   return (
     <BaseModal isOpen={isOpen} onClose={handleClose} hideCloseButton maxWidth="lg">
-      <div className="flex flex-col gap-1 -mt-2">
+      <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2 px-1 pb-3" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
           <Search size={16} style={{ color: 'var(--color-text-tertiary)' }} />
           <input
