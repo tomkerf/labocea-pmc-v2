@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '167'
+export const CHANGELOG_VERSION = '168'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '168',
+    date: '20 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Vue annuelle : Restauration des paddings (p-4 md:p-6), des coins arrondis et des bordures de la boîte conteneur de la table' },
+    ],
+  },
   {
     version: '167',
     date: '20 juillet 2026',

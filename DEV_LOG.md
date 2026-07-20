@@ -21,15 +21,15 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
   - **`Sidebar.tsx`** : Suppression de `COLORS`. Remplacement complet des hovers JS par des classes de survol Tailwind natives (`hover:bg-[var(--color-bg-tertiary)]/40` et `hover:text-[var(--color-text-primary)]`). Restauration de la taille de police d'origine (`text-sm`/13px) et des marges / arrondis sur la navigation pour une meilleure lisibilité.
   - **`BottomTabBar.tsx`** : Retrait de `COLORS`. Utilisation des variables d'accent système, de texte secondaire et de danger en Tailwind pur. Coins plus arrondis et transitions de couleur optimisées pour le mobile.
   - **`AppLayout.tsx`** : Retrait de l'import `COLORS` et conversion du fond principal en variable CSS globale.
-- **`Vue annuelle` (Affinage espace utile)** :
-  - **`YearMatrixView.tsx`** : Suppression du padding externe `p-4 md:p-6` et simplification du conteneur de la table pour qu'elle prenne toute la largeur et hauteur utile sur la page de planning.
+- **`Vue annuelle` (Restauration du layout)** :
+  - **`YearMatrixView.tsx`** : Restauration des paddings d'origine (`p-4 md:p-6`), de la boîte blanche conteneur avec coins arrondis et bordures pour une cohérence esthétique.
 - **`Planning & Navigation` (Compactage vertical)** :
   - **`PlanningHeader.tsx`** : Réduction du padding vertical de la barre d'outils et ajout de l'onglet **Année** dans le sélecteur de vues pour un accès direct et intuitif.
   - **`PlanningFilterBar.tsx`** : Compactage du padding vertical global et masquage conditionnel de la légende d'événements standard si la vue active est `annee` (car la vue annuelle intègre déjà sa propre légende simplifiée).
   - **`PlanningPage.tsx`** : Passage du paramètre `viewMode` à `PlanningFilterBar`.
 - **`Infrastructure et Cache`** :
-  - **`sw.js`** : Incrémentation de la version de cache à `'pmc-v2-22'` pour propager la cohérence globale, la correction de couleur, la résolution ESLint, l'ajustement de la vue annuelle et le compactage de l'en-tête du planning.
-  - **`changelog.ts`** : Enregistrement de la version `167`.
+  - **`sw.js`** : Incrémentation de la version de cache à `'pmc-v2-23'` pour propager la cohérence globale, la correction de couleur, la résolution ESLint, la restauration de la vue annuelle et le compactage de l'en-tête du planning.
+  - **`changelog.ts`** : Enregistrement de la version `168`.
 
 ### État
 - TypeScript 0 erreur, ESLint 0 erreur, 353/353 tests verts.

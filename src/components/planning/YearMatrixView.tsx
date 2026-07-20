@@ -119,8 +119,8 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-[var(--color-bg-primary)] p-0">
-      <div className="flex flex-col flex-1 bg-[var(--color-bg-secondary)] border-t border-[var(--color-border-subtle)] overflow-hidden min-h-0">
+    <div className="flex-1 flex flex-col min-h-0 bg-[var(--color-bg-primary)] p-4 md:p-6">
+      <div className="flex flex-col flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl shadow-[var(--shadow-card)] overflow-hidden min-h-0">
 
         {/* Légende */}
         <div className="shrink-0 px-5 py-3 border-b border-[var(--color-border-subtle)] flex flex-wrap items-center gap-3 text-xs font-semibold bg-[var(--color-bg-secondary)] z-20">
