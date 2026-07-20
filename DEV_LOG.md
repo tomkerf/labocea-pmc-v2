@@ -17,9 +17,13 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
   - **`DashboardHeader.tsx`** : Modernisation du commutateur de rôles en pilule Apple-style double et en-tête épurée.
   - **`StatCard.tsx`** : Intégration de bordures et de fonds pastels adaptés au niveau d'alerte (danger, warning, accent, normal) en totale adéquation avec la charte graphique.
   - **`DonutChart` / Parc matériel** : Utilisation des variables CSS et des tokens pastels à la place de l'ancienne palette brute.
+- **`Layouts & Navigation` (Cohérence UI/UX globale)** :
+  - **`Sidebar.tsx`** : Suppression de `COLORS`. Remplacement complet des hovers JS par des classes de survol Tailwind natives (`hover:bg-[var(--color-bg-tertiary)]/40` et `hover:text-[var(--color-text-primary)]`). Simplification et raffinement de la typographie, des badges de notifications et des boutons d'action du bas.
+  - **`BottomTabBar.tsx`** : Retrait de `COLORS`. Utilisation des variables d'accent système, de texte secondaire et de danger en Tailwind pur. Coins plus arrondis et transitions de couleur optimisées pour le mobile.
+  - **`AppLayout.tsx`** : Retrait de l'import `COLORS` et conversion du fond principal en variable CSS globale.
 - **`Infrastructure et Cache`** :
-  - **`sw.js`** : Incrémentation de la version de cache à `'pmc-v2-15'` pour recharger les actifs de refonte.
-  - **`changelog.ts`** : Enregistrement de la version `160` avec les refontes des trois modules.
+  - **`sw.js`** : Incrémentation de la version de cache à `'pmc-v2-16'` pour propager la cohérence globale.
+  - **`changelog.ts`** : Enregistrement de la version `161`.
 
 ### État
 - TypeScript 0 erreur, 353/353 tests verts.
