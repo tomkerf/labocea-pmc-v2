@@ -643,6 +643,7 @@ export default function AidePage() {
   // Sync mobile expanded key with active section key
   useEffect(() => {
     if (activeSectionKey) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMobileExpandedKey(activeSectionKey)
     }
   }, [activeSectionKey])

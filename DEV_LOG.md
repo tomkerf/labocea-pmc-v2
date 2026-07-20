@@ -22,11 +22,11 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
   - **`BottomTabBar.tsx`** : Retrait de `COLORS`. Utilisation des variables d'accent système, de texte secondaire et de danger en Tailwind pur. Coins plus arrondis et transitions de couleur optimisées pour le mobile.
   - **`AppLayout.tsx`** : Retrait de l'import `COLORS` et conversion du fond principal en variable CSS globale.
 - **`Infrastructure et Cache`** :
-  - **`sw.js`** : Incrémentation de la version de cache à `'pmc-v2-19'` pour propager la cohérence globale et la correction de couleur.
-  - **`changelog.ts`** : Enregistrement de la version `164`.
+  - **`sw.js`** : Incrémentation de la version de cache à `'pmc-v2-20'` pour propager la cohérence globale, la correction de couleur et la résolution ESLint.
+  - **`changelog.ts`** : Enregistrement de la version `165`.
 
 ### État
-- TypeScript 0 erreur, 353/353 tests verts.
+- TypeScript 0 erreur, ESLint 0 erreur, 353/353 tests verts.
 - Déploiement staging réussi : `https://labocea-pmc-v2-dev.tomkerf.workers.dev`.
 
 ---
