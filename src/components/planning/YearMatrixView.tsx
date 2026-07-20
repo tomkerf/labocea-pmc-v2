@@ -8,7 +8,6 @@ import { isSamplingOverdue } from '@/lib/overdue'
 import { type RowData, type GroupData } from '@/lib/yearMatrixUtils'
 import IssueListModal from './IssueListModal'
 import YearMatrixPlanRow from './YearMatrixPlanRow'
-import { COLORS } from '@/lib/constants'
 
 interface YearMatrixViewProps {
   clients: Client[]
@@ -120,26 +119,33 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-[var(--color-bg-primary)] p-4 md:p-6">
-      <div className="flex flex-col flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl shadow-[var(--shadow-card)] overflow-hidden min-h-0">
+    <div className="flex-1 flex flex-col min-h-0 bg-[var(--color-bg-primary)] p-0">
+      <div className="flex flex-col flex-1 bg-[var(--color-bg-secondary)] border-t border-[var(--color-border-subtle)] overflow-hidden min-h-0">
 
         {/* Légende */}
-        <div className="shrink-0 px-4 py-3 border-b border-[var(--color-border-subtle)] flex items-center gap-4 text-xs font-medium bg-[var(--color-bg-secondary)] z-20">
-          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-success)]" /> Fait <span className="text-[var(--color-text-secondary)]">({counts.done})</span></div>
-          <div className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-[var(--color-warning)]" /> Planifié <span className="text-[var(--color-text-secondary)]">({counts.planned})</span></div>
+        <div className="shrink-0 px-5 py-3 border-b border-[var(--color-border-subtle)] flex flex-wrap items-center gap-3 text-xs font-semibold bg-[var(--color-bg-secondary)] z-20">
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-success-light)] text-[var(--color-success)] border border-[rgba(52,199,89,0.15)]">
+            <span className="size-1.5 rounded-full bg-[var(--color-success)]" />
+            Fait <span className="opacity-80 font-normal">({counts.done})</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-warning-light)] text-[var(--color-warning)] border border-[rgba(255,159,10,0.15)]">
+            <span className="size-1.5 rounded-full bg-[var(--color-warning)]" />
+            Planifié <span className="opacity-80 font-normal">({counts.planned})</span>
+          </div>
 
           <button type="button" onClick={() => setIssueModalType('overdue')}
-            className="flex items-center gap-1.5 cursor-pointer hover:bg-[var(--color-danger-light)] px-2 py-0.5 -mx-2 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-danger)]">
-            <span className="size-2.5 rounded-full bg-[var(--color-danger)]" />
-            En retard <span className="text-[var(--color-text-secondary)]">({counts.overdue})</span>
-            <span className="text-[var(--color-danger)] opacity-60">↗</span>
+            className="flex items-center gap-1.5 cursor-pointer px-2.5 py-0.5 rounded-full bg-[var(--color-danger-light)] text-[var(--color-danger)] border border-[rgba(255,59,48,0.15)] hover:bg-[rgba(255,59,48,0.12)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--color-danger)] font-semibold">
+            <span className="size-1.5 rounded-full bg-[var(--color-danger)] animate-pulse" />
+            En retard <span className="opacity-80 font-normal">({counts.overdue})</span>
+            <span className="text-[10px] opacity-60">↗</span>
           </button>
 
           <button type="button" onClick={() => setIssueModalType('non_effectue')}
-            className="flex items-center gap-1.5 cursor-pointer hover:bg-[var(--color-bg-tertiary)] px-2 py-0.5 -mx-2 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-border)]">
-            <span className="size-2.5 rounded-full bg-[var(--color-neutral)]" />
-            Non effectué <span className="text-[var(--color-text-secondary)]">({counts.non_effectue})</span>
-            <span className="text-[var(--color-neutral)] opacity-60">↗</span>
+            className="flex items-center gap-1.5 cursor-pointer px-2.5 py-0.5 rounded-full bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:bg-[var(--color-border-subtle)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--color-border)] font-semibold">
+            <span className="size-1.5 rounded-full bg-[var(--color-neutral)]" />
+            Non effectué <span className="opacity-80 font-normal">({counts.non_effectue})</span>
+            <span className="text-[10px] opacity-60">↗</span>
           </button>
 
           <button type="button"
@@ -148,7 +154,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
               const allCollapsed = allIds.every(id => collapsedClients.has(id))
               setCollapsedClients(allCollapsed ? new Set() : new Set(allIds))
             }}
-            className="ml-auto flex items-center gap-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">
+            className="ml-auto flex items-center gap-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors border border-[var(--color-border)] px-2.5 py-1 rounded-lg bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] shadow-sm text-[11px] font-medium">
             {groupedRows.every(g => collapsedClients.has(g.client.id))
               ? <><ChevronDown size={12} /> Tout déplier</>
               : <><ChevronRight size={12} /> Tout replier</>
@@ -185,38 +191,54 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
 
                   return [
                     <tr key={`header-${client.id}`}
-                      className={`border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)] hover:bg-[#e8e8ec] transition-colors cursor-pointer${groupIdx > 0 ? ' border-t-2 border-t-[var(--color-border)]' : ''}`}
+                      className={`border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-primary)] hover:bg-[#eaeaea] transition-colors cursor-pointer${groupIdx > 0 ? ' border-t border-t-[var(--color-border-subtle)]' : ''}`}
                       onClick={() => toggleClient(client.id)}
                       aria-label={`${client.nom} — ${isCollapsed ? 'développer' : 'réduire'}`}>
-                      <td className="px-3 py-2 sticky left-0 z-20 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)]" style={{ backgroundColor: COLORS.BG_TERTIARY }}>
+                      <td className="px-3 py-2 sticky left-0 z-20 bg-[var(--color-bg-primary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)]">
                         <div className="flex items-center gap-2">
                           {isCollapsed
-                            ? <ChevronRight size={14} className="text-[var(--color-text-secondary)] shrink-0" />
-                            : <ChevronDown size={14} className="text-[var(--color-text-secondary)] shrink-0" />
+                            ? <ChevronRight size={13} className="text-[var(--color-text-secondary)] shrink-0" />
+                            : <ChevronDown size={13} className="text-[var(--color-text-secondary)] shrink-0" />
                           }
                           <div>
                             <Link to={`/missions/${client.id}`}
-                              className="text-sm font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-accent)] hover:underline"
+                              className="text-xs font-bold text-[var(--color-text-primary)] hover:text-[var(--color-accent)] hover:underline"
                               onClick={e => e.stopPropagation()}>
                               {client.nom}
                             </Link>
-                            <div className="text-xs text-[var(--color-text-secondary)]">{client.segment}</div>
+                            <div className="text-[10px] text-[var(--color-text-secondary)] font-medium leading-tight">{client.segment}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-2 border-r border-[var(--color-border-subtle)]">
-                        <div className="flex items-center gap-3 text-xs text-[var(--color-text-secondary)]">
+                      <td className="px-4 py-2 border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-primary)]">
+                        <div className="flex items-center gap-3 text-[10px] text-[var(--color-text-secondary)] font-semibold">
                           <span>{plans.length} plan{plans.length > 1 ? 's' : ''}</span>
-                          <span className="flex items-center gap-1.5">
-                            {summary.done > 0 && <span className="text-[var(--color-success)] font-medium">✓ {summary.done}</span>}
-                            {summary.planned > 0 && <span className="text-[var(--color-warning)] font-medium">● {summary.planned}</span>}
-                            {summary.overdue > 0 && <span className="text-[var(--color-danger)] font-medium">! {summary.overdue}</span>}
-                            {summary.non_effectue > 0 && <span className="text-[var(--color-neutral)] font-medium">✕ {summary.non_effectue}</span>}
+                          <span className="flex items-center gap-1">
+                            {summary.done > 0 && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-[var(--color-success-light)] text-[var(--color-success)] border border-[rgba(52,199,89,0.12)]">
+                                ✓ {summary.done}
+                              </span>
+                            )}
+                            {summary.planned > 0 && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-[var(--color-warning-light)] text-[var(--color-warning)] border border-[rgba(255,159,10,0.12)]">
+                                ● {summary.planned}
+                              </span>
+                            )}
+                            {summary.overdue > 0 && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-[var(--color-danger-light)] text-[var(--color-danger)] border border-[rgba(255,59,48,0.12)]">
+                                ! {summary.overdue}
+                              </span>
+                            )}
+                            {summary.non_effectue > 0 && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
+                                ✕ {summary.non_effectue}
+                              </span>
+                            )}
                           </span>
                         </div>
                       </td>
                       {Array(12).fill(null).map((_, i) => (
-                        <td key={i} className="border-r border-[var(--color-border-subtle)]" aria-label={MOIS_LONG[i]} />
+                        <td key={i} className="border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-primary)]" aria-label={MOIS_LONG[i]} />
                       ))}
                     </tr>,
 

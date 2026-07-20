@@ -21,9 +21,11 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
   - **`Sidebar.tsx`** : Suppression de `COLORS`. Remplacement complet des hovers JS par des classes de survol Tailwind natives (`hover:bg-[var(--color-bg-tertiary)]/40` et `hover:text-[var(--color-text-primary)]`). Restauration de la taille de police d'origine (`text-sm`/13px) et des marges / arrondis sur la navigation pour une meilleure lisibilité.
   - **`BottomTabBar.tsx`** : Retrait de `COLORS`. Utilisation des variables d'accent système, de texte secondaire et de danger en Tailwind pur. Coins plus arrondis et transitions de couleur optimisées pour le mobile.
   - **`AppLayout.tsx`** : Retrait de l'import `COLORS` et conversion du fond principal en variable CSS globale.
+- **`Vue annuelle` (Affinage espace utile)** :
+  - **`YearMatrixView.tsx`** : Suppression du padding externe `p-4 md:p-6` et simplification du conteneur de la table pour qu'elle prenne toute la largeur et hauteur utile sur la page de planning.
 - **`Infrastructure et Cache`** :
-  - **`sw.js`** : Incrémentation de la version de cache à `'pmc-v2-20'` pour propager la cohérence globale, la correction de couleur et la résolution ESLint.
-  - **`changelog.ts`** : Enregistrement de la version `165`.
+  - **`sw.js`** : Incrémentation de la version de cache à `'pmc-v2-21'` pour propager la cohérence globale, la correction de couleur, la résolution ESLint et l'ajustement de la vue annuelle.
+  - **`changelog.ts`** : Enregistrement de la version `166`.
 
 ### État
 - TypeScript 0 erreur, ESLint 0 erreur, 353/353 tests verts.
