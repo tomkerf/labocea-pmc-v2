@@ -3,11 +3,11 @@ import type { Client } from '@/types'
 import type { Preleveur } from '@/stores/preleveursStore'
 import { MOIS_LONG } from '@/lib/planningUtils'
 import {
-  getSamplingDurationHours,
-  formatHours,
-  CAPACITY_HOURS_PER_TECH_PER_MONTH,
-  THRESHOLD_WARNING_HOURS,
-  THRESHOLD_DANGER_HOURS,
+  getSamplingPoints,
+  formatPoints,
+  CAPACITY_POINTS_PER_TECH_PER_MONTH,
+  THRESHOLD_WARNING_POINTS,
+  THRESHOLD_DANGER_POINTS,
 } from '@/lib/workloadUtils'
 
 interface WorkloadMatrixViewProps {
@@ -19,11 +19,11 @@ interface WorkloadMatrixViewProps {
   preleveurs: Preleveur[]
 }
 
-// Seuils de charge mensuelle par technicien, en heures
-function getHeatmapColor(hours: number) {
-  if (hours === 0) return 'transparent'
-  if (hours >= THRESHOLD_DANGER_HOURS) return 'var(--color-danger-light)'
-  if (hours >= THRESHOLD_WARNING_HOURS) return 'var(--color-warning-light)'
+// Seuils de charge mensuelle par technicien, en points de charge (prélèvements équivalents)
+function getHeatmapColor(points: number) {
+  if (points === 0) return 'transparent'
+  if (points >= THRESHOLD_DANGER_POINTS) return 'var(--color-danger-light)'
+  if (points >= THRESHOLD_WARNING_POINTS) return 'var(--color-warning-light)'
   return 'var(--color-bg-secondary)'
 }
 
@@ -35,13 +35,13 @@ function getHeatmapTextColor(value: number) {
 export default function WorkloadMatrixView({ clients, year, filterTech, filterSite, filterMethod = '', preleveurs }: WorkloadMatrixViewProps) {
   
   // 1. Agréger les données par technicien et par mois
-  const { techStats, totalPerMonthHours, totalPerMonthCount, globalStats, methodBreakdown, methodBreakdownHours } = useMemo(() => {
+  const { techStats, totalPerMonthPoints, totalPerMonthCount, globalStats, methodBreakdown, methodBreakdownPoints } = useMemo(() => {
     // Initialisation
     const emptyTechData = () => ({
       totalCount: 0,
-      totalHours: 0,
+      totalPoints: 0,
       monthsCount: Array(12).fill(0) as number[],
-      monthsHours: Array(12).fill(0) as number[],
+      monthsPoints: Array(12).fill(0) as number[],
       monthDetails: Array.from({ length: 12 }, () => ({ Ponctuel: 0, Composite: 0, Automatique: 0 }))
     })
     const stats = new Map<string, ReturnType<typeof emptyTechData>>()
@@ -54,13 +54,13 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
     stats.set('NON_ASSIGNE', emptyTechData())
 
     const totalMonthCount = Array(12).fill(0)
-    const totalMonthHours = Array(12).fill(0)
+    const totalMonthPoints = Array(12).fill(0)
     let totalYear = 0
-    let totalYearHours = 0
+    let totalYearPoints = 0
     let planned = 0
     let done = 0
     const mBreakdown = { Ponctuel: 0, Composite: 0, Automatique: 0 }
-    const mBreakdownHours = { Ponctuel: 0, Composite: 0, Automatique: 0 }
+    const mBreakdownPoints = { Ponctuel: 0, Composite: 0, Automatique: 0 }
 
     clients.forEach(c => {
       if (c.annee && c.annee !== year.toString()) return
@@ -82,7 +82,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
         }
         const techData = stats.get(techKey)!
 
-        const durationH = getSamplingDurationHours(p)
+        const pointsVal = getSamplingPoints(p)
 
         p.samplings.forEach(s => {
           // On ne compte pas les "non_effectue" (annulés) dans la charge de travail
@@ -90,21 +90,21 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
 
           if (s.plannedMonth >= 0 && s.plannedMonth < 12) {
             techData.monthsCount[s.plannedMonth] += 1
-            techData.monthsHours[s.plannedMonth] += durationH
+            techData.monthsPoints[s.plannedMonth] += pointsVal
             techData.totalCount += 1
-            techData.totalHours += durationH
+            techData.totalPoints += pointsVal
 
             const meth = p.methode || 'Ponctuel'
             if (meth === 'Ponctuel' || meth === 'Composite' || meth === 'Automatique') {
               techData.monthDetails[s.plannedMonth][meth] += 1
               mBreakdown[meth] += 1
-              mBreakdownHours[meth] += durationH
+              mBreakdownPoints[meth] += pointsVal
             }
 
             totalMonthCount[s.plannedMonth] += 1
-            totalMonthHours[s.plannedMonth] += durationH
+            totalMonthPoints[s.plannedMonth] += pointsVal
             totalYear += 1
-            totalYearHours += durationH
+            totalYearPoints += pointsVal
 
             if (s.status === 'planned' || s.status === 'overdue') planned++
             if (s.status === 'done') done++
@@ -129,28 +129,28 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
       .sort((a, b) => {
         if (a.code === 'NON_ASSIGNE') return 1 // Non assigné à la fin
         if (b.code === 'NON_ASSIGNE') return -1
-        return b.totalHours - a.totalHours // Trier par charge totale décroissante
+        return b.totalPoints - a.totalPoints // Trier par charge totale décroissante
       })
 
     return {
       techStats: sortedStats,
-      totalPerMonthHours: totalMonthHours,
+      totalPerMonthPoints: totalMonthPoints,
       totalPerMonthCount: totalMonthCount,
-      globalStats: { totalYear, totalYearHours, planned, done },
+      globalStats: { totalYear, totalYearPoints, planned, done },
       methodBreakdown: mBreakdown,
-      methodBreakdownHours: mBreakdownHours
+      methodBreakdownPoints: mBreakdownPoints
     }
   }, [clients, year, filterTech, filterSite, filterMethod, preleveurs])
 
-  // Calcul du mois le plus chargé (en heures)
-  const maxMonthHours = Math.max(...totalPerMonthHours)
-  const maxMonthIndex = totalPerMonthHours.indexOf(maxMonthHours)
-  const maxMonthName = maxMonthHours > 0 ? MOIS_LONG[maxMonthIndex] : 'Aucun'
-  const maxMonthCount = maxMonthHours > 0 ? totalPerMonthCount[maxMonthIndex] : 0
+  // Calcul du mois le plus chargé (en points de charge)
+  const maxMonthPoints = Math.max(...totalPerMonthPoints)
+  const maxMonthIndex = totalPerMonthPoints.indexOf(maxMonthPoints)
+  const maxMonthName = maxMonthPoints > 0 ? MOIS_LONG[maxMonthIndex] : 'Aucun'
+  const maxMonthCount = maxMonthPoints > 0 ? totalPerMonthCount[maxMonthIndex] : 0
 
-  // Capacité théorique en heures de terrain par mois
+  // Capacité théorique en points par mois
   const nbActiveTechs = techStats.filter(t => t.code !== 'NON_ASSIGNE').length
-  const maxCapacityPerMonth = nbActiveTechs * CAPACITY_HOURS_PER_TECH_PER_MONTH
+  const maxCapacityPerMonth = nbActiveTechs * CAPACITY_POINTS_PER_TECH_PER_MONTH
 
   const unassigned = techStats.find(t => t.code === 'NON_ASSIGNE')
 
@@ -159,11 +159,32 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
       <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full pb-8">
         
         {/* Titre et Explications */}
-        <div>
-          <h2 className="text-xl font-bold text-[var(--color-text-primary)] mb-1">Plan de Charge {year}</h2>
-          <p className="text-sm text-[var(--color-text-secondary)]">
-            Visualisez la répartition du volume de travail par mois et par technicien pour anticiper les surcharges.
-          </p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-bold text-[var(--color-text-primary)] mb-1">Plan de Charge {year}</h2>
+            <p className="text-sm text-[var(--color-text-secondary)]">
+              Visualisez la répartition du volume de travail par mois et par technicien en points de charge.
+            </p>
+          </div>
+          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl px-4 py-3 text-xs text-[var(--color-text-secondary)] max-w-lg shadow-[var(--shadow-card)] flex flex-col gap-2">
+            <div>
+              <span className="font-semibold text-[var(--color-text-primary)] block mb-1">Barème des points de charge :</span>
+              <div className="grid grid-cols-3 gap-x-4">
+                <span>• Ponctuel : <strong>1 pt</strong></span>
+                <span>• Eau Souterraine : <strong>2 pts</strong></span>
+                <span>• Composite / Auto : <strong>4 pts</strong></span>
+              </div>
+            </div>
+            <div className="border-t border-[var(--color-border-subtle)] pt-2 mt-0.5">
+              <span className="font-semibold text-[var(--color-text-primary)] block mb-1">Capacité maximale théorique de l'équipe :</span>
+              <p className="leading-relaxed">
+                Fixée à <strong>{CAPACITY_POINTS_PER_TECH_PER_MONTH} pts / mois par technicien actif</strong>.
+              </p>
+              <p className="mt-1 text-[11px] text-[var(--color-text-tertiary)]">
+                Calcul en cours : {nbActiveTechs} {nbActiveTechs > 1 ? 'techniciens actifs' : 'technicien actif'} × {CAPACITY_POINTS_PER_TECH_PER_MONTH} pts = <strong>{maxCapacityPerMonth} pts / mois</strong> pour l'ensemble de l'équipe.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* 1. KPIs Bilan de charge */}
@@ -171,7 +192,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
           <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)] flex flex-col justify-between">
             <div>
               <div className="text-sm text-[var(--color-text-secondary)] mb-1">Volume total annuel</div>
-              <div className="text-2xl font-bold text-[var(--color-text-primary)] flex flex-wrap items-baseline gap-x-1.5">{formatHours(globalStats.totalYearHours)} <span className="text-sm font-medium text-[var(--color-text-tertiary)] whitespace-nowrap">{globalStats.totalYear} prélèv.</span></div>
+              <div className="text-2xl font-bold text-[var(--color-text-primary)] flex flex-wrap items-baseline gap-x-1.5">{formatPoints(globalStats.totalYearPoints)} <span className="text-sm font-medium text-[var(--color-text-tertiary)] whitespace-nowrap">{globalStats.totalYear} prélèv.</span></div>
               <div className="mt-1.5 text-xs flex gap-2">
                 <span className="text-[var(--color-success)] font-medium">✓ {globalStats.done} faits</span>
                 <span className="text-[var(--color-warning)] font-medium">● {globalStats.planned} à faire</span>
@@ -182,19 +203,19 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
                 {methodBreakdown.Ponctuel > 0 && (
                   <div className="flex justify-between items-center">
                     <span>Ponctuels</span>
-                    <span className="font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded-full">{methodBreakdown.Ponctuel} · {formatHours(methodBreakdownHours.Ponctuel)}</span>
+                    <span className="font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded-full">{methodBreakdown.Ponctuel} · {formatPoints(methodBreakdownPoints.Ponctuel)}</span>
                   </div>
                 )}
                 {methodBreakdown.Composite > 0 && (
                   <div className="flex justify-between items-center">
                     <span>Composites</span>
-                    <span className="font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded-full">{methodBreakdown.Composite} · {formatHours(methodBreakdownHours.Composite)}</span>
+                    <span className="font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded-full">{methodBreakdown.Composite} · {formatPoints(methodBreakdownPoints.Composite)}</span>
                   </div>
                 )}
                 {methodBreakdown.Automatique > 0 && (
                   <div className="flex justify-between items-center">
                     <span>Bilans 24h (Auto)</span>
-                    <span className="font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded-full">{methodBreakdown.Automatique} · {formatHours(methodBreakdownHours.Automatique)}</span>
+                    <span className="font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded-full">{methodBreakdown.Automatique} · {formatPoints(methodBreakdownPoints.Automatique)}</span>
                   </div>
                 )}
               </div>
@@ -205,14 +226,14 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
             <div className="text-sm text-[var(--color-text-secondary)] mb-1">Pic d'activité</div>
             <div className="text-2xl font-bold text-[var(--color-text-primary)]">{maxMonthName}</div>
             <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
-              {maxMonthHours > 0 ? `Avec ${formatHours(maxMonthHours)} prévues (${maxMonthCount} interventions)` : 'Aucune intervention'}
+              {maxMonthPoints > 0 ? `Avec ${formatPoints(maxMonthPoints)} prévus (${maxMonthCount} interventions)` : 'Aucune intervention'}
             </div>
           </div>
 
           <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)]">
             <div className="text-sm text-[var(--color-text-secondary)] mb-1">Charge moyenne</div>
             <div className="text-2xl font-bold text-[var(--color-text-primary)]">
-              {formatHours(nbActiveTechs > 0 ? globalStats.totalYearHours / 12 / nbActiveTechs : 0)} <span className="text-sm font-medium text-[var(--color-text-tertiary)]">/ mois / tech</span>
+              {formatPoints(nbActiveTechs > 0 ? Math.round(globalStats.totalYearPoints / 12 / nbActiveTechs * 10) / 10 : 0)} <span className="text-sm font-medium text-[var(--color-text-tertiary)]">/ mois / tech</span>
             </div>
             <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
               Base de {nbActiveTechs} techniciens actifs
@@ -222,7 +243,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
           <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)]">
             <div className="text-sm text-[var(--color-text-secondary)] mb-1">Non assignés</div>
             <div className="text-2xl font-bold text-[var(--color-text-primary)] flex flex-wrap items-baseline gap-x-1.5">
-              {formatHours(unassigned?.totalHours || 0)} <span className="text-sm font-medium text-[var(--color-text-tertiary)] whitespace-nowrap">{unassigned?.totalCount || 0} prélèv.</span>
+              {formatPoints(unassigned?.totalPoints || 0)} <span className="text-sm font-medium text-[var(--color-text-tertiary)] whitespace-nowrap">{unassigned?.totalCount || 0} prélèv.</span>
             </div>
             <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
               Volume de travail orphelin
@@ -243,9 +264,15 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
                 <div className="w-3 h-3 rounded-[2px] bg-[var(--color-warning)]" />
                 <span className="border-b border-dotted border-[var(--color-text-tertiary)]">Surcharge théorique</span>
                 
-                <div className="absolute bottom-full right-0 mb-2 w-56 p-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-[var(--radius-md)] shadow-[var(--shadow-modal)] text-xs leading-relaxed text-[var(--color-text-secondary)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
+                <div className="absolute bottom-full right-0 mb-2 w-72 p-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-[var(--radius-md)] shadow-[var(--shadow-modal)] text-xs leading-relaxed text-[var(--color-text-secondary)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
                   <span className="font-semibold text-[var(--color-text-primary)] block mb-1">Capacité maximale</span>
-                  Calculé sur la base de {CAPACITY_HOURS_PER_TECH_PER_MONTH}h de terrain par mois par technicien actif ({nbActiveTechs} actuellement affichés).
+                  Calculée sur la base de {CAPACITY_POINTS_PER_TECH_PER_MONTH} pts de charge par mois par technicien actif ({nbActiveTechs} actuellement affichés).
+                  <div className="mt-2 pt-2 border-t border-[var(--color-border-subtle)] flex flex-col gap-1 text-[11px]">
+                    <span className="font-medium text-[var(--color-text-primary)] mb-0.5">Barème d'équivalence :</span>
+                    <span>• Prélèvement Ponctuel = 1 pt</span>
+                    <span>• Eau Souterraine = 2 pts</span>
+                    <span>• Composite / Automatique = 4 pts</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -253,17 +280,17 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
           
           <div className="flex items-stretch gap-2 h-64 relative pt-7 pb-2">
             {/* Ligne de flottaison (Capacité max) */}
-            {maxCapacityPerMonth > 0 && maxMonthHours > 0 && (
+            {maxCapacityPerMonth > 0 && maxMonthPoints > 0 && (
               <div
                 className="absolute w-full border-t border-dashed border-[var(--color-danger)] opacity-50 z-10 flex items-center"
-                style={{ bottom: `${Math.min(100, (maxCapacityPerMonth / Math.max(maxCapacityPerMonth, maxMonthHours)) * 100)}%` }}
+                style={{ bottom: `${Math.min(100, (maxCapacityPerMonth / Math.max(maxCapacityPerMonth, maxMonthPoints)) * 100)}%` }}
               >
-                <span className="absolute right-0 -top-5 text-[10px] text-[var(--color-danger)] font-medium">Capacité max théo. ({formatHours(maxCapacityPerMonth)})</span>
+                <span className="absolute right-0 -top-5 text-[10px] text-[var(--color-danger)] font-medium">Capacité max théo. ({formatPoints(maxCapacityPerMonth)})</span>
               </div>
             )}
 
-            {totalPerMonthHours.map((val, i) => {
-              const chartMax = Math.max(maxCapacityPerMonth, maxMonthHours, 1)
+            {totalPerMonthPoints.map((val, i) => {
+              const chartMax = Math.max(maxCapacityPerMonth, maxMonthPoints, 1)
               const heightPct = (val / chartMax) * 100
               const isOverCapacity = maxCapacityPerMonth > 0 && val > maxCapacityPerMonth
 
@@ -271,7 +298,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
                 <div key={MOIS_LONG[i]} className="flex-1 flex flex-col items-center gap-2 relative group h-full">
                   {val > 0 && (
                     <div className="absolute -top-6 text-xs font-semibold text-[var(--color-text-secondary)] whitespace-nowrap">
-                      {formatHours(val)}
+                      {formatPoints(val)}
                     </div>
                   )}
                   <div className="w-full max-w-[40px] bg-[var(--color-bg-tertiary)] rounded-t-[6px] relative flex items-end justify-center overflow-hidden flex-1">
@@ -300,9 +327,9 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
               <span className="text-[11px] text-[var(--color-text-tertiary)] hidden lg:inline">— faites défiler pour voir tous les mois →</span>
             </div>
             <div className="flex items-center gap-4 text-xs">
-              <div className="flex items-center gap-1.5"><span className="size-3 rounded border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)]" /> Normal</div>
-              <div className="flex items-center gap-1.5"><span className="size-3 rounded bg-[var(--color-warning-light)] border border-[var(--color-warning)] opacity-50" /> Chargé ({'>'}{THRESHOLD_WARNING_HOURS}h)</div>
-              <div className="flex items-center gap-1.5"><span className="size-3 rounded bg-[var(--color-danger-light)] border border-[var(--color-danger)] opacity-50" /> Surcharge ({'>'}{THRESHOLD_DANGER_HOURS}h)</div>
+              <div className="flex items-center gap-1.5"><span className="size-3 rounded border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)]" /> Normal (&lt;{THRESHOLD_WARNING_POINTS} pts)</div>
+              <div className="flex items-center gap-1.5"><span className="size-3 rounded bg-[var(--color-warning-light)] border border-[var(--color-warning)] opacity-50" /> Chargé ({THRESHOLD_WARNING_POINTS}–{THRESHOLD_DANGER_POINTS} pts)</div>
+              <div className="flex items-center gap-1.5"><span className="size-3 rounded bg-[var(--color-danger-light)] border border-[var(--color-danger)] opacity-50" /> Surcharge (&gt;={THRESHOLD_DANGER_POINTS} pts)</div>
             </div>
           </div>
           
@@ -337,16 +364,16 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
                         </div>
                       </td>
                       <td className="px-2 py-3 border-r border-[var(--color-border-subtle)] text-center font-bold text-[var(--color-text-primary)] text-sm whitespace-nowrap">
-                        {tech.totalHours > 0 ? formatHours(tech.totalHours) : '-'}
+                        {tech.totalPoints > 0 ? formatPoints(tech.totalPoints) : '-'}
                       </td>
-                      {tech.monthsHours.map((val, i) => {
+                      {tech.monthsPoints.map((val, i) => {
                         const details = tech.monthDetails[i]
                         const detailParts: string[] = []
                         if (details.Ponctuel > 0) detailParts.push(`${details.Ponctuel} Ponctuel${details.Ponctuel > 1 ? 's' : ''}`)
                         if (details.Composite > 0) detailParts.push(`${details.Composite} Composite${details.Composite > 1 ? 's' : ''}`)
                         if (details.Automatique > 0) detailParts.push(`${details.Automatique} Bilan 24h`)
                         const tooltipText = detailParts.length > 0
-                          ? `${name} - ${MOIS_LONG[i]} : ${formatHours(val)} — ${detailParts.join(', ')}`
+                          ? `${name} - ${MOIS_LONG[i]} : ${formatPoints(val)} — ${detailParts.join(', ')}`
                           : undefined
 
                         return (
@@ -359,7 +386,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
                               }}
                               title={tooltipText}
                             >
-                              {val > 0 ? formatHours(val) : '-'}
+                              {val > 0 ? formatPoints(val) : '-'}
                             </div>
                           </td>
                         )
@@ -380,3 +407,4 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
     </div>
   )
 }
+

@@ -13,7 +13,7 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
   - Renommage des constantes et fonctions d'évaluation en `getSamplingPoints` et `formatPoints`.
 - **`WorkloadMatrixView.tsx`** :
   - Adaptation de la logique et du JSX pour utiliser les points de charge à la place des heures terrain.
-  - Intégration d'un petit encart de légende fixe en haut à droite avec le barème.
+  - Intégration d'un panneau de légende fixe en haut à droite détaillant le barème des points et expliquant textuellement et dynamiquement le calcul de la capacité maximale de l'équipe (ex. : `2 techniciens actifs × 35 pts = 70 pts / mois`).
   - Enrichissement du tooltip d'aide sur l'évolution de la charge globale avec le détail des équivalences.
 - **`changelog.ts`** : Incrémentation en version `156` et description des nouveautés.
 
