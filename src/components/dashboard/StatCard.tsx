@@ -1,6 +1,4 @@
 import { m } from 'framer-motion'
-import { COLORS } from '@/lib/constants'
-
 
 interface StatCardProps {
   value: string | number
@@ -13,15 +11,16 @@ interface StatCardProps {
 }
 
 export function StatCard({ value, label, sub, accent, warning, danger, onClick }: StatCardProps) {
-  const color = danger
-    ? COLORS.DANGER
-    : warning
-    ? COLORS.WARNING
-    : accent
-    ? COLORS.ACCENT
-    : COLORS.TEXT_PRIMARY
+  const cardClass = "bg-[var(--color-bg-secondary)] border-[var(--color-border-subtle)]"
+  let valueClass = "text-[var(--color-text-primary)]"
 
-  const gradient = COLORS.BG_SECONDARY
+  if (danger) {
+    valueClass = "text-[var(--color-danger)]"
+  } else if (warning) {
+    valueClass = "text-[var(--color-warning)]"
+  } else if (accent) {
+    valueClass = "text-[var(--color-accent)]"
+  }
 
   return (
     <m.div
@@ -29,16 +28,11 @@ export function StatCard({ value, label, sub, accent, warning, danger, onClick }
       whileTap={onClick ? { scale: 0.98 } : {}}
       transition={{ type: 'spring', stiffness: 350, damping: 25 }}
       onClick={onClick}
-      className={`rounded-xl p-4 select-none ${onClick ? 'cursor-pointer' : ''}`}
-      style={{
-        background: gradient,
-        border: '1px solid var(--color-border-subtle)',
-        boxShadow: 'var(--shadow-card)',
-      }}
+      className={`rounded-2xl p-4.5 select-none border shadow-[var(--shadow-card)] transition-all ${cardClass} ${onClick ? 'cursor-pointer' : ''}`}
     >
-      <p className="text-[10px] font-semibold uppercase mb-2 leading-tight" style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.08em' }}>{label}</p>
-      <p className="text-[28px] font-bold leading-none mb-2" style={{ color, letterSpacing: '-0.03em' }}>{value}</p>
-      {sub && <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{sub}</p>}
+      <p className="text-[10px] font-semibold uppercase mb-2 leading-tight tracking-wider text-[var(--color-text-secondary)]" style={{ letterSpacing: '0.08em' }}>{label}</p>
+      <p className={`text-[28px] font-bold leading-none mb-1.5 ${valueClass}`} style={{ letterSpacing: '-0.03em' }}>{value}</p>
+      {sub && <p className="text-xs text-[var(--color-text-secondary)]">{sub}</p>}
     </m.div>
   )
 }

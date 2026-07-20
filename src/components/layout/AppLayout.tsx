@@ -9,7 +9,6 @@ import ToastContainer from '@/components/ui/ToastContainer'
 import ChangelogModal, { useChangelogState } from '@/components/ui/ChangelogModal'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import SyncBadge from '@/components/ui/SyncBadge'
-import { COLORS } from '@/lib/constants'
 import SpotlightModal from '@/components/spotlight/SpotlightModal'
 import { useSpotlightStore } from '@/stores/spotlightStore'
 import { useGlobalHotkey } from '@/hooks/useGlobalHotkey'
@@ -38,7 +37,7 @@ export default function AppLayout() {
   }, [pathname])
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: COLORS.BG_PRIMARY }}>
+    <div className="flex h-screen overflow-hidden bg-[var(--color-bg-primary)]">
       {/* Listeners Firestore globaux — montés une seule fois pour toute la session */}
       <GlobalListeners />
 

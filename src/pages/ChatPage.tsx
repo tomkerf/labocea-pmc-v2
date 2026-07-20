@@ -602,13 +602,7 @@ export default function ChatPage() {
       >
         {/* En-tête du chat actif */}
         <div 
-          className="px-4 py-3 flex items-center gap-3 shrink-0 animate-fade-in" 
-          style={{ 
-            background: 'rgba(255,255,255,0.85)',
-            backdropFilter: 'var(--glass-panel)',
-            WebkitBackdropFilter: 'var(--glass-panel)',
-            borderBottom: '1px solid var(--color-border-subtle)',
-          }}
+          className="px-4 py-3 flex items-center gap-3 shrink-0 animate-fade-in bg-white/80 backdrop-blur-md border-b border-[var(--color-border-subtle)]"
         >
           {/* Bouton retour mobile */}
           <button 
@@ -777,7 +771,7 @@ export default function ChatPage() {
                                   animate={{ opacity: 1, y: 0, scale: 1 }}
                                   exit={{ opacity: 0, y: 4, scale: 0.95 }}
                                   transition={{ duration: 0.12 }}
-                                  className={`absolute -top-11 z-20 flex items-center gap-0.5 px-1.5 py-1 rounded-full shadow-[var(--shadow-card)] border border-[var(--color-border-subtle)] bg-[var(--color-bg-primary)] ${
+                                  className={`absolute -top-11 z-20 flex items-center gap-0.5 px-1.5 py-1 rounded-full shadow-[var(--shadow-card)] border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] ${
                                     isMe ? 'right-0' : 'left-0'
                                   }`}
                                 >
@@ -847,11 +841,7 @@ export default function ChatPage() {
           <m.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mx-4 mb-2 p-2 rounded-xl flex flex-wrap gap-1.5 shrink-0 shadow-[var(--shadow-card)]"
-            style={{ 
-              background: 'var(--color-bg-secondary)',
-              border: '1px solid var(--color-border-subtle)' 
-            }}
+            className="mx-4 mb-2 p-2 rounded-2xl flex flex-wrap gap-1.5 shrink-0 shadow-[var(--shadow-card)] bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)]"
           >
             <span className="text-[11px] font-medium text-[var(--color-text-secondary)] w-full mb-1 px-1 flex items-center gap-1">
               <AtSign size={12} /> Mentionner un membre :
@@ -874,13 +864,7 @@ export default function ChatPage() {
         {/* Barre de saisie */}
         {selectedChatId && (
           <div 
-            className="p-4 shrink-0" 
-            style={{ 
-              background: 'rgba(255,255,255,0.85)',
-              backdropFilter: 'var(--glass-panel)',
-              WebkitBackdropFilter: 'var(--glass-panel)',
-              borderTop: '1px solid var(--color-border-subtle)',
-            }}
+            className="p-4 shrink-0 bg-white/80 backdrop-blur-md border-t border-[var(--color-border-subtle)]"
           >
             <form onSubmit={handleSend} className="flex items-center gap-2">
               <input

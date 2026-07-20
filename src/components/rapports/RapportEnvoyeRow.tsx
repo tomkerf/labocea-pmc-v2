@@ -1,5 +1,4 @@
 import type { RapportItem } from '@/hooks/useDashboardStats'
-import { COLORS } from '@/lib/constants'
 
 interface RapportEnvoyeRowProps {
   r: RapportItem
@@ -17,23 +16,24 @@ export default function RapportEnvoyeRow({ r, isLast, resolveNom }: RapportEnvoy
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3"
-      style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)' }}
+      className={`flex items-center justify-between gap-3 px-4 py-3.5 ${isLast ? '' : 'border-b border-[var(--color-border-subtle)]'}`}
     >
-      <span className="shrink-0 size-2 rounded-full" style={{ background: COLORS.SUCCESS }} />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
-          {r.planNom} · <span style={{ color: COLORS.TEXT_SECONDARY }}>{r.siteNom}</span>
-        </p>
-        <p className="text-xs truncate" style={{ color: COLORS.TEXT_SECONDARY }}>
-          intervention le {fmtDone}
-        </p>
+      <div className="flex items-center gap-3 min-w-0">
+        <span className="shrink-0 size-2 rounded-full bg-[var(--color-success)]" />
+        <div className="min-w-0">
+          <p className="text-[13px] font-bold text-[var(--color-text-primary)] truncate">
+            {r.planNom} <span className="text-[var(--color-text-tertiary)] font-normal">·</span> <span className="text-[var(--color-text-secondary)] font-medium">{r.siteNom}</span>
+          </p>
+          <p className="text-[11px] text-[var(--color-text-secondary)] font-medium mt-0.5">
+            Intervention le {fmtDone}
+          </p>
+        </div>
       </div>
       <div className="flex items-center gap-3 shrink-0">
-        <span className="text-xs" style={{ color: COLORS.TEXT_SECONDARY }}>
+        <span className="text-[11px] font-semibold text-[var(--color-text-secondary)]">
           Rédigé le {fmtEnvoye}
         </span>
-        <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] border border-[var(--color-border-subtle)]">
           {resolveNom(r.doneBy)}
         </span>
       </div>

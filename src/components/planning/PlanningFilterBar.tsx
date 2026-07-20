@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { m } from 'framer-motion'
-import { getTechColor } from '@/lib/planningUtils'
+import { getTechColor, type ViewMode } from '@/lib/planningUtils'
 import UserAvatar from '@/components/ui/UserAvatar'
 import { COLORS } from '@/lib/constants'
 import type { Preleveur } from '@/stores/preleveursStore'
@@ -24,6 +24,7 @@ interface PlanningFilterBarProps {
   filterSite:    string
   setFilterSite: (v: string) => void
   preleveurs:    Preleveur[]
+  viewMode?:     ViewMode
 }
 
 const LEGEND_ITEM: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '4px' }
@@ -43,7 +44,7 @@ function PlanningLegend() {
 }
 
 export default function PlanningFilterBar({
-  allTechs, filterTech, setFilterTech, filterSite, setFilterSite, preleveurs,
+  allTechs, filterTech, setFilterTech, filterSite, setFilterSite, preleveurs, viewMode,
 }: PlanningFilterBarProps) {
   const availableSites = useMemo(() => {
     const sites = new Set(preleveurs.flatMap(p => p.site ? [p.site] : []))
@@ -51,7 +52,7 @@ export default function PlanningFilterBar({
   }, [preleveurs])
 
   return (
-    <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 px-4 md:px-6 pb-3"
+    <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-2.5 px-4 md:px-5 py-2"
       style={{ borderBottom: '1px solid var(--color-border-subtle)', background: COLORS.BG_SECONDARY }}>
       
       <div className="flex items-center gap-2 flex-wrap">
@@ -145,7 +146,7 @@ export default function PlanningFilterBar({
         )}
       </div>
 
-      <PlanningLegend />
+      {viewMode !== 'annee' && <PlanningLegend />}
     </div>
   )
 }

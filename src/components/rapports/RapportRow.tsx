@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import type { RapportItem } from '@/hooks/useDashboardStats'
-import { COLORS } from '@/lib/constants'
 
 interface RapportRowProps {
   r: RapportItem
@@ -22,28 +21,53 @@ export default function RapportRow({ r, isLast, todayStr, touteEquipe, resolveNo
   const joursAvant = r.rapportDatePrevue
     ? Math.floor((new Date(r.rapportDatePrevue).getTime() - new Date(todayStr).getTime()) / 86400000)
     : null
-  const delaiColor = joursAvant === null ? 'var(--color-text-tertiary)'
-    : joursAvant < 0 ? COLORS.DANGER
-    : joursAvant <= 7 ? COLORS.WARNING
-    : COLORS.SUCCESS
-  const delaiLabel = joursAvant === null ? '—'
-    : joursAvant < 0 ? `${Math.abs(joursAvant)}j de retard`
-    : joursAvant === 0 ? "Aujourd'hui"
-    : `dans ${joursAvant}j`
+
+  // Calcule le badge de retard/délai en pastel premium
+  const renderDelaiBadge = () => {
+    if (joursAvant === null) {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] border border-[var(--color-border-subtle)]">
+          —
+        </span>
+      )
+    }
+
+    if (joursAvant < 0) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--color-danger-light)] text-[var(--color-danger)] border border-[rgba(255,59,48,0.15)]">
+          <span className="size-1 rounded-full bg-[var(--color-danger)] animate-pulse" />
+          {Math.abs(joursAvant)}j de retard
+        </span>
+      )
+    }
+    if (joursAvant <= 7) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--color-warning-light)] text-[var(--color-warning)] border border-[rgba(255,159,10,0.15)]">
+          <span className="size-1 rounded-full bg-[var(--color-warning)]" />
+          {joursAvant === 0 ? "Aujourd'hui" : `dans ${joursAvant}j`}
+        </span>
+      )
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--color-success-light)] text-[var(--color-success)] border border-[rgba(52,199,89,0.15)]">
+        <span className="size-1 rounded-full bg-[var(--color-success)]" />
+        dans {joursAvant}j
+      </span>
+    )
+  }
 
   return (
     <div
       key={r.samplingId}
-      className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3"
-      style={{ borderBottom: isLast ? 'none' : '1px solid var(--color-border-subtle)' }}
+      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3.5 ${isLast ? '' : 'border-b border-[var(--color-border-subtle)]'}`}
     >
       <div className="flex-1 min-w-0">
-        <p className="text-sm truncate" style={{ color: COLORS.TEXT_PRIMARY }}>
-          {r.planNom} · <span style={{ color: COLORS.TEXT_SECONDARY }}>{r.siteNom}</span>
+        <p className="text-[13px] font-bold text-[var(--color-text-primary)] truncate">
+          {r.planNom} <span className="text-[var(--color-text-tertiary)] font-normal">·</span> <span className="text-[var(--color-text-secondary)] font-medium">{r.siteNom}</span>
         </p>
-        <p className="text-xs truncate" style={{ color: COLORS.TEXT_SECONDARY }}>
-          intervention le {fmtDone}
-          {touteEquipe && <span style={{ color: 'var(--color-text-tertiary)' }}> · {resolveNom(r.doneBy)}</span>}
+        <p className="text-[11px] text-[var(--color-text-secondary)] font-medium mt-0.5 truncate">
+          Intervention le {fmtDone}
+          {touteEquipe && <span className="text-[var(--color-text-tertiary)] font-normal"> · {resolveNom(r.doneBy)}</span>}
         </p>
       </div>
       <div className="flex items-center gap-2 flex-wrap shrink-0">
@@ -52,32 +76,24 @@ export default function RapportRow({ r, isLast, todayStr, touteEquipe, resolveNo
           aria-label="Date prévue du rapport"
           defaultValue={r.rapportDatePrevue}
           onBlur={(e) => { if (e.target.value !== r.rapportDatePrevue) onUpdateDate(r.clientId, r.planId, r.samplingId, e.target.value) }}
-          className="rounded-md px-2 py-1 text-xs"
-          style={{ border: '1px solid var(--color-border)', background: COLORS.BG_TERTIARY, color: COLORS.TEXT_PRIMARY }}
+          className="rounded-lg px-2.5 py-1 text-xs bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] shadow-sm"
         />
-        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] inline-flex items-center gap-1.5"
-          style={{ color: delaiColor }}>
-          <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: delaiColor }} />
-          {delaiLabel}
-        </span>
+        {renderDelaiBadge()}
+        
         <button type="button"
           onClick={() => navigate(`/missions/${r.clientId}/plan/${r.planId}?sampling=${r.samplingId}`)}
-          className="px-2 py-1.5 rounded-lg text-xs font-medium"
-          style={{ background: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY, border: '1px solid var(--color-border)' }}
+          className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] active:scale-95 transition-all shadow-sm cursor-pointer"
         >
           Fiche
         </button>
         <button type="button"
           onClick={() => onMark(r.clientId, r.planId, r.samplingId)}
           disabled={sending.has(r.samplingId)}
-          className="px-3 py-1.5 rounded-lg text-xs font-medium"
-          style={{
-            background: sending.has(r.samplingId) ? COLORS.BG_TERTIARY : 'var(--color-accent-light)',
-            color: sending.has(r.samplingId) ? 'var(--color-text-tertiary)' : COLORS.ACCENT,
-            cursor: sending.has(r.samplingId) ? 'not-allowed' : 'pointer',
-          }}
-          onMouseEnter={e => { if (!sending.has(r.samplingId)) { e.currentTarget.style.background = COLORS.ACCENT; e.currentTarget.style.color = 'white' } }}
-          onMouseLeave={e => { if (!sending.has(r.samplingId)) { e.currentTarget.style.background = 'var(--color-accent-light)'; e.currentTarget.style.color = COLORS.ACCENT } }}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-[0.98] border shadow-sm ${
+            sending.has(r.samplingId)
+              ? 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-tertiary)] border-[var(--color-border-subtle)] cursor-not-allowed'
+              : 'bg-[var(--color-accent-light)] hover:bg-[var(--color-accent)] text-[var(--color-accent)] hover:text-white border-[rgba(0,113,227,0.15)] hover:border-transparent cursor-pointer'
+          }`}
         >
           {sending.has(r.samplingId) ? '…' : 'Marquer rédigé'}
         </button>

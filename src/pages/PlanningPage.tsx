@@ -193,6 +193,7 @@ export default function PlanningPage() {
       <PlanningFilterBar
         allTechs={visibleTechs} filterTech={activeFilterTech} setFilterTech={setFilterTech}
         filterSite={filterSite} setFilterSite={setFilterSite} preleveurs={preleveurs}
+        viewMode={viewMode}
       />
       <PlanningDragHint
         showDragHint={showDragHint} setShowDragHint={setShowDragHint} viewMode={viewMode}

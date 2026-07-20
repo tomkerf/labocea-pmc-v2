@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import {
-  getSamplingDurationHours,
-  formatHours,
-  DURATION_HOURS,
-  DURATION_SOUTERRAINE_HOURS,
+  getSamplingPoints,
+  formatPoints,
+  METHOD_POINTS,
+  POINTS_SOUTERRAINE,
 } from '../workloadUtils'
 import type { Plan } from '@/types'
 
@@ -15,45 +15,41 @@ function makePlan(overrides: Partial<Pick<Plan, 'nature' | 'methode'>> = {}): Pi
   }
 }
 
-describe('getSamplingDurationHours', () => {
-  it('2h pour un Bilan 24h (Automatique)', () => {
-    expect(getSamplingDurationHours(makePlan({ methode: 'Automatique' }))).toBe(2)
+describe('getSamplingPoints', () => {
+  it('4 points pour un Bilan 24h (Automatique)', () => {
+    expect(getSamplingPoints(makePlan({ methode: 'Automatique' }))).toBe(4)
   })
-  it('2h pour un Composite', () => {
-    expect(getSamplingDurationHours(makePlan({ methode: 'Composite' }))).toBe(2)
+  it('4 points pour un Composite', () => {
+    expect(getSamplingPoints(makePlan({ methode: 'Composite' }))).toBe(4)
   })
-  it('15 min pour un Ponctuel', () => {
-    expect(getSamplingDurationHours(makePlan({ methode: 'Ponctuel' }))).toBe(0.25)
+  it('1 point pour un Ponctuel', () => {
+    expect(getSamplingPoints(makePlan({ methode: 'Ponctuel' }))).toBe(1)
   })
-  it('1h pour une eau souterraine, quelle que soit la méthode', () => {
-    expect(getSamplingDurationHours(makePlan({ nature: 'Souterraine', methode: 'Ponctuel' }))).toBe(DURATION_SOUTERRAINE_HOURS)
-    expect(getSamplingDurationHours(makePlan({ nature: 'Souterraine', methode: 'Composite' }))).toBe(DURATION_SOUTERRAINE_HOURS)
-    expect(getSamplingDurationHours(makePlan({ nature: 'Souterraine', methode: 'Automatique' }))).toBe(DURATION_SOUTERRAINE_HOURS)
+  it('2 points pour une eau souterraine, quelle que soit la méthode', () => {
+    expect(getSamplingPoints(makePlan({ nature: 'Souterraine', methode: 'Ponctuel' }))).toBe(POINTS_SOUTERRAINE)
+    expect(getSamplingPoints(makePlan({ nature: 'Souterraine', methode: 'Composite' }))).toBe(POINTS_SOUTERRAINE)
+    expect(getSamplingPoints(makePlan({ nature: 'Souterraine', methode: 'Automatique' }))).toBe(POINTS_SOUTERRAINE)
   })
-  it('les natures non souterraines suivent la durée de la méthode', () => {
-    expect(getSamplingDurationHours(makePlan({ nature: 'Rivière', methode: 'Automatique' }))).toBe(2)
-    expect(getSamplingDurationHours(makePlan({ nature: 'Eau usée', methode: 'Ponctuel' }))).toBe(0.25)
+  it('les natures non souterraines suivent les points de la méthode', () => {
+    expect(getSamplingPoints(makePlan({ nature: 'Rivière', methode: 'Automatique' }))).toBe(4)
+    expect(getSamplingPoints(makePlan({ nature: 'Eau usée', methode: 'Ponctuel' }))).toBe(1)
   })
   it('fallback Ponctuel quand la méthode est absente ou inconnue', () => {
     const plan = makePlan({ methode: '' as Plan['methode'] })
-    expect(getSamplingDurationHours(plan)).toBe(DURATION_HOURS.Ponctuel)
+    expect(getSamplingPoints(plan)).toBe(METHOD_POINTS.Ponctuel)
   })
 })
 
-describe('formatHours', () => {
-  it('0h quand zéro', () => {
-    expect(formatHours(0)).toBe('0h')
+describe('formatPoints', () => {
+  it('0 pt quand zéro', () => {
+    expect(formatPoints(0)).toBe('0 pt')
   })
-  it('minutes seules sous une heure', () => {
-    expect(formatHours(0.25)).toBe('15min')
-    expect(formatHours(0.5)).toBe('30min')
+  it('pt au singulier pour 1', () => {
+    expect(formatPoints(1)).toBe('1 pt')
   })
-  it('heures rondes sans minutes', () => {
-    expect(formatHours(1)).toBe('1h')
-    expect(formatHours(70)).toBe('70h')
-  })
-  it('heures et minutes combinées', () => {
-    expect(formatHours(1.25)).toBe('1h15')
-    expect(formatHours(3.5)).toBe('3h30')
+  it('pts au pluriel pour > 1', () => {
+    expect(formatPoints(2)).toBe('2 pts')
+    expect(formatPoints(35)).toBe('35 pts')
   })
 })
+

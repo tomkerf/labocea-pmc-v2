@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '159'
+export const CHANGELOG_VERSION = '167'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,64 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '167',
+    date: '20 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Planning : Optimisation verticale de l\'en-tête (paddings plus compacts et masquage de la légende standard en vue annuelle pour gagner de l\'espace)' },
+    ],
+  },
+  {
+    version: '166',
+    date: '20 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Vue annuelle : Suppression des marges et paddings externes autour du tableau de planning pour maximiser l\'espace utile de lecture des 12 mois' },
+    ],
+  },
+  {
+    version: '165',
+    date: '20 juillet 2026',
+    items: [
+      { type: 'fix', label: 'CI/Lint : Correction d\'une règle ESLint de mise à jour d\'état synchrone dans un useEffect sur la page AidePage afin de débloquer le pipeline de build CI' },
+    ],
+  },
+  {
+    version: '164',
+    date: '20 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Tableau de bord : Restauration du fond blanc neutre et des bordures standard sur les cartes de KPI (seules les valeurs chiffrées conservent leur coloration distinctive d\'état)' },
+    ],
+  },
+  {
+    version: '163',
+    date: '20 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Missions & Tableau de Bord : Restauration des tailles de police d\'origine (titres, étiquettes, selects, boutons et valeurs de KPI) pour un meilleur confort de lecture' },
+    ],
+  },
+  {
+    version: '162',
+    date: '20 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Sidebar : Restauration de la taille de police d\'origine (13px/text-sm) sur la navigation principale pour une lisibilité accrue' },
+    ],
+  },
+  {
+    version: '161',
+    date: '20 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Layouts : Harmonisation globale de la navigation (Sidebar, BottomTabBar et AppLayout épurés de COLORS, utilisation systématique de Tailwind pour les interactions tactiles et hovers)' },
+    ],
+  },
+  {
+    version: '160',
+    date: '20 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Missions : Refonte UI/UX premium Apple-style (retrait de COLORS, listes de clients allégées avec hover Tailwind natif, sélecteurs de filtres épurés, bouton de retard discret)' },
+      { type: 'feat', label: 'Actualités : Palette de catégories et badges refondus à l\'aide de classes pastelles issues du design system, outils de recherche et pilules de filtres aérées' },
+      { type: 'feat', label: 'Tableau de bord : Suppression des styles inline restants sur l\'en-tête, le sélecteur de rôle, le widget d\'actus et les états du parc (DonutChart)' },
+    ],
+  },
   {
     version: '159',
     date: '20 juillet 2026',

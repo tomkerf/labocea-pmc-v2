@@ -4,9 +4,6 @@ import { LayoutDashboard, CalendarDays, ClipboardList, Wrench, LayoutGrid } from
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useChatNotificationStore } from '@/stores/chatNotificationStore'
 import { isSamplingOverdue } from '@/lib/overdue'
-import { COLORS } from '@/lib/constants'
-
-const INACTIVE = '#8E8E93'
 
 function getActiveTab(pathname: string): string {
   if (pathname === '/') return '/'
@@ -41,16 +38,7 @@ export default function BottomTabBar() {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex"
-      style={{
-        height: 80,
-        background: 'rgba(248,248,250,0.92)',
-        backdropFilter: 'var(--glass-bar)',
-        WebkitBackdropFilter: 'var(--glass-bar)',
-        borderTop: '1px solid var(--color-border-subtle)',
-        boxShadow: '0 -1px 0 rgba(0,0,0,0.04), 0 -8px 24px rgba(0,0,0,0.05)',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-      }}
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex h-20 bg-[rgba(248,248,250,0.92)] backdrop-blur-lg border-t border-[var(--color-border-subtle)] shadow-[0_-1px_0_rgba(0,0,0,0.04),0_-8px_24px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom,0px)]"
     >
       {tabs.map(({ to, key, label, icon: Icon, badge }) => {
         const active = activeTab === key
@@ -58,31 +46,25 @@ export default function BottomTabBar() {
           <NavLink
             key={to}
             to={to}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 pt-1"
-            style={{
-              color: active ? COLORS.ACCENT : INACTIVE,
-              textDecoration: 'none',
-              transition: 'color 0.2s cubic-bezier(0.4,0,0.2,1)',
-            }}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 pt-1 transition-colors ${
+              active ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-secondary)]'
+            }`}
           >
             <div
-              className="relative flex items-center justify-center rounded-xl px-4 py-1"
-              style={{
-                background: active ? `${COLORS.ACCENT}18` : 'transparent',
-                transition: 'background 0.2s cubic-bezier(0.4,0,0.2,1)',
-              }}
+              className={`relative flex items-center justify-center rounded-xl px-4 py-1 transition-all ${
+                active ? 'bg-[var(--color-accent-light)]' : 'bg-transparent'
+              }`}
             >
-              <Icon size={22} strokeWidth={active ? 2.2 : 1.6} />
-              {badge !== undefined && (
+              <Icon size={20} strokeWidth={active ? 2.2 : 1.6} />
+              {badge !== undefined && badge > 0 && (
                 <span
-                  className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center"
-                  style={{ background: COLORS.DANGER, color: 'white' }}
+                  className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold flex items-center justify-center bg-[var(--color-danger)] text-white border border-white"
                 >
                   {badge > 99 ? '99+' : badge}
                 </span>
               )}
             </div>
-            <span className={`text-[10px] ${active ? 'font-semibold' : 'font-medium'}`}>{label}</span>
+            <span className={`text-[10px] ${active ? 'font-bold' : 'font-medium'}`}>{label}</span>
           </NavLink>
         )
       })}

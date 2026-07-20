@@ -33,7 +33,6 @@ import type { Sampling, Client, Plan } from '@/types'
 import { TodosWidget } from '@/components/dashboard/TodosWidget'
 import { useTodosStore } from '@/stores/todosStore'
 import { useActusStore } from '@/stores/actusStore'
-import { COLORS } from '@/lib/constants'
 import { uploadSamplingPhoto, ImageValidationError } from '@/lib/uploadPhoto'
 import { toast } from '@/stores/toastStore'
 
@@ -82,11 +81,11 @@ function DashboardNewsWidget() {
   if (recentActus.length === 0) return null
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2.5">
       <div className="flex justify-between items-center">
         <SectionTitle>Dernières actualités</SectionTitle>
         {unreadCount > 0 && (
-          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-accent-light)] text-[var(--color-accent)] border border-[rgba(0,113,227,0.12)]">
             {unreadCount} non lue{unreadCount > 1 ? 's' : ''}
           </span>
         )}
@@ -98,20 +97,17 @@ function DashboardNewsWidget() {
             <div
               key={actu.id}
               onClick={() => navigate('/actus')}
-              className="p-4 rounded-xl cursor-pointer hover:translate-y-[-1px] transition-all relative flex flex-col gap-1.5"
-              style={{
-                background: COLORS.BG_SECONDARY,
-                border: isUnread ? `1.5px solid ${COLORS.ACCENT}` : '1px solid var(--color-border-subtle)',
-                boxShadow: 'var(--shadow-card)',
-              }}
+              className={`p-4 rounded-2xl cursor-pointer transition-all hover:-translate-y-[0.5px] hover:shadow relative flex flex-col gap-1.5 bg-[var(--color-bg-secondary)] border shadow-[var(--shadow-card)] ${
+                isUnread ? 'border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/20' : 'border-[var(--color-border-subtle)]'
+              }`}
             >
               {isUnread && (
-                <div className="absolute top-4 right-4 w-2 h-2 rounded-full" style={{ background: COLORS.ACCENT }} />
+                <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-[var(--color-accent)] animate-pulse" />
               )}
-              <h4 className="text-sm font-bold truncate pr-6" style={{ color: COLORS.TEXT_PRIMARY }}>
+              <h4 className="text-xs font-bold truncate pr-6 text-[var(--color-text-primary)]">
                 {actu.titre}
               </h4>
-              <p className="text-xs line-clamp-2" style={{ color: COLORS.TEXT_SECONDARY }}>
+              <p className="text-[11px] leading-relaxed line-clamp-2 text-[var(--color-text-secondary)]">
                 {actu.contenu}
               </p>
             </div>
@@ -349,20 +345,19 @@ export default function DashboardPage() {
               {/* État du parc */}
               <div>
                 <SectionTitle>État du parc matériel</SectionTitle>
-                <div className="rounded-xl px-6 py-5"
-                  style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+                <div className="rounded-2xl px-6 py-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] shadow-[var(--shadow-card)]">
                   <DonutChart
                     total={parcDonut.en_service + parcDonut.a_calibrer + parcDonut.en_maintenance + parcDonut.hors_service + parcDonut.prete}
                     segments={[
                       { value: parcDonut.en_service,     color: '#34C759',      label: 'En service'     },
                       { value: parcDonut.a_calibrer,     color: '#FF9F0A',      label: 'À calibrer'     },
-                      { value: parcDonut.en_maintenance, color: COLORS.ACCENT,  label: 'En maintenance' },
+                      { value: parcDonut.en_maintenance, color: 'var(--color-accent)',  label: 'En maintenance' },
                       { value: parcDonut.hors_service,   color: '#FF3B30',      label: 'Hors service'   },
                       { value: parcDonut.prete,          color: 'var(--color-neutral)', label: 'Prêté'          },
                     ]}
                   />
                 </div>
-                <button type="button" onClick={() => navigate('/materiel')} className="mt-2 text-xs cursor-pointer" style={{ color: COLORS.ACCENT }}>
+                <button type="button" onClick={() => navigate('/materiel')} className="mt-2.5 text-xs font-semibold text-[var(--color-accent)] hover:underline cursor-pointer">
                   Voir tout le matériel →
                 </button>
               </div>

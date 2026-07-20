@@ -1,7 +1,6 @@
 import { AnimatePresence } from 'framer-motion'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { COLORS } from '@/lib/constants'
 import TodoRow from '@/components/todos/TodoRow'
 import type { Todo } from '@/types'
 
@@ -32,17 +31,20 @@ export default function TodoSection({
       <button
         type="button"
         onClick={onToggleVisible}
-        className="flex items-center gap-2 w-full text-left font-semibold text-xs uppercase mb-3 focus:outline-none"
-        style={{ color: COLORS.TEXT_SECONDARY, letterSpacing: '0.04em' }}
+        className="flex items-center gap-2 w-full text-left font-bold text-[11px] uppercase tracking-wider text-[var(--color-text-secondary)] mb-4 focus:outline-none cursor-pointer"
       >
-        {visible ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-        {emoji} {label} ({todos.length})
+        {visible ? <ChevronDown size={12} className="text-[var(--color-text-tertiary)]" /> : <ChevronRight size={12} className="text-[var(--color-text-tertiary)]" />}
+        <span>{emoji}</span>
+        <span>{label}</span>
+        <span className="text-[10px] font-bold text-[var(--color-text-tertiary)] bg-[var(--color-bg-secondary)] px-1.5 py-0.5 rounded-full border border-[var(--color-border-subtle)]">
+          {todos.length}
+        </span>
       </button>
 
       {visible && (
         <div className="flex flex-col gap-2.5">
           {todos.length === 0 ? (
-            <p className="text-xs italic px-4 py-2" style={{ color: 'var(--color-text-tertiary)' }}>
+            <p className="text-xs font-medium italic px-4 py-3 text-[var(--color-text-tertiary)] bg-[var(--color-bg-secondary)]/50 rounded-xl border border-[var(--color-border-subtle)]">
               {emptyMessage}
             </p>
           ) : (

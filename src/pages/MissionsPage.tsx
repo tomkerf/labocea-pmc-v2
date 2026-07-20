@@ -10,7 +10,6 @@ import { isSamplingOverdue } from '@/lib/overdue'
 import ClientCard from '@/components/client/ClientCard'
 import { SkeletonList } from '@/components/ui/Skeleton'
 import type { Client } from '@/types'
-import { COLORS } from '@/lib/constants'
 
 
 function hasOverdue(client: Client): boolean {
@@ -173,27 +172,22 @@ export default function MissionsPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-[var(--color-bg-primary)]">
       {/* En-tête */}
       <div className="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
+          <h1 className="text-xl font-semibold text-[var(--color-text-primary)]">
             Missions
           </h1>
-          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+          <p className="text-sm text-[var(--color-text-secondary)] mt-0.5">
             {loading ? '…' : `${clients.length} client${clients.length > 1 ? 's' : ''}`}
           </p>
         </div>
         <button type="button"
           onClick={handleNewClient}
           disabled={creating}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold w-full sm:w-auto transition-transform active:scale-[0.98] cursor-pointer"
-          style={{
-            background: COLORS.ACCENT,
-            color: 'white',
-            boxShadow: '0 2px 8px rgba(52, 82, 122, 0.25)',
-            opacity: creating ? 0.7 : 1,
-          }}
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold w-full sm:w-auto transition-all active:scale-[0.98] cursor-pointer bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white shadow-sm hover:shadow"
+          style={{ opacity: creating ? 0.7 : 1 }}
         >
           <Plus size={16} />
           Nouveau client
@@ -201,21 +195,16 @@ export default function MissionsPage() {
       </div>
 
       {/* Filtres globaux (Site et Technicien) */}
-      <div className="shrink-0 flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="flex-1 flex flex-col gap-1.5">
-          <label htmlFor="missions-filter-site" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+      <div className="shrink-0 grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="missions-filter-site" className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
             Site géographique
           </label>
           <select
             id="missions-filter-site"
             value={filterSite}
             onChange={(e) => handleFilterSiteChange(e.target.value)}
-            className="px-3 py-2 rounded-lg text-sm outline-none"
-            style={{
-              background: COLORS.BG_SECONDARY,
-              border: '1px solid var(--color-border-subtle)',
-              color: COLORS.TEXT_PRIMARY,
-            }}
+            className="px-3 py-2 rounded-lg text-sm bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm cursor-pointer"
           >
             <option value="">Tous les sites</option>
             {availableSites.map(site => (
@@ -224,20 +213,15 @@ export default function MissionsPage() {
           </select>
         </div>
 
-        <div className="flex-1 flex flex-col gap-1.5">
-          <label htmlFor="missions-filter-tech" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="missions-filter-tech" className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
             Technicien (préleveur)
           </label>
           <select
             id="missions-filter-tech"
             value={filterTech}
             onChange={(e) => handleFilterTechChange(e.target.value)}
-            className="px-3 py-2 rounded-lg text-sm outline-none"
-            style={{
-              background: COLORS.BG_SECONDARY,
-              border: '1px solid var(--color-border-subtle)',
-              color: COLORS.TEXT_PRIMARY,
-            }}
+            className="px-3 py-2 rounded-lg text-sm bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm cursor-pointer"
           >
             <option value="">Tous les techniciens</option>
             {availableTechs.map(tech => (
@@ -246,20 +230,15 @@ export default function MissionsPage() {
           </select>
         </div>
 
-        <div className="flex-1 flex flex-col gap-1.5">
-          <label htmlFor="missions-filter-pause" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="missions-filter-pause" className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
             Statut
           </label>
           <select
             id="missions-filter-pause"
             value={filterPause}
             onChange={(e) => handleFilterPauseChange(e.target.value)}
-            className="px-3 py-2 rounded-lg text-sm outline-none"
-            style={{
-              background: COLORS.BG_SECONDARY,
-              border: '1px solid var(--color-border-subtle)',
-              color: COLORS.TEXT_PRIMARY,
-            }}
+            className="px-3 py-2 rounded-lg text-sm bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm cursor-pointer"
           >
             <option value="actifs">Actifs</option>
             <option value="pause">En pause</option>
@@ -269,37 +248,29 @@ export default function MissionsPage() {
       </div>
 
       {/* Recherche + filtre retard */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2.5 mb-5">
         <div className="relative flex-1">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
-            style={{ color: 'var(--color-text-tertiary)' }} />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
           <input
             type="text"
             aria-label="Rechercher un client"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher un client, segment, préleveur…"
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
-            style={{
-              background: COLORS.BG_SECONDARY,
-              border: '1px solid var(--color-border-subtle)',
-              color: COLORS.TEXT_PRIMARY,
-            }}
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all shadow-sm"
           />
         </div>
 
         {overdueCount > 0 && (
           <button type="button"
             onClick={() => setOnlyRetard((v) => !v)}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold shrink-0 transition-all cursor-pointer select-none active:scale-95"
-            style={{
-              background: onlyRetard ? 'var(--color-danger)' : 'var(--color-danger-light)',
-              color: onlyRetard ? 'white' : 'var(--color-danger)',
-              border: '1px solid transparent',
-              boxShadow: onlyRetard ? '0 2px 6px rgba(229, 62, 62, 0.2)' : 'none',
-            }}
+            className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold shrink-0 transition-all border active:scale-95 shadow-sm cursor-pointer ${
+              onlyRetard
+                ? 'bg-[var(--color-danger)] text-white border-transparent'
+                : 'bg-[var(--color-danger-light)] text-[var(--color-danger)] border-[rgba(255,59,48,0.15)] hover:bg-[var(--color-danger)] hover:text-white hover:border-transparent'
+            }`}
           >
-            <span className="size-1.5 rounded-full bg-current shrink-0" />
+            <span className="size-1 rounded-full bg-current shrink-0 animate-pulse" />
             {overdueCount} en retard
           </button>
         )}
@@ -309,33 +280,33 @@ export default function MissionsPage() {
         <SkeletonList count={5} variant="card" />
       ) : filtered.length === 0 ? (
         onlyRetard || search ? (
-          <div className="text-center py-16">
-            <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+          <div className="text-center py-16 bg-[var(--color-bg-secondary)] rounded-2xl border border-[var(--color-border-subtle)] shadow-sm">
+            <p className="text-sm text-[var(--color-text-secondary)]">
               {onlyRetard ? 'Aucun client en retard.' : 'Aucun résultat pour cette recherche.'}
             </p>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <div className="size-16 rounded-2xl flex items-center justify-center"
-              style={{ background: 'var(--color-accent-light)' }}>
-              <ClipboardList size={28} strokeWidth={1.5} style={{ color: COLORS.ACCENT }} />
+          <div className="flex flex-col items-center justify-center py-20 gap-4 bg-[var(--color-bg-secondary)] rounded-2xl border border-[var(--color-border-subtle)] shadow-sm">
+            <div className="size-14 rounded-2xl flex items-center justify-center bg-[var(--color-accent-light)] border border-[rgba(0,113,227,0.08)]">
+              <ClipboardList size={22} strokeWidth={1.5} className="text-[var(--color-accent)]" />
             </div>
             <div className="text-center">
-              <p className="text-base font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Aucun client</p>
-              <p className="text-sm mt-1" style={{ color: COLORS.TEXT_SECONDARY }}>
+              <p className="text-base font-semibold text-[var(--color-text-primary)]">Aucun client</p>
+              <p className="text-sm mt-1 text-[var(--color-text-secondary)] leading-relaxed">
                 Commencez par ajouter votre premier client.
               </p>
             </div>
             <button type="button" onClick={handleNewClient} disabled={creating}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
-              style={{ background: COLORS.ACCENT, color: 'white', opacity: creating ? 0.7 : 1 }}>
-              <Plus size={15} />
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white shadow-sm transition-all active:scale-[0.98] cursor-pointer"
+              style={{ opacity: creating ? 0.7 : 1 }}
+            >
+              <Plus size={14} />
               Nouveau client
             </button>
           </div>
         )
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2.5">
           {filtered.map((client) => (
             <ClientCard key={client.id} client={client} />
           ))}

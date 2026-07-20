@@ -8,7 +8,6 @@ import { useUsersStore } from '@/stores/usersStore'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { createTodo, saveTodo, deleteTodo } from '@/services/todoService'
 import { SkeletonList } from '@/components/ui/Skeleton'
-import { COLORS } from '@/lib/constants'
 import { toast } from '@/stores/toastStore'
 import TodoFormModal from '@/components/todos/TodoFormModal'
 import TodoSection from '@/components/todos/TodoSection'
@@ -123,25 +122,24 @@ export default function TodosPage() {
   }
 
   return (
-    <div className="p-6 pb-12 max-w-2xl">
+    <div className="p-6 pb-12 max-w-2xl bg-[var(--color-bg-primary)]">
       {/* Bouton retour mobile */}
       <div className="md:hidden mb-4">
-        <Link to="/plus" className="inline-flex items-center gap-1 font-semibold text-sm transition-opacity active:opacity-80" style={{ color: COLORS.ACCENT }}>
-          <ChevronLeft size={16} />
+        <Link to="/plus" className="inline-flex items-center gap-1 font-semibold text-xs text-[var(--color-accent)] hover:underline transition-opacity active:opacity-85">
+          <ChevronLeft size={14} />
           Plus
         </Link>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Tâches</h1>
-          <p className="text-sm mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
+          <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Tâches</h1>
+          <p className="text-xs font-semibold text-[var(--color-text-secondary)] mt-0.5">
             {todos.filter((t) => t.statut !== 'termine').length} tâches actives · {listCompleted.length} terminées
           </p>
         </div>
         <button type="button" onClick={openAddModal}
-          className="flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-transform active:scale-95 cursor-pointer w-full sm:w-auto"
-          style={{ background: COLORS.ACCENT, color: 'white' }}
+          className="flex items-center justify-center gap-1.5 text-sm font-semibold px-4 py-2.5 rounded-xl transition-all bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white shadow-sm hover:shadow active:scale-[0.98] cursor-pointer w-full sm:w-auto"
         >
           <Plus size={16} />
           Nouvelle tâche
@@ -153,19 +151,16 @@ export default function TodosPage() {
       {loading ? (
         <SkeletonList count={3} />
       ) : filteredTodos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 px-4 rounded-xl text-center border-2 border-dashed"
-          style={{ borderColor: 'var(--color-border-subtle)', background: COLORS.BG_SECONDARY }}
-        >
-          <div className="size-10 rounded-full flex items-center justify-center mb-3" style={{ background: 'var(--color-accent-light)' }}>
-            <ListTodo size={20} style={{ color: COLORS.ACCENT }} />
+        <div className="flex flex-col items-center justify-center py-16 px-4 rounded-2xl text-center border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] shadow-sm">
+          <div className="size-10 rounded-full flex items-center justify-center mb-3 bg-[var(--color-accent-light)] border border-[rgba(0,113,227,0.08)]">
+            <ListTodo size={18} className="text-[var(--color-accent)]" />
           </div>
-          <p className="text-sm font-medium" style={{ color: COLORS.TEXT_PRIMARY }}>Aucune tâche trouvée</p>
-          <p className="text-xs mt-1 max-w-[280px]" style={{ color: COLORS.TEXT_SECONDARY }}>
+          <p className="text-sm font-bold text-[var(--color-text-primary)]">Aucune tâche trouvée</p>
+          <p className="text-xs mt-1.5 max-w-[280px] text-[var(--color-text-secondary)] leading-relaxed font-medium">
             Créez une nouvelle tâche pour planifier vos interventions, calibrations ou autres devoirs.
           </p>
           <button type="button" onClick={openAddModal}
-            className="mt-4 text-xs font-semibold px-4 py-2 rounded-lg cursor-pointer"
-            style={{ background: COLORS.ACCENT, color: 'white' }}
+            className="mt-4 text-xs font-bold px-4 py-2 rounded-xl cursor-pointer bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white shadow-sm transition-all active:scale-[0.98]"
           >
             + Créer la première tâche
           </button>
