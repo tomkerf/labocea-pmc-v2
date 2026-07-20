@@ -36,7 +36,7 @@ export default function ActuFormModal({ isOpen, onClose, editingActu }: Props) {
   const [aiRawText, setAiRawText] = useState('')
   const [aiResult, setAiResult] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
-  const [customApiKey, setCustomApiKey] = useState(() => localStorage.getItem('pmc_gemini_api_key') || '')
+  const [customApiKey, setCustomApiKey] = useState(() => sessionStorage.getItem('pmc_gemini_api_key') || '')
   const [showApiKeyInput, setShowApiKeyInput] = useState(false)
 
   async function handleGenerateSummary() {
@@ -65,12 +65,12 @@ export default function ActuFormModal({ isOpen, onClose, editingActu }: Props) {
 
   function handleSaveApiKey() {
     if (customApiKey.trim()) {
-      localStorage.setItem('pmc_gemini_api_key', customApiKey.trim())
-      toast.success('Clé API Gemini sauvegardée localement')
+      sessionStorage.setItem('pmc_gemini_api_key', customApiKey.trim())
+      toast.success('Clé API Gemini sauvegardée pour cette session')
       setShowApiKeyInput(false)
     } else {
-      localStorage.removeItem('pmc_gemini_api_key')
-      toast.success('Utilisation de la clé par défaut')
+      sessionStorage.removeItem('pmc_gemini_api_key')
+      toast.success('Clé API supprimée')
     }
   }
 

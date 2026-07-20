@@ -1,5 +1,5 @@
 export async function generateRegulatorySummary(rawText: string, customApiKey?: string): Promise<string> {
-  const apiKey = customApiKey || localStorage.getItem('pmc_gemini_api_key')
+  const apiKey = customApiKey || sessionStorage.getItem('pmc_gemini_api_key')
   if (!apiKey) {
     throw new Error('Aucune clé API Gemini configurée')
   }
