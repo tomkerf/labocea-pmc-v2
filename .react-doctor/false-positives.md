@@ -9,6 +9,10 @@
 
 - `src/hooks/useAuth.ts` — `setDoc(userRef, { lastLoginAt: serverTimestamp() }, { merge: true })`. `lastLoginAt` est un horodatage de connexion, pas un champ d'autorisation. Les champs sensibles (`role`, etc.) sont protégés comme immuables côté `firestore.rules` (validation livrée, cf. commit 6df9921). FP.
 
+## react-doctor/auth-token-in-web-storage
+
+- `src/components/actus/ActuFormModal.tsx:68` — `sessionStorage.setItem('pmc_gemini_api_key', …)`. Ce n'est pas un token d'auth de l'app : c'est une clé Gemini AI Studio *personnelle et optionnelle* que l'utilisateur colle lui-même pour l'assistant IA de rédaction d'actus. Stockée en `sessionStorage` (effacée à la fermeture de l'onglet, contrairement au `localStorage` utilisé avant le fix sécurité du 2026-07-20) — compromis assumé entre confort (pas de re-saisie à chaque génération) et surface d'exposition minimale. Pas de clé projet ni de secret partagé en jeu.
+
 ## Sécurité — dangerouslySetInnerHTML
 
 - Signalé en session 128 par react-doctor. Introuvable dans `src/` au 2026-06-15 — faux positif de l'outil ou déjà corrigé dans un commit antérieur. Aucune occurrence de `dangerouslySetInnerHTML` ni d'`innerHTML` dynamique dans le code source.
