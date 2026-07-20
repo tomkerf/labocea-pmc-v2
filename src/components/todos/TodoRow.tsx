@@ -166,7 +166,7 @@ export default function TodoRow({
 
       {/* Actions & Assigné */}
       <div className="flex flex-col items-end justify-between self-stretch shrink-0 gap-3 relative pl-2">
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           <button
             type="button"
             onClick={onEdit}

@@ -59,7 +59,7 @@ export default function RapportRow({ r, isLast, todayStr, touteEquipe, resolveNo
   return (
     <div
       key={r.samplingId}
-      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3.5 ${isLast ? '' : 'border-b border-[var(--color-border-subtle)]'}`}
+      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-[var(--color-bg-primary)] ${isLast ? '' : 'border-b border-[var(--color-border-subtle)]'}`}
     >
       <div className="flex-1 min-w-0">
         <p className="text-[13px] font-bold text-[var(--color-text-primary)] truncate">
