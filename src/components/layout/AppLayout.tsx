@@ -13,6 +13,7 @@ import { COLORS } from '@/lib/constants'
 import SpotlightModal from '@/components/spotlight/SpotlightModal'
 import { useSpotlightStore } from '@/stores/spotlightStore'
 import { useGlobalHotkey } from '@/hooks/useGlobalHotkey'
+import { Search } from 'lucide-react'
 
 
 export default function AppLayout() {
@@ -58,8 +59,17 @@ export default function AppLayout() {
             transition: 'background 300ms, border-color 300ms, box-shadow 300ms',
           }}
         >
-          {/* Sync badge — visible sur mobile uniquement (desktop l'a dans la sidebar) */}
-          <div className="md:hidden flex items-center ml-auto">
+          {/* Recherche + Sync badge — visibles sur mobile uniquement (desktop les a dans la sidebar) */}
+          <div className="md:hidden flex items-center gap-1 ml-auto">
+            <button
+              type="button"
+              onClick={openSpotlight}
+              aria-label="Rechercher"
+              className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors"
+              style={{ color: 'var(--color-text-tertiary)' }}
+            >
+              <Search size={18} strokeWidth={1.8} />
+            </button>
             <SyncBadge />
           </div>
         </header>
