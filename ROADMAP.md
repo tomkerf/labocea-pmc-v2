@@ -212,7 +212,7 @@ C'est la phase la plus longue — c'est le module le plus complexe et celui qui 
 ## Journal de progression
 | Date | Phase | Ce qui a été fait |
 |------|-------|-------------------|
-| 2026-07-20 | Plan de charge ✅ | Refonte complète de la méthode d'évaluation de la charge mensuelle des techniciens. Passage d'un modèle en heures brutes (sensible à la césure ponctuelle/complexe) à un barème d'unités de charge de prélèvement équivalent (Ponctuel=1, Souterraine=2, Composite/Auto=4), avec seuils associés (capacité 50 pts, warning 35 pts, danger 60 pts) et légende intégrée. |
+| 2026-07-20 | Plan de charge ✅ | Refonte complète de la méthode d'évaluation de la charge mensuelle des techniciens (Ponctuel=1, Souterraine=2, Composite/Auto=4, capacité 50 pts, warning 35 pts, danger 60 pts) et **refonte UI/UX de la page de charge** (en-tête collapsible, KPIs allégés avec barre segmentée de répartition, histogramme affiné, et heatmap épurée aux tons pastels ultra-doux). |
 | 2026-07-09 | Onglet Actualités | Création de la section Actualités (/actus) avec flux d'actus par catégorie (veille réglementaire, vie du service, nouveaux clients), indicateurs de lecture (point bleu, badge unread dans la sidebar) et outil d'édition pour les managers/admins. |
 | 2026-07-09 | Dashboard Matériel | Filtrage par site du matériel, des alertes de métrologie et des maintenances actives sur le tableau de bord individuel des techniciens. |
 | 2026-07-09 | Filtres Mission | Filtres par site et par technicien (préleveur) sur la page Missions (vue Liste). Site par défaut initialisé au site du technicien connecté, sauvegardé et persistant dans le localStorage par utilisateur. |

@@ -3,7 +3,7 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
-## Session 186 — Plan de Charge : Refonte du calcul de surcharge (Points de charge)
+## Session 186 — Plan de Charge : Refonte du calcul de surcharge et refonte UI/UX
 **20 juillet 2026**
 
 ### Modifications apportées
@@ -11,10 +11,11 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
   - Coefficients appliqués : Ponctuel = 1 pt, Eau Souterraine = 2 pts, Composite / Automatique = 4 pts.
   - Limite mensuelle fixée à 50 pts par technicien (attention à 35 pts, danger à 60 pts), basée sur une moyenne de 2h de trajet + intervention par prélèvement simple (Scénario C).
   - Renommage des constantes et fonctions d'évaluation en `getSamplingPoints` et `formatPoints`.
-- **`WorkloadMatrixView.tsx`** :
-  - Adaptation de la logique et du JSX pour utiliser les points de charge à la place des heures terrain.
-  - Intégration d'un panneau de légende fixe en haut à droite détaillant le barème des points et justifiant le calcul de la capacité maximale théorique par le détail du Scénario C (151,7h base - 30% administratif/labo = ~107h terrain / 2h par ponctuel = 50 pts/mois/tech).
-  - Enrichissement du tooltip d'aide sur l'évolution de la charge globale avec le détail des équivalences.
+- **`WorkloadMatrixView.tsx` (Refonte UI/UX complète)** :
+  - **En-tête épuré** : Déplacement de la boîte d'explications et de la justification du Scénario C dans un bloc collapsible discret activable via le bouton "Comprendre le calcul de charge" à côté du titre.
+  - **KPIs minimalistes** : Réduction de la densité visuelle des 4 cartes et intégration d'une barre de progression segmentée multicolore dans le KPI "Volume annuel" pour représenter graphiquement la répartition des méthodes de prélèvement.
+  - **Histogramme affiné** : Barres mensuelles plus fines et arrondies, couleurs plus douces (orange pastel pour la surcharge), et affichage du volume au survol pour éviter la surcharge textuelle.
+  - **Heatmap épurée (Pastels)** : Remplacement de la coloration complète et agressive des cellules par des pastilles arrondies aux tons pastels ultra-doux (fonds à 8% d'opacité avec bordure fine à 15% assortie). Les mois vides affichent désormais un simple tiret discret sans couleur pour orienter directement le regard vers les périodes chargées.
 - **`changelog.ts`** : Incrémentation en version `156` et description des nouveautés.
 
 ### État

@@ -1,7 +1,16 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Client } from '@/types'
 import type { Preleveur } from '@/stores/preleveursStore'
 import { MOIS_LONG } from '@/lib/planningUtils'
+import {
+  Info,
+  ChevronDown,
+  ChevronUp,
+  TrendingUp,
+  Users,
+  Calendar,
+  Layers
+} from 'lucide-react'
 import {
   getSamplingPoints,
   formatPoints,
@@ -19,20 +28,38 @@ interface WorkloadMatrixViewProps {
   preleveurs: Preleveur[]
 }
 
-// Seuils de charge mensuelle par technicien, en points de charge (prélèvements équivalents)
-function getHeatmapColor(points: number) {
-  if (points === 0) return 'transparent'
-  if (points >= THRESHOLD_DANGER_POINTS) return 'var(--color-danger-light)'
-  if (points >= THRESHOLD_WARNING_POINTS) return 'var(--color-warning-light)'
-  return 'var(--color-bg-secondary)'
-}
-
-function getHeatmapTextColor(value: number) {
-  if (value === 0) return 'var(--color-text-tertiary)'
-  return 'var(--color-text-primary)'
+// Couleurs et styles heatmap en tons pastels ultra-doux (Apple-style)
+function getHeatmapStyle(points: number) {
+  if (points === 0) {
+    return {
+      bg: 'transparent',
+      text: 'var(--color-text-tertiary)',
+      border: '1px border-transparent'
+    }
+  }
+  if (points >= THRESHOLD_DANGER_POINTS) {
+    return {
+      bg: 'rgba(255, 59, 48, 0.08)',
+      text: 'var(--color-danger)',
+      border: '1px solid rgba(255, 59, 48, 0.15)'
+    }
+  }
+  if (points >= THRESHOLD_WARNING_POINTS) {
+    return {
+      bg: 'rgba(255, 159, 10, 0.08)',
+      text: 'var(--color-warning)',
+      border: '1px solid rgba(255, 159, 10, 0.15)'
+    }
+  }
+  return {
+    bg: 'var(--color-bg-primary)',
+    text: 'var(--color-text-primary)',
+    border: '1px solid var(--color-border-subtle)'
+  }
 }
 
 export default function WorkloadMatrixView({ clients, year, filterTech, filterSite, filterMethod = '', preleveurs }: WorkloadMatrixViewProps) {
+  const [showExplanation, setShowExplanation] = useState(false)
   
   // 1. Agréger les données par technicien et par mois
   const { techStats, totalPerMonthPoints, totalPerMonthCount, globalStats, methodBreakdown, methodBreakdownPoints } = useMemo(() => {
@@ -166,93 +193,148 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
               Visualisez la répartition du volume de travail par mois et par technicien en points de charge.
             </p>
           </div>
-          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl px-4 py-3 text-xs text-[var(--color-text-secondary)] max-w-lg shadow-[var(--shadow-card)] flex flex-col gap-2">
-            <div>
-              <span className="font-semibold text-[var(--color-text-primary)] block mb-1">Barème des points de charge :</span>
-              <div className="grid grid-cols-3 gap-x-4">
-                <span>• Ponctuel : <strong>1 pt</strong></span>
-                <span>• Eau Souterraine : <strong>2 pts</strong></span>
-                <span>• Composite / Auto : <strong>4 pts</strong></span>
-              </div>
-            </div>
-            <div className="border-t border-[var(--color-border-subtle)] pt-2 mt-0.5 flex flex-col gap-1.5">
-              <div>
-                <span className="font-semibold text-[var(--color-text-primary)] block mb-1">Capacité maximale théorique de l'équipe :</span>
-                <p className="leading-relaxed">
-                  Fixée à <strong>{CAPACITY_POINTS_PER_TECH_PER_MONTH} pts / mois par technicien actif</strong>.
-                </p>
-              </div>
-              <div className="bg-[var(--color-bg-primary)] rounded-lg p-2 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
-                <span className="font-medium text-[var(--color-text-primary)] block mb-0.5">Détail du calcul (Scénario C) :</span>
-                Sur un temps mensuel de 151,7h, après déduction de l'administratif (15%) et de la préparation/labo (15%), il reste ~107h pour le terrain.
-                À raison d'une moyenne de <strong>2h par prélèvement Ponctuel</strong> (1h45 route + 15 min site), la capacité est de : 107h / 2h ≈ <strong>50 prélèvements (points) / mois</strong>.
-              </div>
-              <p className="text-[11px] text-[var(--color-text-tertiary)] mt-0.5">
-                Calcul en cours : {nbActiveTechs} {nbActiveTechs > 1 ? 'techniciens actifs' : 'technicien actif'} × {CAPACITY_POINTS_PER_TECH_PER_MONTH} pts = <strong>{maxCapacityPerMonth} pts / mois</strong> pour l'ensemble de l'équipe.
-              </p>
-            </div>
-          </div>
+          
+          <button
+            onClick={() => setShowExplanation(!showExplanation)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-[var(--color-accent)] bg-[var(--color-accent-light)] hover:bg-[var(--color-accent-hover)] hover:text-white transition-all cursor-pointer self-start md:self-auto shadow-sm active:scale-[0.98]"
+          >
+            <Info className="size-4" />
+            <span>{showExplanation ? 'Masquer la méthode de calcul' : 'Comprendre le calcul de charge'}</span>
+            {showExplanation ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
+          </button>
         </div>
 
-        {/* 1. KPIs Bilan de charge */}
+        {/* Détails du calcul (Scénario C) — Collapsible et élégant */}
+        {showExplanation && (
+          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] p-5 text-xs text-[var(--color-text-secondary)] shadow-[var(--shadow-card)] transition-all animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <span className="font-semibold text-[var(--color-text-primary)] block mb-3 text-sm">Barème des points de charge :</span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="bg-[var(--color-bg-primary)] p-3 rounded-lg border border-[var(--color-border-subtle)] flex flex-col justify-between">
+                    <span className="text-[var(--color-text-tertiary)] font-medium block mb-1">Ponctuel</span>
+                    <strong className="text-base text-[var(--color-text-primary)]">1 pt</strong>
+                    <span className="text-[10px] block mt-1 text-[var(--color-text-secondary)]">(15 min sur site)</span>
+                  </div>
+                  <div className="bg-[var(--color-bg-primary)] p-3 rounded-lg border border-[var(--color-border-subtle)] flex flex-col justify-between">
+                    <span className="text-[var(--color-text-tertiary)] font-medium block mb-1">Eau Souterraine</span>
+                    <strong className="text-base text-[var(--color-text-primary)]">2 pts</strong>
+                    <span className="text-[10px] block mt-1 text-[var(--color-text-secondary)]">(1h sur site)</span>
+                  </div>
+                  <div className="bg-[var(--color-bg-primary)] p-3 rounded-lg border border-[var(--color-border-subtle)] flex flex-col justify-between">
+                    <span className="text-[var(--color-text-tertiary)] font-medium block mb-1">Composite / Auto</span>
+                    <strong className="text-base text-[var(--color-text-primary)]">4 pts</strong>
+                    <span className="text-[10px] block mt-1 text-[var(--color-text-secondary)]">(2h site + 2 trajets)</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border-t md:border-t-0 md:border-l border-[var(--color-border-subtle)] pt-4 md:pt-0 md:pl-6 flex flex-col justify-center">
+                <span className="font-semibold text-[var(--color-text-primary)] block mb-1.5 text-sm">Capacité maximale théorique de l'équipe :</span>
+                <p className="leading-relaxed mb-3">
+                  Fixée à <strong>{CAPACITY_POINTS_PER_TECH_PER_MONTH} pts / mois par technicien actif</strong>.
+                </p>
+                <div className="bg-[var(--color-bg-primary)] rounded-lg p-3 text-[11px] leading-relaxed text-[var(--color-text-secondary)] border border-[var(--color-border-subtle)]">
+                  <span className="font-semibold text-[var(--color-text-primary)] block mb-1">Calcul théorique (Scénario C) :</span>
+                  Sur un temps mensuel de 151,7h, après déduction de l'administratif (15%) et de la préparation/labo (15%), il reste ~107h pour le terrain.
+                  À raison d'une moyenne de 2h par prélèvement Ponctuel (1h45 de trajet A/R + 15 min sur site), la capacité est de : 107h / 2h ≈ <strong>50 points par mois</strong>.
+                </div>
+                <p className="mt-3 text-[10px] text-[var(--color-text-tertiary)]">
+                  Calcul en cours : {nbActiveTechs} tech. {nbActiveTechs > 1 ? 'actifs' : 'actif'} × {CAPACITY_POINTS_PER_TECH_PER_MONTH} pts = <strong>{maxCapacityPerMonth} pts / mois</strong> pour l'ensemble de l'équipe.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 1. KPIs Bilan de charge (Version allégée et élégante) */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)] flex flex-col justify-between">
+          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)] flex flex-col justify-between min-h-[120px]">
             <div>
-              <div className="text-sm text-[var(--color-text-secondary)] mb-1">Volume total annuel</div>
-              <div className="text-2xl font-bold text-[var(--color-text-primary)] flex flex-wrap items-baseline gap-x-1.5">{formatPoints(globalStats.totalYearPoints)} <span className="text-sm font-medium text-[var(--color-text-tertiary)] whitespace-nowrap">{globalStats.totalYear} prélèv.</span></div>
-              <div className="mt-1.5 text-xs flex gap-2">
-                <span className="text-[var(--color-success)] font-medium">✓ {globalStats.done} faits</span>
-                <span className="text-[var(--color-warning)] font-medium">● {globalStats.planned} à faire</span>
+              <div className="text-[11px] font-semibold tracking-wider text-[var(--color-text-secondary)] uppercase mb-1.5 flex items-center gap-1.5">
+                <Layers className="size-3.5 text-[var(--color-accent)]" /> Volume total annuel
+              </div>
+              <div className="text-2xl font-bold text-[var(--color-text-primary)] flex items-baseline gap-x-1.5">
+                {formatPoints(globalStats.totalYearPoints)}
+                <span className="text-xs font-medium text-[var(--color-text-tertiary)]">{globalStats.totalYear} prélèv.</span>
+              </div>
+              <div className="mt-2 flex gap-3 text-[10px] font-medium">
+                <span className="text-[var(--color-success)]">✓ {globalStats.done} faits</span>
+                <span className="text-[var(--color-warning)]">● {globalStats.planned} à faire</span>
               </div>
             </div>
             {globalStats.totalYear > 0 && (
-              <div className="mt-3 pt-3 border-t border-[var(--color-border-subtle)] flex flex-col gap-1 text-[11px] text-[var(--color-text-secondary)]">
-                {methodBreakdown.Ponctuel > 0 && (
-                  <div className="flex justify-between items-center">
-                    <span>Ponctuels</span>
-                    <span className="font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded-full">{methodBreakdown.Ponctuel} · {formatPoints(methodBreakdownPoints.Ponctuel)}</span>
-                  </div>
-                )}
-                {methodBreakdown.Composite > 0 && (
-                  <div className="flex justify-between items-center">
-                    <span>Composites</span>
-                    <span className="font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded-full">{methodBreakdown.Composite} · {formatPoints(methodBreakdownPoints.Composite)}</span>
-                  </div>
-                )}
-                {methodBreakdown.Automatique > 0 && (
-                  <div className="flex justify-between items-center">
-                    <span>Bilans 24h (Auto)</span>
-                    <span className="font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded-full">{methodBreakdown.Automatique} · {formatPoints(methodBreakdownPoints.Automatique)}</span>
-                  </div>
-                )}
+              <div className="mt-4 pt-3 border-t border-[var(--color-border-subtle)] flex flex-col gap-2">
+                <div className="flex h-1.5 rounded-full overflow-hidden bg-[var(--color-bg-primary)]">
+                  {methodBreakdown.Ponctuel > 0 && (
+                    <div 
+                      className="bg-[var(--color-accent)] h-full" 
+                      style={{ width: `${(methodBreakdownPoints.Ponctuel / globalStats.totalYearPoints) * 100}%` }}
+                      title={`Ponctuels : ${methodBreakdown.Ponctuel}`}
+                    />
+                  )}
+                  {methodBreakdown.Composite > 0 && (
+                    <div 
+                      className="bg-[#34C759] h-full" 
+                      style={{ width: `${(methodBreakdownPoints.Composite / globalStats.totalYearPoints) * 100}%` }}
+                      title={`Composites : ${methodBreakdown.Composite}`}
+                    />
+                  )}
+                  {methodBreakdown.Automatique > 0 && (
+                    <div 
+                      className="bg-[#FF9F0A] h-full" 
+                      style={{ width: `${(methodBreakdownPoints.Automatique / globalStats.totalYearPoints) * 100}%` }}
+                      title={`Automatiques : ${methodBreakdown.Automatique}`}
+                    />
+                  )}
+                </div>
+                <div className="flex justify-between text-[9px] font-semibold text-[var(--color-text-secondary)]">
+                  <span className="flex items-center gap-1"><span className="size-1 rounded-full bg-[var(--color-accent)]" /> {methodBreakdown.Ponctuel} Ponc.</span>
+                  <span className="flex items-center gap-1"><span className="size-1 rounded-full bg-[#34C759]" /> {methodBreakdown.Composite} Comp.</span>
+                  <span className="flex items-center gap-1"><span className="size-1 rounded-full bg-[#FF9F0A]" /> {methodBreakdown.Automatique} Auto.</span>
+                </div>
               </div>
             )}
           </div>
           
-          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)]">
-            <div className="text-sm text-[var(--color-text-secondary)] mb-1">Pic d'activité</div>
-            <div className="text-2xl font-bold text-[var(--color-text-primary)]">{maxMonthName}</div>
-            <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
-              {maxMonthPoints > 0 ? `Avec ${formatPoints(maxMonthPoints)} prévus (${maxMonthCount} interventions)` : 'Aucune intervention'}
+          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)] flex flex-col justify-between min-h-[120px]">
+            <div>
+              <div className="text-[11px] font-semibold tracking-wider text-[var(--color-text-secondary)] uppercase mb-1.5 flex items-center gap-1.5">
+                <TrendingUp className="size-3.5 text-[#FF9F0A]" /> Pic d'activité
+              </div>
+              <div className="text-2xl font-bold text-[var(--color-text-primary)]">{maxMonthName}</div>
+            </div>
+            <div className="text-[10px] leading-relaxed text-[var(--color-text-secondary)] mt-2 pt-2 border-t border-[var(--color-border-subtle)]">
+              {maxMonthPoints > 0 ? `${formatPoints(maxMonthPoints)} prévus (${maxMonthCount} interventions)` : 'Aucune intervention'}
             </div>
           </div>
 
-          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)]">
-            <div className="text-sm text-[var(--color-text-secondary)] mb-1">Charge moyenne</div>
-            <div className="text-2xl font-bold text-[var(--color-text-primary)]">
-              {formatPoints(nbActiveTechs > 0 ? Math.round(globalStats.totalYearPoints / 12 / nbActiveTechs * 10) / 10 : 0)} <span className="text-sm font-medium text-[var(--color-text-tertiary)]">/ mois / tech</span>
+          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)] flex flex-col justify-between min-h-[120px]">
+            <div>
+              <div className="text-[11px] font-semibold tracking-wider text-[var(--color-text-secondary)] uppercase mb-1.5 flex items-center gap-1.5">
+                <Users className="size-3.5 text-[#34C759]" /> Charge moyenne
+              </div>
+              <div className="text-2xl font-bold text-[var(--color-text-primary)] flex items-baseline gap-x-1.5">
+                {formatPoints(nbActiveTechs > 0 ? Math.round(globalStats.totalYearPoints / 12 / nbActiveTechs * 10) / 10 : 0)}
+                <span className="text-xs font-medium text-[var(--color-text-tertiary)]">/ mois / tech</span>
+              </div>
             </div>
-            <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
+            <div className="text-[10px] leading-relaxed text-[var(--color-text-secondary)] mt-2 pt-2 border-t border-[var(--color-border-subtle)]">
               Base de {nbActiveTechs} techniciens actifs
             </div>
           </div>
 
-          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)]">
-            <div className="text-sm text-[var(--color-text-secondary)] mb-1">Non assignés</div>
-            <div className="text-2xl font-bold text-[var(--color-text-primary)] flex flex-wrap items-baseline gap-x-1.5">
-              {formatPoints(unassigned?.totalPoints || 0)} <span className="text-sm font-medium text-[var(--color-text-tertiary)] whitespace-nowrap">{unassigned?.totalCount || 0} prélèv.</span>
+          <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-[var(--shadow-card)] flex flex-col justify-between min-h-[120px]">
+            <div>
+              <div className="text-[11px] font-semibold tracking-wider text-[var(--color-text-secondary)] uppercase mb-1.5 flex items-center gap-1.5">
+                <Calendar className="size-3.5 text-[var(--color-neutral)]" /> Non assignés
+              </div>
+              <div className="text-2xl font-bold text-[var(--color-text-primary)] flex items-baseline gap-x-1.5">
+                {formatPoints(unassigned?.totalPoints || 0)}
+                <span className="text-xs font-medium text-[var(--color-text-tertiary)]">{unassigned?.totalCount || 0} prélèv.</span>
+              </div>
             </div>
-            <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
+            <div className="text-[10px] leading-relaxed text-[var(--color-text-secondary)] mt-2 pt-2 border-t border-[var(--color-border-subtle)]">
               Volume de travail orphelin
             </div>
           </div>
@@ -261,14 +343,14 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
         {/* 2. Histogramme Global */}
         <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-[var(--radius-md)] p-5 shadow-[var(--shadow-card)]">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-md font-semibold text-[var(--color-text-primary)]">Évolution de la charge globale</h3>
+            <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Évolution de la charge globale</h3>
             <div className="flex items-center gap-4 text-xs text-[var(--color-text-secondary)]">
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-[2px] bg-[var(--color-accent)]" />
+                <div className="w-2.5 h-2.5 rounded-[3px] bg-[var(--color-accent)]" />
                 <span>Volume prévu</span>
               </div>
               <div className="flex items-center gap-1.5 relative group cursor-help">
-                <div className="w-3 h-3 rounded-[2px] bg-[var(--color-warning)]" />
+                <div className="w-2.5 h-2.5 rounded-[3px] bg-[var(--color-warning)]" />
                 <span className="border-b border-dotted border-[var(--color-text-tertiary)]">Surcharge théorique</span>
                 
                 <div className="absolute bottom-full right-0 mb-2 w-72 p-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-[var(--radius-md)] shadow-[var(--shadow-modal)] text-xs leading-relaxed text-[var(--color-text-secondary)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
@@ -285,14 +367,14 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
             </div>
           </div>
           
-          <div className="flex items-stretch gap-2 h-64 relative pt-7 pb-2">
+          <div className="flex items-stretch gap-3 h-48 relative pt-6 pb-2">
             {/* Ligne de flottaison (Capacité max) */}
             {maxCapacityPerMonth > 0 && maxMonthPoints > 0 && (
               <div
-                className="absolute w-full border-t border-dashed border-[var(--color-danger)] opacity-50 z-10 flex items-center"
+                className="absolute w-full border-t border-dashed border-[var(--color-danger)] opacity-35 z-10 flex items-center"
                 style={{ bottom: `${Math.min(100, (maxCapacityPerMonth / Math.max(maxCapacityPerMonth, maxMonthPoints)) * 100)}%` }}
               >
-                <span className="absolute right-0 -top-5 text-[10px] text-[var(--color-danger)] font-medium">Capacité max théo. ({formatPoints(maxCapacityPerMonth)})</span>
+                <span className="absolute right-0 -top-4 text-[9px] text-[var(--color-danger)] font-semibold uppercase tracking-wider">Capacité max théo. ({formatPoints(maxCapacityPerMonth)})</span>
               </div>
             )}
 
@@ -304,20 +386,20 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
               return (
                 <div key={MOIS_LONG[i]} className="flex-1 flex flex-col items-center gap-2 relative group h-full">
                   {val > 0 && (
-                    <div className="absolute -top-6 text-xs font-semibold text-[var(--color-text-secondary)] whitespace-nowrap">
+                    <div className="absolute -top-5 text-[10px] font-semibold text-[var(--color-text-secondary)] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                       {formatPoints(val)}
                     </div>
                   )}
-                  <div className="w-full max-w-[40px] bg-[var(--color-bg-tertiary)] rounded-t-[6px] relative flex items-end justify-center overflow-hidden flex-1">
+                  <div className="w-full max-w-[28px] bg-[var(--color-bg-tertiary)] rounded-t-[4px] relative flex items-end justify-center overflow-hidden flex-1">
                     <div 
-                      className="w-full rounded-t-[6px] transition-all duration-500"
+                      className="w-full rounded-t-[4px] transition-all duration-500"
                       style={{ 
                         height: `${heightPct}%`,
                         background: isOverCapacity ? 'var(--color-warning)' : 'var(--color-accent)'
                       }}
                     />
                   </div>
-                  <div className="text-[10px] font-medium text-[var(--color-text-secondary)] uppercase">
+                  <div className="text-[9px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
                     {MOIS_LONG[i] === 'Juin' ? 'JUN' : MOIS_LONG[i] === 'Juillet' ? 'JUL' : MOIS_LONG[i].substring(0,3)}
                   </div>
                 </div>
@@ -328,15 +410,24 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
 
         {/* 3. Heatmap Matrice */}
         <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl shadow-[var(--shadow-card)] overflow-hidden">
-          <div className="px-5 py-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
+          <div className="px-5 py-4 border-b border-[var(--color-border-subtle)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-semibold text-[var(--color-text-primary)]">Matrice de Charge par Technicien</h3>
-              <span className="text-[11px] text-[var(--color-text-tertiary)] hidden lg:inline">— faites défiler pour voir tous les mois →</span>
+              <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Matrice de Charge par Technicien</h3>
+              <span className="text-[10px] text-[var(--color-text-tertiary)] hidden lg:inline">— défiler horizontalement →</span>
             </div>
-            <div className="flex items-center gap-4 text-xs">
-              <div className="flex items-center gap-1.5"><span className="size-3 rounded border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)]" /> Normal (&lt;{THRESHOLD_WARNING_POINTS} pts)</div>
-              <div className="flex items-center gap-1.5"><span className="size-3 rounded bg-[var(--color-warning-light)] border border-[var(--color-warning)] opacity-50" /> Chargé ({THRESHOLD_WARNING_POINTS}–{THRESHOLD_DANGER_POINTS} pts)</div>
-              <div className="flex items-center gap-1.5"><span className="size-3 rounded bg-[var(--color-danger-light)] border border-[var(--color-danger)] opacity-50" /> Surcharge (&gt;={THRESHOLD_DANGER_POINTS} pts)</div>
+            <div className="flex flex-wrap items-center gap-3.5 text-[11px] text-[var(--color-text-secondary)]">
+              <div className="flex items-center gap-1.5">
+                <span className="size-2.5 rounded bg-[var(--color-bg-primary)] border border-[var(--color-border-subtle)]" />
+                <span>Normal (&lt;{THRESHOLD_WARNING_POINTS} pts)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="size-2.5 rounded bg-[rgba(255,159,10,0.08)] border border-[rgba(255,159,10,0.15)]" />
+                <span className="text-[var(--color-warning)] font-medium">Chargé ({THRESHOLD_WARNING_POINTS}–{THRESHOLD_DANGER_POINTS} pts)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="size-2.5 rounded bg-[rgba(255,59,48,0.08)] border border-[rgba(255,59,48,0.15)]" />
+                <span className="text-[var(--color-danger)] font-medium">Surcharge (&gt;={THRESHOLD_DANGER_POINTS} pts)</span>
+              </div>
             </div>
           </div>
           
@@ -344,11 +435,11 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
             <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse" style={{ minWidth: 800 }}>
               <thead>
-                <tr className="bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] text-[11px] uppercase tracking-wider border-b border-[var(--color-border-subtle)]">
-                  <th className="px-5 py-3 font-semibold sticky left-0 z-40 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)] w-48">Technicien</th>
-                  <th className="px-2 py-3 font-semibold text-center border-r border-[var(--color-border-subtle)] w-16">Total</th>
+                <tr className="bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] text-[10px] uppercase tracking-wider border-b border-[var(--color-border-subtle)]">
+                  <th className="px-5 py-3.5 font-semibold sticky left-0 z-40 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)] w-48">Technicien</th>
+                  <th className="px-2 py-3.5 font-semibold text-center border-r border-[var(--color-border-subtle)] w-16">Total</th>
                   {MOIS_LONG.map(m => (
-                    <th key={m} className="px-2 py-3 font-semibold text-center border-r border-[var(--color-border-subtle)] flex-1 min-w-[50px]">
+                    <th key={m} className="px-2 py-3.5 font-semibold text-center border-r border-[var(--color-border-subtle)] flex-1 min-w-[50px]">
                       {m === 'Juin' ? 'JUN' : m === 'Juillet' ? 'JUL' : m.substring(0, 3).toUpperCase()}
                     </th>
                   ))}
@@ -362,16 +453,16 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
                   
                   return (
                     <tr key={tech.code} className="border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors">
-                      <td className="px-5 py-3 sticky left-0 z-20 bg-[var(--color-bg-secondary)] group-hover:bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] transition-colors shadow-[1px_0_0_var(--color-border-subtle)]">
+                      <td className="px-5 py-4 sticky left-0 z-20 bg-[var(--color-bg-secondary)] group-hover:bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] transition-colors shadow-[1px_0_0_var(--color-border-subtle)]">
                         <div className="flex items-center gap-2">
-                          <span className={`font-medium text-sm ${isUnassigned ? 'text-[var(--color-warning)] italic' : 'text-[var(--color-text-primary)]'}`}>
+                          <span className={`font-semibold text-sm ${isUnassigned ? 'text-[var(--color-warning)] italic font-normal' : 'text-[var(--color-text-primary)]'}`}>
                             {name}
                           </span>
-                          {!isUnassigned && <span className="text-xs text-[var(--color-text-secondary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded">{tech.code}</span>}
+                          {!isUnassigned && <span className="text-[10px] font-semibold text-[var(--color-text-secondary)] bg-[var(--color-bg-tertiary)] px-1.5 py-0.5 rounded-md border border-[var(--color-border-subtle)]">{tech.code}</span>}
                         </div>
                       </td>
-                      <td className="px-2 py-3 border-r border-[var(--color-border-subtle)] text-center font-bold text-[var(--color-text-primary)] text-sm whitespace-nowrap">
-                        {tech.totalPoints > 0 ? formatPoints(tech.totalPoints) : '-'}
+                      <td className="px-2 py-4 border-r border-[var(--color-border-subtle)] text-center font-bold text-[var(--color-text-primary)] text-sm whitespace-nowrap">
+                        {tech.totalPoints > 0 ? tech.totalPoints : '-'}
                       </td>
                       {tech.monthsPoints.map((val, i) => {
                         const details = tech.monthDetails[i]
@@ -383,18 +474,27 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
                           ? `${name} - ${MOIS_LONG[i]} : ${formatPoints(val)} — ${detailParts.join(', ')}`
                           : undefined
 
+                        const style = getHeatmapStyle(val)
+
                         return (
-                          <td key={i} className="px-1.5 py-1.5 border-r border-[var(--color-border-subtle)] last:border-0 relative group">
-                            <div
-                              className="w-full h-8 flex items-center justify-center font-medium rounded-md transition-colors text-xs whitespace-nowrap"
-                              style={{
-                                backgroundColor: getHeatmapColor(val),
-                                color: getHeatmapTextColor(val)
-                              }}
-                              title={tooltipText}
-                            >
-                              {val > 0 ? formatPoints(val) : '-'}
-                            </div>
+                          <td key={i} className="px-2 py-2.5 border-r border-[var(--color-border-subtle)] last:border-0 relative group">
+                            {val > 0 ? (
+                              <div
+                                className="w-full h-8 flex items-center justify-center font-semibold rounded-lg transition-all text-xs whitespace-nowrap select-none shadow-sm"
+                                style={{
+                                  backgroundColor: style.bg,
+                                  color: style.text,
+                                  border: style.border
+                                }}
+                                title={tooltipText}
+                              >
+                                {val}
+                              </div>
+                            ) : (
+                              <div className="w-full h-8 flex items-center justify-center text-[var(--color-text-tertiary)] text-xs font-normal">
+                                -
+                              </div>
+                            )}
                           </td>
                         )
                       })}
