@@ -1,12 +1,15 @@
-import { useMemo } from 'react'
-import { X, ExternalLink, AlertCircle, AlertTriangle, CloudRain, Calendar } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { X, ExternalLink, AlertCircle, AlertTriangle, CloudRain, Calendar, FileText } from 'lucide-react'
 import { m, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import type { Client, Plan, Sampling } from '@/types'
+import type { Preleveur } from '@/stores/preleveursStore'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { MOIS_LONG } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
 import { getStatusColor, getStatusLabel } from '@/lib/yearMatrixUtils'
+import { buildIssueListHtml } from '@/lib/exportIssueListHtml'
+import { PdfPreviewModal } from '@/components/plan/PdfPreviewModal'
 
 
 interface IssueListModalProps {
@@ -15,9 +18,11 @@ interface IssueListModalProps {
   month?: number
   rows: { client: Client; plan: Plan; samplingsByMonth?: (Sampling | null)[]; pairsByMonth?: (Sampling | null)[][] }[]
   year: number
+  preleveurs?: Preleveur[]
 }
 
-export default function IssueListModal({ onClose, type, month, rows, year }: IssueListModalProps) {
+export default function IssueListModal({ onClose, type, month, rows, year, preleveurs = [] }: IssueListModalProps) {
+  const [pdfPreview, setPdfPreview] = useState<string | null>(null)
   const issues = useMemo(() => {
     if (!type) return []
     const list: { client: Client; plan: Plan; sampling: Sampling; planYear: number }[] = []
@@ -80,10 +85,22 @@ export default function IssueListModal({ onClose, type, month, rows, year }: Iss
                 {title} <span className="text-sm font-normal text-[var(--color-text-secondary)]">({issues.length})</span>
               </h2>
             </div>
-            <button type="button" onClick={onClose} className="p-1 rounded-md hover:bg-[var(--color-bg-tertiary)] transition-colors"
-              style={{ color: 'var(--color-text-tertiary)' }}>
-              <X size={18} />
-            </button>
+            <div className="flex items-center gap-1">
+              {type === 'month' && issues.length > 0 && (
+                <button type="button"
+                  onClick={() => setPdfPreview(buildIssueListHtml(issues, MOIS_LONG[month ?? 0], year, preleveurs, false))}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium hover:bg-[var(--color-bg-tertiary)] transition-colors"
+                  style={{ color: COLORS.TEXT_SECONDARY }}
+                  title="Aperçu et impression PDF">
+                  <FileText size={14} />
+                  Exporter
+                </button>
+              )}
+              <button type="button" onClick={onClose} className="p-1 rounded-md hover:bg-[var(--color-bg-tertiary)] transition-colors"
+                style={{ color: 'var(--color-text-tertiary)' }}>
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
@@ -141,6 +158,24 @@ export default function IssueListModal({ onClose, type, month, rows, year }: Iss
           </div>
         </m.div>
       </m.div>
+
+      {pdfPreview && (
+        <PdfPreviewModal
+          srcDoc={pdfPreview}
+          onClose={() => setPdfPreview(null)}
+          onPrint={() => {
+            const html = buildIssueListHtml(issues, MOIS_LONG[month ?? 0], year, preleveurs, true)
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.target = '_blank'
+            a.rel = 'noopener'
+            a.click()
+            setTimeout(() => URL.revokeObjectURL(url), 10_000)
+          }}
+        />
+      )}
     </AnimatePresence>
   )
 }

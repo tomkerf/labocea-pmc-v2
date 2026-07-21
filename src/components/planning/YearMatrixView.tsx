@@ -291,6 +291,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
           month={monthModal}
           rows={rows}
           year={year}
+          preleveurs={preleveurs}
           onClose={() => setMonthModal(null)}
         />
       )}
