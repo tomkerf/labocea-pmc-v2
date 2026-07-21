@@ -223,7 +223,7 @@ export default function EquipementCard({ equipement, compact = false }: Equipeme
             e.stopPropagation()
             exportFicheDeViePDF(equipement, entries)
           }}
-          className="hidden sm:flex p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors text-neutral-500 hover:text-neutral-700"
+          className="hidden sm:flex p-2 rounded-lg hover:bg-neutral-200 transition-colors text-neutral-500 hover:text-neutral-700"
           title="Exporter la fiche de vie (PDF)"
         >
           <FileText size={16} />

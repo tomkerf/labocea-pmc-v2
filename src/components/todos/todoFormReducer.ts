@@ -24,9 +24,12 @@ export const initialFormState: FormState = {
   deletingId: null,
 }
 
+type SetFieldAction = {
+  [K in keyof FormState]: { type: 'SET_FIELD'; field: K; value: FormState[K] }
+}[keyof FormState]
+
 export type FormAction =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  | { type: 'SET_FIELD'; field: keyof FormState; value: any }
+  | SetFieldAction
   | { type: 'RESET_FORM' }
   | { type: 'LOAD_TODO'; payload: Todo }
 

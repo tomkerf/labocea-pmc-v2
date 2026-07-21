@@ -770,7 +770,7 @@ export default function ChatPage() {
                                   initial={{ opacity: 0, y: 4, scale: 0.95 }}
                                   animate={{ opacity: 1, y: 0, scale: 1 }}
                                   exit={{ opacity: 0, y: 4, scale: 0.95 }}
-                                  transition={{ duration: 0.12 }}
+                                  transition={{ duration: 0.15 }}
                                   className={`absolute -top-11 z-20 flex items-center gap-0.5 px-1.5 py-1 rounded-full shadow-[var(--shadow-card)] border border-[var(--color-border-subtle)] bg-[var(--color-bg-secondary)] ${
                                     isMe ? 'right-0' : 'left-0'
                                   }`}

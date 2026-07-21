@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Camera, Loader2, CalendarCheck } from 'lucide-react'
 import { SectionTitle, EmptyCard } from '@/components/dashboard/StatCard'
 import type { PlanningEvent } from '@/lib/planningUtils'
+import type { JourItem } from '@/hooks/useDashboardStats'
 import { COLORS } from '@/lib/constants'
 
 interface DashboardPlanningWidgetProps {
@@ -11,8 +12,7 @@ interface DashboardPlanningWidgetProps {
   setPlanningMode: (mode: 'today' | 'tomorrow') => void;
   hasRainToday: boolean;
   hasRainTomorrow: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  activeItems: any[];
+  activeItems: JourItem[];
   activeDateISO: string;
   setEventDetail: (detail: { event: PlanningEvent, dateStr: string }) => void;
   onUploadPhoto?: (clientId: string, planId: string, samplingId: string, file: File) => Promise<void>;
@@ -115,7 +115,11 @@ export function DashboardPlanningWidget({
           style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}
         >
           <AnimatePresence mode="popLayout">
-            {activeItems.slice(0, 8).map((item, idx) => (
+            {activeItems.slice(0, 8).map((item, idx) => {
+              const camera = item.kind === 'sampling' && item.modalEvent?.clientId && item.modalEvent.planId && item.modalEvent.samplingId && onUploadPhoto
+                ? { clientId: item.modalEvent.clientId, planId: item.modalEvent.planId, samplingId: item.modalEvent.samplingId }
+                : null
+              return (
               <m.div
                 key={'modalEvent' in item ? item.modalEvent?.id : `todo-${idx}`}
                 initial={{ opacity: 0, y: 10 }}
@@ -149,15 +153,15 @@ export function DashboardPlanningWidget({
                 {'meteo' in item && item.meteo === 'pluie' && (
                   <span title="Prélèvement temps de pluie" className="shrink-0 text-base leading-none">🌧</span>
                 )}
-                {item.kind === 'sampling' && item.modalEvent?.samplingId && onUploadPhoto && (
+                {camera && (
                   <button
                     type="button"
                     aria-label="Ajouter une photo"
-                    onClick={(e) => handleCameraClick(e, item.modalEvent.clientId, item.modalEvent.planId, item.modalEvent.samplingId)}
+                    onClick={(e) => handleCameraClick(e, camera.clientId, camera.planId, camera.samplingId)}
                     className="shrink-0 p-1 rounded-lg transition-colors hover:bg-[var(--color-bg-tertiary)]"
-                    style={{ color: uploadingId === item.modalEvent.samplingId ? COLORS.ACCENT : COLORS.TEXT_SECONDARY }}
+                    style={{ color: uploadingId === camera.samplingId ? COLORS.ACCENT : COLORS.TEXT_SECONDARY }}
                   >
-                    {uploadingId === item.modalEvent.samplingId
+                    {uploadingId === camera.samplingId
                       ? <Loader2 size={14} className="animate-spin" />
                       : <Camera size={14} />
                     }
@@ -166,7 +170,8 @@ export function DashboardPlanningWidget({
                 <span className="text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
                   style={{ background: item.badge.bg, color: item.badge.color }}>{item.badge.label}</span>
               </m.div>
-            ))}
+              )
+            })}
           </AnimatePresence>
         </m.div>
       )}
