@@ -21,6 +21,7 @@ interface YearMatrixViewProps {
 export default function YearMatrixView({ clients, year, filterTech, filterSite, filterMethod = '', preleveurs }: YearMatrixViewProps) {
   const [issueModalType, setIssueModalType] = useState<'overdue' | 'non_effectue' | null>(null)
   const [monthModal, setMonthModal] = useState<number | null>(null)
+  const [focusedMonth, setFocusedMonth] = useState<number | null>(null)
 
   const rows = useMemo(() => {
     const list: RowData[] = []
@@ -172,13 +173,21 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                 <th className="px-4 py-3 font-semibold border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)]">Plan</th>
                 {MOIS_LONG.map((m, i) => (
                   <th key={m} scope="col" className="p-0 w-14 transition-opacity duration-200"
-                    style={{ opacity: monthModal !== null && i !== monthModal ? 0.2 : 1 }}>
-                    <button type="button" onClick={() => setMonthModal(i)}
-                      className="flex flex-col items-center justify-center gap-0.5 w-full h-full px-2 py-3 font-semibold text-center border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-border-subtle)] hover:text-[var(--color-accent)] transition-colors cursor-pointer"
-                      title={`Voir les prélèvements de ${m}`}>
-                      <span>{m === 'Juin' ? 'JUN' : m === 'Juillet' ? 'JUL' : m.substring(0, 3).toUpperCase()}</span>
-                      <Search size={9} className="opacity-40" />
-                    </button>
+                    style={{ opacity: focusedMonth !== null && i !== focusedMonth ? 0.2 : 1 }}>
+                    <div className="flex flex-col items-center justify-center gap-0.5 w-full h-full px-2 py-3 font-semibold text-center border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)]">
+                      <button type="button"
+                        onClick={() => setFocusedMonth(prev => prev === i ? null : i)}
+                        className="hover:text-[var(--color-accent)] transition-colors cursor-pointer"
+                        title={`Isoler la colonne ${m}`}>
+                        {m === 'Juin' ? 'JUN' : m === 'Juillet' ? 'JUL' : m.substring(0, 3).toUpperCase()}
+                      </button>
+                      <button type="button"
+                        onClick={() => { setMonthModal(i); setFocusedMonth(i) }}
+                        className="hover:text-[var(--color-accent)] transition-colors cursor-pointer p-0.5 -m-0.5"
+                        title={`Voir les prélèvements de ${m}`}>
+                        <Search size={9} className="opacity-40" />
+                      </button>
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -246,7 +255,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                       </td>
                       {Array(12).fill(null).map((_, i) => (
                         <td key={i} className="border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-primary)] transition-opacity duration-200"
-                          style={{ opacity: monthModal !== null && i !== monthModal ? 0.2 : 1 }} aria-label={MOIS_LONG[i]} />
+                          style={{ opacity: focusedMonth !== null && i !== focusedMonth ? 0.2 : 1 }} aria-label={MOIS_LONG[i]} />
                       ))}
                     </tr>,
 
@@ -256,7 +265,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                         row={row}
                         planYear={planYear}
                         onOpenIssueModal={setIssueModalType}
-                        activeMonth={monthModal}
+                        activeMonth={focusedMonth}
                       />
                     )) : [])
                   ]
