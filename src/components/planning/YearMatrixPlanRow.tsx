@@ -8,6 +8,7 @@ interface YearMatrixPlanRowProps {
   planYear: number
   onOpenIssueModal: (type: 'overdue' | 'non_effectue') => void
   isFirstInSite?: boolean
+  activeMonth?: number | null
 }
 
 // Calcule le style premium (pastel Apple-style) d'une pastille de prélèvement
@@ -56,7 +57,7 @@ function getSamplingBadgeStyle(s: Sampling | null, planYear: number, isAuto?: bo
   }
 }
 
-export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal, isFirstInSite }: YearMatrixPlanRowProps) {
+export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal, isFirstInSite, activeMonth = null }: YearMatrixPlanRowProps) {
   return (
     <tr
       className={`border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors group h-8${isFirstInSite ? ' border-t border-t-[var(--color-border)]' : ''}`}
@@ -82,8 +83,10 @@ export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal, isF
         const dotSize = 'size-4'
         const iconSize = 'text-[9px]'
         const isAuto = row.plan.methode === 'Automatique'
+        const isDimmed = activeMonth !== null && mIdx !== activeMonth
         return (
-          <td key={mIdx} className="px-1 py-1 text-center border-r border-[var(--color-border-subtle)] relative">
+          <td key={mIdx} className="px-1 py-1 text-center border-r border-[var(--color-border-subtle)] relative transition-opacity duration-200"
+            style={{ opacity: isDimmed ? 0.2 : 1 }}>
             {isBimensuel ? (
               pair.length > 0 && (
                 <div className="flex items-center justify-center gap-0.5 mx-auto" style={{ width: 34 }}>
