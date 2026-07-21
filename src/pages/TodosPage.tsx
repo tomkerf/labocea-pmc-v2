@@ -5,7 +5,7 @@ import { useTodosStore } from '@/stores/todosStore'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useEquipementsStore } from '@/stores/equipementsStore'
 import { useUsersStore } from '@/stores/usersStore'
-import { useAuthStore, selectUid } from '@/stores/authStore'
+import { useAuthStore, selectUid, selectAppUser } from '@/stores/authStore'
 import { createTodo, saveTodo, deleteTodo } from '@/services/todoService'
 import { SkeletonList } from '@/components/ui/Skeleton'
 import { toast } from '@/stores/toastStore'
@@ -18,7 +18,7 @@ import type { Todo, TodoStatus } from '@/types'
 
 export default function TodosPage() {
   const uid = useAuthStore(selectUid)
-  const appUser = useAuthStore((s) => s.appUser)
+  const appUser = useAuthStore(selectAppUser)
   const { todos, loading } = useTodosStore()
   const { clients } = useMissionsStore()
   const { equipements } = useEquipementsStore()

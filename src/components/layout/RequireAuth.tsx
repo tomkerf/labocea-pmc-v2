@@ -2,7 +2,7 @@ import { useState, useReducer } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import { useAuthStore, selectAppUser } from '@/stores/authStore'
+import { useAuthStore, selectAppUser, selectSetAppUser } from '@/stores/authStore'
 import { COLLECTIONS, COLORS } from '@/lib/constants'
 
 type ProfileFormState = {
@@ -20,7 +20,7 @@ function profileFormReducer(state: ProfileFormState, action: ProfileFormAction):
 /** Bloque l'accès à l'app tant que le profil n'est pas complété (initiales vides). */
 function CompleteProfileModal() {
   const appUser   = useAuthStore(selectAppUser)
-  const setAppUser = useAuthStore((s) => s.setAppUser)
+  const setAppUser = useAuthStore(selectSetAppUser)
 
   const [form, dispatch] = useReducer(profileFormReducer, {
     prenom:    appUser?.prenom    ?? '',

@@ -41,3 +41,4 @@ export const selectPrenom         = (s: AuthState): string         => s.appUser?
 export const selectInitiales      = (s: AuthState): string         => s.appUser?.initiales ?? ''
 export const selectRole           = (s: AuthState): UserRole | null => s.appUser?.role ?? null
 export const selectAppUser        = (s: AuthState): AppUser | null => s.appUser
+export const selectSetAppUser     = (s: AuthState): AuthState['setAppUser'] => s.setAppUser
