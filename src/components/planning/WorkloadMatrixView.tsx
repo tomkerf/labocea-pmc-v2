@@ -112,6 +112,7 @@ export default function WorkloadMatrixView({ clients, year, filterTech, filterSi
         const pointsVal = getSamplingPoints(p)
 
         p.samplings.forEach(s => {
+          if (!s) return
           // On ne compte pas les "non_effectue" (annulés) dans la charge de travail
           if (s.status === 'non_effectue') return
 

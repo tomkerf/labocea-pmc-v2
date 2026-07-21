@@ -17,7 +17,7 @@ export function buildIssueListHtml(
   issues: { client: Client; plan: Plan; sampling: Sampling; planYear: number }[],
   monthLabel: string,
   year: number,
-  preleveurs: Preleveur[],
+  preleveurs: Preleveur[] = [],
   withPrintScript = false,
 ): string {
   const title = escapeHtml(`Prélèvements — ${monthLabel} ${year}`)
@@ -30,7 +30,7 @@ export function buildIssueListHtml(
     const statusLabel = statusLabels[idx]
     const color = STATUS_COLOR[statusLabel] ?? '#8e8e93'
     const techCode = sampling.assignedTo || client.preleveur || ''
-    const techNom = preleveurs.find(p => p.code === techCode)?.nom || techCode || '—'
+    const techNom = (preleveurs || []).find(p => p.code === techCode)?.nom || techCode || '—'
 
     return `<tr>
       <td>${escapeHtml(client.nom)}</td>

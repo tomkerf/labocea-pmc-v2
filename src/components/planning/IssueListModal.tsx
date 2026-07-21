@@ -30,6 +30,7 @@ export default function IssueListModal({ onClose, type, month, rows, year, prele
     rows.forEach(({ client, plan }) => {
       const planYear = parseInt(client.annee ?? String(year))
       plan.samplings.forEach(s => {
+        if (!s) return
         if (type === 'overdue' && isSamplingOverdue(s, planYear, plan.methode === 'Automatique')) {
           list.push({ client, plan, sampling: s, planYear })
         } else if (type === 'non_effectue' && s.status === 'non_effectue') {

@@ -88,6 +88,7 @@ export default function BilanMoisModal({ onClose, month, year, clients }: BilanM
       client.plans.forEach(plan => {
         const isAuto = plan.methode === 'Automatique'
         plan.samplings.forEach(s => {
+          if (!s) return
           if (s.plannedMonth === month) {
             if (s.status === 'done') {
               res.done.push({ client, plan, sampling: s })

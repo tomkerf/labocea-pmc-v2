@@ -206,7 +206,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.basemaps.cartocdn.com https://firebasestorage.googleapis.com",
   "font-src 'self' data:",
-  "connect-src 'self' https://firestore.googleapis.com https://firebasestorage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://fcm.googleapis.com https://www.googleapis.com https://generativelanguage.googleapis.com https://api.open-meteo.com https://*.sentry.io",
+  "connect-src 'self' https://firestore.googleapis.com https://firebasestorage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://fcm.googleapis.com https://www.googleapis.com https://generativelanguage.googleapis.com https://api.open-meteo.com https://*.sentry.io https://*.ingest.de.sentry.io https://*.ingest.sentry.io",
   "worker-src 'self'",
   "manifest-src 'self'",
   "object-src 'none'",

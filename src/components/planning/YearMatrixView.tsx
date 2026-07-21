@@ -42,6 +42,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
         const pairsByMonth: (Sampling | null)[][] = Array.from({ length: 12 }, () => [])
 
         p.samplings.forEach(s => {
+          if (!s) return
           if (s.plannedMonth >= 0 && s.plannedMonth < 12) {
             samplingsByMonth[s.plannedMonth] = s
             if (p.frequence === 'Bimensuel') {
@@ -65,9 +66,9 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
     })
 
     return list.sort((a, b) => {
-      const c = a.client.nom.localeCompare(b.client.nom)
+      const c = (a.client.nom || '').localeCompare(b.client.nom || '')
       if (c !== 0) return c
-      return a.plan.siteNom.localeCompare(b.plan.siteNom)
+      return (a.plan.siteNom || '').localeCompare(b.plan.siteNom || '')
     })
   }, [clients, year, filterTech, filterSite, filterMethod, preleveurs])
 
@@ -97,6 +98,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
     rows.forEach(({ client, plan }) => {
       const planYear = parseInt(client.annee ?? String(year))
       plan.samplings.forEach(s => {
+        if (!s) return
         if (s.status === 'done') { c.done++; return }
         if (s.status === 'non_effectue') { c.non_effectue++; return }
         if (isSamplingOverdue(s, planYear, plan.methode === 'Automatique')) { c.overdue++; return }
@@ -111,6 +113,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
     plans.forEach(({ client, plan }) => {
       const planYear = parseInt(client.annee ?? String(year))
       plan.samplings.forEach(s => {
+        if (!s) return
         if (s.status === 'done') { c.done++; return }
         if (s.status === 'non_effectue') { c.non_effectue++; return }
         if (isSamplingOverdue(s, planYear, plan.methode === 'Automatique')) { c.overdue++; return }

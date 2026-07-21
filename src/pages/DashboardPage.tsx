@@ -68,6 +68,20 @@ function reducer(state: State, action: Action): State {
   }
 }
 
+function renderMarkdownSnippet(text: string) {
+  let escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n+/g, ' ')
+
+  escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+  escaped = escaped.replace(/_(.*?)_/g, '<em>$1</em>')
+  escaped = escaped.replace(/\[(.*?)\]\(.*?\)/g, '$1')
+
+  return <span dangerouslySetInnerHTML={{ __html: escaped }} />
+}
+
 function DashboardNewsWidget() {
   const navigate = useNavigate()
   const actus = useActusStore(s => s.actus)
@@ -104,11 +118,11 @@ function DashboardNewsWidget() {
               {isUnread && (
                 <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-[var(--color-accent)] animate-pulse" />
               )}
-              <h4 className="text-xs font-bold truncate pr-6 text-[var(--color-text-primary)]">
+              <h4 className="text-sm font-bold truncate pr-6 text-[var(--color-text-primary)]">
                 {actu.titre}
               </h4>
-              <p className="text-[11px] leading-relaxed line-clamp-2 text-[var(--color-text-secondary)]">
-                {actu.contenu}
+              <p className="text-xs leading-relaxed line-clamp-2 text-[var(--color-text-secondary)]">
+                {renderMarkdownSnippet(actu.contenu)}
               </p>
             </div>
           )
