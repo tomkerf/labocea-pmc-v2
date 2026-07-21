@@ -3,6 +3,39 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+
+## Session 190 — Sentry robustness & UI Actualités
+**21 juillet 2026**
+
+### Bugs corrigés & Robustesse
+
+**Sécurisation Sentry (Robustesse de la modale d'export)**
+- Dans [exportIssueListHtml.ts](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/lib/exportIssueListHtml.ts) : Sécurisation du paramètre `preleveurs` en y appliquant une valeur par défaut (`= []`) et un repli `(preleveurs || [])` avant l'évaluation avec `.find()`. Cela évite un crash `TypeError` si l'initialisation de l'état asynchrone des préleveurs n'est pas finalisée lors de l'appel.
+
+**Correction des blocages CSP liés à Sentry**
+- Dans [worker/index.js](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/worker/index.js) : Ajout des noms de domaine de collecte Sentry (`https://*.ingest.de.sentry.io` et `https://*.ingest.sentry.io`) dans la directive `connect-src` de la Content-Security-Policy (CSP) pour lever les blocages de remontée d'erreurs en production et en staging.
+
+**Correction des plantages au tri de la vue matricielle annuelle (Sentry Issue 8)**
+- Dans [YearMatrixView.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/YearMatrixView.tsx) : Ajout de replis de chaîne vide `|| ''` sur le nom du client et le nom du site de prélèvement dans la fonction de tri `.sort` avant d'appeler `.localeCompare`. Empêche l'application de crasher si un plan n'a pas de nom de site renseigné.
+
+**Sécurisation contre les prélèvements null/undefined dans la base de données (Sentry Issue 9)**
+- Dans [YearMatrixView.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/YearMatrixView.tsx), [IssueListModal.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/IssueListModal.tsx), [WorkloadMatrixView.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/WorkloadMatrixView.tsx) et [BilanMoisModal.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/components/planning/BilanMoisModal.tsx) : Ajout de vérifications strictes `if (!s) return` dans les boucles d'itération sur `plan.samplings` afin d'éviter les crashs `TypeError` causés par d'éventuels prélèvements `null` ou `undefined` enregistrés en base.
+
+**Typographie et Markdown des actualités du Tableau de bord**
+- Dans [DashboardPage.tsx](file:///Users/thomaskerfendal/documents/dev/app-pmc-v2/src/pages/DashboardPage.tsx) :
+  - Augmentation des tailles de police des actualités du tableau de bord (`text-xs` -> `text-sm` pour les titres, et `text-[11px]` -> `text-xs` pour le texte) afin de respecter le design system Apple-style et d'être cohérent avec le reste des widgets du tableau de bord.
+  - Ajout d'un parseur léger de markdown `renderMarkdownSnippet` pour interpréter correctement le formatage en gras (`**Texte**`) et italique (`_Texte_`), nettoyer les liens markdown et remplacer les sauts de ligne par des espaces pour que le `line-clamp-2` fonctionne proprement sans casser le layout.
+
+### État
+- TypeScript 0 erreur, ESLint 0 erreur.
+- 353/353 tests unitaires valides et au vert.
+- Build de production réussi.
+
+### Prochaines étapes
+- 🔴 Isolation Firestore staging/prod (bloquant restant avant élargissement de l'équipe).
+
+---
+
 ## Session 189 — Revue UI/UX Rapports/Tâches + audit sécurité complet
 **20 juillet 2026**
 

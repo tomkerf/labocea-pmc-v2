@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '168'
+export const CHANGELOG_VERSION = '169'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,14 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '169',
+    date: '21 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Actualités : Amélioration de la lisibilité des actualités sur le tableau de bord (textes plus grands et mise en forme markdown des descriptions)' },
+      { type: 'fix', label: 'Sentry : Résolution de trois risques de plantage et blocages CSP liés à la remontée d\'erreurs, au tri annuel et à l\'export PDF' },
+    ],
+  },
   {
     version: '168',
     date: '20 juillet 2026',
