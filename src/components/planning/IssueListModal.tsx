@@ -1,25 +1,27 @@
 import { useMemo } from 'react'
-import { X, ExternalLink, AlertCircle, AlertTriangle, CloudRain } from 'lucide-react'
+import { X, ExternalLink, AlertCircle, AlertTriangle, CloudRain, Calendar } from 'lucide-react'
 import { m, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import type { Client, Plan, Sampling } from '@/types'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { MOIS_LONG } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
+import { getStatusColor, getStatusLabel } from '@/lib/yearMatrixUtils'
 
 
 interface IssueListModalProps {
   onClose: () => void
-  type: 'overdue' | 'non_effectue' | null
+  type: 'overdue' | 'non_effectue' | 'month' | null
+  month?: number
   rows: { client: Client; plan: Plan; samplingsByMonth?: (Sampling | null)[]; pairsByMonth?: (Sampling | null)[][] }[]
   year: number
 }
 
-export default function IssueListModal({ onClose, type, rows, year }: IssueListModalProps) {
+export default function IssueListModal({ onClose, type, month, rows, year }: IssueListModalProps) {
   const issues = useMemo(() => {
     if (!type) return []
     const list: { client: Client; plan: Plan; sampling: Sampling; planYear: number }[] = []
-    
+
     rows.forEach(({ client, plan }) => {
       const planYear = parseInt(client.annee ?? String(year))
       plan.samplings.forEach(s => {
@@ -27,21 +29,27 @@ export default function IssueListModal({ onClose, type, rows, year }: IssueListM
           list.push({ client, plan, sampling: s, planYear })
         } else if (type === 'non_effectue' && s.status === 'non_effectue') {
           list.push({ client, plan, sampling: s, planYear })
+        } else if (type === 'month' && s.plannedMonth === month) {
+          list.push({ client, plan, sampling: s, planYear })
         }
       })
     })
-    
-    // Sort by month (oldest first)
+
+    // Sort by month (oldest first) — no-op quand type === 'month' (déjà un seul mois)
     list.sort((a, b) => a.sampling.plannedMonth - b.sampling.plannedMonth)
     return list
-  }, [type, rows, year])
+  }, [type, month, rows, year])
 
   if (!type) return null
 
-  const title = type === 'overdue' ? 'Prélèvements en retard' : 'Prélèvements non effectués'
-  const icon = type === 'overdue' 
-    ? <AlertTriangle size={17} style={{ color: COLORS.DANGER }} /> 
-    : <AlertCircle size={17} style={{ color: 'var(--color-neutral)' }} />
+  const title = type === 'overdue' ? 'Prélèvements en retard'
+    : type === 'non_effectue' ? 'Prélèvements non effectués'
+    : `Prélèvements — ${MOIS_LONG[month ?? 0]} ${year}`
+  const icon = type === 'overdue'
+    ? <AlertTriangle size={17} style={{ color: COLORS.DANGER }} />
+    : type === 'non_effectue'
+    ? <AlertCircle size={17} style={{ color: 'var(--color-neutral)' }} />
+    : <Calendar size={17} style={{ color: COLORS.ACCENT }} />
 
   return (
     <AnimatePresence>
@@ -96,12 +104,21 @@ export default function IssueListModal({ onClose, type, rows, year }: IssueListM
                       </div>
                     </div>
                     <div className="shrink-0 flex items-center gap-2">
-                      <span className="text-xs font-medium px-2 py-1 rounded-md" style={{ 
-                        background: type === 'overdue' ? 'var(--color-danger-light)' : COLORS.BG_TERTIARY,
-                        color: type === 'overdue' ? COLORS.DANGER : COLORS.TEXT_SECONDARY
-                      }}>
-                        {MOIS_LONG[item.sampling.plannedMonth]} {item.planYear}
-                      </span>
+                      {type === 'month' ? (
+                        <span className="text-xs font-medium px-2 py-1 rounded-md" style={{
+                          background: COLORS.BG_TERTIARY,
+                          color: getStatusColor(item.sampling, item.planYear, item.plan.methode === 'Automatique'),
+                        }}>
+                          {getStatusLabel(item.sampling, item.planYear, item.plan.methode === 'Automatique')}
+                        </span>
+                      ) : (
+                        <span className="text-xs font-medium px-2 py-1 rounded-md" style={{
+                          background: type === 'overdue' ? 'var(--color-danger-light)' : COLORS.BG_TERTIARY,
+                          color: type === 'overdue' ? COLORS.DANGER : COLORS.TEXT_SECONDARY
+                        }}>
+                          {MOIS_LONG[item.sampling.plannedMonth]} {item.planYear}
+                        </span>
+                      )}
                       {item.plan.meteo === 'pluie' && (
                         <span title="Temps de pluie requis"><CloudRain size={14} className="text-blue-400" /></span>
                       )}
@@ -113,7 +130,7 @@ export default function IssueListModal({ onClose, type, rows, year }: IssueListM
                       </Link>
                     </div>
                   </div>
-                  {type === 'non_effectue' && item.sampling.comment && (
+                  {item.sampling.status === 'non_effectue' && item.sampling.comment && (
                     <div className="text-xs italic text-[var(--color-text-secondary)] mt-1 border-l-2 border-[var(--color-border-subtle)] pl-2">
                       Motif : {item.sampling.comment}
                     </div>

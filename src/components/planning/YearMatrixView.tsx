@@ -20,6 +20,7 @@ interface YearMatrixViewProps {
 
 export default function YearMatrixView({ clients, year, filterTech, filterSite, filterMethod = '', preleveurs }: YearMatrixViewProps) {
   const [issueModalType, setIssueModalType] = useState<'overdue' | 'non_effectue' | null>(null)
+  const [monthModal, setMonthModal] = useState<number | null>(null)
 
   const rows = useMemo(() => {
     const list: RowData[] = []
@@ -169,9 +170,13 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
               <tr className="bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] text-[11px] uppercase tracking-wider border-b border-[var(--color-border-subtle)]">
                 <th className="px-4 py-3 font-semibold sticky left-0 z-40 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)]">Client & Point de prélèvement</th>
                 <th className="px-4 py-3 font-semibold border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)]">Plan</th>
-                {MOIS_LONG.map(m => (
-                  <th key={m} className="px-2 py-3 font-semibold text-center border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)] w-14">
-                    {m === 'Juin' ? 'JUN' : m === 'Juillet' ? 'JUL' : m.substring(0, 3).toUpperCase()}
+                {MOIS_LONG.map((m, i) => (
+                  <th key={m} scope="col" className="p-0 w-14">
+                    <button type="button" onClick={() => setMonthModal(i)}
+                      className="block w-full h-full px-2 py-3 font-semibold text-center border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-border-subtle)] hover:text-[var(--color-accent)] transition-colors cursor-pointer"
+                      title={`Voir les prélèvements de ${m}`}>
+                      {m === 'Juin' ? 'JUN' : m === 'Juillet' ? 'JUL' : m.substring(0, 3).toUpperCase()}
+                    </button>
                   </th>
                 ))}
               </tr>
@@ -264,6 +269,16 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
           rows={rows}
           year={year}
           onClose={() => setIssueModalType(null)}
+        />
+      )}
+
+      {monthModal !== null && (
+        <IssueListModal
+          type="month"
+          month={monthModal}
+          rows={rows}
+          year={year}
+          onClose={() => setMonthModal(null)}
         />
       )}
     </div>
