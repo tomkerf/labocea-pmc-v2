@@ -194,8 +194,39 @@ function fsFields(doc) {
   return doc?.fields ?? {}
 }
 
-export default {
-  async fetch(request, env) {
+// ── En-têtes de sécurité HTTP ───────────────────────────────────
+// Content-Security-Policy calibrée sur les hôtes externes réellement appelés
+// par le SPA : Firebase (Auth/Firestore/Storage/Messaging), Gemini, météo,
+// tuiles cartographiques CARTO, Sentry. style-src garde 'unsafe-inline' car
+// toute l'UI s'appuie sur des styles inline React (style={{...}}), pas de
+// <style>/<script> injectés dynamiquement par ailleurs.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://*.basemaps.cartocdn.com https://firebasestorage.googleapis.com",
+  "font-src 'self' data:",
+  "connect-src 'self' https://firestore.googleapis.com https://firebasestorage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://fcm.googleapis.com https://www.googleapis.com https://generativelanguage.googleapis.com https://api.open-meteo.com https://*.sentry.io",
+  "worker-src 'self'",
+  "manifest-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join('; ')
+
+function withSecurityHeaders(response) {
+  const headers = new Headers(response.headers)
+  headers.set('Content-Security-Policy', CSP)
+  headers.set('X-Content-Type-Options', 'nosniff')
+  headers.set('X-Frame-Options', 'DENY')
+  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+  headers.set('Permissions-Policy', 'geolocation=(self), camera=(self), microphone=(), payment=(), usb=()')
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers })
+}
+
+async function handleRequest(request, env) {
     const url = new URL(request.url)
 
     // ── Endpoint API d'envoi de notifications push ────────────────
@@ -514,5 +545,11 @@ export default {
     // SPA fallback : toutes les routes → index.html
     const indexRequest = new Request(new URL('/index.html', url.origin), request)
     return env.ASSETS.fetch(indexRequest)
+}
+
+export default {
+  async fetch(request, env) {
+    const response = await handleRequest(request, env)
+    return withSecurityHeaders(response)
   },
 }
