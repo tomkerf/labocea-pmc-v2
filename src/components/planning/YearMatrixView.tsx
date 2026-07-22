@@ -172,12 +172,12 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
           <table className="w-full text-left border-collapse" style={{ minWidth: 1000 }}>
             <thead className="sticky top-0 z-30">
               <tr className="bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] text-[11px] uppercase tracking-wider border-b border-[var(--color-border-subtle)]">
-                <th className="px-4 py-3 font-semibold sticky left-0 z-40 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)]">Client & Point de prélèvement</th>
-                <th className="px-4 py-3 font-semibold border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)]">Plan</th>
+                <th className="px-4 py-2 font-semibold sticky left-0 z-40 bg-[var(--color-bg-tertiary)] border-r border-[var(--color-border-subtle)] shadow-[1px_0_0_var(--color-border-subtle)]">Client & Point de prélèvement</th>
+                <th className="px-4 py-2 font-semibold border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)]">Plan</th>
                 {MOIS_LONG.map((m, i) => (
                   <th key={m} scope="col" className="p-0 w-14 transition-opacity duration-200"
                     style={{ opacity: focusedMonth !== null && i !== focusedMonth ? 0.2 : 1 }}>
-                    <div className="flex flex-col items-center justify-center gap-0.5 w-full h-full px-2 py-3 font-semibold text-center border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)]">
+                    <div className="flex flex-col items-center justify-center gap-0 w-full h-full px-2 py-2 font-semibold text-center border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)]">
                       <button type="button"
                         onClick={() => setFocusedMonth(prev => prev === i ? null : i)}
                         className="hover:text-[var(--color-accent)] transition-colors cursor-pointer"

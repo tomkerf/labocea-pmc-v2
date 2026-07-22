@@ -76,19 +76,19 @@ export default function PilotagePage() {
       </div>
 
       {/* Toggle Vue annuelle / Charge */}
-      <div className="shrink-0 flex gap-1.5 p-1.5 rounded-xl mb-3 w-fit ml-6"
+      <div className="shrink-0 flex gap-1 p-1 rounded-lg mb-3 w-fit ml-6"
         style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
         {([['annee', 'Vue annuelle', CalendarRange], ['charge', 'Charge', BarChart3]] as const).map(([v, label, Icon]) => {
           const active = view === v
           const softActive = v === 'charge'
           return (
             <button type="button" key={v} onClick={() => setView(v)}
-              className="px-3.5 py-1.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="px-3 py-1 rounded-md text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               style={{
                 background: active ? (softActive ? 'var(--color-accent-light)' : COLORS.ACCENT) : 'transparent',
                 color: active ? (softActive ? COLORS.ACCENT : 'white') : COLORS.TEXT_SECONDARY,
               }}>
-              <Icon size={15} /> {label}
+              <Icon size={13} /> {label}
             </button>
           )
         })}
