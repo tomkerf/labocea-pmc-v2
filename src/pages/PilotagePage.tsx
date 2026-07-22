@@ -64,7 +64,7 @@ export default function PilotagePage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 px-6 pt-6">
+      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3 px-6 pt-4">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Pilotage
@@ -76,14 +76,14 @@ export default function PilotagePage() {
       </div>
 
       {/* Toggle Vue annuelle / Charge */}
-      <div className="shrink-0 flex gap-1.5 p-1.5 rounded-xl mb-4 w-fit ml-6"
+      <div className="shrink-0 flex gap-1.5 p-1.5 rounded-xl mb-3 w-fit ml-6"
         style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
         {([['annee', 'Vue annuelle', CalendarRange], ['charge', 'Charge', BarChart3]] as const).map(([v, label, Icon]) => {
           const active = view === v
           const softActive = v === 'charge'
           return (
             <button type="button" key={v} onClick={() => setView(v)}
-              className="px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
               style={{
                 background: active ? (softActive ? 'var(--color-accent-light)' : COLORS.ACCENT) : 'transparent',
                 color: active ? (softActive ? COLORS.ACCENT : 'white') : COLORS.TEXT_SECONDARY,
@@ -95,8 +95,8 @@ export default function PilotagePage() {
       </div>
 
       {/* Filtres */}
-      <div className="shrink-0 flex flex-col sm:flex-row gap-3 mb-4 px-6">
-        <div className="flex-1 flex flex-col gap-1.5">
+      <div className="shrink-0 flex flex-col sm:flex-row gap-3 mb-3 px-6">
+        <div className="flex-1 flex flex-col gap-1">
           <label htmlFor="pilotage-filter-site" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
             Site géographique
           </label>
@@ -104,7 +104,7 @@ export default function PilotagePage() {
             id="pilotage-filter-site"
             value={filterSite}
             onChange={(e) => handleFilterSiteChange(e.target.value)}
-            className="px-3 py-2 rounded-lg text-sm outline-none"
+            className="px-3 py-1.5 rounded-lg text-sm outline-none"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
             <option value="">Tous les sites</option>
@@ -112,7 +112,7 @@ export default function PilotagePage() {
           </select>
         </div>
 
-        <div className="flex-1 flex flex-col gap-1.5">
+        <div className="flex-1 flex flex-col gap-1">
           <label htmlFor="pilotage-filter-tech" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
             Technicien (préleveur)
           </label>
@@ -120,7 +120,7 @@ export default function PilotagePage() {
             id="pilotage-filter-tech"
             value={filterTech}
             onChange={(e) => handleFilterTechChange(e.target.value)}
-            className="px-3 py-2 rounded-lg text-sm outline-none"
+            className="px-3 py-1.5 rounded-lg text-sm outline-none"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
             <option value="">Tous les techniciens</option>
@@ -128,7 +128,7 @@ export default function PilotagePage() {
           </select>
         </div>
 
-        <div className="flex-1 flex flex-col gap-1.5">
+        <div className="flex-1 flex flex-col gap-1">
           <label htmlFor="pilotage-filter-pause" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
             Statut
           </label>
@@ -136,7 +136,7 @@ export default function PilotagePage() {
             id="pilotage-filter-pause"
             value={filterPause}
             onChange={(e) => handleFilterPauseChange(e.target.value)}
-            className="px-3 py-2 rounded-lg text-sm outline-none"
+            className="px-3 py-1.5 rounded-lg text-sm outline-none"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
             <option value="actifs">Actifs</option>
@@ -145,7 +145,7 @@ export default function PilotagePage() {
           </select>
         </div>
 
-        <div className="flex-1 flex flex-col gap-1.5">
+        <div className="flex-1 flex flex-col gap-1">
           <label htmlFor="pilotage-filter-method" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
             Méthode
           </label>
@@ -153,7 +153,7 @@ export default function PilotagePage() {
             id="pilotage-filter-method"
             value={filterMethod}
             onChange={(e) => setFilterMethod(e.target.value)}
-            className="px-3 py-2 rounded-lg text-sm outline-none"
+            className="px-3 py-1.5 rounded-lg text-sm outline-none"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
             <option value="">Toutes les méthodes</option>
@@ -166,7 +166,7 @@ export default function PilotagePage() {
 
       <div className="flex-1 min-h-0 flex flex-col">
         {/* Navigation Année */}
-        <div className="shrink-0 flex items-center gap-3 mb-4 px-6">
+        <div className="shrink-0 flex items-center gap-3 mb-3 px-6">
           <button type="button" onClick={() => setYear((y) => y - 1)}
             aria-label="Année précédente"
             className="size-8 rounded-lg flex items-center justify-center cursor-pointer"
