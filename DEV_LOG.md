@@ -4,6 +4,43 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 
 
+## Session 191 — Onglet Pilotage : drill-down mensuel, export PDF, polish UI
+**21-22 juillet 2026**
+
+### Bug corrigé — page Pilotage en erreur ("Une erreur inattendue s'est produite")
+- **Cause racine** : le Worker Cloudflare déployé référençait un ancien build (chunk `PilotagePage-*.js` pointant vers un `YearMatrixView` obsolète) alors que les assets du nouveau build étaient déjà uploadés côté Cloudflare — un déploiement précédent n'était jamais allé au bout côté Worker. Confirmé via `read_console_messages`/`read_network_requests` (Chrome MCP) : `TypeError: Failed to fetch dynamically imported module`.
+- **Fix** : redéploiement complet (`bash deploy-dev.sh`) qui republie le Worker à jour ; aucun changement de code nécessaire.
+- Root cause distincte déjà documentée de `issue_sw_cache_stale` (cache Service Worker de l'app) — ici c'est un Worker Cloudflare pas à jour, pas un souci de cache navigateur.
+
+### Feature — Drill-down mensuel dans la Vue annuelle (`YearMatrixView.tsx`)
+- Clic sur le libellé d'un mois (JAN..DÉC) : isole visuellement la colonne (grisage des 11 autres mois à `opacity: 0.2`, en style inline — **la classe Tailwind `opacity-20` générée depuis un template literal conditionnel n'était pas détectée par le scanner Oxide**, piège déjà connu sur ce projet, confirmé par `getComputedStyle` restant à 1 malgré la classe présente dans le DOM).
+- Clic sur la petite icône loupe sous le mois : ouvre `IssueListModal` (nouveau mode `'month'`) listant tous les prélèvements de ce mois (tous statuts), filtrés par site/technicien/méthode déjà actifs.
+- Les deux gestes sont volontairement séparés : un premier essai ouvrait la modale directement au clic sur le libellé, mais son fond flouté recouvrait le tableau et rendait le grisage invisible.
+
+### Feature — Export PDF (aperçu + impression) des prélèvements d'un mois
+- Bouton "Exporter" dans la modale mensuelle → aperçu HTML imprimable (`src/lib/exportIssueListHtml.ts`), réutilisant le pattern déjà en place pour les rapports de plan (`reportHtml.ts` + `PdfPreviewModal`) plutôt que d'ajouter une dépendance PDF supplémentaire (jsPDF écarté).
+- Tableau : Client, Point de prélèvement, Site, Statut, Technicien (résolu via `preleveurs.find(p => p.code === ...)`). Stats Fait/Planifié/En retard/Non fait cohérentes avec le total.
+- "Imprimer / Télécharger" régénère le HTML avec script d'auto-print, ouvre un nouvel onglet via Blob URL.
+
+### UI/UX — Polish page Pilotage
+- Marges verticales du haut de page compactées (header, toggle, filtres, nav année) pour agrandir la zone scrollable du tableau.
+- Filtres (Site/Technicien/Statut/Méthode) passés de 2 lignes (label + select) à 1 seule ligne : labels rendus `sr-only` (accessibles aux lecteurs d'écran, invisibles visuellement), premier `<option>` rendu auto-descriptif ("Site : tous les sites"...).
+- Toggle "Vue annuelle / Charge" allégé (padding/police réduits) pour équilibrer son poids visuel avec la ligne de filtres juste en dessous.
+- En-tête du tableau (Client/Plan/mois) compacté (`py-3` → `py-2`) pour se rapprocher de la densité des lignes de données.
+
+### Sécurité (déjà en partie loggé le 21/07)
+- En-têtes HTTP de sécurité (CSP, HSTS, X-Frame-Options...) ajoutés au Worker Cloudflare + Dependabot configuré (npm + GitHub Actions hebdomadaire).
+- Bug de propagation découvert en cours de route : `wrangler.toml` en mode SPA (`not_found_handling`) laissait Cloudflare bypasser le Worker pour les assets statiques → `run_worker_first = true` ajouté pour forcer l'exécution du Worker avant le cache CDN.
+
+### État
+- TypeScript 0 erreur, ESLint 0 erreur, 353/353 tests verts après chaque étape.
+- Tous les commits poussés sur `main`, staging redéployé et vérifié visuellement (Chrome MCP) après chaque changement.
+
+### Prochaines étapes
+- 🔴 Isolation Firestore staging/prod (bloquant restant avant élargissement de l'équipe de Brest) — toujours non traité.
+
+---
+
 ## Session 190 — Sentry robustness & UI Actualités
 **21 juillet 2026**
 
