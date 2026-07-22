@@ -97,9 +97,7 @@ export default function PilotagePage() {
       {/* Filtres */}
       <div className="shrink-0 flex flex-col sm:flex-row gap-3 mb-3 px-6">
         <div className="flex-1 flex flex-col gap-1">
-          <label htmlFor="pilotage-filter-site" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
-            Site géographique
-          </label>
+          <label htmlFor="pilotage-filter-site" className="sr-only">Site géographique</label>
           <select
             id="pilotage-filter-site"
             value={filterSite}
@@ -107,15 +105,13 @@ export default function PilotagePage() {
             className="px-3 py-1.5 rounded-lg text-sm outline-none"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
-            <option value="">Tous les sites</option>
+            <option value="">Site : tous les sites</option>
             {availableSites.map(site => <option key={site} value={site}>{site}</option>)}
           </select>
         </div>
 
         <div className="flex-1 flex flex-col gap-1">
-          <label htmlFor="pilotage-filter-tech" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
-            Technicien (préleveur)
-          </label>
+          <label htmlFor="pilotage-filter-tech" className="sr-only">Technicien (préleveur)</label>
           <select
             id="pilotage-filter-tech"
             value={filterTech}
@@ -123,15 +119,13 @@ export default function PilotagePage() {
             className="px-3 py-1.5 rounded-lg text-sm outline-none"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
-            <option value="">Tous les techniciens</option>
+            <option value="">Technicien : tous</option>
             {availableTechs.map(tech => <option key={tech} value={tech}>{tech}</option>)}
           </select>
         </div>
 
         <div className="flex-1 flex flex-col gap-1">
-          <label htmlFor="pilotage-filter-pause" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
-            Statut
-          </label>
+          <label htmlFor="pilotage-filter-pause" className="sr-only">Statut</label>
           <select
             id="pilotage-filter-pause"
             value={filterPause}
@@ -139,16 +133,14 @@ export default function PilotagePage() {
             className="px-3 py-1.5 rounded-lg text-sm outline-none"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
-            <option value="actifs">Actifs</option>
-            <option value="pause">En pause</option>
-            <option value="tous">Tous</option>
+            <option value="actifs">Statut : actifs</option>
+            <option value="pause">Statut : en pause</option>
+            <option value="tous">Statut : tous</option>
           </select>
         </div>
 
         <div className="flex-1 flex flex-col gap-1">
-          <label htmlFor="pilotage-filter-method" className="text-xs font-semibold uppercase tracking-wide" style={{ color: COLORS.TEXT_SECONDARY }}>
-            Méthode
-          </label>
+          <label htmlFor="pilotage-filter-method" className="sr-only">Méthode</label>
           <select
             id="pilotage-filter-method"
             value={filterMethod}
@@ -156,7 +148,7 @@ export default function PilotagePage() {
             className="px-3 py-1.5 rounded-lg text-sm outline-none"
             style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', color: COLORS.TEXT_PRIMARY }}
           >
-            <option value="">Toutes les méthodes</option>
+            <option value="">Méthode : toutes</option>
             <option value="Ponctuel">Ponctuel</option>
             <option value="Composite">Composite</option>
             <option value="Automatique">Bilan 24 (Automatique)</option>
