@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard PMC — maquette refonte complète (26/07/2026)</title>
+<style>
+  html, body { margin:0; padding:0; background:#E8E8ED; }
+  body { padding:28px 20px 60px; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Inter,sans-serif; }
+  .wrap { max-width:1152px; margin:0 auto; }
+  .doc-note { max-width:1152px; margin:0 auto 20px; font-size:13px; line-height:1.55; color:#6E6E73; }
+  .doc-note strong { color:#1D1D1F; }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+  .pmc-frame *, .pmc-frame *::before, .pmc-frame *::after { box-sizing: border-box; }
+  .pmc-frame {
+    --bg1:#F2F2F7; --bg2:#FFFFFF; --bg3:#F0F0F2;
+    --t1:#1D1D1F; --t2:#6E6E73; --t3:#AEAEB2;
+    --ac:#0071E3; --acl:#E8F1FB;
+    --ok:#34C759; --okl:#EAF8EE;
+    --wa:#FF9F0A; --wal:#FFF4E3;
+    --da:#FF3B30; --dal:#FFEEED;
+    --nu:#8E8E93;
+    --bd:#D2D2D7; --bds:#E5E5EA;
+    --r:18px;
+    --sh:0 1px 2px rgba(30,41,59,.04), 0 8px 24px -16px rgba(30,41,59,.18);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Inter,sans-serif;
+    background:var(--bg1); color:var(--t1);
+    border-radius:14px; border:1px solid var(--bds);
+    padding:26px 24px 30px; overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .pmc-frame .card { background:var(--bg2); border:1px solid var(--bds); border-radius:var(--r); box-shadow:var(--sh); }
+  .pmc-frame .sect { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--t2); margin:0 0 10px; }
+  .pmc-frame .row { display:flex; align-items:center; gap:12px; padding:11px 16px; border-bottom:1px solid var(--bds); }
+  .pmc-frame .row:last-child { border-bottom:none; }
+  .pmc-frame .row:hover { background:var(--bg3); }
+  .pmc-frame .pill { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:3px 9px; border-radius:9999px; white-space:nowrap; }
+  .pmc-frame .trunc { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pmc-frame svg { display:block; }
+  .pmc-frame .seg { appearance:none; border:none; background:transparent; cursor:pointer; font:inherit;
+    display:inline-flex; align-items:center; gap:6px; padding:6px 11px; border-radius:9999px;
+    font-size:12px; font-weight:600; color:var(--t2); transition:all .16s ease; white-space:nowrap; }
+  .pmc-frame .seg:hover { color:var(--t1); }
+  .pmc-frame .seg[aria-selected="true"] { background:var(--bg2); color:var(--t1); box-shadow:0 1px 2px rgba(0,0,0,.06); }
+  .pmc-frame .seg b { font-size:10px; font-weight:700; padding:1px 6px; border-radius:9999px; background:var(--bg3); color:var(--t2); }
+  .pmc-frame .seg[aria-selected="true"] b.d { background:var(--dal); color:var(--da); }
+  .pmc-frame .seg[aria-selected="true"] b.w { background:var(--wal); color:var(--wa); }
+  .pmc-frame .seg[aria-selected="true"] b.a { background:var(--acl); color:var(--ac); }
+  .pmc-frame .kpi { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .pmc-frame .hero { display:grid; grid-template-columns:1.55fr 1fr; gap:18px; margin-top:22px; align-items:start; }
+  .pmc-frame .ico { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex:none; }
+  .pmc-frame .hr { font-size:11px; font-weight:700; letter-spacing:-.01em; width:38px; text-align:center; padding:4px 0; border-radius:8px; background:var(--acl); color:var(--ac); flex:none; }
+  @media (max-width:720px){
+    .pmc-frame .kpi { grid-template-columns:repeat(2,1fr); }
+    .pmc-frame .hero { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-note">
+  <strong>Maquette — refonte complète du dashboard PMC V2.</strong>
+  Validée par Tom le 26/07/2026, implémentation non démarrée.
+  Spec et diagnostic complets : <code>docs/dashboard-refonte-plan.md</code>.
+  Les onglets du bloc « À traiter » en bas de page sont cliquables.
+  Réduis la largeur de la fenêtre sous 720 px pour voir le comportement mobile.
+</div>
+
+<div class="wrap">
+<div class="pmc-frame">
+  <h2 class="sr-only">Maquette de la refonte complète du dashboard PMC : en-tête, quatre cartes KPI avec icônes, planning du jour dominant, état du parc matériel en donut, et un bloc unifié « À traiter » à onglets qui remplace les sept accordéons actuels.</h2>
+
+  <!-- ── EN-TÊTE ── -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;">
+    <div>
+      <p style="margin:0 0 3px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t2);">Jeudi 30 juillet 2026</p>
+      <h1 style="margin:0;font-size:26px;font-weight:700;letter-spacing:-.025em;">Bonjour, Thomas</h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="display:flex;gap:2px;padding:3px;border-radius:11px;background:var(--bg3);border:1px solid var(--bds);">
+        <span style="padding:6px 13px;font-size:12.5px;font-weight:600;border-radius:8px;background:var(--bg2);color:var(--t1);box-shadow:0 1px 2px rgba(0,0,0,.06);">Mon activité</span>
+        <span style="padding:6px 13px;font-size:12.5px;font-weight:600;border-radius:8px;color:var(--t2);">Suivi équipe</span>
+      </div>
+      <div style="width:40px;height:40px;border-radius:9999px;background:#3B6FA8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;letter-spacing:.02em;flex:none;">TK</div>
+    </div>
+  </div>
+
+  <!-- ── KPI ── -->
+  <div class="kpi">
+    <div class="card" style="padding:15px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="ico" style="background:var(--acl);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.5a2 2 0 0 1-.2.9L4.7 20.5a1 1 0 0 0 .9 1.5h12.8a1 1 0 0 0 .9-1.5l-5.1-10.1a2 2 0 0 1-.2-.9V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#AEAEB2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+      <p style="margin:0;font-size:30px;font-weight:700;line-height:1;letter-spacing:-.035em;color:var(--ac);">12</p>
+      <p style="margin:7px 0 1px;font-size:12.5px;font-weight:600;color:var(--t1);">Missions ce mois</p>
+      <p style="margin:0;font-size:11.5px;color:var(--t2);">prélèvements réalisés</p>
+    </div>
+
+    <div class="card" style="padding:15px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="ico" style="background:var(--dal);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+        </div>
+        <span class="pill" style="background:var(--dal);color:var(--da);">1 en retard</span>
+      </div>
+      <p style="margin:0;font-size:30px;font-weight:700;line-height:1;letter-spacing:-.035em;color:var(--da);">3</p>
+      <p style="margin:7px 0 1px;font-size:12.5px;font-weight:600;color:var(--t1);">Rapports à rédiger</p>
+      <p style="margin:0;font-size:11.5px;color:var(--t2);">dont 1 hors délai</p>
+    </div>
+
+    <div class="card" style="padding:15px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="ico" style="background:var(--okl);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+        </div>
+        <svg width="46" height="14" viewBox="0 0 46 14" aria-hidden="true">
+          <rect x="0" y="5" width="46" height="4" rx="2" fill="#E5E5EA"/>
+          <rect x="0" y="5" width="39.5" height="4" rx="2" fill="#34C759"/>
+        </svg>
+      </div>
+      <p style="margin:0;font-size:30px;font-weight:700;line-height:1;letter-spacing:-.035em;color:var(--ok);">86<span style="font-size:19px;">%</span></p>
+      <p style="margin:7px 0 1px;font-size:12.5px;font-weight:600;color:var(--t1);">Conformité métrologie</p>
+      <p style="margin:0;font-size:11.5px;color:var(--t2);">19/22 à jour</p>
+    </div>
+
+    <div class="card" style="padding:15px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="ico" style="background:var(--wal);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF9F0A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        </div>
+        <span class="pill" style="background:var(--wal);color:var(--wa);">≤ 30 j</span>
+      </div>
+      <p style="margin:0;font-size:30px;font-weight:700;line-height:1;letter-spacing:-.035em;color:var(--wa);">4</p>
+      <p style="margin:7px 0 1px;font-size:12.5px;font-weight:600;color:var(--t1);">À calibrer</p>
+      <p style="margin:0;font-size:11.5px;color:var(--t2);">étalonnages à prévoir</p>
+    </div>
+  </div>
+
+  <!-- ── HERO : planning dominant + rail droit ── -->
+  <div class="hero">
+
+    <!-- Planning -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">
+        <h2 class="sect" style="margin:0;">Planning du jour</h2>
+        <div style="display:flex;gap:2px;padding:3px;border-radius:9999px;background:var(--bg3);">
+          <span class="seg" aria-selected="true">Aujourd'hui</span>
+          <span class="seg">Demain</span>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:12px;margin-bottom:9px;background:rgba(0,113,227,.06);border:1px solid rgba(0,113,227,.14);color:var(--ac);font-size:12.5px;font-weight:600;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="M16 14v6M8 14v6M12 16v6"/></svg>
+        Temps de pluie prévu — 2 prélèvements pluie concernés
+      </div>
+
+      <div class="card" style="overflow:hidden;">
+        <div class="row">
+          <span class="hr">08:30</span>
+          <div style="flex:1;min-width:0;">
+            <p class="trunc" style="margin:0;font-size:13.5px;font-weight:600;">SAUR — Station Kerdiles</p>
+            <p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Prélèvement 24 h · entrée + sortie</p>
+          </div>
+          <span class="pill" style="background:var(--acl);color:var(--ac);">Planifié</span>
+        </div>
+        <div class="row">
+          <span class="hr">10:00</span>
+          <div style="flex:1;min-width:0;">
+            <p class="trunc" style="margin:0;font-size:13.5px;font-weight:600;">Véolia — Pluvial Lambézellec</p>
+            <p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Autosurveillance · temps de pluie</p>
+          </div>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="M16 14v6M8 14v6M12 16v6"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#AEAEB2" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></svg>
+          <span class="pill" style="background:var(--acl);color:var(--ac);">Planifié</span>
+        </div>
+        <div class="row">
+          <span class="hr">13:30</span>
+          <div style="flex:1;min-width:0;">
+            <p class="trunc" style="margin:0;font-size:13.5px;font-weight:600;">CCPI — Lagune de Plabennec</p>
+            <p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Prélèvement ponctuel · rejet</p>
+          </div>
+          <span class="pill" style="background:var(--bg3);color:var(--t2);border:1px solid var(--bds);">COFRAC</span>
+          <span class="pill" style="background:var(--wal);color:var(--wa);">À faire</span>
+        </div>
+        <div class="row">
+          <span style="width:38px;display:flex;justify-content:center;flex:none;"><span style="width:7px;height:7px;border-radius:9999px;background:var(--nu);"></span></span>
+          <div style="flex:1;min-width:0;">
+            <p class="trunc" style="margin:0;font-size:13.5px;font-weight:600;">Maintenance sonde pH WTW 3420</p>
+            <p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Atelier Brest · interne</p>
+          </div>
+          <span class="pill" style="background:var(--bg3);color:var(--t2);">Interne</span>
+        </div>
+      </div>
+
+      <button style="width:100%;margin-top:11px;padding:13px;border:none;border-radius:14px;background:var(--ac);color:#fff;font:inherit;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;box-shadow:0 4px 14px -6px rgba(0,113,227,.55);">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.6a1 1 0 0 0-.2-.6l-3.5-4.4a1 1 0 0 0-.8-.4H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+        Démarrer la tournée du jour
+        <span style="font-weight:400;opacity:.75;">· 3 prélèvements</span>
+      </button>
+    </div>
+
+    <!-- Rail droit -->
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div>
+        <h2 class="sect">État du parc matériel</h2>
+        <div class="card" style="padding:17px;">
+          <div style="display:flex;align-items:center;gap:16px;">
+            <div style="position:relative;width:96px;height:96px;flex:none;">
+              <svg width="96" height="96" viewBox="0 0 96 96" style="transform:rotate(-90deg);" aria-hidden="true">
+                <circle cx="48" cy="48" r="41" fill="none" stroke="#E5E5EA" stroke-width="11"/>
+                <circle cx="48" cy="48" r="41" fill="none" stroke="#34C759" stroke-width="11" stroke-linecap="round" stroke-dasharray="161 96.6" stroke-dashoffset="0"/>
+                <circle cx="48" cy="48" r="41" fill="none" stroke="#FF9F0A" stroke-width="11" stroke-linecap="round" stroke-dasharray="32.2 225.4" stroke-dashoffset="-168"/>
+                <circle cx="48" cy="48" r="41" fill="none" stroke="#0071E3" stroke-width="11" stroke-linecap="round" stroke-dasharray="11.4 246.2" stroke-dashoffset="-207"/>
+                <circle cx="48" cy="48" r="41" fill="none" stroke="#FF3B30" stroke-width="11" stroke-linecap="round" stroke-dasharray="3 254.6" stroke-dashoffset="-226"/>
+                <circle cx="48" cy="48" r="41" fill="none" stroke="#8E8E93" stroke-width="11" stroke-linecap="round" stroke-dasharray="24 233.6" stroke-dashoffset="-236"/>
+              </svg>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                <span style="font-size:23px;font-weight:700;letter-spacing:-.03em;">28</span>
+                <span style="font-size:10px;color:var(--t3);margin-top:-2px;">équip.</span>
+              </div>
+            </div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;">
+              <div style="display:flex;align-items:center;gap:7px;"><span style="width:8px;height:8px;border-radius:9999px;background:#34C759;flex:none;"></span><span style="font-size:12px;color:var(--t2);">En service</span><span style="margin-left:auto;font-size:12px;font-weight:600;">18</span></div>
+              <div style="display:flex;align-items:center;gap:7px;"><span style="width:8px;height:8px;border-radius:9999px;background:#FF9F0A;flex:none;"></span><span style="font-size:12px;color:var(--t2);">À calibrer</span><span style="margin-left:auto;font-size:12px;font-weight:600;">4</span></div>
+              <div style="display:flex;align-items:center;gap:7px;"><span style="width:8px;height:8px;border-radius:9999px;background:#0071E3;flex:none;"></span><span style="font-size:12px;color:var(--t2);">Maintenance</span><span style="margin-left:auto;font-size:12px;font-weight:600;">2</span></div>
+              <div style="display:flex;align-items:center;gap:7px;"><span style="width:8px;height:8px;border-radius:9999px;background:#FF3B30;flex:none;"></span><span style="font-size:12px;color:var(--t2);">Hors service</span><span style="margin-left:auto;font-size:12px;font-weight:600;">1</span></div>
+              <div style="display:flex;align-items:center;gap:7px;"><span style="width:8px;height:8px;border-radius:9999px;background:#8E8E93;flex:none;"></span><span style="font-size:12px;color:var(--t2);">Prêté</span><span style="margin-left:auto;font-size:12px;font-weight:600;">3</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <h2 class="sect" style="margin:0;">Actualités</h2>
+          <span class="pill" style="background:var(--acl);color:var(--ac);">1 non lue</span>
+        </div>
+        <div class="card" style="overflow:hidden;">
+          <div class="row" style="align-items:flex-start;padding:12px 15px;">
+            <span style="width:6px;height:6px;border-radius:9999px;background:var(--ac);flex:none;margin-top:5px;"></span>
+            <div style="flex:1;min-width:0;">
+              <p class="trunc" style="margin:0;font-size:12.5px;font-weight:600;">Nouvelle procédure COFRAC métaux</p>
+              <p style="margin:3px 0 0;font-size:11.5px;line-height:1.45;color:var(--t2);">Flaconnage HDPE obligatoire à partir du 1<sup>er</sup> août pour…</p>
+            </div>
+          </div>
+          <div class="row" style="align-items:flex-start;padding:12px 15px;">
+            <span style="width:6px;height:6px;border-radius:9999px;background:var(--bds);flex:none;margin-top:5px;"></span>
+            <div style="flex:1;min-width:0;">
+              <p class="trunc" style="margin:0;font-size:12.5px;font-weight:600;">Fermeture atelier — semaine 33</p>
+              <p style="margin:3px 0 0;font-size:11.5px;line-height:1.45;color:var(--t2);">Récupérez votre matériel avant le vendredi 14…</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BLOC UNIFIÉ « À TRAITER » (remplace les 7 accordéons) ── -->
+  <div style="margin-top:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">
+      <h2 class="sect" style="margin:0;">À traiter <span style="color:var(--t3);font-weight:600;">· 12 éléments</span></h2>
+      <span style="font-size:11.5px;font-weight:600;color:var(--ac);cursor:pointer;">Tout voir →</span>
+    </div>
+
+    <div class="card" style="overflow:hidden;">
+      <div style="display:flex;gap:3px;padding:9px 10px;border-bottom:1px solid var(--bds);background:var(--bg3);overflow-x:auto;">
+        <button class="seg" data-tab="rap" aria-selected="true">Rapports <b class="d">3</b></button>
+        <button class="seg" data-tab="ret" aria-selected="false">Retards <b class="d">2</b></button>
+        <button class="seg" data-tab="plu" aria-selected="false">Pluie <b class="a">1</b></button>
+        <button class="seg" data-tab="mai" aria-selected="false">Maintenances <b class="a">2</b></button>
+        <button class="seg" data-tab="met" aria-selected="false">Métrologie <b class="w">4</b></button>
+      </div>
+
+      <div data-panel="rap">
+        <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--da);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Brest Métropole — STEP Zone portuaire</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Prélevé le 09/07 · autosurveillance mensuelle</p></div><span class="pill" style="background:var(--dal);color:var(--da);">Retard 8 j</span></div>
+        <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--wa);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">SAUR — Réservoir Guipavas</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Prélevé le 21/07 · eau potable</p></div><span class="pill" style="background:var(--wal);color:var(--wa);">Sous 6 j</span></div>
+        <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--wa);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">CCPI — Lagune Plabennec</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Prélevé le 23/07 · rejet COFRAC</p></div><span class="pill" style="background:var(--wal);color:var(--wa);">Sous 8 j</span></div>
+      </div>
+
+      <div data-panel="ret" hidden>
+        <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--da);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Véolia — Poste de relevage Le Relecq</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Plan 2026 · échéance juin</p></div><span class="pill" style="background:var(--dal);color:var(--da);">En retard</span></div>
+        <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--da);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Aéroport Brest — Séparateur hydrocarbures</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Plan 2026 · échéance juillet</p></div><span class="pill" style="background:var(--dal);color:var(--da);">En retard</span></div>
+      </div>
+
+      <div data-panel="plu" hidden>
+        <div class="row"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="M16 14v6M8 14v6M12 16v6"/></svg><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Véolia — Pluvial Lambézellec</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Déversoir DO12 · à déclencher sur épisode</p></div><span class="pill" style="background:var(--acl);color:var(--ac);">Pluie prévue</span></div>
+      </div>
+
+      <div data-panel="mai" hidden>
+        <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--ac);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Préleveur ISCO 6712 — n° 2214</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Pompe péristaltique · atelier depuis le 18/07</p></div><span class="pill" style="background:var(--acl);color:var(--ac);">En cours</span></div>
+        <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--ac);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Sonde multiparamètre WTW 3420</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Remplacement électrode pH</p></div><span class="pill" style="background:var(--acl);color:var(--ac);">En cours</span></div>
+      </div>
+
+      <div data-panel="met" hidden>
+        <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--da);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Oxymètre Hach HQ40d</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Hach · HQ40d — n° 18042207</p></div><span class="pill" style="background:var(--dal);color:var(--da);">En retard</span></div>
+        <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--wa);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">pH-mètre WTW 3110</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">WTW · 3110 — n° 21100934</p></div><span class="pill" style="background:var(--wal);color:var(--wa);">Dans 4 j</span></div>
+        <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--wa);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Conductimètre WTW 3210</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">WTW · 3210 — n° 20870115</p></div><span class="pill" style="background:var(--wal);color:var(--wa);">Dans 9 j</span></div>
+        <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--wa);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Débitmètre portable ISCO 2150</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">ISCO · 2150 — n° 19553801</p></div><span class="pill" style="background:var(--wal);color:var(--wa);">Dans 12 j</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+(function(){
+  var root = document.querySelector('.pmc-frame');
+  if (!root) return;
+  root.querySelectorAll('.seg[data-tab]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      root.querySelectorAll('.seg[data-tab]').forEach(function(b){ b.setAttribute('aria-selected','false'); });
+      btn.setAttribute('aria-selected','true');
+      root.querySelectorAll('[data-panel]').forEach(function(p){
+        p.hidden = (p.getAttribute('data-panel') !== btn.getAttribute('data-tab'));
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

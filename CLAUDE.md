@@ -87,6 +87,8 @@ L'application est fonctionnellement complète (phases 1-7 done). En attente des 
 
 **À consulter avant de coder :** [TODO_REFACTORING.md](./TODO_REFACTORING.md)
 
+**Refonte esthétique du Dashboard — terminée (26/07/2026).** Les 7 étapes de [docs/dashboard-refonte-plan.md](./docs/dashboard-refonte-plan.md) sont implémentées et déployées sur staging : `StatCard`/`DonutChart` finis, `ATraiterWidget` (onglets segmentés, remplace les 5 anciens accordéons Rapports/Retard/Pluie/Maintenances/Métrologie), `TodosWidget` en bande pleine largeur, grille hero `1.55fr/1fr`, `max-w-6xl`. `.claude/docs/design-system.md` mis à jour en cohérence.
+
 Score react-doctor actuel : **44/100** avec react-doctor v0.6 (barème durci — l'ancien barème donnait 71/100 sur le même code). Les 2 « erreurs » sécurité et les warnings restants sont documentés comme faux positifs dans `.react-doctor/false-positives.md`.
 
 ---
@@ -96,6 +98,7 @@ Score react-doctor actuel : **44/100** avec react-doctor v0.6 (barème durci —
 | Sujet | Fichier |
 |-------|---------|
 | Design system (tokens, composants, règles) | [.claude/docs/design-system.md](.claude/docs/design-system.md) |
+| **Refonte Dashboard — plan validé, à implémenter** | [docs/dashboard-refonte-plan.md](./docs/dashboard-refonte-plan.md) |
 | Schéma base de données Firestore | [.claude/docs/database-schema.md](.claude/docs/database-schema.md) |
 | Architecture des pages et routes | [.claude/docs/pages-architecture.md](.claude/docs/pages-architecture.md) |
 | Contexte projet et stack technique | [.claude/docs/project-context.md](.claude/docs/project-context.md) |
