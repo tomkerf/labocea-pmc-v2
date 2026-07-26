@@ -34,7 +34,7 @@ export function DashboardHeader({ prenom, isGeneraliste, activeTab, setActiveTab
             {formatDate()}
           </p>
           <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
-            {getGreeting()}, {prenom || 'Thomas'} 👋
+            {getGreeting()}, {prenom || 'Thomas'}
           </h1>
         </div>
         {initiales && (

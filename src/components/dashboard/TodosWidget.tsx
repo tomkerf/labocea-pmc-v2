@@ -1,20 +1,17 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronDown, Check } from 'lucide-react'
+import { Check, CalendarClock, Briefcase, Wrench } from 'lucide-react'
 import { m, AnimatePresence } from 'framer-motion'
 import type { Todo } from '@/types'
 import { saveTodo } from '@/services/todoService'
-import { COLORS } from '@/lib/constants'
-
+import { SectionTitle } from '@/components/dashboard/StatCard'
 
 const prioColors: Record<string, { bg: string; text: string; label: string; icon: string }> = {
-  haute:   { bg: COLORS.BG_TERTIARY, text: COLORS.TEXT_PRIMARY,   label: 'Haute',   icon: '!!!' },
-  moyenne: { bg: COLORS.BG_TERTIARY, text: COLORS.TEXT_PRIMARY,   label: 'Moyenne', icon: '!!' },
-  basse:   { bg: COLORS.BG_TERTIARY, text: COLORS.TEXT_SECONDARY, label: 'Basse',   icon: '!' },
+  haute:   { bg: 'bg-[var(--color-bg-tertiary)]', text: 'text-[var(--color-text-primary)]',   label: 'Haute',   icon: '!!!' },
+  moyenne: { bg: 'bg-[var(--color-bg-tertiary)]', text: 'text-[var(--color-text-primary)]',   label: 'Moyenne', icon: '!!' },
+  basse:   { bg: 'bg-[var(--color-bg-tertiary)]', text: 'text-[var(--color-text-secondary)]', label: 'Basse',   icon: '!' },
 }
 
 export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
-  const [open, setOpen] = useState(false)
   const navigate = useNavigate()
 
   // Filtre pour n'afficher que les tâches non terminées attribuées à moi ou à l'équipe
@@ -56,175 +53,122 @@ export function TodosWidget({ todos, uid }: { todos: Todo[]; uid: string }) {
   }
 
   return (
-    <div className="mb-6">
-      <button type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 mb-3 w-full text-left focus:outline-none"
-      >
-        <span
-          className="text-xs font-semibold uppercase"
-          style={{ color: 'var(--color-text-tertiary)', letterSpacing: '0.06em' }}
-        >
-          Mes tâches prioritaires
-        </span>
-        <span
-          className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-          style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}
-        >
+    <div>
+      <div className="flex items-center gap-2 mb-2.5">
+        <SectionTitle>Mes tâches prioritaires</SectionTitle>
+        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[var(--color-accent-light)] text-[var(--color-accent)]">
           {pendingTodos.length}
         </span>
-        <ChevronDown
-          size={14}
-          strokeWidth={2}
-          style={{
-            color: 'var(--color-text-tertiary)',
-            marginLeft: 'auto',
-            transform: open ? 'rotate(0deg)' : 'rotate(-90deg)',
-            transition: 'transform 0.2s ease',
-          }}
-        />
-      </button>
+      </div>
 
-      {open && (
-        <div
-          className="rounded-xl overflow-hidden"
-          style={{
-            background: COLORS.BG_SECONDARY,
-            border: '1px solid var(--color-border-subtle)',
-            boxShadow: 'var(--shadow-card)',
-          }}
-        >
-          <div style={{ maxHeight: 320, overflowY: 'auto' }}>
-            <AnimatePresence initial={false}>
-              {visibleTodos.map((todo, i) => {
-                const colors = prioColors[todo.priorite]
-                return (
-                  <m.div
-                    key={todo.id}
-                    layout
-                    initial={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex items-start gap-3 px-4 py-3 group relative transition-colors hover:bg-neutral-50"
-                    style={{
-                      overflow: 'hidden',
-                      borderBottom:
-                        i < visibleTodos.length - 1 ? '1px solid var(--color-border-subtle)' : 'none',
-                    }}
+      <div className="rounded-[var(--radius-md)] overflow-hidden bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] shadow-[var(--shadow-card)]">
+        <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+          <AnimatePresence initial={false}>
+            {visibleTodos.map((todo, i) => {
+              const colors = prioColors[todo.priorite]
+              return (
+                <m.div
+                  key={todo.id}
+                  layout
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className={`flex items-start gap-3 px-4 py-3 group relative transition-colors hover:bg-[var(--color-bg-tertiary)] overflow-hidden ${
+                    i < visibleTodos.length - 1 ? 'border-b border-[var(--color-border-subtle)]' : ''
+                  }`}
+                >
+                  {/* Checkbox animée */}
+                  <button type="button"
+                    onClick={() => handleToggleComplete(todo)}
+                    aria-label="Marquer comme terminé"
+                    className="mt-0.5 shrink-0 flex items-center justify-center size-5 rounded-md border transition-colors cursor-pointer focus:outline-none border-[var(--color-border)] text-[var(--color-accent)] hover:border-[var(--color-accent)] hover:bg-[var(--color-accent-light)]"
                   >
-                    {/* Checkbox animée */}
-                    <button type="button"
-                      onClick={() => handleToggleComplete(todo)}
-                      aria-label="Marquer comme terminé"
-                      className="mt-0.5 shrink-0 flex items-center justify-center size-5 rounded-md border transition-all cursor-pointer focus:outline-none"
-                      style={{
-                        borderColor: COLORS.BORDER,
-                        color: COLORS.ACCENT,
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = COLORS.ACCENT
-                        e.currentTarget.style.background = 'var(--color-accent-light)'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = COLORS.BORDER
-                        e.currentTarget.style.background = 'transparent'
-                      }}
-                    >
-                      <Check
-                        size={12}
-                        strokeWidth={3}
-                        className="opacity-0 group-hover:opacity-60 transition-opacity"
-                      />
-                    </button>
+                    <Check
+                      size={12}
+                      strokeWidth={3}
+                      className="opacity-0 group-hover:opacity-60 transition-opacity"
+                    />
+                  </button>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <button type="button"
-                          className="text-sm font-medium truncate cursor-pointer hover:text-[var(--color-accent)] transition-colors text-left focus:outline-none focus-visible:ring-2"
-                          style={{ color: COLORS.TEXT_PRIMARY }}
-                          onClick={() => navigate('/todos')}
-                        >
-                          {todo.titre}
-                        </button>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <button type="button"
+                        className="text-sm font-medium truncate cursor-pointer hover:text-[var(--color-accent)] transition-colors text-left focus:outline-none focus-visible:ring-2 text-[var(--color-text-primary)]"
+                        onClick={() => navigate('/todos')}
+                      >
+                        {todo.titre}
+                      </button>
+                      <span
+                        className={`text-[10px] font-medium px-1.5 py-0.2 rounded flex items-center gap-1 ${colors.bg} ${colors.text}`}
+                      >
+                        <span className="text-[11px]">{colors.icon}</span>
+                        {colors.label}
+                      </span>
+                    </div>
+                    {todo.description && (
+                      <p className="text-xs truncate mt-0.5 text-[var(--color-text-secondary)]">
+                        {todo.description}
+                      </p>
+                    )}
+
+                    {/* Liaisons & Échéance */}
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-[11px] text-[var(--color-text-tertiary)]">
+                      {todo.dueDate && (
                         <span
-                          className="text-[10px] font-medium px-1.5 py-0.2 rounded flex items-center gap-1"
-                          style={{ background: colors.bg, color: colors.text }}
+                          className={`inline-flex items-center gap-1 ${isOverdue(todo.dueDate) ? 'text-[var(--color-danger)] font-semibold' : ''}`}
                         >
-                          <span className="text-[11px]">{colors.icon}</span>
-                          {colors.label}
+                          <CalendarClock size={12} strokeWidth={1.5} />
+                          Échéance : {todo.dueDate.split('-').reverse().join('/')} {isOverdue(todo.dueDate) && '(en retard)'}
                         </span>
-                      </div>
-                      {todo.description && (
-                        <p className="text-xs truncate mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>
-                          {todo.description}
-                        </p>
                       )}
-
-                      {/* Liaisons & Échéance */}
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-[11px]" style={{ color: 'var(--color-text-tertiary)' }}>
-                        {todo.dueDate && (
-                          <span
-                            style={{
-                              color: isOverdue(todo.dueDate) ? COLORS.DANGER : 'inherit',
-                              fontWeight: isOverdue(todo.dueDate) ? 600 : 'normal',
+                      {todo.clientNom && (
+                        <>
+                          {todo.dueDate && <span>•</span>}
+                          <button type="button"
+                            className="inline-flex items-center gap-1 hover:underline cursor-pointer font-medium text-left focus:outline-none focus-visible:ring-2 text-[var(--color-accent)]"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigate(`/missions/${todo.clientId}`)
                             }}
                           >
-                            📅 Échéance : {todo.dueDate.split('-').reverse().join('/')} {isOverdue(todo.dueDate) && '(en retard)'}
-                          </span>
-                        )}
-                        {todo.clientNom && (
-                          <>
-                            {todo.dueDate && <span>•</span>}
-                            <button type="button"
-                              className="hover:underline cursor-pointer font-medium text-left focus:outline-none focus-visible:ring-2"
-                              style={{ color: COLORS.ACCENT }}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                navigate(`/missions/${todo.clientId}`)
-                              }}
-                            >
-                              💼 {todo.clientNom}
-                            </button>
-                          </>
-                        )}
-                        {todo.equipementNom && (
-                          <>
-                            {(todo.dueDate || todo.clientNom) && <span>•</span>}
-                            <button type="button"
-                              className="hover:underline cursor-pointer font-medium text-left focus:outline-none focus-visible:ring-2"
-                              style={{ color: COLORS.ACCENT }}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                navigate(`/materiel/${todo.equipementId}`)
-                              }}
-                            >
-                              🔧 {todo.equipementNom}
-                            </button>
-                          </>
-                        )}
-                      </div>
+                            <Briefcase size={12} strokeWidth={1.5} />
+                            {todo.clientNom}
+                          </button>
+                        </>
+                      )}
+                      {todo.equipementNom && (
+                        <>
+                          {(todo.dueDate || todo.clientNom) && <span>•</span>}
+                          <button type="button"
+                            className="inline-flex items-center gap-1 hover:underline cursor-pointer font-medium text-left focus:outline-none focus-visible:ring-2 text-[var(--color-accent)]"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigate(`/materiel/${todo.equipementId}`)
+                            }}
+                          >
+                            <Wrench size={12} strokeWidth={1.5} />
+                            {todo.equipementNom}
+                          </button>
+                        </>
+                      )}
                     </div>
-                  </m.div>
-                )
-              })}
-            </AnimatePresence>
-          </div>
-
-          {/* Footer du widget pour aller voir tout */}
-          <button type="button"
-            className="w-full px-4 py-2.5 text-center cursor-pointer hover:bg-neutral-100 transition-colors focus:outline-none focus-visible:ring-2"
-            style={{
-              borderTop: '1px solid var(--color-border-subtle)',
-              background: COLORS.BG_TERTIARY,
-            }}
-            onClick={() => navigate('/todos')}
-          >
-            <span className="text-xs font-semibold" style={{ color: COLORS.ACCENT }}>
-              Voir toutes les tâches
-            </span>
-          </button>
+                  </div>
+                </m.div>
+              )
+            })}
+          </AnimatePresence>
         </div>
-      )}
+
+        {/* Footer du widget pour aller voir tout */}
+        <button type="button"
+          className="w-full px-4 py-2.5 text-center cursor-pointer hover:bg-[var(--color-bg-tertiary)] transition-colors focus:outline-none focus-visible:ring-2 border-t border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)]"
+          onClick={() => navigate('/todos')}
+        >
+          <span className="text-xs font-semibold text-[var(--color-accent)]">
+            Voir toutes les tâches
+          </span>
+        </button>
+      </div>
     </div>
   )
 }

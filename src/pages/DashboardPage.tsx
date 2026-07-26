@@ -3,13 +3,10 @@ import { useNavigate } from 'react-router-dom'
 
 import { m, AnimatePresence } from 'framer-motion'
 
+import { FlaskConical, FileText, Gauge, Crosshair } from 'lucide-react'
 import DonutChart from '@/components/dashboard/DonutChart'
 import { StatCard, SectionTitle } from '@/components/dashboard/StatCard'
-import { RapportsWidget } from '@/components/dashboard/RapportsWidget'
-import { RetardWidget } from '@/components/dashboard/RetardWidget'
-import { PluieWidget } from '@/components/dashboard/PluieWidget'
-import { MaintenancesWidget } from '@/components/dashboard/MaintenancesWidget'
-import { MetrologieWidget } from '@/components/dashboard/MetrologieWidget'
+import { ATraiterWidget } from '@/components/dashboard/ATraiterWidget'
 import { EquipeSuiviWidget } from '@/components/dashboard/EquipeSuiviWidget'
 import { WelcomeModal } from '@/components/dashboard/WelcomeModal'
 import { DashboardPlanningWidget } from '@/components/dashboard/DashboardPlanningWidget'
@@ -95,35 +92,35 @@ function DashboardNewsWidget() {
   if (recentActus.length === 0) return null
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <div className="flex justify-between items-center">
-        <SectionTitle>Dernières actualités</SectionTitle>
+    <div>
+      <div className="flex justify-between items-center mb-2.5">
+        <SectionTitle>Actualités</SectionTitle>
         {unreadCount > 0 && (
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-accent-light)] text-[var(--color-accent)] border border-[rgba(0,113,227,0.12)]">
+          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--color-accent-light)] text-[var(--color-accent)]">
             {unreadCount} non lue{unreadCount > 1 ? 's' : ''}
           </span>
         )}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {recentActus.map(actu => {
+      <div className="rounded-[var(--radius-md)] overflow-hidden bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] shadow-[var(--shadow-card)]">
+        {recentActus.map((actu, i) => {
           const isUnread = uid && !actu.lectureUids.includes(uid)
           return (
             <div
               key={actu.id}
               onClick={() => navigate('/actus')}
-              className={`p-4 rounded-2xl cursor-pointer transition-all hover:-translate-y-[0.5px] hover:shadow relative flex flex-col gap-1.5 bg-[var(--color-bg-secondary)] border shadow-[var(--shadow-card)] ${
-                isUnread ? 'border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/20' : 'border-[var(--color-border-subtle)]'
+              className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--color-bg-tertiary)] ${
+                i < recentActus.length - 1 ? 'border-b border-[var(--color-border-subtle)]' : ''
               }`}
             >
-              {isUnread && (
-                <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-[var(--color-accent)] animate-pulse" />
-              )}
-              <h4 className="text-sm font-bold truncate pr-6 text-[var(--color-text-primary)]">
-                {actu.titre}
-              </h4>
-              <p className="text-xs leading-relaxed line-clamp-2 text-[var(--color-text-secondary)]">
-                {renderMarkdownSnippet(actu.contenu)}
-              </p>
+              <span className={`shrink-0 size-1.5 rounded-full mt-1.5 ${isUnread ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-border)]'}`} />
+              <div className="flex-1 min-w-0">
+                <p className="text-[12.5px] font-semibold truncate text-[var(--color-text-primary)]">
+                  {actu.titre}
+                </p>
+                <p className="text-[11.5px] leading-relaxed line-clamp-2 mt-0.5 text-[var(--color-text-secondary)]">
+                  {renderMarkdownSnippet(actu.contenu)}
+                </p>
+              </div>
             </div>
           )
         })}
@@ -173,7 +170,7 @@ export default function DashboardPage() {
     }
   }
 
-  const { clients }       = useMissionsStore()
+  const { clients, loading } = useMissionsStore()
   const { equipements }   = useEquipementsStore()
   const { verifications } = useMetrologieStore()
   const { evenements }    = useEvenementsStore()
@@ -278,7 +275,7 @@ export default function DashboardPage() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="p-6 pb-10 max-w-4xl"
+      className="p-6 pb-10 max-w-6xl"
     >
 
       <DashboardHeader
@@ -301,49 +298,54 @@ export default function DashboardPage() {
             className="space-y-6"
           >
             {/* KPIs — grille 2×2 mobile, 4 colonnes desktop */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div>
+            {loading ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="rounded-[var(--radius-md)] p-[15px] h-[124px] animate-pulse bg-[var(--color-bg-tertiary)]" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <StatCard
+                  icon={<FlaskConical size={16} strokeWidth={1.6} />}
                   value={missionsCeMoisMoi}
                   label="Missions ce mois"
                   sub="prélèvements réalisés"
-                  accent
+                  tone="accent"
                   onClick={() => navigate('/missions')}
                 />
-              </div>
-              <div>
                 <StatCard
+                  icon={<FileText size={16} strokeWidth={1.6} />}
                   value={rapportsAFaireMoi.length}
                   label="Rapports à rédiger"
                   sub={rapportsAFaireMoi.length > 0 ? `${rapportsAFaireMoi.filter(r => r.enRetard).length} en retard` : 'Tout est à jour'}
-                  danger={rapportsAFaireMoi.some(r => r.enRetard)}
-                  warning={rapportsAFaireMoi.length > 0 && !rapportsAFaireMoi.some(r => r.enRetard)}
+                  tone={rapportsAFaireMoi.some(r => r.enRetard) ? 'danger' : rapportsAFaireMoi.length > 0 ? 'warning' : 'accent'}
+                  pill={rapportsAFaireMoi.some(r => r.enRetard) ? `${rapportsAFaireMoi.filter(r => r.enRetard).length} en retard` : undefined}
                   onClick={() => navigate('/rapports')}
                 />
-              </div>
-              <div>
                 <StatCard
+                  icon={<Gauge size={16} strokeWidth={1.6} />}
                   value={conformitePct !== null ? `${conformitePct}%` : '—'}
                   label="Conformité métrologie"
                   sub={verifiTotal > 0 ? `${verifiConformes}/${verifiTotal} à jour` : 'Aucun instrument suivi'}
-                  warning={conformitePct !== null && conformitePct < 80}
-                  accent={conformitePct !== null && conformitePct >= 80}
+                  tone={conformitePct !== null && conformitePct < 80 ? 'warning' : 'success'}
+                  progressPct={conformitePct ?? undefined}
                   onClick={() => navigate('/metrologie')}
                 />
-              </div>
-              <div>
                 <StatCard
+                  icon={<Crosshair size={16} strokeWidth={1.6} />}
                   value={aCalibrrer}
-                  label="À calibrer (30j)"
+                  label="À calibrer"
                   sub={aCalibrrer > 0 ? 'Étalonnages à prévoir' : 'Aucune échéance proche'}
-                  warning={aCalibrrer > 0}
+                  tone={aCalibrrer > 0 ? 'warning' : 'accent'}
+                  pill={aCalibrrer > 0 ? '≤ 30 j' : undefined}
                   onClick={() => navigate('/metrologie')}
                 />
               </div>
-            </div>
+            )}
 
-            {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Hero : planning dominant + rail droit */}
+            <div className="grid grid-cols-1 md:grid-cols-[1.55fr_1fr] gap-[18px]">
               {/* Planning */}
               <DashboardPlanningWidget
                 planningMode={planningMode}
@@ -356,35 +358,43 @@ export default function DashboardPage() {
                 onUploadPhoto={handleDashboardPhotoUpload}
               />
 
-              {/* État du parc */}
-              <div>
-                <SectionTitle>État du parc matériel</SectionTitle>
-                <div className="rounded-2xl px-6 py-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] shadow-[var(--shadow-card)]">
-                  <DonutChart
-                    total={parcDonut.en_service + parcDonut.a_calibrer + parcDonut.en_maintenance + parcDonut.hors_service + parcDonut.prete}
-                    segments={[
-                      { value: parcDonut.en_service,     color: '#34C759',      label: 'En service'     },
-                      { value: parcDonut.a_calibrer,     color: '#FF9F0A',      label: 'À calibrer'     },
-                      { value: parcDonut.en_maintenance, color: 'var(--color-accent)',  label: 'En maintenance' },
-                      { value: parcDonut.hors_service,   color: '#FF3B30',      label: 'Hors service'   },
-                      { value: parcDonut.prete,          color: 'var(--color-neutral)', label: 'Prêté'          },
-                    ]}
-                  />
+              {/* Rail droit : État du parc + Actualités */}
+              <div className="flex flex-col gap-[18px]">
+                <div>
+                  <SectionTitle>État du parc matériel</SectionTitle>
+                  <div className="rounded-[var(--radius-md)] px-[17px] py-[17px] bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] shadow-[var(--shadow-card)]">
+                    <DonutChart
+                      total={parcDonut.en_service + parcDonut.a_calibrer + parcDonut.en_maintenance + parcDonut.hors_service + parcDonut.prete}
+                      segments={[
+                        { value: parcDonut.en_service,     color: '#34C759',      label: 'En service'     },
+                        { value: parcDonut.a_calibrer,     color: '#FF9F0A',      label: 'À calibrer'     },
+                        { value: parcDonut.en_maintenance, color: 'var(--color-accent)',  label: 'En maintenance' },
+                        { value: parcDonut.hors_service,   color: '#FF3B30',      label: 'Hors service'   },
+                        { value: parcDonut.prete,          color: 'var(--color-neutral)', label: 'Prêté'          },
+                      ]}
+                    />
+                  </div>
+                  <button type="button" onClick={() => navigate('/materiel')} className="mt-2.5 text-xs font-semibold text-[var(--color-accent)] hover:underline cursor-pointer">
+                    Voir tout le matériel →
+                  </button>
                 </div>
-                <button type="button" onClick={() => navigate('/materiel')} className="mt-2.5 text-xs font-semibold text-[var(--color-accent)] hover:underline cursor-pointer">
-                  Voir tout le matériel →
-                </button>
+
+                <DashboardNewsWidget />
               </div>
             </div>
 
-            {/* Bottom Widgets */}
-            <DashboardNewsWidget />
+            {/* Mes tâches prioritaires — bande pleine largeur */}
             <TodosWidget todos={todos} uid={uid || ''} />
-            <RapportsWidget rapports={rapportsAFaireMoi} onMarkEnvoye={markRapportEnvoye} />
-            <RetardWidget items={prelevementsEnRetard} />
-            <PluieWidget items={prelevementsPluie} />
-            <MaintenancesWidget maintenances={maintenancesActives} />
-            <MetrologieWidget equipements={metrologieAlertes} />
+
+            {/* À traiter — carte à onglets (remplace les 5 accordéons) */}
+            <ATraiterWidget
+              rapports={rapportsAFaireMoi}
+              onMarkEnvoye={markRapportEnvoye}
+              retards={prelevementsEnRetard}
+              pluie={prelevementsPluie}
+              maintenances={maintenancesActives}
+              metrologie={metrologieAlertes}
+            />
           </m.div>
         ) : (
           <m.div

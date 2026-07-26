@@ -1,11 +1,10 @@
 import { useState, useRef } from 'react'
 import { m, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { Camera, Loader2, CalendarCheck } from 'lucide-react'
+import { Camera, Loader2, CalendarCheck, CloudRain, Truck } from 'lucide-react'
 import { SectionTitle, EmptyCard } from '@/components/dashboard/StatCard'
 import type { PlanningEvent } from '@/lib/planningUtils'
 import type { JourItem } from '@/hooks/useDashboardStats'
-import { COLORS } from '@/lib/constants'
 
 interface DashboardPlanningWidgetProps {
   planningMode: 'today' | 'tomorrow';
@@ -33,6 +32,8 @@ export function DashboardPlanningWidget({
   const pendingUpload = useRef<{ clientId: string; planId: string; samplingId: string } | null>(null)
   const [uploadingId, setUploadingId] = useState<string | null>(null)
 
+  const rainConcernedCount = activeItems.filter(item => 'meteo' in item && item.meteo === 'pluie').length
+
   function handleCameraClick(e: React.MouseEvent, clientId: string, planId: string, samplingId: string) {
     e.stopPropagation()
     pendingUpload.current = { clientId, planId, samplingId }
@@ -55,64 +56,60 @@ export function DashboardPlanningWidget({
 
   return (
     <div>
-      <div className="flex flex-col gap-2 mb-3">
-        <div className="flex items-center justify-between gap-2">
-          <SectionTitle>{planningMode === 'today' ? 'Planning du jour' : 'Planning de demain'}</SectionTitle>
-          <div className="relative flex gap-1 p-1 rounded-lg shrink-0" style={{ background: COLORS.BG_TERTIARY }}>
-            <button type="button"
-              onClick={() => setPlanningMode('today')}
-              className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:ring-2"
-              style={{
-                color: planningMode === 'today' ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
-              }}
-            >
-              {planningMode === 'today' && (
-                <m.div
-                  layoutId="active-dashboard-pill"
-                  className="absolute inset-0 rounded-md -z-10"
-                  style={{ background: 'var(--color-accent-light)' }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
-              Aujourd'hui
-            </button>
-            <button type="button"
-              onClick={() => setPlanningMode('tomorrow')}
-              className="relative px-3 py-1.5 text-xs font-medium rounded-md z-10 transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:ring-2"
-              style={{
-                color: planningMode === 'tomorrow' ? COLORS.ACCENT : COLORS.TEXT_SECONDARY,
-              }}
-            >
-              {planningMode === 'tomorrow' && (
-                <m.div
-                  layoutId="active-dashboard-pill"
-                  className="absolute inset-0 rounded-md -z-10"
-                  style={{ background: 'var(--color-accent-light)' }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
-              Demain
-            </button>
-          </div>
+      <div className="flex items-center justify-between gap-2 mb-2.5">
+        <SectionTitle>{planningMode === 'today' ? 'Planning du jour' : 'Planning de demain'}</SectionTitle>
+        <div className="relative flex gap-0.5 p-0.5 rounded-full shrink-0 bg-[var(--color-bg-tertiary)]">
+          <button type="button"
+            onClick={() => setPlanningMode('today')}
+            className={`relative px-3 py-1.5 text-xs font-semibold rounded-full z-10 transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 ${
+              planningMode === 'today' ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)]'
+            }`}
+          >
+            {planningMode === 'today' && (
+              <m.div
+                layoutId="active-dashboard-pill"
+                className="absolute inset-0 rounded-full -z-10 bg-[var(--color-bg-secondary)] shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+              />
+            )}
+            Aujourd'hui
+          </button>
+          <button type="button"
+            onClick={() => setPlanningMode('tomorrow')}
+            className={`relative px-3 py-1.5 text-xs font-semibold rounded-full z-10 transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 ${
+              planningMode === 'tomorrow' ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)]'
+            }`}
+          >
+            {planningMode === 'tomorrow' && (
+              <m.div
+                layoutId="active-dashboard-pill"
+                className="absolute inset-0 rounded-full -z-10 bg-[var(--color-bg-secondary)] shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+              />
+            )}
+            Demain
+          </button>
         </div>
-
       </div>
+
       {((planningMode === 'today' && hasRainToday) || (planningMode === 'tomorrow' && hasRainTomorrow)) && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl mb-2 text-sm font-medium"
-          style={{ background: 'rgba(0,113,227,0.07)', color: COLORS.ACCENT, border: '1px solid rgba(0,113,227,0.15)' }}>
-          <span>🌧</span>
-          <span>Temps de pluie prévu</span>
+        <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl mb-2.5 text-[12.5px] font-semibold bg-[rgba(0,113,227,0.06)] border border-[rgba(0,113,227,0.14)] text-[var(--color-accent)]">
+          <CloudRain size={15} strokeWidth={1.7} className="shrink-0" />
+          <span>
+            Temps de pluie prévu
+            {rainConcernedCount > 0 ? ` — ${rainConcernedCount} prélèvement${rainConcernedCount > 1 ? 's' : ''} pluie concerné${rainConcernedCount > 1 ? 's' : ''}` : ''}
+          </span>
         </div>
       )}
+
       {activeItems.length === 0 ? (
-        <EmptyCard icon={<CalendarCheck size={16} strokeWidth={1.5} style={{ color: COLORS.ACCENT }} />}>
+        <EmptyCard icon={<CalendarCheck size={16} strokeWidth={1.5} className="text-[var(--color-accent)]" />}>
           Aucune intervention ni événement{planningMode === 'today' ? " aujourd'hui" : " demain"}.
         </EmptyCard>
       ) : (
         <m.div
           layout
-          className="rounded-xl overflow-hidden"
-          style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}
+          className="rounded-[var(--radius-md)] overflow-hidden bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] shadow-[var(--shadow-card)]"
         >
           <AnimatePresence mode="popLayout">
             {activeItems.slice(0, 8).map((item, idx) => {
@@ -127,39 +124,39 @@ export function DashboardPlanningWidget({
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
                 onClick={() => item.kind === 'todo' ? navigate(item.link) : setEventDetail({ event: item.modalEvent as unknown as PlanningEvent, dateStr: activeDateISO })}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer"
-                style={{ borderBottom: idx < activeItems.slice(0, 8).length - 1 ? '1px solid var(--color-border-subtle)' : 'none' }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.BG_TERTIARY)}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors cursor-pointer hover:bg-[var(--color-bg-tertiary)] ${
+                  idx < activeItems.slice(0, 8).length - 1 ? 'border-b border-[var(--color-border-subtle)]' : ''
+                }`}
               >
                 {item.time ? (
-                  <span className="text-xs font-semibold shrink-0 w-10 text-center px-1.5 py-1 rounded-lg"
-                    style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
+                  <span className="text-xs font-semibold shrink-0 w-10 text-center px-1.5 py-1 rounded-lg bg-[var(--color-accent-light)] text-[var(--color-accent)]">
                     {item.time}
                   </span>
                 ) : (
                   <span className="shrink-0 size-2 rounded-full mt-0.5" style={{ background: item.dot }} />
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium leading-snug" style={{ color: COLORS.TEXT_PRIMARY }}>{item.title}</p>
-                  <p className="text-xs mt-0.5" style={{ color: COLORS.TEXT_SECONDARY }}>{item.sub}</p>
+                  <p className="text-sm font-medium leading-snug text-[var(--color-text-primary)]">{item.title}</p>
+                  <p className="text-xs mt-0.5 text-[var(--color-text-secondary)]">{item.sub}</p>
                 </div>
                 {'cofrac' in item && item.cofrac && (
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0"
-                    style={{ background: 'var(--color-accent-light)', color: COLORS.ACCENT }}>
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 bg-[var(--color-accent-light)] text-[var(--color-accent)]">
                     COFRAC
                   </span>
                 )}
                 {'meteo' in item && item.meteo === 'pluie' && (
-                  <span title="Prélèvement temps de pluie" className="shrink-0 text-base leading-none">🌧</span>
+                  <span title="Prélèvement temps de pluie" className="shrink-0 text-[var(--color-accent)]">
+                    <CloudRain size={15} strokeWidth={1.7} />
+                  </span>
                 )}
                 {camera && (
                   <button
                     type="button"
                     aria-label="Ajouter une photo"
                     onClick={(e) => handleCameraClick(e, camera.clientId, camera.planId, camera.samplingId)}
-                    className="shrink-0 p-1 rounded-lg transition-colors hover:bg-[var(--color-bg-tertiary)]"
-                    style={{ color: uploadingId === camera.samplingId ? COLORS.ACCENT : COLORS.TEXT_SECONDARY }}
+                    className={`shrink-0 p-1 rounded-lg transition-colors hover:bg-[var(--color-bg-tertiary)] ${
+                      uploadingId === camera.samplingId ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-secondary)]'
+                    }`}
                   >
                     {uploadingId === camera.samplingId
                       ? <Loader2 size={14} className="animate-spin" />
@@ -189,18 +186,11 @@ export function DashboardPlanningWidget({
         <button
           type="button"
           onClick={() => navigate('/tournee')}
-          className="w-full mt-3 py-3 rounded-xl text-sm font-semibold flex justify-center items-center gap-2 transition-transform active:scale-[0.98] cursor-pointer"
-          style={{
-            background: COLORS.ACCENT,
-            color: '#FFFFFF',
-            boxShadow: '0 2px 8px rgba(52, 82, 122, 0.25)',
-          }}
+          className="w-full mt-3 py-3.5 rounded-[14px] text-sm font-semibold flex justify-center items-center gap-2 transition-transform active:scale-[0.98] cursor-pointer bg-[var(--color-accent)] text-white shadow-[0_4px_14px_-6px_rgba(0,113,227,0.55)]"
         >
-          <span className="text-base leading-none">🚙</span>
-          <span className="flex flex-col items-start">
-            <span>Mode Tournée du Jour</span>
-            <span className="text-xs font-normal opacity-80">Prélèvements du jour à effectuer</span>
-          </span>
+          <Truck size={17} strokeWidth={1.7} />
+          <span>Démarrer la tournée du jour</span>
+          <span className="text-xs font-normal opacity-80">· {activeItems.filter(i => i.kind === 'sampling').length} prélèvements</span>
         </button>
       )}
     </div>
