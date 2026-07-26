@@ -49,7 +49,7 @@ describe('actuService', () => {
       await updateActu('a1', 'Nouveau', 'MàJ', 'alerte' as never, false)
 
       expect(doc).toHaveBeenCalledWith(expect.anything(), 'actus', 'a1')
-      const [, payload] = vi.mocked(updateDoc).mock.calls[0] as [unknown, Record<string, unknown>]
+      const [, payload] = vi.mocked(updateDoc).mock.calls[0] as unknown as [unknown, Record<string, unknown>]
       expect(payload).toMatchObject({ titre: 'Nouveau', contenu: 'MàJ', categorie: 'alerte', prioritaire: false })
       expect(payload).toHaveProperty('updatedAt')
     })
