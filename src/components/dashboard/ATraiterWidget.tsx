@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CloudRain } from 'lucide-react'
+import { CloudRain, Check, AlertTriangle } from 'lucide-react'
 import { daysDiff } from '@/lib/dashboardUtils'
 import type { Maintenance, Equipement } from '@/types'
 import type { RapportItem, RetardItem, PluieItem } from '@/hooks/useDashboardStats'
@@ -58,15 +58,38 @@ export function ATraiterWidget({ rapports, onMarkEnvoye, retards, pluie, mainten
     ].filter(t => t.count > 0)
   }, [rapports, retards, pluie, maintenances, metrologie])
 
-  const defaultTab = useMemo((): TabKey | null => {
+  const autoTab = useMemo((): TabKey | null => {
     if (retards.length > 0) return 'retards'
     if (rapports.some(r => r.enRetard)) return 'rapports'
     if (metrologie.some(eq => eq.prochainEtalonnage && daysDiff(eq.prochainEtalonnage.split('T')[0]) < 0)) return 'metrologie'
     return tabs[0]?.key ?? null
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [retards, rapports, metrologie, tabs])
 
-  const [activeTab, setActiveTab] = useState<TabKey | null>(defaultTab)
+  const [userPickedTab, setUserPickedTab] = useState<TabKey | null>(null)
+
+  // Le choix utilisateur ne vaut que si son onglet existe toujours :
+  // s'il coche le dernier rapport, l'onglet Rapports disparaît → retour sur autoTab.
+  const activeTab = userPickedTab && tabs.some(t => t.key === userPickedTab)
+    ? userPickedTab
+    : autoTab
+
+  const tabRefs = useRef<Partial<Record<TabKey, HTMLButtonElement | null>>>({})
+
+  function handleTablistKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    const currentIndex = tabs.findIndex(t => t.key === activeTab)
+    if (currentIndex === -1) return
+    let nextIndex: number | null = null
+    if (e.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length
+    else if (e.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length
+    else if (e.key === 'Home') nextIndex = 0
+    else if (e.key === 'End') nextIndex = tabs.length - 1
+    if (nextIndex === null) return
+    e.preventDefault()
+    const nextTab = tabs[nextIndex]
+    setUserPickedTab(nextTab.key)
+    tabRefs.current[nextTab.key]?.focus()
+  }
+
   const totalCount = rapports.length + retards.length + pluie.length + maintenances.length + metrologie.length
 
   if (tabs.length === 0 || !activeTab) return null
@@ -80,16 +103,26 @@ export function ATraiterWidget({ rapports, onMarkEnvoye, retards, pluie, mainten
       </div>
 
       <div className="rounded-[var(--radius-md)] overflow-hidden bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] shadow-[var(--shadow-card)]">
-        <div className="flex gap-1 px-2.5 py-2 border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)] overflow-x-auto">
+        <div
+          role="tablist"
+          aria-label="Catégories à traiter"
+          onKeyDown={handleTablistKeyDown}
+          className="flex gap-1 px-2.5 py-2 border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-tertiary)] overflow-x-auto"
+        >
           {tabs.map(tab => {
             const selected = tab.key === activeTab
             const t = TONE_CLASSES[tab.tone]
             return (
               <button
                 key={tab.key}
+                ref={el => { tabRefs.current[tab.key] = el }}
                 type="button"
-                onClick={() => setActiveTab(tab.key)}
+                role="tab"
+                id={`tab-${tab.key}`}
+                aria-controls={`panel-${tab.key}`}
                 aria-selected={selected}
+                tabIndex={selected ? 0 : -1}
+                onClick={() => setUserPickedTab(tab.key)}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                   selected ? 'bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] shadow-[0_1px_2px_rgba(0,0,0,0.06)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
                 }`}
@@ -103,7 +136,13 @@ export function ATraiterWidget({ rapports, onMarkEnvoye, retards, pluie, mainten
           })}
         </div>
 
-        <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+        <div
+          role="tabpanel"
+          id={`panel-${activeTab}`}
+          aria-labelledby={`tab-${activeTab}`}
+          tabIndex={0}
+          className="max-h-80 overflow-y-auto"
+        >
           {activeTab === 'rapports' && rapports.map(r => {
             const today = new Date(); today.setHours(0, 0, 0, 0)
             const fmtDone = new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
@@ -124,9 +163,9 @@ export function ATraiterWidget({ rapports, onMarkEnvoye, retards, pluie, mainten
                 <span className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full ${t.pillBg} ${t.pillText}`}>{tagLabel}</span>
                 <button type="button"
                   onClick={() => onMarkEnvoye(r.clientId, r.planId, r.samplingId)}
-                  className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--color-accent-light)] text-[var(--color-accent)] hover:bg-[var(--color-accent)] hover:text-white transition-colors"
+                  className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--color-accent-light)] text-[var(--color-accent)] hover:bg-[var(--color-accent)] hover:text-white transition-colors"
                 >
-                  Rédigé ✓
+                  Rédigé <Check size={13} strokeWidth={2.5} />
                 </button>
               </Row>
             )
@@ -151,8 +190,9 @@ export function ATraiterWidget({ rapports, onMarkEnvoye, retards, pluie, mainten
                 <p className="text-sm font-medium truncate text-[var(--color-text-primary)]">{r.clientNom}</p>
                 <p className="text-xs truncate text-[var(--color-text-secondary)]">{[r.siteNom, r.planNom].filter(Boolean).join(' · ')}</p>
               </div>
-              <span className={`shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full ${r.overdue ? 'bg-[var(--color-danger-light)] text-[var(--color-danger)]' : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]'}`}>
-                {r.plannedDay > 0 ? `${r.overdue ? '⚠ ' : ''}${MOIS_COURT[r.plannedMonth]} j${r.plannedDay}` : MOIS_COURT[r.plannedMonth]}
+              <span className={`shrink-0 inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full ${r.overdue ? 'bg-[var(--color-danger-light)] text-[var(--color-danger)]' : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]'}`}>
+                {r.overdue && <AlertTriangle size={12} strokeWidth={2} />}
+                {r.plannedDay > 0 ? `${MOIS_COURT[r.plannedMonth]} j${r.plannedDay}` : MOIS_COURT[r.plannedMonth]}
               </span>
             </Row>
           ))}

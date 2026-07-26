@@ -14,7 +14,7 @@
   /* Texte */
   --color-text-primary:  #1C1C1E; /* iOS text primary */
   --color-text-secondary:#8E8E93; /* iOS text secondary */
-  --color-text-tertiary: #6B7280; /* WCAG AA 4.6:1 on white */
+  --color-text-tertiary: #5F6673; /* WCAG AA 5.2:1 sur --color-bg-primary, 5.8:1 sur blanc */
 
   /* Accents */
   --color-accent:        #34527A; /* Bleu encre désaturé */
