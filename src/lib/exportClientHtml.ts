@@ -150,7 +150,7 @@ export function buildClientReportHtml(client: Client, users: AppUser[], withPrin
     : ''
 
   const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
-    <title>Historique ${client.nom} — ${client.annee}</title>
+    <title>Historique ${escapeHtml(client.nom)} — ${escapeHtml(client.annee)}</title>
     <style>
       * { box-sizing: border-box; }
       body {

@@ -64,11 +64,10 @@ describe('buildClientReportHtml', () => {
     expect(html).toContain('Aucun prélèvement enregistré')
   })
 
-  it('échappe le HTML dans l\'en-tête visible du client (client-name)', () => {
+  it('échappe le HTML du nom du client partout (corps ET title)', () => {
     const html = buildClientReportHtml(client([plan([sampling()])], { nom: '<img src=x>' }), users)
-    // Le corps (h1.client-name) échappe bien le contenu utilisateur
+    expect(html).not.toContain('<img src=x>')
     expect(html).toContain('&lt;img')
-    // NB connu : le <title> réutilise client.nom sans échappement (cf. exportClientHtml.ts ~l.153)
   })
 
   it('n\'injecte le script d\'impression que si withPrintScript=true', () => {
