@@ -91,5 +91,9 @@ Retour externe (revue visuelle staging), non encore traité. Classé par effort.
 - Store filtres global — chaque page gère ses filtres localement, pas de partage
 - Migration `samplings` en sous-collection Firestore — voir §6, à surveiller long terme
 
+## 13. Contraste WCAG — `--color-text-secondary` sous le seuil AA
+
+- [ ] **`--color-text-secondary` (#8E8E93) = 2.92:1 sur `--color-bg-primary`** (#F2F2F7), sous le seuil AA (4.5:1). Préexistant, découvert le 2026-07-26 en corrigeant `--color-text-tertiary` (passé à #5F6673, 5.18:1) pour le dashboard — la hiérarchie des tokens est maintenant inversée (tertiary plus contrasté que secondary). 149 usages sur 33 fichiers (7 dans le dashboard). Piste : assombrir `--color-text-secondary` vers ~#6E6E73 (4.54:1) et remonter `--color-text-tertiary` vers ~#8A8A8F pour rétablir l'ordre. Nécessite un contrôle visuel sur les pages les plus concernées avant de déployer (surface large, hors périmètre d'une session ciblée). `.claude/docs/design-system.md` à resynchroniser sur les vraies valeurs de `src/index.css` au passage (il documente aussi les mauvaises couleurs de texte, pas seulement le radius et le fond déjà corrigés).
+
 ---
 *Mis à jour le 2026-06-06 — §8–10 ajoutés depuis audit Gemini session 111 + liste TODO_PLANNING planning.*
