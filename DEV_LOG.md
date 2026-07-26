@@ -4,6 +4,38 @@ Journal de développement chronologique. Mis à jour à chaque session de travai
 
 
 
+## Session 192 — Refonte esthétique du Dashboard + 4 correctifs post-revue
+**26 juillet 2026**
+
+### Feature — Refonte complète du Dashboard (onglet « Mon activité »)
+Implémentation des 7 étapes de `docs/dashboard-refonte-plan.md` (maquette validée le 26/07/2026 dans `docs/dashboard-refonte-mockup.html`), commit `df5d222` :
+- Styles unifiés : fin des `style={{ background: COLORS.X }}` inline et des hovers gérés en JS (`onMouseEnter`/`onMouseLeave`) au profit de classes Tailwind + `hover:`.
+- `StatCard` refondu avec icône Lucide teintée (carré 30px, radius 9px), badge contextuel ou micro-barre de progression (conformité métrologie).
+- `DonutChart` : caps arrondis, gaps entre segments, animation de tracé à l'entrée (`framer-motion`).
+- Structure : `max-w-4xl` → `max-w-6xl`, grille hero `1.55fr/1fr` (planning dominant à gauche, État du parc + Actualités à droite).
+- Nouveau `ATraiterWidget` à onglets segmentés qui fusionne les 5 anciens accordéons (`RapportsWidget`, `RetardWidget`, `PluieWidget`, `MaintenancesWidget`, `MetrologieWidget`, supprimés) avec sélection automatique de l'onglet le plus urgent.
+- `TodosWidget` repositionné en bande pleine largeur, emojis (👋 🌧 🚙 📅 💼 🔧) remplacés par des icônes Lucide monochromes.
+- `.claude/docs/design-system.md` corrigé (`--radius-md` 10px→18px, `--color-bg-primary` #F5F5F7→#F2F2F7, périmé depuis un commit antérieur non lié à ce chantier).
+- Découverte au passage : le contraste de `--color-text-tertiary` documenté comme non-conforme dans le diagnostic initial était en réalité déjà corrigé (#6B7280, 4.6:1 sur blanc) par un commit antérieur — aucune action nécessaire à cette étape.
+
+### Correctifs post-revue (commit `2a1d155`, bon de travail `docs/dashboard-refonte-correctifs.md`)
+Une revue du commit `df5d222` a trouvé 1 bug bloquant et 3 défauts de finition dans `ATraiterWidget.tsx` :
+- **Bug bloquant — la carte « À traiter » ne s'affichait jamais.** `defaultTab` était calculé par un `useMemo` à dépendances vides (`eslint-disable` posé dessus) puis figé dans un `useState` : au premier rendu les stores Zustand sont vides (Firestore arrive via `onSnapshot` après le montage), donc `activeTab` restait `null` à tous les rendus suivants. Confirmé par un test de régression avant correctif (`toBeEmptyDOMElement` échouait). **Root cause** : le `eslint-disable-next-line react-hooks/exhaustive-deps` masquait l'avertissement qui aurait attrapé le bug. **Fix** : état dérivé — `autoTab` recalculé à chaque rendu, `userPickedTab` qui ne prend le relais que si son onglet existe toujours (sinon retour automatique sur `autoTab`). Plus aucun `eslint-disable` dans le fichier.
+- **Contraste — le bon de travail se trompait de source.** Il citait des valeurs (`--color-text-tertiary` #AEAEB2, `--color-text-secondary` #6E6E73) qui sont en fait celles de la maquette HTML (`docs/dashboard-refonte-mockup.html`), pas du vrai `src/index.css` (#6B7280 et #8E8E93). Vérification par calcul WCAG : le vrai `text-tertiary` fait 4.33:1 sur `--color-bg-primary` (sous le seuil AA 4.5:1, mais de peu), et le `text-secondary` réel fait 2.92:1 — bien pire. Appliquer le correctif tel qu'écrit aurait dégradé le contraste. **Fix retenu** (validé avec Tom) : assombrissement du token `--color-text-tertiary` lui-même à `#5F6673` (5.2:1 sur bg-primary, 5.8:1 sur blanc), bénéficiant à tout le projet plutôt qu'à ce seul composant.
+- Emojis `✓` et `⚠` (réintroduits dans le nouveau `ATraiterWidget.tsx` malgré la règle DS n°4) remplacés par les icônes Lucide `Check` et `AlertTriangle`.
+- Barre d'onglets : `aria-selected` posé sur des `<button>` nus n'est valide que sur `role="tab"` — implémenté le motif ARIA Tabs complet (`tablist`/`tab`/`tabpanel`, `aria-controls`, roving `tabindex`, navigation clavier ← → Home End), vérifié en direct dans Chrome (focus + changement d'onglet aux flèches).
+
+### État
+- TypeScript 0 erreur, ESLint 0 erreur, 418/418 tests verts (415 + 3 nouveaux `ATraiterWidget.test.tsx`), react-doctor 100/100 sur le diff des correctifs.
+- Contrôle visuel fait dans Chrome (desktop + navigation clavier) après chaque étape ; le rendu mobile (< 720px) reste à valider sur téléphone réel, pas seulement en redimensionnant le navigateur.
+- Commits `df5d222` (refonte) et `2a1d155` (correctifs) sur `main`, staging redéployé après chacun.
+
+### Prochaines étapes
+- 🔴 Isolation Firestore staging/prod (bloquant restant avant élargissement de l'équipe de Brest) — toujours non traité.
+- Validation du rendu mobile de la carte « À traiter » sur téléphone réel (cf. `docs/dashboard-refonte-plan.md`, section « Points encore à valider »).
+
+---
+
 ## Session 191 — Onglet Pilotage : drill-down mensuel, export PDF, polish UI
 **21-22 juillet 2026**
 
