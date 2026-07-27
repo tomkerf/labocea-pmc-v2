@@ -142,7 +142,7 @@ export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal, onO
                   <button
                     type="button"
                     onClick={() => onOpenMonthModal(mIdx, row.plan.id)}
-                    className="mx-auto flex items-center justify-center rounded-full text-[10px] font-bold leading-none transition-all hover:scale-110 shadow-sm cursor-pointer active:scale-95"
+                    className="mx-auto flex items-center justify-center rounded-full text-[10px] font-bold leading-none transition-transform hover:scale-110 shadow-sm cursor-pointer active:scale-95"
                     style={{ width: 34, height: 20, backgroundColor: toneStyle.bg, color: toneStyle.text }}
                     title={`${MOIS_LONG[mIdx]} — ${doneCount}/${total} fait${doneCount > 1 ? 's' : ''}${hasOverdue ? ' — en retard' : ''} — cliquer pour voir le détail`}
                     aria-label={`${MOIS_LONG[mIdx]} — ${doneCount} sur ${total} fait${hasOverdue ? ', en retard' : ''}`}
