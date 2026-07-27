@@ -113,7 +113,8 @@ export function usePlanActions({
 
   function generateSamplingsForPlan() {
     if (!client || !plan) return
-    const updated = { ...plan, samplings: generateSamplings(plan) }
+    const year = Number(client.annee) || new Date().getFullYear()
+    const updated = { ...plan, samplings: generateSamplings(plan, year) }
     triggerSave({ ...client, plans: client.plans.map((p) => p.id === planId ? updated : p) })
   }
 
