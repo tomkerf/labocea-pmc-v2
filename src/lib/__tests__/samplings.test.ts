@@ -259,4 +259,17 @@ describe('generateSamplings', () => {
       expect(result).toHaveLength(12)
     })
   })
+
+  describe('Hebdomadaire — plan existant sans defaultWeeklyDay (non-régression)', () => {
+    it('retombe sur lundi (0) si defaultWeeklyDay est undefined en base malgré le typage requis', () => {
+      // Reproduit un plan Firestore créé avant l'ajout du champ : le typage TS déclare
+      // defaultWeeklyDay requis, mais la donnée réelle peut ne pas l'avoir.
+      const legacyPlan = makePlan({ frequence: 'Hebdomadaire' }) as unknown as Record<string, unknown>
+      delete legacyPlan.defaultWeeklyDay
+      const result = generateSamplings(legacyPlan as unknown as Plan, 2026)
+      expect(result).toHaveLength(52)
+      expect(result[0].plannedMonth).toBe(0)
+      expect(result[0].plannedDay).toBe(5)
+    })
+  })
 })

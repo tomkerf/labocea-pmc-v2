@@ -53,12 +53,16 @@ export function generateSamplings(plan: Plan, year: number = new Date().getFullY
   // Hebdomadaire — une occurrence par semaine sur le jour choisi, calculée sur l'année réelle
   // (contrairement aux autres fréquences, "tous les lundis" dépend du calendrier de l'année).
   if (plan.frequence === 'Hebdomadaire') {
+    // ?? 0 : les plans créés avant l'ajout de ce champ n'ont pas defaultWeeklyDay en base
+    // malgré le typage TS qui le déclare requis — sans ce filet, la comparaison ne matchait
+    // jamais et générait silencieusement 0 prélèvement.
+    const targetWeekday = plan.defaultWeeklyDay ?? 0
     const result: Sampling[] = []
     const end = new Date(year, 11, 31)
     let num = 1
     for (const d = new Date(year, 0, 1); d <= end; d.setDate(d.getDate() + 1)) {
       const weekday = (d.getDay() + 6) % 7 // JS: dim=0..sam=6 → lun=0..dim=6
-      if (weekday === plan.defaultWeeklyDay) {
+      if (weekday === targetWeekday) {
         result.push(blankSampling(num++, d.getMonth(), d.getDate()))
       }
     }

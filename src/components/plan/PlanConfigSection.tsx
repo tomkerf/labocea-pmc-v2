@@ -75,7 +75,7 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
           <PlanField label="Jour de la semaine">
             <select
               aria-label="Jour de la semaine"
-              value={plan.defaultWeeklyDay}
+              value={plan.defaultWeeklyDay ?? 0}
               onChange={(e) => onUpdate('defaultWeeklyDay', parseInt(e.target.value))}
               className="field-input"
             >
