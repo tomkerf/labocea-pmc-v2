@@ -23,9 +23,10 @@ export function validateSampling(s: Pick<Sampling, 'status' | 'motif' | 'doneDat
 }
 
 /** Génère la liste initiale des prélèvements pour un plan selon sa fréquence.
- *  - 'Personnalisé' → retourne [] (saisie manuelle uniquement)
- *  - 'Bimensuel'    → 2 prélèvements par mois, jour non fixé (plannedDay = 0)
- *  - Autres         → un prélèvement par mois cible, jour depuis customDays ou defaultDay
+ *  - 'Personnalisé'  → retourne [] (saisie manuelle uniquement)
+ *  - 'Hebdomadaire'  → une occurrence par semaine sur plan.defaultWeeklyDay, calculée sur `year`
+ *  - 'Bimensuel'     → 2 prélèvements par mois, jour non fixé (plannedDay = 0)
+ *  - Autres          → un prélèvement par mois cible, jour depuis customDays ou defaultDay
  *
  *  Si plan.customMonths est renseigné (et fréquence ≠ 'Annuel'), les mois personnalisés
  *  remplacent les mois par défaut de la fréquence.
