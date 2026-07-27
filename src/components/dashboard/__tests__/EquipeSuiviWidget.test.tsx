@@ -26,7 +26,7 @@ describe('EquipeSuiviWidget', () => {
   it('retourne null si aucun prélèvement incomplet', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Site', frequence: 'Mensuel',
       meteo: '', nature: 'Eau usée', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
-      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
+      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [{ ...doneSampling, nappe: '' }] }] })
     const { container } = render(<EquipeSuiviWidget clients={[client]} />)
     expect(container.firstChild).toBeNull()
@@ -35,7 +35,7 @@ describe('EquipeSuiviWidget', () => {
   it('affiche le titre "Suivi équipe"', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Site', frequence: 'Mensuel',
       meteo: '', nature: 'Souterraine', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
-      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
+      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [{ ...doneSampling, nappe: '' }] }] })
     render(<EquipeSuiviWidget clients={[client]} />)
     expect(screen.getByText(/suivi équipe/i)).toBeTruthy()
@@ -44,7 +44,7 @@ describe('EquipeSuiviWidget', () => {
   it('affiche le nom du client dans la liste des incomplets après ouverture', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Jaudy', frequence: 'Mensuel',
       meteo: '', nature: 'Souterraine', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
-      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
+      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [{ ...doneSampling, nappe: '' }] }] })
     render(<EquipeSuiviWidget clients={[client]} />)
     const toggle = screen.getByRole('button', { name: /prélèvements incomplets/i })
@@ -55,7 +55,7 @@ describe('EquipeSuiviWidget', () => {
   it('affiche le bon champ manquant après ouverture', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Site', frequence: 'Mensuel',
       meteo: '', nature: 'Souterraine', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
-      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
+      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [{ ...doneSampling, nappe: '' }] }] })
     render(<EquipeSuiviWidget clients={[client]} />)
     const toggle = screen.getByRole('button', { name: /prélèvements incomplets/i })
@@ -68,7 +68,7 @@ describe('EquipeSuiviWidget', () => {
     // using status: 'planned' to trigger isSamplingOverdue
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Site', frequence: 'Mensuel',
       meteo: '', nature: 'Eau usée', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
-      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
+      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [{ ...doneSampling, status: 'planned', plannedMonth: 0, plannedDay: 15 }] }] })
     vi.setSystemTime(new Date(2026, 3, 22)) // April 2026 (sampling planned in Jan is overdue)
     render(<EquipeSuiviWidget clients={[client]} />)
@@ -80,7 +80,7 @@ describe('EquipeSuiviWidget', () => {
   it('affiche le nom du client dans la liste des rapports dus après ouverture', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Site', frequence: 'Mensuel',
       meteo: '', nature: 'Eau usée', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
-      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
+      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [{ ...doneSampling, status: 'done', rapportPrevu: true, rapportDate: '' }] }] })
     render(<EquipeSuiviWidget clients={[client]} />)
     const toggle = screen.getByRole('button', { name: /rapports dus/i })

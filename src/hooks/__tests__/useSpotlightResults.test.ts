@@ -19,7 +19,7 @@ function makePlan(overrides: Partial<Plan> = {}): Plan {
     customMonths: [],
     bimensuelMonths: [],
     defaultDay: 4,
-    customDays: {},
+    customDays: {}, defaultWeeklyDay: 0,
     samplings: [],
     ...overrides,
   }

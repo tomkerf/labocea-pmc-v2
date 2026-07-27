@@ -29,7 +29,7 @@ function makePlan(overrides: Partial<Plan> = {}): Plan {
     id: 'plan1', nom: 'Plan A', siteNom: 'Site X',
     frequence: 'Mensuel', meteo: '', nature: 'Rivière', methode: 'Ponctuel',
     lat: '', lng: '', gpsApprox: false,
-    customMonths: [], bimensuelMonths: [], defaultDay: 15, customDays: {},
+    customMonths: [], bimensuelMonths: [], defaultDay: 15, customDays: {}, defaultWeeklyDay: 0,
     samplings: [],
     ...overrides,
   }
