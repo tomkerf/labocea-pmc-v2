@@ -33,7 +33,7 @@ export type SegmentType =
   | 'RSDE'
 
 export type SamplingStatus = 'planned' | 'done' | 'overdue' | 'non_effectue'
-export type FrequenceType = 'Mensuel' | 'Bimensuel' | 'Trimestriel' | 'Semestriel' | 'Annuel' | 'Personnalisé'
+export type FrequenceType = 'Hebdomadaire' | 'Mensuel' | 'Bimensuel' | 'Trimestriel' | 'Semestriel' | 'Annuel' | 'Personnalisé'
 export type NatureEauType = 'Eau usée' | 'Rivière' | 'Souterraine' | 'AEP' | 'Eau pluviale' | 'Eau saline' | 'Boues' | 'Autre'
 export type MethodeType = 'Ponctuel' | 'Composite' | 'Automatique'
 export type NappeType = 'haute' | 'basse' | ''
@@ -108,6 +108,8 @@ export interface Plan {
   bimensuelMonths: number[]
   defaultDay: number
   customDays: Record<string, number>
+  /** Jour de la semaine pour frequence === 'Hebdomadaire'. 0 = lundi … 6 = dimanche. Ignoré sinon. */
+  defaultWeeklyDay: number
   notes?: string               // commentaire libre sur le point de prélèvement
   analysesSousTraitees?: boolean // si true, analyses confiées à un sous-traitant (ex : RSDE, CORPEP)
   separator?: boolean          // si true, cet élément est un séparateur visuel (pas un vrai plan)
