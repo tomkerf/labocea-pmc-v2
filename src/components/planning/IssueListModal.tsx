@@ -16,12 +16,13 @@ interface IssueListModalProps {
   onClose: () => void
   type: 'overdue' | 'non_effectue' | 'month' | null
   month?: number
+  planId?: string
   rows: { client: Client; plan: Plan; samplingsByMonth?: (Sampling | null)[]; pairsByMonth?: (Sampling | null)[][] }[]
   year: number
   preleveurs?: Preleveur[]
 }
 
-export default function IssueListModal({ onClose, type, month, rows, year, preleveurs = [] }: IssueListModalProps) {
+export default function IssueListModal({ onClose, type, month, planId, rows, year, preleveurs = [] }: IssueListModalProps) {
   const [pdfPreview, setPdfPreview] = useState<string | null>(null)
   const issues = useMemo(() => {
     if (!type) return []
@@ -35,7 +36,7 @@ export default function IssueListModal({ onClose, type, month, rows, year, prele
           list.push({ client, plan, sampling: s, planYear })
         } else if (type === 'non_effectue' && s.status === 'non_effectue') {
           list.push({ client, plan, sampling: s, planYear })
-        } else if (type === 'month' && s.plannedMonth === month) {
+        } else if (type === 'month' && s.plannedMonth === month && (!planId || plan.id === planId)) {
           list.push({ client, plan, sampling: s, planYear })
         }
       })
@@ -44,12 +45,14 @@ export default function IssueListModal({ onClose, type, month, rows, year, prele
     // Sort by month (oldest first) — no-op quand type === 'month' (déjà un seul mois)
     list.sort((a, b) => a.sampling.plannedMonth - b.sampling.plannedMonth)
     return list
-  }, [type, month, rows, year])
+  }, [type, month, planId, rows, year])
 
   if (!type) return null
 
+  const planNom = planId ? rows.find(r => r.plan.id === planId)?.plan.nom : undefined
   const title = type === 'overdue' ? 'Prélèvements en retard'
     : type === 'non_effectue' ? 'Prélèvements non effectués'
+    : planNom ? `${planNom} — ${MOIS_LONG[month ?? 0]} ${year}`
     : `Prélèvements — ${MOIS_LONG[month ?? 0]} ${year}`
   const icon = type === 'overdue'
     ? <AlertTriangle size={17} style={{ color: COLORS.DANGER }} />
