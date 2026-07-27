@@ -30,7 +30,7 @@ export function validateSampling(s: Pick<Sampling, 'status' | 'motif' | 'doneDat
  *  Si plan.customMonths est renseigné (et fréquence ≠ 'Annuel'), les mois personnalisés
  *  remplacent les mois par défaut de la fréquence.
  */
-export function generateSamplings(plan: Plan): Sampling[] {
+export function generateSamplings(plan: Plan, year: number = new Date().getFullYear()): Sampling[] {
   if (plan.frequence === 'Personnalisé') return []
 
   const blankSampling = (num: number, month: number, day: number): Sampling => ({
@@ -48,6 +48,21 @@ export function generateSamplings(plan: Plan): Sampling[] {
     reportHistory: [],
     doneBy: '',
   })
+
+  // Hebdomadaire — une occurrence par semaine sur le jour choisi, calculée sur l'année réelle
+  // (contrairement aux autres fréquences, "tous les lundis" dépend du calendrier de l'année).
+  if (plan.frequence === 'Hebdomadaire') {
+    const result: Sampling[] = []
+    const end = new Date(year, 11, 31)
+    let num = 1
+    for (const d = new Date(year, 0, 1); d <= end; d.setDate(d.getDate() + 1)) {
+      const weekday = (d.getDay() + 6) % 7 // JS: dim=0..sam=6 → lun=0..dim=6
+      if (weekday === plan.defaultWeeklyDay) {
+        result.push(blankSampling(num++, d.getMonth(), d.getDate()))
+      }
+    }
+    return result
+  }
 
   // Bimensuel — 2 prélèvements / mois, pas de jour fixé
   if (plan.frequence === 'Bimensuel') {
