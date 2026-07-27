@@ -20,7 +20,7 @@ interface YearMatrixViewProps {
 
 export default function YearMatrixView({ clients, year, filterTech, filterSite, filterMethod = '', preleveurs }: YearMatrixViewProps) {
   const [issueModalType, setIssueModalType] = useState<'overdue' | 'non_effectue' | null>(null)
-  const [monthModal, setMonthModal] = useState<number | null>(null)
+  const [monthModal, setMonthModal] = useState<{ month: number; planId?: string } | null>(null)
   const [focusedMonth, setFocusedMonth] = useState<number | null>(null)
 
   const rows = useMemo(() => {
@@ -45,13 +45,13 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
           if (!s) return
           if (s.plannedMonth >= 0 && s.plannedMonth < 12) {
             samplingsByMonth[s.plannedMonth] = s
-            if (p.frequence === 'Bimensuel') {
+            if (p.frequence === 'Bimensuel' || p.frequence === 'Hebdomadaire') {
               pairsByMonth[s.plannedMonth].push(s)
             }
           }
         })
 
-        if (p.frequence === 'Bimensuel') {
+        if (p.frequence === 'Bimensuel' || p.frequence === 'Hebdomadaire') {
           for (let m = 0; m < 12; m++) {
             const pair = pairsByMonth[m]
             if (pair.length > 0 && pair.every(s => s?.status === 'non_effectue')) {
@@ -185,7 +185,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                         {m === 'Juin' ? 'JUN' : m === 'Juillet' ? 'JUL' : m.substring(0, 3).toUpperCase()}
                       </button>
                       <button type="button"
-                        onClick={() => { setMonthModal(i); setFocusedMonth(i) }}
+                        onClick={() => { setMonthModal({ month: i }); setFocusedMonth(i) }}
                         className="hover:text-[var(--color-accent)] transition-colors cursor-pointer p-0.5 -m-0.5"
                         title={`Voir les prélèvements de ${m}`}>
                         <Search size={9} className="opacity-40" />
@@ -268,6 +268,7 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
                         row={row}
                         planYear={planYear}
                         onOpenIssueModal={setIssueModalType}
+                        onOpenMonthModal={(month, planId) => setMonthModal({ month, planId })}
                         activeMonth={focusedMonth}
                       />
                     )) : [])
@@ -291,7 +292,8 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
       {monthModal !== null && (
         <IssueListModal
           type="month"
-          month={monthModal}
+          month={monthModal.month}
+          planId={monthModal.planId}
           rows={rows}
           year={year}
           preleveurs={preleveurs}
