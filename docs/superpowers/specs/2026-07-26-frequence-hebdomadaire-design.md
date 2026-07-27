@@ -1,6 +1,16 @@
 # Fréquence hebdomadaire pour les plans de prélèvement — design
 
 > Brainstorming du 26/07/2026. Design approuvé par Tom section par section.
+>
+> **Amendement du 27/07/2026** : en préparant le plan d'implémentation, vérification faite que
+> `defaultDay`/`customDays` (le pattern "override par mois" que la Section UI d'origine disait
+> réutiliser) **n'a en réalité aucune UI nulle part dans l'app** — ces champs existent dans le
+> modèle et dans `generateSamplings`, mais restent toujours à leurs valeurs par défaut. Le vrai
+> mécanisme pour corriger un jour ponctuel est l'édition ligne par ligne après génération
+> (`SamplingForm.tsx`). En conséquence, `customWeeklyDays` est retiré du design : un seul
+> `defaultWeeklyDay` par plan, et un changement de jour en cours d'année se gère en éditant les
+> lignes concernées à la main — exactement comme pour toute autre exception aujourd'hui. Confirmé
+> avec Tom. Les sections ci-dessous reflètent déjà cet amendement.
 
 ## Contexte et cas d'usage
 
@@ -29,15 +39,12 @@ janvier à juin, puis mardi à partir de juillet) — confirmé par Tom.
 ## Modèle de données
 
 - `FrequenceType` (`src/types/index.ts`) : ajout de `'Hebdomadaire'`.
-- `Plan` : deux nouveaux champs, sur le modèle exact de `defaultDay`/`customDays` (jour du mois) :
-  - `defaultWeeklyDay: number` — jour de la semaine par défaut, **0 = lundi … 6 = dimanche**.
-    Utilisé uniquement si `frequence === 'Hebdomadaire'`.
-  - `customWeeklyDays: Record<string, number>` — override par mois (clé = mois `0`-`11` en
-    string), même mécanique que `customDays`.
-- Champs **requis** (pas optionnels), comme `defaultDay`/`customDays`, pour rester cohérent avec le
-  reste du modèle `Plan`. Tous les sites de construction d'un `Plan` (`ClientPage.tsx`,
-  `demandesConfig.ts`) doivent initialiser `defaultWeeklyDay: 0, customWeeklyDays: {}`. Le
-  compilateur TS pointera les endroits à corriger.
+- `Plan` : un nouveau champ, sur le modèle exact de `defaultDay` (jour du mois) :
+  - `defaultWeeklyDay: number` — jour de la semaine, **0 = lundi … 6 = dimanche**, unique pour tout
+    le plan. Utilisé uniquement si `frequence === 'Hebdomadaire'`.
+- Champ **requis** (pas optionnel), comme `defaultDay`, pour rester cohérent avec le reste du
+  modèle `Plan`. Tous les sites de construction d'un `Plan` (`ClientPage.tsx`, `VisiteFormPage.tsx`)
+  doivent initialiser `defaultWeeklyDay: 0`. Le compilateur TS pointera les endroits à corriger.
 - `Sampling` **ne change pas** : chaque occurrence garde `plannedMonth`/`plannedDay` (date
   concrète), exactement comme pour les autres fréquences. Aucune notion de "semaine" stockée par
   sampling.
@@ -54,8 +61,8 @@ correspondance jour-de-semaine / date-du-mois change chaque année.
 export function generateSamplings(plan: Plan, year: number): Sampling[]
 ```
 
-Nouvelle fonction interne, scan jour par jour de l'année, jour de semaine cible résolu par mois
-(override ou défaut) :
+Nouvelle fonction interne, scan jour par jour de l'année, un seul jour de semaine cible pour tout
+le plan :
 
 ```ts
 function generateWeeklySamplings(plan: Plan, year: number): Sampling[] {
@@ -63,16 +70,19 @@ function generateWeeklySamplings(plan: Plan, year: number): Sampling[] {
   const end = new Date(year, 11, 31)
   let num = 1
   for (const d = new Date(year, 0, 1); d <= end; d.setDate(d.getDate() + 1)) {
-    const month = d.getMonth()
     const weekday = (d.getDay() + 6) % 7 // JS: dim=0..sam=6 → lun=0..dim=6
-    const targetWeekday = plan.customWeeklyDays[String(month)] ?? plan.defaultWeeklyDay
-    if (weekday === targetWeekday) {
-      result.push(blankSampling(num++, month, d.getDate()))
+    if (weekday === plan.defaultWeeklyDay) {
+      result.push(blankSampling(num++, d.getMonth(), d.getDate()))
     }
   }
   return result
 }
 ```
+
+Si le jour de semaine doit changer en cours d'année (ex. lundi jusqu'en juin puis mardi ensuite),
+la technicienne édite à la main les lignes concernées après génération via `SamplingForm.tsx`
+(`plannedMonth`/`plannedDay` par ligne) — exactement le mécanisme déjà utilisé pour toute exception
+sur les autres fréquences.
 
 Branchée dans `generateSamplings` : `if (plan.frequence === 'Hebdomadaire') return generateWeeklySamplings(plan, year)`.
 
@@ -87,12 +97,10 @@ Les autres fréquences ignorent ce paramètre (comportement inchangé).
 - `PlanConfigSection.tsx` : `'Hebdomadaire'` ajouté au tableau `FREQUENCES` (ligne 10) du
   `<select>`. Même ajout dans `demandesConfig.ts` (liste dupliquée, déjà divergente — pas
   d'unification dans ce chantier, juste éviter d'aggraver l'écart).
-- `PlanPage.tsx` : quand `frequence === 'Hebdomadaire'`, un sélecteur "Jour de la semaine"
-  (Lundi…Dimanche) édite `defaultWeeklyDay`, au même emplacement/style que le sélecteur de jour du
-  mois des autres fréquences.
-- Override par mois (`customWeeklyDays`) : réutilise le mécanisme d'édition déjà en place pour
-  `customDays` (tableau mois-par-mois) — juste un sélecteur "jour de semaine" au lieu de "jour du
-  mois" quand la fréquence est hebdomadaire. Pas de nouveau composant.
+- `PlanConfigSection.tsx` : quand `frequence === 'Hebdomadaire'`, un nouveau `<select>` "Jour de la
+  semaine" (Lundi…Dimanche) apparaît dans la configuration du plan et édite `defaultWeeklyDay` —
+  même style que les autres champs de `PlanConfigSection` (`PlanField` + `field-input`). Un seul
+  jour pour tout le plan ; pas d'override par mois (cf. amendement en tête de document).
 
 ## Affichage planning annuel
 
@@ -117,9 +125,8 @@ pas encore dû" que donne la couleur du badge.
 ## Tests
 
 - `samplings.test.ts` : nouveau `describe('generateSamplings — Hebdomadaire')` :
-  - jour par défaut sur toute l'année (nombre d'occurrences correct — 52 ou 53 selon l'année et le
+  - jour choisi sur toute l'année (nombre d'occurrences correct — 52 ou 53 selon l'année et le
     jour choisi)
-  - override par mois (jour différent avant/après une bascule)
   - comportement aux bornes (1er janvier / 31 décembre selon jour de la semaine choisi)
 - Pas de nouveau test dédié à `YearMatrixView` au-delà de l'existant (aucun test actuel sur ce
   composant d'après l'exploration initiale — à confirmer en implémentant).
