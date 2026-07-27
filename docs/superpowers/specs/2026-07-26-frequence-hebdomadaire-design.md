@@ -107,12 +107,25 @@ Les autres fréquences ignorent ce paramètre (comportement inchangé).
 Décidé via compagnon visuel (3 options comparées : badge de synthèse, mini-cluster de pastilles,
 mini barre de progression — badge retenu).
 
+> **Amendement du 27/07/2026** : en préparant le plan, deux points de cette section ne tenaient pas
+> tels qu'écrits, vérifiés en lisant `YearMatrixView.tsx` :
+> 1. `samplingsByMonth[month]` ne garde qu'**un seul** sampling par mois (écrasé à chaque
+>    itération) — pour un plan hebdo à 4-5 occurrences/mois, 3-4 seraient silencieusement perdues.
+>    Il faut généraliser le mécanisme `pairsByMonth` (déjà utilisé pour Bimensuel, qui accumule
+>    plusieurs samplings par mois) aux plans `Hebdomadaire`.
+> 2. La modale de drill-down mensuel (`IssueListModal` mode `'month'`) n'est **pas filtrable par
+>    plan** aujourd'hui — elle liste tous les plans de tous les clients pour un mois donné. Elle
+>    gagne un `planId?: string` optionnel et rétrocompatible (absent = comportement actuel
+>    inchangé) plutôt que d'être "juste réutilisée telle quelle".
+>
+> Confirmé avec Tom. Les sections ci-dessous reflètent cet amendement.
+
 Dans `YearMatrixView`/`YearMatrixPlanRow`, la case du mois pour un plan `Hebdomadaire` passe en
 mode badge de synthèse : `"4/4"` (fait/prévu), coloré selon la conformité (vert si tout fait,
 orange/rouge sinon) — remplace les 1-2 pastilles individuelles utilisées pour les autres
-fréquences. Un clic ouvre la modale de drill-down mensuel **déjà existante** (ajoutée session 191,
-`IssueListModal` mode `'month'`), filtrée sur ce plan, qui liste les occurrences individuelles du
-mois.
+fréquences. Un clic ouvre la modale de drill-down mensuel existante (ajoutée session 191,
+`IssueListModal` mode `'month'`), désormais filtrable par `planId`, qui liste les occurrences
+individuelles du mois pour ce plan.
 
 Pourquoi ce choix plutôt que les alternatives : la modale de drill-down existe déjà, donc on
 réutilise l'infra plutôt que d'inventer une représentation dense (mini-cluster) qui devient
