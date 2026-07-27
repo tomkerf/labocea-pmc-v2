@@ -130,8 +130,9 @@ export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal, onO
                 const occurrences = pair.filter((ps): ps is Sampling => ps !== null)
                 const total = occurrences.length
                 const doneCount = occurrences.filter(ps => ps.status === 'done').length
+                const resolvedCount = occurrences.filter(ps => ps.status === 'done' || ps.status === 'non_effectue').length
                 const hasOverdue = occurrences.some(ps => isSamplingOverdue(ps, planYear, isAuto))
-                const tone = hasOverdue ? 'danger' : doneCount === total ? 'success' : 'warning'
+                const tone = hasOverdue ? 'danger' : resolvedCount === total ? 'success' : 'warning'
                 const toneStyle = {
                   success: { bg: 'var(--color-success-light)', text: 'var(--color-success)' },
                   warning: { bg: 'var(--color-warning-light)', text: 'var(--color-warning)' },
@@ -143,8 +144,8 @@ export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal, onO
                     onClick={() => onOpenMonthModal(mIdx, row.plan.id)}
                     className="mx-auto flex items-center justify-center rounded-full text-[10px] font-bold leading-none transition-all hover:scale-110 shadow-sm cursor-pointer active:scale-95"
                     style={{ width: 34, height: 20, backgroundColor: toneStyle.bg, color: toneStyle.text }}
-                    title={`${MOIS_LONG[mIdx]} — ${doneCount}/${total} fait${doneCount > 1 ? 's' : ''} — cliquer pour voir le détail`}
-                    aria-label={`${MOIS_LONG[mIdx]} — ${doneCount} sur ${total} fait`}
+                    title={`${MOIS_LONG[mIdx]} — ${doneCount}/${total} fait${doneCount > 1 ? 's' : ''}${hasOverdue ? ' — en retard' : ''} — cliquer pour voir le détail`}
+                    aria-label={`${MOIS_LONG[mIdx]} — ${doneCount} sur ${total} fait${hasOverdue ? ', en retard' : ''}`}
                   >
                     {doneCount}/{total}
                   </button>
