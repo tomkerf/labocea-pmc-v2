@@ -19,15 +19,17 @@ interface PoolItemRowProps {
   isLast: boolean
   poolValidId: string | null
   poolDate: string
+  poolTime: string
   poolSaving: boolean
   dateStr: string
   holidays: Record<string, string>
   setPoolValidId: (id: string | null) => void
   setPoolDate: (d: string) => void
+  setPoolTime: (t: string) => void
   onValidate: (item: PoolItem) => void
 }
 
-function PoolItemRow({ item, isLast, poolValidId, poolDate, poolSaving, dateStr, holidays, setPoolValidId, setPoolDate, onValidate }: PoolItemRowProps) {
+function PoolItemRow({ item, isLast, poolValidId, poolDate, poolTime, poolSaving, dateStr, holidays, setPoolValidId, setPoolDate, setPoolTime, onValidate }: PoolItemRowProps) {
   const overdue  = isSamplingOverdue(item.sampling, new Date().getFullYear(), item.methode === 'Automatique')
   const cfgLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[item.sampling.status] ?? SAMPLING_LABEL.planned
   const cfgColor = overdue ? COLORS.DANGER
@@ -49,7 +51,7 @@ function PoolItemRow({ item, isLast, poolValidId, poolDate, poolSaving, dateStr,
         className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
         onClick={() => isValidating
           ? setPoolValidId(null)
-          : (setPoolValidId(item.sampling.id), setPoolDate(dateStr))
+          : (setPoolValidId(item.sampling.id), setPoolDate(dateStr), setPoolTime(item.sampling.plannedTime ?? ''))
         }>
         <span className="size-2 rounded-full shrink-0 mt-0.5" style={{ background: cfg.color }} />
         <div className="flex-1 min-w-0">
@@ -115,32 +117,42 @@ function PoolItemRow({ item, isLast, poolValidId, poolDate, poolSaving, dateStr,
         </span>
       </button>
       {isValidating && (
-        <div className="px-4 py-3 flex flex-col gap-2"
+        <div className="px-4 py-3 flex flex-col gap-3"
           style={{ background: COLORS.BG_TERTIARY, borderTop: '1px solid var(--color-border-subtle)' }}>
-          <div className="flex items-end gap-3">
-            <div className="flex-1">
-              <label htmlFor="dm-pool-date" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
-                Planifier le
-              </label>
-              <input id="dm-pool-date" type="date" value={poolDate} onChange={e => setPoolDate(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg text-sm"
-                style={{
-                  background: COLORS.BG_SECONDARY,
-                  border: `1px solid ${poolHoliday ? COLORS.DANGER : COLORS.BORDER}`,
-                  color: COLORS.TEXT_PRIMARY,
-                }} />
-            </div>
-            <button type="button" onClick={() => onValidate(item)} disabled={poolSaving || !poolDate || !!poolHoliday}
-              className="px-4 py-2 rounded-lg text-sm font-medium"
+          <div>
+            <label htmlFor="dm-pool-date" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
+              Planifier le
+            </label>
+            <input id="dm-pool-date" type="date" value={poolDate} onChange={e => setPoolDate(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-lg text-base"
               style={{
-                background: poolHoliday ? COLORS.BG_TERTIARY : COLORS.SUCCESS,
-                color: poolHoliday ? 'var(--color-text-tertiary)' : 'white',
-                opacity: poolSaving ? 0.6 : 1,
-                cursor: poolHoliday ? 'not-allowed' : 'pointer',
-              }}>
-              {poolSaving ? '…' : 'Confirmer'}
-            </button>
+                background: COLORS.BG_SECONDARY,
+                border: `1px solid ${poolHoliday ? COLORS.DANGER : COLORS.BORDER}`,
+                color: COLORS.TEXT_PRIMARY,
+              }} />
           </div>
+          <div>
+            <label htmlFor="dm-pool-time" className="block text-xs font-medium mb-1" style={{ color: COLORS.TEXT_SECONDARY }}>
+              Heure (optionnel)
+            </label>
+            <input id="dm-pool-time" type="time" value={poolTime} onChange={e => setPoolTime(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-lg text-base"
+              style={{
+                background: COLORS.BG_SECONDARY,
+                border: `1px solid ${COLORS.BORDER}`,
+                color: COLORS.TEXT_PRIMARY,
+              }} />
+          </div>
+          <button type="button" onClick={() => onValidate(item)} disabled={poolSaving || !poolDate || !!poolHoliday}
+            className="w-full px-4 py-2.5 rounded-lg text-sm font-medium"
+            style={{
+              background: poolHoliday ? COLORS.BG_TERTIARY : COLORS.SUCCESS,
+              color: poolHoliday ? 'var(--color-text-tertiary)' : 'white',
+              opacity: poolSaving ? 0.6 : 1,
+              cursor: poolHoliday ? 'not-allowed' : 'pointer',
+            }}>
+            {poolSaving ? '…' : 'Confirmer'}
+          </button>
           {poolHoliday && (
             <p className="text-xs flex items-center gap-1.5" style={{ color: COLORS.DANGER }}>
               <span>⛔</span>
@@ -158,12 +170,13 @@ interface DayModalPoolTabProps {
   pool: PoolItem[]
   overduePool: PoolItem[]
   holidays: Record<string, string>
-  onValidatePool: (item: PoolItem, date: string) => Promise<void>
+  onValidatePool: (item: PoolItem, date: string, time?: string) => Promise<void>
 }
 
 export default function DayModalPoolTab({ dateStr, pool, overduePool, holidays, onValidatePool }: DayModalPoolTabProps) {
   const [poolValidId, setPoolValidId] = useState<string | null>(null)
   const [poolDate,    setPoolDate]    = useState(dateStr)
+  const [poolTime,    setPoolTime]    = useState('')
   const [poolSaving,  setPoolSaving]  = useState(false)
   const [openGroups,  setOpenGroups]  = useState<Record<string, boolean>>({
     'En retard': false, 'Planifié': false, 'À planifier': false,
@@ -172,7 +185,7 @@ export default function DayModalPoolTab({ dateStr, pool, overduePool, holidays, 
   async function handleValidatePool(item: PoolItem) {
     if (poolSaving) return
     setPoolSaving(true)
-    try { await onValidatePool(item, poolDate); setPoolValidId(null) }
+    try { await onValidatePool(item, poolDate, poolTime || undefined); setPoolValidId(null) }
     finally { setPoolSaving(false) }
   }
 
@@ -231,9 +244,9 @@ export default function DayModalPoolTab({ dateStr, pool, overduePool, holidays, 
                     {group.items.map((item, i) => (
                       <PoolItemRow key={item.sampling.id}
                         item={item} isLast={i === group.items.length - 1}
-                        poolValidId={poolValidId} poolDate={poolDate} poolSaving={poolSaving}
+                        poolValidId={poolValidId} poolDate={poolDate} poolTime={poolTime} poolSaving={poolSaving}
                         dateStr={dateStr} holidays={holidays}
-                        setPoolValidId={setPoolValidId} setPoolDate={setPoolDate}
+                        setPoolValidId={setPoolValidId} setPoolDate={setPoolDate} setPoolTime={setPoolTime}
                         onValidate={handleValidatePool}
                       />
                     ))}

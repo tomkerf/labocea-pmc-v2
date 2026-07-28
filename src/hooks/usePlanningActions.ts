@@ -181,7 +181,7 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
     }
   }
 
-  async function handleValidatePool(item: PoolItem, date: string) {
+  async function handleValidatePool(item: PoolItem, date: string, time?: string) {
     if (!uid) return
     if (holidays[date]) return
     const client = clients.find((c: Client) => c.id === item.clientId)
@@ -195,7 +195,7 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
         plans: client.plans.map(plan => plan.id !== item.planId ? plan : {
           ...plan,
           samplings: plan.samplings.map((s: Sampling) =>
-            s.id !== item.sampling.id ? s : { ...s, plannedDay, plannedMonth }
+            s.id !== item.sampling.id ? s : { ...s, plannedDay, plannedMonth, plannedTime: time || undefined }
           )
         })
       }, uid)
