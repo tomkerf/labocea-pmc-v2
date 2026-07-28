@@ -64,7 +64,7 @@ export default function PilotagePage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3 px-6 pt-4">
+      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3 px-4 md:px-8 pt-4">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>
             Pilotage
@@ -76,7 +76,7 @@ export default function PilotagePage() {
       </div>
 
       {/* Toggle Vue annuelle / Charge */}
-      <div className="shrink-0 flex gap-1 p-1 rounded-lg mb-3 w-fit ml-6"
+      <div className="shrink-0 flex gap-1 p-1 rounded-lg mb-3 w-fit ml-4 md:ml-8"
         style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>
         {([['annee', 'Vue annuelle', CalendarRange], ['charge', 'Charge', BarChart3]] as const).map(([v, label, Icon]) => {
           const active = view === v
@@ -95,7 +95,7 @@ export default function PilotagePage() {
       </div>
 
       {/* Filtres */}
-      <div className="shrink-0 flex flex-col sm:flex-row gap-3 mb-3 px-6">
+      <div className="shrink-0 flex flex-col sm:flex-row gap-3 mb-3 px-4 md:px-8">
         <div className="flex-1 flex flex-col gap-1">
           <label htmlFor="pilotage-filter-site" className="sr-only">Site géographique</label>
           <select
@@ -158,7 +158,7 @@ export default function PilotagePage() {
 
       <div className="flex-1 min-h-0 flex flex-col">
         {/* Navigation Année */}
-        <div className="shrink-0 flex items-center gap-3 mb-3 px-6">
+        <div className="shrink-0 flex items-center gap-3 mb-3 px-4 md:px-8">
           <button type="button" onClick={() => setYear((y) => y - 1)}
             aria-label="Année précédente"
             className="size-8 rounded-lg flex items-center justify-center cursor-pointer"

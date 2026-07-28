@@ -161,7 +161,7 @@ export default function EquipementPage() {
     : 0
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="px-4 py-6 md:px-8 max-w-2xl mx-auto">
       <button type="button" onClick={() => navigate('/materiel')}
         className="flex items-center gap-1 text-sm mb-6" style={{ color: COLORS.ACCENT }}>
         <ChevronLeft size={16} /> Matériel

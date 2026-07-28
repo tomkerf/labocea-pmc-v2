@@ -172,7 +172,7 @@ export default function MissionsPage() {
   }
 
   return (
-    <div className="p-6 bg-[var(--color-bg-primary)]">
+    <div className="px-4 py-6 md:px-8 bg-[var(--color-bg-primary)]">
       {/* En-tête */}
       <div className="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>

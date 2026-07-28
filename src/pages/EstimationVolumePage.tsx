@@ -54,7 +54,7 @@ export default function EstimationVolumePage() {
         </div>
       </div>
 
-      <div className="px-4 pt-4 flex flex-col gap-4 max-w-xl mx-auto w-full">
+      <div className="px-4 md:px-8 pt-4 flex flex-col gap-4 max-w-2xl mx-auto w-full">
         {/* toggle Estimer / Données */}
         <div className="flex gap-1.5 p-1.5 rounded-xl"
           style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)' }}>

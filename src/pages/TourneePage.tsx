@@ -246,14 +246,14 @@ export default function TourneePage() {
 
   if (allDone) {
     return (
-      <div className="p-6 max-w-xl mx-auto">
+      <div className="px-4 py-6 md:px-8 max-w-2xl mx-auto">
         <TourneeFinEcran items={finItems} onRetour={() => navigate('/')} />
       </div>
     )
   }
 
   return (
-    <div className="p-6 pb-10 max-w-xl mx-auto">
+    <div className="px-4 py-6 md:px-8 max-w-2xl mx-auto pb-10">
       {/* En-tête */}
       <div className="flex items-center gap-3 mb-6">
         <button type="button" onClick={() => navigate(-1)} className="p-1 -ml-1" aria-label="Retour">

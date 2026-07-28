@@ -143,7 +143,7 @@ export default function InfosPage() {
     <div className="min-h-screen" style={{ background: COLORS.BG_PRIMARY }}>
 
       {/* Header + recherche */}
-      <div className="sticky top-0 z-20 px-4 pt-4 pb-3 flex flex-col gap-3"
+      <div className="sticky top-0 z-20 px-4 md:px-8 pt-4 pb-3 flex flex-col gap-3"
         style={{ background: COLORS.BG_PRIMARY, borderBottom: '1px solid var(--color-border-subtle)' }}>
 
         <div className="flex items-center justify-between">
@@ -214,7 +214,7 @@ export default function InfosPage() {
       </div>
 
       {/* Contenu */}
-      <div className="px-4 py-4 flex flex-col gap-3">
+      <div className="px-4 md:px-8 py-4 flex flex-col gap-3">
         {groups.length === 0 && (
           <div className="text-center py-16">
             <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>

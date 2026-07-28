@@ -83,7 +83,7 @@ export default function MaterielPage() {
   }
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="px-4 py-6 md:px-8">
       {/* En-tête */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>

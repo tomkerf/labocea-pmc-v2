@@ -68,7 +68,7 @@ export default function PlanPage() {
   const isCustom = plan.frequence === 'Personnalisé'
 
   return (
-    <div className="p-4 sm:p-6 max-w-2xl pb-10">
+    <div className="px-4 py-6 md:px-8 max-w-2xl mx-auto pb-10">
       <button type="button" onClick={() => navigate(`/missions/${clientId}`)}
         className="flex items-center gap-1 text-sm mb-6" style={{ color: COLORS.ACCENT }}>
         <ChevronLeft size={16} /> {client.nom}

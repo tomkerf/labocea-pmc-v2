@@ -179,7 +179,7 @@ export default function ClientPage() {
   if (!client) return <div className="p-6 text-sm" style={{ color: COLORS.DANGER }}>Client introuvable.</div>
 
   return (
-    <div className="max-w-2xl pb-10">
+    <div className="max-w-2xl mx-auto pb-10">
       <div className="px-4 sm:px-6 pt-4 sm:pt-6">
         <ClientHeader
           client={client}

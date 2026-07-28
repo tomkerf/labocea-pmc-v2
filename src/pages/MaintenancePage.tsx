@@ -66,7 +66,7 @@ export default function MaintenancePage() {
   )
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="px-4 py-6 md:px-8 max-w-2xl mx-auto">
       {/* Retour */}
       <button type="button" onClick={() => navigate('/maintenances')}
         className="flex items-center gap-1 text-sm mb-6" style={{ color: COLORS.ACCENT }}>

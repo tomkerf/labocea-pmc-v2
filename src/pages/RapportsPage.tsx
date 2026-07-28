@@ -94,7 +94,7 @@ export default function RapportsPage() {
   const envoyesGroups = useMemo(() => groupByClient(rapportsEnvoyes), [rapportsEnvoyes])
 
   return (
-    <div className="px-4 py-6 pb-12 sm:px-6 max-w-4xl bg-[var(--color-bg-primary)]">
+    <div className="px-4 py-6 md:px-8 max-w-4xl mx-auto pb-12 bg-[var(--color-bg-primary)]">
       {/* Bouton retour mobile */}
       <div className="md:hidden mb-4">
         <Link to="/plus" className="inline-flex items-center gap-1 font-semibold text-xs text-[var(--color-accent)] hover:underline transition-opacity active:opacity-85">

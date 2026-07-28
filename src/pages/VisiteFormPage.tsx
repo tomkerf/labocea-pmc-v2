@@ -221,7 +221,7 @@ export default function VisiteFormPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 max-w-2xl pb-20">
+    <div className="px-4 py-6 md:px-8 max-w-2xl mx-auto pb-20">
       <VisiteFormHeader
         isNew={isNew}
         linkedNom={linkedNomState}

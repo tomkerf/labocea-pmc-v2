@@ -123,7 +123,7 @@ export default function MissionDetailPage() {
   const hasGps = !!(plan.lat && plan.lng && plan.lat !== '' && plan.lng !== '')
 
   return (
-    <div className="max-w-lg mx-auto pb-48 md:pb-32">
+    <div className="max-w-2xl mx-auto pb-48 md:pb-32">
 
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-3">

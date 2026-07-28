@@ -90,7 +90,7 @@ export default function PlusPage() {
   }, [todosActives, metrologieRetard, maintenancesActives, role, chatUnreadCount, actusUnreadCount])
 
   return (
-    <div className="p-6 pb-28 max-w-lg">
+    <div className="px-4 py-6 md:px-8 max-w-2xl mx-auto pb-28">
       <div className="mb-6">
         <h1 className="text-3xl font-bold" style={{ color: COLORS.TEXT_PRIMARY, letterSpacing: '-0.8px' }}>Plus</h1>
       </div>

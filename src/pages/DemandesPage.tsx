@@ -77,7 +77,7 @@ export default function DemandesPage() {
   return (
     <div className="h-full flex flex-col bg-[var(--color-bg-primary)]">
       {/* Header */}
-      <div className="px-6 pt-6 pb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shrink-0">
+      <div className="px-4 md:px-8 pt-6 pb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shrink-0">
         <div>
           <h1 className="text-xl font-bold text-[var(--color-text-primary)]">Demandes clients</h1>
           <p className="text-xs font-medium text-[var(--color-text-secondary)] mt-0.5">
@@ -92,7 +92,7 @@ export default function DemandesPage() {
       </div>
 
       {/* Kanban */}
-      <div className="flex-1 overflow-x-auto px-6 pb-6">
+      <div className="flex-1 overflow-x-auto px-4 md:px-8 pb-6">
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="size-6 rounded-full border-2 animate-spin border-[var(--color-border)] border-t-[var(--color-accent)]" />

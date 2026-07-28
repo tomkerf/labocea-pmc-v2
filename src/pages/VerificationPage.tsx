@@ -70,7 +70,7 @@ function NewVerificationForm() {
   }
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="px-4 py-6 md:px-8 max-w-2xl mx-auto">
       <button type="button" onClick={() => navigate('/metrologie')}
         className="flex items-center gap-1 text-sm mb-6" style={{ color: COLORS.ACCENT }}>
         <ChevronLeft size={16} /> Métrologie
@@ -173,7 +173,7 @@ export default function VerificationPage() {
   )
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="px-4 py-6 md:px-8 max-w-2xl mx-auto">
       {/* Retour */}
       <button type="button" onClick={() => navigate('/metrologie')}
         className="flex items-center gap-1 text-sm mb-6" style={{ color: COLORS.ACCENT }}>

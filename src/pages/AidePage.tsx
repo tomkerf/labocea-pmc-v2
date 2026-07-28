@@ -723,7 +723,7 @@ export default function AidePage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col gap-6">
+    <div className="px-4 py-6 md:px-8 max-w-4xl mx-auto flex flex-col gap-6">
       <AideHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <AideShortcuts onShortcutClick={handleShortcutClick} />
 

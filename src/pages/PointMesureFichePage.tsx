@@ -87,7 +87,7 @@ export default function PointMesureFichePage() {
 
 
   return (
-    <div className="max-w-lg mx-auto pb-24">
+    <div className="max-w-2xl mx-auto pb-24">
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-3">
         <button type="button"

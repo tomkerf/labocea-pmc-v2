@@ -75,7 +75,7 @@ export default function ComptePage() {
   }
 
   return (
-    <div className="p-6 max-w-lg">
+    <div className="px-4 py-6 md:px-8 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold" style={{ color: COLORS.TEXT_PRIMARY }}>Mon compte</h1>
         {saving && <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Sauvegarde…</span>}

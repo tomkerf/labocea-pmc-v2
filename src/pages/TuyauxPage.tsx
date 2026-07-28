@@ -92,7 +92,7 @@ export default function TuyauxPage() {
   )
 
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="px-4 py-6 md:px-8 max-w-4xl mx-auto">
       {/* En-tête + stats */}
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div>
