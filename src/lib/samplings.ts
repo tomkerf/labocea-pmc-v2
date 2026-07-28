@@ -23,14 +23,15 @@ export function validateSampling(s: Pick<Sampling, 'status' | 'motif' | 'doneDat
 }
 
 /** Génère la liste initiale des prélèvements pour un plan selon sa fréquence.
- *  - 'Personnalisé' → retourne [] (saisie manuelle uniquement)
- *  - 'Bimensuel'    → 2 prélèvements par mois, jour non fixé (plannedDay = 0)
- *  - Autres         → un prélèvement par mois cible, jour depuis customDays ou defaultDay
+ *  - 'Personnalisé'  → retourne [] (saisie manuelle uniquement)
+ *  - 'Hebdomadaire'  → une occurrence par semaine sur plan.defaultWeeklyDay, calculée sur `year`
+ *  - 'Bimensuel'     → 2 prélèvements par mois, jour non fixé (plannedDay = 0)
+ *  - Autres          → un prélèvement par mois cible, jour depuis customDays ou defaultDay
  *
  *  Si plan.customMonths est renseigné (et fréquence ≠ 'Annuel'), les mois personnalisés
  *  remplacent les mois par défaut de la fréquence.
  */
-export function generateSamplings(plan: Plan): Sampling[] {
+export function generateSamplings(plan: Plan, year: number = new Date().getFullYear()): Sampling[] {
   if (plan.frequence === 'Personnalisé') return []
 
   const blankSampling = (num: number, month: number, day: number): Sampling => ({
@@ -48,6 +49,25 @@ export function generateSamplings(plan: Plan): Sampling[] {
     reportHistory: [],
     doneBy: '',
   })
+
+  // Hebdomadaire — une occurrence par semaine sur le jour choisi, calculée sur l'année réelle
+  // (contrairement aux autres fréquences, "tous les lundis" dépend du calendrier de l'année).
+  if (plan.frequence === 'Hebdomadaire') {
+    // ?? 0 : les plans créés avant l'ajout de ce champ n'ont pas defaultWeeklyDay en base
+    // malgré le typage TS qui le déclare requis — sans ce filet, la comparaison ne matchait
+    // jamais et générait silencieusement 0 prélèvement.
+    const targetWeekday = plan.defaultWeeklyDay ?? 0
+    const result: Sampling[] = []
+    const end = new Date(year, 11, 31)
+    let num = 1
+    for (const d = new Date(year, 0, 1); d <= end; d.setDate(d.getDate() + 1)) {
+      const weekday = (d.getDay() + 6) % 7 // JS: dim=0..sam=6 → lun=0..dim=6
+      if (weekday === targetWeekday) {
+        result.push(blankSampling(num++, d.getMonth(), d.getDate()))
+      }
+    }
+    return result
+  }
 
   // Bimensuel — 2 prélèvements / mois, pas de jour fixé
   if (plan.frequence === 'Bimensuel') {

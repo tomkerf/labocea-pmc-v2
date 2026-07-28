@@ -40,6 +40,7 @@ function makePlan(overrides: Partial<Plan> = {}): Plan {
     bimensuelMonths: [],
     defaultDay: 15,
     customDays: {},
+    defaultWeeklyDay: 0,
     samplings: [],
     ...overrides,
   }
@@ -202,6 +203,73 @@ describe('generateSamplings', () => {
         expect(Array.isArray(s.reportHistory)).toBe(true)
         expect(s.reportHistory).toHaveLength(0)
       }
+    })
+  })
+
+  describe('Hebdomadaire', () => {
+    it('génère 52 occurrences pour 2026 avec jour = lundi (0)', () => {
+      // 2026 commence un jeudi ; vérifié manuellement : 52 lundis en 2026
+      const result = generateSamplings(makePlan({ frequence: 'Hebdomadaire', defaultWeeklyDay: 0 }), 2026)
+      expect(result).toHaveLength(52)
+    })
+
+    it('génère 53 occurrences pour 2026 avec jour = jeudi (3)', () => {
+      // 2026 commence un jeudi ET finit un jeudi (365 jours, année non bissextile) → 53 jeudis
+      const result = generateSamplings(makePlan({ frequence: 'Hebdomadaire', defaultWeeklyDay: 3 }), 2026)
+      expect(result).toHaveLength(53)
+    })
+
+    it('toutes les occurrences tombent bien sur le jour de semaine demandé', () => {
+      const result = generateSamplings(makePlan({ frequence: 'Hebdomadaire', defaultWeeklyDay: 0 }), 2026)
+      for (const s of result) {
+        const d = new Date(2026, s.plannedMonth, s.plannedDay)
+        const weekday = (d.getDay() + 6) % 7
+        expect(weekday).toBe(0)
+      }
+    })
+
+    it('la première occurrence de 2026 (lundi) est le 5 janvier', () => {
+      const result = generateSamplings(makePlan({ frequence: 'Hebdomadaire', defaultWeeklyDay: 0 }), 2026)
+      expect(result[0].plannedMonth).toBe(0)
+      expect(result[0].plannedDay).toBe(5)
+    })
+
+    it('la dernière occurrence de 2026 (lundi) est le 28 décembre', () => {
+      const result = generateSamplings(makePlan({ frequence: 'Hebdomadaire', defaultWeeklyDay: 0 }), 2026)
+      const last = result[result.length - 1]
+      expect(last.plannedMonth).toBe(11)
+      expect(last.plannedDay).toBe(28)
+    })
+
+    it('les numéros (num) sont consécutifs à partir de 1', () => {
+      const result = generateSamplings(makePlan({ frequence: 'Hebdomadaire', defaultWeeklyDay: 0 }), 2026)
+      expect(result.map((s) => s.num)).toEqual(Array.from({ length: 52 }, (_, i) => i + 1))
+    })
+
+    it('chaque prélèvement a le statut "planned" et un id unique', () => {
+      const result = generateSamplings(makePlan({ frequence: 'Hebdomadaire', defaultWeeklyDay: 0 }), 2026)
+      expect(result.every((s) => s.status === 'planned')).toBe(true)
+      expect(new Set(result.map((s) => s.id)).size).toBe(52)
+    })
+  })
+
+  describe('year non fourni', () => {
+    it('les fréquences non-hebdomadaires ignorent le paramètre year (comportement inchangé)', () => {
+      const result = generateSamplings(makePlan({ frequence: 'Mensuel' }))
+      expect(result).toHaveLength(12)
+    })
+  })
+
+  describe('Hebdomadaire — plan existant sans defaultWeeklyDay (non-régression)', () => {
+    it('retombe sur lundi (0) si defaultWeeklyDay est undefined en base malgré le typage requis', () => {
+      // Reproduit un plan Firestore créé avant l'ajout du champ : le typage TS déclare
+      // defaultWeeklyDay requis, mais la donnée réelle peut ne pas l'avoir.
+      const legacyPlan = makePlan({ frequence: 'Hebdomadaire' }) as unknown as Record<string, unknown>
+      delete legacyPlan.defaultWeeklyDay
+      const result = generateSamplings(legacyPlan as unknown as Plan, 2026)
+      expect(result).toHaveLength(52)
+      expect(result[0].plannedMonth).toBe(0)
+      expect(result[0].plannedDay).toBe(5)
     })
   })
 })

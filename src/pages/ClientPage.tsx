@@ -139,7 +139,7 @@ export default function ClientPage() {
       id: generateId(), nom: 'Nouveau point', siteNom: '',
       frequence: 'Mensuel', meteo: '', nature: 'Eau usée', methode: 'Ponctuel',
       lat: '', lng: '', gpsApprox: false,
-      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
+      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [],
     }
     triggerSave({ ...client, plans: [...client.plans, newPlan] })
@@ -151,7 +151,7 @@ export default function ClientPage() {
       id: generateId(), separator: true, nom: '', siteNom: '',
       frequence: 'Mensuel', meteo: '', nature: 'Souterraine', methode: 'Ponctuel',
       lat: '', lng: '', gpsApprox: false,
-      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
+      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [],
     }
     triggerSave({ ...client, plans: [...client.plans, sep] })

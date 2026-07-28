@@ -7,6 +7,7 @@ interface YearMatrixPlanRowProps {
   row: RowData
   planYear: number
   onOpenIssueModal: (type: 'overdue' | 'non_effectue') => void
+  onOpenMonthModal: (month: number, planId: string) => void
   isFirstInSite?: boolean
   activeMonth?: number | null
 }
@@ -57,7 +58,7 @@ function getSamplingBadgeStyle(s: Sampling | null, planYear: number, isAuto?: bo
   }
 }
 
-export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal, isFirstInSite, activeMonth = null }: YearMatrixPlanRowProps) {
+export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal, onOpenMonthModal, isFirstInSite, activeMonth = null }: YearMatrixPlanRowProps) {
   return (
     <tr
       className={`border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-tertiary)] transition-colors group h-8${isFirstInSite ? ' border-t border-t-[var(--color-border)]' : ''}`}
@@ -79,6 +80,7 @@ export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal, isF
       </td>
       {row.samplingsByMonth.map((s, mIdx) => {
         const isBimensuel = row.plan.frequence === 'Bimensuel'
+        const isHebdomadaire = row.plan.frequence === 'Hebdomadaire'
         const pair = row.pairsByMonth[mIdx]
         const dotSize = 'size-4'
         const iconSize = 'text-[9px]'
@@ -123,6 +125,32 @@ export default function YearMatrixPlanRow({ row, planYear, onOpenIssueModal, isF
                   })()}
                 </div>
               )
+            ) : isHebdomadaire ? (
+              pair.length > 0 && (() => {
+                const occurrences = pair.filter((ps): ps is Sampling => ps !== null)
+                const total = occurrences.length
+                const doneCount = occurrences.filter(ps => ps.status === 'done').length
+                const resolvedCount = occurrences.filter(ps => ps.status === 'done' || ps.status === 'non_effectue').length
+                const hasOverdue = occurrences.some(ps => isSamplingOverdue(ps, planYear, isAuto))
+                const tone = hasOverdue ? 'danger' : resolvedCount === total ? 'success' : 'warning'
+                const toneStyle = {
+                  success: { bg: 'var(--color-success-light)', text: 'var(--color-success)' },
+                  warning: { bg: 'var(--color-warning-light)', text: 'var(--color-warning)' },
+                  danger:  { bg: 'var(--color-danger-light)',  text: 'var(--color-danger)' },
+                }[tone]
+                return (
+                  <button
+                    type="button"
+                    onClick={() => onOpenMonthModal(mIdx, row.plan.id)}
+                    className="mx-auto flex items-center justify-center rounded-full text-[10px] font-bold leading-none transition-transform hover:scale-110 shadow-sm cursor-pointer active:scale-95"
+                    style={{ width: 34, height: 20, backgroundColor: toneStyle.bg, color: toneStyle.text }}
+                    title={`${MOIS_LONG[mIdx]} — ${doneCount}/${total} fait${doneCount > 1 ? 's' : ''}${hasOverdue ? ' — en retard' : ''} — cliquer pour voir le détail`}
+                    aria-label={`${MOIS_LONG[mIdx]} — ${doneCount} sur ${total} fait${hasOverdue ? ', en retard' : ''}`}
+                  >
+                    {doneCount}/{total}
+                  </button>
+                )
+              })()
             ) : (
               s && (
                 (() => {

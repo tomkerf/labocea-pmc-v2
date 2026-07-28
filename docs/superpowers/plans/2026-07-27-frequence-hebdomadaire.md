@@ -100,7 +100,7 @@ function makePlan(overrides: Partial<Plan> = {}): Plan {
 
 - [ ] **Step 5: Vérifier que le projet compile**
 
-Run: `npx tsc --noEmit`
+Run: `npx tsc -b` (pas `npx tsc --noEmit` — voir note en Task 7)
 Expected: aucune erreur (si une erreur apparaît sur un autre site de construction de `Plan` non
 listé ci-dessus, l'ajouter avec `defaultWeeklyDay: 0` et documenter le fichier ici avant de
 continuer).
@@ -250,7 +250,7 @@ Dans `src/hooks/usePlanActions.ts`, remplacer la fonction `generateSamplingsForP
 
 - [ ] **Step 2: Vérifier la compilation et les tests existants du hook**
 
-Run: `npx tsc --noEmit && npx vitest run --project unit src/hooks/__tests__/usePlanActions.test.ts`
+Run: `npx tsc -b && npx vitest run --project unit src/hooks/__tests__/usePlanActions.test.ts`
 Expected: PASS (aucun test existant ne devrait dépendre du comportement précis de l'année passée
 à `generateSamplings`, seulement de l'appel).
 
@@ -388,7 +388,7 @@ Remplacer le calcul de `title` (lignes 51-53) :
 
 - [ ] **Step 4: Vérifier la compilation**
 
-Run: `npx tsc --noEmit`
+Run: `npx tsc -b`
 Expected: aucune erreur.
 
 - [ ] **Step 5: Commit**
@@ -484,7 +484,7 @@ Remplacer le bloc `{monthModal !== null && (...)}` (lignes 291-300) :
 
 - [ ] **Step 5: Vérifier la compilation (échec attendu à ce stade)**
 
-Run: `npx tsc --noEmit`
+Run: `npx tsc -b`
 Expected: FAIL — `YearMatrixPlanRow` n'accepte pas encore la prop `onOpenMonthModal` (corrigé à la
 Task 7). Confirmer que l'erreur pointe bien vers `YearMatrixPlanRow.tsx` / l'appel dans
 `YearMatrixView.tsx`, pas ailleurs.
@@ -636,7 +636,9 @@ menant au rendu par défaut), insérer une branche intermédiaire — remplacer 
 
 - [ ] **Step 3: Vérifier la compilation**
 
-Run: `npx tsc --noEmit`
+Run: `npx tsc -b` (⚠️ pas `npx tsc --noEmit` — le `tsconfig.json` racine a `"files": []` avec des
+project references, donc `--noEmit` seul ne type-check rien du tout ; `-b` est la commande utilisée
+par `npm run build` et la seule qui vérifie réellement le projet)
 Expected: aucune erreur.
 
 - [ ] **Step 4: Lint**

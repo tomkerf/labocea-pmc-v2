@@ -23,7 +23,7 @@ export function joursEcoules(dateStr: string) {
 }
 
 export const SEGMENTS = ['SRA', 'AEP', 'STEP', 'TAR', 'Réseau de mesure', 'RSDE']
-export const FREQUENCES = ['', 'Mensuel', 'Bimensuel', 'Trimestriel', 'Semestriel', 'Annuel', 'Ponctuel']
+export const FREQUENCES = ['', 'Hebdomadaire', 'Mensuel', 'Bimensuel', 'Trimestriel', 'Semestriel', 'Annuel', 'Ponctuel']
 
 export const EMPTY: Omit<Demande, 'id' | 'createdBy' | 'createdAt' | 'updatedAt'> = {
   contactNom: '', contactSociete: '', contactEmail: '', contactTel: '',

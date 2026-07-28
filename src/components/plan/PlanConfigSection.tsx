@@ -5,9 +5,10 @@ import type { Plan, FrequenceType, NatureEauType, MethodeType } from '@/types'
 import { uploadPlanPhoto, deletePlanPhoto, ImageValidationError } from '@/lib/uploadPhoto'
 import { toast } from '@/stores/toastStore'
 import { COLORS } from '@/lib/constants'
+import { JOURS_LONG } from '@/lib/planningUtils'
 
 
-const FREQUENCES: FrequenceType[] = ['Mensuel', 'Bimensuel', 'Trimestriel', 'Semestriel', 'Annuel', 'Personnalisé']
+const FREQUENCES: FrequenceType[] = ['Hebdomadaire', 'Mensuel', 'Bimensuel', 'Trimestriel', 'Semestriel', 'Annuel', 'Personnalisé']
 const NATURES: NatureEauType[] = ['Eau usée', 'Rivière', 'Souterraine', 'Eau pluviale', 'Eau saline', 'Boues', 'Autre']
 const METHODES: MethodeType[] = ['Ponctuel', 'Composite', 'Automatique']
 
@@ -70,6 +71,18 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
             {FREQUENCES.map((f) => <option key={f}>{f}</option>)}
           </select>
         </PlanField>
+        {plan.frequence === 'Hebdomadaire' && (
+          <PlanField label="Jour de la semaine">
+            <select
+              aria-label="Jour de la semaine"
+              value={plan.defaultWeeklyDay ?? 0}
+              onChange={(e) => onUpdate('defaultWeeklyDay', parseInt(e.target.value))}
+              className="field-input"
+            >
+              {JOURS_LONG.map((jour, i) => <option key={jour} value={i}>{jour}</option>)}
+            </select>
+          </PlanField>
+        )}
         <PlanField label="Nature de l'eau">
           <select aria-label="Nature de l'eau" value={plan.nature} onChange={(e) => onUpdate('nature', e.target.value as NatureEauType)} className="field-input">
             {NATURES.map((n) => <option key={n}>{n}</option>)}

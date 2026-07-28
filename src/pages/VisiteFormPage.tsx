@@ -153,7 +153,7 @@ export default function VisiteFormPage() {
       nature: visitePoint.typeEau,
       methode: visitePoint.methode,
       lat: '', lng: '', gpsApprox: false,
-      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {},
+      customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [],
     }
     saveClient({ ...linkedClient, plans: [...linkedClient.plans, newPlan] })
