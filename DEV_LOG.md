@@ -3,6 +3,39 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 193 — Fréquence hebdomadaire, heure de planification, plein écran vue annuelle, sidebar rail, harmonisation padding
+**28 juillet 2026**
+
+### Feature — Fréquence hebdomadaire pour les plans de prélèvement
+Merge de la branche `feature/frequence-hebdomadaire` (13 commits, travail préparé en sessions précédentes) : nouveau `FrequenceType = 'Hebdomadaire'`, `defaultWeeklyDay` sur `Plan`, génération des samplings hebdomadaires (`generateWeeklySamplings`), sélecteur de jour de semaine dans `PlanConfigSection`, agrégation mensuelle + badge de synthèse + drill-down dans `YearMatrixView`/`YearMatrixPlanRow`, filtre par plan dans `IssueListModal` (mode `'month'`). 427/427 tests, tsc/lint clean. Déployé staging.
+
+### Feature — Heure optionnelle + date lisible dans la modale « Planifier le »
+Le champ `Sampling.plannedTime` existait déjà dans le modèle (utilisé par `SamplingForm`) mais pas dans la modale rapide de planification du pool (`DayModalPoolTab.tsx`). Ajout d'un champ heure optionnel (`type="time"`, toujours visible, vide par défaut — cohérent avec le pattern existant), et agrandissement du champ date (pleine largeur, police plus grande, bouton Confirmer sur sa propre ligne). Propagation via 3ᵉ paramètre optionnel `time?: string` sur `onValidatePool`/`handleValidatePool` à travers `DayModalPoolTab → DayModal → PlanningModals → usePlanningActions`. Exécuté en subagent-driven-development (3 tâches, review indépendant par tâche). 432/432 tests.
+
+### Feature — Mode plein écran pour la vue annuelle (`YearMatrixView`)
+Overlay in-app (`fixed inset-0 z-50`, pas de Fullscreen API navigateur — plus fiable cross-navigateur/mobile) déclenché par un bouton dans la toolbar existante, sortie via le bouton ou la touche Échap. Porté par le composant partagé, donc actif automatiquement dans Planning et Pilotage sans dupliquer de code. 437/437 tests.
+
+### Feature — Sidebar repliable en rail d'icônes
+Tom a soumis une proposition de Gemini pour remplacer la sidebar par un dock flottant façon macOS. Analyse : 19 destinations + 3 badges temps réel ne tiennent pas dans un dock de 6 icônes, les libellés comptent pour l'équipe terrain, et le timing (mode d'emploi fraîchement réécrit, pré-validation Brest) rendait un changement radical risqué. Alternative retenue et implémentée : rail d'icônes repliable (pattern Linear/Notion), `Sidebar.tsx` passe de 220px à 64px via un toggle persistant (`localStorage.sidebar_collapsed`), badges en overlay sur les icônes, tooltips natifs, sections aplaties avec séparateurs en mode rail. Vérifié visuellement que le contenu des pages se recentre automatiquement (flexbox + `mx-auto`, aucun code additionnel nécessaire) dans les deux états de la sidebar, sur les 3 paliers de largeur. 5 nouveaux tests, 437/437 au total.
+
+### Style — Harmonisation du padding et de la largeur des 25 pages
+Audit complet de `src/pages/` : padding incohérent (`p-6`, `px-4 py-8`, `px-6 py-5`, `p-4 sm:p-6`...), `mx-auto` appliqué au hasard, 6 valeurs de `max-w` différentes sans logique claire, 2 pages sans contrainte de largeur du tout. Normalisation en système à 3 paliers documenté dans `.claude/docs/design-system.md` : Étroit `max-w-2xl` (fiches/formulaires), Moyen `max-w-4xl` (listes éditées), Large sans `max-w` (vues denses) — toujours `px-4 py-6 md:px-8` + `mx-auto`. Les `pb-*` compensant des barres d'action fixes mobiles (ex. `MissionDetailPage`) et les headers sticky ont été identifiés et préservés sans les toucher.
+
+### Housekeeping
+Suite non commitée de la refonte Dashboard (TodosWidget fusionné en 1er onglet de `ATraiterWidget`, `EquipeSuiviWidget` segmenté, badges horaires selon `plannedTime`, accent bleu Apple `#0071E3`) commitée et poussée, séparée du segment client `PCCD` ajouté par erreur dans le même diff. Doublons `DEV_LOG 2/3.md` supprimés (contenu vérifié strictement inclus dans `DEV_LOG.md`). 4 worktrees mergées nettoyées avec leurs branches. 42 commits poussés sur `origin/main`.
+
+### État
+- TypeScript 0 erreur, ESLint 0 erreur, 437/437 tests verts.
+- Chaque feature exécutée en subagent-driven-development (implémenteur + review conformité spec + review qualité code, dans une worktree dédiée), mergée sur `main`, déployée staging après chaque merge.
+- 4 specs + 4 plans archivés dans `docs/superpowers/`.
+
+### Prochaines étapes
+- 🔴 Isolation Firestore staging/prod — toujours LE bloquant avant élargissement à l'équipe de Brest.
+- Validation du rendu mobile de la carte « À traiter » sur téléphone réel.
+- Améliorations cosmétiques mineures notées en revue de code sur `Sidebar.tsx` (constantes pour les classes des boutons footer dupliquées, `aria-controls` sur le toggle) — non bloquantes.
+
+---
+
 
 ## Session 192 — Refonte esthétique du Dashboard + 4 correctifs post-revue
 **26 juillet 2026**
