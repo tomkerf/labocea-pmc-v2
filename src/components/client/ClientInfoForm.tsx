@@ -6,7 +6,7 @@ import type { Client, SegmentType, NouvelleDemandeType } from '@/types'
 import { COLORS } from '@/lib/constants'
 
 
-const SEGMENTS: SegmentType[] = ['SRA', 'Réseau de mesure', 'RSDE']
+const SEGMENTS: SegmentType[] = ['SRA', 'Réseau de mesure', 'RSDE', 'PCCD']
 const NOUVELLES_DEMANDES: NouvelleDemandeType[] = ['Annuelle', 'Avenant', 'Ponctuelle']
 
 interface Props {

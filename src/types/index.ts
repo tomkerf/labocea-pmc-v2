@@ -31,6 +31,7 @@ export type SegmentType =
   | 'SRA'
   | 'Réseau de mesure'
   | 'RSDE'
+  | 'PCCD'
 
 export type SamplingStatus = 'planned' | 'done' | 'overdue' | 'non_effectue'
 export type FrequenceType = 'Hebdomadaire' | 'Mensuel' | 'Bimensuel' | 'Trimestriel' | 'Semestriel' | 'Annuel' | 'Personnalisé'
