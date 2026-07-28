@@ -244,6 +244,17 @@ describe('usePlanningActions', () => {
       const s = savedSampling()
       expect(s.plannedDay).toBe(20)
       expect(s.plannedMonth).toBe(7) // août (0-based)
+      expect(s.plannedTime).toBeUndefined()
+    })
+
+    it('planifie le prélèvement avec une heure', async () => {
+      const actions = setup()
+      await actions.handleValidatePool(poolItem, '2026-08-20', '09:30')
+
+      const s = savedSampling()
+      expect(s.plannedDay).toBe(20)
+      expect(s.plannedMonth).toBe(7)
+      expect(s.plannedTime).toBe('09:30')
     })
 
     it('refuse de planifier sur un jour férié', async () => {
