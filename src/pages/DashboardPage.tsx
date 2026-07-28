@@ -274,7 +274,7 @@ export default function DashboardPage() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="p-6 pb-10 max-w-6xl"
+      className="p-6 pb-10 max-w-6xl mx-auto"
     >
 
       <DashboardHeader
@@ -344,7 +344,7 @@ export default function DashboardPage() {
             )}
 
             {/* Hero : planning dominant + rail droit */}
-            <div className="grid grid-cols-1 md:grid-cols-[1.55fr_1fr] gap-[18px]">
+            <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-[18px]">
               {/* Planning */}
               <DashboardPlanningWidget
                 planningMode={planningMode}
