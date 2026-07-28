@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronRight, ChevronDown, Search } from 'lucide-react'
+import { ChevronRight, ChevronDown, Search, Maximize2, Minimize2 } from 'lucide-react'
 import type { Client, Sampling } from '@/types'
 import type { Preleveur } from '@/stores/preleveursStore'
 import { MOIS_LONG } from '@/lib/planningUtils'
@@ -22,6 +22,16 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
   const [issueModalType, setIssueModalType] = useState<'overdue' | 'non_effectue' | null>(null)
   const [monthModal, setMonthModal] = useState<{ month: number; planId?: string } | null>(null)
   const [focusedMonth, setFocusedMonth] = useState<number | null>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  useEffect(() => {
+    if (!isFullscreen) return
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsFullscreen(false)
+    }
+    window.addEventListener('keydown', handleEsc)
+    return () => window.removeEventListener('keydown', handleEsc)
+  }, [isFullscreen])
 
   const rows = useMemo(() => {
     const list: RowData[] = []
@@ -124,7 +134,10 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-[var(--color-bg-primary)] p-4 md:p-6">
+    <div className={isFullscreen
+      ? 'fixed inset-0 z-50 flex flex-col min-h-0 bg-[var(--color-bg-primary)] p-4 md:p-6'
+      : 'flex-1 flex flex-col min-h-0 bg-[var(--color-bg-primary)] p-4 md:p-6'
+    }>
       <div className="flex flex-col flex-1 bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] rounded-xl shadow-[var(--shadow-card)] overflow-hidden min-h-0">
 
         {/* Légende */}
@@ -164,6 +177,14 @@ export default function YearMatrixView({ clients, year, filterTech, filterSite, 
               ? <><ChevronDown size={12} /> Tout déplier</>
               : <><ChevronRight size={12} /> Tout replier</>
             }
+          </button>
+
+          <button type="button"
+            onClick={() => setIsFullscreen(v => !v)}
+            aria-label={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+            title={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+            className="flex items-center justify-center size-7 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors border border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
+            {isFullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
           </button>
         </div>
 
