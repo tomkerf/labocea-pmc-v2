@@ -129,11 +129,13 @@ export function DashboardPlanningWidget({
                 }`}
               >
                 {item.time ? (
-                  <span className="text-xs font-semibold shrink-0 w-10 text-center px-1.5 py-1 rounded-lg bg-[var(--color-accent-light)] text-[var(--color-accent)]">
+                  <span className="text-[11px] font-bold shrink-0 w-[38px] text-center py-1 rounded-[8px] bg-[var(--color-accent-light)] text-[var(--color-accent)] tracking-[-0.01em]">
                     {item.time}
                   </span>
                 ) : (
-                  <span className="shrink-0 size-2 rounded-full mt-0.5" style={{ background: item.dot }} />
+                  <span className="shrink-0 w-[38px] flex justify-center mt-0.5">
+                    <span className="shrink-0 size-2 rounded-full" style={{ background: item.dot }} />
+                  </span>
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium leading-snug text-[var(--color-text-primary)]">{item.title}</p>

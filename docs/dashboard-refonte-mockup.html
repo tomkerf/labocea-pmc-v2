@@ -262,20 +262,64 @@
   <!-- ── BLOC UNIFIÉ « À TRAITER » (remplace les 7 accordéons) ── -->
   <div style="margin-top:24px;">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">
-      <h2 class="sect" style="margin:0;">À traiter <span style="color:var(--t3);font-weight:600;">· 12 éléments</span></h2>
+      <h2 class="sect" style="margin:0;">À traiter <span style="color:var(--t3);font-weight:600;">· 17 éléments</span></h2>
       <span style="font-size:11.5px;font-weight:600;color:var(--ac);cursor:pointer;">Tout voir →</span>
     </div>
 
     <div class="card" style="overflow:hidden;">
       <div style="display:flex;gap:3px;padding:9px 10px;border-bottom:1px solid var(--bds);background:var(--bg3);overflow-x:auto;">
-        <button class="seg" data-tab="rap" aria-selected="true">Rapports <b class="d">3</b></button>
+        <button class="seg" data-tab="tod" aria-selected="true">Tâches <b class="a">5</b></button>
+        <button class="seg" data-tab="rap" aria-selected="false">Rapports <b class="d">3</b></button>
         <button class="seg" data-tab="ret" aria-selected="false">Retards <b class="d">2</b></button>
         <button class="seg" data-tab="plu" aria-selected="false">Pluie <b class="a">1</b></button>
         <button class="seg" data-tab="mai" aria-selected="false">Maintenances <b class="a">2</b></button>
         <button class="seg" data-tab="met" aria-selected="false">Métrologie <b class="w">4</b></button>
       </div>
 
-      <div data-panel="rap">
+      <div data-panel="tod">
+        <div class="row">
+          <input type="checkbox" style="margin-right:12px;cursor:pointer;transform:scale(1.15);accent-color:var(--ac);" />
+          <div style="flex:1;min-width:0;">
+            <p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Calibrer la sonde pH WTW 3420</p>
+            <p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Client : SAUR · Équipement : Sonde pH WTW 3420</p>
+          </div>
+          <span class="pill" style="background:var(--dal);color:var(--da);">Haute</span>
+        </div>
+        <div class="row">
+          <input type="checkbox" style="margin-right:12px;cursor:pointer;transform:scale(1.15);accent-color:var(--ac);" />
+          <div style="flex:1;min-width:0;">
+            <p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Rédiger rapport de prélèvement - Lambézellec</p>
+            <p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Client : Véolia · Échéance : Hier</p>
+          </div>
+          <span class="pill" style="background:var(--dal);color:var(--da);">Haute</span>
+        </div>
+        <div class="row">
+          <input type="checkbox" style="margin-right:12px;cursor:pointer;transform:scale(1.15);accent-color:var(--ac);" />
+          <div style="flex:1;min-width:0;">
+            <p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Vérification annuelle de l'oxymètre Hach HQ40d</p>
+            <p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Équipement : Oxymètre · Métrologie externe</p>
+          </div>
+          <span class="pill" style="background:var(--wal);color:var(--wa);">Moyenne</span>
+        </div>
+        <div class="row">
+          <input type="checkbox" style="margin-right:12px;cursor:pointer;transform:scale(1.15);accent-color:var(--ac);" />
+          <div style="flex:1;min-width:0;">
+            <p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Nettoyer et ranger les tuyaux de prélèvement</p>
+            <p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Atelier Brest · Interne</p>
+          </div>
+          <span class="pill" style="background:var(--bg3);color:var(--t2);">Basse</span>
+        </div>
+        <div class="row">
+          <input type="checkbox" style="margin-right:12px;cursor:pointer;transform:scale(1.15);accent-color:var(--ac);" />
+          <div style="flex:1;min-width:0;">
+            <p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Préparer les glacières pour la tournée de demain</p>
+            <p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Logistique · Brest</p>
+          </div>
+          <span class="pill" style="background:var(--bg3);color:var(--t2);">Basse</span>
+        </div>
+      </div>
+
+      <div data-panel="rap" hidden>
         <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--da);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">Brest Métropole — STEP Zone portuaire</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Prélevé le 09/07 · autosurveillance mensuelle</p></div><span class="pill" style="background:var(--dal);color:var(--da);">Retard 8 j</span></div>
         <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--wa);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">SAUR — Réservoir Guipavas</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Prélevé le 21/07 · eau potable</p></div><span class="pill" style="background:var(--wal);color:var(--wa);">Sous 6 j</span></div>
         <div class="row"><span style="width:7px;height:7px;border-radius:9999px;background:var(--wa);flex:none;"></span><div style="flex:1;min-width:0;"><p class="trunc" style="margin:0;font-size:13px;font-weight:600;">CCPI — Lagune Plabennec</p><p class="trunc" style="margin:2px 0 0;font-size:11.5px;color:var(--t2);">Prélevé le 23/07 · rejet COFRAC</p></div><span class="pill" style="background:var(--wal);color:var(--wa);">Sous 8 j</span></div>

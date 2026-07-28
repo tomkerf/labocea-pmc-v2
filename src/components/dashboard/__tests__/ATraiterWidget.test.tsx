@@ -11,6 +11,7 @@ const retard = (id: string): RetardItem => ({
 })
 
 const empty = {
+  todos: [], uid: 'u1',
   rapports: [], onMarkEnvoye: vi.fn(), retards: [],
   pluie: [], maintenances: [], metrologie: [],
 }

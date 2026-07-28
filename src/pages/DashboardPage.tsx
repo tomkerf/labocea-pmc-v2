@@ -27,7 +27,6 @@ import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { localISO } from '@/lib/dashboardUtils'
 import { usePreleveursListener } from '@/hooks/usePreleveurs'
 import type { Sampling, Client, Plan } from '@/types'
-import { TodosWidget } from '@/components/dashboard/TodosWidget'
 import { useTodosStore } from '@/stores/todosStore'
 import { useActusStore } from '@/stores/actusStore'
 import { uploadSamplingPhoto, ImageValidationError } from '@/lib/uploadPhoto'
@@ -383,11 +382,10 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Mes tâches prioritaires — bande pleine largeur */}
-            <TodosWidget todos={todos} uid={uid || ''} />
-
-            {/* À traiter — carte à onglets (remplace les 5 accordéons) */}
+            {/* À traiter — carte à onglets (remplace les 5 accordéons + Todos) */}
             <ATraiterWidget
+              todos={todos}
+              uid={uid || ''}
               rapports={rapportsAFaireMoi}
               onMarkEnvoye={markRapportEnvoye}
               retards={prelevementsEnRetard}

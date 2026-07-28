@@ -1,14 +1,15 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CloudRain, Check, AlertTriangle } from 'lucide-react'
+import { CloudRain, Check, AlertTriangle, CalendarClock, Briefcase, Wrench } from 'lucide-react'
 import { daysDiff } from '@/lib/dashboardUtils'
-import type { Maintenance, Equipement } from '@/types'
+import type { Maintenance, Equipement, Todo } from '@/types'
+import { saveTodo } from '@/services/todoService'
 import type { RapportItem, RetardItem, PluieItem } from '@/hooks/useDashboardStats'
 import { SectionTitle } from '@/components/dashboard/StatCard'
 
 const MOIS_COURT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 
-type TabKey = 'rapports' | 'retards' | 'pluie' | 'maintenances' | 'metrologie'
+type TabKey = 'todos' | 'rapports' | 'retards' | 'pluie' | 'maintenances' | 'metrologie'
 type Tone = 'danger' | 'warning' | 'accent'
 
 const TONE_CLASSES: Record<Tone, { pillBg: string; pillText: string; badgeSelectedBg: string; badgeSelectedText: string }> = {
@@ -35,6 +36,8 @@ function Dot({ color }: { color: string }) {
 }
 
 interface ATraiterWidgetProps {
+  todos: Todo[]
+  uid: string
   rapports: RapportItem[]
   onMarkEnvoye: (clientId: string, planId: string, samplingId: string) => void
   retards: RetardItem[]
@@ -43,20 +46,45 @@ interface ATraiterWidgetProps {
   metrologie: Equipement[]
 }
 
-export function ATraiterWidget({ rapports, onMarkEnvoye, retards, pluie, maintenances, metrologie }: ATraiterWidgetProps) {
+export function ATraiterWidget({ todos, uid, rapports, onMarkEnvoye, retards, pluie, maintenances, metrologie }: ATraiterWidgetProps) {
   const navigate = useNavigate()
+
+  async function handleToggleComplete(todo: Todo) {
+    const updated: Todo = {
+      ...todo,
+      statut: 'termine',
+    }
+    await saveTodo(updated, uid)
+  }
+
+  const pendingTodos = useMemo(() => {
+    return todos
+      .filter(t => t.statut !== 'termine' && (t.assignedTo === uid || t.assignedTo === 'equipe'))
+      .toSorted((a, b) => {
+        const prioWeight = { haute: 3, moyenne: 2, basse: 1 }
+        const prioA = prioWeight[a.priorite] || 0
+        const prioB = prioWeight[b.priorite] || 0
+        if (prioB !== prioA) return prioB - prioA
+        if (!a.dueDate) return 1
+        if (!b.dueDate) return -1
+        return a.dueDate.localeCompare(b.dueDate)
+      })
+  }, [todos, uid])
 
   const tabs = useMemo(() => {
     const rapportsEnRetard = rapports.some(r => r.enRetard)
     const metrologieEnRetard = metrologie.some(eq => eq.prochainEtalonnage && daysDiff(eq.prochainEtalonnage.split('T')[0]) < 0)
+    const hasHighPrioTodo = pendingTodos.some(t => t.priorite === 'haute')
+
     return [
+      { key: 'todos' as TabKey,        label: 'Tâches',       count: pendingTodos.length, tone: (hasHighPrioTodo ? 'danger' : 'accent') as Tone },
       { key: 'rapports' as TabKey,     label: 'Rapports',     count: rapports.length,     tone: (rapportsEnRetard ? 'danger' : 'warning') as Tone },
       { key: 'retards' as TabKey,      label: 'Retards',      count: retards.length,      tone: 'danger' as Tone },
       { key: 'pluie' as TabKey,        label: 'Pluie',         count: pluie.length,        tone: 'accent' as Tone },
       { key: 'maintenances' as TabKey, label: 'Maintenances', count: maintenances.length, tone: 'accent' as Tone },
       { key: 'metrologie' as TabKey,   label: 'Métrologie',   count: metrologie.length,   tone: (metrologieEnRetard ? 'danger' : 'warning') as Tone },
     ].filter(t => t.count > 0)
-  }, [rapports, retards, pluie, maintenances, metrologie])
+  }, [pendingTodos, rapports, retards, pluie, maintenances, metrologie])
 
   const autoTab = useMemo((): TabKey | null => {
     if (retards.length > 0) return 'retards'
@@ -90,7 +118,7 @@ export function ATraiterWidget({ rapports, onMarkEnvoye, retards, pluie, mainten
     tabRefs.current[nextTab.key]?.focus()
   }
 
-  const totalCount = rapports.length + retards.length + pluie.length + maintenances.length + metrologie.length
+  const totalCount = pendingTodos.length + rapports.length + retards.length + pluie.length + maintenances.length + metrologie.length
 
   if (tabs.length === 0 || !activeTab) return null
 
@@ -143,6 +171,58 @@ export function ATraiterWidget({ rapports, onMarkEnvoye, retards, pluie, mainten
           tabIndex={0}
           className="max-h-80 overflow-y-auto"
         >
+          {activeTab === 'todos' && pendingTodos.map(todo => {
+            const prioLabel = todo.priorite === 'haute' ? 'Haute' : todo.priorite === 'moyenne' ? 'Moyenne' : 'Basse'
+            const tone: Tone = todo.priorite === 'haute' ? 'danger' : todo.priorite === 'moyenne' ? 'warning' : 'accent'
+            const t = TONE_CLASSES[tone]
+
+            const todayStr = new Date().toISOString().split('T')[0]
+            const isOverdue = todo.dueDate && todo.dueDate < todayStr
+            const formattedDate = todo.dueDate ? todo.dueDate.split('-').reverse().join('/') : null
+
+            return (
+              <Row key={todo.id}>
+                <button
+                  type="button"
+                  onClick={() => handleToggleComplete(todo)}
+                  aria-label="Marquer comme terminé"
+                  className="shrink-0 flex items-center justify-center size-5 rounded-full border border-[var(--color-border)] text-[var(--color-accent)] hover:border-[var(--color-accent)] hover:bg-[var(--color-accent-light)] transition-colors cursor-pointer"
+                >
+                  <Check size={11} strokeWidth={3} className="opacity-0 hover:opacity-100 transition-opacity" />
+                </button>
+
+                <div className="flex-1 min-w-0" onClick={() => navigate('/todos')}>
+                  <p className="text-sm font-medium truncate text-[var(--color-text-primary)] hover:text-[var(--color-accent)] cursor-pointer transition-colors">
+                    {todo.titre}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-[11px] text-[var(--color-text-secondary)]">
+                    {todo.description && <span className="truncate max-w-[200px]">{todo.description} •</span>}
+                    {formattedDate && (
+                      <span className={`inline-flex items-center gap-0.5 ${isOverdue ? 'text-[var(--color-danger)] font-semibold' : ''}`}>
+                        <CalendarClock size={11} /> {formattedDate} {isOverdue && '(retard)'}
+                      </span>
+                    )}
+                    {todo.clientNom && (
+                      <span className="inline-flex items-center gap-0.5 text-[var(--color-accent)] font-medium">
+                        <Briefcase size={11} /> {todo.clientNom}
+                      </span>
+                    )}
+                    {todo.equipementNom && (
+                      <span className="inline-flex items-center gap-0.5 text-[var(--color-accent)] font-medium">
+                        <Wrench size={11} /> {todo.equipementNom}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <span className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full ${t.pillBg} ${t.pillText}`}>
+                  {prioLabel}
+                </span>
+              </Row>
+            )
+          })}
+
           {activeTab === 'rapports' && rapports.map(r => {
             const today = new Date(); today.setHours(0, 0, 0, 0)
             const fmtDone = new Date(r.doneDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })

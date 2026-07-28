@@ -64,15 +64,24 @@ interface Params {
 
 function getSamplingBadge(s: Sampling): SamplingBadge {
   const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes()
-  if (s.status === 'done')         return { label: 'Réalisé',  bg: 'var(--color-success-light)', color: COLORS.SUCCESS }
-  if (s.status === 'overdue')      return { label: 'Urgent',   bg: 'var(--color-danger-light)',  color: COLORS.DANGER }
-  if (s.status === 'non_effectue') return { label: 'Non fait', bg: 'var(--color-warning-light)', color: COLORS.WARNING }
+  if (s.status === 'done')         return { label: 'Réalisé',  bg: 'var(--color-success-light)', color: 'var(--color-success)' }
+  if (s.status === 'overdue')      return { label: 'Urgent',   bg: 'var(--color-danger-light)',  color: 'var(--color-danger)' }
+  if (s.status === 'non_effectue') return { label: 'Non fait', bg: 'var(--color-warning-light)', color: 'var(--color-warning)' }
   if (s.plannedTime) {
     const [h, m] = s.plannedTime.split(':').map(Number)
     const tMin = h * 60 + m
-    if (nowMinutes >= tMin && nowMinutes < tMin + 120) return { label: 'En cours', bg: 'var(--color-accent-light)', color: COLORS.ACCENT }
+    // Si on est dans le créneau courant (2 heures à partir de l'heure prévue) : "En cours"
+    if (nowMinutes >= tMin && nowMinutes < tMin + 120) {
+      return { label: 'En cours', bg: 'var(--color-accent-light)', color: 'var(--color-accent)' }
+    }
+    // Si l'heure est passée : "À faire"
+    if (nowMinutes >= tMin + 120) {
+      return { label: 'À faire', bg: 'var(--color-warning-light)', color: 'var(--color-warning)' }
+    }
+    // Si c'est dans le futur : "Planifié"
+    return { label: 'Planifié', bg: 'var(--color-accent-light)', color: 'var(--color-accent)' }
   }
-  return { label: 'À faire', bg: COLORS.BG_TERTIARY, color: COLORS.TEXT_SECONDARY }
+  return { label: 'À faire', bg: 'var(--color-warning-light)', color: 'var(--color-warning)' }
 }
 
 export function useDashboardStats({

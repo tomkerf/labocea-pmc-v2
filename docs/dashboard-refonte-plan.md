@@ -97,23 +97,16 @@ Onglet **« Mon activité »** uniquement. L'onglet « Suivi équipe » (`Equipe
 
 ## Décisions tranchées le 26/07/2026
 
-### 1. Placement du `TodosWidget` → **bande pleine largeur**
+### 1. Placement du `TodosWidget` → **Intégré en tant qu'onglet dans « À traiter »** (Mise à jour suite au retour de Tom)
 
-Section propre entre le hero et « À traiter », sur toute la largeur (`max-w-6xl`).
+Le widget de tâches libres (Todos) est fusionné directement en tant qu'onglet de la carte « À traiter » (placé en premier onglet).
 
-**Pourquoi pas les deux autres options :**
-- *6ᵉ onglet de « À traiter »* — les 5 autres onglets sont des listes **en lecture seule**,
-  2 lignes, badge à droite. `TodosWidget` a une checkbox qui **écrit dans Firestore**
-  (`saveTodo`, l. 43-49), 3 liens cliquables (client / équipement / échéance), un badge de
-  priorité et un footer. Le mettre en onglet casse l'uniformité des lignes, ou oblige à
-  l'amputer.
-- *Rail droit* — le rail fait ~380px. La ligne de métadonnées à 3 liens (l. 164-205)
-  passerait à la ligne salement, et 5 tâches × 4 lignes rendraient le rail deux fois plus
-  haut que la colonne planning.
+**Avantages :**
+- **Centralisation** : Toutes les actions de la journée (tâches, rapports, retards, métrologie, maintenances) sont regroupées dans un panneau unifié.
+- **Grille sans scroll** : Permet une disposition desktop à 2 colonnes parfaitement équilibrée tenant entièrement sur un écran standard (viewport 100vh) sans scroll vertical global de la page.
+- **Uniformité** : Les lignes de tâches ont été adaptées à la charte visuelle des autres listes (checkbox circulaire Apple-style à gauche, titre/description au centre, badge de priorité à droite), gardant l'interactivité d'écriture (sauvegarde dans Firestore lors du clic sur la checkbox).
 
-**Conséquence :** la page passe de 7 sections empilées à **2** (bande Todos + carte À traiter).
-Le composant garde toutes ses fonctions ; seuls le header (contraste, emojis) et le style
-(Tailwind au lieu de `COLORS.X` inline, hovers CSS au lieu de `onMouseEnter`) changent.
+**Conséquence :** Suppression de la bande Todos séparée. La page n'est plus constituée que d'une seule ligne Hero et de la carte « À traiter », facilitant la lisibilité.
 
 ### 2. Comportement mobile de « À traiter » → **dépliée sur l'onglet le plus urgent**
 

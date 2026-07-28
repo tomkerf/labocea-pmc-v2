@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { Timestamp } from 'firebase/firestore'
 import { EquipeSuiviWidget } from '../EquipeSuiviWidget'
 import type { Client } from '@/types'
@@ -32,59 +32,49 @@ describe('EquipeSuiviWidget', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('affiche le titre "Suivi équipe"', () => {
+  it('affiche le titre "À traiter (Équipe)"', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Site', frequence: 'Mensuel',
       meteo: '', nature: 'Souterraine', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
       customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [{ ...doneSampling, nappe: '' }] }] })
     render(<EquipeSuiviWidget clients={[client]} />)
-    expect(screen.getByText(/suivi équipe/i)).toBeTruthy()
+    expect(screen.getByText(/À traiter \(Équipe\)/i)).toBeTruthy()
   })
 
-  it('affiche le nom du client dans la liste des incomplets après ouverture', () => {
+  it('affiche le nom du client dans la liste des incomplets', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Jaudy', frequence: 'Mensuel',
       meteo: '', nature: 'Souterraine', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
       customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [{ ...doneSampling, nappe: '' }] }] })
     render(<EquipeSuiviWidget clients={[client]} />)
-    const toggle = screen.getByRole('button', { name: /prélèvements incomplets/i })
-    fireEvent.click(toggle)
     expect(screen.getByText('Kerjequel')).toBeTruthy()
   })
 
-  it('affiche le bon champ manquant après ouverture', () => {
+  it('affiche le bon champ manquant', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Site', frequence: 'Mensuel',
       meteo: '', nature: 'Souterraine', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
       customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [{ ...doneSampling, nappe: '' }] }] })
     render(<EquipeSuiviWidget clients={[client]} />)
-    const toggle = screen.getByRole('button', { name: /prélèvements incomplets/i })
-    fireEvent.click(toggle)
     expect(screen.getByText('Nappe manquante')).toBeTruthy()
   })
 
-  it('affiche le nom du client dans la liste des en retard après ouverture', () => {
-    // doneSampling has plannedMonth: 0, which will be in the past relative to today in the test environment (2026-05)
-    // using status: 'planned' to trigger isSamplingOverdue
+  it('affiche le nom du client dans la liste des en retard', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Site', frequence: 'Mensuel',
       meteo: '', nature: 'Eau usée', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
       customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [{ ...doneSampling, status: 'planned', plannedMonth: 0, plannedDay: 15 }] }] })
     vi.setSystemTime(new Date(2026, 3, 22)) // April 2026 (sampling planned in Jan is overdue)
     render(<EquipeSuiviWidget clients={[client]} />)
-    const toggle = screen.getByRole('button', { name: /prélèvements en retard/i })
-    fireEvent.click(toggle)
     expect(screen.getByText('Kerjequel')).toBeTruthy()
   })
 
-  it('affiche le nom du client dans la liste des rapports dus après ouverture', () => {
+  it('affiche le nom du client dans la liste des rapports dus', () => {
     const client = makeClient({ plans: [{ id: 'p1', nom: 'Plan', siteNom: 'Site', frequence: 'Mensuel',
       meteo: '', nature: 'Eau usée', methode: 'Ponctuel', lat: '', lng: '', gpsApprox: false,
       customMonths: [], bimensuelMonths: [], defaultDay: 0, customDays: {}, defaultWeeklyDay: 0,
       samplings: [{ ...doneSampling, status: 'done', rapportPrevu: true, rapportDate: '' }] }] })
     render(<EquipeSuiviWidget clients={[client]} />)
-    const toggle = screen.getByRole('button', { name: /rapports dus/i })
-    fireEvent.click(toggle)
     expect(screen.getByText('Kerjequel')).toBeTruthy()
   })
 })
