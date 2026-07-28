@@ -19,7 +19,7 @@ interface PlanningModalsProps {
   uid:                  string | null
   initiales:            string
   holidays:             Record<string, string>
-  handleValidatePool:   (item: PoolItem, date: string) => Promise<void>
+  handleValidatePool:   (item: PoolItem, date: string, time?: string) => Promise<void>
   setSelectedDay:       (v: string | null) => void
   // CellContextMenu
   ctxMenu:              { dateStr: string; x: number; y: number } | null

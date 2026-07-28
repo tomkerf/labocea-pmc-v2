@@ -12,7 +12,7 @@ export interface DayModalProps {
   overduePool: PoolItem[]
   uid: string | null
   initiales: string
-  onValidatePool: (item: PoolItem, date: string) => Promise<void>
+  onValidatePool: (item: PoolItem, date: string, time?: string) => Promise<void>
   initialTab?: 'pool' | 'evt'
   holidays: Record<string, string>
 }
