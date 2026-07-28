@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText, Sparkles, FlaskConical, CloudRain, MessageSquare, Newspaper, ChevronDown, Search, Compass } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText, Sparkles, FlaskConical, CloudRain, MessageSquare, Newspaper, ChevronDown, Search, Compass, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { m } from 'framer-motion'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectAppUser, selectRole, selectUid } from '@/stores/authStore'
@@ -36,7 +36,14 @@ export default function Sidebar() {
   const role    = useAuthStore(selectRole)
   const [bugOpen, setBugOpen] = useState(false)
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set(['Matériel & Suivi', 'Outils & Support']))
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true')
   const openSpotlight = useSpotlightStore((s) => s.open)
+
+  const toggleCollapsed = () => setCollapsed(prev => {
+    const next = !prev
+    localStorage.setItem('sidebar_collapsed', String(next))
+    return next
+  })
 
   const toggleSection = (title: string) => setCollapsedSections(prev => {
     const next = new Set(prev)
@@ -109,31 +116,57 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex flex-col w-[220px] shrink-0 h-screen sticky top-0 bg-[rgba(255,255,255,0.85)] backdrop-blur-md border-r border-[var(--color-border-subtle)]"
+      className="hidden md:flex flex-col shrink-0 h-screen sticky top-0 bg-[rgba(255,255,255,0.85)] backdrop-blur-md border-r border-[var(--color-border-subtle)]"
+      style={{ width: collapsed ? 64 : 220, transition: 'width 200ms ease' }}
     >
       {/* Logo + titre app */}
-      <div className="px-4 py-4 flex items-center gap-3 border-b border-[var(--color-border-subtle)]">
+      <div className={collapsed
+        ? 'px-2 py-4 flex flex-col items-center gap-2 border-b border-[var(--color-border-subtle)]'
+        : 'px-4 py-4 flex items-center gap-3 border-b border-[var(--color-border-subtle)]'}>
         <img src="/logo.png" alt="Labocea" className="size-8 object-contain shrink-0" />
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-base font-semibold text-[var(--color-text-primary)]">
-            Labocea PMC
-          </span>
-          {import.meta.env.DEV && (
-            <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-[var(--color-warning-light)] text-[var(--color-warning)] border border-[rgba(255,159,10,0.12)]">
-              DEV
+        {!collapsed && (
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-base font-semibold text-[var(--color-text-primary)]">
+              Labocea PMC
             </span>
-          )}
-        </div>
+            {import.meta.env.DEV && (
+              <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-[var(--color-warning-light)] text-[var(--color-warning)] border border-[rgba(255,159,10,0.12)]">
+                DEV
+              </span>
+            )}
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={toggleCollapsed}
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? 'Développer la barre latérale' : 'Réduire la barre latérale'}
+          title={collapsed ? 'Développer la barre latérale' : 'Réduire la barre latérale'}
+          className={collapsed
+            ? 'flex items-center justify-center p-1.5 rounded-md transition-all cursor-pointer text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]/50'
+            : 'ml-auto flex items-center justify-center p-1.5 rounded-md transition-all cursor-pointer text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]/50'}
+        >
+          {collapsed
+            ? <PanelLeftOpen size={16} strokeWidth={1.8} />
+            : <PanelLeftClose size={16} strokeWidth={1.8} />}
+        </button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-3 flex flex-col gap-4" style={{ scrollbarWidth: 'none' }}>
-        {sections.map((section) => {
+      <nav
+        className={collapsed
+          ? 'flex-1 min-h-0 overflow-y-auto px-2 py-3 flex flex-col gap-2'
+          : 'flex-1 min-h-0 overflow-y-auto px-3 py-3 flex flex-col gap-4'}
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {sections.map((section, index) => {
           const isExpanded = !collapsedSections.has(section.title)
-          const showItems = !section.collapsible || isExpanded
+          const showItems = collapsed || !section.collapsible || isExpanded
           return (
             <div key={section.title} className="flex flex-col gap-0.5">
-              {section.collapsible ? (
+              {collapsed ? (
+                index > 0 && <div role="separator" className="mx-2 border-t border-[var(--color-border-subtle)]" />
+              ) : section.collapsible ? (
                 <button
                   type="button"
                   onClick={() => toggleSection(section.title)}
@@ -150,91 +183,132 @@ export default function Sidebar() {
                   {section.title}
                 </span>
               )}
-              {showItems && section.items.map(({ to, icon: Icon, label, end, isAccount }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  end={end}
-                  className={({ isActive }) => `relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${
-                    isActive ? 'text-[var(--color-accent)] font-semibold' : 'text-[var(--color-text-secondary)] font-normal hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]/40'
-                  }`}
-                >
-                  {({ isActive }) => (
-                    <>
-                      {isActive && (
-                        <m.div
-                          layoutId="active-sidebar-bg"
-                          className="absolute inset-0 rounded-lg -z-10 bg-[var(--color-accent-light)] border border-[rgba(52,82,122,0.08)]"
-                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                        />
-                      )}
+              {showItems && section.items.map(({ to, icon: Icon, label, end, isAccount }) => {
+                const badge = to === '/missions' ? { count: overdueCount, danger: true }
+                  : to === '/chat'  ? { count: chatUnreadCount, danger: true }
+                  : to === '/actus' ? { count: actusUnreadCount, danger: false }
+                  : null
+                const railName = badge && badge.count > 0 ? `${label} (${badge.count})` : label
+                return (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    end={end}
+                    aria-label={collapsed ? railName : undefined}
+                    title={collapsed ? railName : undefined}
+                    className={({ isActive }) => collapsed
+                      ? `relative flex items-center justify-center py-2.5 rounded-lg transition-all cursor-pointer ${
+                          isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]/40'
+                        }`
+                      : `relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${
+                          isActive ? 'text-[var(--color-accent)] font-semibold' : 'text-[var(--color-text-secondary)] font-normal hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]/40'
+                        }`}
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <m.div
+                            layoutId="active-sidebar-bg"
+                            className="absolute inset-0 rounded-lg -z-10 bg-[var(--color-accent-light)] border border-[rgba(52,82,122,0.08)]"
+                            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                          />
+                        )}
 
-                      {isAccount ? (
-                        <UserAvatar
-                          initiales={appUser?.initiales}
-                          color={appUser?.avatarColor}
-                          size={20}
-                          fontSize={8}
-                        />
-                      ) : Icon ? (
-                        <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} />
-                      ) : null}
-                      <span className="flex-1 z-10 truncate">{label}</span>
-                      {to === '/missions' && overdueCount > 0 && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10 bg-[var(--color-danger-light)] text-[var(--color-danger-text)] border border-[rgba(255,59,48,0.15)] min-w-[18px] text-center">
-                          {overdueCount}
+                        <span className="relative shrink-0">
+                          {isAccount ? (
+                            <UserAvatar
+                              initiales={appUser?.initiales}
+                              color={appUser?.avatarColor}
+                              size={20}
+                              fontSize={8}
+                            />
+                          ) : Icon ? (
+                            <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} />
+                          ) : null}
+                          {collapsed && badge && badge.count > 0 && (
+                            <span className={badge.danger
+                              ? 'absolute -top-1.5 -right-2 text-[9px] font-bold px-1 rounded-full min-w-[15px] text-center z-10 bg-[var(--color-danger-light)] text-[var(--color-danger-text)] border border-[rgba(255,59,48,0.15)]'
+                              : 'absolute -top-1.5 -right-2 text-[9px] font-bold px-1 rounded-full min-w-[15px] text-center z-10 bg-[var(--color-accent-light)] text-[var(--color-accent)] border border-[rgba(0,113,227,0.15)]'}>
+                              {badge.count > 99 ? '99+' : badge.count}
+                            </span>
+                          )}
                         </span>
-                      )}
-                      {to === '/chat' && chatUnreadCount > 0 && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10 bg-[var(--color-danger-light)] text-[var(--color-danger-text)] border border-[rgba(255,59,48,0.15)] min-w-[18px] text-center">
-                          {chatUnreadCount}
-                        </span>
-                      )}
-                      {to === '/actus' && actusUnreadCount > 0 && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10 bg-[var(--color-accent-light)] text-[var(--color-accent)] border border-[rgba(0,113,227,0.15)] min-w-[18px] text-center">
-                          {actusUnreadCount}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </NavLink>
-              ))}
+                        {!collapsed && <span className="flex-1 z-10 truncate">{label}</span>}
+                        {!collapsed && badge && badge.count > 0 && (
+                          <span className={badge.danger
+                            ? 'text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10 bg-[var(--color-danger-light)] text-[var(--color-danger-text)] border border-[rgba(255,59,48,0.15)] min-w-[18px] text-center'
+                            : 'text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10 bg-[var(--color-accent-light)] text-[var(--color-accent)] border border-[rgba(0,113,227,0.15)] min-w-[18px] text-center'}>
+                            {badge.count}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </NavLink>
+                )
+              })}
             </div>
           )
         })}
       </nav>
 
       {/* Sync badge + Bouton signalement bug */}
-      <div className="shrink-0 px-3 pb-4 flex flex-col gap-1 border-t border-[var(--color-border-subtle)] pt-3.5">
-        <div className="flex items-center gap-2 px-3 py-1.5">
+      <div className={collapsed
+        ? 'shrink-0 px-2 pb-4 flex flex-col items-stretch gap-1 border-t border-[var(--color-border-subtle)] pt-3.5'
+        : 'shrink-0 px-3 pb-4 flex flex-col gap-1 border-t border-[var(--color-border-subtle)] pt-3.5'}>
+        <div className={collapsed
+          ? 'flex items-center justify-center py-1.5'
+          : 'flex items-center gap-2 px-3 py-1.5'}>
           <SyncBadge />
         </div>
         <button type="button"
           onClick={openSpotlight}
-          className="relative flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-all text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]/50 cursor-pointer"
+          aria-label={collapsed ? 'Rechercher (⌘K)' : undefined}
+          title={collapsed ? 'Rechercher (⌘K)' : undefined}
+          className={collapsed
+            ? 'relative flex items-center justify-center w-full py-2 rounded-lg text-xs font-medium transition-all text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]/50 cursor-pointer'
+            : 'relative flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-all text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]/50 cursor-pointer'}
         >
           <Search size={14} strokeWidth={1.8} />
-          <span>Rechercher</span>
-          <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--color-bg-tertiary)] text-[var(--color-text-tertiary)] border border-[var(--color-border-subtle)]">
-            ⌘K
-          </span>
+          {!collapsed && <span>Rechercher</span>}
+          {!collapsed && (
+            <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--color-bg-tertiary)] text-[var(--color-text-tertiary)] border border-[var(--color-border-subtle)]">
+              ⌘K
+            </span>
+          )}
         </button>
         <button type="button"
           onClick={() => changelog.show()}
-          className="relative flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-all text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]/50 cursor-pointer"
+          aria-label={collapsed ? 'Nouveautés' : undefined}
+          title={collapsed ? 'Nouveautés' : undefined}
+          className={collapsed
+            ? 'relative flex items-center justify-center w-full py-2 rounded-lg text-xs font-medium transition-all text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]/50 cursor-pointer'
+            : 'relative flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-all text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]/50 cursor-pointer'}
         >
-          <Sparkles size={14} strokeWidth={1.8} />
-          <span>Nouveautés</span>
-          {changelog.hasNew && (
+          {collapsed ? (
+            <span className="relative">
+              <Sparkles size={14} strokeWidth={1.8} />
+              {changelog.hasNew && (
+                <span className="size-2 rounded-full shrink-0 absolute -top-0.5 -right-0.5 bg-[var(--color-accent)] animate-pulse" />
+              )}
+            </span>
+          ) : (
+            <Sparkles size={14} strokeWidth={1.8} />
+          )}
+          {!collapsed && <span>Nouveautés</span>}
+          {!collapsed && changelog.hasNew && (
             <span className="size-2 rounded-full shrink-0 ml-auto bg-[var(--color-accent)] animate-pulse" />
           )}
         </button>
         <button type="button"
           onClick={() => setBugOpen(true)}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-all text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]/50 cursor-pointer"
+          aria-label={collapsed ? 'Signaler un problème' : undefined}
+          title={collapsed ? 'Signaler un problème' : undefined}
+          className={collapsed
+            ? 'relative flex items-center justify-center w-full py-2 rounded-lg text-xs font-medium transition-all text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]/50 cursor-pointer'
+            : 'flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-all text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]/50 cursor-pointer'}
         >
           <Bug size={14} strokeWidth={1.8} />
-          <span>Signaler un problème</span>
+          {!collapsed && <span>Signaler un problème</span>}
         </button>
       </div>
 
