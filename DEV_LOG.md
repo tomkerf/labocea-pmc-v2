@@ -4454,3 +4454,25 @@ Review complète de la codebase. 8 issues corrigées :
 
 ### Prochaines étapes
 - Ordre de passage dans la tournée (drag & drop ou heure planifiée) — reporté
+
+---
+
+## Session 194 — Centrage dashboard + ratio hero grid
+**28 juillet 2026**
+
+### Bugs corrigés
+
+**Dashboard non centré**
+- Cause racine : conteneur racine `p-6 pb-10 max-w-6xl` limitait la largeur sans `mx-auto`, donc la page restait collée à gauche sur les écrans larges.
+- Fix : ajout de `mx-auto`.
+
+### Ajustements UI
+- Ratio du hero grid (Planning du jour / rail État du parc matériel + Actualités) élargi en faveur du planning : `1.55fr/1fr` → `2fr/1fr` → `2.2fr/1fr`.
+- `CACHE_VERSION` du Service Worker bumpée (`pmc-v2-23` → `pmc-v2-24`) pour forcer la purge du cache client après déploiement.
+
+### Non résolu en fin de session
+- Utilisateur signale ne toujours pas voir le nouveau ratio du hero grid dans le navigateur après le bump de cache et un rechargement. Vérification serveur effectuée : le CSS et le JS déployés sur staging contiennent bien `2.2fr` — le déploiement est correct. Cause probable : cache navigateur/Service Worker persistant côté client (SW non désenregistré, ou onglet jamais rechargé après activation du nouveau SW). À reprendre : faire vérifier en navigation privée ou après désinscription manuelle du Service Worker (DevTools → Application → Service Workers → Unregister) avant de creuser plus loin côté code.
+
+### Prochaines étapes
+- Confirmer visuellement le nouveau ratio 2.2fr/1fr une fois le cache purgé côté client.
+- Ordre de passage dans la tournée (drag & drop ou heure planifiée) — toujours reporté.
