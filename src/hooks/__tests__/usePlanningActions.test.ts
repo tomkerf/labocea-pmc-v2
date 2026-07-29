@@ -263,5 +263,30 @@ describe('usePlanningActions', () => {
 
       expect(saveClient).not.toHaveBeenCalled()
     })
+
+    it('alerte si un Bilan 24h est planifié sans matériel disponible ce jour-là', async () => {
+      const equipements = [
+        { id: 'preleveur-1', categorie: 'preleveur', etat: 'operationnel' },
+        { id: 'debitmetre-1', categorie: 'debitmetre', etat: 'operationnel' },
+      ] as never
+      const eventsByDate = {
+        '2026-08-20': [{ id: 'other', type: 'prelevement', equipementsAssignes: ['preleveur-1', 'debitmetre-1'] }],
+      } as never
+      const actions = setup({ equipements, eventsByDate })
+      await actions.handleValidatePool({ ...poolItem, methode: 'Automatique' } as never, '2026-08-20')
+
+      expect(addToast).toHaveBeenCalledWith('warning', expect.stringContaining('20/08/2026'))
+    })
+
+    it('n\'alerte pas pour une méthode autre qu\'Automatique même sans matériel', async () => {
+      const equipements = [{ id: 'preleveur-1', categorie: 'preleveur', etat: 'operationnel' }] as never
+      const eventsByDate = {
+        '2026-08-20': [{ id: 'other', type: 'prelevement', equipementsAssignes: ['preleveur-1'] }],
+      } as never
+      const actions = setup({ equipements, eventsByDate })
+      await actions.handleValidatePool({ ...poolItem, methode: 'Ponctuel' } as never, '2026-08-20')
+
+      expect(addToast).not.toHaveBeenCalledWith('warning', expect.anything())
+    })
   })
 })

@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '169'
+export const CHANGELOG_VERSION = '178'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,78 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '178',
+    date: '29 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Visite préliminaire : Le bouton "Enregistrer" et l\'ajout de photo pouvaient rester silencieusement bloqués (champ requis manquant sans aucun message) — ajout d\'un message d\'aide et de notifications d\'erreur explicites' },
+      { type: 'feat', label: 'Visite préliminaire : Compression automatique des photos de plus de 10 Mo avant l\'envoi (au lieu d\'un simple refus)' },
+      { type: 'feat', label: 'Visite préliminaire : Possibilité de créer les points de prélèvement associés directement en fin de formulaire, en un seul récapitulatif' },
+    ],
+  },
+  {
+    version: '177',
+    date: '28 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Tableau de bord : Centrage correct de la page et rééquilibrage de la largeur entre le planning et le panneau latéral' },
+      { type: 'feat', label: 'Toutes les pages : Harmonisation des marges et de la largeur maximale sur l\'ensemble de l\'application' },
+    ],
+  },
+  {
+    version: '176',
+    date: '28 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Navigation : La barre latérale peut désormais se replier en un rail d\'icônes compact' },
+      { type: 'feat', label: 'Tableau de bord : Les tâches personnelles apparaissent dans un onglet dédié, le suivi d\'équipe est segmenté et les badges horaires deviennent dynamiques' },
+      { type: 'feat', label: 'Fiche client : Ajout du segment PCCD' },
+    ],
+  },
+  {
+    version: '175',
+    date: '28 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Vue annuelle : Ajout d\'un mode plein écran pour consulter le planning et le pilotage sans distraction' },
+    ],
+  },
+  {
+    version: '174',
+    date: '28 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Planification rapide : L\'heure de passage devient optionnelle et la date s\'affiche plus lisiblement lors de la validation d\'un pool de prélèvements' },
+    ],
+  },
+  {
+    version: '173',
+    date: '27-28 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Plans de prélèvement : Ajout de la fréquence Hebdomadaire (choix du jour de semaine, agrégation mensuelle en vue annuelle, badge de synthèse et détail par plan)' },
+    ],
+  },
+  {
+    version: '172',
+    date: '26 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Tableau de bord : Refonte esthétique complète (cartes de statistiques, graphique du parc matériel, widget "À traiter" par onglets)' },
+      { type: 'fix', label: 'Tableau de bord : 4 correctifs de polish suite à la refonte' },
+    ],
+  },
+  {
+    version: '171',
+    date: '26 juillet 2026',
+    items: [
+      { type: 'fix', label: 'Fiabilité : Ajout de tests de couverture sur les services d\'écriture Firestore et les générateurs d\'export HTML' },
+      { type: 'fix', label: 'Export client : Correction d\'une faille d\'échappement HTML sur le nom/année dans le titre du document exporté' },
+    ],
+  },
+  {
+    version: '170',
+    date: '21-22 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Pilotage : Clic sur un mois de la vue annuelle pour isoler la colonne et exporter en PDF (aperçu + impression) la liste des prélèvements du mois' },
+      { type: 'fix', label: 'Pilotage : Filtres compactés sur une ligne et interface allégée pour une zone de lecture plus grande' },
+      { type: 'fix', label: 'Actualités : Robustesse renforcée (export, tris et boucles sécurisés) suite à plusieurs incidents remontés' },
+    ],
+  },
   {
     version: '169',
     date: '21 juillet 2026',

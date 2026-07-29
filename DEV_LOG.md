@@ -4476,3 +4476,60 @@ Review complète de la codebase. 8 issues corrigées :
 ### Prochaines étapes
 - Confirmer visuellement le nouveau ratio 2.2fr/1fr une fois le cache purgé côté client.
 - Ordre de passage dans la tournée (drag & drop ou heure planifiée) — toujours reporté.
+
+---
+
+## Session 195 — Bugfixes visite préliminaire + exploration dashboard
+**29 juillet 2026**
+
+### Dashboard — itérations puis retour à l'état d'origine
+- Ratio hero grid 2.2fr/1fr : confirmé correctement appliqué (souci de session 194 = cache navigateur/SW, pas un bug de code).
+- Testé un teaser "À traiter" compact au-dessus du planning, et une compaction générale des espacements pour tout afficher sans scroll → les deux ont été explicitement annulés par Tom, dashboard revenu à l'état du commit `88349b0`.
+- `sw.js` CACHE_VERSION bumpée à `pmc-v2-25` (bump répété plusieurs fois dans la session pour forcer la purge du cache client entre chaque test).
+
+### Bugs corrigés — Visite préliminaire
+- **Bouton "Enregistrer" silencieusement bloqué** : `disabled` sans retour visuel quand un champ requis manquait (technicien vide ou point sans nom) — le bouton gardait la même apparence "actif". Fix : opacité réduite quand désactivé + message d'aide sous le bouton. Bug annexe corrigé : `technicienNom` pouvait se retrouver à un simple espace `" "` (préremplissage `${prenom} ${nom}` sans trim), invisible mais bloquant `canSave`. Ajout aussi d'un `catch` manquant sur `handleSave` (échec Firestore silencieux).
+- **Ajout de photo silencieusement bloqué** : même cause racine — sur une visite pas encore enregistrée, l'ajout de photo déclenche une sauvegarde implicite qui échouait silencieusement si un champ requis manquait. Ajout d'un toast d'erreur explicite.
+- **Compression automatique des photos > 10 Mo** : au lieu de rejeter sec, `processImageFile` (`src/lib/uploadPhoto.ts`) tente maintenant un redimensionnement + réduction de qualité JPEG progressive via canvas avant l'upload, avec toast informatif. Limite absolue conservée à 40 Mo. Bénéficie automatiquement aux 4 points d'upload (prélèvement, visite, plan, chat) via la factorisation existante dans `processImageFile`.
+- **Créer un point de prélèvement depuis la visite** : le bouton existait déjà par point (mid-formulaire, facile à manquer). Extrait dans un composant partagé `CreatePlanInline.tsx`, réutilisé aussi dans un nouveau récapitulatif en fin de formulaire ("Points de prélèvement à créer") listant tous les points sans point associé.
+  - **Bug trouvé au passage** : un point dont le `pointMesureId` pointait vers un point de prélèvement supprimé côté client (lien orphelin) masquait à tort le bouton "Créer", puisque la condition ne vérifiait que la présence de `pointMesureId`, pas son existence réelle dans les plans actuels du client. Fix : vérifie maintenant que `pointMesureId` correspond à un plan encore existant.
+- Commit `0a16f35` poussé sur `origin/main`, staging à jour. 437/437 tests verts, lint 0 erreur.
+
+### Housekeeping
+- Fichier résiduel `src/pages/DashboardPage 2.tsx` (copie de sauvegarde involontaire de la session de compaction annulée) identifié et supprimé.
+
+### Isolation Firestore staging/prod — plan revu, exécution reportée
+- Tom a redemandé le plan (déjà écrit en session 185, `.claude/plans/oui-encapsulated-taco.md`). Plan re-présenté tel quel, pas de nouvelle exploration nécessaire.
+- Décision : exécution reportée à une prochaine session (pas de date fixée). Repartir directement du plan sauvegardé.
+
+### Prochaines étapes
+- Exécuter le plan d'isolation Firestore (projet `labocea-pmc-dev` séparé) — voir `.claude/plans/oui-encapsulated-taco.md`.
+- Ordre de passage dans la tournée (drag & drop ou heure planifiée) — toujours reporté.
+
+---
+
+## Session 196 — Changelog figé, alerte matériel Bilan 24h, dette technique
+**29 juillet 2026**
+
+### Bug corrigé — "Nouveautés" ne se mettait jamais à jour
+- Cause : `src/data/changelog.ts` est une liste **statique** codée en dur (pas Firestore, contrairement au module "Actualités"), comparée à `CHANGELOG_VERSION` via `localStorage['pmc_changelog_seen']`. Plus jamais réaffichée tant qu'un dev n'ajoute pas manuellement une entrée + n'incrémente pas la version. Dernière entrée : version 169, 21 juillet — 9 jours de vrais développements jamais reflétés.
+- Fix : ajout des versions 170 à 178 résumant tout le shipping depuis (Pilotage drill-down/export PDF, refonte dashboard, fréquence hebdomadaire, heure optionnelle planification, plein écran vue annuelle, sidebar rail, harmonisation padding, bugfixes visite préliminaire). `CHANGELOG_VERSION` → `'178'`.
+
+### Feature — Alerte matériel insuffisant pour les Bilans 24h
+- Un Bilan 24h nécessite un préleveur automatique ET un débitmètre libres sur toute sa durée (J1+J2). Aucune vérification prédictive n'existait au moment de planifier (seulement une vérification réactive existante, v119, au moment d'assigner du matériel à un événement déjà créé).
+- Ajout de `getMissingMaterielForDate()` (`src/lib/planningUtils.ts`) : vérifie la disponibilité sur J1 et J2 (le Bilan 24h s'étale sur deux jours), en excluant le matériel hors service.
+- Branché dans `handleValidatePool` et `handleMoveEvent` (`src/hooks/usePlanningActions.ts`), uniquement pour `methode === 'Automatique'`.
+- Alerte **non bloquante** (décision explicite de Tom) : nouveau type de toast `warning` ajouté au système existant (`toastStore.ts` + `ToastContainer.tsx`, 4e type après success/error/info).
+- 8 nouveaux tests (`planningUtils.test.ts`, `usePlanningActions.test.ts`). 445/445 tests verts.
+
+### Dette technique — audit react-doctor + backlog priorisé
+- Tom a demandé si l'app peut être améliorée côté code. Score react-doctor 40/100 : sur les 5 erreurs "critiques", 4 étaient des faux positifs déjà documentés dans `.react-doctor/false-positives.md`. La seule réelle : `Sidebar.tsx` écrivait dans `localStorage` à l'intérieur du updater `setState` (`toggleCollapsed`) — déplacé dans un `useEffect` dédié. Score 40→41.
+- Backlog priorisé identifié et sauvegardé en mémoire (`project_clean_code_todos.md`) pour la prochaine fois que ce sujet revient : contraste WCAG `--color-text-secondary` (§13 TODO_REFACTORING, seul vrai souci a11y actif), absence de tests E2E (Playwright), taille du bundle (`heic-to` 2,9 Mo), migration `samplings` en sous-collection (surveillance seule).
+
+### Non commité en fin de session
+DEV_LOG.md/ROADMAP.md de la session 195 n'avaient pas été commités avant d'enchaîner sur cette session — les deux sessions (195 + 196) sont documentées ici et seront commitées ensemble.
+
+### Prochaines étapes
+- Contraste WCAG `--color-text-secondary` ou tests E2E — au choix de Tom, voir `project_clean_code_todos.md`.
+- Exécuter le plan d'isolation Firestore (projet `labocea-pmc-dev` séparé) — voir `.claude/plans/oui-encapsulated-taco.md`.
+- Ordre de passage dans la tournée (drag & drop ou heure planifiée) — toujours reporté.

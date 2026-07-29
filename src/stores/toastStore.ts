@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type ToastType = 'success' | 'error' | 'info'
+export type ToastType = 'success' | 'error' | 'info' | 'warning'
 
 export interface Toast {
   id: string
@@ -19,10 +19,10 @@ export const useToastStore = create<ToastState>((set) => ({
   add: (type, message) => {
     const id = crypto.randomUUID()
     set((s) => ({ toasts: [...s.toasts, { id, type, message }] }))
-    // Auto-dismiss : 4s pour les infos/succès, 6s pour les erreurs
+    // Auto-dismiss : 4s pour les infos/succès, 6s pour les erreurs/avertissements
     setTimeout(() => {
       set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }))
-    }, type === 'error' ? 6000 : 4000)
+    }, type === 'error' || type === 'warning' ? 6000 : 4000)
   },
   remove: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
 }))
@@ -32,4 +32,5 @@ export const toast = {
   success: (msg: string) => useToastStore.getState().add('success', msg),
   error:   (msg: string) => useToastStore.getState().add('error',   msg),
   info:    (msg: string) => useToastStore.getState().add('info',    msg),
+  warning: (msg: string) => useToastStore.getState().add('warning', msg),
 }

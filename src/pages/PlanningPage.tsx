@@ -162,7 +162,7 @@ export default function PlanningPage() {
     handleCancelSampling, handleMoveEvent, handleMoveEvenement, handleDeleteEvent,
     toggleRainDay, handleChangeTechnicien, handleChangeEquipements,
     handleSaveEvenement, handleValidatePool,
-  } = usePlanningActions({ uid, initiales, clients, evenements, holidays })
+  } = usePlanningActions({ uid, initiales, clients, evenements, holidays, equipements, eventsByDate })
 
   const periodLabel = getPeriodLabel(viewMode, selectedDate, weekStart, monthStart)
 

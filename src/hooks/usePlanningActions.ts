@@ -1,9 +1,9 @@
 import { useRef } from 'react'
 import { saveClient } from '@/services/clientService'
 import { createEvenement, deleteEvenement, updateEvenementDate } from '@/services/evenementService'
-import { toISO, shiftDateFin } from '@/lib/planningUtils'
+import { toISO, shiftDateFin, getMissingMaterielForDate } from '@/lib/planningUtils'
 import { useToastStore } from '@/stores/toastStore'
-import type { Client, Sampling, TypeEvenement } from '@/types'
+import type { Client, Sampling, TypeEvenement, Equipement } from '@/types'
 import type { PlanningEvent, PoolItem } from '@/lib/planningUtils'
 
 
@@ -13,11 +13,21 @@ interface UsePlanningActionsProps {
   clients: Client[]
   evenements: { id: string; type: string; date: string }[]
   holidays: Record<string, string>
+  equipements?: Equipement[]
+  eventsByDate?: Record<string, PlanningEvent[]>
 }
 
-export function usePlanningActions({ uid, initiales, clients, evenements, holidays }: UsePlanningActionsProps) {
+export function usePlanningActions({ uid, initiales, clients, evenements, holidays, equipements = [], eventsByDate = {} }: UsePlanningActionsProps) {
   const isPending = useRef(false)
   const { add: addToast } = useToastStore()
+
+  function warnIfMaterielInsuffisant(methode: string | undefined, dateStr: string) {
+    if (methode !== 'Automatique') return
+    const { preleveurManquant, debitmetreManquant } = getMissingMaterielForDate(eventsByDate, dateStr, equipements)
+    if (!preleveurManquant && !debitmetreManquant) return
+    const manquants = [preleveurManquant && 'préleveur automatique', debitmetreManquant && 'débitmètre'].filter(Boolean).join(' et ')
+    addToast('warning', `Matériel insuffisant le ${dateStr.split('-').reverse().join('/')} : plus aucun ${manquants} disponible pour ce Bilan 24h.`)
+  }
 
   async function handleDeleteEvent(event: PlanningEvent) {
     if (!event.evenementData) return
@@ -74,6 +84,7 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
           })
         })
       }, uid)
+      warnIfMaterielInsuffisant(event.methode, newDate)
     } catch {
       addToast('error', 'Erreur lors du report du prélèvement')
     } finally {
@@ -199,6 +210,7 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
           )
         })
       }, uid)
+      warnIfMaterielInsuffisant(item.methode, date)
     } catch {
       addToast('error', 'Erreur lors de la validation du prélèvement')
     }

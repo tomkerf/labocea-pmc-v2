@@ -5,7 +5,7 @@
  * Aucune dépendance sur React ou le state — 100 % testables en isolation.
  */
 
-import type { Maintenance, EvenementPersonnel, TypeEvenement } from '@/types'
+import type { Maintenance, EvenementPersonnel, TypeEvenement, Equipement } from '@/types'
 
 // ── Types ───────────────────────────────────────────────────────
 
@@ -211,6 +211,33 @@ export function toISO(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
+}
+
+/**
+ * Un Bilan 24h nécessite un préleveur automatique ET un débitmètre libres sur toute
+ * sa durée (J1 + J2, car il s'étale sur 24h). Retourne ce qui manquerait encore
+ * disponible pour `dateStr` si on y planifie un Bilan 24h supplémentaire.
+ */
+export function getMissingMaterielForDate(
+  eventsByDate: Record<string, PlanningEvent[]>,
+  dateStr: string,
+  equipements: Equipement[],
+): { preleveurManquant: boolean; debitmetreManquant: boolean } {
+  const dateFinStr = toISO(new Date(new Date(dateStr + 'T12:00:00').getTime() + 86_400_000))
+
+  const assignedIds = [dateStr, dateFinStr].flatMap(d =>
+    (eventsByDate[d] || [])
+      .filter(e => e.type === 'prelevement' && e.equipementsAssignes)
+      .flatMap(e => e.equipementsAssignes || [])
+  )
+
+  const preleveurs  = equipements.filter(e => e.categorie === 'preleveur'  && e.etat !== 'hors_service')
+  const debitmetres = equipements.filter(e => e.categorie === 'debitmetre' && e.etat !== 'hors_service')
+
+  return {
+    preleveurManquant:  preleveurs.length  === 0 || preleveurs.every(e  => assignedIds.includes(e.id)),
+    debitmetreManquant: debitmetres.length === 0 || debitmetres.every(e => assignedIds.includes(e.id)),
+  }
 }
 
 export function sameDay(a: Date, b: Date): boolean { return toISO(a) === toISO(b) }

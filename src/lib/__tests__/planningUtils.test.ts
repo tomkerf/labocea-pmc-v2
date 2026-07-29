@@ -3,7 +3,64 @@ import {
   shiftDateFin, getFrenchHolidays, isVeilleJourFerie, getISOWeek,
   startOfWeek, startOfMonth, addDays, addMonths, toISO, sameDay,
   buildMonthGrid, buildMiniGrid, parseHHMM, normTech, getPeriodLabel,
+  getMissingMaterielForDate,
 } from '../planningUtils'
+import type { PlanningEvent } from '../planningUtils'
+import type { Equipement } from '@/types'
+
+function makeEquipement(id: string, categorie: Equipement['categorie'], etat: Equipement['etat'] = 'operationnel'): Equipement {
+  return { id, categorie, etat } as unknown as Equipement
+}
+
+function makeEvent(dateEquipementsAssignes: string[]): PlanningEvent {
+  return { id: 'e1', type: 'prelevement', equipementsAssignes: dateEquipementsAssignes } as unknown as PlanningEvent
+}
+
+describe('getMissingMaterielForDate', () => {
+  it('ne signale rien s\'il reste un préleveur et un débitmètre libres', () => {
+    const equipements = [makeEquipement('p1', 'preleveur'), makeEquipement('d1', 'debitmetre')]
+    const result = getMissingMaterielForDate({}, '2026-08-20', equipements)
+    expect(result).toEqual({ preleveurManquant: false, debitmetreManquant: false })
+  })
+
+  it('signale le préleveur manquant si le seul disponible est déjà assigné ce jour', () => {
+    const equipements = [makeEquipement('p1', 'preleveur'), makeEquipement('d1', 'debitmetre')]
+    const eventsByDate = { '2026-08-20': [makeEvent(['p1'])] }
+    const result = getMissingMaterielForDate(eventsByDate, '2026-08-20', equipements)
+    expect(result).toEqual({ preleveurManquant: true, debitmetreManquant: false })
+  })
+
+  it('signale les deux manquants si prélèvements et débitmètres sont tous pris', () => {
+    const equipements = [makeEquipement('p1', 'preleveur'), makeEquipement('d1', 'debitmetre')]
+    const eventsByDate = { '2026-08-20': [makeEvent(['p1', 'd1'])] }
+    const result = getMissingMaterielForDate(eventsByDate, '2026-08-20', equipements)
+    expect(result).toEqual({ preleveurManquant: true, debitmetreManquant: true })
+  })
+
+  it('vérifie aussi le J2 (lendemain) car un Bilan 24h s\'étale sur 24h', () => {
+    const equipements = [makeEquipement('p1', 'preleveur'), makeEquipement('d1', 'debitmetre')]
+    const eventsByDate = { '2026-08-21': [makeEvent(['p1', 'd1'])] }
+    const result = getMissingMaterielForDate(eventsByDate, '2026-08-20', equipements)
+    expect(result).toEqual({ preleveurManquant: true, debitmetreManquant: true })
+  })
+
+  it('ignore le matériel hors service dans le total disponible', () => {
+    const equipements = [
+      makeEquipement('p1', 'preleveur', 'hors_service'),
+      makeEquipement('p2', 'preleveur'),
+      makeEquipement('d1', 'debitmetre'),
+    ]
+    const eventsByDate = { '2026-08-20': [makeEvent(['p2'])] }
+    const result = getMissingMaterielForDate(eventsByDate, '2026-08-20', equipements)
+    expect(result).toEqual({ preleveurManquant: true, debitmetreManquant: false })
+  })
+
+  it('signale manquant si le parc ne contient tout simplement aucun équipement de la catégorie', () => {
+    const equipements = [makeEquipement('d1', 'debitmetre')]
+    const result = getMissingMaterielForDate({}, '2026-08-20', equipements)
+    expect(result).toEqual({ preleveurManquant: true, debitmetreManquant: false })
+  })
+})
 
 describe('shiftDateFin', () => {
   it('retourne undefined si pas de dateFin (événement jour unique)', () => {

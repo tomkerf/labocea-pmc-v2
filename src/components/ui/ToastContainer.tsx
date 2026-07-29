@@ -7,12 +7,14 @@ const ICONS: Record<Toast['type'], string> = {
   success: '✓',
   error:   '✕',
   info:    'ℹ',
+  warning: '⚠',
 }
 
 const TOAST_COLORS: Record<Toast['type'], { bg: string; color: string; border: string }> = {
   success: { bg: 'var(--color-success-light)', color: 'var(--color-success-text)', border: 'var(--color-success-text)' },
   error:   { bg: 'var(--color-danger-light)',  color: 'var(--color-danger-text)',  border: 'var(--color-danger-text)'  },
   info:    { bg: 'var(--color-accent-light)',  color: COLORS.ACCENT,               border: COLORS.ACCENT               },
+  warning: { bg: 'var(--color-warning-light)', color: 'var(--color-warning-text)', border: 'var(--color-warning-text)' },
 }
 
 export default function ToastContainer() {

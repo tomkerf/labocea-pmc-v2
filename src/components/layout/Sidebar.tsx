@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, ClipboardList, CalendarDays, ListTodo, Wrench, Gauge, Hammer, Inbox, BookOpen, ShieldAlert, Pipette, HelpCircle, Bug, FileText, Sparkles, FlaskConical, CloudRain, MessageSquare, Newspaper, ChevronDown, Search, Compass, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { m } from 'framer-motion'
@@ -39,11 +39,11 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true')
   const openSpotlight = useSpotlightStore((s) => s.open)
 
-  const toggleCollapsed = () => setCollapsed(prev => {
-    const next = !prev
-    localStorage.setItem('sidebar_collapsed', String(next))
-    return next
-  })
+  useEffect(() => {
+    localStorage.setItem('sidebar_collapsed', String(collapsed))
+  }, [collapsed])
+
+  const toggleCollapsed = () => setCollapsed(prev => !prev)
 
   const toggleSection = (title: string) => setCollapsedSections(prev => {
     const next = new Set(prev)
