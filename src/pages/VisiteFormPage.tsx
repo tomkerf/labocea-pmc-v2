@@ -16,6 +16,7 @@ import PointCard from '@/components/visites/PointCard'
 import VisiteFormHeader from '@/components/visites/VisiteFormHeader'
 import VisiteGeneralFields from '@/components/visites/VisiteGeneralFields'
 import VisiteFormActions from '@/components/visites/VisiteFormActions'
+import CreatePlanInline from '@/components/visites/CreatePlanInline'
 
 type FormState = {
   date: string
@@ -77,7 +78,7 @@ export default function VisiteFormPage() {
 
   useEffect(() => {
     if (user && isNew) {
-      dispatch({ technicienUid: user.uid, technicienNom: `${user.prenom} ${user.nom}` })
+      dispatch({ technicienUid: user.uid, technicienNom: `${user.prenom ?? ''} ${user.nom ?? ''}`.trim() })
     }
   }, [user, isNew])
 
@@ -119,7 +120,10 @@ export default function VisiteFormPage() {
     let id = visiteId ?? null
     if (isNew) {
       id = await handleSave(true)
-      if (!id) return
+      if (!id) {
+        toast.error('Renseigne le technicien et le nom de chaque point avant d\'ajouter une photo.')
+        return
+      }
       navigate(`/visites/${id}`, { replace: true })
     }
     setUploadingPointId(pointId)
@@ -181,6 +185,9 @@ export default function VisiteFormPage() {
         if (!silent) navigate(-1)
         return visiteId!
       }
+    } catch {
+      toast.error('Échec de l\'enregistrement de la visite. Vérifie ta connexion.')
+      return null
     } finally {
       setSaving(false)
     }
@@ -265,6 +272,20 @@ export default function VisiteFormPage() {
         <Plus size={16} />
         Ajouter un point
       </button>
+
+      {linkedClient && points.some(p => !linkedClient.plans.some(pl => pl.id === p.pointMesureId)) && (
+        <div className="mb-6 rounded-xl p-4" style={{ background: COLORS.BG_SECONDARY, border: '1px solid var(--color-border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          <p className="text-sm font-semibold mb-3" style={{ color: COLORS.TEXT_PRIMARY }}>Points de prélèvement à créer</p>
+          <div className="flex flex-col gap-3">
+            {points.filter(p => !linkedClient.plans.some(pl => pl.id === p.pointMesureId)).map(p => (
+              <div key={p.id} className="p-3 rounded-lg" style={{ background: COLORS.BG_TERTIARY }}>
+                <p className="text-sm font-medium mb-1.5" style={{ color: COLORS.TEXT_PRIMARY }}>{p.nom || 'Point sans nom'}</p>
+                <CreatePlanInline idSuffix={`end-${p.id}`} pointNom={p.nom} onCreate={(freq, site) => handleCreatePlan(p.id, freq, site)} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <VisiteFormActions
         isNew={isNew}

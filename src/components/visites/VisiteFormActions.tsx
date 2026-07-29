@@ -36,14 +36,21 @@ export default function VisiteFormActions({ isNew, saving, canSave, confirmDelet
         )
       )}
       {isNew && <div />}
-      <button type="button"
-        onClick={onSave}
-        disabled={saving || !canSave}
-        className="px-5 py-2 rounded-lg text-sm font-medium"
-        style={{ background: COLORS.ACCENT, color: 'white', opacity: saving ? 0.6 : 1 }}
-      >
-        {saving ? 'Enregistrement…' : 'Enregistrer'}
-      </button>
+      <div className="flex flex-col items-end gap-1">
+        <button type="button"
+          onClick={onSave}
+          disabled={saving || !canSave}
+          className="px-5 py-2 rounded-lg text-sm font-medium"
+          style={{ background: COLORS.ACCENT, color: 'white', opacity: (saving || !canSave) ? 0.6 : 1, cursor: (saving || !canSave) ? 'not-allowed' : 'pointer' }}
+        >
+          {saving ? 'Enregistrement…' : 'Enregistrer'}
+        </button>
+        {!saving && !canSave && (
+          <p className="text-xs" style={{ color: COLORS.DANGER }}>
+            Renseigne le technicien et le nom de chaque point pour enregistrer.
+          </p>
+        )}
+      </div>
     </div>
   )
 }
