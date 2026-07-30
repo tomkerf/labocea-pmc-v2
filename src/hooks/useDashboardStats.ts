@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { isSamplingOverdue } from '@/lib/overdue'
 import { calcStatut } from '@/hooks/useMetrologieRows'
 import { isThisMonth, localISO, isToday, daysDiff } from '@/lib/dashboardUtils'
+import { getBilan24Dates } from '@/lib/planningUtils'
 import { usePreleveursStore } from '@/stores/preleveursStore'
 
 import type { Client, Sampling, Verification, Equipement, Plan, EvenementPersonnel, Maintenance, Todo } from '@/types'
@@ -299,21 +300,23 @@ export function useDashboardStats({
             const techSampling = s.assignedTo || client.preleveur
             if (techSampling && techSampling !== initiales) return
           }
-          const baseDate = s.doneDate || localISO(new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay + dayOffset))
+          const plannedISO = localISO(new Date(new Date().getFullYear(), s.plannedMonth, s.plannedDay + dayOffset))
+          const baseDate = s.doneDate || plannedISO
           const isJ2Today = baseDate === yesterdayISO && s.status === 'planned'
           if (!isToday(baseDate) && !isJ2Today) return
+          const isAuto = plan.methode === 'Automatique'
+          const bilan24 = isAuto ? (getBilan24Dates(s, plannedISO).j2 === todayISO ? 'J2' as const : 'J1' as const) : undefined
+          const isJ2 = bilan24 === 'J2'
           const badge = getSamplingBadge(s)
           const dot = s.status === 'done' ? COLORS.SUCCESS : s.status === 'overdue' ? COLORS.DANGER : COLORS.ACCENT
           const sub = [plan.siteNom, plan.nom].filter(Boolean).join(' · ') || '—'
           const modalEvent: ModalEventRef = {
             id: s.id, type: 'prelevement', title: client.nom, subtitle: sub,
             statusLabel: badge.label, statusBg: badge.bg, statusColor: dot,
-            link: `/missions/${client.id}/plan/${plan.id}/sampling/${s.id}?j=${isJ2Today ? '2' : '1'}`,
+            link: `/missions/${client.id}/plan/${plan.id}/sampling/${s.id}?j=${isJ2 ? '2' : '1'}`,
             isDone: s.status === 'done', technicien: client.preleveur || '—',
             clientId: client.id, planId: plan.id, samplingId: s.id, plannedTime: s.plannedTime,
           }
-          const isAuto = plan.methode === 'Automatique'
-          const bilan24 = isAuto ? (isJ2Today ? 'J2' as const : 'J1' as const) : undefined
           items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub, badge, dot, meteo: plan.meteo || '', cofrac: plan.cofrac ?? false, modalEvent, bilan24 })
         })
       })

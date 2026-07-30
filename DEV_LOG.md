@@ -4554,12 +4554,18 @@ DEV_LOG.md/ROADMAP.md de la session 195 n'avaient pas été commités avant d'en
 - Demande explicite de Tom : retirer le bandeau vert "Astuce — glisse sur plusieurs jours pour créer rapidement un événement…" affiché en haut du Planning (vues semaine/mois).
 - Suppression complète : composant `PlanningDragHint.tsx` supprimé, état `showDragHint`/action `SET_SHOW_DRAG_HINT` retirés du reducer UI (`planningPageReducers.ts`), câblage retiré de `PlanningPage.tsx`, clé `localStorage['planning_drag_hint_seen']` obsolète (plus référencée nulle part).
 
+### Bug corrigé — Badge J1/J2 dashboard erroné sur un bilan 24h "Réalisé" + refactoring
+- Tom a testé le badge tout juste ajouté et signalé "CCA Traumat" affiché en J1 alors que c'était J2.
+- Cause racine : `bilan24` retombait sur `'J1'` par défaut dès que `isJ2Today` était faux — or `isJ2Today` exigeait `status === 'planned'`, un statut impossible une fois le bilan marqué "done". Un bilan 24h terminé était donc *toujours* étiqueté J1, même le jour de la relève.
+- Tom a fait remarquer que ce type de bug revient souvent : la logique J1/J2 était en réalité dupliquée dans 3 fichiers (`usePlanningData.ts`, `useDashboardStats.ts`, `MissionDetailPage.tsx`), chacun avec sa variante — `usePlanningData.ts` gérait déjà correctement le cas "done" (retranche un jour à `doneDate`), mais cette règle n'avait pas été reportée dans `useDashboardStats.ts`.
+- Fix de fond : extraction d'une fonction unique `getBilan24Dates(sampling, referenceISO)` dans `planningUtils.ts` (seule source de vérité pour dériver J1/J2, gérant le cas planifié/en retard ET le cas réalisé), reprise par `usePlanningData.ts` et `useDashboardStats.ts` à la place de leurs calculs locaux.
+- 8 nouveaux tests de régression (`planningUtils.test.ts` sur `getBilan24Dates`, `useDashboardStats.test.ts` sur le badge affiché selon le statut). 453/453 tests verts.
+
 ### Vérifications
-- Build (`tsc --noEmit`), lint (0 erreur) et 445/445 tests verts après chaque changement.
-- 3 déploiements staging successifs (badge J1/J2, fix Maps, suppression bandeau) — le premier a échoué une fois avec une erreur Cloudflare transitoire ("Completion token already consumed"), résolu par une simple relance.
+- Build (`tsc --noEmit`), lint (0 erreur) et 445 puis 453/453 tests verts après chaque changement.
+- 4 déploiements staging successifs (badge J1/J2, fix Maps, suppression bandeau, fix+refactor bilan24) — le premier a échoué une fois avec une erreur Cloudflare transitoire ("Completion token already consumed"), résolu par une simple relance.
 
 ### Prochaines étapes
-- Validation visuelle des 3 changements sur staging par Tom (badge J1/J2, carte Google Maps, disparition du bandeau).
 - Contraste WCAG `--color-text-secondary` ou tests E2E — au choix de Tom, voir `project_clean_code_todos.md`.
 - Exécuter le plan d'isolation Firestore (projet `labocea-pmc-dev` séparé) — voir `.claude/plans/oui-encapsulated-taco.md`.
 - Ordre de passage dans la tournée (drag & drop ou heure planifiée) — toujours reporté.

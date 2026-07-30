@@ -5,7 +5,7 @@
  * Aucune dépendance sur React ou le state — 100 % testables en isolation.
  */
 
-import type { Maintenance, EvenementPersonnel, TypeEvenement, Equipement } from '@/types'
+import type { Maintenance, EvenementPersonnel, TypeEvenement, Equipement, Sampling } from '@/types'
 
 // ── Types ───────────────────────────────────────────────────────
 
@@ -211,6 +211,25 @@ export function toISO(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
+}
+
+/**
+ * Un Bilan 24h (méthode "Automatique") est stocké comme un seul Sampling mais
+ * représente deux visites : J1 (pose du matériel) et J2 (relève, 24h après).
+ * Tant que le prélèvement n'est pas validé, `referenceISO` (la date planifiée)
+ * est le jour J1. Une fois validé (`status === 'done'`), `doneDate` est
+ * nécessairement le jour où le technicien est revenu clôturer le cycle : c'est
+ * donc J2, et J1 se déduit en retranchant un jour.
+ *
+ * Seule source de vérité pour cette distinction — à réutiliser partout où le
+ * calendrier, le dashboard ou une fiche mission doivent savoir si "aujourd'hui"
+ * correspond à la pose ou à la relève d'un Bilan 24h.
+ */
+export function getBilan24Dates(s: Sampling, referenceISO: string): { j1: string; j2: string } {
+  if (s.status === 'done' && s.doneDate) {
+    return { j1: toISO(addDays(new Date(s.doneDate + 'T12:00:00'), -1)), j2: s.doneDate }
+  }
+  return { j1: referenceISO, j2: toISO(addDays(new Date(referenceISO + 'T12:00:00'), 1)) }
 }
 
 /**

@@ -10,7 +10,7 @@
 import { useMemo } from 'react'
 import { isSamplingOverdue } from '@/lib/overdue'
 import {
-  toISO, addDays, getTechColor, normTech,
+  toISO, getTechColor, normTech, getBilan24Dates,
   SAMPLING_LABEL, MAINTENANCE_LABEL, EVENEMENT_LABEL,
   type PlanningEvent, type PoolItem, type TechOption,
 } from '@/lib/planningUtils'
@@ -61,14 +61,7 @@ export function usePlanningData({
               ? toISO(new Date(year, s.plannedMonth, s.plannedDay))
               : ''
 
-          // Si c'est un Bilan 24h (Automatique) et que la date provient de doneDate,
-          // et que l'intervention est VALIDÉE (done), doneDate représente J2 (la relève). Donc J1 doit être la veille.
-          let dateStr = dateStrRaw || ''
-          if (isAuto && dateFromDone && dateStrRaw && isSamplingDone) {
-            const d = new Date(dateStrRaw + 'T12:00:00')
-            d.setDate(d.getDate() - 1)
-            dateStr = toISO(d)
-          }
+          const dateStr = dateStrRaw || ''
           const statusLabel = overdue ? SAMPLING_LABEL.overdue : SAMPLING_LABEL[s.status] ?? SAMPLING_LABEL.planned
           const priority    = overdue ? 0 : s.status === 'non_effectue' ? 1 : s.status === 'planned' ? 2 : 3
           const technicien  = s.assignedTo || client.preleveur || ''
@@ -92,8 +85,8 @@ export function usePlanningData({
             lng: plan.lng || '',
           }
           if (isAuto) {
-            const dateStr2 = toISO(addDays(new Date(dateStr + 'T12:00:00'), 1))
-            add(dateStr, { ...common, id: s.id, title: client.nom, subtitle: baseSub, dateFin: dateStr2, link: `${common.link}?j=1` })
+            const { j1: dateStrJ1, j2: dateStr2 } = getBilan24Dates(s, dateStr)
+            add(dateStrJ1, { ...common, id: s.id, title: client.nom, subtitle: baseSub, dateFin: dateStr2, link: `${common.link}?j=1` })
             add(dateStr2, { ...common, id: `${s.id}_j2`, title: client.nom, subtitle: baseSub, isJ2Continuation: true, link: `${common.link}?j=2` })
           } else {
             add(dateStr, { ...common, id: s.id, title: client.nom, subtitle: baseSub })

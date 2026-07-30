@@ -3,10 +3,17 @@ import {
   shiftDateFin, getFrenchHolidays, isVeilleJourFerie, getISOWeek,
   startOfWeek, startOfMonth, addDays, addMonths, toISO, sameDay,
   buildMonthGrid, buildMiniGrid, parseHHMM, normTech, getPeriodLabel,
-  getMissingMaterielForDate,
+  getMissingMaterielForDate, getBilan24Dates,
 } from '../planningUtils'
 import type { PlanningEvent } from '../planningUtils'
-import type { Equipement } from '@/types'
+import type { Equipement, Sampling } from '@/types'
+
+function makeSampling(overrides: Partial<Sampling> = {}): Sampling {
+  return {
+    id: 's1', status: 'planned', plannedMonth: 6, plannedDay: 15,
+    ...overrides,
+  } as unknown as Sampling
+}
 
 function makeEquipement(id: string, categorie: Equipement['categorie'], etat: Equipement['etat'] = 'operationnel'): Equipement {
   return { id, categorie, etat } as unknown as Equipement
@@ -59,6 +66,33 @@ describe('getMissingMaterielForDate', () => {
     const equipements = [makeEquipement('d1', 'debitmetre')]
     const result = getMissingMaterielForDate({}, '2026-08-20', equipements)
     expect(result).toEqual({ preleveurManquant: true, debitmetreManquant: false })
+  })
+})
+
+describe('getBilan24Dates', () => {
+  it('planifié (pas encore fait) : J1 = date planifiée, J2 = le lendemain', () => {
+    const s = makeSampling({ status: 'planned' })
+    expect(getBilan24Dates(s, '2026-07-29')).toEqual({ j1: '2026-07-29', j2: '2026-07-30' })
+  })
+
+  it('en retard : J1 = date planifiée, J2 = le lendemain (comme "planned")', () => {
+    const s = makeSampling({ status: 'overdue' })
+    expect(getBilan24Dates(s, '2026-07-29')).toEqual({ j1: '2026-07-29', j2: '2026-07-30' })
+  })
+
+  it('réalisé : doneDate est J2 (la relève), J1 se déduit en retranchant un jour', () => {
+    const s = makeSampling({ status: 'done', doneDate: '2026-07-30' })
+    expect(getBilan24Dates(s, '2026-07-29')).toEqual({ j1: '2026-07-29', j2: '2026-07-30' })
+  })
+
+  it('réalisé avec changement de mois : le retrait d\'un jour traverse la frontière du mois', () => {
+    const s = makeSampling({ status: 'done', doneDate: '2026-08-01' })
+    expect(getBilan24Dates(s, '2026-07-31')).toEqual({ j1: '2026-07-31', j2: '2026-08-01' })
+  })
+
+  it('réalisé sans doneDate (donnée incohérente) : retombe sur le calcul "non fait"', () => {
+    const s = makeSampling({ status: 'done', doneDate: undefined })
+    expect(getBilan24Dates(s, '2026-07-29')).toEqual({ j1: '2026-07-29', j2: '2026-07-30' })
   })
 })
 
