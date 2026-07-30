@@ -23,7 +23,6 @@ import { usePlanningFilters } from '@/hooks/usePlanningFilters'
 import { usePlanningExports } from '@/hooks/usePlanningExports'
 import PlanningHeader       from '@/components/planning/PlanningHeader'
 import PlanningFilterBar    from '@/components/planning/PlanningFilterBar'
-import PlanningDragHint     from '@/components/planning/PlanningDragHint'
 import PlanningMiniCalendar from '@/components/planning/PlanningMiniCalendar'
 import PlanningViewRenderer from '@/components/planning/PlanningViewRenderer'
 import PlanningModals       from '@/components/planning/PlanningModals'
@@ -53,7 +52,6 @@ export default function PlanningPage() {
 
   // ── UI state ─────────────────────────────────────────────
   const [ui, dispatch] = useReducer(uiReducer, undefined, () => ({
-    showDragHint:      !localStorage.getItem('planning_drag_hint_seen'),
     showRain:          localStorage.getItem('planning_show_rain') !== 'false',
     showMiniCal:       false,
     showBilanMois:     false,
@@ -65,10 +63,9 @@ export default function PlanningPage() {
     dragModal:         null,
   }))
 
-  const { showDragHint, showRain, showMiniCal, showBilanMois,
+  const { showRain, showMiniCal, showBilanMois,
           selectedDay, dayModalInitialTab, ctxMenu, eventDetail, ghostDetail, dragModal } = ui
 
-  const setShowDragHint       = (value: boolean) => dispatch({ type: 'SET_SHOW_DRAG_HINT', value })
   const setShowRain           = (value: boolean) => dispatch({ type: 'SET_SHOW_RAIN', value })
   const setShowMiniCal        = (value: boolean) => dispatch({ type: 'SET_SHOW_MINI_CAL', value })
   const setShowBilanMois      = (value: boolean) => dispatch({ type: 'SET_SHOW_BILAN_MOIS', value })
@@ -195,10 +192,6 @@ export default function PlanningPage() {
         filterSite={filterSite} setFilterSite={setFilterSite} preleveurs={preleveurs}
         viewMode={viewMode}
       />
-      <PlanningDragHint
-        showDragHint={showDragHint} setShowDragHint={setShowDragHint} viewMode={viewMode}
-      />
-
       <PlanningMiniCalendar
         showMiniCal={showMiniCal} setShowMiniCal={setShowMiniCal}
         viewMode={viewMode}

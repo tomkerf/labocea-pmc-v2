@@ -78,7 +78,7 @@ export default function TourneePage() {
           lng:        plan?.lng     ?? '',
           status:     (s?.status === 'done' ? 'done' : s?.status === 'non_effectue' ? 'non_effectue' : 'todo') as TourneeItemData['status'],
           motif:      s?.motif ?? '',
-          isJ1Bilan24: i.isJ1Bilan24,
+          isJ1Bilan24: i.bilan24 === 'J1',
           rapportPrevu: s?.rapportPrevu ?? false,
         }]
       })

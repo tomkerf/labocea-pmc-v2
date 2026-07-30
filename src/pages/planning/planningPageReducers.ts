@@ -3,7 +3,6 @@ import type { PlanningEvent, ViewMode } from '@/lib/planningUtils'
 // ── UI State ─────────────────────────────────────────────────
 
 export type UIState = {
-  showDragHint: boolean
   showRain: boolean
   showMiniCal: boolean
   showBilanMois: boolean
@@ -16,7 +15,6 @@ export type UIState = {
 }
 
 export type UIAction =
-  | { type: 'SET_SHOW_DRAG_HINT'; value: boolean }
   | { type: 'SET_SHOW_RAIN'; value: boolean }
   | { type: 'SET_SHOW_MINI_CAL'; value: boolean }
   | { type: 'SET_SHOW_BILAN_MOIS'; value: boolean }
@@ -29,7 +27,6 @@ export type UIAction =
 
 export function uiReducer(state: UIState, action: UIAction): UIState {
   switch (action.type) {
-    case 'SET_SHOW_DRAG_HINT':  return { ...state, showDragHint: action.value }
     case 'SET_SHOW_RAIN':       return { ...state, showRain: action.value }
     case 'SET_SHOW_MINI_CAL':   return { ...state, showMiniCal: action.value }
     case 'SET_SHOW_BILAN_MOIS': return { ...state, showBilanMois: action.value }

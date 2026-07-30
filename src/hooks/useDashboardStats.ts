@@ -18,7 +18,7 @@ const EVENEMENT_CFG: Record<string, { label: string; bg: string; color: string; 
 export type SamplingBadge = { label: string; bg: string; color: string }
 
 export type JourItem =
-  | { kind: 'sampling';  time: string; title: string; sub: string; badge: SamplingBadge; dot: string; meteo: string; cofrac: boolean; modalEvent: ModalEventRef; isJ1Bilan24?: boolean }
+  | { kind: 'sampling';  time: string; title: string; sub: string; badge: SamplingBadge; dot: string; meteo: string; cofrac: boolean; modalEvent: ModalEventRef; bilan24?: 'J1' | 'J2' }
   | { kind: 'evenement'; time: string; title: string; sub: string; badge: SamplingBadge; dot: string; modalEvent: ModalEventRef }
   | { kind: 'todo';      time: string; title: string; sub: string; badge: SamplingBadge; dot: string; link: string }
 
@@ -313,8 +313,8 @@ export function useDashboardStats({
             clientId: client.id, planId: plan.id, samplingId: s.id, plannedTime: s.plannedTime,
           }
           const isAuto = plan.methode === 'Automatique'
-          const isJ1Bilan24 = isAuto && isToday(baseDate)
-          items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub, badge, dot, meteo: plan.meteo || '', cofrac: plan.cofrac ?? false, modalEvent, isJ1Bilan24 })
+          const bilan24 = isAuto ? (isJ2Today ? 'J2' as const : 'J1' as const) : undefined
+          items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub, badge, dot, meteo: plan.meteo || '', cofrac: plan.cofrac ?? false, modalEvent, bilan24 })
         })
       })
     })
@@ -375,7 +375,7 @@ export function useDashboardStats({
               isDone: false, technicien: client.preleveur || '—',
               clientId: client.id, planId: plan.id, samplingId: s.id, plannedTime: s.plannedTime,
             }
-            items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub: subJ2, badge, dot, meteo: plan.meteo || '', cofrac: plan.cofrac ?? false, modalEvent })
+            items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub: subJ2, badge, dot, meteo: plan.meteo || '', cofrac: plan.cofrac ?? false, modalEvent, bilan24: 'J2' })
             return
           }
           if (baseDate !== tomorrowISO) return
@@ -391,7 +391,7 @@ export function useDashboardStats({
             isDone: false, technicien: client.preleveur || '—',
             clientId: client.id, planId: plan.id, samplingId: s.id, plannedTime: s.plannedTime,
           }
-          items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub: subtitle, badge, dot, meteo: plan.meteo || '', cofrac: plan.cofrac ?? false, modalEvent })
+          items.push({ kind: 'sampling', time: s.plannedTime ?? '', title: client.nom, sub: subtitle, badge, dot, meteo: plan.meteo || '', cofrac: plan.cofrac ?? false, modalEvent, bilan24: isAuto ? 'J1' : undefined })
         })
       })
     })

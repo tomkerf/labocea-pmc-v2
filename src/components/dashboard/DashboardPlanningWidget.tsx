@@ -151,6 +151,15 @@ export function DashboardPlanningWidget({
                     <CloudRain size={15} strokeWidth={1.7} />
                   </span>
                 )}
+                {'bilan24' in item && item.bilan24 && (
+                  <span
+                    title={item.bilan24 === 'J1' ? 'Bilan 24h — pose (J1)' : 'Bilan 24h — relève (J2)'}
+                    className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded"
+                    style={{ background: item.dot + '22', color: item.dot }}
+                  >
+                    {item.bilan24}
+                  </span>
+                )}
                 {camera && (
                   <button
                     type="button"

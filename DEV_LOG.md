@@ -4533,3 +4533,33 @@ DEV_LOG.md/ROADMAP.md de la session 195 n'avaient pas été commités avant d'en
 - Contraste WCAG `--color-text-secondary` ou tests E2E — au choix de Tom, voir `project_clean_code_todos.md`.
 - Exécuter le plan d'isolation Firestore (projet `labocea-pmc-dev` séparé) — voir `.claude/plans/oui-encapsulated-taco.md`.
 - Ordre de passage dans la tournée (drag & drop ou heure planifiée) — toujours reporté.
+
+---
+
+## Session 197 — Badge J1/J2 dashboard, bug Google Maps, ménage planning
+**30 juillet 2026**
+
+### Feature — Badge J1/J2 sur le widget "Planning du jour" du Dashboard
+- Demande : distinguer visuellement J1 (pose) et J2 (relève) d'un Bilan 24h directement sur les cartes du widget dashboard, comme c'est déjà le cas dans la vue Planning complète (`EventPill.tsx`).
+- `useDashboardStats.ts` : le champ `isJ1Bilan24` existait déjà dans `JourItem` mais n'était calculé que partiellement (un seul des 3 cas J1/J2) et n'était lu nulle part — code mort/préparé. Remplacé par un champ `bilan24?: 'J1' | 'J2'` correctement renseigné dans les 3 branches (`jourItems` J1 et J2 du jour, `lendemainItems` J1/J2 de demain).
+- `DashboardPlanningWidget.tsx` : badge `J1`/`J2` ajouté sur la carte, même style que `EventPill.tsx` (fond teinté par la couleur du point de statut, tooltip "pose"/"relève").
+- `TourneePage.tsx` : adapté pour consommer le nouveau champ (`bilan24 === 'J1'`).
+
+### Bug corrigé — Carte Google Maps cassée (icône image brisée)
+- Signalé par capture d'écran sur la page "Détail mission" (mode Tournée). La carte Google Maps embarquée (iframe) affichait l'icône "image cassée" de Chrome au lieu de la carte.
+- Cause racine : l'iframe portait `sandbox="allow-scripts allow-popups"` **sans** `allow-same-origin`. Sans cet attribut, l'iframe est traitée comme ayant une origine opaque, ce qui empêche les scripts de Google Maps de s'exécuter correctement (stockage/cookies bloqués) — Google affiche alors sa propre page d'erreur avec une icône de tuile cassée. Deux composants concernés : `MissionDetailMap.tsx` et `PointMesureMap.tsx` (même code dupliqué).
+- Fix : ajout de `allow-same-origin` au sandbox des deux iframes. Sans risque de sécurité supplémentaire notable : le `src` de l'iframe est toujours une URL Google Maps que l'app construit elle-même (lat/lng internes), pas un contenu arbitraire.
+
+### Housekeeping — Bandeau "Astuce" du planning supprimé
+- Demande explicite de Tom : retirer le bandeau vert "Astuce — glisse sur plusieurs jours pour créer rapidement un événement…" affiché en haut du Planning (vues semaine/mois).
+- Suppression complète : composant `PlanningDragHint.tsx` supprimé, état `showDragHint`/action `SET_SHOW_DRAG_HINT` retirés du reducer UI (`planningPageReducers.ts`), câblage retiré de `PlanningPage.tsx`, clé `localStorage['planning_drag_hint_seen']` obsolète (plus référencée nulle part).
+
+### Vérifications
+- Build (`tsc --noEmit`), lint (0 erreur) et 445/445 tests verts après chaque changement.
+- 3 déploiements staging successifs (badge J1/J2, fix Maps, suppression bandeau) — le premier a échoué une fois avec une erreur Cloudflare transitoire ("Completion token already consumed"), résolu par une simple relance.
+
+### Prochaines étapes
+- Validation visuelle des 3 changements sur staging par Tom (badge J1/J2, carte Google Maps, disparition du bandeau).
+- Contraste WCAG `--color-text-secondary` ou tests E2E — au choix de Tom, voir `project_clean_code_todos.md`.
+- Exécuter le plan d'isolation Firestore (projet `labocea-pmc-dev` séparé) — voir `.claude/plans/oui-encapsulated-taco.md`.
+- Ordre de passage dans la tournée (drag & drop ou heure planifiée) — toujours reporté.
