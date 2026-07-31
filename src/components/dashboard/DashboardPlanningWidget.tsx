@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { m, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { Camera, Loader2, CalendarCheck, CloudRain, Truck } from 'lucide-react'
+import { Camera, Loader2, CalendarCheck, CloudRain, Truck, CheckCircle2 } from 'lucide-react'
 import { SectionTitle, EmptyCard } from '@/components/dashboard/StatCard'
 import type { PlanningEvent } from '@/lib/planningUtils'
 import type { JourItem } from '@/hooks/useDashboardStats'
@@ -134,7 +134,27 @@ export function DashboardPlanningWidget({
                   </span>
                 ) : (
                   <span className="shrink-0 w-[38px] flex justify-center mt-0.5">
-                    <span className="shrink-0 size-2 rounded-full" style={{ background: item.dot }} />
+                    <AnimatePresence mode="wait" initial={false}>
+                      {item.kind !== 'todo' && item.modalEvent.isDone ? (
+                        <m.span
+                          key="check"
+                          initial={{ scale: 0.3, opacity: 0, rotate: -45 }}
+                          animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                          className="shrink-0 inline-flex"
+                        >
+                          <CheckCircle2 size={18} style={{ color: item.dot }} />
+                        </m.span>
+                      ) : (
+                        <m.span
+                          key="dot"
+                          initial={{ scale: 0.3, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          className="shrink-0 size-2 rounded-full"
+                          style={{ background: item.dot }}
+                        />
+                      )}
+                    </AnimatePresence>
                   </span>
                 )}
                 <div className="flex-1 min-w-0">
@@ -154,7 +174,7 @@ export function DashboardPlanningWidget({
                 {'bilan24' in item && item.bilan24 && (
                   <span
                     title={item.bilan24 === 'J1' ? 'Bilan 24h — pose (J1)' : 'Bilan 24h — relève (J2)'}
-                    className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded"
+                    className="shrink-0 text-xs font-bold px-2 py-1 rounded"
                     style={{ background: item.dot + '22', color: item.dot }}
                   >
                     {item.bilan24}

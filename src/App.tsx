@@ -16,6 +16,7 @@ import { COLORS } from '@/lib/constants'
 
 const DashboardPage     = lazy(() => import('@/pages/DashboardPage'))
 const MissionsPage      = lazy(() => import('@/pages/MissionsPage'))
+const MissionsBilanPage = lazy(() => import('@/pages/MissionsBilanPage'))
 const PilotagePage      = lazy(() => import('@/pages/PilotagePage'))
 const ClientPage        = lazy(() => import('@/pages/ClientPage'))
 const PlanPage          = lazy(() => import('@/pages/PlanPage'))
@@ -91,6 +92,9 @@ function AppRoutes() {
         } />
         <Route path="/missions" element={
           <Suspense fallback={<PageSpinner />}><MissionsPage /></Suspense>
+        } />
+        <Route path="/missions/bilan" element={
+          <Suspense fallback={<PageSpinner />}><MissionsBilanPage /></Suspense>
         } />
         <Route path="/pilotage" element={
           <Suspense fallback={<PageSpinner />}><PilotagePage /></Suspense>

@@ -6,6 +6,7 @@
  */
 
 import { useNavigate } from 'react-router-dom'
+import { motion as m, AnimatePresence } from 'framer-motion'
 import { CheckCircle2, FileText, Bell, Wrench, CheckSquare, CalendarDays, Droplet, Backpack } from 'lucide-react'
 import { getTechColor, isVeilleJourFerie, type PlanningEvent } from '@/lib/planningUtils'
 import { COLORS } from '@/lib/constants'
@@ -127,15 +128,29 @@ export default function EventPill({ event, compact, dateStr, expanded, onExpand,
     >
       {/* Ligne 1 : dot (ou ✓) + titre + badges */}
       <div className="flex items-center gap-1">
-        {event.isDone
-          ? <CheckCircle2 size={11} className="shrink-0" style={{ color: dotColor }} />
-          : event.type === 'rapport' ? <FileText size={11} className="shrink-0" style={{ color: dotColor }} />
-          : event.type === 'verification' ? <Bell size={11} className="shrink-0" style={{ color: dotColor }} />
-          : event.type === 'maintenance' ? <Wrench size={11} className="shrink-0" style={{ color: dotColor }} />
-          : event.type === 'todo' ? <CheckSquare size={11} className="shrink-0" style={{ color: dotColor }} />
-          : event.type === 'evenement' ? <CalendarDays size={11} className="shrink-0" style={{ color: dotColor }} />
-          : <Droplet size={11} className="shrink-0" style={{ color: dotColor }} />
-        }
+        <AnimatePresence mode="wait" initial={false}>
+          {event.isDone ? (
+            <m.span
+              key="check"
+              initial={{ scale: 0.3, opacity: 0, rotate: -45 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+              className="shrink-0 inline-flex"
+            >
+              <CheckCircle2 size={11} style={{ color: dotColor }} />
+            </m.span>
+          ) : (
+            <m.span key="icon" className="shrink-0 inline-flex">
+              {event.type === 'rapport' ? <FileText size={11} style={{ color: dotColor }} />
+                : event.type === 'verification' ? <Bell size={11} style={{ color: dotColor }} />
+                : event.type === 'maintenance' ? <Wrench size={11} style={{ color: dotColor }} />
+                : event.type === 'todo' ? <CheckSquare size={11} style={{ color: dotColor }} />
+                : event.type === 'evenement' ? <CalendarDays size={11} style={{ color: dotColor }} />
+                : <Droplet size={11} style={{ color: dotColor }} />
+              }
+            </m.span>
+          )}
+        </AnimatePresence>
         {event.meteo === 'pluie' && (
           <span className="shrink-0 text-[10px]" title="Prélèvement par temps de pluie">🌧</span>
         )}

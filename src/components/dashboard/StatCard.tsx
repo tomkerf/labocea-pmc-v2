@@ -40,7 +40,9 @@ export function StatCard({ value, label, sub, icon, tone = 'accent', pill, progr
         {progressPct !== undefined ? (
           <svg width="46" height="14" viewBox="0 0 46 14" aria-hidden="true">
             <rect x="0" y="5" width="46" height="4" rx="2" className="fill-[var(--color-border)]" />
-            <rect x="0" y="5" width={Math.max(0, Math.min(100, progressPct)) / 100 * 46} height="4" rx="2" className={tone === 'warning' ? 'fill-[var(--color-warning)]' : 'fill-[var(--color-success)]'} />
+            <rect x="0" y="5" width={Math.max(0, Math.min(100, progressPct)) / 100 * 46} height="4" rx="2" className={
+              tone === 'warning' ? 'fill-[var(--color-warning)]' : tone === 'accent' ? 'fill-[var(--color-accent)]' : 'fill-[var(--color-success)]'
+            } />
           </svg>
         ) : pill ? (
           <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${t.pillBg} ${t.pillText}`}>

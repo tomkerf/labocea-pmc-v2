@@ -3,6 +3,42 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 198 — Coche animée dot→check, harmonisation max-width, bilan mensuel des missions
+**31 juillet 2026**
+
+### Feature — Point du planning transformé en coche quand la mission est réalisée
+- Demande : sur le widget "Planning du jour" du Dashboard, transformer le point coloré en coche quand le prélèvement est fait, comme la vue Planning complète (`EventPill.tsx`) le fait déjà avec `CheckCircle2`.
+- `DashboardPlanningWidget.tsx` : ajout de la même logique conditionnelle (`item.modalEvent.isDone`), coche 18px avec `AnimatePresence`/pop spring (scale+rotation) au moment du changement d'état — pas d'animation au chargement initial de la page (`initial={false}`).
+- Même traitement appliqué à `EventPill.tsx` pour cohérence (la coche y existait déjà mais sans animation de transition).
+- Badge J1/J2 agrandi en même temps (`text-[10px]`→`text-xs`, padding augmenté) à la demande de Tom.
+
+### Refactoring — Harmonisation des max-width entre les 19 onglets
+- Audit demandé par Tom sur la cohérence visuelle Dashboard/Actualités/Demandes/Missions. Le vrai écart n'était pas le padding (déjà harmonisé en session 193, `px-4 py-6 md:px-8` partout) mais le `max-w` : le Dashboard était seul à `max-w-6xl` (1152px) alors que le reste de l'app suit 3 paliers cohérents (`max-w-2xl` formulaires, `max-w-4xl` contenu/listes, pleine largeur pour tableaux/kanban/calendrier denses).
+- Décision de Tom : Dashboard aligné sur `max-w-4xl` comme Actualités/Rapports/Tâches/Tuyaux/Aide. Vérifié visuellement (Chrome piloté) que la grille hero 2 colonnes (`2.2fr_1fr`) reste lisible à cette largeur.
+- Note : un aller-retour a eu lieu sur ce changement (retour temporaire à `max-w-6xl` puis re-confirmation à `max-w-4xl`), la valeur finale committée est `max-w-4xl`.
+
+### Feature — Bilan mensuel des missions (fait/non fait)
+- La carte KPI "Missions ce mois" du Dashboard n'affichait qu'un total de prélèvements réalisés, sans dénominateur ni vue déroulée. Ajout d'un vrai ratio d'avancement.
+- `useDashboardStats.ts` : nouveau calcul `missionsMoisMoiTotal` (mes prélèvements dont `plannedMonth` = mois courant, tous statuts confondus, clients en pause exclus) à côté de `missionsCeMoisMoi` (déjà existant, basé sur `doneDate`).
+- `StatCard.tsx` : la couleur de la barre de progression suit désormais le `tone` de la carte (bleu accent pour Missions, vert/orange inchangés pour Conformité métrologie) — avant, elle était figée vert/orange peu importe le tone.
+- Nouvelle page **`/missions/bilan`** (`MissionsBilanPage.tsx`) : liste en lecture seule des prélèvements du mois en cours, sections "Non fait"/"Fait", clic sur une ligne → fiche du prélèvement (`/missions/:clientId/plan/:planId?sampling=:samplingId`, pattern réutilisé de `RapportRow.tsx`). Bascule `SegmentedControl` "Mes missions"/"Équipe" (`?scope=equipe`) qui affiche alors tous les techniciens avec leur nom sur chaque ligne.
+- Clic sur toute la carte "Missions ce mois" (Dashboard, onglet Mon activité) → `/missions/bilan`.
+- `EquipeSuiviWidget.tsx` (onglet Suivi équipe) : 5ᵉ carte KPI ajoutée "Missions ce mois" (équipe, même ratio+barre), sans toucher à la carte "Réalisés" existante (total annuel). Grille passée de 4 à 5 colonnes (`lg:grid-cols-5`). Clic → `/missions/bilan?scope=equipe`.
+- Bug de test corrigé au passage : `dashboardStats.test.ts` calculait `LAST_MONTH_DATE` via `setMonth(getMonth()-1)` sans fixer le jour à 1 d'abord — en testant un 31 juillet, ça débordait sur juillet au lieu de reculer à juin (30 jours). `d.setDate(1)` ajouté avant `setMonth`.
+
+### Vérifications
+- `tsc --noEmit`, 0 erreur à chaque étape. 453/453 tests verts (après le fix du bug de date ci-dessus).
+- Vérifications visuelles via Chrome piloté (connexion manuelle par Tom, l'assistant n'entre jamais de mot de passe) : rendu dashboard à `max-w-4xl`, clic précis sur la barre de progression (petite cible SVG 46×14px), navigation `/missions/bilan` et `/missions/bilan?scope=equipe`, clic sur une ligne → fiche prélèvement.
+- Plusieurs déploiements staging successifs au fil des itérations.
+
+### Prochaines étapes
+- Contraste WCAG `--color-text-secondary` ou tests E2E — au choix de Tom, voir `project_clean_code_todos.md`.
+- Exécuter le plan d'isolation Firestore (projet `labocea-pmc-dev` séparé) — voir `.claude/plans/oui-encapsulated-taco.md`.
+- Ordre de passage dans la tournée (drag & drop ou heure planifiée) — toujours reporté.
+- La condition d'affichage de `EquipeSuiviWidget` (`return null` si aucun incomplet/retard/rapport dû) peut masquer la nouvelle carte "Missions ce mois" équipe même quand elle a des données — pas rencontré en pratique, à surveiller.
+
+---
+
 ## Session 193 — Fréquence hebdomadaire, heure de planification, plein écran vue annuelle, sidebar rail, harmonisation padding
 **28 juillet 2026**
 

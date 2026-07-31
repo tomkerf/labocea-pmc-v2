@@ -178,7 +178,7 @@ export default function DashboardPage() {
 
 
   const {
-    missionsCeMoisMoi, verifiTotal, verifiConformes, conformitePct,
+    missionsCeMoisMoi, missionsMoisMoiTotal, verifiTotal, verifiConformes, conformitePct,
     aCalibrrer, rapportsAFaireMoi, jourItems, lendemainItems,
     hasRainToday, hasRainTomorrow,
     parcDonut,
@@ -274,7 +274,7 @@ export default function DashboardPage() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="p-6 pb-10 max-w-6xl mx-auto"
+      className="px-4 py-6 md:px-8 max-w-6xl mx-auto"
     >
 
       <DashboardHeader
@@ -309,9 +309,10 @@ export default function DashboardPage() {
                   icon={<FlaskConical size={16} strokeWidth={1.6} />}
                   value={missionsCeMoisMoi}
                   label="Missions ce mois"
-                  sub="prélèvements réalisés"
+                  sub={missionsMoisMoiTotal > 0 ? `${missionsCeMoisMoi}/${missionsMoisMoiTotal} ce mois` : 'prélèvements réalisés'}
                   tone="accent"
-                  onClick={() => navigate('/missions')}
+                  progressPct={missionsMoisMoiTotal > 0 ? Math.round((missionsCeMoisMoi / missionsMoisMoiTotal) * 100) : undefined}
+                  onClick={() => navigate('/missions/bilan')}
                 />
                 <StatCard
                   icon={<FileText size={16} strokeWidth={1.6} />}

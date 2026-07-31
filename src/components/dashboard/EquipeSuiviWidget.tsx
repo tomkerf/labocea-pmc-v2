@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, AlertCircle, Clock, FileText, CloudRain } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Clock, FileText, CloudRain, FlaskConical } from 'lucide-react'
 import { isSamplingIncomplet, isSamplingOverdue } from '@/lib/overdue'
 import { useUsersStore } from '@/stores/usersStore'
 import type { Client, Sampling, NatureEauType } from '@/types'
@@ -100,6 +100,9 @@ export function EquipeSuiviWidget({ clients }: Props) {
     let realises = 0
     let enRetard = 0
     let rapportsDus = 0
+    let moisTotal = 0
+    let moisDone = 0
+    const moisCourant = new Date().getMonth()
     const incompletsList: IncompletItem[] = []
     const enRetardListItems: EnRetardItem[] = []
     const rapportsDusListItems: RapportDuItem[] = []
@@ -110,6 +113,10 @@ export function EquipeSuiviWidget({ clients }: Props) {
       const year = parseInt(client.annee ?? currentYear)
       for (const plan of client.plans) {
         for (const s of plan.samplings) {
+          if (s.plannedMonth === moisCourant) {
+            moisTotal++
+            if (s.status === 'done') moisDone++
+          }
           if (s.status === 'done') {
             realises++
             if (isSamplingIncomplet(s, plan.nature)) {
@@ -166,7 +173,7 @@ export function EquipeSuiviWidget({ clients }: Props) {
     rapportsDusListItems.sort((a, b) => b.doneDate.localeCompare(a.doneDate))
 
     return {
-      kpis: { realises, incomplets: incompletsList.length, enRetard, rapportsDus },
+      kpis: { realises, incomplets: incompletsList.length, enRetard, rapportsDus, moisTotal, moisDone },
       incomplets: incompletsList,
       enRetardList: enRetardListItems,
       rapportsDusList: rapportsDusListItems,
@@ -217,13 +224,22 @@ export function EquipeSuiviWidget({ clients }: Props) {
   return (
     <div className="mb-6 animate-fade-in space-y-6">
       {/* KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <StatCard
           icon={<CheckCircle2 size={16} strokeWidth={1.6} />}
           value={kpis.realises}
           label="Réalisés"
           sub="Faits sur l'année"
           tone="success"
+        />
+        <StatCard
+          icon={<FlaskConical size={16} strokeWidth={1.6} />}
+          value={kpis.moisDone}
+          label="Missions ce mois"
+          sub={kpis.moisTotal > 0 ? `${kpis.moisDone}/${kpis.moisTotal} ce mois` : 'Équipe'}
+          tone="accent"
+          progressPct={kpis.moisTotal > 0 ? Math.round((kpis.moisDone / kpis.moisTotal) * 100) : undefined}
+          onClick={() => navigate('/missions/bilan?scope=equipe')}
         />
         <StatCard
           icon={<AlertCircle size={16} strokeWidth={1.6} />}

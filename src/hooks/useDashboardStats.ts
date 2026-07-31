@@ -154,6 +154,19 @@ export function useDashboardStats({
         }).length, 0), 0),
     [clients, initiales, uid])
 
+  const missionsMoisMoiTotal = useMemo(() => {
+    const moisCourant = new Date(todayStr + 'T12:00:00').getMonth()
+    return clients.reduce((count, client) =>
+      count + client.plans.reduce((c, plan) =>
+        c + plan.samplings.filter((s: Sampling) => {
+          if (s.plannedMonth !== moisCourant) return false
+          const estMonPrelevement = s.assignedTo
+            ? s.assignedTo === initiales
+            : (s.doneBy ? s.doneBy === uid : client.preleveur === initiales)
+          return estMonPrelevement
+        }).length, 0), 0)
+  }, [clients, initiales, uid, todayStr])
+
   const { verifiTotal, verifiConformes, conformitePct } = useMemo(() => {
     const total = verifications.length
     const conformes = verifications.filter((v: Verification) =>
@@ -531,6 +544,7 @@ export function useDashboardStats({
   return {
     missionsCeMois,
     missionsCeMoisMoi,
+    missionsMoisMoiTotal,
     verifiTotal, verifiConformes, conformitePct,
     aCalibrrer,
     rapportsAFaire,

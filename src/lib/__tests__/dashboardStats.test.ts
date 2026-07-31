@@ -10,6 +10,7 @@ import { usePreleveursStore } from '@/stores/preleveursStore'
 const THIS_MONTH_DATE = new Date().toISOString().slice(0, 7) + '-01'
 const LAST_MONTH_DATE = (() => {
   const d = new Date()
+  d.setDate(1)
   d.setMonth(d.getMonth() - 1)
   return d.toISOString().slice(0, 7) + '-01'
 })()
