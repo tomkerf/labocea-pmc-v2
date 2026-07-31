@@ -36,6 +36,22 @@ export default function AppLayout() {
     return () => container.removeEventListener('scroll', handleScroll)
   }, [pathname])
 
+  // Contourne un bug de repaint Chromium : au retour sur l'onglet, le DOM est
+  // à jour mais les pixels ne sont pas repeints tant qu'aucun scroll ne survient.
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState !== 'visible') return
+      const container = scrollContainerRef.current
+      if (!container) return
+      requestAnimationFrame(() => {
+        container.scrollTop += 1
+        container.scrollTop -= 1
+      })
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [])
+
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--color-bg-primary)]">
       {/* Listeners Firestore globaux — montés une seule fois pour toute la session */}
