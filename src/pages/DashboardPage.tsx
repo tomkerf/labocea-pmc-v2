@@ -320,7 +320,7 @@ export default function DashboardPage() {
             )}
 
             {/* Hero : planning dominant + rail droit */}
-            <div className="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-[18px]">
+            <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1.618fr)_minmax(0,1fr)] gap-[18px]">
               {/* Planning */}
               <DashboardPlanningWidget
                 planningMode={planningMode}
