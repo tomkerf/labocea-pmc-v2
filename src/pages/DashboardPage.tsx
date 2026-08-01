@@ -1,8 +1,6 @@
 import { useMemo, useEffect, useReducer, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { m, AnimatePresence } from 'framer-motion'
-
 import { FlaskConical, FileText, Gauge, Crosshair } from 'lucide-react'
 import DonutChart from '@/components/dashboard/DonutChart'
 import { StatCard, SectionTitle } from '@/components/dashboard/StatCard'
@@ -127,16 +125,6 @@ function DashboardNewsWidget() {
     </div>
   )
 }
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05
-    }
-  }
-} as const
 
 export default function DashboardPage() {
   usePreleveursListener()
@@ -270,12 +258,7 @@ export default function DashboardPage() {
   // ── Render ────────────────────────────────────────────────
 
   return (
-    <m.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="px-4 py-6 md:px-8 max-w-6xl mx-auto"
-    >
+    <div className="px-4 py-6 md:px-8 max-w-6xl mx-auto animate-page-in">
 
       <DashboardHeader
         prenom={prenom}
@@ -286,16 +269,8 @@ export default function DashboardPage() {
         initiales={appUser?.initiales}
       />
 
-      <AnimatePresence mode="wait">
-        {(!isGeneraliste || activeTab === 'technicien') ? (
-          <m.div
-            key="technicien"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.15 }}
-            className="space-y-6"
-          >
+      {(!isGeneraliste || activeTab === 'technicien') ? (
+          <div key="technicien" className="space-y-6 animate-page-in">
             {/* KPIs — grille 2×2 mobile, 4 colonnes desktop */}
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -394,19 +369,12 @@ export default function DashboardPage() {
               maintenances={maintenancesActives}
               metrologie={metrologieAlertes}
             />
-          </m.div>
+          </div>
         ) : (
-          <m.div
-            key="manager"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.15 }}
-          >
+          <div key="manager" className="animate-page-in">
             <EquipeSuiviWidget clients={clients} />
-          </m.div>
+          </div>
         )}
-      </AnimatePresence>
 
       {eventDetail && (
         <EventDetailModal
@@ -444,6 +412,6 @@ export default function DashboardPage() {
       )}
 
       <WelcomeModal show={showWelcome} onDismiss={dismissWelcome} />
-    </m.div>
+    </div>
   )
 }
