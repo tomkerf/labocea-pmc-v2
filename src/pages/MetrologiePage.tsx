@@ -59,7 +59,7 @@ export default function MerologiePage() {
   }
 
   return (
-    <div className="px-4 py-6 md:px-8">
+    <div className="px-4 py-6 md:px-8 max-w-4xl mx-auto">
       {/* Bouton retour mobile */}
       <div className="md:hidden mb-4">
         <Link to="/plus" className="inline-flex items-center gap-1 font-semibold text-sm transition-opacity active:opacity-80" style={{ color: COLORS.ACCENT }}>
