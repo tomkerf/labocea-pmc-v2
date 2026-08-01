@@ -39,31 +39,26 @@ export default function AppLayout() {
   // Contourne un bug de repaint Chromium : le DOM est à jour (nouvelle page
   // montée, opacité animée à 1) mais les pixels ne sont pas repeints tant
   // qu'aucun scroll ne survient. Se produit au retour sur l'onglet ET après
-  // une navigation SPA (transition framer-motion) — on force donc un micro-
-  // scroll dans les deux cas.
-  useEffect(() => {
-    const forceRepaint = () => {
-      const container = scrollContainerRef.current
-      if (!container) return
-      requestAnimationFrame(() => {
-        container.scrollTop += 1
-        container.scrollTop -= 1
-      })
-    }
+  // une navigation SPA — on force donc un micro-scroll dans les deux cas.
+  // Pour la navigation, on se cale sur la fin réelle de l'animation
+  // framer-motion (onAnimationComplete) plutôt qu'un délai fixe, qui peut
+  // être trop court si l'onglet est ralenti (beaucoup d'onglets ouverts…).
+  function forceRepaint() {
+    const container = scrollContainerRef.current
+    if (!container) return
+    requestAnimationFrame(() => {
+      container.scrollTop += 1
+      container.scrollTop -= 1
+    })
+  }
 
+  useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') forceRepaint()
     }
     document.addEventListener('visibilitychange', handleVisibility)
-
-    // Après la transition framer-motion (150ms) de la nouvelle page
-    const navTimer = setTimeout(forceRepaint, 200)
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibility)
-      clearTimeout(navTimer)
-    }
-  }, [pathname])
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [])
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--color-bg-primary)]">
@@ -118,6 +113,7 @@ export default function AppLayout() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
+              onAnimationComplete={forceRepaint}
               className="h-full"
             >
               <ErrorBoundary key={pathname}>
