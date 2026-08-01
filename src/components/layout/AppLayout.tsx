@@ -36,11 +36,13 @@ export default function AppLayout() {
     return () => container.removeEventListener('scroll', handleScroll)
   }, [pathname])
 
-  // Contourne un bug de repaint Chromium : au retour sur l'onglet, le DOM est
-  // à jour mais les pixels ne sont pas repeints tant qu'aucun scroll ne survient.
+  // Contourne un bug de repaint Chromium : le DOM est à jour (nouvelle page
+  // montée, opacité animée à 1) mais les pixels ne sont pas repeints tant
+  // qu'aucun scroll ne survient. Se produit au retour sur l'onglet ET après
+  // une navigation SPA (transition framer-motion) — on force donc un micro-
+  // scroll dans les deux cas.
   useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState !== 'visible') return
+    const forceRepaint = () => {
       const container = scrollContainerRef.current
       if (!container) return
       requestAnimationFrame(() => {
@@ -48,9 +50,20 @@ export default function AppLayout() {
         container.scrollTop -= 1
       })
     }
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') forceRepaint()
+    }
     document.addEventListener('visibilitychange', handleVisibility)
-    return () => document.removeEventListener('visibilitychange', handleVisibility)
-  }, [])
+
+    // Après la transition framer-motion (150ms) de la nouvelle page
+    const navTimer = setTimeout(forceRepaint, 200)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+      clearTimeout(navTimer)
+    }
+  }, [pathname])
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--color-bg-primary)]">
