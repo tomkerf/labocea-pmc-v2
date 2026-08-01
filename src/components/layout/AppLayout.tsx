@@ -106,7 +106,11 @@ export default function AppLayout() {
               : 'overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-0'
           }`}
         >
-          <AnimatePresence mode="wait">
+          {/* Pas de mode="wait" : si l'exit d'une page se fige (onglet en
+              arrière-plan, rAF gelé), l'entrant reste bloqué à opacity: 0
+              indéfiniment (deadlock AnimatePresence). En mode par défaut
+              (sync), l'entrant monte sans attendre la fin de l'exit. */}
+          <AnimatePresence>
             <m.div
               key={pathname}
               initial={{ opacity: 0, y: 4 }}
@@ -116,7 +120,7 @@ export default function AppLayout() {
               onAnimationComplete={forceRepaint}
               className="h-full"
             >
-              <ErrorBoundary key={pathname}>
+              <ErrorBoundary>
                 <Outlet />
               </ErrorBoundary>
             </m.div>
