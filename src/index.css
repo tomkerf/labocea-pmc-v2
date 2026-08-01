@@ -82,6 +82,19 @@ body {
   flex-direction: column;
 }
 
+/* ── Transition de page (route) — animation CSS pure, pas de JS/rAF ──
+   Volontairement SANS fill-mode backwards/both : l'état de repos du
+   contenu est opacity:1 (classe de base). Si l'animation ne joue pas
+   (onglet gelé, reduced-motion), le contenu reste visible plutôt que
+   figé à opacity:0. */
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(4px); }
+}
+
+.animate-page-in {
+  animation: pageIn 0.15s ease-out;
+}
+
 /* ── Jours fériés & congés — overlay animé ── */
 @keyframes holidayFadeIn {
   from { opacity: 0; }

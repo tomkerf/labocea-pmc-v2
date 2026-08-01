@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
-import { AnimatePresence, m } from 'framer-motion'
 import Sidebar from './Sidebar'
 import BottomTabBar from './BottomTabBar'
 import ErrorBoundary from './ErrorBoundary'
@@ -33,32 +32,32 @@ export default function AppLayout() {
     const handleScroll = () => setScrolled(container.scrollTop > 5)
     container.addEventListener('scroll', handleScroll, { passive: true })
     setScrolled(false)
+    container.scrollTo(0, 0)
     return () => container.removeEventListener('scroll', handleScroll)
   }, [pathname])
 
-  // Contourne un bug de repaint Chromium : le DOM est à jour (nouvelle page
-  // montée, opacité animée à 1) mais les pixels ne sont pas repeints tant
-  // qu'aucun scroll ne survient. Se produit au retour sur l'onglet ET après
-  // une navigation SPA — on force donc un micro-scroll dans les deux cas.
-  // Pour la navigation, on se cale sur la fin réelle de l'animation
-  // framer-motion (onAnimationComplete) plutôt qu'un délai fixe, qui peut
-  // être trop court si l'onglet est ralenti (beaucoup d'onglets ouverts…).
-  function forceRepaint() {
-    const container = scrollContainerRef.current
-    if (!container) return
-    requestAnimationFrame(() => {
-      container.scrollTop += 1
-      container.scrollTop -= 1
-    })
-  }
-
+  // Filet de sécurité : si un wrapper de page reste figé à opacity < 1
+  // (animation CSS interrompue par un rAF/onglet gelé), on le rend visible
+  // de force. Ne devrait normalement jamais se déclencher puisque .animate-page-in
+  // n'a pas de fill-mode — l'état de repos est déjà opacity:1.
   useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') forceRepaint()
+    const heal = () => {
+      document.querySelectorAll<HTMLElement>('[data-route-wrapper]').forEach((el) => {
+        if (parseFloat(getComputedStyle(el).opacity) < 1) {
+          el.style.opacity = '1'
+          el.style.transform = 'none'
+        }
+      })
     }
-    document.addEventListener('visibilitychange', handleVisibility)
-    return () => document.removeEventListener('visibilitychange', handleVisibility)
-  }, [])
+    const timer = setTimeout(heal, 300)
+    document.addEventListener('visibilitychange', heal)
+    window.addEventListener('pageshow', heal)
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('visibilitychange', heal)
+      window.removeEventListener('pageshow', heal)
+    }
+  }, [pathname])
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--color-bg-primary)]">
@@ -106,25 +105,16 @@ export default function AppLayout() {
               : 'overflow-y-auto pb-[calc(80px+env(safe-area-inset-bottom,0px))] md:pb-0'
           }`}
         >
-          {/* Pas de mode="wait" : si l'exit d'une page se fige (onglet en
-              arrière-plan, rAF gelé), l'entrant reste bloqué à opacity: 0
-              indéfiniment (deadlock AnimatePresence). En mode par défaut
-              (sync), l'entrant monte sans attendre la fin de l'exit. */}
-          <AnimatePresence>
-            <m.div
-              key={pathname}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15, ease: 'easeOut' }}
-              onAnimationComplete={forceRepaint}
-              className="h-full"
-            >
-              <ErrorBoundary>
-                <Outlet />
-              </ErrorBoundary>
-            </m.div>
-          </AnimatePresence>
+          {/* Animation CSS pure (pas de framer-motion) : dépendre d'une
+              boucle rAF pour rendre le contenu visible est dangereux, un
+              onglet gelé en arrière-plan fige l'opacité à 0 indéfiniment
+              (page blanche jusqu'à reload). .animate-page-in n'a pas de
+              fill-mode : l'état de repos est déjà opacity:1. */}
+          <div key={pathname} data-route-wrapper className="h-full animate-page-in">
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
+          </div>
         </div>
       </main>
 
