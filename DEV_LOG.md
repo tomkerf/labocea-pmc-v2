@@ -3,6 +3,37 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 199 — Bug page blanche (root cause), ratio hero grid Dashboard, harmonisation largeurs
+**1er août 2026**
+
+### Bug corrigé — Page blanche intermittente sur les routes (root cause enfin identifiée)
+- Symptôme signalé par Tom sur `/planning`, `/todos` et d'autres routes : la zone de contenu principale restait entièrement blanche (sidebar/header OK), parfois après un retour d'onglet, parfois après une simple navigation SPA. Seul un rechargement complet (F5) réparait.
+- **Trois itérations infructueuses** avant la vraie cause : (1) hack `scrollTop +1/-1` sur `visibilitychange` en supposant un bug de repaint Chromium (a9ccb8b), (2) extension du hack aux navigations SPA (0ba647f), (3) passage de `setTimeout` à `onAnimationComplete` framer-motion (6d2ac0f), (4) suppression de `mode="wait"` sur `AnimatePresence` en supposant un deadlock exit/enter (6c42de7) — chacune plausible sur le moment, aucune ne réglait le symptôme en usage réel.
+- **Root cause démontrée** (mesures directes dans les devtools : `getAnimations()`, `getComputedStyle`, wrapper observé figé 22s) : tout le contenu de page dépendait d'une animation `framer-motion` JS pilotée par `requestAnimationFrame` (`initial={{opacity:0}}` → `animate={{opacity:1}}`). Quand Chrome gèle la boucle rAF d'un onglet en arrière-plan (throttling, charge élevée), l'animation ne se termine jamais → le wrapper reste figé à `opacity: 0`, parfois en plein vol. Plusieurs wrappers pouvaient même s'empiler (exit jamais terminé).
+- **Fix définitif** (commit `4937ad4`), principe *fail-visible* : remplacement du fade `framer-motion` sur le wrapper de route (`AppLayout.tsx`) par une animation CSS pure (`@keyframes pageIn`, classe `.animate-page-in`) **sans fill-mode** — l'état de repos est `opacity:1` par défaut, l'animation n'est qu'un bonus visuel qui ne bloque jamais l'affichage si elle ne joue pas. Filet de sécurité ajouté (`visibilitychange`/`pageshow`/`setTimeout(300ms)`) qui force `opacity:1` en dernier recours.
+- Le même pattern a été trouvé et corrigé dans `DashboardPage.tsx` (commit `92d60eb`) : wrapper racine (`containerVariants`) + switch d'onglet Mon activité/Suivi équipe (`AnimatePresence mode="wait"`), tous deux remplacés par `.animate-page-in`. Imports `framer-motion` devenus inutiles supprimés.
+- Leçon retenue (mémoire long terme) : vérifier `getComputedStyle(el).opacity` avant de suspecter repaint/données quand un contenu monté reste invisible ; éviter `AnimatePresence mode="wait"` sur des conteneurs structurants dans ce projet.
+
+### Style — Ratio du hero grid Dashboard (Planning du jour / rail matériel+actualités)
+- Deux tentatives précédentes (sessions antérieures, 2fr → 2.2fr) n'avaient jamais eu d'effet visible. Cause : `grid-cols-[2.2fr_1fr]` sans `minmax(0, Nfr)` laisse chaque piste garder une largeur minimale égale à son contenu — mesuré en pratique 467px/603px, l'inverse du ratio voulu.
+- Fix : `minmax(0, Nfr)` sur les deux pistes force le ratio à s'appliquer réellement. Plusieurs itérations avec Tom (2.2:1 trop large → 1.6:1 → 2:1 "fait 2/3 1/3" → ratio final retenu **1,618:1 (nombre d'or)**, meilleur compromis entre dominance du planning et lisibilité du rail droit (titre actu sur 2 lignes propres, légende du donut qui respire).
+
+### Style — Harmonisation des largeurs de page (suite session 198)
+- Constat de Tom en parcourant l'app : Missions s'étirait pleine largeur avec un grand vide entre le nom du client et la colonne "Prochain", contrairement à Rapports/Tâches (`max-w-4xl`).
+- Missions, puis Matériel/Métrologie/Maintenances (à la demande de Tom, "je préfère qu'ils aient la largeur de Missions") passés en `max-w-4xl mx-auto`, alignés sur le palier des pages liste. Planning/Pilotage/Demandes restent pleine largeur (colonnes/calendrier, cas légitime).
+
+### Vérifications
+- `tsc --noEmit` et 453/453 tests verts après chaque changement. Vérifications visuelles via Chrome piloté à chaque étape (dev local + staging), y compris mesure directe des largeurs de colonnes en JS (`getComputedStyle`).
+- De nombreux déploiements staging successifs au fil des itérations (bug page blanche : 6 déploiements avant le fix définitif ; ratio hero grid : 4 itérations).
+
+### Prochaines étapes
+- Contraste WCAG `--color-text-secondary` ou tests E2E — au choix de Tom, voir `project_clean_code_todos.md`.
+- Exécuter le plan d'isolation Firestore (projet `labocea-pmc-dev` séparé) — voir `.claude/plans/oui-encapsulated-taco.md`.
+- Ordre de passage dans la tournée (drag & drop ou heure planifiée) — toujours reporté.
+- 11 commits locaux en avance sur `origin/main`, jamais poussés en fin de session 198/199 — à pousser.
+
+---
+
 ## Session 198 — Coche animée dot→check, harmonisation max-width, bilan mensuel des missions
 **31 juillet 2026**
 
