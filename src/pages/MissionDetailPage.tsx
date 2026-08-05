@@ -51,7 +51,7 @@ export default function MissionDetailPage() {
   const uid = useAuthStore(selectUid)
   const [j1Modal, setJ1Modal] = useState<'non_effectue' | 'reporte' | null>(null)
 
-  const { client, loading, saving, triggerSave } = useClientData(clientId)
+  const { client, loading, saving, saveNow } = useClientData(clientId)
 
   useEffect(() => {
     if (!loading && !client) navigate('/missions', { replace: true })
@@ -60,7 +60,11 @@ export default function MissionDetailPage() {
   const plan = client?.plans.find((p) => p.id === planId) ?? null
   const sampling = plan?.samplings.find((s) => s.id === samplingId) ?? null
 
-  function saveSamplingPatch(patch: Partial<Sampling>) {
+  // Sauvegarde immédiate (pas de debounce) : ces actions naviguent hors de la
+  // page juste après, or navigate(-1) sans historique SPA (deep-link, notif
+  // push) sort du document React et tuerait un debounce en attente, perdant
+  // la modification silencieusement (issue_terminer_mission_debounce_lost_on_deeplink).
+  async function saveSamplingPatchNow(patch: Partial<Sampling>) {
     if (!client || !plan) return;
     const updatedSamplings = plan.samplings.map((s) =>
       s.id === samplingId ? { ...s, ...patch } : s
@@ -68,7 +72,7 @@ export default function MissionDetailPage() {
     const updatedPlans = client.plans.map((p) =>
       p.id === planId ? { ...p, samplings: updatedSamplings } : p
     );
-    triggerSave({ ...client, plans: updatedPlans });
+    await saveNow({ ...client, plans: updatedPlans });
   }
 
   // J1 Bilan 24h : calculé à partir des dates, pas du param URL
@@ -77,14 +81,14 @@ export default function MissionDetailPage() {
   const plannedISO = sampling ? getFormattedISODate(sampling) : '';
   const isAutoJ1 = plan?.methode === 'Automatique' && !!plannedISO && plannedISO === todayISO;
 
-  function handleTerminer() {
+  async function handleTerminer() {
     if (!client || !plan || !sampling || saving) return;
     const today = new Date().toISOString().split('T')[0];
-    saveSamplingPatch({ status: 'done' as SamplingStatus, doneDate: today, doneBy: uid ?? '' });
+    await saveSamplingPatchNow({ status: 'done' as SamplingStatus, doneDate: today, doneBy: uid ?? '' });
     navigate(-1);
   }
 
-  function handleJ1Action(data: SaisieRapideData) {
+  async function handleJ1Action(data: SaisieRapideData) {
     if (!client || !plan || !sampling) return;
     let patch: Partial<Sampling>;
     if (data.status === 'non_effectue') {
@@ -101,7 +105,7 @@ export default function MissionDetailPage() {
         ],
       };
     }
-    saveSamplingPatch(patch);
+    await saveSamplingPatchNow(patch);
     setJ1Modal(null);
     navigate(-1);
   }

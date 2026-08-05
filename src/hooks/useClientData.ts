@@ -36,6 +36,7 @@ export interface UseClientDataReturn {
   saving: boolean
   remoteChanged: { byName: string } | null
   triggerSave: (updated: Client) => void
+  saveNow: (updated: Client) => Promise<void>
   update: (field: keyof Client, value: unknown) => void
   handleReload: () => void
   handleDeleteClient: () => Promise<void>
@@ -87,32 +88,47 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
     return () => unsub()
   }, [clientId, uid])
 
+  async function writeNow(updated: Client) {
+    if (!uid || isDeleted.current) return
+    setSaving(true)
+    const p = (async () => {
+      try {
+        await saveClient(updated, uid)
+        if (!saveTimer.current) isDirty.current = false
+      } catch {
+        toast.error('Échec de la sauvegarde. Vérifie ta connexion.')
+      } finally {
+        setSaving(false)
+      }
+    })()
+    savingPromise.current = p
+    await p
+    savingPromise.current = null
+  }
+
   function triggerSave(updated: Client) {
     isDirty.current = true
     hasEdited.current = true
     dispatch({ type: 'SET_CLIENT', client: updated })
     if (saveTimer.current) clearTimeout(saveTimer.current)
-    saveTimer.current = setTimeout(async () => {
-      if (!uid || isDeleted.current) {
-        saveTimer.current = null
-        return
-      }
+    saveTimer.current = setTimeout(() => {
       saveTimer.current = null
-      setSaving(true)
-      const p = (async () => {
-        try {
-          await saveClient(updated, uid)
-          if (!saveTimer.current) isDirty.current = false
-        } catch {
-          toast.error('Échec de la sauvegarde. Vérifie ta connexion.')
-        } finally {
-          setSaving(false)
-        }
-      })()
-      savingPromise.current = p
-      await p
-      savingPromise.current = null
+      void writeNow(updated)
     }, DEBOUNCE)
+  }
+
+  // Réservé aux actions terminales en un clic (ex: "Terminer la mission")
+  // suivies d'une navigation immédiate — contourne le debounce pour que
+  // l'écriture soit garantie avant de quitter la page. Sans ça, un
+  // navigate(-1) sans historique SPA (deep-link, notification push) sort du
+  // document React et tue le timer avant qu'il se déclenche, perdant la
+  // sauvegarde silencieusement (cf issue_terminer_mission_debounce_lost_on_deeplink).
+  async function saveNow(updated: Client) {
+    isDirty.current = true
+    hasEdited.current = true
+    dispatch({ type: 'SET_CLIENT', client: updated })
+    if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null }
+    await writeNow(updated)
   }
 
   function update(field: keyof Client, value: unknown) {
@@ -158,6 +174,7 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
     saving,
     remoteChanged,
     triggerSave,
+    saveNow,
     update,
     handleReload,
     handleDeleteClient,
