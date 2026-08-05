@@ -73,7 +73,7 @@ service cloud.firestore {
     match /clients-v2/{clientId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && hasRequiredClientFields();
-      allow update: if isAuthenticated() && immutableOn(['createdBy', 'annee']);
+      allow update: if isAuthenticated() && immutableOn(['createdBy', 'annee']) && hasRequiredClientFields();
       allow delete: if isAdmin();
     }
 
@@ -165,7 +165,8 @@ service cloud.firestore {
 
     // ── todos ─────────────────────────────────────────────────
     match /todos/{todoId} {
-      allow read, create, update: if isAuthenticated();
+      allow read, create: if isAuthenticated();
+      allow update: if isAuthenticated() && immutableOn(['createdBy']);
       allow delete: if isAuthenticated() && (request.auth.uid == resource.data.createdBy || isAdmin());
     }
 
