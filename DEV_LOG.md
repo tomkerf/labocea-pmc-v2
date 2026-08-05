@@ -4603,6 +4603,35 @@ DEV_LOG.md/ROADMAP.md de la session 195 n'avaient pas été commités avant d'en
 
 ---
 
+## Session 200 — Audit sécurité firestore.rules + correctifs déployés
+**5 août 2026**
+
+### Audit — firestore.rules (skill `tester-code`, modèle Opus)
+- Demande de Tom : évaluer ce qu'Opus/Fable peuvent apporter en robustesse/sécurité au-delà du travail courant. Lancement d'un audit ciblé de `firestore.rules` avec le skill `tester-code`.
+- 3 bugs critiques identifiés : (1) usurpation d'identité possible dans le chat, `senderUid` jamais vérifié contre `request.auth.uid` à la création ; (2) `allow delete: if isAdmin()` contournable via `update` sur 8 collections (`immutableOn` ne protège que `createdBy`, le reste du document reste réécrivable intégralement — structurel, lié à `samplings` imbriqué dans `clients-v2`) ; (3) aucun moyen de tester une modification de règles avant déploiement (staging=prod, pas de `.firebaserc`, `@firebase/rules-unit-testing` absent, émulateur bloqué par l'absence de Java).
+- 6 risques modérés et 5 améliorations mineures documentés en mémoire (`project_audit_firestore_rules_2026_08_05.md`).
+
+### Correctifs de sécurité déployés en production (`labocea-pmc`)
+- **`senderUid`** (commit `dfc037f`) : la règle `create` sur `chat-messages` exige désormais `senderUid == request.auth.uid`, bloquant l'usurpation d'identité dans le chat.
+- **`immutableOn` élargi** (commit `ed82cdd`) : `clients-v2.update` applique désormais `hasRequiredClientFields()` (empêche de vider `nom`) ; `todos.update` protège `createdBy` (empêchait de contourner la restriction de suppression réservée au créateur). Les deux vérifiés contre tous les chemins d'écriture réels du code avant déploiement (aucun test automatisé disponible à ce stade).
+- **`selfOnlyKeyDiff`** (commit `4d5c183`) : la logique de vote/réaction (`pollVotes`, `reactions`) reposait sur `removeAll`+`hasOnly`, qui ignore les doublons — un utilisateur pouvait dupliquer son propre uid des milliers de fois dans un vote, gonflant le document vers la limite Firestore. Corrigé via un delta de taille exact (apparition/disparition de soi = ±1, sinon 0). Écueil rencontré : la première version du correctif (égalité de liste complète) dépassait la limite CEL de 1000 expressions par règle une fois combinée à l'itération sur les 10 clés `pollVotes`/`reactions` — résolu en n'évaluant que le champ réellement modifié (`fieldChanged()`), la boucle de l'autre champ n'étant plus exécutée inutilement.
+
+### Infrastructure — tests d'émulateur Firestore débloqués
+- Java absent empêchait tout test de règles depuis des semaines (bloquant identifié en session 2026-08-02). Installé via `brew install openjdk`, PATH ajouté à `~/.zshrc`.
+- `@firebase/rules-unit-testing` installé, nouveau projet vitest `rules` (`vitest.config.ts`), script `npm run test:rules` (`firebase emulators:exec --only firestore "vitest run --project rules"`).
+- `firestore-rules/security-rules.test.ts` créé : 10 tests couvrant les 3 correctifs déployés (senderUid, immutableOn clients-v2/todos, selfOnlyKeyDiff), à faire vivre comme filet de non-régression pour toute future modification des règles.
+
+### Vérifications
+- Chaque correctif validé (lecture statique des chemins d'écriture réels pour les 2 premiers, tests d'émulateur pour le 3e) avant déploiement — aucun test manuel sur données réelles (cf `feedback_test_data_shared_firestore.md`).
+- `firebase deploy --only firestore:rules --project labocea-pmc` × 3, chaque déploiement confirmé par la CLI avant de commiter/pousser le fichier de règles correspondant.
+
+### Prochaines étapes
+- Isolation staging/prod (`labocea-pmc-dev`) — toujours le seul risque 🔴 non résolu du projet, voir `.claude/plans/oui-encapsulated-taco.md`.
+- Migration `samplings` en sous-collection — seule vraie solution au point critique #2 (contournement `delete` via `update`), et bénéfice croisé en performance (`project_firestore_perf_todo.md`).
+- Reste de l'audit non traité : `chat-messages` sans horodatage serveur imposé par les règles, `visites.technicienUid` mutable, lecture globale des emails `users`, `storage.rules` delete ouvert à tout authentifié — voir `project_audit_firestore_rules_2026_08_05.md`.
+
+---
+
 ## Session 197 — Badge J1/J2 dashboard, bug Google Maps, ménage planning
 **30 juillet 2026**
 
