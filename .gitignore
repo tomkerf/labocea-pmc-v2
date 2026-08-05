@@ -13,6 +13,9 @@ dist_old
 dist-ssr
 skills/
 *.local
+playwright-report/
+test-results/
+blob-report/
 
 # Editor directories and files
 .vscode/*
