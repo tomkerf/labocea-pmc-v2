@@ -10,6 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run --project unit",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:rules": "firebase emulators:exec --only firestore \"vitest run --project rules\"",
     "doctor": "npx react-doctor@latest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
@@ -36,6 +38,8 @@
   "devDependencies": {
     "@chromatic-com/storybook": "^5.2.1",
     "@eslint/js": "9.39.4",
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "@playwright/test": "^1.62.1",
     "@storybook/addon-a11y": "^10.4.2",
     "@storybook/addon-docs": "^10.4.2",
     "@storybook/addon-mcp": "^0.6.0",
@@ -55,6 +59,7 @@
     "eslint-plugin-react-hooks": "7.1.1",
     "eslint-plugin-react-refresh": "0.5.2",
     "eslint-plugin-storybook": "^10.4.2",
+    "firebase-admin": "^14.2.0",
     "globals": "17.5.0",
     "jsdom": "^29.1.1",
     "playwright": "^1.60.0",

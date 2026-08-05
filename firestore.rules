@@ -37,10 +37,19 @@ service cloud.firestore {
     // reactions), seul l'uid de l'appelant a pu être ajouté/retiré de la liste — jamais
     // celui d'un tiers.
     function selfOnlyKeyDiff(oldMap, newMap, key) {
+      let self = request.auth.uid;
       let oldVoters = key in oldMap ? oldMap[key] : [];
       let newVoters = key in newMap ? newMap[key] : [];
-      return oldVoters.removeAll(newVoters).hasOnly([request.auth.uid]) &&
-        newVoters.removeAll(oldVoters).hasOnly([request.auth.uid]);
+      // Le delta de taille doit correspondre exactement à l'apparition/disparition
+      // de self (±1) ou à aucun changement de sa présence (0) — ça bloque la
+      // duplication du même uid (delta incohérent avec le simple toggle),
+      // sans le coût d'une égalité de liste complète (limite 1000 expr CEL).
+      let oldHasSelf = self in oldVoters;
+      let newHasSelf = self in newVoters;
+      let expectedSizeDelta = (newHasSelf ? 1 : 0) - (oldHasSelf ? 1 : 0);
+      return oldVoters.removeAll(newVoters).hasOnly([self]) &&
+        newVoters.removeAll(oldVoters).hasOnly([self]) &&
+        newVoters.size() - oldVoters.size() == expectedSizeDelta;
     }
 
     // pollVotes : clés = index d'option (sendChatPoll limite à 10 options, index "0".."9").
@@ -54,6 +63,14 @@ service cloud.firestore {
         selfOnlyKeyDiff(oldMap, newMap, '4') && selfOnlyKeyDiff(oldMap, newMap, '5') &&
         selfOnlyKeyDiff(oldMap, newMap, '6') && selfOnlyKeyDiff(oldMap, newMap, '7') &&
         selfOnlyKeyDiff(oldMap, newMap, '8') && selfOnlyKeyDiff(oldMap, newMap, '9');
+    }
+
+    // Évite d'évaluer inutilement la boucle 10-clés de l'autre champ (pollVotes ou
+    // reactions) quand un seul des deux est modifié — chaque appel de
+    // selfOnlyKeyDiff coûte plusieurs expressions CEL, et le budget total par
+    // règle est plafonné à 1000 (limite atteinte sans ce garde-fou).
+    function fieldChanged(field) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasAny([field]);
     }
 
     // reactions : clés = emojis autorisés (voir ALLOWED_REACTIONS dans chatService.ts).
@@ -196,8 +213,10 @@ service cloud.firestore {
           (request.auth.uid in resource.data.participants)
         ) &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pollVotes', 'reactions']) &&
-        isSelfOnlyPollVotesUpdate(resource.data.get('pollVotes', {}), request.resource.data.get('pollVotes', {})) &&
-        isSelfOnlyReactionsUpdate(resource.data.get('reactions', {}), request.resource.data.get('reactions', {}));
+        (!fieldChanged('pollVotes') ||
+          isSelfOnlyPollVotesUpdate(resource.data.get('pollVotes', {}), request.resource.data.get('pollVotes', {}))) &&
+        (!fieldChanged('reactions') ||
+          isSelfOnlyReactionsUpdate(resource.data.get('reactions', {}), request.resource.data.get('reactions', {})));
       allow delete: if false;
     }
 
