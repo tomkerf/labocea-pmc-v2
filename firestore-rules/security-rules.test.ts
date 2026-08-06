@@ -55,6 +55,18 @@ describe('chat-messages — create (fix senderUid, commit dfc037f)', () => {
       })
     )
   })
+
+  it('refuse un createdAt fourni par le client (doit être serverTimestamp())', async () => {
+    const alice = testEnv.authenticatedContext('alice').firestore()
+    await assertFails(
+      addDoc(collection(alice, 'chat-messages'), {
+        senderUid: 'alice',
+        chatId: 'general',
+        text: 'antidaté',
+        createdAt: new Date('2020-01-01'),
+      })
+    )
+  })
 })
 
 describe('todos — update (fix immutableOn createdBy, commit ed82cdd)', () => {
