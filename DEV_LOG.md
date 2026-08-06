@@ -4686,6 +4686,22 @@ DEV_LOG.md/ROADMAP.md de la session 195 n'avaient pas été commités avant d'en
 
 ---
 
+## Session 203 — Changelog figé rattrapé, mise à jour intégrée au rituel de fin de session
+**6 août 2026**
+
+### Bug corrigé — "Nouveautés" ne reflétait plus l'état réel de l'app
+- Signalé par Tom : `src/data/changelog.ts` (liste statique, comparée via `CHANGELOG_VERSION`/`localStorage`) était figé à la version 178 (29 juillet) alors que 7 sessions de travail utilisateur-visible avaient suivi. Déjà arrivé une fois (session 196, figé 9 jours) — cette fois figé 8 jours / 7 sessions, jamais rattrapé entre-temps.
+- 5 entrées ajoutées (179→183) résumant : alerte matériel Bilan 24h, badge J1/J2 dashboard, fix carte Google Maps, bandeau retiré, coche animée dot→check, harmonisation des largeurs de page (Dashboard/Missions/Matériel/Métrologie/Maintenances), bilan mensuel des missions, résolution définitive du bug de page blanche, ratio hero grid nombre d'or, fix "Terminer la mission" (sauvegarde perdue), durcissement sécurité (générique, sans détailler les règles Firestore aux utilisateurs). `CHANGELOG_VERSION` → `'183'`.
+- **Fix structurel** (pas qu'un rattrapage ponctuel) : le skill local `.claude/skills/fin-session/SKILL.md` (non versionné dans git) intègre désormais la mise à jour du changelog comme étape systématique du rituel de clôture de session, au même titre que `DEV_LOG.md`/`ROADMAP.md` — condition : uniquement si la session a eu un impact visible utilisateur, pour ne pas gonfler artificiellement la liste.
+
+### Vérifications
+- `tsc --noEmit`, `npm run lint`, `npm run test` (453/453) tous propres avant commit. Déployé sur staging.
+
+### Prochaines étapes
+- Isolation staging/prod, migration `samplings`, reste de l'audit `firestore.rules` — voir Sessions 200-202.
+
+---
+
 ## Session 197 — Badge J1/J2 dashboard, bug Google Maps, ménage planning
 **30 juillet 2026**
 
