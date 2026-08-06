@@ -104,7 +104,14 @@ export default function ActuFormModal({ isOpen, onClose, editingActu }: Props) {
     }
   }
 
-  const isValid = titre.trim().length > 0 && contenu.trim().length > 0
+  // Message et validité dérivés d'une seule source : sans explication, le bouton
+  // grisé bloque sans qu'on sache lequel des deux champs manque.
+  const validationHint =
+    !titre.trim() && !contenu.trim() ? 'Renseigne le titre et le contenu pour publier.'
+    : !titre.trim() ? 'Renseigne le titre pour publier.'
+    : !contenu.trim() ? 'Renseigne le contenu pour publier.'
+    : null
+  const isValid = validationHint === null
 
   return (
     <>
@@ -115,6 +122,11 @@ export default function ActuFormModal({ isOpen, onClose, editingActu }: Props) {
       icon={<Newspaper size={17} strokeWidth={1.8} style={{ color: COLORS.ACCENT }} />}
       footer={
         <>
+          {validationHint && (
+            <p id="actu-hint" className="text-xs mr-auto" style={{ color: COLORS.TEXT_SECONDARY }}>
+              {validationHint}
+            </p>
+          )}
           <button type="button" onClick={handleClose} className="px-4 py-2 rounded-lg text-sm cursor-pointer"
             style={{ color: COLORS.TEXT_SECONDARY, background: COLORS.BG_TERTIARY }}>
             Annuler
@@ -122,6 +134,7 @@ export default function ActuFormModal({ isOpen, onClose, editingActu }: Props) {
           <button
             type="button"
             onClick={handleSubmit}
+            aria-describedby={validationHint ? 'actu-hint' : undefined}
             disabled={!isValid || submitting}
             className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors"
             style={{

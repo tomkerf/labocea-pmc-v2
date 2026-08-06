@@ -328,6 +328,15 @@ export default function ChatPage() {
     setPollOptions(updated)
   }
 
+  // Message et validité dérivés d'une seule source : sans explication, le bouton
+  // grisé bloque sans qu'on sache s'il manque la question ou une 2e option.
+  const pollFilledOptions = pollOptions.map(o => o.trim()).filter(Boolean).length
+  const pollHint =
+    !pollQuestion.trim() && pollFilledOptions < 2 ? 'Renseigne la question et au moins 2 options.'
+    : !pollQuestion.trim() ? 'Renseigne la question du sondage.'
+    : pollFilledOptions < 2 ? 'Renseigne au moins 2 options.'
+    : null
+
   const handleSendPoll = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!pollQuestion.trim() || !appUser) return
@@ -1026,6 +1035,11 @@ export default function ChatPage() {
 
                 {/* Actions */}
                 <div className="pt-4 border-t border-[var(--color-border-subtle)] flex items-center justify-end gap-2.5 shrink-0">
+                  {pollHint && (
+                    <p id="poll-hint" className="text-xs mr-auto text-[var(--color-text-secondary)]">
+                      {pollHint}
+                    </p>
+                  )}
                   <button
                     type="button"
                     onClick={() => setIsPollModalOpen(false)}
@@ -1035,9 +1049,10 @@ export default function ChatPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={!pollQuestion.trim() || pollOptions.map(o => o.trim()).filter(Boolean).length < 2}
+                    aria-describedby={pollHint ? 'poll-hint' : undefined}
+                    disabled={!!pollHint}
                     className={`px-4 py-2 text-xs font-semibold text-white rounded-xl active:scale-95 transition-all ${
-                      pollQuestion.trim() && pollOptions.map(o => o.trim()).filter(Boolean).length >= 2
+                      !pollHint
                         ? 'bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)]'
                         : 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-tertiary)] cursor-not-allowed border border-[var(--color-border-subtle)]'
                     }`}
