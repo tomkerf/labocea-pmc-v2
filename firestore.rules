@@ -176,7 +176,13 @@ service cloud.firestore {
     // Modification/suppression : technicien créateur ou admin.
     match /visites/{visiteId} {
       allow read, create: if isAuthenticated();
-      allow update, delete: if isAuthenticated() &&
+      // technicienUid immuable : aucun flux UI ne le réassigne (seul
+      // technicienNom est éditable), sans quoi le créateur pourrait se
+      // déposséder de sa propre visite en changeant l'uid propriétaire.
+      allow update: if isAuthenticated() &&
+        (request.auth.uid == resource.data.technicienUid || isAdmin()) &&
+        immutableOn(['technicienUid']);
+      allow delete: if isAuthenticated() &&
         (request.auth.uid == resource.data.technicienUid || isAdmin());
     }
 

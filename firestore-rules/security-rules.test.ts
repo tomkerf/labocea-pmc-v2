@@ -168,3 +168,32 @@ describe('chat-messages — pollVotes (fix selfOnlyKeyDiff, audit point 5)', () 
     )
   })
 })
+
+describe('visites — update (fix immutableOn technicienUid)', () => {
+  const visiteId = 'visite-1'
+
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'visites', visiteId), {
+        technicienUid: 'alice',
+        technicienNom: 'Alice',
+        notes: '',
+      })
+    })
+  })
+
+  it('refuse au créateur de réassigner technicienUid à un autre utilisateur', async () => {
+    const alice = testEnv.authenticatedContext('alice').firestore()
+    await assertFails(updateDoc(doc(alice, 'visites', visiteId), { technicienUid: 'bob' }))
+  })
+
+  it('autorise le créateur à modifier un autre champ (technicienNom)', async () => {
+    const alice = testEnv.authenticatedContext('alice').firestore()
+    await assertSucceeds(updateDoc(doc(alice, 'visites', visiteId), { technicienNom: 'Alice T.' }))
+  })
+
+  it('refuse à un tiers non-admin de modifier la visite', async () => {
+    const bob = testEnv.authenticatedContext('bob').firestore()
+    await assertFails(updateDoc(doc(bob, 'visites', visiteId), { technicienNom: 'Bob' }))
+  })
+})
