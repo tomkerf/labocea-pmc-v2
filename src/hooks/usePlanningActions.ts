@@ -205,9 +205,17 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
         ...client,
         plans: client.plans.map(plan => plan.id !== item.planId ? plan : {
           ...plan,
-          samplings: plan.samplings.map((s: Sampling) =>
-            s.id !== item.sampling.id ? s : { ...s, plannedDay, plannedMonth, plannedTime: time || undefined }
-          )
+          samplings: plan.samplings.map((s: Sampling) => {
+            if (s.id !== item.sampling.id) return s
+            // Omettre la clé plutôt que de poser undefined : le tableau plans est
+            // remplacé en bloc par le set merge, donc l'absence de clé efface bien
+            // une heure précédemment saisie.
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars -- on retire la clé par destructuration
+            const { plannedTime, ...rest } = s
+            return time
+              ? { ...rest, plannedDay, plannedMonth, plannedTime: time }
+              : { ...rest, plannedDay, plannedMonth }
+          })
         })
       }, uid)
       warnIfMaterielInsuffisant(item.methode, date)

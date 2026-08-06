@@ -38,19 +38,28 @@ if (USE_EMULATOR) connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWa
 // mises en file et synchronisées dès que le réseau revient.
 // Fallback mémoire si l'IndexedDB est corrompu (ex: première ouverture après
 // un changement de schéma Firestore ou cache navigateur dégradé).
+// Sans ignoreUndefinedProperties, le SDK LÈVE une exception dès qu'un champ vaut
+// undefined ("Unsupported field value: undefined"), y compris profondément
+// imbriqué. Le code utilise abondamment le pattern `champ: valeur || undefined`
+// pour dire "pas de valeur" (plannedTime, pointMesureId…) — ce qui faisait
+// planter la sauvegarde en production (bug du 2026-08-06 sur la planification
+// rapide d'un créneau sans heure). Avec ce flag, le champ est simplement omis.
+const FIRESTORE_SETTINGS = { ignoreUndefinedProperties: true }
+
 function buildDb() {
   // Emulator : cache mémoire pour repartir d'un état propre à chaque test,
   // pas de persistance IndexedDB entre les runs.
-  if (USE_EMULATOR) return initializeFirestore(app, { localCache: memoryLocalCache() })
+  if (USE_EMULATOR) return initializeFirestore(app, { ...FIRESTORE_SETTINGS, localCache: memoryLocalCache() })
   try {
     return initializeFirestore(app, {
+      ...FIRESTORE_SETTINGS,
       localCache: persistentLocalCache({
         tabManager: persistentMultipleTabManager(),
       }),
     })
   } catch {
     console.warn('[Firebase] Cache IndexedDB indisponible — fallback mémoire')
-    return initializeFirestore(app, { localCache: memoryLocalCache() })
+    return initializeFirestore(app, { ...FIRESTORE_SETTINGS, localCache: memoryLocalCache() })
   }
 }
 

@@ -244,7 +244,10 @@ describe('usePlanningActions', () => {
       const s = savedSampling()
       expect(s.plannedDay).toBe(20)
       expect(s.plannedMonth).toBe(7) // août (0-based)
-      expect(s.plannedTime).toBeUndefined()
+      // La clé doit être ABSENTE, pas présente à undefined : Firestore lève
+      // "Unsupported field value: undefined" sur une clé explicitement undefined
+      // (bug prod du 2026-08-06). toBeUndefined() ne distingue pas les deux cas.
+      expect('plannedTime' in s).toBe(false)
     })
 
     it('planifie le prélèvement avec une heure', async () => {
