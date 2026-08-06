@@ -6,6 +6,7 @@ import { saveClient, deleteClient } from '@/services/clientService'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
 import { toast } from '@/stores/toastStore'
+import { reportError } from '@/lib/sentry'
 import type { Client } from '@/types'
 import { COLLECTIONS } from '@/lib/constants'
 
@@ -95,7 +96,8 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
       try {
         await saveClient(updated, uid)
         if (!saveTimer.current) isDirty.current = false
-      } catch {
+      } catch (err) {
+        reportError('useClientData.save', err)
         toast.error('Échec de la sauvegarde. Vérifie ta connexion.')
       } finally {
         setSaving(false)
@@ -162,7 +164,8 @@ export function useClientData(clientId: string | undefined): UseClientDataReturn
     try {
       await deleteClient(client.id)
       navigate('/missions')
-    } catch {
+    } catch (err) {
+      reportError('useClientData.delete', err)
       isDeleted.current = false
       toast.error('Échec de la suppression. Réessaie.')
     }

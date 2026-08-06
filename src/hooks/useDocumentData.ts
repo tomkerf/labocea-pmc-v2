@@ -4,6 +4,7 @@ import { doc, onSnapshot, deleteDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useAuthStore, selectUid } from '@/stores/authStore'
 import { toast } from '@/stores/toastStore'
+import { reportError } from '@/lib/sentry'
 
 const DEBOUNCE = 800
 
@@ -81,7 +82,8 @@ export function useDocumentData<T extends { id: string }>(
         if (!saveTimer.current) {
           isDirty.current = false
         }
-      } catch {
+      } catch (err) {
+        reportError('useDocumentData.save', err)
         toast.error('Échec de la sauvegarde. Vérifie ta connexion.')
       } finally {
         setSaving(false)
@@ -98,7 +100,8 @@ export function useDocumentData<T extends { id: string }>(
     try {
       await deleteDoc(doc(db, collection, docId))
       navigate(deleteRedirect)
-    } catch {
+    } catch (err) {
+      reportError('useDocumentData.delete', err)
       toast.error('Échec de la suppression. Réessaie.')
     }
   }

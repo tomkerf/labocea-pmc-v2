@@ -3,6 +3,7 @@ import { saveClient } from '@/services/clientService'
 import { createEvenement, deleteEvenement, updateEvenementDate } from '@/services/evenementService'
 import { toISO, shiftDateFin, getMissingMaterielForDate } from '@/lib/planningUtils'
 import { useToastStore } from '@/stores/toastStore'
+import { reportError } from '@/lib/sentry'
 import type { Client, Sampling, TypeEvenement, Equipement } from '@/types'
 import type { PlanningEvent, PoolItem } from '@/lib/planningUtils'
 
@@ -33,7 +34,8 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
     if (!event.evenementData) return
     try {
       await deleteEvenement(event.evenementData.id)
-    } catch {
+    } catch (err) {
+      reportError('handleDeleteEvent', err)
       addToast('error', 'Erreur lors de la suppression de l\'événement')
     }
   }
@@ -56,7 +58,8 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
           })
         })
       }, uid)
-    } catch {
+    } catch (err) {
+      reportError('handleCancelSampling', err)
       addToast('error', 'Erreur lors de l\'annulation du prélèvement')
     } finally {
       isPending.current = false
@@ -85,7 +88,8 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
         })
       }, uid)
       warnIfMaterielInsuffisant(event.methode, newDate)
-    } catch {
+    } catch (err) {
+      reportError('handleMoveEvent', err)
       addToast('error', 'Erreur lors du report du prélèvement')
     } finally {
       isPending.current = false
@@ -98,7 +102,8 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
     isPending.current = true
     try {
       await updateEvenementDate(data.id, newDate, shiftDateFin(data.date, newDate, data.dateFin))
-    } catch {
+    } catch (err) {
+      reportError('handleMoveEvenement', err)
       addToast('error', 'Erreur lors du déplacement de l\'événement')
     } finally {
       isPending.current = false
@@ -114,7 +119,8 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
       } else {
         await createEvenement('Pluie prévue', dateStr, 'meteo', '', '', uid, initiales)
       }
-    } catch {
+    } catch (err) {
+      reportError('toggleRainDay', err)
       addToast('error', 'Erreur lors de la mise à jour météo')
     }
   }
@@ -149,7 +155,8 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
           )
         }).catch(err => console.error('[Notification] Failed to load notificationService:', err))
       }
-    } catch {
+    } catch (err) {
+      reportError('handleChangeTechnicien', err)
       addToast('error', 'Erreur lors du changement de technicien')
     } finally {
       isPending.current = false
@@ -172,7 +179,8 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
           ),
         }),
       }, uid)
-    } catch {
+    } catch (err) {
+      reportError('handleChangeEquipements', err)
       addToast('error', 'Erreur lors de l\'assignation des équipements')
     } finally {
       isPending.current = false
@@ -187,7 +195,8 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
     if (!uid) return
     try {
       await createEvenement(titre, dateDebut, type, heure, notes, uid, initiales, dateFin || undefined)
-    } catch {
+    } catch (err) {
+      reportError('handleSaveEvenement', err)
       addToast('error', 'Erreur lors de la création de l\'événement')
     }
   }
@@ -219,7 +228,8 @@ export function usePlanningActions({ uid, initiales, clients, evenements, holida
         })
       }, uid)
       warnIfMaterielInsuffisant(item.methode, date)
-    } catch {
+    } catch (err) {
+      reportError('handleValidatePool', err)
       addToast('error', 'Erreur lors de la validation du prélèvement')
     }
   }

@@ -48,7 +48,7 @@ export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConf
       toast.success('Photo supprimée avec succès !')
     } catch (err) {
       console.error(err)
-      toast.error('Erreur lors de la suppression de la photo.')
+      toast.error('Impossible de supprimer cette photo. Elle a peut-être été ajoutée par un collègue.')
     }
   }
 

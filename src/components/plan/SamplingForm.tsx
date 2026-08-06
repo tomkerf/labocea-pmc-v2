@@ -59,8 +59,15 @@ export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId
   }
 
   async function handlePhotoDelete(url: string) {
+    // Supprimer d'abord le fichier : retirer l'URL avant laisserait un fichier
+    // orphelin dans Storage si la suppression échoue (droits insuffisants).
+    try {
+      await deleteSamplingPhoto(url)
+    } catch {
+      toast.error('Impossible de supprimer cette photo. Elle a peut-être été ajoutée par un collègue.')
+      return
+    }
     onUpdate('photos', (sampling.photos ?? []).filter((u) => u !== url))
-    await deleteSamplingPhoto(url)
   }
 
   const checklist: ChecklistItem[] = sampling.checklist ?? []

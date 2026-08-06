@@ -142,18 +142,31 @@ export async function uploadSamplingPhoto(
 }
 
 /**
- * Supprime une photo depuis son URL de téléchargement.
+ * Supprime un objet Storage depuis son URL de téléchargement.
  * L'URL Firebase Storage encode le chemin après "/o/" en URIComponent.
+ *
+ * Seul le cas « fichier déjà absent » est ignoré : c'est le seul où
+ * l'intention de l'appelant est déjà satisfaite. Toute autre erreur (droits
+ * insuffisants depuis le durcissement de storage.rules, réseau coupé…) est
+ * propagée — sinon l'appelant retire l'URL du document en croyant la
+ * suppression réussie et le fichier reste orphelin dans Storage, sans que
+ * personne ne le sache.
  */
-export async function deleteSamplingPhoto(url: string): Promise<void> {
+async function deleteByDownloadUrl(url: string): Promise<void> {
+  const match = url.match(/\/o\/(.+?)(\?|$)/)
+  if (!match) return
+  const path = decodeURIComponent(match[1])
   try {
-    const match = url.match(/\/o\/(.+?)(\?|$)/)
-    if (!match) return
-    const path = decodeURIComponent(match[1])
     await deleteObject(ref(storage, path))
-  } catch {
-    // Si le fichier n'existe plus (déjà supprimé), on ignore silencieusement
+  } catch (err) {
+    if ((err as { code?: string }).code === 'storage/object-not-found') return
+    throw err
   }
+}
+
+/** Supprime une photo de prélèvement. Lève si la suppression a réellement échoué. */
+export async function deleteSamplingPhoto(url: string): Promise<void> {
+  await deleteByDownloadUrl(url)
 }
 
 /**
@@ -174,18 +187,9 @@ export async function uploadVisitePhoto(
   return getDownloadURL(storageRef)
 }
 
-/**
- * Supprime une photo de visite depuis son URL.
- */
+/** Supprime une photo de visite. Lève si la suppression a réellement échoué. */
 export async function deleteVisitePhoto(url: string): Promise<void> {
-  try {
-    const match = url.match(/\/o\/(.+?)(\?|$)/)
-    if (!match) return
-    const path = decodeURIComponent(match[1])
-    await deleteObject(ref(storage, path))
-  } catch {
-    // Fichier déjà supprimé — ignorer silencieusement
-  }
+  await deleteByDownloadUrl(url)
 }
 
 /**
@@ -206,18 +210,9 @@ export async function uploadPlanPhoto(
   return getDownloadURL(storageRef)
 }
 
-/**
- * Supprime une photo de plan depuis son URL.
- */
+/** Supprime une photo de plan. Lève si la suppression a réellement échoué. */
 export async function deletePlanPhoto(url: string): Promise<void> {
-  try {
-    const match = url.match(/\/o\/(.+?)(\?|$)/)
-    if (!match) return
-    const path = decodeURIComponent(match[1])
-    await deleteObject(ref(storage, path))
-  } catch {
-    // Ignorer silencieusement
-  }
+  await deleteByDownloadUrl(url)
 }
 
 /**
@@ -236,17 +231,8 @@ export async function uploadChatPhoto(
   return getDownloadURL(storageRef)
 }
 
-/**
- * Supprime une photo de chat depuis son URL.
- */
+/** Supprime une photo de chat. Lève si la suppression a réellement échoué. */
 export async function deleteChatPhoto(url: string): Promise<void> {
-  try {
-    const match = url.match(/\/o\/(.+?)(\?|$)/)
-    if (!match) return
-    const path = decodeURIComponent(match[1])
-    await deleteObject(ref(storage, path))
-  } catch {
-    // Ignorer silencieusement
-  }
+  await deleteByDownloadUrl(url)
 }
 

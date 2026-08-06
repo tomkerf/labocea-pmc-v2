@@ -140,7 +140,12 @@ export default function VisiteFormPage() {
   }
 
   async function handlePhotoDelete(pointId: string, url: string) {
-    await deleteVisitePhoto(url)
+    try {
+      await deleteVisitePhoto(url)
+    } catch {
+      toast.error('Impossible de supprimer cette photo. Elle a peut-être été ajoutée par un collègue.')
+      return
+    }
     dispatch({ points: points.map(p => p.id === pointId ? { ...p, photos: p.photos.filter(u => u !== url) } : p) })
   }
 
