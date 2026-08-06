@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '184'
+export const CHANGELOG_VERSION = '185'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,13 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '185',
+    date: '6 août 2026',
+    items: [
+      { type: 'feat', label: 'Rapports : la liste des rapports rédigés est désormais masquée par défaut avec possibilité de la déplier en un clic (gain d\'espace)' },
+    ],
+  },
   {
     version: '184',
     date: '6 août 2026',

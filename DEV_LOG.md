@@ -3,6 +3,22 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 200 — Repli par défaut des rapports rédigés
+**6 août 2026**
+
+### Feature — Liste des rapports rédigés collapsée par défaut
+- Demande : "Dans Rapports : La liste des rapports rédigés doit être collapsée par défaut".
+- Ajout de l'état local `redigesCollapsed` initialisé à `true` dans `RapportsPage.tsx`.
+- L'en-tête de la section "Rédigés" est devenu un bouton de bascule discret (`hover:opacity-80 transition-opacity focus:outline-none`).
+- Ajout d'un chevron indicateur d'état de repli (`ChevronDown` avec transition et rotation de `-90deg` quand fermé, `0deg` quand ouvert).
+- Le rendu de la liste ou de l'état vide associé est conditionné par `!redigesCollapsed`.
+- Validation technique : compilation TypeScript (`tsc --noEmit`) OK et exécution de `react-doctor` (score de 100/100, 0 régression).
+
+### Prochaines étapes
+- Poursuivre le traitement des demandes utilisateurs sur les rapports ou la planification.
+
+---
+
 ## Session 199 — Bug page blanche (root cause), ratio hero grid Dashboard, harmonisation largeurs
 **1er août 2026**
 

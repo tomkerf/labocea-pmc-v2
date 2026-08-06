@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { FileText, ChevronLeft } from 'lucide-react'
+import { FileText, ChevronLeft, ChevronDown } from 'lucide-react'
 import { useMissionsStore } from '@/stores/missionsStore'
 import { useAuthStore, selectUid, selectAppUser } from '@/stores/authStore'
 import { useUsersStore } from '@/stores/usersStore'
@@ -44,6 +44,7 @@ export default function RapportsPage() {
 
   const initiales = appUser?.initiales ?? ''
   const [touteEquipe, setTouteEquipe] = useState(false)
+  const [redigesCollapsed, setRedigesCollapsed] = useState(true)
   const [sending, setSending] = useState<Set<string>>(new Set())
 
   const { rapportsAFaire, rapportsEnvoyes } = useDashboardStats({
@@ -150,26 +151,37 @@ export default function RapportsPage() {
 
       {/* Section Rédigés */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
+        <button
+          type="button"
+          onClick={() => setRedigesCollapsed(prev => !prev)}
+          className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity focus:outline-none"
+        >
           <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">Rédigés</h2>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-success-light)] text-[var(--color-success)] border border-[rgba(52,199,89,0.15)]">
             {rapportsEnvoyes.length}
           </span>
-        </div>
-        {rapportsEnvoyes.length === 0 ? (
-          <div className="rounded-xl px-5 py-4 text-xs font-medium bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] shadow-sm">
-            Aucun rapport rédigé pour le moment.
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {envoyesGroups.map(({ clientId, clientNom, siteEntries }) => (
-              <RapportClientGroup key={clientId} clientNom={clientNom} siteEntries={siteEntries}
-                renderRow={(r, isLast) => (
-                  <RapportEnvoyeRow key={r.samplingId} r={r} isLast={isLast} resolveNom={resolveNom} />
-                )}
-              />
-            ))}
-          </div>
+          <ChevronDown
+            size={14}
+            className="text-[var(--color-text-tertiary)] transition-transform duration-200"
+            style={{ transform: redigesCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)' }}
+          />
+        </button>
+        {!redigesCollapsed && (
+          rapportsEnvoyes.length === 0 ? (
+            <div className="rounded-xl px-5 py-4 text-xs font-medium bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] shadow-sm">
+              Aucun rapport rédigé pour le moment.
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {envoyesGroups.map(({ clientId, clientNom, siteEntries }) => (
+                <RapportClientGroup key={clientId} clientNom={clientNom} siteEntries={siteEntries}
+                  renderRow={(r, isLast) => (
+                    <RapportEnvoyeRow key={r.samplingId} r={r} isLast={isLast} resolveNom={resolveNom} />
+                  )}
+                />
+              ))}
+            </div>
+          )
         )}
       </section>
     </div>
