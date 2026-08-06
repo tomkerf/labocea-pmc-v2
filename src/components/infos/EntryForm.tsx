@@ -2,6 +2,7 @@ import { useReducer } from 'react'
 import { X } from 'lucide-react'
 import type { Client, TerrainEntry, TerrainType } from '@/types'
 import { TYPE_CONFIG } from './entryConfig'
+import { validationHint, type FormState } from './entryValidation'
 import { COLORS } from '@/lib/constants'
 
 
@@ -27,11 +28,6 @@ const inputStyle = {
   color: COLORS.TEXT_PRIMARY,
 }
 
-type FormState = {
-  type: TerrainType; clientId: string; nom: string; role: string
-  tel: string; tel2: string; email: string; libelle: string
-  code: string; contenu: string; notes: string
-}
 type FormAction = { field: keyof FormState; value: string }
 
 function formReducer(state: FormState, action: FormAction): FormState {
@@ -74,9 +70,8 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
     onSave(clientId, base)
   }
 
-  const canSave = type === 'contact' ? nom.trim().length > 0
-    : type === 'acces' ? libelle.trim().length > 0 && code.trim().length > 0
-    : (libelle.trim().length > 0 || contenu.trim().length > 0)
+  const hint = validationHint(form)
+  const canSave = hint === null
 
   const inputCls = "w-full px-3 py-2.5 text-sm rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
 
@@ -231,15 +226,23 @@ export function EntryForm({ entry, clients, defaultClientId, error, onSave, onCl
             </p>
           )}
 
-          {/* Bouton */}
-          <button type="button" onClick={handleSave} disabled={!canSave}
-            className="w-full py-2.5 rounded-lg text-sm font-medium"
-            style={{
-              background: canSave ? COLORS.ACCENT : COLORS.BG_TERTIARY,
-              color: canSave ? 'white' : 'var(--color-text-tertiary)',
-            }}>
-            {isEdit ? 'Enregistrer' : 'Créer'}
-          </button>
+          {/* Bouton + explication du blocage */}
+          <div className="flex flex-col gap-2">
+            <button type="button" onClick={handleSave} disabled={!canSave}
+              aria-describedby={hint ? 'entry-hint' : undefined}
+              className="w-full py-2.5 rounded-lg text-sm font-medium"
+              style={{
+                background: canSave ? COLORS.ACCENT : COLORS.BG_TERTIARY,
+                color: canSave ? 'white' : 'var(--color-text-tertiary)',
+              }}>
+              {isEdit ? 'Enregistrer' : 'Créer'}
+            </button>
+            {hint && (
+              <p id="entry-hint" className="text-xs text-center" style={{ color: COLORS.TEXT_SECONDARY }}>
+                {hint}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>
