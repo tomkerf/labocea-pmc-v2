@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/test'
 import { loginAsTech } from './fixtures/login'
 
 // Régression sur le bug corrigé en session 197 (badge J1/J2 erroné) : un

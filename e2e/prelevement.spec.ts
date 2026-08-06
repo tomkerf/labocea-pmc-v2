@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/test'
 import { loginAsTech } from './fixtures/login'
 
 // Parcours : marquer un prélèvement planifié comme réalisé ("Terminer la

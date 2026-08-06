@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/test'
 import { loginAsTech } from './fixtures/login'
 
 // Parcours : valider une tournée du jour — marquer un point "Réalisé"
