@@ -131,12 +131,13 @@ export async function uploadSamplingPhoto(
   clientId: string,
   planId: string,
   samplingId: string,
+  uid: string,
 ): Promise<string> {
   validateImageFile(file)
   const { data, ext, contentType } = await processImageFile(file)
   const path = `samplings/${clientId}/${planId}/${samplingId}/${Date.now()}.${ext}`
   const storageRef = ref(storage, path)
-  await uploadBytes(storageRef, data, { contentType })
+  await uploadBytes(storageRef, data, { contentType, customMetadata: { uploadedBy: uid } })
   return getDownloadURL(storageRef)
 }
 
@@ -163,12 +164,13 @@ export async function uploadVisitePhoto(
   file: File,
   visiteId: string,
   pointId: string,
+  uid: string,
 ): Promise<string> {
   validateImageFile(file)
   const { data, ext, contentType } = await processImageFile(file)
   const path = `visites/${visiteId}/${pointId}/${Date.now()}.${ext}`
   const storageRef = ref(storage, path)
-  await uploadBytes(storageRef, data, { contentType })
+  await uploadBytes(storageRef, data, { contentType, customMetadata: { uploadedBy: uid } })
   return getDownloadURL(storageRef)
 }
 
@@ -194,12 +196,13 @@ export async function uploadPlanPhoto(
   file: File,
   clientId: string,
   planId: string,
+  uid: string,
 ): Promise<string> {
   validateImageFile(file)
   const { data, ext, contentType } = await processImageFile(file)
   const path = `plans/${clientId}/${planId}/${Date.now()}.${ext}`
   const storageRef = ref(storage, path)
-  await uploadBytes(storageRef, data, { contentType })
+  await uploadBytes(storageRef, data, { contentType, customMetadata: { uploadedBy: uid } })
   return getDownloadURL(storageRef)
 }
 

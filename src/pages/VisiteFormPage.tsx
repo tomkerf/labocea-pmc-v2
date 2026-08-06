@@ -126,9 +126,10 @@ export default function VisiteFormPage() {
       }
       navigate(`/visites/${id}`, { replace: true })
     }
+    if (!user) return
     setUploadingPointId(pointId)
     try {
-      const url = await uploadVisitePhoto(file, id!, pointId)
+      const url = await uploadVisitePhoto(file, id!, pointId, user.uid)
       dispatch({ points: points.map(p => p.id === pointId ? { ...p, photos: [...p.photos, url] } : p) })
     } catch (err) {
       if (err instanceof ImageValidationError) toast.error(err.message)

@@ -6,6 +6,7 @@ import { uploadPlanPhoto, deletePlanPhoto, ImageValidationError } from '@/lib/up
 import { toast } from '@/stores/toastStore'
 import { COLORS } from '@/lib/constants'
 import { JOURS_LONG } from '@/lib/planningUtils'
+import { useAuthStore, selectUid } from '@/stores/authStore'
 
 
 const FREQUENCES: FrequenceType[] = ['Hebdomadaire', 'Mensuel', 'Bimensuel', 'Trimestriel', 'Semestriel', 'Annuel', 'Personnalisé']
@@ -21,13 +22,14 @@ interface PlanConfigSectionProps {
 
 export function PlanConfigSection({ plan, onUpdate, clientId, planId }: PlanConfigSectionProps) {
   const [uploading, setUploading] = useState(false)
+  const uid = useAuthStore(selectUid)
 
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file || uploading) return
+    if (!file || uploading || !uid) return
     setUploading(true)
     try {
-      const url = await uploadPlanPhoto(file, clientId, planId)
+      const url = await uploadPlanPhoto(file, clientId, planId, uid)
       onUpdate('photos', [...(plan.photos || []), url])
       toast.success('Photo ajoutée avec succès !')
     } catch (err) {

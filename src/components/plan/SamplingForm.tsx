@@ -6,6 +6,7 @@ import { toast } from '@/stores/toastStore'
 import type { AppUser, Sampling, SamplingStatus, NappeType, ChecklistItem } from '@/types'
 import { COLORS } from '@/lib/constants'
 import { useEquipementsStore } from '@/stores/equipementsStore'
+import { useAuthStore, selectUid } from '@/stores/authStore'
 import SamplingPhotosSection from './SamplingPhotosSection'
 import SamplingChecklistSection from './SamplingChecklistSection'
 
@@ -26,6 +27,7 @@ interface SamplingFormProps {
 }
 
 export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId, planId, saving }: SamplingFormProps) {
+  const uid = useAuthStore(selectUid)
   const errors = validateSampling(sampling)
   // Auto-remplir rapportDatePrevue = doneDate + 1 mois pour les prélèvements existants
   useEffect(() => {
@@ -42,10 +44,10 @@ export function SamplingForm({ sampling, onUpdate, users = EMPTY_USERS, clientId
 
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file || !uid) return
     setUploading(true)
     try {
-      const url = await uploadSamplingPhoto(file, clientId, planId, sampling.id)
+      const url = await uploadSamplingPhoto(file, clientId, planId, sampling.id, uid)
       onUpdate('photos', [...(sampling.photos ?? []), url])
     } catch (err) {
       if (err instanceof ImageValidationError) toast.error(err.message)

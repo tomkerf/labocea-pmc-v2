@@ -190,7 +190,7 @@ export default function DashboardPage() {
     const client = clients.find((c: Client) => c.id === clientId)
     if (!client || !uid) return
     try {
-      const url = await uploadSamplingPhoto(file, clientId, planId, samplingId)
+      const url = await uploadSamplingPhoto(file, clientId, planId, samplingId, uid)
       await saveClient({
         ...client,
         plans: client.plans.map((p: Plan) => p.id !== planId ? p : {
