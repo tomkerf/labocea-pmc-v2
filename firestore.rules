@@ -33,6 +33,15 @@ service cloud.firestore {
         request.resource.data.annee.size() > 0;
     }
 
+    // Version allégée pour update : ne revalide QUE nom. annee est déjà
+    // protégé par immutableOn(['annee']) — le revalider ici bloquerait à
+    // tort toute mise à jour sur les clients legacy (migration V1→V2) dont
+    // annee était vide avant que cette validation n'existe (2026-08-06,
+    // regression trouvée en prod juste après le déploiement de ed82cdd).
+    function hasValidNom() {
+      return request.resource.data.nom is string && request.resource.data.nom.size() > 0;
+    }
+
     // Vérifie que pour une clé donnée d'un champ map<string, list<string>> (ex: pollVotes,
     // reactions), seul l'uid de l'appelant a pu être ajouté/retiré de la liste — jamais
     // celui d'un tiers.
@@ -90,7 +99,7 @@ service cloud.firestore {
     match /clients-v2/{clientId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && hasRequiredClientFields();
-      allow update: if isAuthenticated() && immutableOn(['createdBy', 'annee']) && hasRequiredClientFields();
+      allow update: if isAuthenticated() && immutableOn(['createdBy', 'annee']) && hasValidNom();
       allow delete: if isAdmin();
     }
 

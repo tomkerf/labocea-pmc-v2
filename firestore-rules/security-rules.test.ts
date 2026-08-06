@@ -115,6 +115,19 @@ describe('clients-v2 — update (fix hasRequiredClientFields, commit ed82cdd)', 
     const bob = testEnv.authenticatedContext('bob').firestore()
     await assertSucceeds(updateDoc(doc(bob, 'clients-v2', clientId), { notes: 'RAS' }))
   })
+
+  it('autorise une mise à jour sur un client legacy dont annee est vide (régression 2026-08-06)', async () => {
+    const legacyId = 'client-legacy'
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'clients-v2', legacyId), {
+        nom: 'Client Legacy V1',
+        annee: '',
+        createdBy: 'alice',
+      })
+    })
+    const bob = testEnv.authenticatedContext('bob').firestore()
+    await assertSucceeds(updateDoc(doc(bob, 'clients-v2', legacyId), { notes: 'planifié' }))
+  })
 })
 
 describe('chat-messages — pollVotes (fix selfOnlyKeyDiff, audit point 5)', () => {
