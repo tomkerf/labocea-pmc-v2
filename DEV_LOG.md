@@ -4632,6 +4632,33 @@ DEV_LOG.md/ROADMAP.md de la session 195 n'avaient pas été commités avant d'en
 
 ---
 
+## Session 201 — Isolation reportée, tests E2E débloqués, bug sauvegarde perdue corrigé
+**5 août 2026**
+
+### Décision — isolation staging/prod reportée
+- Plan complet retrouvé (`~/.claude/plans/oui-encapsulated-taco.md`, validé le 19 juillet), accès Firebase CLI et `gh` (scope `workflow`) vérifiés opérationnels. Tom a choisi de reporter l'exécution (chantier ~2-3h avec un point d'arrêt facturation) pour prioriser d'autres tâches ce soir.
+
+### Infrastructure — suite E2E Playwright enfin fonctionnelle
+- Les specs écrites en session 199 n'avaient jamais tourné. Trois blocages d'infra résolus : (1) `jose@6` (ESM pur) incompatible avec le `require()` CJS de `jwks-rsa`/`firebase-admin` sous Node 22 → override npm vers `jose@4.15.9` ; (2) binaire Chromium de Playwright jamais installé ; (3) la modale "Nouveautés" (changelog) bloquait tous les clics au premier login sur un navigateur E2E frais (jamais de `localStorage['pmc_changelog_seen']`) → posée via `page.addInitScript()` dans `login.ts`.
+- Découverte annexe : `e2e/**` n'était pas exclu de `vitest.config.ts`, donc `npm run test` tentait de charger les specs Playwright (syntaxe incompatible) depuis leur création en session 199 — jamais remarqué faute d'avoir relancé la suite unit entre-temps. Corrigé.
+
+### Bug corrigé — sauvegarde silencieusement perdue sur "Terminer la mission"
+- En remettant en route les tests E2E, `prelevement.spec.ts` a exposé un vrai bug (pas un artefact de test), vérifié empiriquement via Admin SDK contre l'émulateur : `handleTerminer()` et `handleJ1Action()` (`MissionDetailPage.tsx`) programmaient une sauvegarde debouncée (800ms, `useClientData.ts`) puis appelaient `navigate(-1)` **synchrone**, sans attendre. Si la page était atteinte par navigation directe (deep-link — cas réel via une notification push), `navigate(-1)` n'avait pas d'historique SPA à dépiler : il sortait du document React et tuait le `setTimeout` en attente avant qu'il se déclenche. La sauvegarde ne partait jamais, silencieusement (pas d'erreur, pas de toast) — le statut restait "planifié" en base.
+- Fix : ajout de `saveNow()` dans `useClientData.ts` — écriture immédiate et **attendue**, sans debounce, réservée aux actions terminales en un clic. `handleTerminer` et `handleJ1Action` passés en `async`, `await`ent la sauvegarde avant de naviguer. `triggerSave` (debounce) inchangé pour la saisie continue.
+- Validé en 2 temps : d'abord documenté via `test.fail()` (échec attendu et confirmé), puis fix appliqué et confirmé par "Expected to fail, but passed." Découverte annexe au passage : `tournee.spec.ts` échoue désormais si lancé juste après `prelevement.spec.ts` (les fixtures E2E ne sont seedées qu'une fois pour toute la suite — le prélèvement marqué "réalisé" par le premier test disparaît de la liste "à faire" du second, qui cible alors un item différent). Passe seul, non corrigé, tracé en mémoire.
+- 463/463 tests unitaires verts, déployé sur staging.
+
+### Vérifications
+- `npx tsc --noEmit` propre, `npm run lint` 0 erreur, `npm run test` 463/463, suite E2E rejouée deux fois de suite pour confirmer la non-régression.
+- `bash deploy-dev.sh` exécuté, fix actif sur staging — à valider en réel avant tout déploiement prod.
+
+### Prochaines étapes
+- Isolation staging/prod toujours en attente (voir Session 200).
+- Isolation des fixtures E2E entre specs (reseed par test ou fixtures dédiées) — découverte cette session, non urgente.
+- Reste de l'audit firestore.rules non traité (voir Session 200).
+
+---
+
 ## Session 197 — Badge J1/J2 dashboard, bug Google Maps, ménage planning
 **30 juillet 2026**
 
