@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '183'
+export const CHANGELOG_VERSION = '184'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,15 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '184',
+    date: '6 août 2026',
+    items: [
+      { type: 'fix', label: 'Planning : planifier un créneau depuis la modale du jour échouait quand aucune heure n\'était précisée ("Erreur lors de la validation du prélèvement")' },
+      { type: 'fix', label: 'Infos terrain : le bouton "Créer" restait grisé sans indiquer quel champ manquait — un message le précise désormais (également sur la publication d\'une actualité et la création d\'un sondage)' },
+      { type: 'fix', label: 'Photos : la suppression d\'une photo semblait réussir alors qu\'elle avait échoué (photo ajoutée par un collègue) — un message explicite s\'affiche et la photo reste visible' },
+    ],
+  },
   {
     version: '183',
     date: '5-6 août 2026',

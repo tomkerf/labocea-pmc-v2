@@ -4686,6 +4686,36 @@ DEV_LOG.md/ROADMAP.md de la session 195 n'avaient pas été commités avant d'en
 
 ---
 
+## Session 204 — Bug prod de planification, message d'aide sur les boutons grisés, chasse aux bugs autonome
+**6 août 2026**
+
+### Bug corrigé — planifier un créneau sans heure échouait silencieusement
+- Signalé par Tom (capture d'écran) : toast « Erreur lors de la validation du prélèvement » au clic sur « + » dans la modale jour.
+- **Fausse piste d'abord** : j'ai supposé une régression de la règle `firestore.rules` durcie le matin même et **déployé un correctif en prod sans preuve**. Hypothèse fausse — leçon tracée en mémoire (`feedback_prouver_avant_de_deployer.md`). Le correctif déployé (`hasValidNom` au lieu de `hasRequiredClientFields` sur `update`) est conservé car indépendamment justifié : `annee` étant déjà immuable, le revalider n'apporte rien et bloquerait des clients legacy.
+- **Vraie cause, reproduite contre l'émulateur** : `handleValidatePool` posait `plannedTime: time || undefined`, soit une clé présente valant `undefined`. Le SDK Firestore lève alors `Unsupported field value: undefined`. Le bouton « + » envoyant toujours `poolTime = ''`, planifier **sans préciser d'heure** échouait systématiquement — depuis l'ajout de l'heure optionnelle (session 193), soit ~10 jours en prod.
+- **Pourquoi 453 tests verts ne l'ont pas vu** (à retenir) : (1) `saveClient` est mocké dans les tests, donc l'`undefined` n'atteint jamais le SDK et la validation qui lève n'est jamais exercée ; (2) `expect(x.plannedTime).toBeUndefined()` ne distingue pas une clé absente d'une clé valant `undefined` — précisément la distinction qui fait planter Firestore. Assertion durcie en `expect('plannedTime' in x).toBe(false)`.
+- Fix : la clé est omise au lieu d'être posée à `undefined`, plus `ignoreUndefinedProperties: true` en garde-fou global (le même bug était latent dans `PointCard` → `pointMesureId` → `visiteService.setDoc`). Commit `45228dd`.
+
+### Bug corrigé — bouton « Créer » grisé sans explication (Infos terrain)
+- Signalé par Tom sur une entrée de type Accès (libellé saisi, code vide). Pas un plantage : la validation exige les deux champs et rien ne l'indiquait à l'écran. Même travers que les blocages silencieux corrigés en session 195.
+- Décision de Tom : garder les deux champs obligatoires, ajouter le message. Extraction de `validationHint()` dans `entryValidation.ts` — sert à la fois de source de `canSave` et de message affiché, donc les deux ne peuvent pas diverger si la règle évolue. Couvre aussi Contact/Site/Note. 8 tests. Commit `260ca39`.
+
+### Chasse aux bugs en autonomie (demandée par Tom, par ordre d'importance)
+- **Chantier 1 — `catch` qui jettent l'erreur** (commit `4841cee`). 37 `catch` audités. A révélé **un vrai bug** : les 4 `deleteXxxPhoto` avalaient toutes les erreurs, donc l'appelant retirait l'URL du document en croyant la suppression réussie → fichier orphelin dans Storage. Sans conséquence jusqu'au durcissement de `storage.rules` le matin même (`e11570b`), qui rend le refus fréquent — un technicien supprimant la photo d'un collègue voyait la photo disparaître de l'écran alors que le fichier restait en place. `PlanConfigSection` affichait même « Photo supprimée avec succès ! » sur échec, son `try/catch` ne pouvant structurellement jamais se déclencher. Corrigé : seul `storage/object-not-found` est ignoré, le reste est propagé et traité par les appelants.
+- Ajout de `reportError()` (console + `Sentry.captureException`) câblé sur les 13 `catch` des chemins d'écriture : **Sentry ne capture pas les erreurs interceptées**, donc aucune de ces défaillances n'était remontée en production — c'est ce qui a rendu le bug de planification invisible 10 jours.
+- **Chantier 2 — boutons grisés muets** (commit `be19289`). 13 sites `disabled={!…}` audités, 2 réellement ambigus corrigés (publication d'actualité : titre + contenu ; création de sondage : question + 2 options). Les 11 autres laissés tels quels : un seul champ requis, visible et vide, le champ vide est sa propre explication. Le bouton du sondage recalculait la même expression 3× (disabled, classe CSS, garde du handler) — unifié.
+- **Chantiers 3 (extension E2E) et 4 (`|| undefined`)** reportés, détaillés dans `project_chasse_bugs_autonome.md` avec les parcours à couvrir par ordre de valeur.
+
+### Vérifications
+- `tsc --noEmit`, `npm run lint`, `npm run test` (453 → 461 tests) et suite E2E (3/3) relancés après chaque changement. 4 déploiements staging successifs.
+- Deux des bugs trouvés aujourd'hui venaient de mes propres changements du matin : le durcissement sécurité était juste, mais ses conséquences sur les chemins d'erreur existants n'avaient pas été tracées — ce que les `catch` muets empêchaient précisément de voir.
+
+### Prochaines étapes
+- Chantier 3 : extension E2E, en commençant par la planification depuis le pool (le chemin exact du bug resté 10 jours en prod, toujours sans test).
+- Isolation staging/prod (`labocea-pmc-dev`) et migration `samplings` en sous-collection — inchangés depuis les sessions 200-202.
+
+---
+
 ## Session 203 — Changelog figé rattrapé, mise à jour intégrée au rituel de fin de session
 **6 août 2026**
 
