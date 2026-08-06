@@ -4659,6 +4659,33 @@ DEV_LOG.md/ROADMAP.md de la session 195 n'avaient pas été commités avant d'en
 
 ---
 
+## Session 202 — Suite de l'audit firestore.rules : createdAt, technicienUid, storage delete
+**6 août 2026**
+
+### Correctifs de sécurité déployés en production (`labocea-pmc`)
+- **`createdAt` serveur sur `chat-messages`** (commit `5b8a763`) : la règle `create` exige désormais `createdAt == request.time`, forçant l'usage de `serverTimestamp()` (déjà fait côté client) et empêchant un message antidaté dans un historique par ailleurs immuable (`allow delete: if false`). Ferme le point 7 de l'audit du 2026-08-05.
+- **`technicienUid` immuable sur `visites`** (commit `7bd7a51`) : vérifié qu'aucun flux UI ne réassigne ce champ (seul `technicienNom` est éditable en texte libre, `VisiteFormPage.tsx`) avant d'ajouter `immutableOn(['technicienUid'])`, empêchant le créateur d'une visite de s'en déposséder. Ferme le point 8.
+- **`storage.rules` delete restreint à l'auteur ou un admin** (commit `e11570b`) : n'importe quel authentifié pouvait supprimer n'importe quelle photo (samplings/visites/plans). `uploadPhoto.ts` pose désormais `customMetadata.uploadedBy` à l'upload (4 points d'appel modifiés : `SamplingForm`, `PlanConfigSection`, `VisiteFormPage`, `DashboardPage` — `uploadChatPhoto` inchangé, déjà scopé aux participants du chat). `storage.rules` restreint `delete` à l'auteur ou un admin (`firestore.get()` cross-service sur `users/{uid}.role`), avec un fallback explicite pour les photos uploadées avant ce champ (pas de régression sur le nettoyage de l'historique).
+- Chaque correctif validé par tests d'émulateur avant déploiement (`firestore-rules/security-rules.test.ts`, 14 tests) ; le fix Storage validé par compilation à froid de l'émulateur (pas de tests automatisés Storage pour l'instant).
+
+### Décision — points 2/9 de l'audit reportés
+- Les deux derniers points ouverts (`delete` Firestore contournable via `update` sur `clients-v2`, et absence d'arbitrage de concurrence en dessous du document) partagent la même cause racine : `samplings` imbriqué dans le document `clients-v2`. La vraie solution — migration en sous-collection — est un chantier de l'ampleur de l'isolation staging/prod. Tom a choisi de reporter plutôt que d'improviser un correctif de façade.
+
+### Infrastructure — trou de config vitest corrigé
+- `npm run test` (`vitest --project unit`) scannait aussi `firestore-rules/**` faute d'`include` explicite sur le projet `unit`, échouant sans émulateur actif. Masqué jusqu'ici par un émulateur résiduel qui traînait par coïncidence sur le port 8080 lors des runs précédents. Corrigé en scopant `unit` à `src/**/*.{test,spec}.{ts,tsx}`.
+
+### Vérifications
+- `npx tsc --noEmit` propre, `npm run lint` 0 erreur, `npm run build` OK, `npm run test` 453/453, suite E2E rejouée après chaque changement (3/3 stables).
+- 3 déploiements `firestore:rules`/`storage` successifs sur `labocea-pmc`, chacun confirmé par la CLI avant commit/push. `bash deploy-dev.sh` exécuté en fin de session.
+
+### Prochaines étapes
+- Isolation staging/prod (`labocea-pmc-dev`) — toujours le seul risque 🔴 non résolu, voir Session 200/201.
+- Migration `samplings` en sous-collection — ferme les points 2/9 de l'audit + bénéfice perf (`project_firestore_perf_todo.md`).
+- Lecture globale des emails `users` (point mineur restant, non fixable par une règle seule).
+- Isolation des fixtures E2E entre specs (voir Session 201, non urgente).
+
+---
+
 ## Session 197 — Badge J1/J2 dashboard, bug Google Maps, ménage planning
 **30 juillet 2026**
 
