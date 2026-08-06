@@ -1,4 +1,4 @@
-export const CHANGELOG_VERSION = '178'
+export const CHANGELOG_VERSION = '183'
 
 export type ChangelogEntry = {
   version: string
@@ -7,6 +7,48 @@ export type ChangelogEntry = {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '183',
+    date: '5-6 août 2026',
+    items: [
+      { type: 'fix', label: '"Terminer la mission" : la validation d\'un prélèvement pouvait très rarement ne pas s\'enregistrer sans message d\'erreur — désormais garantie avant de quitter la page' },
+      { type: 'fix', label: 'Sécurité : durcissement des règles d\'accès sur la messagerie, les missions, les tâches et les visites préliminaires (empêche des manipulations non autorisées)' },
+    ],
+  },
+  {
+    version: '182',
+    date: '1er août 2026',
+    items: [
+      { type: 'fix', label: 'Résolution définitive du bug de page blanche après une mise en veille prolongée de l\'onglet (rechargement F5 n\'était plus nécessaire)' },
+      { type: 'feat', label: 'Tableau de bord : ratio du planning/rail latéral ajusté au nombre d\'or pour un meilleur équilibre visuel' },
+      { type: 'feat', label: 'Missions, Matériel, Métrologie, Maintenances : largeur de page harmonisée avec le reste de l\'application' },
+    ],
+  },
+  {
+    version: '181',
+    date: '31 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Planning : le point coloré se transforme en coche animée dès qu\'un prélèvement est marqué réalisé' },
+      { type: 'feat', label: 'Nouvelle page Bilan mensuel des missions (fait/non fait du mois, bascule Mes missions/Équipe), accessible depuis la carte "Missions ce mois"' },
+      { type: 'feat', label: 'Tableau de bord : largeur harmonisée avec le reste de l\'application' },
+    ],
+  },
+  {
+    version: '180',
+    date: '30 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Tableau de bord : badge J1/J2 sur les Bilans 24h du widget "Planning du jour", comme dans la vue Planning complète' },
+      { type: 'fix', label: 'Détail mission : la carte Google Maps ne s\'affichait plus (icône image cassée) — corrigé' },
+      { type: 'fix', label: 'Planning : suppression du bandeau "Astuce" jugé superflu' },
+    ],
+  },
+  {
+    version: '179',
+    date: '29 juillet 2026',
+    items: [
+      { type: 'feat', label: 'Alerte non bloquante quand un Bilan 24h est planifié sans préleveur ou débitmètre disponible ce jour-là' },
+    ],
+  },
   {
     version: '178',
     date: '29 juillet 2026',
