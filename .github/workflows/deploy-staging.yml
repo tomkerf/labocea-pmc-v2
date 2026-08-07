@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  # Relance manuelle : indispensable quand un run échoue sans qu'aucune étape
+  # ne démarre (indisponibilité des runners GitHub), sinon il faut un commit vide.
+  workflow_dispatch:
 
 jobs:
   deploy:
