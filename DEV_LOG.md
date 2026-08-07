@@ -3,6 +3,28 @@
 Journal de développement chronologique. Mis à jour à chaque session de travail.
 
 
+## Session 205 — CI/CD : diagnostic des échecs de déploiement, relance manuelle, mise à jour des actions
+**7 août 2026**
+
+### Diagnostic — 3 runs `Deploy Staging` en échec
+- Tom a repéré 3 runs rouges dans l'onglet Actions (`be19289`, `4841cee`, `260ca39`, tous du 6 août ~19h). Investigation : aucune étape n'avait démarré dans les trois jobs, annotation identique `The job was not acquired by Runner of type hosted even after multiple attempts` — indisponibilité temporaire des runners hébergés GitHub, pas une régression de build. Le run suivant sur la même config est passé en 5m23 sans changement.
+- Découverte annexe : le dernier commit (`d4e0634`, repli par défaut des rapports rédigés) n'avait déclenché aucun run CI (`total_count: 0` sur son SHA) — staging tournait donc sur le commit précédent. `bash deploy-dev.sh` lancé en local a confirmé que le build était en fait déjà déployé (wrangler : « No updated asset files to upload »), déployé manuellement la veille.
+
+### CI corrigé — trigger `workflow_dispatch` ajouté
+- `deploy-staging.yml` n'avait que le trigger `push` sur `main` : aucun moyen de relancer un déploiement après un échec d'infra GitHub sans commit vide. Ajout de `workflow_dispatch:` (commit `0d4ae99`). Vérifié à deux reprises : un run déclenché par push et un run déclenché via `gh workflow run deploy-staging.yml --ref main`, tous deux verts en moins d'une minute.
+
+### CI — mise à jour des actions (dépréciation Node.js 20)
+- Annotation relevée sur les runs verts : `actions/checkout@v4`, `actions/setup-node@v4` et `cloudflare/wrangler-action@v3` ciblent Node.js 20 (déprécié par GitHub Actions, forcé sur Node 24 en attendant). Bump vers `checkout@v5`, `setup-node@v5`, `wrangler-action@v4` (commit `5838b52`). Run de vérification vert, annotation disparue.
+- `react-doctor.yml` également mis à jour en local mais **non commité** : le fichier est volontairement ignoré (`.gitignore` ligne 32) et absent de `origin/main` — il ne tourne pas en CI, changement purement local sans effet.
+
+### Revue du backlog (pas d'action, juste un état des lieux demandé par Tom)
+- Rien de nouveau : les points ouverts restent l'isolation Firestore staging/prod, la migration `samplings` en sous-collection, le contraste WCAG `--color-text-secondary`, les chantiers 3 (extension E2E) et 4 (`|| undefined`) de la chasse aux bugs, et les fixtures E2E partagées entre specs.
+
+### Prochaines étapes
+- Aucun changement de code applicatif cette session — uniquement infra CI. Backlog inchangé, voir Session 204 pour le détail des priorités.
+
+---
+
 ## Session 200 — Repli par défaut des rapports rédigés
 **6 août 2026**
 
